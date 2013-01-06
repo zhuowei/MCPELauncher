@@ -10,11 +10,15 @@ import android.util.DisplayMetrics;
 public class MainActivity extends NativeActivity
 {
 
-	public static final int INPUT_STATUS_IN_PROGRESs = 0;
+	public static final int INPUT_STATUS_IN_PROGRESS = 0;
 
 	public static final int INPUT_STATUS_OK = 1;
 
 	public static final int INPUT_STATUS_CANCELLED = 2;
+
+	public static final int DIALOG_CREATE_WORLD = 0;
+
+	public static final int DIALOG_SETTINGS = 3;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -53,10 +57,10 @@ public class MainActivity extends NativeActivity
 	public void displayDialog(int dialogId) {
 		System.out.println("displayDialog: " + dialogId);
 		switch (dialogId) {
-			case 0:
+			case DIALOG_CREATE_WORLD:
 				System.out.println("World creation");
 				break;
-			case 3:
+			case DIALOG_SETTINGS:
 				System.out.println("Settings");
 				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
 				startActivityForResult(intent, 1234);
@@ -64,9 +68,14 @@ public class MainActivity extends NativeActivity
 		}
 	}
 
-	public String getDateString(int a) {
-		System.out.println("getDateString: " + a);
-		return Integer.toString(a);
+	/**
+	 * @param time Unix timestamp
+	 * @returns a formatted time value
+	 */
+
+	public String getDateString(int time) {
+		System.out.println("getDateString: " + time);
+		return Integer.toString(time);
 	}
 
 	public byte[] getFileDataBytes(String name) {
@@ -106,7 +115,7 @@ public class MainActivity extends NativeActivity
 
 	public int getUserInputStatus() {
 		System.out.println("User input status");
-		return 2;
+		return INPUT_STATUS_CANCELLED;
 	}
 
 	public String[] getUserInputString() {
