@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.mojang.minecraftpe"
+      android:versionCode="3035"
+      android:versionName="0.3.3">
+    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9"/>
+    <uses-permission
+        android:name="android.permission.INTERNET"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="android.permission.VIBRATE"/>
+    <application android:label="Minecraft" >
+        <activity android:name="com.mojang.minecraftpe.MainActivity"
+                  android:label="Minecraft"
+                  android:configChanges="orientation|keyboardHidden">
+            <meta-data android:name="android.app.lib_name"
+                  android:value="minecraftpe"/>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.mojang.minecraftpe.MainMenuOptionsActivity"/>
+    </application>
+
+</manifest> 
