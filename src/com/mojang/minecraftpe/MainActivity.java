@@ -18,9 +18,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.util.DisplayMetrics;
+import android.widget.Toast;
 
 import net.zhuoweizhang.mcpelauncher.TexturePack;
 import net.zhuoweizhang.mcpelauncher.ZipTexturePack;
+
+
 
 public class MainActivity extends NativeActivity
 {
@@ -50,6 +53,8 @@ public class MainActivity extends NativeActivity
 			System.load("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
 		} catch (Exception e) {
 			e.printStackTrace();
+			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK", Toast.LENGTH_LONG).show();
+			finish();
 		}
 		nativeRegisterThis();
 
@@ -63,12 +68,16 @@ public class MainActivity extends NativeActivity
 			texturePack = new ZipTexturePack(new File(Environment.getExternalStorageDirectory(), "tex.zip"));
 		} catch (Exception e) {
 			e.printStackTrace();
+			Toast.makeText(this, "No tex.zip found!", Toast.LENGTH_LONG).show();
+			finish();
 		}
 		
 		try {
 			minecraftApkContext = createPackageContext("com.mojang.minecraftpe", 0);
 		} catch (Exception e) {
 			e.printStackTrace();
+			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
+			finish();
 		}
 		//setContentView(R.layout.main);
 	}
