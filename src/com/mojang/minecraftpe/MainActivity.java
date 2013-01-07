@@ -1,11 +1,26 @@
 package com.mojang.minecraftpe;
 
+import java.io.File;
+import java.io.InputStream;
+
+import java.text.DateFormat;
+
+import java.util.Date;
+import java.util.Locale;
+
 import android.app.Activity;
 import android.app.NativeActivity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.util.DisplayMetrics;
+
+import net.zhuoweizhang.mcpelauncher.TexturePack;
+import net.zhuoweizhang.mcpelauncher.ZipTexturePack;
 
 public class MainActivity extends NativeActivity
 {
@@ -22,20 +37,39 @@ public class MainActivity extends NativeActivity
 
 	protected DisplayMetrics displayMetrics;
 
+	protected TexturePack texturePack;
+
+	protected Context minecraftApkContext;
+
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		System.out.println("oncreate");
+		try {
+			System.load("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		nativeRegisterThis();
-		super.onCreate(savedInstanceState);
-
-		/*View contentView = this.findViewById(android.R.id.content);
 
 		displayMetrics = new DisplayMetrics();
 
-		contentView.getDisplay().getMetrics(displayMetrics);*/
+		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+		super.onCreate(savedInstanceState);
+
+		try {
+			texturePack = new ZipTexturePack(new File(Environment.getExternalStorageDirectory(), "tex.zip"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
+		try {
+			minecraftApkContext = createPackageContext("com.mojang.minecraftpe", 0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		//setContentView(R.layout.main);
 	}
 
@@ -75,17 +109,65 @@ public class MainActivity extends NativeActivity
 
 	public String getDateString(int time) {
 		System.out.println("getDateString: " + time);
-		return Integer.toString(time);
+		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(new Date(((long) time) * 1000));
 	}
 
 	public byte[] getFileDataBytes(String name) {
 		System.out.println("Get file data: " + name);
-		return null;
+		try {
+			InputStream is = getInputStreamForAsset(name);
+			if (is == null) return null;
+			byte[] retval = new byte[(int) getSizeForAsset(name)];
+			is.read(retval);
+			return retval;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private InputStream getInputStreamForAsset(String name) {
+		try {
+			InputStream is = texturePack.getInputStream(name);
+			if (is == null) {
+				is = minecraftApkContext.getAssets().open(name);
+			}
+			return is;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private long getSizeForAsset(String name) {
+		try {
+			long size = texturePack.getSize(name);
+			if (size == -1) {
+				size = minecraftApkContext.getAssets().openFd(name).getLength();
+			}
+			return size;
+		} catch (Exception e) {
+			return -1;
+		}
 	}
 
 	public int[] getImageData(String name) {
 		System.out.println("Get image data: " + name);
-		return null;
+		try {
+			InputStream is = getInputStreamForAsset(name);
+			if (is == null) return null;
+			Bitmap bmp = BitmapFactory.decodeStream(is);
+			int[] retval = new int[(bmp.getWidth() * bmp.getHeight()) + 2];
+			retval[0] = bmp.getWidth();
+			retval[1] = bmp.getHeight();
+			bmp.getPixels(retval, 2, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
+			is.close();
+
+			return retval;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		/* format: width, height, each integer a pixel */
+		/* 0 = white, full transparent */
 	}
 
 	public String[] getOptionStrings() {
@@ -95,22 +177,22 @@ public class MainActivity extends NativeActivity
 
 	public float getPixelsPerMillimeter() {
 		System.out.println("Pixels per mm");
-		return 1.0f;
+		return ((float) displayMetrics.densityDpi) / 25.4f ;
 	}
 
 	public String getPlatformStringVar(int a) {
-		System.out.println("getPlatformStrinVar: " +a);
+		System.out.println("getPlatformStringVar: " +a);
 		return "";
 	}
 
 	public int getScreenHeight() {
 		System.out.println("height");
-		return 100;
+		return displayMetrics.heightPixels;
 	}
 
 	public int getScreenWidth() {
 		System.out.println("width");
-		return 100;
+		return displayMetrics.widthPixels;
 	}
 
 	public int getUserInputStatus() {
@@ -160,14 +242,6 @@ public class MainActivity extends NativeActivity
 	}	
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
-	}
-
-	static {
-		try {
-			System.loadLibrary("minecraftpe");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }
