@@ -50,10 +50,10 @@ public class MainActivity extends NativeActivity
 	public void onCreate(Bundle savedInstanceState) {
 		System.out.println("oncreate");
 		try {
-			System.load("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
-		} catch (Exception e) {
+			System.loadLibrary("minecraftpe");
+		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
-			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Can't load libminecraftpe.so", Toast.LENGTH_LONG).show();
 			finish();
 		}
 		nativeRegisterThis();
@@ -65,7 +65,12 @@ public class MainActivity extends NativeActivity
 		super.onCreate(savedInstanceState);
 
 		try {
-			texturePack = new ZipTexturePack(new File(Environment.getExternalStorageDirectory(), "tex.zip"));
+			File file = new File(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", "/sdcard/tex.zip"));
+			if (!file.exists()) {
+				texturePack = null;
+			} else {
+				texturePack = new ZipTexturePack(file);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(this, "No tex.zip found!", Toast.LENGTH_LONG).show();
@@ -73,7 +78,11 @@ public class MainActivity extends NativeActivity
 		}
 		
 		try {
-			minecraftApkContext = createPackageContext("com.mojang.minecraftpe", 0);
+			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
+				minecraftApkContext = this;
+			} else {
+				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", 0);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
@@ -135,10 +144,15 @@ public class MainActivity extends NativeActivity
 	}
 
 	private InputStream getInputStreamForAsset(String name) {
+		InputStream is = null;
 		try {
-			InputStream is = texturePack.getInputStream(name);
-			if (is == null) {
+			if (texturePack == null) {
 				is = minecraftApkContext.getAssets().open(name);
+			} else {
+				is = texturePack.getInputStream(name);
+				if (is == null) {
+					is = minecraftApkContext.getAssets().open(name);
+				}
 			}
 			return is;
 		} catch (Exception e) {
@@ -147,14 +161,18 @@ public class MainActivity extends NativeActivity
 	}
 
 	private long getSizeForAsset(String name) {
+		long size = 0;
 		try {
-			long size = texturePack.getSize(name);
+			if (texturePack == null) {
+				return minecraftApkContext.getAssets().openFd(name).getLength();
+			}
+			size = texturePack.getSize(name);
 			if (size == -1) {
 				size = minecraftApkContext.getAssets().openFd(name).getLength();
 			}
 			return size;
 		} catch (Exception e) {
-			return -1;
+			return 0;
 		}
 	}
 
@@ -238,6 +256,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void quit() {
+		finish();
 	}
 
 	public void setIsPowerVR(boolean powerVR) {
