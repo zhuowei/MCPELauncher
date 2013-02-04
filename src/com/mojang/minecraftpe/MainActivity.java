@@ -5,14 +5,14 @@ import java.io.InputStream;
 
 import java.text.DateFormat;
 
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ComponentName;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
+
+import android.preference.*;
 
 import net.zhuoweizhang.mcpelauncher.*;
 
@@ -227,7 +229,18 @@ public class MainActivity extends NativeActivity
 
 	public String[] getOptionStrings() {
 		System.err.println("OptionStrings");
-		return new String[] {"zebra"};
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		Map prefsMap = sharedPref.getAll();
+		Set<Map.Entry> prefsSet = prefsMap.entrySet();
+		String[] retval = new String[prefsSet.size() * 2];
+		int i = 0;
+		for (Map.Entry e: prefsSet) {
+			retval[i] = (String) e.getKey();
+			retval[i + 1] = e.getValue().toString();
+			i+= 2;
+		}
+		System.out.println(Arrays.toString(retval));
+		return retval;
 	}
 
 	public float getPixelsPerMillimeter() {
@@ -277,7 +290,7 @@ public class MainActivity extends NativeActivity
 
 	public boolean isTouchscreen() {
 		System.err.println("Touchscreen");
-		return true;
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("ctrl_usetouchscreen", true);
 	}
 
 	public void postScreenshotToFacebook(String name, int firstInt, int secondInt, int[] thatArray) {

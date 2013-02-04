@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MainActivity</string>
+    <string name="app_name">MCPELauncher</string>
+    <string name="pref_ctrl_touchscreen">Use Touchscreen</string>
+    <string name="pref_ctrl_touchscreen_summary">If you are not using an Xperia Play, check this</string>
+    <string name="pref_mp_username">Multiplayer Username</string>
+    <string name="pref_mp_username_summary">Your name, duh</string>
+    <string name="pref_texture_pack">Texture Pack</string>
+    <string name="pref_texture_pack_summary">Change your texture pack</string>
 </resources>
