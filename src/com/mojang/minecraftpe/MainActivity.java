@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
@@ -295,9 +296,9 @@ public class MainActivity extends NativeActivity
 	public void vibrate(int duration) {
 	}
 
-	public int getKeyFromKeyCode(int a, int b, int c) {
-		System.out.printf("Key from keycode %i %i %i\n", a, b, c);
-		return 0;
+	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
+		KeyCharacterMap characterMap = KeyCharacterMap.load(deviceId);
+		return characterMap.get(keyCode, metaState);
 	}
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
