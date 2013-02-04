@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
@@ -294,6 +295,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void vibrate(int duration) {
+		 ((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(duration);
 	}
 
 	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
