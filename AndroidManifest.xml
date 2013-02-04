@@ -14,7 +14,8 @@
         <activity android:name="com.mojang.minecraftpe.MainActivity"
                   android:label="MCPELauncher"
                   android:configChanges="orientation|keyboardHidden"
-                  android:screenOrientation="landscape">
+                  android:screenOrientation="landscape"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <meta-data android:name="android.app.lib_name"
                   android:value="minecraftpe"/>
             <intent-filter>

@@ -7,4 +7,21 @@
     <string name="pref_mp_username_summary">Your name, duh</string>
     <string name="pref_texture_pack">Texture Pack</string>
     <string name="pref_texture_pack_summary">Change your texture pack</string>
+    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
+    <string name="pref_ctrl_islefthanded">Lefty</string>
+    <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
+    <string name="pref_ctrl_invertmouse">Invert Y-axis</string>
+    <string name="pref_ctrl_invertmouse_summary">Meanwhile in Australia :)</string>
+    <string name="pref_feedback_vibration">Vibrate</string>
+    <string name="pref_feedback_vibration_summary">Vibrate when a block is destroyed</string>
+    <string name="pref_zz_longvibration">Extra-long vibration</string>
+    <string name="pref_zz_longvibration_summary">BZZZZT!!!11!</string>
+    <string name="pref_gfx_fancygraphics">Fancy graphics</string>
+    <string name="pref_gfx_fancygraphics_summary">Make stuff look better</string>
+    <string name="pref_gfx_lowquality">Low quality graphics</string>
+    <string name="pref_gfx_lowquality_summary">Make stuff look worse</string>
+    <string name="pref_game_difficultypeaceful">Peaceful mode</string>
+    <string name="pref_game_difficultypeaceful_summary">Health regeneration, no monsters</string>
+    <string name="pref_ctrl_sensitivity">Sensitivity</string>
+    <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
 </resources>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="mp_username"
+        android:title="@string/pref_mp_username"
+        android:summary="@string/pref_mp_username_summary"
+        android:defaultValue="Steve" />
+    <CheckBoxPreference
+        android:key="ctrl_usetouchscreen"
+        android:title="@string/pref_ctrl_touchscreen"
+        android:summary="@string/pref_ctrl_touchscreen_summary"
+        android:defaultValue="true" />
+    <CheckBoxPreference
+        android:key="ctrl_usetouchjoypad"
+        android:title="@string/pref_ctrl_usetouchjoypad"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="ctrl_islefthanded"
+        android:title="@string/pref_ctrl_islefthanded"
+        android:summary="@string/pref_ctrl_islefthanded_summary"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="ctrl_invertmouse"
+        android:title="@string/pref_ctrl_invertmouse"
+        android:summary="@string/pref_ctrl_invertmouse_summary"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="feedback_vibration"
+        android:title="@string/pref_feedback_vibration"
+        android:summary="@string/pref_feedback_vibration_summary"
+        android:defaultValue="true"/>
+    <CheckBoxPreference
+        android:key="zz_longvibration"
+        android:title="@string/pref_zz_longvibration"
+        android:summary="@string/pref_zz_longvibration_summary"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="gfx_fancygraphics"
+        android:title="@string/pref_gfx_fancygraphics"
+        android:summary="@string/pref_gfx_fancygraphics_summary"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="gfx_lowquality"
+        android:title="@string/pref_gfx_lowquality"
+        android:summary="@string/pref_gfx_lowquality_summary"
+        android:defaultValue="false"/>
+    <CheckBoxPreference
+        android:key="game_difficultypeaceful"
+        android:title="@string/pref_game_difficultypeaceful"
+        android:summary="@string/pref_game_difficultypeaceful_summary"
+        android:defaultValue="false"/>
+    <Preference
+        android:key="texture_pack"
+        android:title="@string/pref_texture_pack"
+        android:summary="@string/pref_texture_pack_summary"/>
+</PreferenceScreen>

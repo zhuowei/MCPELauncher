@@ -39,7 +39,7 @@ public class MainActivity extends NativeActivity
 
 	public static final int INPUT_STATUS_CANCELLED = 2;
 
-	public static final int DIALOG_CREATE_WORLD = 0;
+	public static final int DIALOG_CREATE_WORLD = 1;
 
 	public static final int DIALOG_SETTINGS = 3;
 
@@ -52,6 +52,8 @@ public class MainActivity extends NativeActivity
 	protected boolean fakePackage = false;
 
 	private static final String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
+
+	protected int inputStatus = INPUT_STATUS_IN_PROGRESS;
 
 	/** Called when the activity is first created. */
 
@@ -134,19 +136,34 @@ public class MainActivity extends NativeActivity
 		return 0;
 	}
 
+	/** displays a dialog. Not called from UI thread. */
 	public void displayDialog(int dialogId) {
 		System.out.println("displayDialog: " + dialogId);
+		inputStatus = INPUT_STATUS_CANCELLED;
 		switch (dialogId) {
 			case DIALOG_CREATE_WORLD:
 				System.out.println("World creation");
+				inputStatus = INPUT_STATUS_CANCELLED;
+				runOnUiThread(new Runnable() {
+					public void run() {
+						Toast.makeText(MainActivity.this, "Not supported :(", Toast.LENGTH_SHORT).show();
+					}
+				});
 				break;
 			case DIALOG_SETTINGS:
 				System.out.println("Settings");
 				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
+				inputStatus = INPUT_STATUS_OK;
 				startActivityForResult(intent, 1234);
 				break;
 		}
 	}
+
+	/*protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		if (requestCode == DIALOG_SETTINGS) {
+			inputStatus = INPUT_STATUS_OK;
+		}
+	}*/
 
 	/**
 	 * @param time Unix timestamp
@@ -264,8 +281,8 @@ public class MainActivity extends NativeActivity
 	}
 
 	public int getUserInputStatus() {
-		System.out.println("User input status");
-		return INPUT_STATUS_CANCELLED;
+		System.out.println("User input status: " + inputStatus);
+		return inputStatus;
 	}
 
 	public String[] getUserInputString() {
@@ -278,6 +295,7 @@ public class MainActivity extends NativeActivity
 		return false;
 	}
 
+	/** Seems to be called whenever displayDialog is called. Not on UI thread. */
 	public void initiateUserInput(int a) {
 		System.out.println("initiateUserInput: " + a);
 	}
@@ -308,7 +326,10 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void vibrate(int duration) {
-		 ((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(duration);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_longvibration", false)) {
+			duration *= 5;
+		}
+		((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(duration);
 	}
 
 	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
