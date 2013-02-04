@@ -47,13 +47,21 @@ public class MainMenuOptionsActivity extends Activity
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					Toast.makeText(this, "Texture pack set! Restart Minecraft to see texture pack.", Toast.LENGTH_LONG).show();
-					System.exit(0);
+					Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
+					finish();
+					restartFirstActivity();
+					//System.exit(0);
 
 				}
 				break;
 		}
 		finish();
+	}
+	/* thanks, http://stackoverflow.com/questions/1397361/how-do-i-restart-an-android-activity */
+	private void restartFirstActivity() {
+		Intent i = getPackageManager().getLaunchIntentForPackage(getPackageName());
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK );
+		startActivity(i);
 	}
 
 

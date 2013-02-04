@@ -12,6 +12,8 @@ import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -20,8 +22,7 @@ import android.view.View;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
-import net.zhuoweizhang.mcpelauncher.TexturePack;
-import net.zhuoweizhang.mcpelauncher.ZipTexturePack;
+import net.zhuoweizhang.mcpelauncher.*;
 
 
 
@@ -44,28 +45,38 @@ public class MainActivity extends NativeActivity
 
 	protected Context minecraftApkContext;
 
+	protected boolean fakePackage = false;
+
+	private static final String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
+
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		System.out.println("oncreate");
 		try {
-			System.loadLibrary("minecraftpe");
-		} catch (UnsatisfiedLinkError e) {
+			System.load("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
+		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, "Can't load libminecraftpe.so", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK", Toast.LENGTH_LONG).show();
 			finish();
 		}
+
 		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
 
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
+		setFakePackage(true);
+
 		super.onCreate(savedInstanceState);
+
+		setFakePackage(false);
 
 		try {
 			File file = new File(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", "/sdcard/tex.zip"));
+			System.out.println("File!! " + file);
 			if (!file.exists()) {
 				texturePack = null;
 			} else {
@@ -94,6 +105,19 @@ public class MainActivity extends NativeActivity
 	public void onStart() {
 		super.onStart();
 	}
+
+	private void setFakePackage(boolean enable) {
+		fakePackage = enable;
+	}
+
+	@Override
+	public PackageManager getPackageManager() {
+		if (fakePackage) {
+			return new RedirectPackageManager(super.getPackageManager(), MC_NATIVE_LIBRARY_DIR);
+		}
+		return super.getPackageManager();
+	}
+		
 
 	public native void nativeRegisterThis();
 	public native void nativeUnregisterThis();
@@ -149,8 +173,10 @@ public class MainActivity extends NativeActivity
 			if (texturePack == null) {
 				is = minecraftApkContext.getAssets().open(name);
 			} else {
+				System.out.println("Trying to load  " +name + "from tp");
 				is = texturePack.getInputStream(name);
 				if (is == null) {
+					System.out.println("Can't load " + name + " from tp");
 					is = minecraftApkContext.getAssets().open(name);
 				}
 			}
@@ -267,7 +293,12 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void vibrate(int duration) {
-	}	
+	}
+
+	public int getKeyFromKeyCode(int a, int b, int c) {
+		System.out.printf("Key from keycode %i %i %i\n", a, b, c);
+		return 0;
+	}
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
 	}
