@@ -2,6 +2,7 @@ package com.mojang.minecraftpe;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 import java.nio.ByteBuffer;
 
@@ -195,8 +196,20 @@ public class MainActivity extends NativeActivity
 		try {
 			InputStream is = getInputStreamForAsset(name);
 			if (is == null) return null;
-			byte[] retval = new byte[(int) getSizeForAsset(name)];
-			is.read(retval);
+			// can't always find length - use the method from 
+			// http://www.velocityreviews.com/forums/t136788-store-whole-inputstream-in-a-string.html
+			// instead
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			while(true) {
+				int len = is.read(buffer);
+				if(len < 0) {
+					break;
+				}
+				bout.write(buffer, 0, len);
+			}
+			byte[] retval = bout.toByteArray();
+
 			return retval;
 		} catch (Exception e) {
 			return null;
@@ -218,6 +231,7 @@ public class MainActivity extends NativeActivity
 			}
 			return is;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -234,6 +248,7 @@ public class MainActivity extends NativeActivity
 			}
 			return size;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return 0;
 		}
 	}
@@ -322,7 +337,6 @@ public class MainActivity extends NativeActivity
 
 
 	public boolean isTouchscreen() {
-		System.err.println("Touchscreen");
 		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("ctrl_usetouchscreen", true);
 	}
 
