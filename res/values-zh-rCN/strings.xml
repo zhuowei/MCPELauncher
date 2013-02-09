@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MCPELauncher</string>
+    <string name="app_name">MCPE启动器</string>
     <string name="pref_ctrl_touchscreen">使用触摸屏</string>
-    <string name="pref_ctrl_touchscreen_summary">If you are not using an Xperia Play, check this</string>
+    <string name="pref_ctrl_touchscreen_summary">如果你用的是Xperia Play，请勾上此处</string>
     <string name="pref_mp_username">多人游戏用户名</string>
-    <string name="pref_mp_username_summary">Your name, duh</string>
+    <string name="pref_mp_username_summary">填你的名字，嗯</string>
     <string name="pref_texture_pack">物质包</string>
-    <string name="pref_texture_pack_summary">Change your texture pack</string>
-    <string name="pref_ctrl_usetouchjoypad">分触摸</string>
+    <string name="pref_texture_pack_summary">使用你的1秒钟来换材质</string>
+    <string name="pref_ctrl_usetouchjoypad">分触摸（准星）</string>
     <string name="pref_ctrl_islefthanded">左撇子</string>
-    <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
-    <string name="pref_ctrl_invertmouse">鼠标反转</string>
-    <string name="pref_ctrl_invertmouse_summary">Meanwhile in Australia :)</string>
+    <string name="pref_ctrl_islefthanded_summary">镜像一般的操作方式</string>
+    <string name="pref_ctrl_invertmouse">Y轴操作反转</string>
+    <string name="pref_ctrl_invertmouse_summary">貌似澳大利亚就是这么玩的:)</string>
     <string name="pref_feedback_vibration">振动</string>
-    <string name="pref_feedback_vibration_summary">Vibrate when a block is destroyed</string>
+    <string name="pref_feedback_vibration_summary">在破坏一个方块时会产生振动</string>
     <string name="pref_zz_longvibration">超级振动</string>
-    <string name="pref_zz_longvibration_summary">BZZZZT!!!11!</string>
+    <string name="pref_zz_longvibration_summary">滋滋滋滋滋滋滋滋滋滋！</string>
     <string name="pref_gfx_fancygraphics">高品质</string>
-    <string name="pref_gfx_fancygraphics_summary">Make stuff look better</string>
+    <string name="pref_gfx_fancygraphics_summary">让画面看起来更好（提升体验）</string>
     <string name="pref_gfx_lowquality">低品质</string>
-    <string name="pref_gfx_lowquality_summary">Make stuff look worse</string>
+    <string name="pref_gfx_lowquality_summary">让画面看起来更糟（提升性能）</string>
     <string name="pref_game_difficultypeaceful">和平模式</string>
-    <string name="pref_game_difficultypeaceful_summary">Health regeneration, no monsters</string>
+    <string name="pref_game_difficultypeaceful_summary">生命恢复，没有怪物</string>
     <string name="pref_ctrl_sensitivity">灵敏度</string>
-    <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
+    <string name="pref_ctrl_sensitivity_summary">触控灵敏度</string>
 </resources>
