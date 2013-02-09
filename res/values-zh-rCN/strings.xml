@@ -5,7 +5,7 @@
     <string name="pref_ctrl_touchscreen_summary">如果你用的是Xperia Play，请勾上此处</string>
     <string name="pref_mp_username">多人游戏用户名</string>
     <string name="pref_mp_username_summary">填你的名字，嗯</string>
-    <string name="pref_texture_pack">物质包</string>
+    <string name="pref_texture_pack">材质包</string>
     <string name="pref_texture_pack_summary">使用你的1秒钟来换材质</string>
     <string name="pref_ctrl_usetouchjoypad">分触摸（准星）</string>
     <string name="pref_ctrl_islefthanded">左撇子</string>
@@ -24,7 +24,7 @@
     <string name="pref_game_difficultypeaceful_summary">生命恢复，没有怪物</string>
     <string name="pref_ctrl_sensitivity">灵敏度</string>
     <string name="pref_ctrl_sensitivity_summary">触控灵敏度</string>
-    <string name="texture_pack_unable_to_load">无法加载物质包.</string>
+    <string name="texture_pack_unable_to_load">无法加载材质包。</string>
     <string name="nerdy_stuff_page">计算机迷的东西</string>
     <string name="dump_libminecraftpe">从内存导出libminecraftpe.so</string>
 </resources>
