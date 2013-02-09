@@ -24,4 +24,7 @@
     <string name="pref_game_difficultypeaceful_summary">Health regeneration, no monsters</string>
     <string name="pref_ctrl_sensitivity">Sensitivity</string>
     <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
+    <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
+    <string name="nerdy_stuff_page">Nerdy stuff</string>
+    <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
 </resources>

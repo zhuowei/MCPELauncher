@@ -24,4 +24,7 @@
     <string name="pref_game_difficultypeaceful_summary">生命恢复，没有怪物</string>
     <string name="pref_ctrl_sensitivity">灵敏度</string>
     <string name="pref_ctrl_sensitivity_summary">触控灵敏度</string>
+    <string name="texture_pack_unable_to_load">无法加载物质包.</string>
+    <string name="nerdy_stuff_page">计算机迷的东西</string>
+    <string name="dump_libminecraftpe">从内存导出libminecraftpe.so</string>
 </resources>

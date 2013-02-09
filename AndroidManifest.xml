@@ -10,9 +10,8 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission
         android:name="android.permission.VIBRATE"/>
-    <application android:label="MCPELauncher" >
-        <activity android:name="com.mojang.minecraftpe.MainActivity"
-                  android:label="MCPELauncher"
+    <application android:label="@string/app_name" >
+        <activity android:name="net.zhuoweizhang.mcpelauncher.LauncherActivity"
                   android:configChanges="orientation|keyboardHidden"
                   android:screenOrientation="landscape"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -34,6 +33,7 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
+        <activity android:name="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
     </application>
 
 </manifest> 

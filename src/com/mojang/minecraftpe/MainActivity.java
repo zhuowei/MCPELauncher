@@ -3,6 +3,8 @@ package com.mojang.minecraftpe;
 import java.io.File;
 import java.io.InputStream;
 
+import java.nio.ByteBuffer;
+
 import java.text.DateFormat;
 
 import java.util.*;
@@ -28,6 +30,8 @@ import android.preference.*;
 
 import net.zhuoweizhang.mcpelauncher.*;
 
+import net.zhuoweizhang.pokerface.PokerFace;
+
 
 
 public class MainActivity extends NativeActivity
@@ -52,8 +56,11 @@ public class MainActivity extends NativeActivity
 	protected boolean fakePackage = false;
 
 	private static final String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
+	private static final String MC_NATIVE_LIBRARY_LOCATION = "/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so";
 
 	protected int inputStatus = INPUT_STATUS_IN_PROGRESS;
+
+	public static ByteBuffer minecraftLibBuffer;
 
 	/** Called when the activity is first created. */
 
@@ -61,7 +68,7 @@ public class MainActivity extends NativeActivity
 	public void onCreate(Bundle savedInstanceState) {
 		System.out.println("oncreate");
 		try {
-			System.load("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
+			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK", Toast.LENGTH_LONG).show();
@@ -81,17 +88,19 @@ public class MainActivity extends NativeActivity
 		setFakePackage(false);
 
 		try {
-			File file = new File(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", "/sdcard/tex.zip"));
-			System.out.println("File!! " + file);
-			if (!file.exists()) {
-				texturePack = null;
-			} else {
-				texturePack = new ZipTexturePack(file);
+			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
+			if (filePath != null) {
+				File file = new File(filePath);
+				System.out.println("File!! " + file);
+				if (!file.exists()) {
+					texturePack = null;
+				} else {
+					texturePack = new ZipTexturePack(file);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, "No tex.zip found!", Toast.LENGTH_LONG).show();
-			finish();
+			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
 		}
 		
 		try {
@@ -104,6 +113,12 @@ public class MainActivity extends NativeActivity
 			e.printStackTrace();
 			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
 			finish();
+		}
+
+		try {
+			applyPatches();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		//setContentView(R.layout.main);
 	}
@@ -338,6 +353,49 @@ public class MainActivity extends NativeActivity
 	}
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
+	}
+
+
+	public void applyPatches() throws Exception {
+		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
+		System.out.println(Long.toString(pageSize, 16));
+		long minecraftLibLocation = findMinecraftLibLocation();
+		long minecraftLibLength = findMinecraftLibLength();
+		long mapPageLength = ((minecraftLibLength / pageSize) + 1) * pageSize;
+		System.out.println("Calling mprotect with " + minecraftLibLocation + " and " + mapPageLength);
+		int returnStatus = PokerFace.mprotect(minecraftLibLocation, mapPageLength, PokerFace.PROT_WRITE | PokerFace.PROT_READ | PokerFace.PROT_EXEC);
+		System.out.println("mprotect result is " + returnStatus);
+		if (returnStatus < 0) {
+			System.out.println("Well, that sucks!");
+			return;
+		}
+		ByteBuffer buffer = PokerFace.createDirectByteBuffer(minecraftLibLocation, minecraftLibLength);
+		//findMinecraftLibLocation();
+		System.out.println("Has the byte buffer: " + buffer);
+		minecraftLibBuffer = buffer;
+		buffer.position(0x1b6d50);//"v0.6.1" offset
+		buffer.put(">9000!".getBytes());
+	}
+
+	public static long findMinecraftLibLocation() throws Exception {
+		Scanner scan = new Scanner(new File("/proc/self/maps"));
+		long minecraftLocation = -1;
+		while (scan.hasNextLine()) {
+			String line = scan.nextLine();
+			//System.out.println(line);
+			String[] parts = line.split(" ");
+			if (parts[parts.length - 1].indexOf("libminecraftpe.so") >= 0 && parts[1].indexOf("x") >= 0) {
+				System.out.println("Found minecraft location");
+				minecraftLocation = Long.parseLong(parts[0].substring(0, parts[0].indexOf("-")), 16);
+				break;
+			}
+		}
+		scan.close();
+		return minecraftLocation;
+	}
+
+	public static long findMinecraftLibLength() throws Exception {
+		return new File(MC_NATIVE_LIBRARY_LOCATION).length(); //TODO: don't hardcode the 0x1000 page for relocation .data.rel.ro.local
 	}
 
 }
