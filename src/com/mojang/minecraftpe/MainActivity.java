@@ -388,7 +388,18 @@ public class MainActivity extends NativeActivity
 		System.out.println("Has the byte buffer: " + buffer);
 		minecraftLibBuffer = buffer;
 		buffer.position(0x1b6d50);//"v0.6.1" offset
+		byte[] testBuffer = new byte[6];
+		buffer.get(testBuffer);
+		System.out.println("Before: " + Arrays.toString(testBuffer));
+		if (testBuffer.equals(">9000!".getBytes())) {
+			System.out.println("This lib has been patched already!!!");
+			Toast.makeText(this, "Already patched!", Toast.LENGTH_LONG).show();
+		}
+		buffer.position(0x1b6d50);//"v0.6.1" offset
 		buffer.put(">9000!".getBytes());
+		buffer.position(0x1b6d50);//"v0.6.1" offset
+		buffer.get(testBuffer);
+		System.out.println("After " + Arrays.toString(testBuffer));
 	}
 
 	public static long findMinecraftLibLocation() throws Exception {

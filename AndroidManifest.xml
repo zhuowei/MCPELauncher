@@ -34,6 +34,7 @@
             </intent-filter>
         </activity>
         <activity android:name="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
+        <activity android:name="net.zhuoweizhang.mcpelauncher.ManagePatchesActivity"/>
     </application>
 
 </manifest> 

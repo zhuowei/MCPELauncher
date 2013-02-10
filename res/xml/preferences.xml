@@ -54,6 +54,11 @@
         android:title="@string/pref_texture_pack"
         android:summary="@string/pref_texture_pack_summary"/>
     <Preference
+        android:title="@string/manage_patches">
+        <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
+                android:targetClass="net.zhuoweizhang.mcpelauncher.ManagePatchesActivity"/>
+    </Preference>
+    <Preference
         android:title="@string/nerdy_stuff_page">
         <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
                 android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>

@@ -27,4 +27,7 @@
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
+    <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
+    <string name="restart_app">Restart app</string>
+    <string name="manage_patches">Manage patches</string>
 </resources>

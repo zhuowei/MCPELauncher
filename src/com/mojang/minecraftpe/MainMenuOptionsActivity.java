@@ -75,7 +75,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	/* thanks, http://stackoverflow.com/questions/1397361/how-do-i-restart-an-android-activity */
 	private void restartFirstActivity() {
 		Intent i = getPackageManager().getLaunchIntentForPackage(getPackageName());
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK );
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(i);
 	}
 
