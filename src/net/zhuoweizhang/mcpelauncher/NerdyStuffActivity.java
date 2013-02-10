@@ -36,6 +36,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		try {
 			FileOutputStream os = new FileOutputStream("/sdcard/libminecraftpe.so.dump");
 			FileChannel channel = os.getChannel();
+			com.mojang.minecraftpe.MainActivity.minecraftLibBuffer.position(0);
 			channel.write(com.mojang.minecraftpe.MainActivity.minecraftLibBuffer);
 			channel.close();
 			Toast.makeText(this, "/sdcard/libminecraftpe.so.dump", Toast.LENGTH_LONG).show();

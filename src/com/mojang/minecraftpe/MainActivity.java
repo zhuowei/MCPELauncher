@@ -117,15 +117,19 @@ public class MainActivity extends NativeActivity
 		}
 
 		try {
-			applyPatches();
+			if (!isSafeMode()) {
+				initPatching();
+				applyPatches();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		//setContentView(R.layout.main);
 	}
 
-	public void onStart() {
-		super.onStart();
+	public void onDestroy() {
+		super.onDestroy();
+		nativeUnregisterThis();
 	}
 
 	private void setFakePackage(boolean enable) {
@@ -369,8 +373,11 @@ public class MainActivity extends NativeActivity
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
 	}
 
+	public boolean isSafeMode() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode", false);
+	}
 
-	public void applyPatches() throws Exception {
+	public void initPatching() throws Exception {
 		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
 		System.out.println(Long.toString(pageSize, 16));
 		long minecraftLibLocation = findMinecraftLibLocation();
@@ -387,14 +394,14 @@ public class MainActivity extends NativeActivity
 		//findMinecraftLibLocation();
 		System.out.println("Has the byte buffer: " + buffer);
 		minecraftLibBuffer = buffer;
+	}
+
+	public void applyPatches() throws Exception {
+		ByteBuffer buffer = minecraftLibBuffer;
 		buffer.position(0x1b6d50);//"v0.6.1" offset
 		byte[] testBuffer = new byte[6];
 		buffer.get(testBuffer);
 		System.out.println("Before: " + Arrays.toString(testBuffer));
-		if (testBuffer.equals(">9000!".getBytes())) {
-			System.out.println("This lib has been patched already!!!");
-			Toast.makeText(this, "Already patched!", Toast.LENGTH_LONG).show();
-		}
 		buffer.position(0x1b6d50);//"v0.6.1" offset
 		buffer.put(">9000!".getBytes());
 		buffer.position(0x1b6d50);//"v0.6.1" offset
