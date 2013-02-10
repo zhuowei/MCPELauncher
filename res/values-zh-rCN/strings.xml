@@ -24,7 +24,16 @@
     <string name="pref_game_difficultypeaceful_summary">生命恢复，没有怪物</string>
     <string name="pref_ctrl_sensitivity">灵敏度</string>
     <string name="pref_ctrl_sensitivity_summary">触控灵敏度</string>
+    <string name="pref_zz_safe_mode">安全模式</string>
+    <string name="pref_zz_safe_mode_summary">不打任何补丁</string>
+    <string name="pref_zz_patch_ip_enable">多人服务器重定向</string>
+    <string name="pref_zz_patch_ip_enable_summary">把多人游戏连接重定向到网上服务器</string>
+    <string name="pref_zz_patch_ip">服务器IP</string>
+    <string name="pref_zz_patch_ip_summary">您想连接的服务器的IP地址</string>
     <string name="texture_pack_unable_to_load">无法加载材质包。</string>
     <string name="nerdy_stuff_page">计算机迷的东西</string>
     <string name="dump_libminecraftpe">从内存导出libminecraftpe.so</string>
+    <string name="nerdy_stuff_are_useless">这页上基本上所有的东西都没用。它们为了修复故障才留在这里。</string>
+    <string name="restart_app">重新启动程序</string>
+    <string name="manage_patches">管理补丁</string>
 </resources>

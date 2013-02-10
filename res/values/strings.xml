@@ -15,7 +15,7 @@
     <string name="pref_feedback_vibration">Vibrate</string>
     <string name="pref_feedback_vibration_summary">Vibrate when a block is destroyed</string>
     <string name="pref_zz_longvibration">Extra-long vibration</string>
-    <string name="pref_zz_longvibration_summary">BZZZZT!!!11!</string>
+    <string name="pref_zz_longvibration_summary">Increase the vibration length by 5x</string>
     <string name="pref_gfx_fancygraphics">Fancy graphics</string>
     <string name="pref_gfx_fancygraphics_summary">Make stuff look better</string>
     <string name="pref_gfx_lowquality">Low quality graphics</string>
