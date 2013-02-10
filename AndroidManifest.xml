@@ -10,7 +10,7 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission
         android:name="android.permission.VIBRATE"/>
-    <application android:label="@string/app_name" >
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
         <activity android:name="net.zhuoweizhang.mcpelauncher.LauncherActivity"
                   android:configChanges="orientation|keyboardHidden"
                   android:screenOrientation="landscape"
