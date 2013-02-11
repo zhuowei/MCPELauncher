@@ -36,4 +36,10 @@
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
     <string name="restart_app">Restart app</string>
     <string name="manage_patches">Manage patches</string>
+    <string name="world_create_title">Create world</string>
+    <string name="world_name_prompt">Name: </string>
+    <string name="world_seed_prompt">Seed: </string>
+    <string name="world_gamemode_prompt">Game Mode: </string>
+    <string name="gamemode_survival">Survival</string>
+    <string name="gamemode_creative">Creative</string>
 </resources>

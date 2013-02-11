@@ -36,4 +36,10 @@
     <string name="nerdy_stuff_are_useless">这页上基本上所有的东西都没用。它们为了修复故障才留在这里。</string>
     <string name="restart_app">重新启动程序</string>
     <string name="manage_patches">管理补丁</string>
+    <string name="world_create_title">新建世界</string>
+    <string name="world_name_prompt">世界名: </string>
+    <string name="world_seed_prompt">种子:</string>
+    <string name="world_gamemode_prompt">游戏模式: </string>
+    <string name="gamemode_survival">生存模式</string>
+    <string name="gamemode_creative">创造模式</string>
 </resources>

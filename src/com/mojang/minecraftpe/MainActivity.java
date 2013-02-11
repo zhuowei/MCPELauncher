@@ -12,10 +12,13 @@ import java.util.*;
 
 import android.app.Activity;
 import android.app.NativeActivity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,6 +28,8 @@ import android.os.Vibrator;
 import android.view.View;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.preference.*;
@@ -38,11 +43,11 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity
 {
 
-	public static final int INPUT_STATUS_IN_PROGRESS = 0;
+	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
 	public static final int INPUT_STATUS_OK = 1;
 
-	public static final int INPUT_STATUS_CANCELLED = 2;
+	public static final int INPUT_STATUS_CANCELLED = 0;
 
 	public static final int DIALOG_CREATE_WORLD = 1;
 
@@ -56,10 +61,14 @@ public class MainActivity extends NativeActivity
 
 	protected boolean fakePackage = false;
 
+	public static final String[] GAME_MODES = {"creative", "survival"};
+
 	private static final String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
 	private static final String MC_NATIVE_LIBRARY_LOCATION = "/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so";
 
 	protected int inputStatus = INPUT_STATUS_IN_PROGRESS;
+
+	protected String[] userInputStrings = null;
 
 	public static ByteBuffer minecraftLibBuffer;
 
@@ -163,10 +172,10 @@ public class MainActivity extends NativeActivity
 		switch (dialogId) {
 			case DIALOG_CREATE_WORLD:
 				System.out.println("World creation");
-				inputStatus = INPUT_STATUS_CANCELLED;
+				inputStatus = INPUT_STATUS_IN_PROGRESS;
 				runOnUiThread(new Runnable() {
 					public void run() {
-						Toast.makeText(MainActivity.this, "Not supported :(", Toast.LENGTH_SHORT).show();
+						showDialog(DIALOG_CREATE_WORLD);
 					}
 				});
 				break;
@@ -184,6 +193,45 @@ public class MainActivity extends NativeActivity
 			inputStatus = INPUT_STATUS_OK;
 		}
 	}*/
+
+	public Dialog onCreateDialog(int dialogId) {
+		switch (dialogId) {
+			case DIALOG_CREATE_WORLD:
+				return createCreateWorldDialog();
+			default:
+				return super.onCreateDialog(dialogId);
+		}
+	}
+
+	protected Dialog createCreateWorldDialog() {
+		final View textEntryView = getLayoutInflater().inflate(R.layout.create_world_dialog, null);
+		return new AlertDialog.Builder(this)
+			.setTitle(R.string.world_create_title)
+			.setView(textEntryView)
+			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					AlertDialog dialog = (AlertDialog) dialogI;
+					String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry)).getText().toString();
+					String worldSeed = ((TextView) dialog.findViewById(R.id.world_seed_entry)).getText().toString();
+					String worldGameMode = GAME_MODES[
+						((Spinner) dialog.findViewById(R.id.world_gamemode_spinner)).getSelectedItemPosition()];
+					userInputStrings = new String[] {worldName, worldSeed, worldGameMode};
+					inputStatus = INPUT_STATUS_OK;
+					
+				}
+			})
+			.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					inputStatus = INPUT_STATUS_CANCELLED;
+				}
+			})
+			.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				public void onCancel(DialogInterface dialogI) {
+					inputStatus = INPUT_STATUS_CANCELLED;
+				}
+			})
+			.create();
+	}
 
 	/**
 	 * @param time Unix timestamp
@@ -322,7 +370,7 @@ public class MainActivity extends NativeActivity
 	public String[] getUserInputString() {
 		System.out.println("User input string");
 		/* for the seed input: name, world type, seed */
-		return new String[] {"elephant", "potato", "strawberry"};
+		return userInputStrings;
 	}
 
 	public boolean hasBuyButtonWhenInvalidLicense() {
