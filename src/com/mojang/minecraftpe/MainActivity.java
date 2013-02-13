@@ -268,40 +268,15 @@ public class MainActivity extends NativeActivity
 		}
 	}
 
-	private InputStream getInputStreamForAsset(String name) {
+	protected InputStream getInputStreamForAsset(String name) {
 		InputStream is = null;
 		try {
-			if (texturePack == null) {
-				is = minecraftApkContext.getAssets().open(name);
-			} else {
-				System.out.println("Trying to load  " +name + "from tp");
-				is = texturePack.getInputStream(name);
-				if (is == null) {
-					System.out.println("Can't load " + name + " from tp");
-					is = minecraftApkContext.getAssets().open(name);
-				}
-			}
+			System.out.println("Trying to load " + name);
+			is = minecraftApkContext.getAssets().open(name);
 			return is;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
-		}
-	}
-
-	private long getSizeForAsset(String name) {
-		long size = 0;
-		try {
-			if (texturePack == null) {
-				return minecraftApkContext.getAssets().openFd(name).getLength();
-			}
-			size = texturePack.getSize(name);
-			if (size == -1) {
-				size = minecraftApkContext.getAssets().openFd(name).getLength();
-			}
-			return size;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
 		}
 	}
 

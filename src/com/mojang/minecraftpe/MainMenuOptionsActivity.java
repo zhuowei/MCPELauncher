@@ -43,8 +43,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	protected void chooseTexturePack() {
 		Intent target = FileUtils.createGetContentIntent();
 		target.setType("application/zip");
-		Intent intent = Intent.createChooser(target, "Select texture pack");
-		startActivityForResult(intent, REQUEST_SELECT_TEXTURE_PACK);
+		//Intent intent = Intent.createChooser(target, "Select texture pack");
+		target.setClass(this, FileChooserActivity.class);
+		startActivityForResult(target, REQUEST_SELECT_TEXTURE_PACK);
 	}
 
 	@Override
