@@ -1,8 +1,6 @@
 package com.mojang.minecraftpe;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 
 import java.nio.ByteBuffer;
 
@@ -66,8 +64,10 @@ public class MainActivity extends NativeActivity
 
 	public static final String[] GAME_MODES = {"creative", "survival"};
 
-	private static final String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
-	private static final String MC_NATIVE_LIBRARY_LOCATION = "/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so";
+	private static String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
+	private static String MC_NATIVE_LIBRARY_LOCATION = "/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so";
+
+	public static final String PT_PATCHES_DIR = "ptpatches";
 
 	protected int inputStatus = INPUT_STATUS_IN_PROGRESS;
 
@@ -75,11 +75,32 @@ public class MainActivity extends NativeActivity
 
 	public static ByteBuffer minecraftLibBuffer;
 
+	public static boolean hasPrePatched = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		System.out.println("oncreate");
+
+		File lockFile = new File(getFilesDir(), "running.lock");
+		if (lockFile.exists()) {
+			try {
+				PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", true).apply();
+				showDialog(DIALOG_CRASH_SAFE_MODE);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			if (!isSafeMode()) {
+				prePatch();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		try {
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
@@ -128,21 +149,10 @@ public class MainActivity extends NativeActivity
 			finish();
 		}
 
-
-		File lockFile = new File(getFilesDir(), "running.lock");
-		if (lockFile.exists()) {
-			try {
-				PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", true).apply();
-				showDialog(DIALOG_CRASH_SAFE_MODE);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
 		try {
 			if (!isSafeMode()) {
 				initPatching();
-				applyPatches();
+				//applyPatches();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -193,6 +203,35 @@ public class MainActivity extends NativeActivity
 			return new RedirectPackageManager(super.getPackageManager(), MC_NATIVE_LIBRARY_DIR);
 		}
 		return super.getPackageManager();
+	}
+
+	private void prePatch() throws Exception {
+		File patched = getDir("patched", 0);
+		File originalLibminecraft = new File("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
+		File newMinecraft = new File(patched, "libminecraftpe.so");
+		File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
+		if (!hasPrePatched) {
+			File[] patches = patchesDir.listFiles();
+			byte[] libBytes = new byte[(int) originalLibminecraft.length()];
+
+			InputStream is = new FileInputStream(originalLibminecraft);
+			is.read(libBytes);
+			is.close();
+
+			for (File f: patches) {
+				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+				patch.loadPatch(f);
+				patch.applyPatch(libBytes);
+			}
+
+			OutputStream os = new FileOutputStream(newMinecraft);
+			os.write(libBytes);
+			os.close();
+			hasPrePatched = true;
+		}
+
+		MC_NATIVE_LIBRARY_DIR = patched.getCanonicalPath();
+		MC_NATIVE_LIBRARY_LOCATION = newMinecraft.getCanonicalPath();
 	}
 		
 
