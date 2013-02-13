@@ -1,14 +1,17 @@
-package com.mojang.minecraftpe;
+package net.zhuoweizhang.mcpelauncher;
 
 import java.io.File;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.NativeActivity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.widget.Toast;
 
 import android.preference.*;
@@ -21,20 +24,27 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 	public static final String PREFERENCES_NAME = "mcpelauncherprefs";
 	public static final int REQUEST_SELECT_TEXTURE_PACK = 5;
+	public static final int REQUEST_MANAGE_PATCHES = 6;
 
 	private Preference texturePackPreference;
+	private Preference managePatchesPreference;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(net.zhuoweizhang.mcpelauncher.R.xml.preferences);
-		texturePackPreference = findPreference("texture_pack");
+		texturePackPreference = findPreference("zz_texture_pack");
 		texturePackPreference.setOnPreferenceClickListener(this);
+		managePatchesPreference = findPreference("zz_manage_patches");
+		managePatchesPreference.setOnPreferenceClickListener(this);
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
 		if (pref == texturePackPreference) {
 			chooseTexturePack();
+			return true;
+		} else if (pref == managePatchesPreference) {
+			managePatches();
 			return true;
 		}
 		return false;
@@ -46,6 +56,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		//Intent intent = Intent.createChooser(target, "Select texture pack");
 		target.setClass(this, FileChooserActivity.class);
 		startActivityForResult(target, REQUEST_SELECT_TEXTURE_PACK);
+	}
+
+	protected void managePatches() {
+		Intent intent = new Intent(this, ManagePatchesActivity.class);
+		intent.putExtras(this.getIntent());
+		startActivityForResult(intent, REQUEST_MANAGE_PATCHES);
 	}
 
 	@Override
@@ -70,8 +86,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 				}
 				break;
+			case REQUEST_MANAGE_PATCHES:
+				if (resultCode == RESULT_OK) {
+					forceRestart();
+				}
+				break;
 		}
-		finish();
 	}
 	/* thanks, http://stackoverflow.com/questions/1397361/how-do-i-restart-an-android-activity */
 	private void restartFirstActivity() {
@@ -80,5 +100,27 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		startActivity(i);
 	}
 
+	/** Forces the app to be restarted by calling System.exit(0), 
+	 * Android automatically re-launches the activity behind this one when the vm exits, so to go back to the main activity, 
+	 * use the AlarmService to launch the home screen intent 1 second later. 
+	 */
+	private void forceRestart() {
+
+/*		AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		long timeMillis = SystemClock.elapsedRealtime() + 1000; //1 second
+		Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis, PendingIntent.getActivity(this, 0, intent, 0));*/
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(200);
+					System.exit(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
 
 }

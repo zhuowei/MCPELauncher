@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.mojang.minecraftpe.MainMenuOptionsActivity"/>
+        <activity android:name="net.zhuoweizhang.mcpelauncher.MainMenuOptionsActivity"/>
 
         <!-- aFileChooser -->
         <activity android:name="com.ipaulpro.afilechooser.FileChooserActivity" android:exported="false">

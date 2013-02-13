@@ -56,11 +56,8 @@
         android:summary="@string/pref_zz_safe_mode_summary"
         android:defaultValue="false"/>
 
-    <Preference
-        android:title="@string/manage_patches">
-        <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
-                android:targetClass="net.zhuoweizhang.mcpelauncher.ManagePatchesActivity"/>
-    </Preference>
+    <Preference android:key="zz_manage_patches"
+        android:title="@string/manage_patches"/>
 
     <Preference
         android:title="@string/nerdy_stuff_page">

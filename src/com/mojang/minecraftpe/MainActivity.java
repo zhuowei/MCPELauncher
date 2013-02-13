@@ -53,6 +53,9 @@ public class MainActivity extends NativeActivity
 
 	public static final int DIALOG_SETTINGS = 3;
 
+	/* private dialogs start here */
+	public static final int DIALOG_CRASH_SAFE_MODE = 0x1000;
+
 	protected DisplayMetrics displayMetrics;
 
 	protected TexturePack texturePack;
@@ -125,6 +128,17 @@ public class MainActivity extends NativeActivity
 			finish();
 		}
 
+
+		File lockFile = new File(getFilesDir(), "running.lock");
+		if (lockFile.exists()) {
+			try {
+				PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", true).apply();
+				showDialog(DIALOG_CRASH_SAFE_MODE);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		try {
 			if (!isSafeMode()) {
 				initPatching();
@@ -136,9 +150,37 @@ public class MainActivity extends NativeActivity
 		//setContentView(R.layout.main);
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		File lockFile = new File(getFilesDir(), "running.lock");
+		try {
+			lockFile.createNewFile();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		File lockFile = new File(getFilesDir(), "running.lock");
+		try {
+			lockFile.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void onDestroy() {
 		super.onDestroy();
 		nativeUnregisterThis();
+		File lockFile = new File(getFilesDir(), "running.lock");
+		try {
+			lockFile.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void setFakePackage(boolean enable) {
@@ -183,6 +225,7 @@ public class MainActivity extends NativeActivity
 				System.out.println("Settings");
 				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
 				inputStatus = INPUT_STATUS_OK;
+				intent.putExtra("maxNumPatches", getMaxNumPatches());
 				startActivityForResult(intent, 1234);
 				break;
 		}
@@ -198,6 +241,8 @@ public class MainActivity extends NativeActivity
 		switch (dialogId) {
 			case DIALOG_CREATE_WORLD:
 				return createCreateWorldDialog();
+			case DIALOG_CRASH_SAFE_MODE:
+				return createCrashSafeModeDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -230,6 +275,13 @@ public class MainActivity extends NativeActivity
 					inputStatus = INPUT_STATUS_CANCELLED;
 				}
 			})
+			.create();
+	}
+
+	protected Dialog createCrashSafeModeDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(R.string.manage_patches_crash_safe_mode)
+			.setPositiveButton(android.R.string.ok, null)
 			.create();
 	}
 
@@ -451,6 +503,10 @@ public class MainActivity extends NativeActivity
 
 	public static long findMinecraftLibLength() throws Exception {
 		return new File(MC_NATIVE_LIBRARY_LOCATION).length(); //TODO: don't hardcode the 0x1000 page for relocation .data.rel.ro.local
+	}
+
+	public int getMaxNumPatches() {
+		return 3; //3 patches
 	}
 
 }
