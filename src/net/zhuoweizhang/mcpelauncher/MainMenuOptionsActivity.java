@@ -28,6 +28,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 	private Preference texturePackPreference;
 	private Preference managePatchesPreference;
+	private Preference safeModePreference;
+	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,17 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		texturePackPreference.setOnPreferenceClickListener(this);
 		managePatchesPreference = findPreference("zz_manage_patches");
 		managePatchesPreference.setOnPreferenceClickListener(this);
+		safeModePreference = findPreference("zz_safe_mode");
+		safeModePreference.setOnPreferenceClickListener(this);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (needsRestart) {
+			forceRestart();
+		} else {
+			super.onBackPressed();
+		}
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
@@ -46,6 +59,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == managePatchesPreference) {
 			managePatches();
 			return true;
+		} else if (pref == safeModePreference) {
+			needsRestart = true;
+			return false; //Don't eat it
 		}
 		return false;
 	}
@@ -60,7 +76,6 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 	protected void managePatches() {
 		Intent intent = new Intent(this, ManagePatchesActivity.class);
-		intent.putExtras(this.getIntent());
 		startActivityForResult(intent, REQUEST_MANAGE_PATCHES);
 	}
 

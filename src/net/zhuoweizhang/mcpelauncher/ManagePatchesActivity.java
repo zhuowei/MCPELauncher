@@ -72,7 +72,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	}
 
 	public void importPatch() {
-		int maxPatchCount = getIntent().getIntExtra("maxNumPatches", 3);
+		int maxPatchCount = getMaxPatchCount();
 		if (maxPatchCount >= 0 && patches.size() >= maxPatchCount) {
 			Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
 			return;
@@ -81,6 +81,11 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		target.setType("application/x-ptpatch");
 		target.setClass(this, FileChooserActivity.class);
 		startActivityForResult(target, REQUEST_IMPORT_PATCH);
+	}
+
+	/** gets the maximum number of patches this application can patch. A negative value indicates unlimited amount. */
+	protected int getMaxPatchCount() {
+		return this.getResources().getInteger(R.integer.max_num_patches);
 	}
 
 	@Override

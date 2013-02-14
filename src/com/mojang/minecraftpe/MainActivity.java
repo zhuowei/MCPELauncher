@@ -218,10 +218,15 @@ public class MainActivity extends NativeActivity
 			is.read(libBytes);
 			is.close();
 
+			int patchedCount = 0;
+			int maxPatchNum = getMaxNumPatches();
+
 			for (File f: patches) {
+				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 				patch.loadPatch(f);
 				patch.applyPatch(libBytes);
+				patchedCount++;
 			}
 
 			OutputStream os = new FileOutputStream(newMinecraft);
@@ -264,7 +269,6 @@ public class MainActivity extends NativeActivity
 				System.out.println("Settings");
 				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
 				inputStatus = INPUT_STATUS_OK;
-				intent.putExtra("maxNumPatches", getMaxNumPatches());
 				startActivityForResult(intent, 1234);
 				break;
 		}
@@ -545,7 +549,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public int getMaxNumPatches() {
-		return 3; //3 patches
+		return this.getResources().getInteger(R.integer.max_num_patches);
 	}
 
 }
