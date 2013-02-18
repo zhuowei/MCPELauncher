@@ -79,6 +79,8 @@ public class MainActivity extends NativeActivity
 
 	public static boolean hasPrePatched = false;
 
+	public boolean forceFallback = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -122,6 +124,8 @@ public class MainActivity extends NativeActivity
 		super.onCreate(savedInstanceState);
 
 		setFakePackage(false);
+
+		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
 
 		try {
 			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
@@ -369,8 +373,33 @@ public class MainActivity extends NativeActivity
 	protected InputStream getInputStreamForAsset(String name) {
 		InputStream is = null;
 		try {
-			System.out.println("Trying to load " + name);
+			if (texturePack == null) {
+				return getLocalInputStreamForAsset(name);
+			} else {
+				System.out.println("Trying to load  " +name + "from tp");
+				is = texturePack.getInputStream(name);
+				if (is == null) {
+					System.out.println("Can't load " + name + " from tp");
+					return getLocalInputStreamForAsset(name);
+				}
+			}
+			return is;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	protected InputStream getLocalInputStreamForAsset(String name) {
+		InputStream is = null;
+		try {
+			if (forceFallback) {
+				return getAssets().open(name);
+			}
 			is = minecraftApkContext.getAssets().open(name);
+			if (is == null) {
+				System.out.println("Can't find it in the APK - attempting to load fallback");
+				is = getAssets().open(name);
+			}
 			return is;
 		} catch (Exception e) {
 			e.printStackTrace();

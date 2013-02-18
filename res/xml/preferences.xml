@@ -59,6 +59,12 @@
         android:defaultValue="false"/>
 
     <CheckBoxPreference
+        android:key="zz_texture_pack_demo"
+        android:title="@string/pref_zz_texture_pack_demo"
+        android:summary="@string/pref_zz_texture_pack_demo_summary"
+        android:defaultValue="false"/>
+
+    <CheckBoxPreference
         android:key="zz_safe_mode"
         android:title="@string/pref_zz_safe_mode"
         android:summary="@string/pref_zz_safe_mode_summary"
