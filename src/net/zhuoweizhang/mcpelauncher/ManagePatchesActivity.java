@@ -88,6 +88,11 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		return this.getResources().getInteger(R.integer.max_num_patches);
 	}
 
+	protected void setPatchListModified() {
+		setResult(RESULT_OK);
+		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
@@ -97,7 +102,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 					File file = FileUtils.getFile(uri);
 					try {
 						PatchUtils.copy(file, new File(getDir(PT_PATCHES_DIR, 0), file.getName()));
-						setResult(RESULT_OK);
+						setPatchListModified();
 						findPatches();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -152,7 +157,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 				public void onClick(DialogInterface dialogI, int button) {
 					if (button == 0) {
 						selectedPatchItem.file.delete();
-						setResult(RESULT_OK);
+						setPatchListModified();
 						findPatches();
 					}
 				}

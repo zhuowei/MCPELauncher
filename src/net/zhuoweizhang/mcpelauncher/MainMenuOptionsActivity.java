@@ -28,6 +28,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 	private Preference texturePackPreference;
 	private Preference texturePackEnablePreference;
+	private Preference texturePackDemoPreference;
 	private Preference managePatchesPreference;
 	private Preference safeModePreference;
 	private boolean needsRestart = false;
@@ -40,6 +41,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		if (texturePackPreference != null) texturePackPreference.setOnPreferenceClickListener(this);
 		texturePackEnablePreference = findPreference("zz_texture_pack_enable");
 		if (texturePackEnablePreference != null) texturePackEnablePreference.setOnPreferenceClickListener(this);
+		texturePackDemoPreference = findPreference("zz_texture_pack_demo");
+		if (texturePackDemoPreference != null) texturePackDemoPreference.setOnPreferenceClickListener(this);
 		managePatchesPreference = findPreference("zz_manage_patches");
 		managePatchesPreference.setOnPreferenceClickListener(this);
 		safeModePreference = findPreference("zz_safe_mode");
@@ -62,9 +65,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == managePatchesPreference) {
 			managePatches();
 			return true;
-		} else if (pref == safeModePreference || pref == texturePackEnablePreference) {
+		} else if (pref == safeModePreference) {
 			needsRestart = true;
 			return false; //Don't eat it
+		} else if (pref == texturePackDemoPreference || pref == texturePackEnablePreference) {
+			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
+			needsRestart = true;
+			return false;
 		}
 		return false;
 	}
@@ -93,6 +100,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 					SharedPreferences.Editor editor = prefs.edit();
 					try {
 						editor.putString("texturePack", file.getCanonicalPath());
+						editor.putBoolean("force_prepatch", true);
 						editor.commit();
 					} catch (Exception e) {
 						e.printStackTrace();

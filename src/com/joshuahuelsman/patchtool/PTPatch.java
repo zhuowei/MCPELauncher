@@ -35,6 +35,14 @@ public class PTPatch {
 		int num_patches;
 		byte[] indices;
 	}
+
+	public void loadPatch(byte[] patch_array) {
+		this.patch_array = patch_array;
+		mHeader.minecraft_ver = getMinecraftVersion();
+		mHeader.num_patches = getNumPatches();
+		mHeader.indices = getIndices();
+		count = 0;
+	}	
 	
 	public void loadPatch(File patchf) throws IOException{
 		patch_array = new byte[(int) patchf.length()];

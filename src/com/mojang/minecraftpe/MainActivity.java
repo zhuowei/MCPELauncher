@@ -58,8 +58,6 @@ public class MainActivity extends NativeActivity
 
 	protected TexturePack texturePack;
 
-	protected TexturePack originalPack;
-
 	protected Context minecraftApkContext;
 
 	protected boolean fakePackage = false;
@@ -81,6 +79,8 @@ public class MainActivity extends NativeActivity
 
 	public boolean forceFallback = false;
 
+	public boolean requiresGuiBlocksPatch = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -96,6 +96,27 @@ public class MainActivity extends NativeActivity
 				e.printStackTrace();
 			}
 		}
+
+		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
+
+		try {
+			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
+			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
+			if (loadTexturePack && filePath != null) {
+				File file = new File(filePath);
+				System.out.println("File!! " + file);
+				if (!file.exists()) {
+					texturePack = null;
+				} else {
+					texturePack = new ZipTexturePack(file);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
+		}
+
+		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
 		try {
 			if (!isSafeMode()) {
@@ -124,25 +145,6 @@ public class MainActivity extends NativeActivity
 		super.onCreate(savedInstanceState);
 
 		setFakePackage(false);
-
-		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
-
-		try {
-			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
-			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
-			if (loadTexturePack && filePath != null) {
-				File file = new File(filePath);
-				System.out.println("File!! " + file);
-				if (!file.exists()) {
-					texturePack = null;
-				} else {
-					texturePack = new ZipTexturePack(file);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
-		}
 		
 		try {
 			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
@@ -217,7 +219,11 @@ public class MainActivity extends NativeActivity
 		File originalLibminecraft = new File("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
 		File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
-		if (!hasPrePatched) {
+		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getBoolean("force_prepatch", true);
+		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
+
+			System.out.println("Forcing new prepatch");
+
 			File[] patches = patchesDir.listFiles();
 			byte[] libBytes = new byte[(int) originalLibminecraft.length()];
 
@@ -236,10 +242,18 @@ public class MainActivity extends NativeActivity
 				patchedCount++;
 			}
 
+			/* patching specific built-in patches */
+			if (requiresGuiBlocksPatch) {
+				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+				patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
+				patch.applyPatch(libBytes);
+			}
+
 			OutputStream os = new FileOutputStream(newMinecraft);
 			os.write(libBytes);
 			os.close();
 			hasPrePatched = true;
+			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", false).apply();
 		}
 
 		MC_NATIVE_LIBRARY_DIR = patched.getCanonicalPath();
@@ -592,6 +606,21 @@ public class MainActivity extends NativeActivity
 
 	public int getMaxNumPatches() {
 		return this.getResources().getInteger(R.integer.max_num_patches);
+	}
+
+	public boolean doesRequireGuiBlocksPatch() {
+		if (forceFallback) return true;
+		if (texturePack != null) {
+			try {
+				InputStream instr = texturePack.getInputStream("gui/gui_blocks.png");
+				instr.close();
+				return true;
+			} catch (Exception e) {	
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return false;
 	}
 
 }
