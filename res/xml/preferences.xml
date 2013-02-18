@@ -44,6 +44,14 @@
         android:title="@string/pref_gfx_lowquality"
         android:summary="@string/pref_gfx_lowquality_summary"
         android:defaultValue="false"/>
+
+    <EditTextPreference
+        android:key="zz_custom_dpi"
+        android:title="@string/pref_zz_custom_dpi"
+        android:summary="@string/pref_zz_custom_dpi_summary"
+        android:inputType="numberDecimal"
+        android:defaultValue=""/>
+
     <CheckBoxPreference
         android:key="game_difficultypeaceful"
         android:title="@string/pref_game_difficultypeaceful"

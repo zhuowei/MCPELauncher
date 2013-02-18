@@ -58,6 +58,8 @@ public class MainActivity extends NativeActivity
 
 	protected TexturePack texturePack;
 
+	protected TexturePack originalPack;
+
 	protected Context minecraftApkContext;
 
 	protected boolean fakePackage = false;
@@ -122,8 +124,9 @@ public class MainActivity extends NativeActivity
 		setFakePackage(false);
 
 		try {
+			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
 			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
-			if (filePath != null) {
+			if (loadTexturePack && filePath != null) {
 				File file = new File(filePath);
 				System.out.println("File!! " + file);
 				if (!file.exists()) {
@@ -141,7 +144,7 @@ public class MainActivity extends NativeActivity
 			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
 				minecraftApkContext = this;
 			} else {
-				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", 0);
+				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", Context.CONTEXT_IGNORE_SECURITY);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -414,7 +417,17 @@ public class MainActivity extends NativeActivity
 
 	public float getPixelsPerMillimeter() {
 		System.out.println("Pixels per mm");
-		return ((float) displayMetrics.densityDpi) / 25.4f ;
+		float val = ((float) displayMetrics.densityDpi) / 25.4f;
+		String custom = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_custom_dpi", null);
+		if (custom != null && custom.length() > 0) {
+			try {
+				val = Float.parseFloat(custom) / 25.4f;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return val;
+		
 	}
 
 	public String getPlatformStringVar(int a) {

@@ -30,6 +30,9 @@
     <string name="pref_zz_patch_ip_enable_summary">Redirects multiplayer connections to an online server</string>
     <string name="pref_zz_patch_ip">Server IP</string>
     <string name="pref_zz_patch_ip_summary">The IP address of the online server</string>
+    <string name="pref_zz_texture_pack_enable">Use texture pack</string>
+    <string name="pref_zz_custom_dpi">Custom DPI</string>
+    <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>

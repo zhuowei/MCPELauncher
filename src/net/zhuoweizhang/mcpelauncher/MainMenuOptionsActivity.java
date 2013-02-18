@@ -27,6 +27,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	public static final int REQUEST_MANAGE_PATCHES = 6;
 
 	private Preference texturePackPreference;
+	private Preference texturePackEnablePreference;
 	private Preference managePatchesPreference;
 	private Preference safeModePreference;
 	private boolean needsRestart = false;
@@ -36,7 +37,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(net.zhuoweizhang.mcpelauncher.R.xml.preferences);
 		texturePackPreference = findPreference("zz_texture_pack");
-		texturePackPreference.setOnPreferenceClickListener(this);
+		if (texturePackPreference != null) texturePackPreference.setOnPreferenceClickListener(this);
+		texturePackEnablePreference = findPreference("zz_texture_pack_enable");
+		if (texturePackEnablePreference != null) texturePackEnablePreference.setOnPreferenceClickListener(this);
 		managePatchesPreference = findPreference("zz_manage_patches");
 		managePatchesPreference.setOnPreferenceClickListener(this);
 		safeModePreference = findPreference("zz_safe_mode");
@@ -59,7 +62,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == managePatchesPreference) {
 			managePatches();
 			return true;
-		} else if (pref == safeModePreference) {
+		} else if (pref == safeModePreference || pref == texturePackEnablePreference) {
 			needsRestart = true;
 			return false; //Don't eat it
 		}
@@ -94,7 +97,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
+					//Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
 					finish();
 					restartFirstActivity();
 					//System.exit(0);
