@@ -167,6 +167,7 @@ public class MainActivity extends NativeActivity
 			e.printStackTrace();
 		}
 		//setContentView(R.layout.main);
+		System.gc();
 	}
 
 	@Override
@@ -244,6 +245,7 @@ public class MainActivity extends NativeActivity
 
 			/* patching specific built-in patches */
 			if (requiresGuiBlocksPatch) {
+				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 				patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
 				patch.applyPatch(libBytes);
@@ -432,6 +434,7 @@ public class MainActivity extends NativeActivity
 			retval[1] = bmp.getHeight();
 			bmp.getPixels(retval, 2, bmp.getWidth(), 0, 0, bmp.getWidth(), bmp.getHeight());
 			is.close();
+			bmp.recycle();
 
 			return retval;
 		} catch (Exception e) {
@@ -613,8 +616,8 @@ public class MainActivity extends NativeActivity
 		if (texturePack != null) {
 			try {
 				InputStream instr = texturePack.getInputStream("gui/gui_blocks.png");
-				instr.close();
-				return true;
+				if (instr != null) instr.close();
+				return instr == null;
 			} catch (Exception e) {	
 				e.printStackTrace();
 				return false;

@@ -23,6 +23,7 @@ public class ZipTexturePack implements TexturePack {
 		Enumeration<? extends ZipEntry> i = zipFile.entries();
 		while (i.hasMoreElements()) {
 			ZipEntry entry = i.nextElement();
+			if (entry.getName().contains("__MACOSX")) continue; //A pox on ye, Mac OS X
 			entries.put(getFilenameOnly(entry.getName()), entry);
 		}
 	}

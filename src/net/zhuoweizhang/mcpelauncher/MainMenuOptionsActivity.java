@@ -106,8 +106,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 						e.printStackTrace();
 					}
 					//Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
-					finish();
-					restartFirstActivity();
+					//restartFirstActivity();
+					forceRestart();
 					//System.exit(0);
 
 				}
