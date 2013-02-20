@@ -17,3 +17,17 @@ Known issues:
 Download: http://zhuowei.github.com/MCPEFailLauncher/MCPELauncher-release.apk
 
 This program uses aFileChooser by Paul Burke. See https://github.com/zhuowei/aFileChooser for licensing information.
+
+## Building
+
+```
+
+git clone git@github.com:zhuowei/aFileChooser.git
+git clone git@github.com:zhuowei/Pokerface.git
+git clone git@github.com:zhuowei/MCPELauncher.git
+git clone git@github.com:zhuowei/MCPELauncher-app.git
+
+cd MCPELauncher-app
+ant clean debug
+
+```
