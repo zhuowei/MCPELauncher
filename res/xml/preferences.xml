@@ -6,6 +6,11 @@
         android:summary="@string/pref_mp_username_summary"
         android:defaultValue="Steve" />
     <CheckBoxPreference
+        android:key="mp_server_visible_default"
+        android:title="@string/pref_mp_server_visible_default"
+        android:defaultValue="true"/>
+
+    <CheckBoxPreference
         android:key="ctrl_usetouchscreen"
         android:title="@string/pref_ctrl_touchscreen"
         android:summary="@string/pref_ctrl_touchscreen_summary"
@@ -52,11 +57,11 @@
         android:inputType="numberDecimal"
         android:defaultValue=""/>
 
-    <CheckBoxPreference
-        android:key="game_difficultypeaceful"
+    <!--<CheckBoxPreference
+        android:key="game_difficulty_peaceful"
         android:title="@string/pref_game_difficultypeaceful"
         android:summary="@string/pref_game_difficultypeaceful_summary"
-        android:defaultValue="false"/>
+        android:defaultValue="false"/>-->
 
     <CheckBoxPreference
         android:key="zz_texture_pack_demo"
@@ -78,5 +83,11 @@
         <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
                 android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
     </Preference>
+
+    <Preference android:key="zz_about"
+        android:title="@string/about_about"/>
+
+    <Preference android:key="zz_get_pro"
+        android:title="@string/get_pro"/>
 
 </PreferenceScreen>

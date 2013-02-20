@@ -26,11 +26,17 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	public static final int REQUEST_SELECT_TEXTURE_PACK = 5;
 	public static final int REQUEST_MANAGE_PATCHES = 6;
 
+	public static final String PRO_APP_ID = "net.zhuoweizhang.mcpelauncher.pro";
+
+	public static final String GOOGLE_PLAY_URL = "market://details?id=";
+
 	private Preference texturePackPreference;
 	private Preference texturePackEnablePreference;
 	private Preference texturePackDemoPreference;
 	private Preference managePatchesPreference;
 	private Preference safeModePreference;
+	private Preference aboutPreference;
+	private Preference getProPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -47,6 +53,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		managePatchesPreference.setOnPreferenceClickListener(this);
 		safeModePreference = findPreference("zz_safe_mode");
 		safeModePreference.setOnPreferenceClickListener(this);
+		aboutPreference = findPreference("zz_about");
+		aboutPreference.setOnPreferenceClickListener(this);
+		getProPreference = findPreference("zz_get_pro");
+		if (getProPreference != null) getProPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -72,6 +82,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
 			needsRestart = true;
 			return false;
+		} else if (pref == getProPreference) {
+			startGetPro();
+			return true;
+		} else if (pref == aboutPreference) {
+			startAbout();
+			return true;
 		}
 		return false;
 	}
@@ -119,6 +135,21 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				break;
 		}
 	}
+
+	private void startAbout() {
+		startActivity(new Intent(this, AboutAppActivity.class));
+	}
+
+	private void startGetPro() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
+		try {
+			this.startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	/* thanks, http://stackoverflow.com/questions/1397361/how-do-i-restart-an-android-activity */
 	private void restartFirstActivity() {
 		Intent i = getPackageManager().getLaunchIntentForPackage(getPackageName());

@@ -35,6 +35,7 @@
     <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
     <string name="pref_zz_texture_pack_demo">Demonstrate texture pack support</string>
     <string name="pref_zz_texture_pack_demo_summary">Use the built-in RepetiCraft pack by Theevilpplz</string>
+    <string name="pref_mp_server_visible_default">Server visible by default</string>
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
@@ -52,4 +53,16 @@
     <string name="manage_patches_too_many">Upgrade to MCPELauncher Pro to patch more than 3 patches</string>
     <string name="manage_patches_delete">Delete</string>
     <string name="manage_patches_crash_safe_mode">MCPELauncher has detected a recent crash. Safe Mode has been enabled to prevent further crashes by misbehaving patches.</string>
+    <string name="get_pro">Upgrade to Pro</string>
+    <string name="about_about">About MCPELauncher</string>
+    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
+This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
+The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n
+For full licensing information, check the Minecraft Forums thread.\n
+    </string>
+    <string name="about_pro_library_credits"></string>
+    <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
+    <string name="about_go_to_forums">Open Minecraft Forums thread for MCPELauncher</string>
 </resources>
