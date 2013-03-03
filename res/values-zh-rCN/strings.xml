@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">MCPELauncher</string>
     <string name="pref_ctrl_touchscreen">使用触摸屏</string>
-    <string name="pref_ctrl_touchscreen_summary">如果你用的是Xperia Play，请勾上此处</string>
+    <string name="pref_ctrl_touchscreen_summary">如果你用的不是Xperia Play，请勾上此处</string>
     <string name="pref_mp_username">多人游戏用户名</string>
     <string name="pref_mp_username_summary">填你的名字，嗯</string>
     <string name="pref_texture_pack">材质包</string>

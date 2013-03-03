@@ -81,6 +81,8 @@ public class MainActivity extends NativeActivity
 
 	public boolean requiresGuiBlocksPatch = false;
 
+	private HoverCar hoverCar = null;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -168,6 +170,7 @@ public class MainActivity extends NativeActivity
 		}
 		//setContentView(R.layout.main);
 		System.gc();
+		setupHoverCar();
 	}
 
 	@Override
@@ -624,6 +627,11 @@ public class MainActivity extends NativeActivity
 			}
 		}
 		return false;
+	}
+
+	protected void setupHoverCar() {
+		hoverCar = new HoverCar(this);
+		hoverCar.show();
 	}
 
 }
