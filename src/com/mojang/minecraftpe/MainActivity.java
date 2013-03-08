@@ -17,7 +17,7 @@ import android.content.Intent;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
+import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -97,6 +97,17 @@ public class MainActivity extends NativeActivity
 				e.printStackTrace();
 			}
 		}
+
+		try {
+			ApplicationInfo mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
+			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
+			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+			Toast.makeText(this, "There is no copy of Minecraft installed!", Toast.LENGTH_LONG).show();
+		}
+			
 
 		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
 
