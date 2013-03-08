@@ -23,12 +23,10 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
-import android.view.View;
+import android.view.*;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import android.preference.*;
 
@@ -53,6 +51,7 @@ public class MainActivity extends NativeActivity
 
 	/* private dialogs start here */
 	public static final int DIALOG_CRASH_SAFE_MODE = 0x1000;
+	public static final int DIALOG_RUNTIME_OPTIONS = 0x1001;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -168,9 +167,13 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//setContentView(R.layout.main);
+		getWindow().getDecorView().post(new Runnable() {
+			public void run() {
+				setupHoverCar();
+			}
+		});
 		System.gc();
-		setupHoverCar();
+
 	}
 
 	@Override
@@ -312,6 +315,8 @@ public class MainActivity extends NativeActivity
 				return createCreateWorldDialog();
 			case DIALOG_CRASH_SAFE_MODE:
 				return createCrashSafeModeDialog();
+			case DIALOG_RUNTIME_OPTIONS:
+				return createRuntimeOptionsDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -350,6 +355,13 @@ public class MainActivity extends NativeActivity
 	protected Dialog createCrashSafeModeDialog() {
 		return new AlertDialog.Builder(this)
 			.setMessage(R.string.manage_patches_crash_safe_mode)
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
+	protected Dialog createRuntimeOptionsDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage("COMING SOON!!!!! Soon, seriously")
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
 	}
@@ -631,7 +643,12 @@ public class MainActivity extends NativeActivity
 
 	protected void setupHoverCar() {
 		hoverCar = new HoverCar(this);
-		hoverCar.show();
+		hoverCar.show(getWindow().getDecorView());
+		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				showDialog(DIALOG_RUNTIME_OPTIONS);
+			}
+		});
 	}
 
 }
