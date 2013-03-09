@@ -22,7 +22,7 @@ public class HoverCar extends PopupWindow {
 	}
 
 	public void show(View parentView) {
-		showAtLocation(parentView, Gravity.RIGHT | Gravity.TOP, 0, 0);
+		showAtLocation(parentView, Gravity.CENTER | Gravity.TOP, 0, 0);
 	}
 
 }
