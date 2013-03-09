@@ -173,6 +173,7 @@ public class MainActivity extends NativeActivity
 		try {
 			if (!isSafeMode()) {
 				initPatching();
+				loadNativeAddons();
 				//applyPatches();
 			}
 		} catch (Exception e) {
@@ -184,6 +185,7 @@ public class MainActivity extends NativeActivity
 			}
 		});
 		System.gc();
+		setupHoverCar();
 
 	}
 
@@ -661,5 +663,21 @@ public class MainActivity extends NativeActivity
 			}
 		});
 	}
+
+	protected void loadNativeAddons() {
+		List<ApplicationInfo> apps = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+		for (ApplicationInfo app: apps) {
+			if (app.metaData == null) continue;
+			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.beta.do.not.use.i.love.pancakes.nativelibname");
+			if (nativeLibName != null) {
+				try {
+					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 
 }
