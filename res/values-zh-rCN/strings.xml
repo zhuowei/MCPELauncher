@@ -15,7 +15,7 @@
     <string name="pref_feedback_vibration">振动</string>
     <string name="pref_feedback_vibration_summary">在破坏一个方块时会产生振动</string>
     <string name="pref_zz_longvibration">超级振动</string>
-    <string name="pref_zz_longvibration_summary">滋滋滋滋滋滋滋滋滋滋！</string>
+    <string name="pref_zz_longvibration_summary">滋滋滋滋滋滋滋滋滋滋！（增加5倍振动长度）</string>
     <string name="pref_gfx_fancygraphics">高品质</string>
     <string name="pref_gfx_fancygraphics_summary">让画面看起来更好（提升体验）</string>
     <string name="pref_gfx_lowquality">低品质</string>
@@ -26,6 +26,7 @@
     <string name="pref_ctrl_sensitivity_summary">触控灵敏度</string>
     <string name="pref_zz_safe_mode">安全模式</string>
     <string name="pref_zz_safe_mode_summary">不打任何补丁</string>
+    <string name="pref_mp_server_visible_default">服务器默认开启</string>
     <string name="pref_zz_patch_ip_enable">多人服务器重定向</string>
     <string name="pref_zz_patch_ip_enable_summary">把多人游戏连接重定向到网上服务器</string>
     <string name="pref_zz_patch_ip">服务器IP</string>
@@ -36,10 +37,23 @@
     <string name="nerdy_stuff_are_useless">这页上基本上所有的东西都没用。它们为了修复故障才留在这里。</string>
     <string name="restart_app">重新启动程序</string>
     <string name="manage_patches">管理补丁</string>
+    <string name="manage_patches_crash_safe_mode">mcpelauncher已检测到崩溃。安全模式已启用，防止进一步的崩溃。</string>
+    <string name="manage_patches_delete">删除</string>
+    <string name="manage_patches_import_error">补丁输入失败</string>
+    <string name="manage_patches_import">输入</string>
+    <string name="manage_patches_too_many">升级到Pro版解除3个MOD的限制</string>
     <string name="world_create_title">新建世界</string>
     <string name="world_name_prompt">世界名: </string>
     <string name="world_seed_prompt">种子:</string>
     <string name="world_gamemode_prompt">游戏模式: </string>
     <string name="gamemode_survival">生存模式</string>
     <string name="gamemode_creative">创造模式</string>
+    <string name="pref_zz_custom_dpi">定制DPI</string>
+    <string name="pref_zz_custom_dpi_summary">修改你屏幕上的方向键大小 - 留空白自动设置默认大小</string>
+    <string name="get_pro">升级到Pro</string>
+    <string name="about_about">关于MCPELauncher</string>
+    <string name="pref_zz_texture_pack_enable">使用材质包</string>
+    <string name="texture_pack_unable_to_load">无法载入材质包</string>
+    <string name="pref_zz_texture_pack_demo">显示材质包支持</string>
+    <string name="pref_zz_texture_pack_demo_summary">使用内置Theevilpplz的RepetiCraft材质包 </string>
 </resources>
