@@ -65,4 +65,8 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
     <string name="about_go_to_forums">Open Minecraft Forums thread for MCPELauncher</string>
+
+    <string name="permlab_mcpelauncher_addon">MCPELauncher Addon</string>
+    <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into MCPELauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
+
 </resources>

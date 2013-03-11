@@ -185,7 +185,7 @@ public class MainActivity extends NativeActivity
 			}
 		});
 		System.gc();
-		setupHoverCar();
+
 
 	}
 
@@ -439,7 +439,13 @@ public class MainActivity extends NativeActivity
 			if (forceFallback) {
 				return getAssets().open(name);
 			}
-			is = minecraftApkContext.getAssets().open(name);
+			try {
+				is = minecraftApkContext.getAssets().open(name);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Attempting to load fallback");
+				is = getAssets().open(name);
+			}
 			if (is == null) {
 				System.out.println("Can't find it in the APK - attempting to load fallback");
 				is = getAssets().open(name);
@@ -668,7 +674,7 @@ public class MainActivity extends NativeActivity
 		List<ApplicationInfo> apps = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
 		for (ApplicationInfo app: apps) {
 			if (app.metaData == null) continue;
-			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.beta.do.not.use.i.love.pancakes.nativelibname");
+			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
 			if (nativeLibName != null) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
