@@ -190,11 +190,11 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		getWindow().getDecorView().post(new Runnable() {
+		/*getWindow().getDecorView().post(new Runnable() {
 			public void run() {
 				setupHoverCar();
 			}
-		});
+		});*/
 		System.gc();
 
 		currentMainActivity = new WeakReference<MainActivity>(this);
@@ -691,6 +691,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected void loadNativeAddons() {
+		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_load_native_addons", false)) return;
 		List<ApplicationInfo> apps = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
 		for (ApplicationInfo app: apps) {
 			if (app.metaData == null) continue;

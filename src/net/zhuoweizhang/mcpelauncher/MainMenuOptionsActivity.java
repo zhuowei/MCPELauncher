@@ -37,6 +37,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference safeModePreference;
 	private Preference aboutPreference;
 	private Preference getProPreference;
+	private Preference loadNativeAddonsPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -57,6 +58,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		aboutPreference.setOnPreferenceClickListener(this);
 		getProPreference = findPreference("zz_get_pro");
 		if (getProPreference != null) getProPreference.setOnPreferenceClickListener(this);
+		loadNativeAddonsPreference = findPreference("zz_load_native_addons");
+		if (loadNativeAddonsPreference != null) loadNativeAddonsPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -88,6 +91,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == aboutPreference) {
 			startAbout();
 			return true;
+		} else if (pref == loadNativeAddonsPreference) {
+			needsRestart = true;
 		}
 		return false;
 	}

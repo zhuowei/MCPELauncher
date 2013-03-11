@@ -78,6 +78,11 @@
     <Preference android:key="zz_manage_patches"
         android:title="@string/manage_patches"/>
 
+    <CheckBoxPreference
+        android:key="zz_load_native_addons"
+        android:title="@string/pref_zz_load_native_addons"
+        android:defaultValue="false"/>
+
     <Preference
         android:title="@string/nerdy_stuff_page">
         <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
