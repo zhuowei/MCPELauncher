@@ -2,6 +2,8 @@ package com.mojang.minecraftpe;
 
 import java.io.*;
 
+import java.lang.ref.WeakReference;
+
 import java.nio.ByteBuffer;
 
 import java.text.DateFormat;
@@ -76,11 +78,17 @@ public class MainActivity extends NativeActivity
 
 	public static boolean hasPrePatched = false;
 
+	public static boolean libLoaded = false;
+
 	public boolean forceFallback = false;
 
 	public boolean requiresGuiBlocksPatch = false;
 
 	private HoverCar hoverCar = null;
+
+	public static WeakReference<MainActivity> currentMainActivity = null;
+
+	public static Set<String> loadedAddons = new HashSet<String>();
 
 	/** Called when the activity is first created. */
 
@@ -159,6 +167,8 @@ public class MainActivity extends NativeActivity
 			finish();
 		}
 
+		libLoaded = true;
+
 		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
@@ -187,6 +197,7 @@ public class MainActivity extends NativeActivity
 		});
 		System.gc();
 
+		currentMainActivity = new WeakReference<MainActivity>(this);
 
 	}
 
@@ -687,6 +698,7 @@ public class MainActivity extends NativeActivity
 			if (nativeLibName != null) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
+					loadedAddons.add(app.packageName);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

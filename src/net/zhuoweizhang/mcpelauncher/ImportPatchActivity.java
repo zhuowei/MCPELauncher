@@ -67,7 +67,7 @@ public class ImportPatchActivity extends Activity implements View.OnClickListene
 			PatchUtils.copy(from, to);
 			setPatchListModified();
 			Toast.makeText(this, R.string.manage_patches_import_done, Toast.LENGTH_SHORT).show();
-			if (MainActivity.hasPrePatched) {
+			if (MainActivity.libLoaded) {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
