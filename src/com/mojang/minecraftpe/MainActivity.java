@@ -107,6 +107,19 @@ public class MainActivity extends NativeActivity
 			e.printStackTrace();
 			Toast.makeText(this, "There is no copy of Minecraft installed!", Toast.LENGTH_LONG).show();
 		}
+
+		
+		try {
+			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
+				minecraftApkContext = this;
+			} else {
+				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", Context.CONTEXT_IGNORE_SECURITY);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
+			finish();
+		}
 			
 
 		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
@@ -157,18 +170,6 @@ public class MainActivity extends NativeActivity
 		super.onCreate(savedInstanceState);
 
 		setFakePackage(false);
-		
-		try {
-			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
-				minecraftApkContext = this;
-			} else {
-				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", Context.CONTEXT_IGNORE_SECURITY);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
-			finish();
-		}
 
 		try {
 			if (!isSafeMode()) {
@@ -656,8 +657,16 @@ public class MainActivity extends NativeActivity
 				e.printStackTrace();
 				return false;
 			}
+		} else {
+			try {
+				InputStream instr = minecraftApkContext.getAssets().open("gui/gui_blocks.png");
+				instr.close();
+				return false;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return true;
+			}
 		}
-		return false;
 	}
 
 	protected void setupHoverCar() {

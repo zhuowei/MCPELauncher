@@ -53,6 +53,8 @@
     <string name="manage_patches_too_many">Upgrade to MCPELauncher Pro to patch more than 3 patches</string>
     <string name="manage_patches_delete">Delete</string>
     <string name="manage_patches_crash_safe_mode">MCPELauncher has detected a recent crash. Safe Mode has been enabled to prevent further crashes by misbehaving patches.</string>
+    <string name="manage_patches_import_confirm">Do you want to import this patch?</string>
+    <string name="manage_patches_import_done">Patch imported</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About MCPELauncher</string>
     <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
