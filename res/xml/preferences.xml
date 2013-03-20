@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory 
+        android:title="@string/pref_mp_title">
+
     <EditTextPreference
         android:key="mp_username"
         android:title="@string/pref_mp_username"
@@ -9,6 +13,11 @@
         android:key="mp_server_visible_default"
         android:title="@string/pref_mp_server_visible_default"
         android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:title="@string/pref_ctrl_title">
 
     <CheckBoxPreference
         android:key="ctrl_usetouchscreen"
@@ -39,6 +48,12 @@
         android:title="@string/pref_zz_longvibration"
         android:summary="@string/pref_zz_longvibration_summary"
         android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:title="@string/pref_gfx_title">
+
     <CheckBoxPreference
         android:key="gfx_fancygraphics"
         android:title="@string/pref_gfx_fancygraphics"
@@ -57,11 +72,17 @@
         android:inputType="numberDecimal"
         android:defaultValue=""/>
 
+    </PreferenceCategory>
+
     <!--<CheckBoxPreference
         android:key="game_difficulty_peaceful"
         android:title="@string/pref_game_difficultypeaceful"
         android:summary="@string/pref_game_difficultypeaceful_summary"
         android:defaultValue="false"/>-->
+
+
+    <PreferenceCategory 
+        android:title="@string/pref_addons_title">
 
     <CheckBoxPreference
         android:key="zz_texture_pack_demo"
@@ -82,6 +103,8 @@
         android:key="zz_load_native_addons"
         android:title="@string/pref_zz_load_native_addons"
         android:defaultValue="false"/>
+
+    </PreferenceCategory>
 
     <Preference
         android:title="@string/nerdy_stuff_page">
