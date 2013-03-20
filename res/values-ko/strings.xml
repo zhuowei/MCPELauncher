@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MCPE 런처</string>
+    <string name="pref_ctrl_touchscreen">터치스크린 사용</string>
+    <string name="pref_ctrl_touchscreen_summary">Xperia Play를 사용하지 않는 경우 체크하세요.</string>
+    <string name="pref_mp_username">멀티플레이 별명</string>
+    <string name="pref_mp_username_summary">멀티플레이에서 보여지는 별명입니다.</string>
+    <string name="pref_texture_pack">텍스쳐팩</string>
+    <string name="pref_texture_pack_summary">텍스쳐팩을 선택할 수 있습니다.</string>
+    <string name="pref_ctrl_usetouchjoypad">조이패드 터치 (Split 터치)</string>
+    <string name="pref_ctrl_islefthanded">왼손잡이 컨트롤</string>
+    <string name="pref_ctrl_islefthanded_summary">컨트롤 버튼들의 자리가 반대로 바뀝니다.</string>
+    <string name="pref_ctrl_invertmouse">Y축 반전</string>
+    <string name="pref_ctrl_invertmouse_summary">Y축의 방향을 반전시킵니다.</string>
+    <string name="pref_feedback_vibration">진동</string>
+    <string name="pref_feedback_vibration_summary">블럭이 제거될 때 진동을 울립니다.</string>
+    <string name="pref_zz_longvibration">아주 긴 진동</string>
+    <string name="pref_zz_longvibration_summary">진동의 길이를 5배 이상 늘입니다.</string>
+    <string name="pref_gfx_fancygraphics">고급 그래픽</string>
+    <string name="pref_gfx_fancygraphics_summary">화려한 그래픽을 사용합니다.</string>
+    <string name="pref_gfx_lowquality">저급 그래픽</string>
+    <string name="pref_gfx_lowquality_summary">고급 그래픽보다 더 낮은 그래픽 요소를 사용합니다.</string>
+    <string name="pref_game_difficultypeaceful">평화로움</string>
+    <string name="pref_game_difficultypeaceful_summary">체력이 자동으로 회복되고, 몬스터가 나타나지 않습니다.</string>
+    <string name="pref_ctrl_sensitivity">민감도</string>
+    <string name="pref_ctrl_sensitivity_summary">터치 민감도를 설정합니다.</string>
+    <string name="pref_zz_safe_mode">안전 모드</string>
+    <string name="pref_zz_safe_mode_summary">모든 패치를 비활성화 합니다.</string>
+    <string name="pref_zz_patch_ip_enable">멀티플레이 IP 패치</string>
+    <string name="pref_zz_patch_ip_enable_summary">온라인으로 멀티플레이를 즐길 수 있습니다.</string>
+    <string name="pref_zz_patch_ip">서버 IP</string>
+    <string name="pref_zz_patch_ip_summary">온라인 서버의 IP 값</string>
+    <string name="pref_zz_texture_pack_enable">텍스쳐팩 사용</string>
+    <string name="pref_zz_custom_dpi">사용자 DPI</string>
+    <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
+    <string name="pref_zz_texture_pack_demo">데모 텍스쳐팩 사용</string>
+    <string name="pref_zz_texture_pack_demo_summary">RepetiCraft 텍스쳐팩을 사용합니다.</string>
+    <string name="pref_mp_server_visible_default">서버를 기본적으로 보이기</string>
+    <string name="texture_pack_unable_to_load">텍스쳐팩 불러오기 실패</string>
+    <string name="nerdy_stuff_page">그 외...</string>
+    <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
+    <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
+    <string name="restart_app">어플리케이션 재시작</string>
+    <string name="manage_patches">패치 관리</string>
+    <string name="world_create_title">월드 생성</string>
+    <string name="world_name_prompt">이름 : </string>
+    <string name="world_seed_prompt">시드 : </string>
+    <string name="world_gamemode_prompt">게임 모드 : </string>
+    <string name="gamemode_survival">서바이벌</string>
+    <string name="gamemode_creative">크리에이티브</string>
+    <string name="manage_patches_import">추가하기</string>
+    <string name="manage_patches_import_error">패치 추가 실패!</string>
+    <string name="manage_patches_too_many">MCPE 런처를 업그레이드하면 3개 이상의 패치를 사용할 수 있습니다.</string>
+    <string name="manage_patches_delete">제거</string>
+    <string name="manage_patches_crash_safe_mode">MCPE 런처가 크래시를 발견하였습니다. 나중의 크래시를 방지하기 위해 안전 모드를 활성화 합니다.</string>
+    <string name="manage_patches_import_confirm">이 패치를 사용하시겠습니까?</string>
+    <string name="manage_patches_import_done">패치 추가됨</string>
+    <string name="get_pro">Pro 버전으로 업그레이드</string>
+    <string name="about_about">MCPE 런처 소개</string>
+    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.</string>
+    <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
+이 어플은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
+데모 텍스쳐팩인 RepetiCraft는 제작자 Theevilpplz의 허락을 받고 사용하였습니다.\n
+모든 라이센스를 확인하시려면 마인크래프트 포럼 스레드에 접속해 보시기 바랍니다.\n
+    </string>
+    <string name="about_pro_library_credits"></string>
+    <string name="about_thankscommunity">이 어플리케이션은 재능 있는 많은 번역자, 테스터, 프로그래머가 있기에 제작할 수 있었습니다.\n마인크래프트 포럼 스레드에 방문하시면 어플에 기여하신 모든 분들을 보실 수 있습니다.</string>
+    <string name="about_go_to_forums">MCPE 런처의 마인크래프트 포럼 스레드 보기</string>
+
+    <string name="permlab_mcpelauncher_addon">MCPE 런처 애드온</string>
+    <string name="permdesc_mcpelauncher_addon">MCPE 런처에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, SD카드 사용, 그리고 마인크래프트 PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
+
+</resources>
