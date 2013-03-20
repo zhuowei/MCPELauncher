@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="app_name">MCPELauncher</string>
+  <string name="pref_ctrl_touchscreen">Usar Touchscreen</string>
+  <string name="pref_ctrl_touchscreen_summary">Se você não está usando um Xperia Play, marque isso</string>
+  <string name="pref_mp_username">Nickname Online</string>
+  <string name="pref_mp_username_summary">Seu nome, dãã</string>
+  <string name="pref_texture_pack">Pacote de textura</string>
+  <string name="pref_texture_pack_summary">Mudar seu pacote de textura</string>
+  <string name="pref_ctrl_usetouchjoypad">Split touch</string>
+  <string name="pref_ctrl_islefthanded">Canhoto</string>
+  <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
+  <string name="pref_ctrl_invertmouse">Inverter eixo-Y</string>
+  <string name="pref_ctrl_invertmouse_summary"> Enquanto isso, na Australia :)</string>
+  <string name="pref_feedback_vibration">Vibrar</string>
+  <string name="pref_feedback_vibration_summary">Vibrar quando um bloco é destruido</string>
+  <string name="pref_zz_longvibration">Vibracão extra</string>
+  <string name="pref_zz_longvibration_summary">Aumenta a duração da vibração 5 vezes</string>
+  <string name="pref_gfx_fancygraphics">Gráficos bonitos</string>
+  <string name="pref_gfx_fancygraphics_summary">Faz as coisas parecerem bonitas</string>
+  <string name="pref_gfx_lowquality">Gráficos ruins</string>
+  <string name="pref_gfx_lowquality_summary">Faz as coisas parecerem feias :(</string>
+  <string name="pref_game_difficultypeaceful">Modo pacífico</string>
+  <string name="pref_game_difficultypeaceful_summary">Regeneração de vida e nem um monstro</string>
+  <string name="pref_ctrl_sensitivity">Sensibilidade</string>
+  <string name="pref_ctrl_sensitivity_summary">Sensibilidade do touch</string>
+  <string name="pref_zz_safe_mode">Modo de segurança</string>
+  <string name="pref_zz_safe_mode_summary">Desativa todos os patches</string>
+  <string name="pref_zz_patch_ip_enable">Redirecionar Multiplayer</string>
+  <string name="pref_zz_patch_ip_enable_summary">Redireciona a conexão multiplayer para um servidor online</string>
+  <string name="pref_zz_patch_ip">IP do servidor</string>
+  <string name="pref_zz_patch_ip_summary">Endereço IP do servidor</string>
+  <string name="pref_zz_texture_pack_enable">Usar pacote de textura</string>
+  <string name="pref_zz_custom_dpi">DPI customizada</string>
+  <string name="pref_zz_custom_dpi_summary">Diz certa densidade da tela ao jogo para mudar o tamanho do controle touch. Deixe em branco para desativar</string>
+  <string name="pref_zz_texture_pack_demo">Demonstração do suporte de pacotes de textura</string>
+  <string name="pref_zz_texture_pack_demo_summary">Usar a textura interna RepetiCraft feita por Theevilpplz</string>
+  <string name="pref_mp_server_visible_default">Server visível por padrão</string>
+  <string name="texture_pack_unable_to_load">Não foi possível carregar pacote de textura.</string>
+  <string name="nerdy_stuff_page">Nerdy stuff</string>
+  <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
+  <string name="nerdy_stuff_are_useless">Quase tudo dessa página é inútil. Estão aqui para solucionar bugs.</string>
+  <string name="restart_app">Resetar app</string>
+  <string name="manage_patches">Gerenciar patches</string>
+  <string name="world_create_title">Criar Mundo</string>
+  <string name="world_name_prompt">Nome:</string>
+  <string name="world_seed_prompt">Semente:</string>
+  <string name="world_gamemode_prompt">Game Mode: </string>
+  <string name="gamemode_survival">Sobrevivência</string>
+  <string name="gamemode_creative">Criativo</string>
+  <string name="manage_patches_import">Importar</string>
+  <string name="manage_patches_import_error">Falha ao importar patch</string>
+  <string name="manage_patches_too_many">Atualize para MCPELauncher Pro para instalar mais de 3 patches</string>
+  <string name="manage_patches_delete">Deletar</string>
+  <string name="manage_patches_crash_safe_mode">MCPELauncher detectou uma parada recente. O modo de segurança foi ativado para prenevir futuros problemas com os patches.</string>
+  <string name="get_pro">Atualizar para versão Pro</string>
+  <string name="about_about">Sobre MCPELauncher</string>
+  <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+  <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Não distribua sem permissão.</string>
+  <string name="about_librarycredits">Esse programa usa a biblioteca aFileChooser por Paul Burke. \n
+Esse programa contém códigos do Snowbound\'s PTPatchTool, licenciado pela Eclipse Public License. \n
+A demonstração da textura, RepetiCraft, foi feita por Theevilpplz e usada com sua permissão.\n
+Para informações completas, cheque o tópico no Minecraft Forums.\n
+    </string>
+  <string name="about_pro_library_credits"/>
+  <string name="about_thankscommunity">Essa aplicação só foi possível pelo trabalho duro de várias pessoas talentosas: Tradutores, Testers e Programadores. Obrigado.\nVer tópico no Minecraft Forums thread para a lista de contribuidores.</string>
+  <string name="about_go_to_forums">Abrir tópico do MCPELauncher no Minecraft Fóruns.</string>
+  <string name="permlab_mcpelauncher_addon">MCPELauncher Addon</string>
+  <string name="permdesc_mcpelauncher_addon">Permite a aplicação ser aberta como addon no MCPELauncher. Isso significa que este APP poderá acessar a internet, cartão sd ou qualquer coisa que o Minecraft PE tem permissão para fazer.</string>
+</resources>
