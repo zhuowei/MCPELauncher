@@ -74,11 +74,11 @@
 
     </PreferenceCategory>
 
-    <!--<CheckBoxPreference
-        android:key="game_difficulty_peaceful"
+    <CheckBoxPreference
+        android:key="game_difficultypeaceful"
         android:title="@string/pref_game_difficultypeaceful"
         android:summary="@string/pref_game_difficultypeaceful_summary"
-        android:defaultValue="false"/>-->
+        android:defaultValue="false"/>
 
 
     <PreferenceCategory 

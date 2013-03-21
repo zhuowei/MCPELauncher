@@ -322,17 +322,18 @@ public class MainActivity extends NativeActivity
 			case DIALOG_SETTINGS:
 				System.out.println("Settings");
 				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
-				inputStatus = INPUT_STATUS_OK;
+				inputStatus = INPUT_STATUS_IN_PROGRESS;
 				startActivityForResult(intent, 1234);
 				break;
 		}
 	}
 
-	/*protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (requestCode == DIALOG_SETTINGS) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		if (requestCode == 1234) {
 			inputStatus = INPUT_STATUS_OK;
+			System.out.println("Settings OK");
 		}
-	}*/
+	}
 
 	public Dialog onCreateDialog(int dialogId) {
 		switch (dialogId) {
@@ -454,7 +455,7 @@ public class MainActivity extends NativeActivity
 			try {
 				is = minecraftApkContext.getAssets().open(name);
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				System.out.println("Attempting to load fallback");
 				is = getAssets().open(name);
 			}
@@ -496,15 +497,19 @@ public class MainActivity extends NativeActivity
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		Map prefsMap = sharedPref.getAll();
 		Set<Map.Entry> prefsSet = prefsMap.entrySet();
-		String[] retval = new String[prefsSet.size() * 2];
-		int i = 0;
+		List<String> retval = new ArrayList<String>();
 		for (Map.Entry e: prefsSet) {
-			retval[i] = (String) e.getKey();
-			retval[i + 1] = e.getValue().toString();
-			i+= 2;
+			String key = (String) e.getKey();
+			if (key.indexOf("zz_") == 0) continue;
+			retval.add(key);
+			retval.add(e.getValue().toString());
 		}
-		System.out.println(Arrays.toString(retval));
-		return retval;
+		if (sharedPref.getBoolean("game_difficultypeaceful", false)) {
+			retval.add("game_difficulty");
+			retval.add("0");
+		}
+		System.out.println(retval.toString());
+		return retval.toArray(new String[0]);
 	}
 
 	public float getPixelsPerMillimeter() {
