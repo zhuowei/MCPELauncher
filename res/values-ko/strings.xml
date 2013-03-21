@@ -36,6 +36,11 @@
     <string name="pref_zz_texture_pack_demo">데모 텍스쳐팩 사용</string>
     <string name="pref_zz_texture_pack_demo_summary">RepetiCraft 텍스쳐팩을 사용합니다.</string>
     <string name="pref_mp_server_visible_default">서버를 기본적으로 보이기</string>
+    <string name="pref_mp_title">멀티플레이</string>
+    <string name="pref_ctrl_title">조작</string>
+    <string name="pref_gfx_title">그래픽</string>
+    <string name="pref_addons_title">애드온과 패치</string>
+    <string name="pref_zz_load_native_addons">실험적인 애드온 활성화</string>
     <string name="texture_pack_unable_to_load">텍스쳐팩 불러오기 실패</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
@@ -57,7 +62,9 @@
     <string name="manage_patches_import_done">패치 추가됨</string>
     <string name="get_pro">Pro 버전으로 업그레이드</string>
     <string name="about_about">MCPE 런처 소개</string>
-    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang \n
+한글 번역 by 꽁치사마 (Koongchi, koongchi123.blog.me)
+    </string>
     <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.</string>
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
@@ -67,8 +74,10 @@
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">이 어플리케이션은 재능 있는 많은 번역자, 테스터, 프로그래머가 있기에 제작할 수 있었습니다.\n마인크래프트 포럼 스레드에 방문하시면 어플에 기여하신 모든 분들을 보실 수 있습니다.</string>
     <string name="about_go_to_forums">MCPE 런처의 마인크래프트 포럼 스레드 보기</string>
+    <string name="no_minecraft_installed">MCPE 런처에서 기기에서 Minecraft PE가 설치되지 않았다고 감지하였습니다. 이 어플은 Mojang의 Minecraft PE가 설치되어 있어야 원활한 작동이 가능합니다.</string>
 
     <string name="permlab_mcpelauncher_addon">MCPE 런처 애드온</string>
     <string name="permdesc_mcpelauncher_addon">MCPE 런처에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, SD카드 사용, 그리고 마인크래프트 PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
 
 </resources>
+
