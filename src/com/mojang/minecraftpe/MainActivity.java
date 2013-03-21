@@ -113,7 +113,14 @@ public class MainActivity extends NativeActivity
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
-			Toast.makeText(this, "There is no copy of Minecraft installed!", Toast.LENGTH_LONG).show();
+			finish();
+			startActivity(new Intent(this, NoMinecraftActivity.class));
+			try {
+				Thread.sleep(100);
+				android.os.Process.killProcess(android.os.Process.myPid());
+			} catch (Throwable t) {
+			}
+			return;
 		}
 
 		
