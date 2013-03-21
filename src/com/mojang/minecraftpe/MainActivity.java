@@ -504,9 +504,11 @@ public class MainActivity extends NativeActivity
 			retval.add(key);
 			retval.add(e.getValue().toString());
 		}
+		retval.add("game_difficulty");
 		if (sharedPref.getBoolean("game_difficultypeaceful", false)) {
-			retval.add("game_difficulty");
 			retval.add("0");
+		} else {
+			retval.add("2");
 		}
 		System.out.println(retval.toString());
 		return retval.toArray(new String[0]);
