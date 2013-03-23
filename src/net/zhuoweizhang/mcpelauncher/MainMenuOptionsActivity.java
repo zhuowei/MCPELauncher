@@ -2,15 +2,23 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.File;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.NativeActivity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.SystemClock;
 import android.widget.Toast;
 
@@ -18,6 +26,8 @@ import android.preference.*;
 
 import com.ipaulpro.afilechooser.FileChooserActivity;
 import com.ipaulpro.afilechooser.utils.FileUtils;
+
+import eu.chainfire.libsuperuser.Shell;
 
 
 public class MainMenuOptionsActivity extends PreferenceActivity implements Preference.OnPreferenceClickListener {
@@ -38,6 +48,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference aboutPreference;
 	private Preference getProPreference;
 	private Preference loadNativeAddonsPreference;
+	private Preference extractOriginalTexturesPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -60,6 +71,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		if (getProPreference != null) getProPreference.setOnPreferenceClickListener(this);
 		loadNativeAddonsPreference = findPreference("zz_load_native_addons");
 		if (loadNativeAddonsPreference != null) loadNativeAddonsPreference.setOnPreferenceClickListener(this);
+		extractOriginalTexturesPreference = findPreference("zz_extract_original_textures");
+		if (extractOriginalTexturesPreference != null) {
+			extractOriginalTexturesPreference.setOnPreferenceClickListener(this);
+			if (Build.VERSION.SDK_INT < 16 /*Build.VERSION_CODES.JELLY_BEAN*/) { //MCPE original textures not accessible on Jelly Bean
+				getPreferenceScreen().removePreference(extractOriginalTexturesPreference);
+			}
+		}
 	}
 
 	@Override
@@ -93,6 +111,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			return true;
 		} else if (pref == loadNativeAddonsPreference) {
 			needsRestart = true;
+		} else if (pref == extractOriginalTexturesPreference) {
+			startExtractTextures();
 		}
 		return false;
 	}
@@ -117,19 +137,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				if (resultCode == RESULT_OK) {  
 					final Uri uri = data.getData();
 					File file = FileUtils.getFile(uri);
-					SharedPreferences prefs = getSharedPreferences(PREFERENCES_NAME, 0);
-					SharedPreferences.Editor editor = prefs.edit();
-					try {
-						editor.putString("texturePack", file.getCanonicalPath());
-						editor.putBoolean("force_prepatch", true);
-						editor.commit();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					//Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
-					//restartFirstActivity();
+					setTexturePack(file);
 					forceRestart();
-					//System.exit(0);
 
 				}
 				break;
@@ -139,6 +148,21 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				}
 				break;
 		}
+	}
+
+	private void setTexturePack(File file) {
+		SharedPreferences prefs = getSharedPreferences(PREFERENCES_NAME, 0);
+		SharedPreferences.Editor editor = prefs.edit();
+		try {
+			editor.putString("texturePack", file.getCanonicalPath());
+			editor.putBoolean("force_prepatch", true);
+			editor.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		needsRestart = true;
+		//Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
+		//restartFirstActivity();
 	}
 
 	private void startAbout() {
@@ -154,6 +178,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			e.printStackTrace();
 		}
 	}
+
+	private void startExtractTextures() {
+		new ExtractTextureTask().execute();
+	}
+
 
 	/* thanks, http://stackoverflow.com/questions/1397361/how-do-i-restart-an-android-activity */
 	private void restartFirstActivity() {
@@ -183,6 +212,53 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				}
 			}
 		}).start();
+	}
+
+	private class ExtractTextureTask extends AsyncTask<Void, Void, Void> {
+
+		private ProgressDialog dialog;
+		private String mcpeApkLoc;
+		private File outFile;
+		private boolean hasSu = true;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(MainMenuOptionsActivity.this);
+			dialog.setMessage(getResources().getString(R.string.extracting_textures));
+			dialog.setIndeterminate(true);
+			dialog.setCancelable(false);
+			dialog.show();
+			try {
+				ApplicationInfo appInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+				mcpeApkLoc = appInfo.sourceDir;
+			} catch (PackageManager.NameNotFoundException impossible) {
+			}
+			outFile = new File(getExternalFilesDir(null), "minecraft.apk");
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			List<String> suResult = Shell.SU.run("cp \"" + mcpeApkLoc + "\" \"" + outFile.getAbsolutePath() + "\"");
+			if (suResult == null) {
+				hasSu = false;
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			dialog.dismiss();			
+			if (outFile.exists()) {
+				setTexturePack(outFile);
+				Toast.makeText(MainMenuOptionsActivity.this, R.string.extract_textures_success, Toast.LENGTH_SHORT).show();
+			} else {
+				new AlertDialog.Builder(MainMenuOptionsActivity.this).
+					setMessage(hasSu? R.string.extract_textures_error : R.string.extract_textures_no_root).
+					setPositiveButton(android.R.string.ok, null).
+					show();
+			}
+		}		
 	}
 
 }

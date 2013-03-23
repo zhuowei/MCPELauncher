@@ -42,6 +42,12 @@
     <string name="pref_addons_title">Addons and patches</string>
     <string name="pref_zz_load_native_addons">Enable experimental addon support</string>
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
+    <string name="pref_zz_extract_original_textures">Extract original textures with root access</string>
+    <string name="pref_zz_extract_original_textures_summary">Backup original APK with root access and set it as the texture pack</string>
+    <string name="extracting_textures">Backing up original APK</string>
+    <string name="extract_textures_success">Successfully set original APK as texture pack.</string>
+    <string name="extract_textures_error">Unable to access original APK.</string>
+    <string name="extract_textures_no_root">Unable to gain superuser access - are you rooted?</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
@@ -67,6 +73,8 @@
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
 The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n
+This program contains code from 2of1\'s Andhook framework; used with permission.\n
+This program uses the libsuperuser library by Chainfire.\n
 For full licensing information, check the Minecraft Forums thread.\n
     </string>
     <string name="about_pro_library_credits"></string>

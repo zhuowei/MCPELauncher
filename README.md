@@ -1,20 +1,17 @@
-# MCPEFailLauncher: a custom Minecraft PE launcher for Android
+# MCPELauncher: a custom Minecraft PE launcher for Android
 
-MCPEFailLauncher is a custom Minecraft PE launcher that wraps around Minecraft PE and provides texture pack loading support.
+MCPELauncher is a custom Minecraft PE launcher that wraps around Minecraft PE and provides texture pack and patch loading support.
 
 Just choose Options on the main screen, then select a texture pack. It is that easy!
 
 This program loads libminecraftpe.so from the currently installed copy of Minecraft PE, so it should be compatiable with the mod patching features of PocketTool and QuickPatch.
 
-This version is *Alpha* and is for testing only. *There is a 5 minute timer on the binary release - after 5 minutes, the game shuts down.*
+There is a 3-PTPatch limitation on this free version.
 
 Known issues:
- - Xperia support not implemented
- - world date format not implemented
- - Options in the option screen not implemented
- - vibrate not implemented
+ - Sensitivity option in the option screen not implemented
 
-Download: http://zhuowei.github.com/MCPEFailLauncher/MCPELauncher-release.apk
+Download from the Forums thread.
 
 This program uses aFileChooser by Paul Burke. See https://github.com/zhuowei/aFileChooser for licensing information.
 
@@ -26,6 +23,8 @@ git clone git@github.com:zhuowei/aFileChooser.git
 git clone git@github.com:zhuowei/Pokerface.git
 git clone git@github.com:zhuowei/MCPELauncher.git
 git clone git@github.com:zhuowei/MCPELauncher-app.git
+git clone https://github.com/Chainfire/libsuperuser.git
+android update lib-project -p libsuperuser/libsuperuser -t 1
 
 cd MCPELauncher-app
 ant clean debug
