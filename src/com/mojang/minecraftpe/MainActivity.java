@@ -54,6 +54,7 @@ public class MainActivity extends NativeActivity
 	/* private dialogs start here */
 	public static final int DIALOG_CRASH_SAFE_MODE = 0x1000;
 	public static final int DIALOG_RUNTIME_OPTIONS = 0x1001;
+	public static final int DIALOG_INVALID_PATCHES = 0x1002;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -90,6 +91,10 @@ public class MainActivity extends NativeActivity
 
 	public static Set<String> loadedAddons = new HashSet<String>();
 
+	public ApplicationInfo mcAppInfo;
+
+	public static List<String> failedPatches = new ArrayList<String>();
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -107,7 +112,7 @@ public class MainActivity extends NativeActivity
 		}
 
 		try {
-			ApplicationInfo mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+			mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
@@ -158,12 +163,15 @@ public class MainActivity extends NativeActivity
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
+		migrateToPatchManager();
+
 		try {
 			if (!isSafeMode()) {
 				prePatch();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			//showDialog(DIALOG_UNABLE_TO_PATCH);
 		}
 
 		try {
@@ -197,11 +205,7 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		/*getWindow().getDecorView().post(new Runnable() {
-			public void run() {
-				setupHoverCar();
-			}
-		});*/
+
 		System.gc();
 
 		currentMainActivity = new WeakReference<MainActivity>(this);
@@ -216,6 +220,20 @@ public class MainActivity extends NativeActivity
 			lockFile.createNewFile();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_enable_hovercar", false)) {
+			if (hoverCar == null) {
+				getWindow().getDecorView().post(new Runnable() {
+					public void run() {
+						setupHoverCar();
+					}
+				});
+			}
+		} else {
+			if (hoverCar != null) {
+				hoverCar.dismiss();
+				hoverCar = null;
+			}
 		}
 	}
 
@@ -255,7 +273,7 @@ public class MainActivity extends NativeActivity
 
 	private void prePatch() throws Exception {
 		File patched = getDir("patched", 0);
-		File originalLibminecraft = new File("/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so");
+		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
 		File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
 		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getBoolean("force_prepatch", true);
@@ -263,7 +281,6 @@ public class MainActivity extends NativeActivity
 
 			System.out.println("Forcing new prepatch");
 
-			File[] patches = patchesDir.listFiles();
 			byte[] libBytes = new byte[(int) originalLibminecraft.length()];
 
 			InputStream is = new FileInputStream(originalLibminecraft);
@@ -272,14 +289,29 @@ public class MainActivity extends NativeActivity
 
 			int patchedCount = 0;
 			int maxPatchNum = getMaxNumPatches();
+			PatchManager patchMgr = PatchManager.getPatchManager(this);
 
-			for (File f: patches) {
+			Set<String> patchLocs = patchMgr.getEnabledPatches();
+
+			for (String patchLoc: patchLocs) {
 				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
+				File patchFile = new File(patchLoc);
+				if (!patchFile.exists()) continue;
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				patch.loadPatch(f);
+				patch.loadPatch(patchFile);
+				if (!patch.checkMagic()) {
+					failedPatches.add(patchFile.getName());
+					continue;
+				}
 				patch.applyPatch(libBytes);
 				patchedCount++;
 			}
+
+			/*patchedCount = prePatchDir(libBytes, patchesDir, patchMgr, patchedCount, maxPatchNum);
+			patchedCount = prePatchDir(libBytes, new File(Environment.getExternalStorageDirectory(), 
+				"Android/data/com.snowbound.pockettool.free/Patches"), patchMgr, patchedCount, maxPatchNum);
+			patchedCount = prePatchDir(libBytes, new File(Environment.getExternalStorageDirectory(), 
+				"Android/data/com.snowbound.pockettool.free/Patches"), patchMgr, patchedCount, maxPatchNum);*/
 
 			/* patching specific built-in patches */
 			if (requiresGuiBlocksPatch) {
@@ -294,12 +326,30 @@ public class MainActivity extends NativeActivity
 			os.close();
 			hasPrePatched = true;
 			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", false).apply();
+			if (failedPatches.size() > 0) {
+				showDialog(DIALOG_INVALID_PATCHES);
+			}
+				
 		}
 
 		MC_NATIVE_LIBRARY_DIR = patched.getCanonicalPath();
 		MC_NATIVE_LIBRARY_LOCATION = newMinecraft.getCanonicalPath();
 	}
-		
+
+	private int prePatchDir(byte[] libBytes, File patchesDir, PatchManager patchMgr, int patchedCount, int maxPatchNum) throws Exception {
+		if (!patchesDir.exists()) return patchedCount;
+		File[] patches = patchesDir.listFiles();
+
+		for (File f: patches) {
+			if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
+			if (!patchMgr.isEnabled(f)) continue;
+			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+			patch.loadPatch(f);
+			patch.applyPatch(libBytes);
+			patchedCount++;
+		}
+		return patchedCount;
+	}
 
 	public native void nativeRegisterThis();
 	public native void nativeUnregisterThis();
@@ -350,6 +400,8 @@ public class MainActivity extends NativeActivity
 				return createCrashSafeModeDialog();
 			case DIALOG_RUNTIME_OPTIONS:
 				return createRuntimeOptionsDialog();
+			case DIALOG_INVALID_PATCHES:
+				return createInvalidPatchesDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -395,6 +447,14 @@ public class MainActivity extends NativeActivity
 	protected Dialog createRuntimeOptionsDialog() {
 		return new AlertDialog.Builder(this)
 			.setMessage("COMING SOON!!!!! Soon, seriously")
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
+	protected Dialog createInvalidPatchesDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(getResources().getString(R.string.manage_patches_invalid_patches) + "\n" + 
+				PatchManager.join(failedPatches.toArray(PatchManager.blankArray), "\n"))
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
 	}
@@ -699,7 +759,10 @@ public class MainActivity extends NativeActivity
 		hoverCar.show(getWindow().getDecorView());
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				showDialog(DIALOG_RUNTIME_OPTIONS);
+				//showDialog(DIALOG_RUNTIME_OPTIONS);
+				Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
+				intent.putExtra("prePatchConfigure", false);
+				startActivity(intent);
 			}
 		});
 	}
@@ -718,6 +781,19 @@ public class MainActivity extends NativeActivity
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+
+	protected void migrateToPatchManager() {
+		try {
+			boolean enabledPatchMgr = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("patchManagerVersion", -1) > 0;
+			if (enabledPatchMgr) return;
+			File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
+			PatchManager.getPatchManager(this).setEnabled(patchesDir.listFiles(), true);
+			System.out.println(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("enabledPatches", "LOL"));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

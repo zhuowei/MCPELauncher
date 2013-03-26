@@ -182,6 +182,26 @@ public class PTPatch {
 		}
 
 	}
+
+	public void applyPatch(ByteBuffer buf) throws IOException{
+		for(count = 0; count < mHeader.num_patches; count++){
+			buf.position(getNextAddr());
+			buf.put(getNextData());
+		}
+
+	}
+
+	public void removePatch(ByteBuffer buf, byte[] original) {
+		ByteBuffer originalBuf = ByteBuffer.wrap(original);
+		for(count = 0; count < mHeader.num_patches; count++){
+			int nextAddr = getNextAddr();
+			buf.position(nextAddr);
+			originalBuf.position(nextAddr);
+			byte[] nextData = new byte[getDataLength()];
+			originalBuf.get(nextData);
+			buf.put(nextData);
+		}
+	}
 	
 	public static final byte[] intToByteArray(int value) {
         return new byte[] {

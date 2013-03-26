@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MCPELauncher</string>
+    <string name="app_name">BlockLauncher</string>
     <string name="pref_ctrl_touchscreen">Use Touchscreen</string>
     <string name="pref_ctrl_touchscreen_summary">If you are not using an Xperia Play, check this</string>
     <string name="pref_mp_username">Multiplayer Username</string>
@@ -41,6 +41,7 @@
     <string name="pref_gfx_title">Graphics</string>
     <string name="pref_addons_title">Addons and patches</string>
     <string name="pref_zz_load_native_addons">Enable experimental addon support</string>
+    <string name="pref_zz_enable_hovercar">Enable in-game patch manager</string>
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>
     <string name="pref_zz_extract_original_textures">Extract original textures with root access</string>
     <string name="pref_zz_extract_original_textures_summary">Backup original APK with root access and set it as the texture pack</string>
@@ -66,6 +67,9 @@
     <string name="manage_patches_crash_safe_mode">MCPELauncher has detected a recent crash. Safe Mode has been enabled to prevent further crashes by misbehaving patches.</string>
     <string name="manage_patches_import_confirm">Do you want to import this patch?</string>
     <string name="manage_patches_import_done">Patch imported</string>
+    <string name="manage_patches_enable">Enable</string>
+    <string name="manage_patches_disable">Disable</string>
+    <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that MCPELauncher recognizes:</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About MCPELauncher</string>
     <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>

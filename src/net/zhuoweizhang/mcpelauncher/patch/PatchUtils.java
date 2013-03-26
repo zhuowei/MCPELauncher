@@ -44,4 +44,17 @@ public final class PatchUtils {
 		os.write(data);
 		os.close();
 	}
+
+	public static boolean canLivePatch(File file) throws IOException {
+		com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+		patch.loadPatch(file);
+		for(int count = 0; count < patch.getNumPatches(); count++){
+			int address = patch.getNextAddr();
+			if (address >= LIB_LOAD_OFFSET_BEGIN) {
+				return false;
+			}
+		}
+		return true;
+	}
+		
 }

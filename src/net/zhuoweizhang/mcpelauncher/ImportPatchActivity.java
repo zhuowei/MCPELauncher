@@ -1,6 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import java.io.*;
+import java.util.*;
 
 import android.app.*;
 import android.content.*;
@@ -43,10 +44,6 @@ public class ImportPatchActivity extends Activity implements View.OnClickListene
 
 		patchNameText.setText(patchUri.getLastPathSegment());
 
-		if (hasTooManyPatches()) {
-			okButton.setEnabled(false);
-			patchNameText.setText(R.string.manage_patches_too_many);
-		}
 		setResult(RESULT_CANCELED);
 	}
 
@@ -65,6 +62,12 @@ public class ImportPatchActivity extends Activity implements View.OnClickListene
 		File to = new File(getDir(PT_PATCHES_DIR, 0), from.getName());
 		try {
 			PatchUtils.copy(from, to);
+			PatchManager.getPatchManager(this).setEnabled(to, false);
+			if (!hasTooManyPatches()) {
+				PatchManager.getPatchManager(this).setEnabled(to, true);
+			} else {
+				Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_LONG).show();
+			}
 			setPatchListModified();
 			Toast.makeText(this, R.string.manage_patches_import_done, Toast.LENGTH_SHORT).show();
 			if (MainActivity.libLoaded) {
@@ -86,8 +89,8 @@ public class ImportPatchActivity extends Activity implements View.OnClickListene
 
 	public boolean hasTooManyPatches() {
 		int maxPatchCount = this.getResources().getInteger(R.integer.max_num_patches);
-		File[] patches = getDir(PT_PATCHES_DIR, 0).listFiles();
-		return maxPatchCount >= 0 && patches.length >= maxPatchCount;
+		Set<String> enabledPatches = PatchManager.getPatchManager(this).getEnabledPatches();
+		return maxPatchCount >= 0 && enabledPatches.size() >= maxPatchCount;
 	}
 
 	protected void setPatchListModified() {

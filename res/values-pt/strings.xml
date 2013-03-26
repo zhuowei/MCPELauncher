@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <string name="app_name">MCPELauncher</string>
+  <string name="app_name">BlockLauncher</string>
   <string name="pref_ctrl_touchscreen">Usar Touchscreen</string>
   <string name="pref_ctrl_touchscreen_summary">Se você não está usando um Xperia Play, marque isso</string>
   <string name="pref_mp_username">Nickname Online</string>
