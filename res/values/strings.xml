@@ -65,17 +65,17 @@
     <string name="gamemode_creative">Creative</string>
     <string name="manage_patches_import">Import</string>
     <string name="manage_patches_import_error">Failed to import patch</string>
-    <string name="manage_patches_too_many">Upgrade to MCPELauncher Pro to patch more than 3 patches</string>
+    <string name="manage_patches_too_many">Upgrade to BlockLauncher Pro to patch more than 3 patches</string>
     <string name="manage_patches_delete">Delete</string>
-    <string name="manage_patches_crash_safe_mode">MCPELauncher has detected a recent crash. Safe Mode has been enabled to prevent further crashes by misbehaving patches.</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher has detected a recent crash. Safe Mode has been enabled to prevent further crashes by misbehaving patches.</string>
     <string name="manage_patches_import_confirm">Do you want to import this patch?</string>
     <string name="manage_patches_import_done">Patch imported</string>
     <string name="manage_patches_enable">Enable</string>
     <string name="manage_patches_disable">Disable</string>
-    <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that MCPELauncher recognizes:</string>
+    <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that BlockLauncher recognizes:</string>
     <string name="skin_imported">Skin set</string>
     <string name="get_pro">Upgrade to Pro</string>
-    <string name="about_about">About MCPELauncher</string>
+    <string name="about_about">About BlockLauncher</string>
     <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
     <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
@@ -87,10 +87,10 @@ For full licensing information, check the Minecraft Forums thread.\n
     </string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
-    <string name="about_go_to_forums">Open Minecraft Forums thread for MCPELauncher</string>
-    <string name="no_minecraft_installed">MCPELauncher cannot find a copy of Minecraft PE on your device. This app is designed to patch the full version of Minecraft Pocket Edition by Mojang.</string>
+    <string name="about_go_to_forums">Open Minecraft Forums thread for BlockLauncher</string>
+    <string name="no_minecraft_installed">BlockLauncher cannot find a copy of Minecraft PE on your device. This app is designed to patch the full version of Minecraft Pocket Edition by Mojang.</string>
 
-    <string name="permlab_mcpelauncher_addon">MCPELauncher Addon</string>
-    <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into MCPELauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
+    <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
+    <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
 
 </resources>
