@@ -95,6 +95,8 @@ public class MainActivity extends NativeActivity
 
 	public static List<String> failedPatches = new ArrayList<String>();
 
+	public List<TexturePack> textureOverrides = new ArrayList<TexturePack>();
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -160,6 +162,8 @@ public class MainActivity extends NativeActivity
 			e.printStackTrace();
 			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
 		}
+
+		textureOverrides.add(new SkinTextureOverride(this));
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
@@ -497,6 +501,13 @@ public class MainActivity extends NativeActivity
 	protected InputStream getInputStreamForAsset(String name) {
 		InputStream is = null;
 		try {
+			for (int i = 0; i < textureOverrides.size(); i++) {
+				try {
+					is = textureOverrides.get(i).getInputStream(name);
+					if (is != null) return is;
+				} catch (IOException e) {
+				}
+			}
 			if (texturePack == null) {
 				return getLocalInputStreamForAsset(name);
 			} else {
@@ -569,7 +580,11 @@ public class MainActivity extends NativeActivity
 			String key = (String) e.getKey();
 			if (key.indexOf("zz_") == 0) continue;
 			retval.add(key);
-			retval.add(e.getValue().toString());
+			if (key.equals("ctrl_sensitivity")) {
+				retval.add(Double.toString(Integer.parseInt(e.getValue().toString()) / 100.0));
+			} else {
+				retval.add(e.getValue().toString());
+			}
 		}
 		retval.add("game_difficulty");
 		if (sharedPref.getBoolean("game_difficultypeaceful", false)) {

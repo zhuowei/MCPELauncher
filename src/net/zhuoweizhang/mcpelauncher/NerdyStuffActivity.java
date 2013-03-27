@@ -6,6 +6,7 @@ import java.nio.channels.*;
 
 import android.app.*;
 import android.content.*;
+import android.net.*;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
@@ -14,6 +15,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 
 	private Button dumpLibMinecraftPeButton;
 	private Button restartAppButton;
+	private Button setSkinButton;
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -22,6 +24,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		dumpLibMinecraftPeButton.setOnClickListener(this);
 		restartAppButton = (Button) findViewById(R.id.restart_app_button);
 		restartAppButton.setOnClickListener(this);
+		setSkinButton = (Button) findViewById(R.id.set_skin_button);
+		setSkinButton.setOnClickListener(this);
 	}
 
 	public void onClick(View v) {
@@ -29,6 +33,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 			dumpLib();
 		} else if (v == restartAppButton) {
 			forceRestart();
+		} else if (v == setSkinButton) {
+			setSkin();
 		}
 	}
 
@@ -66,5 +72,16 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 				}
 			}
 		}).start();
+	}
+
+	public void setSkin() {
+		Intent intent = new Intent("net.zhuoweizhang.mcpelauncher.action.SET_SKIN");
+		Uri derp = Uri.fromFile(new File("/sdcard/skin.png"));
+		intent.setDataAndType(derp, "image/png");
+		try {
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

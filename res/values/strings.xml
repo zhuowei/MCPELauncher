@@ -49,6 +49,9 @@
     <string name="extract_textures_success">Successfully set original APK as texture pack.</string>
     <string name="extract_textures_error">Unable to access original APK.</string>
     <string name="extract_textures_no_root">Unable to gain superuser access - are you rooted?</string>
+    <string name="pref_zz_skin_enable">Enable skin override</string>
+    <string name="pref_zz_skin">Change skin</string>
+    <string name="pref_zz_skin_summary">Select .png file to change skin to (will only be visible to you)</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
@@ -70,6 +73,7 @@
     <string name="manage_patches_enable">Enable</string>
     <string name="manage_patches_disable">Disable</string>
     <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that MCPELauncher recognizes:</string>
+    <string name="skin_imported">Skin set</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About MCPELauncher</string>
     <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>

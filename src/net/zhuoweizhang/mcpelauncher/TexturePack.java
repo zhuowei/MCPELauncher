@@ -8,7 +8,4 @@ public interface TexturePack extends Closeable {
 
 	public InputStream getInputStream(String fileName) throws IOException;
 
-	public long getSize(String fileName) throws IOException;
-
-	public void close() throws IOException;
 }

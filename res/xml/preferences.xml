@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory 
         android:title="@string/pref_mp_title">
@@ -19,6 +20,25 @@
     <PreferenceCategory 
         android:title="@string/pref_ctrl_title">
 
+    <com.lukehorvat.SeekBarDialogPreference android:key="ctrl_sensitivity"
+        android:defaultValue="50"
+        android:max="100"
+        android:title="@string/pref_ctrl_sensitivity"
+        custom:progressTextSuffix="%"
+        custom:min="1" />
+
+    <CheckBoxPreference
+        android:key="ctrl_invertmouse"
+        android:title="@string/pref_ctrl_invertmouse"
+        android:summary="@string/pref_ctrl_invertmouse_summary"
+        android:defaultValue="false"/>
+
+    <CheckBoxPreference
+        android:key="ctrl_islefthanded"
+        android:title="@string/pref_ctrl_islefthanded"
+        android:summary="@string/pref_ctrl_islefthanded_summary"
+        android:defaultValue="false"/>
+
     <CheckBoxPreference
         android:key="ctrl_usetouchscreen"
         android:title="@string/pref_ctrl_touchscreen"
@@ -28,16 +48,7 @@
         android:key="ctrl_usetouchjoypad"
         android:title="@string/pref_ctrl_usetouchjoypad"
         android:defaultValue="false"/>
-    <CheckBoxPreference
-        android:key="ctrl_islefthanded"
-        android:title="@string/pref_ctrl_islefthanded"
-        android:summary="@string/pref_ctrl_islefthanded_summary"
-        android:defaultValue="false"/>
-    <CheckBoxPreference
-        android:key="ctrl_invertmouse"
-        android:title="@string/pref_ctrl_invertmouse"
-        android:summary="@string/pref_ctrl_invertmouse_summary"
-        android:defaultValue="false"/>
+
     <CheckBoxPreference
         android:key="feedback_vibration"
         android:title="@string/pref_feedback_vibration"
@@ -89,6 +100,17 @@
         android:title="@string/pref_zz_texture_pack_demo"
         android:summary="@string/pref_zz_texture_pack_demo_summary"
         android:defaultValue="false"/>
+
+    <CheckBoxPreference
+        android:key="zz_skin_enable"
+        android:title="@string/pref_zz_skin_enable"
+        android:defaultValue="false"/>
+
+    <Preference
+        android:key="zz_skin"
+        android:title="@string/pref_zz_skin"
+        android:summary="@string/pref_zz_skin_summary"
+        android:dependency="zz_skin_enable"/>
 
     <CheckBoxPreference
         android:key="zz_safe_mode"

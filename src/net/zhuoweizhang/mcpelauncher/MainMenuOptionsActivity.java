@@ -35,6 +35,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	public static final String PREFERENCES_NAME = "mcpelauncherprefs";
 	public static final int REQUEST_SELECT_TEXTURE_PACK = 5;
 	public static final int REQUEST_MANAGE_PATCHES = 6;
+	public static final int REQUEST_SELECT_SKIN = 7;
 
 	public static final String PRO_APP_ID = "net.zhuoweizhang.mcpelauncher.pro";
 
@@ -49,6 +50,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference getProPreference;
 	private Preference loadNativeAddonsPreference;
 	private Preference extractOriginalTexturesPreference;
+	private Preference skinPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -78,6 +80,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				getPreferenceScreen().removePreference(extractOriginalTexturesPreference);
 			}
 		}
+		skinPreference = findPreference("zz_skin");
+		if (skinPreference != null) skinPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -113,6 +117,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			needsRestart = true;
 		} else if (pref == extractOriginalTexturesPreference) {
 			startExtractTextures();
+		} else if (pref == skinPreference) {
+			chooseSkin();
 		}
 		return false;
 	}
@@ -123,6 +129,14 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		//Intent intent = Intent.createChooser(target, "Select texture pack");
 		target.setClass(this, FileChooserActivity.class);
 		startActivityForResult(target, REQUEST_SELECT_TEXTURE_PACK);
+	}
+
+	protected void chooseSkin() {
+		Intent target = FileUtils.createGetContentIntent();
+		target.setType("image/png");
+		//Intent intent = Intent.createChooser(target, "Select texture pack");
+		target.setClass(this, FileChooserActivity.class);
+		startActivityForResult(target, REQUEST_SELECT_SKIN);
 	}
 
 	protected void managePatches() {
@@ -145,6 +159,15 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			case REQUEST_MANAGE_PATCHES:
 				if (resultCode == RESULT_OK) {
 					forceRestart();
+				}
+				break;
+			case REQUEST_SELECT_SKIN:  
+				if (resultCode == RESULT_OK) {  
+					final Uri uri = data.getData();
+					File file = FileUtils.getFile(uri);
+					getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
+						.putString("player_skin", file.getAbsolutePath()).apply();
+
 				}
 				break;
 		}

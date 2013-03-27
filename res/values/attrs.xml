@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- note: to re-use an existing Android attribute not already used by the superclass, name should have prefix "android:" and do not define a format -->
+    <declare-styleable name="SeekBarDialogPreference">
+        <attr name="android:max" />
+        <attr name="min" format="integer" />
+        <attr name="progressTextSuffix" format="string" />
+    </declare-styleable>
+
+</resources>
