@@ -41,7 +41,17 @@
     <string name="pref_gfx_title">그래픽</string>
     <string name="pref_addons_title">애드온과 패치</string>
     <string name="pref_zz_load_native_addons">실험적인 애드온 활성화</string>
+    <string name="pref_zz_enable_hovercar">게임 패치 관리자 활성화</string>
     <string name="texture_pack_unable_to_load">텍스쳐팩 불러오기 실패</string>
+    <string name="pref_zz_extract_original_textures">루팅 권한으로 기존 텍스쳐팩 백업</string>
+    <string name="pref_zz_extract_original_textures_summary">텍스쳐팩을 설정하기 위해 루팅 권한을 이용해 기존 APK 파일을 백업합니다.</string>
+    <string name="extracting_textures">기존 APK 백업 중...</string>
+    <string name="extract_textures_success">성공적으로 기존 APK 패키지를 텍스쳐팩으로 설정하였습니다.</string>
+    <string name="extract_textures_error">기존 APK 패키지를 찾을 수 없습니다.</string>
+    <string name="extract_textures_no_root">기존 APK 패키지를 찾을 수 없습니다. 루팅되어 있습니까?</string>
+    <string name="pref_zz_skin_enable">스킨 덮어쓰기</string>
+    <string name="pref_zz_skin">스킨 변경</string>
+    <string name="pref_zz_skin_summary">.PNG 파일을 선택하여 스킨을 변경합니다. (스킨은 오직 혼자만 보여집니다.)</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
     <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
@@ -60,6 +70,10 @@
     <string name="manage_patches_crash_safe_mode">BlockLauncher가 크래시를 발견하였습니다. 나중의 크래시를 방지하기 위해 안전 모드를 활성화 합니다.</string>
     <string name="manage_patches_import_confirm">이 패치를 사용하시겠습니까?</string>
     <string name="manage_patches_import_done">패치 추가됨</string>
+    <string name="manage_patches_enable">활성화</string>
+    <string name="manage_patches_disable">비활성화</string>
+    <string name="manage_patches_invalid_patches">이 패치들은 BlockLauncher에서 알 수 없는 형식으로 만들어져 불러올 수 없었습니다.</string>
+    <string name="skin_imported">스킨 설정</string>
     <string name="get_pro">Pro 버전으로 업그레이드</string>
     <string name="about_about">BlockLauncher 소개</string>
     <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang \n
@@ -69,6 +83,8 @@
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
 데모 텍스쳐팩인 RepetiCraft는 제작자 Theevilpplz의 허락을 받고 사용하였습니다.\n
+이 어플은 2of1의 Andhook framework 코드를 허락 하에 사용하였습니다.\n
+이 어플은 Chainfire의 libsuperuser 라이브러리를 사용하였습니다.\n
 모든 라이센스를 확인하시려면 마인크래프트 포럼 스레드에 접속해 보시기 바랍니다.\n
     </string>
     <string name="about_pro_library_credits"></string>
