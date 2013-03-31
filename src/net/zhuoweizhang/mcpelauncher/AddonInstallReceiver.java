@@ -16,6 +16,7 @@ public class AddonInstallReceiver extends BroadcastReceiver {
 		System.out.println("MCPELauncher: " + intent.toString());
 		System.out.println("Is lib loaded? " + MainActivity.libLoaded);
 		if (!MainActivity.libLoaded) return;
+		if (MainMenuOptionsActivity.isManagingAddons) return;
 		if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED) && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
 			return;
 		}

@@ -36,10 +36,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	public static final int REQUEST_SELECT_TEXTURE_PACK = 5;
 	public static final int REQUEST_MANAGE_PATCHES = 6;
 	public static final int REQUEST_SELECT_SKIN = 7;
+	public static final int REQUEST_MANAGE_ADDONS = 8;
 
 	public static final String PRO_APP_ID = "net.zhuoweizhang.mcpelauncher.pro";
 
 	public static final String GOOGLE_PLAY_URL = "market://details?id=";
+
+	public static boolean isManagingAddons = false;
 
 	private Preference texturePackPreference;
 	private Preference texturePackEnablePreference;
@@ -51,6 +54,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference loadNativeAddonsPreference;
 	private Preference extractOriginalTexturesPreference;
 	private Preference skinPreference;
+	private Preference manageAddonsPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -82,6 +86,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		}
 		skinPreference = findPreference("zz_skin");
 		if (skinPreference != null) skinPreference.setOnPreferenceClickListener(this);
+		manageAddonsPreference = findPreference("zz_manage_addons");
+		if (manageAddonsPreference != null) manageAddonsPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -117,8 +123,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			needsRestart = true;
 		} else if (pref == extractOriginalTexturesPreference) {
 			startExtractTextures();
+			return true;
 		} else if (pref == skinPreference) {
 			chooseSkin();
+			return true;
+		} else if (pref == manageAddonsPreference) {
+			manageAddons();
+			return true;
 		}
 		return false;
 	}
@@ -142,6 +153,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	protected void managePatches() {
 		Intent intent = new Intent(this, ManagePatchesActivity.class);
 		startActivityForResult(intent, REQUEST_MANAGE_PATCHES);
+	}
+
+	protected void manageAddons() {
+		isManagingAddons = true;
+		Intent intent = new Intent(this, ManageAddonsActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_ADDONS);
 	}
 
 	@Override
@@ -168,6 +185,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 					getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
 						.putString("player_skin", file.getAbsolutePath()).apply();
 
+				}
+				break;
+			case REQUEST_MANAGE_ADDONS:
+				isManagingAddons = false;
+				if (resultCode == RESULT_OK) {
+					forceRestart();
 				}
 				break;
 		}

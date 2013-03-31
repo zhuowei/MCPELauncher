@@ -126,6 +126,9 @@
         android:title="@string/pref_zz_load_native_addons"
         android:defaultValue="false"/>
 
+    <Preference android:key="zz_manage_addons"
+        android:title="@string/manage_addons"/>
+
     <CheckBoxPreference
         android:key="zz_enable_hovercar"
         android:title="@string/pref_zz_enable_hovercar"
