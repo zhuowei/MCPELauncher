@@ -132,8 +132,15 @@ public class ManageAddonsActivity extends ListActivity/* implements View.OnClick
 	public void deleteAddon(AddonListItem addon) throws Exception {
 		Uri packageURI = Uri.parse("package:" + addon.appInfo.packageName);
 		Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
-		startActivityForResult(uninstallIntent, 0);
+		startActivityForResult(uninstallIntent, 123);
 		setAddonListModified();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 123) {
+			findAddons();
+		}
 	}
 
 
