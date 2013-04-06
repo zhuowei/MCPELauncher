@@ -217,7 +217,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 	private void startGetPro() {
 		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
+		//intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
+		intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
 		try {
 			this.startActivity(intent);
 		} catch (Exception e) {

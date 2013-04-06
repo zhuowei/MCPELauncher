@@ -11,7 +11,7 @@ import android.widget.TextView;
 public final class AboutAppActivity extends Activity implements View.OnLongClickListener, View.OnClickListener {
 
 	public static final String FORUMS_PAGE_URL = 
-		"http://www.minecraftforum.net/topic/1675581-mcpelauncher-an-android-app-that-patches-minecraft-pe-without-reinstall/";
+		"http://www.minecraftforum.net/topic/1675581-blocklauncher-an-android-app-that-patches-minecraft-pe-without-reinstall/";
 
 	public static final int SLEEP_INTERVAL = 120;
 

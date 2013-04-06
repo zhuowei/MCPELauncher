@@ -91,6 +91,12 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="about_go_to_forums">Open Minecraft Forums thread for BlockLauncher</string>
     <string name="no_minecraft_installed">BlockLauncher cannot find a copy of Minecraft PE on your device. This app is designed to patch the full version of Minecraft Pocket Edition by Mojang.</string>
 
+    <string name="firstlaunch_title">Welcome to BlockLauncher!</string>
+    <string name="firstlaunch_generic_intro">Thank you for trying BlockLauncher. BlockLauncher starts your copy of Minecraft Pocket Edition and adds additional features to it through patches, addons, skins, and textures.</string>
+    <string name="firstlaunch_jelly_bean">Your device runs Android Jelly Bean or newer, so BlockLauncher cannot access the default textures. The demo texture pack has been enabled so you can test the launcher.</string>
+    <string name="firstlaunch_see_options">To get started with BlockLauncher, tap Options on the title menu. For more help, visit the Minecraft Forum thread.</string>
+    <string name="firstlaunch_help">Help</string>
+
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
 

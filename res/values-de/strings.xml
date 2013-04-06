@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BlockLauncher</string>
+    <string name="pref_ctrl_touchscreen">Verwende Touchscreen</string>
+    <string name="pref_ctrl_touchscreen_summary">Wenn du kein Xperia Play verwendest, wähle das</string>
+    <string name="pref_mp_username">Multiplayer Username</string>
+    <string name="pref_mp_username_summary">Dein Name</string>
+    <string name="pref_texture_pack">Texture Pack</string>
+    <string name="pref_texture_pack_summary">Ändere dein Textur Pack</string>
+    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
+    <string name="pref_ctrl_islefthanded">Links</string>
+    <string name="pref_ctrl_islefthanded_summary">Spiegelt das Controll Schema</string>
+    <string name="pref_ctrl_invertmouse">Umgekehrte Y-Achse</string>
+    <string name="pref_ctrl_invertmouse_summary">Hauptsächlich in Australien :)</string>
+    <string name="pref_feedback_vibration">Vibration</string>
+    <string name="pref_feedback_vibration_summary">Wenn ein Block zerstört wird</string>
+    <string name="pref_zz_longvibration">Extra-lange Vibration</string>
+    <string name="pref_zz_longvibration_summary">Verlängert die Vibrations Länge um 5x</string>
+    <string name="pref_gfx_fancygraphics">Fancy Grafiks</string>
+    <string name="pref_gfx_fancygraphics_summary">Macht das Zeug schöner</string>
+    <string name="pref_gfx_lowquality">Niedrige Grafik Qualität</string>
+    <string name="pref_gfx_lowquality_summary">Das Zeug wird schlechter aussehen</string>
+    <string name="pref_game_difficultypeaceful">Friedlicher Modus</string>
+    <string name="pref_game_difficultypeaceful_summary">Lebens Regeneration, keine Monsters</string>
+    <string name="pref_ctrl_sensitivity">Sensitivity</string>
+    <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
+    <string name="pref_zz_safe_mode">Sicherer Modus</string>
+    <string name="pref_zz_safe_mode_summary">Deaktiviert alle Patches</string>
+    <string name="pref_zz_patch_ip_enable">Fügt Multiplayer hinzu</string>
+    <string name="pref_zz_patch_ip_enable_summary">Fügt Multiplayer Verbindungen zu einem Online Server</string>
+    <string name="pref_zz_patch_ip">Server IP</string>
+    <string name="pref_zz_patch_ip_summary">Die IP Addresse von einem Online Server</string>
+    <string name="pref_zz_texture_pack_enable">Verwendet Texture Pack</string>
+    <string name="pref_zz_custom_dpi">Benutzerdefiniertes DPI</string>
+    <string name="pref_zz_custom_dpi_summary">Ändert die Größe des Touchpad - leer lassen, um es deaktivieren</string>
+    <string name="pref_zz_texture_pack_demo">Demonstriert Texture Pack Support</string>
+    <string name="pref_zz_texture_pack_demo_summary">Verwendet das eingebaute RepetiCraft Pack von Theevilpplz</string>
+    <string name="pref_mp_server_visible_default"> Server standardmäßig sichtbar</string>
+    <string name="pref_mp_title">Multiplayer</string>
+    <string name="pref_ctrl_title">Steuerung</string>
+    <string name="pref_gfx_title">Grafiken</string>
+    <string name="pref_addons_title">Addons und Patches</string>
+    <string name="pref_zz_load_native_addons"> Aktivieren Sie zusätzliche Addon Unterstützung</string>
+    <string name="pref_zz_enable_hovercar">Erlaubt In-Game Patch Manager</string>
+    <string name="texture_pack_unable_to_load">Konnte das Texture Pack nicht laden.</string>
+    <string name="pref_zz_extract_original_textures">Extrahiert die ursprünglichen Texturen mit Root-Zugriff</string>
+    <string name="pref_zz_extract_original_textures_summary">Backup original APK with root access and set it as the texture pack</string>
+    <string name="extracting_textures">Backing up original APK</string>
+    <string name="extract_textures_success">Successfully set original APK as texture pack.</string>
+    <string name="extract_textures_error">Unable to access original APK.</string>
+    <string name="extract_textures_no_root">Unable to gain superuser access - are you rooted?</string>
+    <string name="pref_zz_skin_enable">Erlaube Skins</string>
+    <string name="pref_zz_skin">Ändere Skin</string>
+    <string name="pref_zz_skin_summary">Wähle .png Datei un den Skin zu ändern (Wird nur für dich sichtbar sein)</string>
+    <string name="nerdy_stuff_page">Nerdy Zeug</string>
+    <string name="dump_libminecraftpe">Leert libminecraftpe.so aus dem Speicher</string>
+    <string name="nerdy_stuff_are_useless">So ziemlich alles hier auf dieser Seite ist nutzlos. Das ist nur für die Fehlersuche gedacht.</string>
+    <string name="restart_app">Starte die App erneut</string>
+    <string name="manage_patches"> Verwalte Patches</string>
+    <string name="world_create_title">Erschaffe Welt</string>
+    <string name="world_name_prompt">Name: </string>
+    <string name="world_seed_prompt">Seed: </string>
+    <string name="world_gamemode_prompt">Spielmodus: </string>
+    <string name="gamemode_survival">Überleben</string>
+    <string name="gamemode_creative">Kreativ</string>
+    <string name="manage_patches_import">Import</string>
+    <string name="manage_patches_import_error">Patch Import fehlgeschlagen</string>
+    <string name="manage_patches_too_many">Upgrade zu BlockLauncher Pro um mehr als 3 Patches zu installieren</string>
+    <string name="manage_patches_delete">Löschen</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher hat einen Crash erkannt. Sicherer Modus wurde aktiviert um weitere Abstürze durch fehlerhafte Patches zu verhindern.</string>
+    <string name="manage_patches_import_confirm">Willst du einen Patch importieren?</string>
+    <string name="manage_patches_import_done">Patch wurde importiert</string>
+    <string name="manage_patches_enable">Aktiviert</string>
+    <string name="manage_patches_disable">Deaktiviert</string>
+    <string name="manage_patches_invalid_patches">Diese Patches können nicht installiert werden, weil sie in einem Format sind das BlockLauncher nicht verträgt:</string>
+    <string name="skin_imported">Skin gesetzt</string>
+    <string name="get_pro">Upgrade zu Pro</string>
+    <string name="about_about">Über BlockLauncher</string>
+    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_librarycredits">Dieses Programm verwendet eine FileChooser library von Paul Burke. \n
+Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
+The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n
+This program contains code from 2of1\'s Andhook framework; used with permission.\n
+This program uses the libsuperuser library by Chainfire.\n
+For full licensing information, check the Minecraft Forums thread.\n
+    </string>
+    <string name="about_pro_library_credits"></string>
+    <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
+    <string name="about_go_to_forums">Öffne Minecraft Forums thread für BlockLauncher</string>
+    <string name="no_minecraft_installed">BlockLauncher cannot find a copy of Minecraft PE on your device. This app is designed to patch the full version of Minecraft Pocket Edition by Mojang.</string>
+
+    <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
+    <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
+
+</resources>
+

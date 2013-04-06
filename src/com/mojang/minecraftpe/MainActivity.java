@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -55,6 +56,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_CRASH_SAFE_MODE = 0x1000;
 	public static final int DIALOG_RUNTIME_OPTIONS = 0x1001;
 	public static final int DIALOG_INVALID_PATCHES = 0x1002;
+	public static final int DIALOG_FIRST_LAUNCH = 0x1003;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -97,6 +99,8 @@ public class MainActivity extends NativeActivity
 
 	public List<TexturePack> textureOverrides = new ArrayList<TexturePack>();
 
+	public boolean minecraftApkForwardLocked = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -118,6 +122,7 @@ public class MainActivity extends NativeActivity
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
+			minecraftApkForwardLocked = !mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 			finish();
@@ -406,6 +411,8 @@ public class MainActivity extends NativeActivity
 				return createRuntimeOptionsDialog();
 			case DIALOG_INVALID_PATCHES:
 				return createInvalidPatchesDialog();
+			case DIALOG_FIRST_LAUNCH:
+				return createFirstLaunchDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -460,6 +467,27 @@ public class MainActivity extends NativeActivity
 			.setMessage(getResources().getString(R.string.manage_patches_invalid_patches) + "\n" + 
 				PatchManager.join(failedPatches.toArray(PatchManager.blankArray), "\n"))
 			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
+	protected Dialog createFirstLaunchDialog() {
+		StringBuilder dialogMsg = new StringBuilder();
+		dialogMsg.append(getResources().getString(R.string.firstlaunch_generic_intro)).append("\n\n");
+		if (minecraftApkForwardLocked) {
+			dialogMsg.append(getResources().getString(R.string.firstlaunch_jelly_bean)).append("\n\n");
+		}
+		dialogMsg.append(getResources().getString(R.string.firstlaunch_see_options)).append("\n\n");
+		return new AlertDialog.Builder(this)
+			.setTitle(R.string.firstlaunch_title)
+			.setMessage(dialogMsg.toString())
+			.setPositiveButton(android.R.string.ok, null)
+			.setNeutralButton(R.string.firstlaunch_help, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
+					startActivity(intent);
+				}
+			})
 			.create();
 	}
 
@@ -803,6 +831,7 @@ public class MainActivity extends NativeActivity
 		try {
 			boolean enabledPatchMgr = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("patchManagerVersion", -1) > 0;
 			if (enabledPatchMgr) return;
+			showDialog(DIALOG_FIRST_LAUNCH);
 			File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
 			PatchManager.getPatchManager(this).setEnabled(patchesDir.listFiles(), true);
 			System.out.println(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("enabledPatches", "LOL"));
