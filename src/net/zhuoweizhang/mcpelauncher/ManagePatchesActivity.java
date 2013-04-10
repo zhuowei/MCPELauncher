@@ -35,6 +35,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_MANAGE_PATCH = 1;
 	private static final int DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED = 2;
 	private static final int DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED = 3;
+	private static final int DIALOG_PATCH_INFO = 4;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
@@ -122,6 +123,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 							Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
 						} else {
 							PatchManager.getPatchManager(this).setEnabled(to, true);
+							afterPatchToggle(new PatchListItem(to, true));
 						}
 						setPatchListModified();
 						findPatches();
@@ -169,6 +171,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 				return createManagePatchDialog(1);
 			case DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED:
 				return createManagePatchDialog(0);
+			case DIALOG_PATCH_INFO:
+				return createPatchInfoDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -181,6 +185,9 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			case DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED:
 				AlertDialog aDialog = (AlertDialog) dialog;
 				aDialog.setTitle(selectedPatchItem.toString());
+				break;
+			case DIALOG_PATCH_INFO:
+				preparePatchInfo((AlertDialog) dialog, selectedPatchItem);
 				break;
 			default:
 				super.onPrepareDialog(dialogId, dialog);
@@ -195,6 +202,10 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		}
 		PatchManager.getPatchManager(this).setEnabled(patch.file, !patch.enabled);
 		patch.enabled = !patch.enabled;
+		afterPatchToggle(patch);
+	}
+
+	private void afterPatchToggle(PatchListItem patch) {
 		if (prePatchConfigure) {
 			setPatchListModified(); //should really be called requestPrePatch
 		} else if (canLivePatch(patch)) {
@@ -256,17 +267,49 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		patch.file.delete();
 	}
 
+	public void preparePatchInfo(AlertDialog dialog, PatchListItem patch) {
+		dialog.setTitle(patch.toString());
+		String patchInfo;
+		try {
+			patchInfo = getPatchInfo(patch);
+		} catch (Exception e) {
+			patchInfo = "Cannot show info: " + e.getStackTrace();
+		}
+		dialog.setMessage(patchInfo);
+	}
+
+	private String getPatchInfo(PatchListItem patchItem) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.getResources().getString(R.string.manage_patches_path));
+		builder.append(": ");
+		builder.append(patchItem.file.getAbsolutePath());
+		builder.append('\n');
+		com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+		patch.loadPatch(patchItem.file);
+		String desc = patch.getDescription();
+		if (desc.length() > 0) {
+			builder.append(this.getResources().getString(R.string.manage_patches_metadata));
+			builder.append(": ");
+			builder.append(desc);
+		} else {
+			builder.append(this.getResources().getString(R.string.manage_patches_no_metadata));
+		}
+		return builder.toString();
+	}
+
 
 	/**
 	 * @param enableStatus -1 = can't disable, 0 = currently disabled, 1 = currently enabled 
 	 */
 
 	protected AlertDialog createManagePatchDialog(int enableStatus) {
+		CharSequence patchInfoStr = this.getResources().getText(R.string.manage_patches_info);
 		CharSequence[] options = null;
 		if (enableStatus == -1) {
-			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete)};
-		} else {
 			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete), 
+				patchInfoStr};
+		} else {
+			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete), patchInfoStr,
 				(enableStatus == 0? this.getResources().getText(R.string.manage_patches_enable): 
 					this.getResources().getText(R.string.manage_patches_disable))};
 		}
@@ -283,11 +326,21 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 							e.printStackTrace();
 						}
 					} else if (button == 1) {
+						showDialog(DIALOG_PATCH_INFO);
+					} else if (button == 2) {
 						togglePatch(selectedPatchItem);
 						findPatches();
 					}
 				}
 			}).create();
+	}
+
+	private AlertDialog createPatchInfoDialog() {
+		return new AlertDialog.Builder(this)
+			.setTitle("Whoops! info fail") //will get filled in by prepare
+			.setMessage("Whoops - try again, this is a tiny fail")
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
 	}
 
 	private final class FindPatchesThread implements Runnable {

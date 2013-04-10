@@ -73,6 +73,10 @@
     <string name="manage_patches_enable">Enable</string>
     <string name="manage_patches_disable">Disable</string>
     <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that BlockLauncher recognizes:</string>
+    <string name="manage_patches_info">Information</string>
+    <string name="manage_patches_metadata">Author</string>
+    <string name="manage_patches_no_metadata">No author information available</string>
+    <string name="manage_patches_path">Path</string>
     <string name="skin_imported">Skin set</string>
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>

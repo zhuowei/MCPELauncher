@@ -202,6 +202,25 @@ public class PTPatch {
 			buf.put(nextData);
 		}
 	}
+
+	public byte[] getMetaData() {
+		count = 0;
+		int firstIndex = getCurrentIndex();
+		int metaDataStart = (mHeader.num_patches * 4) + 6;
+		byte[] retval = new byte[firstIndex - metaDataStart];
+		System.arraycopy(patch_array, metaDataStart, retval, 0, retval.length);
+		return retval;
+	}
+
+	public String getDescription() {
+		try {
+			byte[] metaData = getMetaData();
+			return new String(metaData, "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ""; //should this return null? feel free to yell at me if it should
+		}
+	}
 	
 	public static final byte[] intToByteArray(int value) {
         return new byte[] {
