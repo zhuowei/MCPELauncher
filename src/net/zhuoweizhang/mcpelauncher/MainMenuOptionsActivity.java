@@ -55,6 +55,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference extractOriginalTexturesPreference;
 	private Preference skinPreference;
 	private Preference manageAddonsPreference;
+	private Preference goToForumsPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -75,6 +76,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		aboutPreference.setOnPreferenceClickListener(this);
 		getProPreference = findPreference("zz_get_pro");
 		if (getProPreference != null) getProPreference.setOnPreferenceClickListener(this);
+		goToForumsPreference = findPreference("zz_go_to_forums");
+		if (goToForumsPreference != null) goToForumsPreference.setOnPreferenceClickListener(this);
 		loadNativeAddonsPreference = findPreference("zz_load_native_addons");
 		if (loadNativeAddonsPreference != null) loadNativeAddonsPreference.setOnPreferenceClickListener(this);
 		extractOriginalTexturesPreference = findPreference("zz_extract_original_textures");
@@ -129,6 +132,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			return true;
 		} else if (pref == manageAddonsPreference) {
 			manageAddons();
+			return true;
+		} else if (pref == goToForumsPreference) {
+			goToForums();
 			return true;
 		}
 		return false;
@@ -216,6 +222,17 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	}
 
 	private void startGetPro() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		//intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
+		intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
+		try {
+			this.startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void goToForums() {
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		//intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
 		intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));

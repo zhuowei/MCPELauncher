@@ -40,6 +40,8 @@
     <string name="pref_ctrl_title">Controls</string>
     <string name="pref_gfx_title">Graphics</string>
     <string name="pref_addons_title">Addons and patches</string>
+    <string name="pref_textures_title">Textures</string>
+    <string name="pref_support_title">Support</string>
     <string name="pref_zz_load_native_addons">Enable experimental addon support</string>
     <string name="pref_zz_enable_hovercar">Enable in-game patch manager</string>
     <string name="texture_pack_unable_to_load">Unable to load texture pack.</string>

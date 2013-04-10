@@ -91,9 +91,8 @@
         android:summary="@string/pref_game_difficultypeaceful_summary"
         android:defaultValue="false"/>
 
-
     <PreferenceCategory 
-        android:title="@string/pref_addons_title">
+        android:title="@string/pref_textures_title">
 
     <CheckBoxPreference
         android:key="zz_texture_pack_demo"
@@ -112,6 +111,11 @@
         android:summary="@string/pref_zz_skin_summary"
         android:dependency="zz_skin_enable"/>
 
+    </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:title="@string/pref_addons_title">
+
     <CheckBoxPreference
         android:key="zz_safe_mode"
         android:title="@string/pref_zz_safe_mode"
@@ -122,6 +126,11 @@
         android:title="@string/manage_patches"/>
 
     <CheckBoxPreference
+        android:key="zz_enable_hovercar"
+        android:title="@string/pref_zz_enable_hovercar"
+        android:defaultValue="false"/>
+
+    <CheckBoxPreference
         android:key="zz_load_native_addons"
         android:title="@string/pref_zz_load_native_addons"
         android:defaultValue="false"/>
@@ -129,12 +138,10 @@
     <Preference android:key="zz_manage_addons"
         android:title="@string/manage_addons"/>
 
-    <CheckBoxPreference
-        android:key="zz_enable_hovercar"
-        android:title="@string/pref_zz_enable_hovercar"
-        android:defaultValue="false"/>
-
     </PreferenceCategory>
+
+    <PreferenceCategory 
+        android:title="@string/pref_support_title">
 
     <Preference
         android:title="@string/nerdy_stuff_page">
@@ -145,7 +152,9 @@
     <Preference android:key="zz_about"
         android:title="@string/about_about"/>
 
-    <Preference android:key="zz_get_pro"
-        android:title="@string/get_pro"/>
+    <Preference android:key="zz_go_to_forums"
+        android:title="@string/about_go_to_forums"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
