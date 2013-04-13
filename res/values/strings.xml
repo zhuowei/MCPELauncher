@@ -65,6 +65,7 @@
     <string name="world_gamemode_prompt">Game Mode: </string>
     <string name="gamemode_survival">Survival</string>
     <string name="gamemode_creative">Creative</string>
+    <string name="copy_world_title">Save world</string>
     <string name="manage_patches_import">Import</string>
     <string name="manage_patches_import_error">Failed to import patch</string>
     <string name="manage_patches_too_many">Upgrade to BlockLauncher Pro to patch more than 3 patches</string>
