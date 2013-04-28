@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="select_file">Selecciona el archivo de la SD</string>
+    <string name="pref_ctrl_touchscreen">Pantalla táctil</string>
+    <string name="pref_ctrl_touchscreen_summary">Si no está utilizando un Xperia Play, marque esta opción</string>
+    <string name="pref_mp_username">Nombre en Multijugador</string>
+    <string name="pref_mp_username_summary">Tu nombre, duh!</string>
+    <string name="pref_texture_pack">Paquete de texturas</string>
+    <string name="pref_texture_pack_summary">Cambia tu paquete de texturas</string>
+    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
+    <string name="pref_ctrl_islefthanded">Zurdos</string>
+    <string name="pref_ctrl_islefthanded_summary">Cambia de lugar los controles</string>
+    <string name="pref_ctrl_invertmouse">Invertir Y-axis</string>
+    <string name="pref_ctrl_invertmouse_summary">Mientras tanto, en Australia :)</string>
+    <string name="pref_feedback_vibration">Vibrar</string>
+    <string name="pref_feedback_vibration_summary">Vibra cuando destruyes un bloque</string>
+    <string name="pref_zz_longvibration">Más tiempo de vibración</string>
+    <string name="pref_zz_longvibration_summary">Incrementa el tiempo de vibración X5</string>
+    <string name="pref_gfx_fancygraphics">Gráficos Detallados</string>
+    <string name="pref_gfx_fancygraphics_summary">Hace que las cosas se vean mejor</string>
+    <string name="pref_gfx_lowquality">Gráficos de baja calidad</string>
+    <string name="pref_gfx_lowquality_summary">Hace que las cosas se vean peor = Rendimiento</string>
+    <string name="pref_game_difficultypeaceful">Modo pacífico</string>
+    <string name="pref_game_difficultypeaceful_summary">Se regenera la vida y no hay monstruos</string>
+    <string name="pref_ctrl_sensitivity">Sensibilidad</string>
+    <string name="pref_ctrl_sensitivity_summary">Sensibilidad de táctil</string>
+    <string name="pref_zz_safe_mode">Modo Seguro</string>
+    <string name="pref_zz_safe_mode_summary">Desactivar todos los parches</string>
+    <string name="pref_zz_patch_ip_enable">Redireccionar Multiplayer</string>
+    <string name="pref_zz_patch_ip_enable_summary">Redirecciona las conexiones Multiplayer hacia servidores en linea</string>
+    <string name="pref_zz_patch_ip">IP del servidor</string>
+    <string name="pref_zz_patch_ip_summary">La dirección IP del servidor en línea</string>
+    <string name="pref_zz_texture_pack_enable">Usar Paquete de texturas</string>
+    <string name="pref_zz_custom_dpi">Custom DPI</string>
+    <string name="pref_zz_custom_dpi_summary">Cambie la densidad de pantalla para cambiar el tamaño de los controles - dejar en blanco para desactivar</string>
+    <string name="pref_zz_texture_pack_demo">Demonstrate texture pack support</string>
+    <string name="pref_zz_texture_pack_demo_summary">Utilice la textura RepetiCraft pack de Theevilpplz</string>
+    <string name="pref_mp_server_visible_default">Servidor visible por defecto</string>
+    <string name="pref_mp_title">Multijugador</string>
+    <string name="pref_ctrl_title">Controles</string>
+    <string name="pref_gfx_title">Graficos</string>
+    <string name="pref_addons_title">Complementos y parches</string>
+	<string name="pref_textures_title">Texturas</string>
+	<string name="pref_support_title">Soporte</string>
+    <string name="pref_zz_load_native_addons">Habilitar complementos experimentales</string>
+	<string name="pref_zz_enable_hovercar">Habilitar en el juego Patch Manager</string>
+    <string name="texture_pack_unable_to_load">No se puede cargar paquete de textura.</string>
+	<string name="pref_zz_extract_original_textures">Extraer texturas originales con acceso root</string>
+    <string name="pref_zz_extract_original_textures_summary">Copia de seguridad del APK original con acceso root y configurarlo como el paquete de textura</string>
+	<string name="extracting_textures">Copia de seguridad del APK original</string>
+	<string name="extract_textures_success">Éxito! establecido el APK original como paquete de texturas.</string>
+    <string name="extract_textures_error">No se puede acceder al APK original.</string>
+    <string name="extract_textures_no_root">No se puede tener acceso de superusuario - ¿Tu Android tiene root?</string>
+    <string name="pref_zz_skin_enable">Habilitar la skin</string>
+    <string name="pref_zz_skin">Cambiar skin</string>
+    <string name="pref_zz_skin_summary">Selecciona el archivo .png para cambiar tu skin (solamente será visible para usted)</string>
+    <string name="nerdy_stuff_page">Cosas Nerdy</string>
+    <string name="dump_libminecraftpe">Volcado de memoria libminecraftpe.so</string>
+    <string name="nerdy_stuff_are_useless">Casi todo en esta página es inútil. Ellos están aquí para la solución de problemas.</string>
+    <string name="restart_app">Reiniciar aplicación</string>
+    <string name="manage_patches">Administrar parches</string>
+    <string name="world_create_title">Crear mundo</string>
+    <string name="world_name_prompt">Nombre:</string>
+    <string name="world_seed_prompt">Semilla:</string>
+    <string name="world_gamemode_prompt">Modo de Juego:</string>
+    <string name="gamemode_survival">Supervivencia</string>
+    <string name="gamemode_creative">Creativo</string>
+    <string name="manage_patches_import">Importar</string>
+    <string name="manage_patches_import_error">No se pudo importar el parche</string>
+    <string name="manage_patches_too_many">Actualiza BlockLauncher Pro para obtener 3 parches más.</string>
+    <string name="manage_patches_delete">Borrar</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher ha detectado un fallo reciente. Modo seguro se ha activado para evitar futuros errores por mal funcionamiento de parches.</string>
+    <string name="manage_patches_import_confirm">¿Desea importar este parche?</string>
+    <string name="manage_patches_import_done">Parche importado</string>
+	<string name="manage_patches_enable">Activar</string>
+    <string name="manage_patches_disable">Desactivar</string>
+    <string name="manage_patches_invalid_patches">Estos parches no pueden ser parcheados, ya que no están en un formato que reconoce BlockLauncher:</string>
+	<string name="manage_patches_info">Información</string>
+	<string name="manage_patches_metadata">Autor</string>
+	<string name="manage_patches_no_metadata">Información del autor no disponible</string>
+    <string name="manage_patches_path">Ruta</string>
+    <string name="skin_imported">Skin establecido</string>
+    <string name="manage_addons">Administrar complementos</string>
+    <string name="get_pro">Actualizar a Pro</string>
+    <string name="about_about">Acerca de BlockLauncher</string>
+    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. No distribuir sin permiso.</string>
+    <string name="about_librarycredits">"Este programa utiliza la biblioteca aFileChooser por Paul Burke.
+  Este programa contiene código de PTPatchTool sitiado por Snowbound's el licenciado bajo la Licencia Pública Eclipse.
+  El paquete de textura de demostración, RepetiCraft, es hecho por Theevilpplz y se utiliza con permiso.
+  Este programa contiene código de Andhook 2of1 del framework, que se utiliza con permiso.
+  Este programa utiliza la biblioteca libsuperuser de Chainfire.
+  Para obtener información sobre la licencia completa, compruebe el hilo en los foros de minecraft. "</string>
+    <string name="about_pro_library_credits" />
+    <string name="about_thankscommunity">"Esta aplicación ha sido posible gracias al trabajo de muchos traductores con talento, probadores y programadores. Gracias.
+Ver el hilo de Minecraft Forum para obtener una lista de contribuyentes."</string>
+    <string name="about_go_to_forums">Abrir el hilo en los foros de Minecraft para BlockLauncher</string>
+    <string name="no_minecraft_installed">BlockLauncher no pudo encontrar una copia de Minecraft PE en su dispositivo. Esta aplicación está diseñada para parchear la versión completa de Minecraft Pocket Edition de Mojang.</string>
+	<string name="firstlaunch_title">Bienvenido a BlockLauncher!</string>
+    <string name="firstlaunch_generic_intro">Gracias por probar BlockLauncher. BlockLauncher inicia tu copia de Minecraft Pocket Edition y añade características adicionales a través de los parches, complementos, skins, y texturas.</string>
+    <string name="firstlaunch_jelly_bean">El dispositivo funciona con Android Jelly Bean o más reciente, por lo BlockLauncher no puede acceder a las texturas por defecto. El paquete de textura de demostración ha sido activado para que pueda probar el lanzador.</string>
+    <string name="firstlaunch_see_options">Para empezar con BlockLauncher, puntee en Opciones en el menú de título. Para más ayuda, visitar el hilo en Minecraft Forum.</string>
+    <string name="firstlaunch_help">Ayuda</string>
+    <string name="permlab_mcpelauncher_addon">BlockLauncher Complemento</string>
+    <string name="permdesc_mcpelauncher_addon">Permite que la aplicación se cargue como un complemento a BlockLauncher. Esto significa que esta aplicación puede acceder a la red, el almacenamiento, y hacer cualquier cosa Minecraft PE tiene el permiso para hacerlo.</string>
+</resources>
