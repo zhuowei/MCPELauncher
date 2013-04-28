@@ -72,7 +72,6 @@
     <string name="get_pro">升级到Pro</string>
     <string name="about_about">关于BlockLauncher</string>
     <string name="pref_zz_texture_pack_enable">使用材质包</string>
-    <string name="texture_pack_unable_to_load">无法载入材质包</string>
     <string name="pref_zz_texture_pack_demo">显示材质包支持</string>
     <string name="pref_zz_texture_pack_demo_summary">使用内置Theevilpplz的RepetiCraft材质包 </string>
     <string name="no_minecraft_installed">BlockLauncher无法在您的手机上检测到Minecraft PE。 此程序需要Mojang的Minecraft PE 完整版。</string>

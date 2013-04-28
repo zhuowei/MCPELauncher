@@ -261,9 +261,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		if (!prePatchConfigure) {
 			livePatch(patch);
 			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
-		} else {
-			setPatchListModified();
 		}
+		setPatchListModified();
 		patch.file.delete();
 	}
 

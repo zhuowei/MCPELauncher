@@ -84,8 +84,8 @@
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About BlockLauncher</string>
-    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
 The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n

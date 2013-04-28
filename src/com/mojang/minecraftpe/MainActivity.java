@@ -153,22 +153,7 @@ public class MainActivity extends NativeActivity
 
 		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
 
-		try {
-			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
-			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
-			if (loadTexturePack && filePath != null) {
-				File file = new File(filePath);
-				System.out.println("File!! " + file);
-				if (!file.exists()) {
-					texturePack = null;
-				} else {
-					texturePack = new ZipTexturePack(file);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
-		}
+		loadTexturePack();
 
 		textureOverrides.add(new SkinTextureOverride(this));
 
@@ -212,6 +197,7 @@ public class MainActivity extends NativeActivity
 				initPatching();
 				loadNativeAddons();
 				//applyPatches();
+				applyBuiltinPatches();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -246,6 +232,7 @@ public class MainActivity extends NativeActivity
 				hoverCar = null;
 			}
 		}
+
 	}
 
 	@Override
@@ -409,6 +396,10 @@ public class MainActivity extends NativeActivity
 		if (requestCode == 1234) {
 			inputStatus = INPUT_STATUS_OK;
 			System.out.println("Settings OK");
+			loadTexturePack();
+			if (!isSafeMode()) {
+				applyBuiltinPatches();
+			}
 		}
 	}
 
@@ -877,6 +868,41 @@ public class MainActivity extends NativeActivity
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	protected void applyBuiltinPatches() {
+		try {
+			//Apply guiBlocks
+			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
+			System.out.println("Patching guiblocks: " + patchGuiBlocks);
+			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+			patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
+			patch.applyPatch(minecraftLibBuffer);
+		} catch (IOException ie) {
+			ie.printStackTrace();
+		}
+
+	}
+
+	protected void loadTexturePack() {
+		try {
+			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
+			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
+			if (loadTexturePack && filePath != null) {
+				File file = new File(filePath);
+				System.out.println("File!! " + file);
+				if (!file.exists()) {
+					texturePack = null;
+				} else {
+					texturePack = new ZipTexturePack(file);
+				}
+			} else {
+				texturePack = null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
 		}
 	}
 

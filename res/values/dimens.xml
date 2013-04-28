@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="hovercar_width">48dip</dimen>
+    <dimen name="hovercar_height">48dip</dimen>
+
+</resources>

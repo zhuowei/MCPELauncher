@@ -8,17 +8,20 @@ import android.widget.*;
 
 public class HoverCar extends PopupWindow {
 
-	public Button mainButton;
+	public ImageButton mainButton;
 
 	public HoverCar(Activity activity) {
 		super(activity);
 		setContentView(activity.getLayoutInflater().inflate(R.layout.hovercar, null));
-		mainButton = (Button) getContentView().findViewById(R.id.hovercar_main_button);
+		mainButton = (ImageButton) getContentView().findViewById(R.id.hovercar_main_button);
 		setBackgroundDrawable(new ColorDrawable(0x77ffffff));
-		setWidth(100);
-		setHeight(50);
-		mainButton.setWidth(100);
-		mainButton.setHeight(50);
+		float myWidth = activity.getResources().getDimension(R.dimen.hovercar_width);
+		float myHeight = activity.getResources().getDimension(R.dimen.hovercar_height);
+		setWidth((int) myWidth);
+		setHeight((int) myHeight);
+		mainButton.setMaxWidth((int) myWidth);
+		mainButton.setMaxHeight((int) myHeight);
+		mainButton.setScaleType(ImageButton.ScaleType.CENTER_INSIDE);
 	}
 
 	public void show(View parentView) {

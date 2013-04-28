@@ -176,10 +176,7 @@ public class PTPatch {
 	public void applyPatch(byte[] barray) throws IOException{
 		
 		ByteBuffer buf = ByteBuffer.wrap(barray);
-		for(count = 0; count < mHeader.num_patches; count++){
-			buf.position(getNextAddr());
-			buf.put(getNextData());
-		}
+		applyPatch(buf);
 
 	}
 

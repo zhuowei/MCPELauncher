@@ -3,8 +3,8 @@
     android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
-    <Button android:id="@+id/hovercar_main_button"
+    <ImageButton android:id="@+id/hovercar_main_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hovercar!"/>
+        android:src="@drawable/ic_menu_settings_holo_light"/>
 </LinearLayout>
