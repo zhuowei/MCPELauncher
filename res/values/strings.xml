@@ -105,6 +105,8 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="firstlaunch_see_options">To get started with BlockLauncher, tap Options on the title menu. For more help, visit the Minecraft Forum thread.</string>
     <string name="firstlaunch_help">Help</string>
 
+    <string name="version_mismatch_message">This version of Minecraft PE is not supported by BlockLauncher. BlockLauncher will run in safe mode temporarily. Please check for updates to BlockLauncher as support may be added in a newer version.</string>
+
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
 

@@ -59,6 +59,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_RUNTIME_OPTIONS = 0x1001;
 	public static final int DIALOG_INVALID_PATCHES = 0x1002;
 	public static final int DIALOG_FIRST_LAUNCH = 0x1003;
+	public static final int DIALOG_VERSION_MISMATCH_SAFE_MODE = 0x1004;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -103,6 +104,8 @@ public class MainActivity extends NativeActivity
 
 	public boolean minecraftApkForwardLocked = false;
 
+	public boolean tempSafeMode = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -120,11 +123,17 @@ public class MainActivity extends NativeActivity
 		}
 
 		try {
-			mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+			PackageInfo mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+			mcAppInfo = mcPkgInfo.applicationInfo;/*getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);*/
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
 			minecraftApkForwardLocked = !mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
+			int minecraftVersionCode = mcPkgInfo.versionCode;
+			if (minecraftVersionCode != MinecraftConstants.MINECRAFT_VERSION_CODE) {
+				tempSafeMode = true;
+				showDialog(DIALOG_VERSION_MISMATCH_SAFE_MODE);
+			}
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 			finish();
@@ -202,6 +211,8 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		enableSoftMenuKey();
 
 		System.gc();
 
@@ -410,13 +421,15 @@ public class MainActivity extends NativeActivity
 			case DIALOG_COPY_WORLD:
 				return createCopyWorldDialog();
 			case DIALOG_CRASH_SAFE_MODE:
-				return createCrashSafeModeDialog();
+				return createSafeModeDialog(R.string.manage_patches_crash_safe_mode);
 			case DIALOG_RUNTIME_OPTIONS:
 				return createRuntimeOptionsDialog();
 			case DIALOG_INVALID_PATCHES:
 				return createInvalidPatchesDialog();
 			case DIALOG_FIRST_LAUNCH:
 				return createFirstLaunchDialog();
+			case DIALOG_VERSION_MISMATCH_SAFE_MODE:
+				return createSafeModeDialog(R.string.version_mismatch_message);
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -452,9 +465,9 @@ public class MainActivity extends NativeActivity
 			.create();
 	}
 
-	protected Dialog createCrashSafeModeDialog() {
+	protected Dialog createSafeModeDialog(int messageRes) {
 		return new AlertDialog.Builder(this)
-			.setMessage(R.string.manage_patches_crash_safe_mode)
+			.setMessage(messageRes)
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
 	}
@@ -744,7 +757,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public boolean isSafeMode() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode", false);
+		return tempSafeMode || PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode", false);
 	}
 
 	public void initPatching() throws Exception {
@@ -906,5 +919,9 @@ public class MainActivity extends NativeActivity
 		}
 	}
 
+	/** enables the on-screen menu key on devices without a dedicated menu key, needed because target SDK is v15 */
+	private void enableSoftMenuKey() {
+		getWindow().addFlags(0x08000000); //FLAG_NEEDS_MENU_KEY
+	}
 
 }
