@@ -75,6 +75,7 @@
     <string name="manage_patches_import_done">Patch imported</string>
     <string name="manage_patches_enable">Enable</string>
     <string name="manage_patches_disable">Disable</string>
+    <string name="manage_patches_disabled">(disabled)</string>
     <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that BlockLauncher recognizes:</string>
     <string name="manage_patches_info">Information</string>
     <string name="manage_patches_metadata">Author</string>

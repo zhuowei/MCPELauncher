@@ -70,6 +70,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		importButton = (Button) findViewById(R.id.manage_patches_import_button);
 		importButton.setOnClickListener(this);
 		prePatchConfigure = getIntent().getBooleanExtra("prePatchConfigure", true);
+		disabledString = " ".concat(getResources().getString(R.string.manage_patches_disabled));
 	}
 
 	@Override

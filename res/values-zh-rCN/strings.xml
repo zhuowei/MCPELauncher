@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BlockLauncher</string>
     <string name="pref_ctrl_touchscreen">使用触摸屏</string>
     <string name="pref_ctrl_touchscreen_summary">如果你用的不是Xperia Play，请勾上此处</string>
     <string name="pref_mp_username">多人游戏用户名</string>
@@ -42,8 +41,8 @@
     <string name="pref_zz_extract_original_textures_summary">用ROOT备份原APK然后把它设为材质包</string>
     <string name="extracting_textures">正在备份原APK</string>
     <string name="extract_textures_success">成功备份原APK并把它设为材质包.</string>
-    <string name="extract_textures_error">无法访问原始apk</string>
-    <string name="extract_textures_no_root">无法获取权限，你root了么？</string>
+    <string name="extract_textures_error">无法访问原始APK</string>
+    <string name="extract_textures_no_root">无法获取权限，你ROOT了么？</string>
     <string name="pref_zz_skin_enable">使用皮肤</string>
     <string name="pref_zz_skin">设定皮肤</string>
     <string name="pref_zz_skin_summary">选择*.png文件来改变皮肤(只有你自己看得见)</string>
@@ -56,7 +55,6 @@
     <string name="manage_patches_delete">删除</string>
     <string name="manage_patches_import_error">补丁输入失败</string>
     <string name="manage_patches_import">输入</string>
-    <string name="manage_patches_too_many">升级到Pro版解除3个MOD的限制</string>
     <string name="manage_patches_info">信息</string>
     <string name="manage_patches_metadata">作者</string>
     <string name="manage_patches_path">路径</string>
@@ -64,10 +62,12 @@
     <string name="manage_patches_enable">启用</string>
     <string name="manage_patches_too_many">升级到专业版解除3个补丁限制</string>
     <string name="manage_patches_disable">禁用</string>
+    <string name="manage_patches_disabled">(已禁用)</string>
     <string name="manage_patches_invalid_patches">无法加载这些补丁，因为BlockLauncher无法识别它们的格式：</string>
     <string name="manage_patches_import_confirm">你想要添加这个补丁么?</string>
     <string name="manage_patches_import_done">补丁已添加</string>
     <string name="skin_imported">已设定皮肤</string>
+    <string name="manage_addons">管理插件</string>
     <string name="world_create_title">新建世界</string>
     <string name="world_name_prompt">世界名: </string>
     <string name="world_seed_prompt">种子:</string>
@@ -84,9 +84,10 @@
     <string name="no_minecraft_installed">BlockLauncher无法在您的手机上检测到Minecraft PE。 此程序需要Mojang的Minecraft PE 完整版。</string>
     <string name="firstlaunch_help">帮助</string>
     <string name="permlab_mcpelauncher_addon">BlockLauncher的插件</string>
-    <string name="permdesc_mcpelauncher_addon">允许在BlockLauncher里载入插件.这意味着这个应用被允许访问网络,存储,以及任何Minecraft PE被允许可以做的.</strin>
+    <string name="permdesc_mcpelauncher_addon">允许在BlockLauncher里载入插件.这意味着这个应用被允许访问网络,存储,以及任何Minecraft PE被允许可以做的.</string>
     <string name="firstlaunch_title">欢迎使用BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">感谢你使用BlockLauncher!BlockLauncher可以给你的MinecraftPE添加额外的功能，通过它增加补丁，皮肤，和材质等.</string>
     <string name="firstlaunch_jelly_bean">您的设备是果冻豆（4.2）及以上，BlockLauncher无法访问默认的材质包，已启用演示材质您可以启动测试看看.</string>
     <string name="firstlaunch_see_options">开始blocklauncher请点击首页里的设置按钮。更多的帮助请访问Minecraft Forum。</string>
+    <string name="about_go_to_forums">访问BlockLauncher的Minecraft Forum贴子</string>
 </resources>
