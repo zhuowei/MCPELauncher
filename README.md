@@ -15,17 +15,29 @@ Download from the Forums thread.
 
 This program uses aFileChooser by Paul Burke. See https://github.com/zhuowei/aFileChooser for licensing information.
 
+This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License.
+
+The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.
+
+This program contains code from 2of1\'s Andhook framework; used with permission.
+
+This program uses the libsuperuser library by Chainfire.
+
 ## Building
+
+Building requires the Android SDK (it's built with the Gingerbread SDK currently; not sure if it works with other SDKs) as well as the Android NDK
+to build the embedded copy of PokerFace and Andhook.
 
 ```
 
 git clone git@github.com:zhuowei/aFileChooser.git
-git clone git@github.com:zhuowei/Pokerface.git
 git clone git@github.com:zhuowei/MCPELauncher.git
 git clone git@github.com:zhuowei/MCPELauncher-app.git
 git clone https://github.com/Chainfire/libsuperuser.git
 android update lib-project -p libsuperuser/libsuperuser -t 1
-
+cd MCPELauncher
+ndk-build
+cd ..
 cd MCPELauncher-app
 ant clean debug
 
