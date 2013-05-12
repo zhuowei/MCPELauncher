@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Block 런처</string>
     <string name="pref_ctrl_touchscreen">터치스크린 사용</string>
     <string name="pref_ctrl_touchscreen_summary">Xperia Play를 사용하지 않는 경우 체크하세요.</string>
     <string name="pref_mp_username">멀티플레이 별명</string>
