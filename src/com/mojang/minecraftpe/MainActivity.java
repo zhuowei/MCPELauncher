@@ -29,6 +29,7 @@ import android.os.Vibrator;
 import android.view.*;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.*;
 
 import android.preference.*;
@@ -41,6 +42,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 
 public class MainActivity extends NativeActivity
 {
+
+	public static final String TAG = "BlockLauncher/MainActivity";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -105,6 +108,8 @@ public class MainActivity extends NativeActivity
 	public boolean minecraftApkForwardLocked = false;
 
 	public boolean tempSafeMode = false;
+
+	public String session, refreshToken;
 
 	/** Called when the activity is first created. */
 
@@ -362,6 +367,11 @@ public class MainActivity extends NativeActivity
 
 	public native void nativeRegisterThis();
 	public native void nativeUnregisterThis();
+
+	//added in 0.7.0:
+	public native void nativeLoginData(String param1, String param2, String param3);
+	public native void nativeStopThis();
+	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
 
 	public void buyGame() {
 	}
@@ -754,6 +764,60 @@ public class MainActivity extends NativeActivity
 	}
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
+	}
+
+	//added in 0.7.0
+	public int abortWebRequest(int requestId) {
+		Log.i(TAG, "Abort web request: " + requestId);
+		return 0;
+	}
+
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		Log.i(TAG, "Dispatch key event: " + event);
+		return false;
+	}
+
+	public String getRefreshToken() {
+		Log.i(TAG, "Refresh token");
+		return refreshToken;
+	}
+
+	public String getSession() {
+		Log.i(TAG, "Session");
+		return session;
+	}
+
+	public String getWebRequestContent(int requestId) {
+		Log.i(TAG, "Get web request content: " + requestId);
+		return "ThisIsSparta";
+	}
+
+	public int getWebRequestStatus(int requestId) {
+		Log.i(TAG, "Get web request status: " + requestId);
+		return 0;
+	}
+
+	public void openLoginWindow() {
+		Log.i(TAG, "Open login window");
+	}
+
+	public void setRefreshToken(String token) {
+		Log.i(TAG, "set refresh token: " + token);
+		this.refreshToken = token;
+	}
+
+	public void setSession(String session) {
+		Log.i(TAG, "Session: " + session);
+		this.session = session;
+	}
+
+	public boolean supportsNonTouchscreen() {
+		Log.i(TAG, "Supports non touchscreen");
+		return true;
+	}
+
+	public void webRequest(int requestId, long param2, String param3, String param4, String param5) {
+		Log.i(TAG, "Web request: " + requestId + ": " + param2 + " :" + param3 + ":" + param4 + ":"+ param5);
 	}
 
 	public boolean isSafeMode() {
