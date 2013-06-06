@@ -109,7 +109,10 @@ public class MainActivity extends NativeActivity
 
 	public boolean tempSafeMode = false;
 
-	public String session, refreshToken;
+	public String session = "";
+	public String refreshToken = "";
+
+	private PackageInfo mcPkgInfo;
 
 	/** Called when the activity is first created. */
 
@@ -128,7 +131,7 @@ public class MainActivity extends NativeActivity
 		}
 
 		try {
-			PackageInfo mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+			mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
 			mcAppInfo = mcPkgInfo.applicationInfo;/*getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);*/
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
@@ -139,6 +142,15 @@ public class MainActivity extends NativeActivity
 				tempSafeMode = true;
 				showDialog(DIALOG_VERSION_MISMATCH_SAFE_MODE);
 			}
+			int prepatchedVersionCode = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("prepatch_version", -1);
+
+			if (prepatchedVersionCode != minecraftVersionCode) {
+				System.out.println("Version updated; forcing prepatch");
+				getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
+				disableAllPatches();
+			}
+
+				
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 			finish();
@@ -234,7 +246,7 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_enable_hovercar", false)) {
+		if (true || PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_enable_hovercar", false)) {
 			if (hoverCar == null) {
 				getWindow().getDecorView().post(new Runnable() {
 					public void run() {
@@ -331,7 +343,7 @@ public class MainActivity extends NativeActivity
 			if (requiresGuiBlocksPatch) {
 				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
+				//patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
 				patch.applyPatch(libBytes);
 			}
 
@@ -339,7 +351,8 @@ public class MainActivity extends NativeActivity
 			os.write(libBytes);
 			os.close();
 			hasPrePatched = true;
-			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", false).apply();
+			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", false).
+				putInt("prepatch_version", mcPkgInfo.versionCode).apply();
 			if (failedPatches.size() > 0) {
 				showDialog(DIALOG_INVALID_PATCHES);
 			}
@@ -369,7 +382,7 @@ public class MainActivity extends NativeActivity
 	public native void nativeUnregisterThis();
 
 	//added in 0.7.0:
-	public native void nativeLoginData(String param1, String param2, String param3);
+	public native void nativeLoginData(String session, String param2, String refreshToken);
 	public native void nativeStopThis();
 	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
 
@@ -483,10 +496,24 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected Dialog createRuntimeOptionsDialog() {
-		return new AlertDialog.Builder(this)
-			.setMessage("COMING SOON!!!!! Soon, seriously")
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+		CharSequence[] options = new CharSequence[] {"Live patch", "Normal patching (requires restart)", "Launcher options"};
+		return new AlertDialog.Builder(this).setTitle("HOVERCAR!!!!!1").
+			setItems(options, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					if (button == 0) {
+						Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
+						intent.putExtra("prePatchConfigure", false);
+						startActivity(intent);	
+					} else if (button == 1) {
+						Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
+						intent.putExtra("prePatchConfigure", true);
+						startActivity(intent);	
+					} else if (button == 2) {
+						Intent intent = new Intent(MainActivity.this, MainMenuOptionsActivity.class);
+						startActivity(intent);
+					}
+				}
+			}).create();
 	}
 
 	protected Dialog createInvalidPatchesDialog() {
@@ -799,6 +826,7 @@ public class MainActivity extends NativeActivity
 
 	public void openLoginWindow() {
 		Log.i(TAG, "Open login window");
+		nativeLoginData("Spartan", "Warrior", "Peacock");
 	}
 
 	public void setRefreshToken(String token) {
@@ -816,8 +844,9 @@ public class MainActivity extends NativeActivity
 		return true;
 	}
 
-	public void webRequest(int requestId, long param2, String param3, String param4, String param5) {
-		Log.i(TAG, "Web request: " + requestId + ": " + param2 + " :" + param3 + ":" + param4 + ":"+ param5);
+	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
+		Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
+		nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
 	}
 
 	public boolean isSafeMode() {
@@ -909,10 +938,7 @@ public class MainActivity extends NativeActivity
 		hoverCar.show(getWindow().getDecorView());
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				//showDialog(DIALOG_RUNTIME_OPTIONS);
-				Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
-				intent.putExtra("prePatchConfigure", false);
-				startActivity(intent);
+				showDialog(DIALOG_RUNTIME_OPTIONS);
 			}
 		});
 	}
@@ -954,7 +980,7 @@ public class MainActivity extends NativeActivity
 			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
+			//patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
 			patch.applyPatch(minecraftLibBuffer);
 		} catch (IOException ie) {
 			ie.printStackTrace();
@@ -987,5 +1013,11 @@ public class MainActivity extends NativeActivity
 	private void enableSoftMenuKey() {
 		getWindow().addFlags(0x08000000); //FLAG_NEEDS_MENU_KEY
 	}
+
+	private void disableAllPatches() {
+		Log.i(TAG, "Disabling all patches");
+		PatchManager.getPatchManager(this).disableAllPatches();
+	}
+		
 
 }

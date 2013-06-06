@@ -94,4 +94,9 @@ public class PatchManager {
 		}
 		return builder.toString();
 	}
+
+	public void disableAllPatches() {
+		enabledPatches.clear();
+		saveEnabledPatches();
+	}
 }
