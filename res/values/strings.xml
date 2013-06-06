@@ -52,6 +52,7 @@
     <string name="extract_textures_success">Successfully set original APK as texture pack.</string>
     <string name="extract_textures_error">Unable to access original APK.</string>
     <string name="extract_textures_no_root">Unable to gain superuser access - are you rooted?</string>
+    <string name="extract_textures_need_update">It seems you are using textures from an older version of Minecraft PE. Please run \"Extract original textures with root access\" in the options screen again to update textures.</string>
     <string name="pref_zz_skin_enable">Enable skin override</string>
     <string name="pref_zz_skin">Change skin</string>
     <string name="pref_zz_skin_summary">Select .png file to change skin to (will only be visible to you)</string>
@@ -107,6 +108,11 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="firstlaunch_help">Help</string>
 
     <string name="version_mismatch_message">This version of Minecraft PE is not supported by BlockLauncher. BlockLauncher will run in safe mode temporarily. Please check for updates to BlockLauncher as support may be added in a newer version.</string>
+
+    <string name="feature_not_supported">This feature is not supported in BlockLauncher yet.</string>
+    <string name="hovercar_title">In-game patch manager</string>
+    <string name="hovercar_live_patch">Patch mods in-game</string>
+    <string name="hovercar_options">Launcher options (restart required)</string>
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>

@@ -114,7 +114,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			return false; //Don't eat it
 		} else if (pref == texturePackDemoPreference || pref == texturePackEnablePreference) {
 			//getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
-			//needsRestart = true;
+			needsRestart = true;
 			return false;
 		} else if (pref == getProPreference) {
 			startGetPro();
@@ -212,7 +212,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//needsRestart = true;
+		needsRestart = true;
 		//Toast.makeText(this, "Texture pack set! Restarting Minecraft to load texture pack...", Toast.LENGTH_LONG).show();
 		//restartFirstActivity();
 	}

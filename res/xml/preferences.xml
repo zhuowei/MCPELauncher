@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory 
+    <!--<PreferenceCategory 
         android:title="@string/pref_mp_title">
 
     <EditTextPreference
@@ -15,12 +15,12 @@
         android:title="@string/pref_mp_server_visible_default"
         android:defaultValue="true"/>
 
-    </PreferenceCategory>
+    </PreferenceCategory>-->
 
     <PreferenceCategory 
         android:title="@string/pref_ctrl_title">
 
-    <com.lukehorvat.SeekBarDialogPreference android:key="ctrl_sensitivity"
+    <!--<com.lukehorvat.SeekBarDialogPreference android:key="ctrl_sensitivity"
         android:defaultValue="50"
         android:max="100"
         android:title="@string/pref_ctrl_sensitivity"
@@ -53,7 +53,7 @@
         android:key="feedback_vibration"
         android:title="@string/pref_feedback_vibration"
         android:summary="@string/pref_feedback_vibration_summary"
-        android:defaultValue="true"/>
+        android:defaultValue="true"/>-->
     <CheckBoxPreference
         android:key="zz_longvibration"
         android:title="@string/pref_zz_longvibration"
@@ -65,7 +65,7 @@
     <PreferenceCategory 
         android:title="@string/pref_gfx_title">
 
-    <CheckBoxPreference
+    <!--<CheckBoxPreference
         android:key="gfx_fancygraphics"
         android:title="@string/pref_gfx_fancygraphics"
         android:summary="@string/pref_gfx_fancygraphics_summary"
@@ -74,7 +74,7 @@
         android:key="gfx_lowquality"
         android:title="@string/pref_gfx_lowquality"
         android:summary="@string/pref_gfx_lowquality_summary"
-        android:defaultValue="false"/>
+        android:defaultValue="false"/>-->
 
     <EditTextPreference
         android:key="zz_custom_dpi"
@@ -85,11 +85,11 @@
 
     </PreferenceCategory>
 
-    <CheckBoxPreference
+    <!--<CheckBoxPreference
         android:key="game_difficultypeaceful"
         android:title="@string/pref_game_difficultypeaceful"
         android:summary="@string/pref_game_difficultypeaceful_summary"
-        android:defaultValue="false"/>
+        android:defaultValue="false"/>-->
 
     <PreferenceCategory 
         android:title="@string/pref_textures_title">

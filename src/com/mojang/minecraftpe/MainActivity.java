@@ -63,6 +63,8 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_INVALID_PATCHES = 0x1002;
 	public static final int DIALOG_FIRST_LAUNCH = 0x1003;
 	public static final int DIALOG_VERSION_MISMATCH_SAFE_MODE = 0x1004;
+	public static final int DIALOG_NOT_SUPPORTED = 0x1005;
+	public static final int DIALOG_UPDATE_TEXTURE_PACK = 0x1006;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -142,12 +144,16 @@ public class MainActivity extends NativeActivity
 				tempSafeMode = true;
 				showDialog(DIALOG_VERSION_MISMATCH_SAFE_MODE);
 			}
-			int prepatchedVersionCode = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("prepatch_version", -1);
+			SharedPreferences myprefs = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+			int prepatchedVersionCode = myprefs.getInt("prepatch_version", -1);
 
 			if (prepatchedVersionCode != minecraftVersionCode) {
 				System.out.println("Version updated; forcing prepatch");
-				getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).apply();
+				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
+				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
+					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
+				}
 			}
 
 				
@@ -453,6 +459,10 @@ public class MainActivity extends NativeActivity
 				return createFirstLaunchDialog();
 			case DIALOG_VERSION_MISMATCH_SAFE_MODE:
 				return createSafeModeDialog(R.string.version_mismatch_message);
+			case DIALOG_NOT_SUPPORTED:
+				return createNotSupportedDialog();
+			case DIALOG_UPDATE_TEXTURE_PACK:
+				return createUpdateTexturePackDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -496,8 +506,10 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected Dialog createRuntimeOptionsDialog() {
-		CharSequence[] options = new CharSequence[] {"Live patch", "Normal patching (requires restart)", "Launcher options"};
-		return new AlertDialog.Builder(this).setTitle("HOVERCAR!!!!!1").
+		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
+		CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
+		CharSequence[] options = new CharSequence[] {livePatch, optionMenu};
+		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					if (button == 0) {
@@ -505,10 +517,6 @@ public class MainActivity extends NativeActivity
 						intent.putExtra("prePatchConfigure", false);
 						startActivity(intent);	
 					} else if (button == 1) {
-						Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
-						intent.putExtra("prePatchConfigure", true);
-						startActivity(intent);	
-					} else if (button == 2) {
 						Intent intent = new Intent(MainActivity.this, MainMenuOptionsActivity.class);
 						startActivity(intent);
 					}
@@ -569,7 +577,21 @@ public class MainActivity extends NativeActivity
 				}
 			})
 			.create();
-	}				
+	}	
+
+	protected Dialog createNotSupportedDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(R.string.feature_not_supported)
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
+	protected Dialog createUpdateTexturePackDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(R.string.extract_textures_need_update)
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}			
 
 	/**
 	 * @param time Unix timestamp
@@ -799,11 +821,6 @@ public class MainActivity extends NativeActivity
 		return 0;
 	}
 
-	public boolean dispatchKeyEvent(KeyEvent event) {
-		Log.i(TAG, "Dispatch key event: " + event);
-		return false;
-	}
-
 	public String getRefreshToken() {
 		Log.i(TAG, "Refresh token");
 		return refreshToken;
@@ -826,7 +843,12 @@ public class MainActivity extends NativeActivity
 
 	public void openLoginWindow() {
 		Log.i(TAG, "Open login window");
-		nativeLoginData("Spartan", "Warrior", "Peacock");
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				showDialog(DIALOG_NOT_SUPPORTED);
+			}
+		});
+		//nativeLoginData("Spartan", "Warrior", "Peacock");
 	}
 
 	public void setRefreshToken(String token) {
