@@ -125,10 +125,10 @@
     <Preference android:key="zz_manage_patches"
         android:title="@string/manage_patches"/>
 
-    <CheckBoxPreference
+    <!--<CheckBoxPreference
         android:key="zz_enable_hovercar"
         android:title="@string/pref_zz_enable_hovercar"
-        android:defaultValue="false"/>
+        android:defaultValue="false"/>-->
 
     <CheckBoxPreference
         android:key="zz_load_native_addons"

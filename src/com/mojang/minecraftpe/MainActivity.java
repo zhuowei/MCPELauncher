@@ -256,7 +256,11 @@ public class MainActivity extends NativeActivity
 			if (hoverCar == null) {
 				getWindow().getDecorView().post(new Runnable() {
 					public void run() {
-						setupHoverCar();
+						try {
+							setupHoverCar();
+						} catch (Exception e) {
+							e.printStackTrace();
+						} //don't force close on hover car fail
 					}
 				});
 			}
