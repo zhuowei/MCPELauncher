@@ -353,7 +353,7 @@ public class MainActivity extends NativeActivity
 			if (requiresGuiBlocksPatch) {
 				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				//patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
+				patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
 				patch.applyPatch(libBytes);
 			}
 
@@ -900,7 +900,7 @@ public class MainActivity extends NativeActivity
 
 	public void applyPatches() throws Exception {
 		ByteBuffer buffer = minecraftLibBuffer;
-		buffer.position(0x1b6d50);//"v0.6.1" offset
+		/*buffer.position(0x1b6d50);//"v0.6.1" offset
 		byte[] testBuffer = new byte[6];
 		buffer.get(testBuffer);
 		System.out.println("Before: " + Arrays.toString(testBuffer));
@@ -908,7 +908,7 @@ public class MainActivity extends NativeActivity
 		buffer.put(">9000!".getBytes());
 		buffer.position(0x1b6d50);//"v0.6.1" offset
 		buffer.get(testBuffer);
-		System.out.println("After " + Arrays.toString(testBuffer));
+		System.out.println("After " + Arrays.toString(testBuffer));*/
 	}
 
 	public static long findMinecraftLibLocation() throws Exception {
@@ -1006,7 +1006,7 @@ public class MainActivity extends NativeActivity
 			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			//patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
+			patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
 			patch.applyPatch(minecraftLibBuffer);
 		} catch (IOException ie) {
 			ie.printStackTrace();
