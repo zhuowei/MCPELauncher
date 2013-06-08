@@ -833,13 +833,13 @@ public class MainActivity extends NativeActivity
 	}
 
 	public String getRefreshToken() {
-		Log.i(TAG, "Refresh token");
-		return refreshToken;
+		Log.i(TAG, "Get Refresh token");
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("refreshToken", "");
 	}
 
 	public String getSession() {
-		Log.i(TAG, "Session");
-		return session;
+		Log.i(TAG, "Get Session");
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("sessionId", "");
 	}
 
 	public String getWebRequestContent(int requestId) {
@@ -878,13 +878,13 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void setRefreshToken(String token) {
-		Log.i(TAG, "set refresh token: " + token);
-		this.refreshToken = token;
+		Log.i(TAG, "Set refresh token");
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("refreshToken", token).apply();
 	}
 
 	public void setSession(String session) {
-		Log.i(TAG, "Session: " + session);
-		this.session = session;
+		Log.i(TAG, "Set Session");
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("sessionId", session).apply();
 	}
 
 	public boolean supportsNonTouchscreen() {
@@ -1069,6 +1069,11 @@ public class MainActivity extends NativeActivity
 
 	protected void loginLaunchCallback(Uri launchUri) {
 		loginDialog.dismiss();
+		String session = launchUri.getQueryParameter("sessionId");
+		if (session == null) return;
+		String profileName = launchUri.getQueryParameter("profileName");
+		String refreshToken = launchUri.getQueryParameter("identity");
+		nativeLoginData(session, profileName, refreshToken);
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
@@ -1076,7 +1081,6 @@ public class MainActivity extends NativeActivity
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			Uri tempUri = Uri.parse(url);
 			Log.i(TAG, tempUri.toString());
-			Log.i(TAG, tempUri.getHost() + ":" + tempUri.getPath());
 			if (tempUri.getHost().equals("account.mojang.com")) {
 				if (tempUri.getPath().equals("/m/launch")) {
 					loginLaunchCallback(tempUri);
