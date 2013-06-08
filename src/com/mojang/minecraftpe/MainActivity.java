@@ -30,6 +30,7 @@ import android.view.*;
 import android.view.KeyCharacterMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.webkit.*;
 import android.widget.*;
 
 import android.preference.*;
@@ -56,6 +57,8 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_SETTINGS = 3;
 
 	public static final int DIALOG_COPY_WORLD = 4;
+
+	public static final String MOJANG_ACCOUNT_LOGIN_URL = "https://account.mojang.com/m/login?app=mcpe";
 
 	/* private dialogs start here */
 	public static final int DIALOG_CRASH_SAFE_MODE = 0x1000;
@@ -115,6 +118,10 @@ public class MainActivity extends NativeActivity
 	public String refreshToken = "";
 
 	private PackageInfo mcPkgInfo;
+
+	private WebView loginWebView;
+
+	private Dialog loginDialog;
 
 	/** Called when the activity is first created. */
 
@@ -849,7 +856,22 @@ public class MainActivity extends NativeActivity
 		Log.i(TAG, "Open login window");
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				showDialog(DIALOG_NOT_SUPPORTED);
+				loginWebView = new WebView(MainActivity.this);
+				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+				loginWebView.setWebViewClient(new LoginWebViewClient());
+				WebSettings settings = loginWebView.getSettings();
+				settings.setJavaScriptEnabled(true); //at least on Firefox, the webview tries to do some Ajax stuff
+				/*loginPopup = new PopupWindow(loginWebView, ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+				loginPopup.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);*/
+
+				loginDialog = new Dialog(MainActivity.this);
+				loginDialog.setCancelable(true);
+				loginDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+				loginDialog.setContentView(loginWebView);
+				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+				loginDialog.show();
+
+				loginWebView.loadUrl(MOJANG_ACCOUNT_LOGIN_URL);
 			}
 		});
 		//nativeLoginData("Spartan", "Warrior", "Peacock");
@@ -1043,6 +1065,30 @@ public class MainActivity extends NativeActivity
 	private void disableAllPatches() {
 		Log.i(TAG, "Disabling all patches");
 		PatchManager.getPatchManager(this).disableAllPatches();
+	}
+
+	protected void loginLaunchCallback(Uri launchUri) {
+		loginDialog.dismiss();
+	}
+
+	private class LoginWebViewClient extends WebViewClient {
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			Uri tempUri = Uri.parse(url);
+			Log.i(TAG, tempUri.toString());
+			Log.i(TAG, tempUri.getHost() + ":" + tempUri.getPath());
+			if (tempUri.getHost().equals("account.mojang.com")) {
+				if (tempUri.getPath().equals("/m/launch")) {
+					loginLaunchCallback(tempUri);
+				} else {
+					view.loadUrl(url);
+				}
+				return true;
+			} else {
+				return false;
+			}
+
+		}
 	}
 		
 
