@@ -270,6 +270,8 @@ public class MainActivity extends NativeActivity
 						} //don't force close on hover car fail
 					}
 				});
+			} else {
+				hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
 			}
 		} else {
 			if (hoverCar != null) {
@@ -299,6 +301,10 @@ public class MainActivity extends NativeActivity
 			lockFile.delete();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		if (hoverCar != null) {
+			hoverCar.dismiss();
+			hoverCar = null;
 		}
 	}
 
@@ -984,6 +990,7 @@ public class MainActivity extends NativeActivity
 	protected void setupHoverCar() {
 		hoverCar = new HoverCar(this);
 		hoverCar.show(getWindow().getDecorView());
+		hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				showDialog(DIALOG_RUNTIME_OPTIONS);
