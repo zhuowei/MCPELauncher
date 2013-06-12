@@ -50,6 +50,7 @@
     <string name="extract_textures_success">성공적으로 기존 APK 패키지를 텍스쳐팩으로 설정하였습니다.</string>
     <string name="extract_textures_error">기존 APK 패키지를 찾을 수 없습니다.</string>
     <string name="extract_textures_no_root">기존 APK 패키지를 찾을 수 없습니다. 루팅되어 있습니까?</string>
+    <string name="extract_textures_need_update">이전 버전의 Minecraft PE의 텍스쳐팩을 설정한 것으로 판단됩니다. 텍스쳐팩을 업데이트 한 후, \"루팅 권한으로 기존 텍스쳐팩 백업\" 기능을 실행해 주시기 바랍니다.</string>
     <string name="pref_zz_skin_enable">스킨 덮어쓰기</string>
     <string name="pref_zz_skin">스킨 변경</string>
     <string name="pref_zz_skin_summary">.PNG 파일을 선택하여 스킨을 변경합니다. (스킨은 오직 혼자만 보여집니다.)</string>
@@ -80,7 +81,8 @@
     <string name="manage_patches_metadata">개발자</string>
     <string name="manage_patches_no_metadata">개발자 정보 없음</string>
     <string name="manage_patches_path">경로</string>
-    <string name="skin_imported">스킨 설정</string>
+    <string name="skin_imported">스킨 설정됨</string>
+    <string name="manage_addons">애드온 관리</string>
     <string name="get_pro">Pro 버전으로 업그레이드</string>
     <string name="about_about">BlockLauncher 소개</string>
     <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang. \n한글 번역 by 꽁치사마 (Koongchi, koongchi123.blog.me)
@@ -105,6 +107,11 @@
     <string name="firstlaunch_help">도움말</string>
 
     <string name="version_mismatch_message">이 Minecraft PE의 버전은 Block 런처에서 지원하지 않습니다. Block 런처는 임시적으로 안전 모드를 작동할 것입니다. 새로운 버전을 지원하기 위해 Block 런처의 업데이트를 확인해 주시기 바랍니다.</string>
+
+    <string name="feature_not_supported">이 기능은 현재 Block 런처에서 지원하지 않습니다.</string>
+    <string name="hovercar_title">모드 패치 관리자</string>
+    <string name="hovercar_live_patch">게임 내에서 모드 패치</string>
+    <string name="hovercar_options">런처 설정 (MCPE 재시작 필요)</string>
 
     <string name="permlab_mcpelauncher_addon">Block 런처 애드온</string>
     <string name="permdesc_mcpelauncher_addon">Block 런처에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, SD카드 사용, 그리고 마인크래프트 PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
