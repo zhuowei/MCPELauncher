@@ -43,9 +43,11 @@
     <string name="extract_textures_success">成功备份原APK并把它设为材质包.</string>
     <string name="extract_textures_error">无法访问原始APK</string>
     <string name="extract_textures_no_root">无法获取权限，你ROOT了么？</string>
+    <string name="extract_textures_need_update">请再运行\"用ROOT提取原材质\"来提取新版本Minecraft的材质。</string>
     <string name="pref_zz_skin_enable">使用皮肤</string>
     <string name="pref_zz_skin">设定皮肤</string>
     <string name="pref_zz_skin_summary">选择*.png文件来改变皮肤(只有你自己看得见)</string>
+    <string name="pref_zz_hovercar_hide">隐藏补丁管理器按钮</string>
     <string name="nerdy_stuff_page">计算机迷的东西</string>
     <string name="dump_libminecraftpe">从内存导出libminecraftpe.so</string>
     <string name="nerdy_stuff_are_useless">这页上基本上所有的东西都没用。它们为了修复故障才留在这里。</string>
@@ -88,6 +90,11 @@
     <string name="firstlaunch_title">欢迎使用BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">感谢你使用BlockLauncher!BlockLauncher可以给你的MinecraftPE添加额外的功能，通过它增加补丁，皮肤，和材质等.</string>
     <string name="firstlaunch_jelly_bean">您的设备是果冻豆（4.2）及以上，BlockLauncher无法访问默认的材质包，已启用演示材质您可以启动测试看看.</string>
-    <string name="firstlaunch_see_options">开始blocklauncher请点击首页里的设置按钮。更多的帮助请访问Minecraft Forum。</string>
+    <string name="firstlaunch_see_options">开始BlockLauncher请点击首页里的设置按钮。更多的帮助请访问Minecraft Forum。</string>
     <string name="about_go_to_forums">访问BlockLauncher的Minecraft Forum贴子</string>
+
+    <string name="feature_not_supported">BlockLauncher现在还不支持此功能。</string>
+    <string name="hovercar_title">游戏内部补丁管理器</string>
+    <string name="hovercar_live_patch">游戏内打补丁</string>
+    <string name="hovercar_options">启动器设置(需要重启)</string>
 </resources>
