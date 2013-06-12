@@ -131,6 +131,11 @@
         android:defaultValue="false"/>-->
 
     <CheckBoxPreference
+        android:key="zz_hovercar_hide"
+        android:title="@string/pref_zz_hovercar_hide"
+        android:defaultValue="false"/>
+
+    <CheckBoxPreference
         android:key="zz_load_native_addons"
         android:title="@string/pref_zz_load_native_addons"
         android:defaultValue="false"/>

@@ -541,8 +541,7 @@ public class MainActivity extends NativeActivity
 						intent.putExtra("prePatchConfigure", false);
 						startActivity(intent);	
 					} else if (button == 1) {
-						Intent intent = new Intent(MainActivity.this, MainMenuOptionsActivity.class);
-						startActivity(intent);
+						startOptionsActivity();
 					}
 				}
 			}).create();
@@ -615,7 +614,21 @@ public class MainActivity extends NativeActivity
 			.setMessage(R.string.extract_textures_need_update)
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
-	}			
+	}
+
+	protected Dialog createBackupsNotSupportedDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage("Backed up versions of BlockLauncher are not supported, as" +
+				" BlockLauncher depends on updates from the application store. " +
+				" Please reinstall BlockLauncher. If you believe you received this message in error, contact zhuowei_applications@yahoo.com")
+			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					finish();
+				}
+			})
+			.setCancelable(false)
+			.create();
+	}		
 
 	/**
 	 * @param time Unix timestamp
@@ -908,7 +921,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
-		Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
+		if (BuildConfig.DEBUG) Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
 		//nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
 		new Thread(new HurlRunner(requestId, timestamp, url, method, cookies)).start();
 	}
@@ -1093,6 +1106,11 @@ public class MainActivity extends NativeActivity
 		nativeLoginData(session, profileName, refreshToken);
 	}
 
+	protected void startOptionsActivity() {
+		Intent intent = new Intent(this, MainMenuOptionsActivity.class);
+		startActivity(intent);
+	}
+
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
@@ -1111,7 +1129,7 @@ public class MainActivity extends NativeActivity
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			Uri tempUri = Uri.parse(url);
-			Log.i(TAG, tempUri.toString());
+			if (BuildConfig.DEBUG) Log.i(TAG, tempUri.toString());
 			if (tempUri.getHost().equals("account.mojang.com")) {
 				if (tempUri.getPath().equals("/m/launch")) {
 					loginLaunchCallback(tempUri);
