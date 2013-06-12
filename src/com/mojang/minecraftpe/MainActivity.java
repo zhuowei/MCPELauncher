@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 
 import java.text.DateFormat;
 
+import java.net.*;
+
 import java.util.*;
 
 import android.app.Activity;
@@ -122,6 +124,8 @@ public class MainActivity extends NativeActivity
 	private WebView loginWebView;
 
 	private Dialog loginDialog;
+
+	private Map<Integer, HurlRunner> requestMap = new HashMap<Integer, HurlRunner>();
 
 	/** Called when the activity is first created. */
 
@@ -243,6 +247,9 @@ public class MainActivity extends NativeActivity
 		}
 
 		enableSoftMenuKey();
+
+		java.net.CookieManager cookieManager = new java.net.CookieManager();
+		java.net.CookieHandler.setDefault(cookieManager);
 
 		System.gc();
 
@@ -835,6 +842,8 @@ public class MainActivity extends NativeActivity
 	//added in 0.7.0
 	public int abortWebRequest(int requestId) {
 		Log.i(TAG, "Abort web request: " + requestId);
+		HurlRunner runner = requestMap.get(requestId);
+		if (runner != null) runner.isValid = false;
 		return 0;
 	}
 
@@ -900,7 +909,8 @@ public class MainActivity extends NativeActivity
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
 		Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
-		nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
+		//nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
+		new Thread(new HurlRunner(requestId, timestamp, url, method, cookies)).start();
 	}
 
 	public boolean isSafeMode() {
@@ -1083,6 +1093,20 @@ public class MainActivity extends NativeActivity
 		nativeLoginData(session, profileName, refreshToken);
 	}
 
+	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
+		try {
+			byte[] buffer = new byte[1024];
+			int count;
+			while ((count = in.read(buffer)) != -1) {
+				bytes.write(buffer, 0, count);
+			}
+			return bytes.toString("UTF-8");
+		} finally {
+			bytes.close();
+		}
+	}
+
 	private class LoginWebViewClient extends WebViewClient {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -1101,6 +1125,75 @@ public class MainActivity extends NativeActivity
 
 		}
 	}
+
+	private class HurlRunner implements Runnable {
+		private URL url;
+		private String method, cookies, strurl;
+		private int requestId;
+		private long timestamp;
+		private boolean isValid = true;
+
+		private HttpURLConnection conn;
+
+		public HurlRunner(int requestId, long timestamp, String url, String method, String cookies) {
+			this.requestId = requestId;
+			this.timestamp = timestamp;
+			this.strurl = url;
+			this.method = method;
+			this.cookies = cookies;
+			synchronized(requestMap) {
+				requestMap.put(requestId, this);
+			}
+		}
+
+		public void run() {
+			InputStream is = null;
+			String content = null;
+			int response = 0;
+
+			try {
+				url = new URL(strurl);
+				conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod(method);
+				conn.setRequestProperty("Cookie", cookies);
+				conn.setRequestProperty("User-Agent", "MCPE/Curl");
+				conn.setDoInput(true);
+				conn.connect();
+				try {
+					response = conn.getResponseCode();
+					is = conn.getInputStream();
+				} catch (Exception e) {
+					is = conn.getErrorStream();
+				}
+
+				if (is != null) {
+					content = stringFromInputStream(is, conn.getContentLength() < 0? 1024: conn.getContentLength());
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (Exception e) {
+					}
+				}
+			}
+
+			if (content != null && BuildConfig.DEBUG) Log.i(TAG, response + ":" + content);
+			
+			if (isValid) {
+				nativeWebRequestCompleted(requestId, timestamp, response, content);
+			}
+			synchronized(requestMap) {
+				requestMap.remove(this);
+			}
+		}
+		
+	}
+
+
 		
 
 }

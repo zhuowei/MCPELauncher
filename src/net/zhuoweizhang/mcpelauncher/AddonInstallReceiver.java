@@ -45,7 +45,7 @@ public class AddonInstallReceiver extends BroadcastReceiver {
 			return;
 		}
 		System.out.println("Scheduling MCPELauncher restart");
-		if (MainActivity.currentMainActivity != null) {
+		if (MainActivity.currentMainActivity != null && MainActivity.currentMainActivity.get() != null) {
 			try {
 				MainActivity.currentMainActivity.get().finish();
 			} catch (Exception e) {
