@@ -3,16 +3,18 @@ package net.zhuoweizhang.mcpelauncher.patch;
 import java.io.*;
 import java.nio.*;
 
-import static net.zhuoweizhang.mcpelauncher.MinecraftConstants.*;
+import net.zhuoweizhang.mcpelauncher.MinecraftVersion;
 
 public final class PatchUtils {
+
+	public static MinecraftVersion minecraftVersion = null;
 
 	public static void patch(ByteBuffer buffer, Patch patch) {
 		for (PatchSegment segment: patch.getSegments()) {
 			int newOffset = segment.offset;
 			System.out.println("offset: " + Integer.toString(newOffset, 16));
-			if (newOffset >= LIB_LOAD_OFFSET_BEGIN) {
-				newOffset += LIB_LOAD_OFFSET;
+			if (newOffset >= minecraftVersion.libLoadOffsetBegin) {
+				newOffset += minecraftVersion.libLoadOffset;
 				System.out.println("relocated offset: " + Integer.toString(newOffset, 16));
 			}
 			buffer.position(newOffset);
@@ -50,7 +52,7 @@ public final class PatchUtils {
 		patch.loadPatch(file);
 		for(int count = 0; count < patch.getNumPatches(); count++){
 			int address = patch.getNextAddr();
-			if (address >= LIB_LOAD_OFFSET_BEGIN) {
+			if (address >= minecraftVersion.libLoadOffsetBegin) {
 				return false;
 			}
 		}

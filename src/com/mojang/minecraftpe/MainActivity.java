@@ -127,6 +127,8 @@ public class MainActivity extends NativeActivity
 
 	private Map<Integer, HurlRunner> requestMap = new HashMap<Integer, HurlRunner>();
 
+	protected MinecraftVersion minecraftVersion;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -151,10 +153,16 @@ public class MainActivity extends NativeActivity
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
 			minecraftApkForwardLocked = !mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
 			int minecraftVersionCode = mcPkgInfo.versionCode;
-			if (minecraftVersionCode != MinecraftConstants.MINECRAFT_VERSION_CODE) {
+			minecraftVersion = MinecraftVersion.getRaw(minecraftVersionCode);
+			if (minecraftVersion == null) {
 				tempSafeMode = true;
 				showDialog(DIALOG_VERSION_MISMATCH_SAFE_MODE);
+				minecraftVersion = MinecraftVersion.getDefault();
 			}
+			if (minecraftVersion.needsWarning) {
+				Log.w(TAG, "OMG hipster version code found - breaking mod compat before it's cool");
+			}
+			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 			SharedPreferences myprefs = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 			int prepatchedVersionCode = myprefs.getInt("prepatch_version", -1);
 
@@ -378,7 +386,7 @@ public class MainActivity extends NativeActivity
 			if (requiresGuiBlocksPatch) {
 				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				patch.loadPatch(MinecraftConstants.GUI_BLOCKS_PATCH);
+				patch.loadPatch(minecraftVersion.guiBlocksPatch);
 				patch.applyPatch(libBytes);
 			}
 
@@ -1063,7 +1071,7 @@ public class MainActivity extends NativeActivity
 			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			patch.loadPatch(patchGuiBlocks? MinecraftConstants.GUI_BLOCKS_PATCH : MinecraftConstants.GUI_BLOCKS_UNPATCH);
+			patch.loadPatch(patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch);
 			patch.applyPatch(minecraftLibBuffer);
 		} catch (IOException ie) {
 			ie.printStackTrace();
