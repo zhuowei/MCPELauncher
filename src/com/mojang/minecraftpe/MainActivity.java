@@ -353,14 +353,19 @@ public class MainActivity extends NativeActivity
 				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
 				File patchFile = new File(patchLoc);
 				if (!patchFile.exists()) continue;
-				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				patch.loadPatch(patchFile);
-				if (!patch.checkMagic()) {
+				try {
+					com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
+					patch.loadPatch(patchFile);
+					if (!patch.checkMagic()) {
+						failedPatches.add(patchFile.getName());
+						continue;
+					}
+					patch.applyPatch(libBytes);
+					patchedCount++;
+				} catch (Exception e) {
+					e.printStackTrace();
 					failedPatches.add(patchFile.getName());
-					continue;
 				}
-				patch.applyPatch(libBytes);
-				patchedCount++;
 			}
 
 			/*patchedCount = prePatchDir(libBytes, patchesDir, patchMgr, patchedCount, maxPatchNum);

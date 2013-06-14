@@ -207,6 +207,12 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	}
 
 	private void afterPatchToggle(PatchListItem patch) {
+		if (!isValidPatch(patch)) {
+			PatchManager.getPatchManager(this).setEnabled(patch.file, false);
+			new AlertDialog.Builder(this).setMessage(getResources().getString(R.string.manage_patches_invalid_patches) +
+				" " + patch.displayName).setPositiveButton(android.R.string.ok, null).show();
+			return;
+		}
 		if (prePatchConfigure) {
 			setPatchListModified(); //should really be called requestPrePatch
 		} else if (canLivePatch(patch)) {
@@ -248,7 +254,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	public boolean canLivePatch(PatchListItem patch) {
 		try {
 			return PatchUtils.canLivePatch(patch.file);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -297,7 +303,6 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		return builder.toString();
 	}
 
-
 	/**
 	 * @param enableStatus -1 = can't disable, 0 = currently disabled, 1 = currently enabled 
 	 */
@@ -341,6 +346,13 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			.setMessage("Whoops - try again, this is a tiny fail")
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
+	}
+
+	private boolean isValidPatch(PatchListItem patch) {
+		if (patch.file.length() < 6) {
+			return false;
+		}
+		return true;
 	}
 
 	private final class FindPatchesThread implements Runnable {
