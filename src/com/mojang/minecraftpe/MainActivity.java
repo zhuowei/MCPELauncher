@@ -445,8 +445,8 @@ public class MainActivity extends NativeActivity
 				break;
 			case DIALOG_SETTINGS:
 				System.out.println("Settings");
-				Intent intent = new Intent(this, MainMenuOptionsActivity.class);
 				inputStatus = INPUT_STATUS_IN_PROGRESS;
+				Intent intent = getOptionsActivityIntent();
 				startActivityForResult(intent, 1234);
 				break;
 			case DIALOG_COPY_WORLD:
@@ -546,7 +546,7 @@ public class MainActivity extends NativeActivity
 						intent.putExtra("prePatchConfigure", false);
 						startActivity(intent);	
 					} else if (button == 1) {
-						startOptionsActivity();
+						startActivity(getOptionsActivityIntent());
 					}
 				}
 			}).create();
@@ -1111,9 +1111,8 @@ public class MainActivity extends NativeActivity
 		nativeLoginData(session, profileName, refreshToken);
 	}
 
-	protected void startOptionsActivity() {
-		Intent intent = new Intent(this, MainMenuOptionsActivity.class);
-		startActivity(intent);
+	protected Intent getOptionsActivityIntent() {
+		return new Intent(this, MainMenuOptionsActivity.class);
 	}
 
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
