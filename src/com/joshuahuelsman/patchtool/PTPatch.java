@@ -23,7 +23,7 @@ public class PTPatch {
 	public final static byte[] magic = { (byte) 0xff, 0x50, 0x54, 0x50 };
 	public final static byte[] op_codes = { (byte) 0xaa, (byte) 0xdd, (byte) 0xee };
 	private byte[] patch_array;
-	private int count;
+	public int count;
 	public String name;
 	Header mHeader;
 	public PTPatch(){

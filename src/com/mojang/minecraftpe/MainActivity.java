@@ -39,6 +39,8 @@ import android.preference.*;
 
 import net.zhuoweizhang.mcpelauncher.*;
 
+import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
+
 import net.zhuoweizhang.pokerface.PokerFace;
 
 
@@ -346,6 +348,7 @@ public class MainActivity extends NativeActivity
 			System.out.println("Forcing new prepatch");
 
 			byte[] libBytes = new byte[(int) originalLibminecraft.length()];
+			ByteBuffer libBuffer = ByteBuffer.wrap(libBytes);
 
 			InputStream is = new FileInputStream(originalLibminecraft);
 			is.read(libBytes);
@@ -368,7 +371,8 @@ public class MainActivity extends NativeActivity
 						failedPatches.add(patchFile.getName());
 						continue;
 					}
-					patch.applyPatch(libBytes);
+					//patch.applyPatch(libBytes);
+					PatchUtils.patch(libBuffer, patch);
 					patchedCount++;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -387,7 +391,8 @@ public class MainActivity extends NativeActivity
 				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 				patch.loadPatch(minecraftVersion.guiBlocksPatch);
-				patch.applyPatch(libBytes);
+				//patch.applyPatch(libBytes);
+				PatchUtils.patch(libBuffer, patch);
 			}
 
 			OutputStream os = new FileOutputStream(newMinecraft);
@@ -406,7 +411,7 @@ public class MainActivity extends NativeActivity
 		MC_NATIVE_LIBRARY_LOCATION = newMinecraft.getCanonicalPath();
 	}
 
-	private int prePatchDir(byte[] libBytes, File patchesDir, PatchManager patchMgr, int patchedCount, int maxPatchNum) throws Exception {
+	/*private int prePatchDir(byte[] libBytes, File patchesDir, PatchManager patchMgr, int patchedCount, int maxPatchNum) throws Exception {
 		if (!patchesDir.exists()) return patchedCount;
 		File[] patches = patchesDir.listFiles();
 
@@ -419,7 +424,7 @@ public class MainActivity extends NativeActivity
 			patchedCount++;
 		}
 		return patchedCount;
-	}
+	}*/
 
 	public native void nativeRegisterThis();
 	public native void nativeUnregisterThis();
@@ -1072,8 +1077,9 @@ public class MainActivity extends NativeActivity
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 			patch.loadPatch(patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch);
-			patch.applyPatch(minecraftLibBuffer);
-		} catch (IOException ie) {
+			//patch.applyPatch(minecraftLibBuffer);
+			PatchUtils.patch(minecraftLibBuffer, patch);
+		} catch (Exception ie) {
 			ie.printStackTrace();
 		}
 

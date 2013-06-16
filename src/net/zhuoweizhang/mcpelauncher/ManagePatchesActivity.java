@@ -238,7 +238,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		patch.loadPatch(patchItem.file);
 		boolean enabled = patchItem.enabled;
 		if (enabled) {
-			patch.applyPatch(MainActivity.minecraftLibBuffer);
+			//patch.applyPatch(MainActivity.minecraftLibBuffer);
+			PatchUtils.patch(MainActivity.minecraftLibBuffer, patch);
 		} else {
 			if (libBytes == null) {
 				libBytes = new byte[(int) originalLibminecraft.length()];
@@ -248,7 +249,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 				is.close();
 			}
 
-			patch.removePatch(MainActivity.minecraftLibBuffer, libBytes);
+			PatchUtils.unpatch(MainActivity.minecraftLibBuffer, libBytes, patch);
 		}
 	}
 

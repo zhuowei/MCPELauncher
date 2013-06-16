@@ -20,5 +20,7 @@ public final class MinecraftConstants {
 
 	public static final int MINECRAFT_VERSION_CODE = 30007010; //Minecraft's version code
 
+	public static final int MINECRAFT_AMAZON_VERSION_CODE = 40007010; //Version code of the derped version on Amazon
+
 
 }

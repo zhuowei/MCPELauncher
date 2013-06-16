@@ -9,30 +9,27 @@ public final class PatchUtils {
 
 	public static MinecraftVersion minecraftVersion = null;
 
-	public static void patch(ByteBuffer buffer, Patch patch) {
-		for (PatchSegment segment: patch.getSegments()) {
-			int newOffset = segment.offset;
-			System.out.println("offset: " + Integer.toString(newOffset, 16));
-			if (newOffset >= minecraftVersion.libLoadOffsetBegin) {
-				newOffset += minecraftVersion.libLoadOffset;
-				System.out.println("relocated offset: " + Integer.toString(newOffset, 16));
-			}
-			buffer.position(newOffset);
-			buffer.put(segment.data);
+	public static void patch(ByteBuffer buf, com.joshuahuelsman.patchtool.PTPatch patch) {
+		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
+		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
+			int addr = patch.getNextAddr();
+			if (translator != null) addr = translator.get(addr);
+			buf.position(addr);
+			buf.put(patch.getNextData());
 		}
 	}
 
-	public static void patchAll(ByteBuffer buffer, File folder, int maxCount) throws IOException {
-		int curCount = 0;
-		for (File f: folder.listFiles()) {
-			if (maxCount >= 0 && curCount >= maxCount) return;
-			String fileName = f.getName().toLowerCase();
-			if (!fileName.substring(fileName.length() - 4).equals(".mod")) 
-				continue;
-			Patch p = new PTPatch(f);
-			patch(buffer, p);
-			curCount++;
-			System.out.println("Successfully patched " + fileName);
+	public static void unpatch(ByteBuffer buf, byte[] original, com.joshuahuelsman.patchtool.PTPatch patch) {
+		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
+		ByteBuffer originalBuf = ByteBuffer.wrap(original);
+		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
+			int addr = patch.getNextAddr();
+			if (translator != null) addr = translator.get(addr);
+			buf.position(addr);
+			originalBuf.position(addr);
+			byte[] nextData = new byte[patch.getDataLength()];
+			originalBuf.get(nextData);
+			buf.put(nextData);
 		}
 	}
 
@@ -48,10 +45,12 @@ public final class PatchUtils {
 	}
 
 	public static boolean canLivePatch(File file) throws IOException {
+		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
 		com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 		patch.loadPatch(file);
-		for(int count = 0; count < patch.getNumPatches(); count++){
+		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
 			int address = patch.getNextAddr();
+			if (translator != null) address = translator.get(address);
 			if (address >= minecraftVersion.libLoadOffsetBegin) {
 				return false;
 			}

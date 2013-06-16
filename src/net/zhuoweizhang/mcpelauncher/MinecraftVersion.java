@@ -12,10 +12,13 @@ public final class MinecraftVersion {
 	public int versionCode, libLoadOffsetBegin, libLoadOffset, ipAddressOffset;
 	public byte[] guiBlocksPatch, guiBlocksUnpatch, noAnimationPatch, noAnimationUnpatch;
 	public boolean needsWarning;
+	public PatchTranslator translator;
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
-	public MinecraftVersion(int versionCode, boolean needsWarning, int libLoadOffsetBegin, int libLoadOffset, 
+	public final static boolean FUZZY_VERSION = false;
+
+	public MinecraftVersion(int versionCode, boolean needsWarning, int libLoadOffsetBegin, int libLoadOffset, PatchTranslator translator,
 		int ipAddressOffset, byte[] guiBlocksPatch, byte[] guiBlocksUnpatch, byte[] noAnimationPatch, byte[] noAnimationUnpatch) {
 		this.versionCode = versionCode;
 		this.needsWarning = needsWarning;
@@ -26,6 +29,7 @@ public final class MinecraftVersion {
 		this.guiBlocksUnpatch = guiBlocksUnpatch;
 		this.noAnimationPatch = noAnimationPatch;
 		this.noAnimationUnpatch = noAnimationUnpatch;
+		this.translator = translator;
 	}
 
 	public static void add(MinecraftVersion version) {
@@ -59,7 +63,23 @@ public final class MinecraftVersion {
 	}
 
 	static {
-		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET,
+		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			0x1E7E3A, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
+		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
+			0x1E7E52, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
+	}
+
+	public static abstract class PatchTranslator {
+		public abstract int get(int addr);
+	}
+
+	public static class AmazonTranslator extends PatchTranslator {
+		public int get(int addr) {
+			if (addr < 0xdae60) {
+				return addr + (0xdadb4 - 0xdad74); // there's one more, but I really don't give a care
+			} else {
+				return addr + (0x174de0 - 0x174dc8);
+			}
+		}
 	}
 }
