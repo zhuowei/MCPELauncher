@@ -12,6 +12,10 @@ import java.net.*;
 
 import java.util.*;
 
+import javax.net.ssl.*;
+import java.security.*;
+import java.security.cert.*;
+
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
@@ -25,6 +29,7 @@ import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -917,7 +922,7 @@ public class MainActivity extends NativeActivity
 				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
 				loginDialog.show();
 
-				loginWebView.loadUrl(MOJANG_ACCOUNT_LOGIN_URL);
+				loginWebView.loadUrl(getRealmsRedirectInfo().loginUrl);
 			}
 		});
 		//nativeLoginData("Spartan", "Warrior", "Peacock");
@@ -941,7 +946,19 @@ public class MainActivity extends NativeActivity
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
 		if (BuildConfig.DEBUG) Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
 		//nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
+		url = filterUrl(url);
+		if (BuildConfig.DEBUG) Log.i(TAG, url);
 		new Thread(new HurlRunner(requestId, timestamp, url, method, cookies)).start();
+	}
+
+	protected String filterUrl(String url) {
+		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		if (peoapiRedirect.equals("NONE")) return url;
+		RealmsRedirectInfo info = getRealmsRedirectInfo();
+		if (info.accountUrl != null) {
+			url.replace("account.mojang.com", info.accountUrl); //TODO: better system
+		}
+		return url.replace("peoapi.minecraft.net", peoapiRedirect);
 	}
 
 	public boolean isSafeMode() {
@@ -1129,6 +1146,16 @@ public class MainActivity extends NativeActivity
 		return new Intent(this, MainMenuOptionsActivity.class);
 	}
 
+	public boolean isRedirectingRealms() {
+		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		return !peoapiRedirect.equals("NONE");
+	}
+
+	public RealmsRedirectInfo getRealmsRedirectInfo() {
+		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		return RealmsRedirectInfo.targets.get(peoapiRedirect);
+	}
+
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
@@ -1148,7 +1175,9 @@ public class MainActivity extends NativeActivity
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			Uri tempUri = Uri.parse(url);
 			if (BuildConfig.DEBUG) Log.i(TAG, tempUri.toString());
-			if (tempUri.getHost().equals("account.mojang.com")) {
+			String endHost = getRealmsRedirectInfo().accountUrl;
+			if (endHost == null) endHost = "account.mojang.com";
+			if (tempUri.getHost().equals(endHost)) {
 				if (tempUri.getPath().equals("/m/launch")) {
 					loginLaunchCallback(tempUri);
 				} else {
@@ -1159,6 +1188,14 @@ public class MainActivity extends NativeActivity
 				return false;
 			}
 
+		}
+		@Override
+		public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+			if (isRedirectingRealms()) {
+				handler.proceed();
+				return;
+			}
+			super.onReceivedSslError(view, handler, error);
 		}
 	}
 
@@ -1194,6 +1231,9 @@ public class MainActivity extends NativeActivity
 				conn.setRequestProperty("Cookie", cookies);
 				conn.setRequestProperty("User-Agent", "MCPE/Curl");
 				conn.setDoInput(true);
+				if (conn instanceof HttpsURLConnection && isRedirectingRealms()) {
+					TrustModifier.relaxHostChecking(conn);
+				}
 				conn.connect();
 				try {
 					response = conn.getResponseCode();
@@ -1217,7 +1257,7 @@ public class MainActivity extends NativeActivity
 				}
 			}
 
-			if (content != null && BuildConfig.DEBUG) Log.i(TAG, response + ":" + content);
+			if (content != null && BuildConfig.DEBUG) Log.i(TAG, url + ":" + response + ":" + content);
 			
 			if (isValid) {
 				nativeWebRequestCompleted(requestId, timestamp, response, content);

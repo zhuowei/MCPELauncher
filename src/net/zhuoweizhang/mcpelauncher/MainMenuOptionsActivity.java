@@ -56,6 +56,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference skinPreference;
 	private Preference manageAddonsPreference;
 	private Preference goToForumsPreference;
+	private Preference mcoRedirectAddressPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -91,6 +92,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		if (skinPreference != null) skinPreference.setOnPreferenceClickListener(this);
 		manageAddonsPreference = findPreference("zz_manage_addons");
 		if (manageAddonsPreference != null) manageAddonsPreference.setOnPreferenceClickListener(this);
+		mcoRedirectAddressPreference = findPreference("zz_redirect_mco_address");
+		if (mcoRedirectAddressPreference != null) mcoRedirectAddressPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -136,6 +139,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == goToForumsPreference) {
 			goToForums();
 			return true;
+		} else if (pref == mcoRedirectAddressPreference) {
+			needsRestart = true;
+			return false;
 		}
 		return false;
 	}

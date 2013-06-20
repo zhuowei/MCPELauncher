@@ -5,4 +5,14 @@
         <item>@string/gamemode_creative</item>
         <item>@string/gamemode_survival</item>
     </string-array>
+    <string-array name="mco_redirect_target_names">
+        <item>@string/mco_redirect_none</item>
+        <item>@string/mco_redirect_pocketmine</item>
+        <!--<item>@string/mco_redirect_minepocket</item>-->
+    </string-array>
+    <string-array name="mco_redirect_target_addresses">
+        <item>NONE</item>
+        <item>peoapi.pocketmine.net</item>
+        <!--<item>peoapi.minepocket.com</item>-->
+    </string-array>
 </resources>
