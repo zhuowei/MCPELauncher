@@ -35,6 +35,7 @@ import android.os.Environment;
 import android.os.Vibrator;
 import android.view.*;
 import android.view.KeyCharacterMap;
+import android.view.inputmethod.*;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.webkit.*;
@@ -146,7 +147,6 @@ public class MainActivity extends NativeActivity
 		if (lockFile.exists()) {
 			try {
 				PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", true).apply();
-				showDialog(DIALOG_CRASH_SAFE_MODE);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -265,6 +265,10 @@ public class MainActivity extends NativeActivity
 
 		java.net.CookieManager cookieManager = new java.net.CookieManager();
 		java.net.CookieHandler.setDefault(cookieManager);
+
+		if (isSafeMode()) {
+			showDialog(DIALOG_CRASH_SAFE_MODE);
+		}
 
 		System.gc();
 
@@ -439,6 +443,9 @@ public class MainActivity extends NativeActivity
 	public native void nativeStopThis();
 	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
 
+	//added in 0.7.2
+	public native void nativeTypeCharacter(String character);
+
 	public void buyGame() {
 	}
 
@@ -548,7 +555,12 @@ public class MainActivity extends NativeActivity
 	protected Dialog createSafeModeDialog(int messageRes) {
 		return new AlertDialog.Builder(this)
 			.setMessage(messageRes)
-			.setPositiveButton(android.R.string.ok, null)
+			.setPositiveButton(R.string.safe_mode_exit, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					turnOffSafeMode();
+				}
+			})
+			.setNegativeButton(R.string.safe_mode_continue, null)
 			.create();
 	}
 
@@ -868,6 +880,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "getKey: " + keyCode + ":" + metaState + ":" + deviceId);
 		KeyCharacterMap characterMap = KeyCharacterMap.load(deviceId);
 		return characterMap.get(keyCode, metaState);
 	}
@@ -959,6 +972,24 @@ public class MainActivity extends NativeActivity
 			url.replace("account.mojang.com", info.accountUrl); //TODO: better system
 		}
 		return url.replace("peoapi.minecraft.net", peoapiRedirect);
+	}
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (event.getAction() == KeyEvent.ACTION_MULTIPLE && event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
+			nativeTypeCharacter(event.getCharacters());
+			return true;
+		}
+		return super.dispatchKeyEvent(event);
+	}
+
+	//added in 0.7.2
+
+	public void showKeyboardView() {
+		Log.i(TAG, "Show keyboard view");
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_IMPLICIT);
+
 	}
 
 	public boolean isSafeMode() {
@@ -1154,6 +1185,13 @@ public class MainActivity extends NativeActivity
 	public RealmsRedirectInfo getRealmsRedirectInfo() {
 		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
 		return RealmsRedirectInfo.targets.get(peoapiRedirect);
+	}
+
+	private void turnOffSafeMode() {
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", false).commit();
+		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).commit();
+		finish();
+		NerdyStuffActivity.forceRestart(this);
 	}
 
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {

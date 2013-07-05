@@ -32,7 +32,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		if (v == dumpLibMinecraftPeButton) {
 			dumpLib();
 		} else if (v == restartAppButton) {
-			forceRestart();
+			forceRestart(this);
 		} else if (v == setSkinButton) {
 			setSkin();
 		}
@@ -55,13 +55,13 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	 * Android automatically re-launches the activity behind this one when the vm exits, so to go back to the main activity, 
 	 * use the AlarmService to launch the home screen intent 1 second later. 
 	 */
-	public void forceRestart() {
+	public static void forceRestart(Activity activity) {
 
-		AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-		long timeMillis = SystemClock.elapsedRealtime() + 1000; //5 seconds
-		Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+		AlarmManager alarmMgr = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+		long timeMillis = SystemClock.elapsedRealtime() + 1000; //.5 seconds
+		Intent intent = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis, PendingIntent.getActivity(this, 0, intent, 0));
+		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis, PendingIntent.getActivity(activity, 0, intent, 0));
 		new Thread(new Runnable() {
 			public void run() {
 				try {

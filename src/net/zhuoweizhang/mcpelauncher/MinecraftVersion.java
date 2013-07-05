@@ -16,7 +16,7 @@ public final class MinecraftVersion {
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
-	public final static boolean FUZZY_VERSION = false;
+	public final static boolean FUZZY_VERSION = true;
 
 	public MinecraftVersion(int versionCode, boolean needsWarning, int libLoadOffsetBegin, int libLoadOffset, PatchTranslator translator,
 		int ipAddressOffset, byte[] guiBlocksPatch, byte[] guiBlocksUnpatch, byte[] noAnimationPatch, byte[] noAnimationUnpatch) {
@@ -37,7 +37,11 @@ public final class MinecraftVersion {
 	}
 
 	public static MinecraftVersion getRaw(int versionCode) {
-		return versions.get(versionCode);
+		MinecraftVersion ver = versions.get(versionCode);
+		if (ver == null && FUZZY_VERSION) {
+			ver = getDefault();
+		}
+		return ver;
 	}
 
 	public static MinecraftVersion get(int versionCode) {
@@ -64,9 +68,9 @@ public final class MinecraftVersion {
 
 	static {
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x1E7E3A, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
-		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
-			0x1E7E52, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
+			0x1F8624, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
+		/*add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
+			0x1E7E52, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));*/
 	}
 
 	public static abstract class PatchTranslator {
