@@ -78,6 +78,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_VERSION_MISMATCH_SAFE_MODE = 0x1004;
 	public static final int DIALOG_NOT_SUPPORTED = 0x1005;
 	public static final int DIALOG_UPDATE_TEXTURE_PACK = 0x1006;
+	public static final int DIALOG_INSERT_TEXT = 0x1007;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -517,6 +518,8 @@ public class MainActivity extends NativeActivity
 				return createNotSupportedDialog();
 			case DIALOG_UPDATE_TEXTURE_PACK:
 				return createUpdateTexturePackDialog();
+			case DIALOG_INSERT_TEXT:
+				return createInsertTextDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -567,7 +570,8 @@ public class MainActivity extends NativeActivity
 	protected Dialog createRuntimeOptionsDialog() {
 		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
 		CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
-		CharSequence[] options = new CharSequence[] {livePatch, optionMenu};
+		CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
+		CharSequence[] options = new CharSequence[] {livePatch, insertText, optionMenu};
 		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
@@ -576,6 +580,8 @@ public class MainActivity extends NativeActivity
 						intent.putExtra("prePatchConfigure", false);
 						startActivity(intent);	
 					} else if (button == 1) {
+						showDialog(DIALOG_INSERT_TEXT);
+					} else if (button == 2) {
 						startActivity(getOptionsActivityIntent());
 					}
 				}
@@ -663,7 +669,23 @@ public class MainActivity extends NativeActivity
 			})
 			.setCancelable(false)
 			.create();
-	}		
+	}
+
+	protected Dialog createInsertTextDialog() {
+		final EditText editText = new EditText(this);
+		editText.setSingleLine(true);
+		return new AlertDialog.Builder(this)
+			.setTitle(R.string.hovercar_insert_text)
+			.setView(editText)
+			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					nativeTypeCharacter(editText.getText().toString());
+					editText.setText("");
+				}
+			})
+			.setNegativeButton(android.R.string.cancel, null)
+			.create();
+	}	
 
 	/**
 	 * @param time Unix timestamp
@@ -976,6 +998,7 @@ public class MainActivity extends NativeActivity
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (BuildConfig.DEBUG) Log.i(TAG, event.toString());
 		if (event.getAction() == KeyEvent.ACTION_MULTIPLE && event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
 			nativeTypeCharacter(event.getCharacters());
 			return true;
@@ -988,7 +1011,7 @@ public class MainActivity extends NativeActivity
 	public void showKeyboardView() {
 		Log.i(TAG, "Show keyboard view");
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_IMPLICIT);
+		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
 
 	}
 
@@ -1209,6 +1232,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
+		boolean hasFiredLaunchEvent = false;
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			Uri tempUri = Uri.parse(url);
@@ -1218,6 +1242,7 @@ public class MainActivity extends NativeActivity
 			if (tempUri.getHost().equals(endHost)) {
 				if (tempUri.getPath().equals("/m/launch")) {
 					loginLaunchCallback(tempUri);
+					hasFiredLaunchEvent = true;
 				} else {
 					view.loadUrl(url);
 				}
@@ -1234,6 +1259,20 @@ public class MainActivity extends NativeActivity
 				return;
 			}
 			super.onReceivedSslError(view, handler, error);
+		}
+
+		@Override
+		public void onPageStarted(WebView view, String url, Bitmap favicon) {
+			Uri tempUri = Uri.parse(url);
+			if (BuildConfig.DEBUG) Log.i(TAG, "PageStarted: " + tempUri.toString());
+			String endHost = getRealmsRedirectInfo().accountUrl;
+			if (endHost == null) endHost = "account.mojang.com";
+			if (tempUri.getHost().equals(endHost)) {
+				if (tempUri.getPath().equals("/m/launch") && !hasFiredLaunchEvent) {
+					loginLaunchCallback(tempUri);
+					hasFiredLaunchEvent = true;
+				}
+			}
 		}
 	}
 

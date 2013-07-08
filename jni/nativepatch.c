@@ -54,7 +54,7 @@ void mcpelauncher_hook(void *orig_fcn, void* new_fcn, void **orig_fcn_ptr)
     unsigned char *hook = malloc( sysconf( _SC_PAGESIZE ) );
 
     __memcpy( hook, (unsigned char *)orig_fcn, 8 );    /* save 1st 8 bytes of orig fcn */
-    *(int *)(hook + 8) = 0xf000f85f;                   /* ldr pc, [pc, #-4] */
+    *(int *)(hook + 8) = 0xf000f85f;                   /* ldr pc, [pc] */
     *(int *)(hook + 12) = (int)orig_fcn + 9;           /* ptr to orig fcn offset */
 
     if( __mprotect_no_errno_set( (void *)(int)hook - ((int)hook % sysconf( _SC_PAGESIZE )),
