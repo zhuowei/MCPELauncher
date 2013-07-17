@@ -318,6 +318,7 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		hideKeyboardView();
 	}
 
 	public void onDestroy() {
@@ -679,8 +680,12 @@ public class MainActivity extends NativeActivity
 			.setView(editText)
 			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
-					nativeTypeCharacter(editText.getText().toString());
-					editText.setText("");
+					try {
+						nativeTypeCharacter(editText.getText().toString());
+						editText.setText("");
+					} catch (UnsatisfiedLinkError e) {
+						showDialog(DIALOG_NOT_SUPPORTED);
+					}
 				}
 			})
 			.setNegativeButton(android.R.string.cancel, null)
@@ -1000,8 +1005,12 @@ public class MainActivity extends NativeActivity
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (BuildConfig.DEBUG) Log.i(TAG, event.toString());
 		if (event.getAction() == KeyEvent.ACTION_MULTIPLE && event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
-			nativeTypeCharacter(event.getCharacters());
-			return true;
+			try {
+				nativeTypeCharacter(event.getCharacters());
+				return true;
+			} catch (UnsatisfiedLinkError e) {
+				//Do nothing
+			}
 		}
 		return super.dispatchKeyEvent(event);
 	}
@@ -1217,6 +1226,11 @@ public class MainActivity extends NativeActivity
 		NerdyStuffActivity.forceRestart(this);
 	}
 
+	protected void hideKeyboardView() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
+	}
+
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
@@ -1344,9 +1358,6 @@ public class MainActivity extends NativeActivity
 			}
 		}
 		
-	}
-
-
-		
+	}	
 
 }
