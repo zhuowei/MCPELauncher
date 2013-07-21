@@ -94,7 +94,7 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
-This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 This program contains code from 2of1\'s Andhook framework; used with permission.\n
 This program uses the libsuperuser library by Chainfire.\n

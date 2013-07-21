@@ -89,7 +89,7 @@
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.\n한글 번역 by 꽁치사마 (Koongchi, koongchi123.blog.me)</string>
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
-This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 이 어플은 2of1의 Andhook framework 코드를 허락 하에 사용하였습니다.\n
 이 어플은 Chainfire의 libsuperuser 라이브러리를 사용하였습니다.\n
