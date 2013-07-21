@@ -6,6 +6,7 @@ import java.nio.channels.*;
 
 import android.app.*;
 import android.content.*;
+import android.content.pm.*;
 import android.net.*;
 import android.os.*;
 import android.view.*;
@@ -16,6 +17,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	private Button dumpLibMinecraftPeButton;
 	private Button restartAppButton;
 	private Button setSkinButton;
+	private Button chefSpecialButton;
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -26,6 +28,9 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		restartAppButton.setOnClickListener(this);
 		setSkinButton = (Button) findViewById(R.id.set_skin_button);
 		setSkinButton.setOnClickListener(this);
+		chefSpecialButton = (Button) findViewById(R.id.chef_special);
+		chefSpecialButton.setOnClickListener(this);
+		if (BuildConfig.DEBUG) chefSpecialButton.setVisibility(View.VISIBLE);
 	}
 
 	public void onClick(View v) {
@@ -35,6 +40,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 			forceRestart(this);
 		} else if (v == setSkinButton) {
 			setSkin();
+		} else if (v == chefSpecialButton && BuildConfig.DEBUG) {
+			connectToServer();
 		}
 	}
 
@@ -83,5 +90,11 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void connectToServer() {
+		Intent a = new Intent();
+		a.setClassName("net.zhuoweizhang.mcpelauncher.pro", "net.zhuoweizhang.mcpelauncher.pro.ServerListActivity");
+		startActivity(a);
 	}
 }

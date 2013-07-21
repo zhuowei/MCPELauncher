@@ -37,6 +37,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	public static final int REQUEST_MANAGE_PATCHES = 6;
 	public static final int REQUEST_SELECT_SKIN = 7;
 	public static final int REQUEST_MANAGE_ADDONS = 8;
+	public static final int REQUEST_SERVER_LIST = 9;
 
 	public static final String PRO_APP_ID = "net.zhuoweizhang.mcpelauncher.pro";
 
@@ -57,6 +58,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference manageAddonsPreference;
 	private Preference goToForumsPreference;
 	private Preference mcoRedirectAddressPreference;
+	private Preference serverListPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -94,6 +96,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		if (manageAddonsPreference != null) manageAddonsPreference.setOnPreferenceClickListener(this);
 		mcoRedirectAddressPreference = findPreference("zz_redirect_mco_address");
 		if (mcoRedirectAddressPreference != null) mcoRedirectAddressPreference.setOnPreferenceClickListener(this);
+		serverListPreference = findPreference("zz_server_list");
+		if (serverListPreference != null) serverListPreference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -142,6 +146,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == mcoRedirectAddressPreference) {
 			needsRestart = true;
 			return false;
+		} else if (pref == serverListPreference) {
+			openServerList();
+			return true;
 		}
 		return false;
 	}
@@ -203,6 +210,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 				isManagingAddons = false;
 				if (resultCode == RESULT_OK) {
 					forceRestart();
+				}
+				break;
+			case REQUEST_SERVER_LIST:
+				if (resultCode == RESULT_OK) {  
+					onBackPressed();
 				}
 				break;
 		}
@@ -284,6 +296,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		}).start();
 	}
 
+	private void openServerList() {
+		Intent a = new Intent();
+		a.setClassName("net.zhuoweizhang.mcpelauncher.pro", "net.zhuoweizhang.mcpelauncher.pro.ServerListActivity");
+		startActivityForResult(a, REQUEST_SERVER_LIST);
+	}
+
 	private class ExtractTextureTask extends AsyncTask<Void, Void, Void> {
 
 		private ProgressDialog dialog;
@@ -321,6 +339,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			dialog.dismiss();			
 			if (outFile.exists()) {
 				setTexturePack(outFile);
+				((CheckBoxPreference) texturePackEnablePreference).setChecked(true);
 				Toast.makeText(MainMenuOptionsActivity.this, R.string.extract_textures_success, Toast.LENGTH_SHORT).show();
 			} else {
 				new AlertDialog.Builder(MainMenuOptionsActivity.this).

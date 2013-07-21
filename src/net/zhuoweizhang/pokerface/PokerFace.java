@@ -27,7 +27,7 @@ public class PokerFace {
 
 	public static native int mprotect(long addr, long len, int prot);
 
-	/** Get system configuration. Is here because Libcore is available on (some old?) Gingerbread versions */
+	/** Get system configuration. Is here because the Libcore version of this is not available on (some old?) Gingerbread versions */
 	public static native long sysconf(int name);
 
 	/** Creates a direct ByteBuffer to an area of memory using a libcore implementation. */

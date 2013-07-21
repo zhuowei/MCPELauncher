@@ -26,4 +26,11 @@
             android:layout_margin="20dp"
             android:text="Set skin to /sdcard/skin.png"/>
 
+        <Button android:id="@+id/chef_special"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Authorized personnel only"
+            android:visibility="gone"/>
+
  </LinearLayout>

@@ -125,6 +125,13 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="safe_mode_exit">Return to normal</string>
     <string name="safe_mode_continue">Continue</string>
 
+    <string name="server_list_add">Add server</string>
+    <string name="pref_zz_server_list">Server list</string>
+    <string name="pref_zz_server_list_summary">Select from or add a server to your saved server list</string>
+    <string name="server_list_patch_address">Patch server address</string>
+    <string name="server_list_name_prompt">Name: </string>
+    <string name="server_list_address_prompt">Address: </string>
+
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
 
