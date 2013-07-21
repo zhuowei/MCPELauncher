@@ -33,7 +33,7 @@
     <string name="pref_zz_custom_dpi">DPI personalizzato</string>
     <string name="pref_zz_custom_dpi_summary">Modificarlo per cambiare la grandezza dei controlli - Lasciare vuoto per disabilitarlo</string>
     <string name="pref_zz_texture_pack_demo">Demo del supporto per Pacchetti Grafici</string>
-    <string name="pref_zz_texture_pack_demo_summary">Usa il Pacchetto Grafico istallato nel launcher (RepetiCraft pack by Theevilpplz)</string>
+    <string name="pref_zz_texture_pack_demo_summary">Usa il Pacchetto Grafico istallato nel launcher (Slickcraft pack by NathanX)</string>
     <string name="pref_mp_server_visible_default">Server sempre visibile</string>
     <string name="pref_mp_title">Multiplayer</string>
     <string name="pref_ctrl_title">Controlli</string>
@@ -79,7 +79,8 @@
     <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Non distribuire senza permesso.</string>
     <string name="about_librarycredits">Questo programma usa la aFileChooser library di Paul Burke. \n
 Questo programma contiene codice da Snowbound\'s PTPatchTool, licenza sotto l\' Eclipse Public License. \n
-Il Pacchetto grafico dimostrativo, RepetiCraft, è fatto da Theevilpplz e usato con il suo permesso.\n
+This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 Questo programma contiene codice dal 2of1\'s Andhook framework; usato con il permesso.\n
 Questo progranma usa la libsuperuser library di Chainfire.\n
 Per la licenza completa, apri il thread su Minecraft Forum.\n

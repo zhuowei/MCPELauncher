@@ -33,7 +33,7 @@
     <string name="pref_zz_custom_dpi">Custom DPI</string>
     <string name="pref_zz_custom_dpi_summary">Changez la densité de l\'écran signalé pour modifier la taille des contrôles - laissez vide pour désactiver</string>
     <string name="pref_zz_texture_pack_demo">Démontration du pack de texture</string>
-    <string name="pref_zz_texture_pack_demo_summary">Utiliser le texture pack intégré,RepetiCraft par Theevilpplz</string>
+    <string name="pref_zz_texture_pack_demo_summary">Utiliser le texture pack intégré, SlickCraft par NathanX</string>
     <string name="pref_mp_server_visible_default">Serveur visible par défaut</string>
     <string name="pref_mp_title">Multijoueur</string>
     <string name="pref_ctrl_title">Controles</string>
@@ -80,7 +80,8 @@
     <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Ne pas diffuser sans autorisation.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 Ce programme contient le code de Snowbound PTPatchTool \'s, sous licence publique Eclipse. \n
-Le pack de texture de démonstration, RepetiCraft, est faite par Theevilpplz et sont utilisés avec autorisation.\n
+This program contains a modified version of NathanX's SlickCraft texture pack: used with permission.\n
+Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 Ce programme contient le code d\'2of1 cadre d \'s Andhook; utilisés avec la permission.\n
 Ce programme utilise la bibliothèque libsuperuser par Chainfire.\n
 Pour plus d\'informations de licence complète, consultez le fil Minecraft Forums.\n

@@ -35,7 +35,7 @@
     <string name="pref_zz_custom_dpi">Custom DPI</string>
     <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
     <string name="pref_zz_texture_pack_demo">Demonstrate texture pack support</string>
-    <string name="pref_zz_texture_pack_demo_summary">Use the built-in RepetiCraft pack by Theevilpplz</string>
+    <string name="pref_zz_texture_pack_demo_summary">Use the built-in version of the Slickcraft texture pack by NathanX</string>
     <string name="pref_mp_server_visible_default">Server visible by default</string>
     <string name="pref_mp_title">Multiplayer</string>
     <string name="pref_ctrl_title">Controls</string>
@@ -94,7 +94,8 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
-The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n
+This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 This program contains code from 2of1\'s Andhook framework; used with permission.\n
 This program uses the libsuperuser library by Chainfire.\n
 For full licensing information, check the Minecraft Forums thread.\n

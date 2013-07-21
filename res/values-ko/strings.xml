@@ -33,7 +33,6 @@
     <string name="pref_zz_custom_dpi">사용자 DPI</string>
     <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
     <string name="pref_zz_texture_pack_demo">데모 텍스쳐팩 사용</string>
-    <string name="pref_zz_texture_pack_demo_summary">RepetiCraft 텍스쳐팩을 사용합니다.</string>
     <string name="pref_mp_server_visible_default">서버를 기본적으로 보이기</string>
     <string name="pref_mp_title">멀티플레이</string>
     <string name="pref_ctrl_title">조작</string>
@@ -90,7 +89,8 @@
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.\n한글 번역 by 꽁치사마 (Koongchi, koongchi123.blog.me)</string>
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
-데모 텍스쳐팩인 RepetiCraft는 제작자 Theevilpplz의 허락을 받고 사용하였습니다.\n
+This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 이 어플은 2of1의 Andhook framework 코드를 허락 하에 사용하였습니다.\n
 이 어플은 Chainfire의 libsuperuser 라이브러리를 사용하였습니다.\n
 모든 라이센스를 확인하시려면 마인크래프트 포럼 스레드에 접속해 보시기 바랍니다.\n

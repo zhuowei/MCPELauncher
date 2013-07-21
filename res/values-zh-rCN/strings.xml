@@ -82,7 +82,7 @@
     <string name="about_about">关于BlockLauncher</string>
     <string name="pref_zz_texture_pack_enable">使用材质包</string>
     <string name="pref_zz_texture_pack_demo">显示材质包支持</string>
-    <string name="pref_zz_texture_pack_demo_summary">使用内置Theevilpplz的RepetiCraft材质包 </string>
+    <string name="pref_zz_texture_pack_demo_summary">使用内置NathanX的Slickcraft材质包 </string>
     <string name="no_minecraft_installed">BlockLauncher无法在您的手机上检测到Minecraft PE。 此程序需要Mojang的Minecraft PE 完整版。</string>
     <string name="firstlaunch_help">帮助</string>
     <string name="permlab_mcpelauncher_addon">BlockLauncher的插件</string>

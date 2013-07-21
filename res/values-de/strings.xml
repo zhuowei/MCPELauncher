@@ -33,7 +33,6 @@
     <string name="pref_zz_custom_dpi">Benutzerdefiniertes DPI</string>
     <string name="pref_zz_custom_dpi_summary">Ändert die Größe des Touchpad - leer lassen, um es deaktivieren</string>
     <string name="pref_zz_texture_pack_demo">Demonstriert Texture Pack Support</string>
-    <string name="pref_zz_texture_pack_demo_summary">Verwendet das eingebaute RepetiCraft Pack von Theevilpplz</string>
     <string name="pref_mp_server_visible_default"> Server standardmäßig sichtbar</string>
     <string name="pref_mp_title">Multiplayer</string>
     <string name="pref_ctrl_title">Steuerung</string>
@@ -79,9 +78,10 @@
     <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">Dieses Programm verwendet eine FileChooser library von Paul Burke. \n
 Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
-The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.\n
+This program contains a modified version of NathanX's Slickcraft texture pack: used with permission.\n
+Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 This program contains code from 2of1\'s Andhook framework; used with permission.\n
-This program uses the libsuperuser library by Chainfire.\n
+This program uses the libsuperuser library by Chainfire.\
 For full licensing information, check the Minecraft Forums thread.\n
     </string>
     <string name="about_pro_library_credits"></string>
