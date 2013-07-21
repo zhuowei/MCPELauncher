@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BlockLauncher server URI generator: based on McURL by SpaceManiac</title>
+</head>
+<body>
+<h1>BlockLauncher server URI generator: based on McURL by SpaceManiac</h1>
+<h2><a name="owners">For Server Owners</a></h2>
+<form name="mainform" id="mainform">Run a server? Link to it with BlockLauncher URL! Enter a server IP.
+<table>
+	<tr>
+		<td valign="top">Address</td><td>
+		<input type="text" id="address" name="address" size="50" value="127.0.0.1" /></td>
+	</tr>
+	<tr>
+		<td valign="top">Name (Optional)</td><td>
+		<input type="text" id="servername" name="servername" size="50" value="ExampleCraft" /></td>
+	</tr>
+	<tr>
+		<td valign="top">HTML</td>
+		<td><input type="text" name="html" size="50" /></td>
+	</tr>
+	<tr>
+		<td valign="top">BBCode</td>
+		<td><input type="text" name="bbcode" size="50" /></td>
+	</tr>
+	<tr>
+		<td valign="top">Alternate</td>
+		<td><input type="text" name="bbalt" size="50" /><br />
+			<small>Use if BBCode above does not work for a certain forum</small></td>
+	</tr>
+	<tr>
+		<td valign="top">Preview</td>
+		<td><span id="preview">&nbsp;</span></td>
+	</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+function update() {
+	var form = document.mainform;
+	var value = encodeURI(form.address.value + "/" + form.servername.value);
+	if (value == "/") return;
+	
+	var html = "<a href=\"mcpe-server://" + value + "\">mcpe-server://" + value + "</a>";
+	form.html.value = html;
+	
+	var bbcode = "[URL=mcpe-server://" + value + "]mcpe-server://" + value + "[/URL]";
+	form.bbcode.value = bbcode;
+	
+	var bbalt = "[URL=http://zhuoweizhang.net/MCPELauncher/?n=" + value + "]mcpe-server://" + value + "/[/URL]";
+	form.bbalt.value = bbalt;
+	
+	document.getElementById("preview").innerHTML = html;
+}
+document.mainform.onkeyup = update;
+update();
+</script>
+</body>
+</html>
