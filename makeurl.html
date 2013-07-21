@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<link rel="stylesheet" href="/style.css" />
 <title>BlockLauncher server URI generator: based on McURL by SpaceManiac</title>
 </head>
 <body>
@@ -48,7 +50,7 @@ function update() {
 	var bbcode = "[URL=mcpe-server://" + value + "]mcpe-server://" + value + "[/URL]";
 	form.bbcode.value = bbcode;
 	
-	var bbalt = "[URL=http://zhuoweizhang.net/MCPELauncher/?n=" + value + "]mcpe-server://" + value + "/[/URL]";
+	var bbalt = "[URL=http://zhuoweizhang.net/MCPELauncher/?n=" + value + "]mcpe-server://" + value + "[/URL]";
 	form.bbalt.value = bbalt;
 	
 	document.getElementById("preview").innerHTML = html;
