@@ -34,5 +34,9 @@ public final class MinecraftConstants {
 
 	public static final int MINECRAFT_AMAZON_VERSION_CODE = 40007010; //Version code of the derped version on Amazon
 
+	public static final int PORT_OFFSET = 0xeed86;
+
+	public static final int PORT_OFFSET_0_7_1 = 0xe1bb2;
+	public static final int PORT_OFFSET_0_7_1_AMAZON = 0xe1bca;
 
 }

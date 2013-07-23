@@ -12,6 +12,7 @@ public final class MinecraftVersion {
 	public int versionCode, libLoadOffsetBegin, libLoadOffset, ipAddressOffset;
 	public byte[] guiBlocksPatch, guiBlocksUnpatch, noAnimationPatch, noAnimationUnpatch;
 	public boolean needsWarning;
+	public int portOffset;
 	public PatchTranslator translator;
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
@@ -19,7 +20,7 @@ public final class MinecraftVersion {
 	public final static boolean FUZZY_VERSION = true;
 
 	public MinecraftVersion(int versionCode, boolean needsWarning, int libLoadOffsetBegin, int libLoadOffset, PatchTranslator translator,
-		int ipAddressOffset, byte[] guiBlocksPatch, byte[] guiBlocksUnpatch, byte[] noAnimationPatch, byte[] noAnimationUnpatch) {
+		int ipAddressOffset, byte[] guiBlocksPatch, byte[] guiBlocksUnpatch, byte[] noAnimationPatch, byte[] noAnimationUnpatch, int portOffset) {
 		this.versionCode = versionCode;
 		this.needsWarning = needsWarning;
 		this.libLoadOffsetBegin = libLoadOffsetBegin;
@@ -29,6 +30,7 @@ public final class MinecraftVersion {
 		this.guiBlocksUnpatch = guiBlocksUnpatch;
 		this.noAnimationPatch = noAnimationPatch;
 		this.noAnimationUnpatch = noAnimationUnpatch;
+		this.portOffset = portOffset;
 		this.translator = translator;
 	}
 
@@ -68,11 +70,11 @@ public final class MinecraftVersion {
 
 	static {
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x1F8624, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null));
+			0x1F8624, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET));
 		add(new MinecraftVersion(30007010, false, 0x1f0b18, 0x1000, null,
-			0x1E7E3A, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null));
+			0x1E7E3A, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1));
 		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
-			0x1E7E52, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null));
+			0x1E7E52, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1_AMAZON));
 	}
 
 	public static abstract class PatchTranslator {

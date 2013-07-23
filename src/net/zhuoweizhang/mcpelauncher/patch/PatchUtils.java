@@ -57,5 +57,26 @@ public final class PatchUtils {
 		}
 		return true;
 	}
+
+	public static byte[] createMovwInstr(int rd, int imm) {
+		long instr = 0xf2400000L;
+		instr |= (rd << 8); //RD
+		instr |= (imm & 0xff); //Imm8
+		instr |= ((imm >> 8) & 0x7) << 12; //Imm3
+		instr |= ((imm >> 11) & 0x1) << 26; //i
+		instr |= ((imm >> 12) & 0xf) << 16; //Imm4
+		byte[] finalByte = intToLEByteArray(instr);
+		System.out.println("Port patch: " + Long.toString(instr, 16));
+		return finalByte;
+	}
+
+	public static final byte[] intToLEByteArray(long value) {
+        return new byte[] {
+                (byte)(value >>> 16),
+                (byte)(value >>> 24),
+                (byte)value,
+                (byte)(value >>> 8)};
+
+	}
 		
 }
