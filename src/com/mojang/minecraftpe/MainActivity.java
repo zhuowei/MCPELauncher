@@ -1231,6 +1231,19 @@ public class MainActivity extends NativeActivity
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 	}
+	/**
+	 * Called by the ScriptManager when a new level is loaded.
+	 * This is for subclasses to do cleanup/disable menu items that cannot be used ingame/show ads, etc
+	 */
+	public void setLevelCallback() {
+	}
+
+	/**
+	 * Called by the ScriptManager when exiting to the main menu.
+	 * This is for subclasses to do cleanup/disable menu items that cannot be used ingame/show ads, etc
+	 */
+	public void leaveGameCallback() {
+	}
 
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);

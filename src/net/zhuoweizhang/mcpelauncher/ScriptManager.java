@@ -2,6 +2,8 @@ package net.zhuoweizhang.mcpelauncher;
 
 //import org.mozilla.javascript.*;
 
+import com.mojang.minecraftpe.MainActivity;
+
 public class ScriptManager {
 
 //	public static List<Context> scriptContexts = new ArrayList<Context>();
@@ -12,6 +14,27 @@ public class ScriptManager {
 
 	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid) {
 		callScriptMethod("useItem", x, y, z, itemid, blockid);
+	}
+
+	public static void setLevelCallback(boolean hasLevel) {
+		System.out.println("Level: " + hasLevel);
+		callScriptMethod("newLevel", hasLevel);
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.setLevelCallback();
+			}
+		}
+	}
+
+	public static void leaveGameCallback(boolean thatboolean) {
+		callScriptMethod("leaveGame");
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.leaveGameCallback();
+			}
+		}
 	}
 
 	public static void init() {
