@@ -171,6 +171,9 @@ public class MainActivity extends NativeActivity
 				Log.w(TAG, "OMG hipster version code found - breaking mod compat before it's cool");
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
+
+			migrateToPatchManager();
+
 			SharedPreferences myprefs = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 			int prepatchedVersionCode = myprefs.getInt("prepatch_version", -1);
 
@@ -217,8 +220,6 @@ public class MainActivity extends NativeActivity
 		textureOverrides.add(new SkinTextureOverride(this));
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
-
-		migrateToPatchManager();
 
 		try {
 			if (!isSafeMode()) {
