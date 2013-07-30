@@ -33,9 +33,18 @@ public class PokerFace {
 	/** Creates a direct ByteBuffer to an area of memory using a libcore implementation. */
 
 	public static ByteBuffer createDirectByteBuffer(long address, long length) throws Exception {
+		if (android.os.Build.VERSION.SDK_INT >= 18) { //Jelly Bean 4.3 simplified byte buffer creation
+			return createDirectByteBufferNew(address, length);
+		}
 		Constructor cons = Class.forName("java.nio.ReadWriteDirectByteBuffer").getDeclaredConstructor(Integer.TYPE, Integer.TYPE);
 		cons.setAccessible(true);
 		return (ByteBuffer) cons.newInstance((int) address, (int) length);
+	}
+
+	private static ByteBuffer createDirectByteBufferNew(long address, long length) throws Exception {
+		Constructor cons = Class.forName("java.nio.DirectByteBuffer").getDeclaredConstructor(Long.TYPE, Integer.TYPE);
+		cons.setAccessible(true);
+		return (ByteBuffer) cons.newInstance(address, (int) length);
 	}
 
 	static {

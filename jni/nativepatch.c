@@ -9,6 +9,8 @@
 
 #include <mcpelauncher.h>
 
+JavaVM* bl_JavaVM;
+
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_pokerface_PokerFace_mprotect
   (JNIEnv *env, jclass clazz, jlong addr, jlong len, jint prot) {
 	return mprotect((void *)(uintptr_t) addr, len, prot);
@@ -77,3 +79,8 @@ int mcpelauncher_get_version() {
 	return 1;
 }
 
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+	bl_JavaVM = vm;
+
+	return JNI_VERSION_1_2;
+}

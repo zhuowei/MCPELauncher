@@ -257,6 +257,7 @@ public class MainActivity extends NativeActivity
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
+				ScriptManager.init();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
