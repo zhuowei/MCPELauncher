@@ -1,5 +1,5 @@
 <MimeTypes>
 <!-- specifies MIME types of Minecraft-related files for picking files -->
 <type mimetype="application/x-ptpatch" extension=".mod"/>
-
+<type mimetype="application/javascript" extension=".js"/>
 </MimeTypes>

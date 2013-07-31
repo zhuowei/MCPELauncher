@@ -6,16 +6,31 @@ import java.io.IOException;
 import java.io.Reader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
+
+import android.content.SharedPreferences;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
 
 import com.mojang.minecraftpe.MainActivity;
 
+import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
+import static net.zhuoweizhang.mcpelauncher.PatchManager.blankArray;
+
 public class ScriptManager {
 
+	public static final String SCRIPTS_DIR = "modscripts";
+
 	public static List<ScriptState> scripts = new ArrayList<ScriptState>();
+
+	public static android.content.Context androidContext;
+
+	public static Set<String> enabledScripts = new HashSet<String>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		Context ctx = Context.enter();
@@ -36,7 +51,7 @@ public class ScriptManager {
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
-		String[] names = { "setTile" };
+		String[] names = { "setTile", "print" };
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
 
 		ScriptState state = new ScriptState(script, scope, sourceName);
@@ -84,11 +99,101 @@ public class ScriptManager {
 		}
 	}
 
-	public static void init() {
+	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
 		nativeSetupHooks();
 		scripts.clear();
+		androidContext = cxt.getApplicationContext();
+		loadEnabledScripts();
 	}
+
+	public static void removeScript(String scriptId) {
+		for (int i = scripts.size() - 1; i >= 0; i--) {
+			if (scripts.get(i).name.equals(scriptId)) {
+				scripts.remove(i);
+				break;
+			}
+		}
+	}
+
+	public static void reloadScript(File file) throws IOException {
+		removeScript(file.getName());
+		loadScript(file);
+	}
+
+
+	//following taken from the patch manager
+	public static Set<String> getEnabledScripts() {
+		return enabledScripts;
+	}
+
+	private static void setEnabled(String name, boolean state) throws IOException {
+		if (state) {
+			enabledScripts.add(name);
+			reloadScript(getScriptFile(name));
+		} else {
+			enabledScripts.remove(name);
+			removeScript(name);
+		}
+		saveEnabledScripts();
+	}
+
+	public static void setEnabled(File[] files, boolean state) throws IOException {
+		for (File file: files) {
+			String name = file.getAbsolutePath();
+			if (name == null || name.length() <= 0) continue;
+			if (state) {
+				enabledScripts.add(name);
+				reloadScript(getScriptFile(name));
+			} else {
+				enabledScripts.remove(name);
+				removeScript(name);
+			}
+		}
+		saveEnabledScripts();
+	}
+
+	public static void setEnabled(File file, boolean state) throws IOException {
+		setEnabled(file.getName(), state);
+	}
+
+	private static boolean isEnabled(String name) {
+		return enabledScripts.contains(name);
+	}
+
+	public static boolean isEnabled(File file) {
+		return isEnabled(file.getName());
+	}
+
+	public static void removeDeadEntries(Collection<String> allPossibleFiles) {
+		enabledScripts.retainAll(allPossibleFiles);
+		saveEnabledScripts();
+	}
+
+	protected static void loadEnabledScripts() throws IOException {
+		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+		String enabledScriptsStr = sharedPrefs.getString("enabledScripts", "");
+		enabledScripts = new HashSet<String>(Arrays.asList(enabledScriptsStr.split(";")));
+		for (String name: enabledScripts) {
+			//load all scripts into the script interpreter
+			loadScript(getScriptFile(name));
+		}
+	}
+
+	protected static void saveEnabledScripts() {
+		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+		SharedPreferences.Editor edit = sharedPrefs.edit();
+		edit.putString("enabledScripts", join(enabledScripts.toArray(blankArray), ";"));
+		edit.putInt("scriptManagerVersion", 1);
+		edit.apply();
+	}
+
+	public static File getScriptFile(String scriptId) {
+		File scriptsFolder = androidContext.getDir(SCRIPTS_DIR, 0);
+		return new File(scriptsFolder, scriptId);
+	}
+	//end script manager controls
+
 
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
 
@@ -118,5 +223,9 @@ public class ScriptManager {
 		//public void setTile(int x, int y, int z, int id, int damage) {
 		//	nativeSetTile(x, y, z, id, damage);
 		//}
+		@JSFunction
+		public void print(String str) {
+			System.out.println(str);
+		}
 	}
 }

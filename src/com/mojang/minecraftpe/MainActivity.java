@@ -258,8 +258,7 @@ public class MainActivity extends NativeActivity
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
-				ScriptManager.init();
-				ScriptManager.loadScript(new File("/sdcard/winprogress/modscript.js"));
+				ScriptManager.init(this);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
