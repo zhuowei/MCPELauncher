@@ -32,10 +32,12 @@ jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
+static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
 static LocalPlayer* bl_localplayer;
+static int bl_hasinit_script = 0;
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
 	JNIEnv *env;
@@ -89,10 +91,12 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint id, jint damage) {
+	bl_Level_setTileAndData(bl_level, x, y, z, id, damage, 3); //3 = full block update
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz) {
+	if (bl_hasinit_script) return;
 	//edit the vtables of the GameMode implementations
 	bl_GameMode_useItemOn_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnEP6PlayerP5LevelP12ItemInstanceiiiiRK4Vec3");
 	int *creativeVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12CreativeMode");
@@ -106,9 +110,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+	//get the level set block method. In future versions this might link against libminecraftpe itself
+	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
+	if (bl_Level_setTileAndData == NULL) {
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to get setTileAndData: %s\n", dlerror());
+	}
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
 	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
+
+	bl_hasinit_script = 1;
 
 }

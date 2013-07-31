@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mozilla.javascript.*;
+import org.mozilla.javascript.annotations.JSFunction;
 
 import com.mojang.minecraftpe.MainActivity;
 
@@ -34,7 +35,10 @@ public class ScriptManager {
 	}
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
-		Scriptable scope = ctx.initStandardObjects(null, false);
+		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
+		String[] names = { "setTile" };
+		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
+
 		ScriptState state = new ScriptState(script, scope, sourceName);
 		script.exec(ctx, scope);
 		scripts.add(state);
@@ -83,6 +87,7 @@ public class ScriptManager {
 	public static void init() {
 		//set up hooks
 		nativeSetupHooks();
+		scripts.clear();
 	}
 
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
@@ -98,5 +103,20 @@ public class ScriptManager {
 			this.scope = scope;
 			this.name = name;
 		}
+	}
+
+	private static class BlockHostObject extends ScriptableObject {
+		@Override
+		public String getClassName() {
+			return "BlockHostObject";
+		}
+		@JSFunction
+		public void setTile(int x, int y, int z, int id) {
+			nativeSetTile(x, y, z, id, 0);
+		}
+		//@JSFunction
+		//public void setTile(int x, int y, int z, int id, int damage) {
+		//	nativeSetTile(x, y, z, id, damage);
+		//}
 	}
 }
