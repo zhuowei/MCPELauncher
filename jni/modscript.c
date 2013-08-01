@@ -1,5 +1,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <android/log.h>
 #include <jni.h>
 
@@ -7,7 +9,18 @@
 #include "modscript.h"
 
 typedef void Level;
-typedef void Entity;
+typedef struct {
+	void** vtable; //0
+	float x; //4
+	float y; //8
+	float z; //12
+	char filler[10];
+	float motionX; //52
+	float motionY; //56
+	float motionZ; //60
+	float yaw; //64
+	float pitch; //68
+} Entity;
 typedef Entity Player;
 typedef struct {
 	int count;
@@ -26,6 +39,10 @@ typedef Player LocalPlayer;
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
+
+#define AXIS_X 0
+#define AXIS_Y 1
+#define AXIS_Z 2
 //This is true on the ARM/Dalvik/bionic platform
 
 //(0x23021C - 0x2301e8) / 4
@@ -40,6 +57,10 @@ static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
+static void (*bl_Player_ride)(Player*, Entity*);
+static void (*bl_Entity_setPos)(Entity*, float, float, float);
+static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int);
+static int (*bl_Inventory_add)(void*, ItemInstance*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -107,7 +128,7 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "attackCallback", "(JJ)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (jlong) player, (jlong) entity);
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (jlong) (intptr_t) player, (jlong) (intptr_t) entity);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -129,6 +150,73 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePreventDefault
   (JNIEnv *env, jclass clazz) {
 	preventDefaultStatus = TRUE;
+}
+
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
+  (JNIEnv *env, jclass clazz) {
+	return (jlong) (intptr_t) bl_localplayer;
+}
+
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLevel
+  (JNIEnv *env, jclass clazz) {
+	return (jlong) (intptr_t) bl_level;
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
+  (JNIEnv *env, jclass clazz, jint axis) {
+	switch (axis) {
+		case AXIS_X:
+			return bl_localplayer->x;
+		case AXIS_Y:
+			return bl_localplayer->y;
+		case AXIS_Z:
+			return bl_localplayer->z;
+	}
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPosition
+  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat x, jfloat y, jfloat z) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	bl_Entity_setPos(entity, x, y, z);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
+  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat vel, jint axis) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	switch (axis) {
+		case AXIS_X:
+			entity->motionX = vel;
+		case AXIS_Y:
+			entity->motionY = vel;
+		case AXIS_Z:
+			entity->motionZ = vel;
+	}
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
+  (JNIEnv *env, jclass clazz, jlong riderPtr, jlong mountPtr) {
+	//use vtable so the rider doesn't have to be a player (useful?)
+	Entity* rider = (Entity*) (intptr_t) riderPtr;
+	Entity* mount = (Entity*) (intptr_t) mountPtr;
+	void* vtable = rider->vtable[19];
+	void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
+	fn(rider, mount);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power) {
+	bl_Level_explode(bl_level, NULL, x, y, z, power, FALSE);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
+  (JNIEnv *env, jclass clazz, jint id, jint amount) {
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->id = id;
+	instance->damage = 0;
+	instance->count = amount;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3204));
+	bl_Inventory_add(invPtr, instance);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
@@ -159,6 +247,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
+	bl_Player_ride = dlsym(RTLD_DEFAULT, "_ZN6Player4rideEP6Entity");
+	bl_Entity_setPos = dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
+	bl_Level_explode = dlsym(RTLD_DEFAULT, "_ZN5Level7explodeEP6Entityffffb");
+	bl_Inventory_add = dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 

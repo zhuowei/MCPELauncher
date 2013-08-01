@@ -106,7 +106,7 @@ public class ScriptManager {
 	}
 
 	public static void attackCallback(long attacker, long victim) {
-		callScriptMethod("attackHook", attacker, victim);
+		callScriptMethod("attackHook", new NativePointer(attacker), new NativePointer(victim));
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -217,11 +217,15 @@ public class ScriptManager {
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native long nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
-	public static native void setPosition(long entity, float x, float y, float z);
+	public static native void nativeSetPosition(long entity, float x, float y, float z);
 	public static native void nativeSetVel(long ent, float vel, int axis);
+	public static native void nativeExplode(float x, float y, float z, float radius);
+	public static native void nativeAddItemInventory(int id, int amount);
+	public static native void nativeRideAnimal(long rider, long mount);
 	public static native int nativeGetCarriedItem();
-	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
 	public static native void nativePreventDefault();
+	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
+	public static native void nativeSpawnEntity(float x, float y, float z, int entityType);
 
 	public static native void nativeSetupHooks();
 
@@ -268,6 +272,11 @@ public class ScriptManager {
 		}
 
 		@JSFunction
+		public void setPosition(NativePointer ent, double x, double y, double z) {
+			nativeSetPosition(ent.value, (float) x, (float) y, (float) z);
+		}
+
+		@JSFunction
 		public void setVelX(NativePointer ent, double amount) {
 			nativeSetVel(ent.value, (float) amount, AXIS_X);
 		}
@@ -280,6 +289,30 @@ public class ScriptManager {
 			nativeSetVel(ent.value, (float) amount, AXIS_Z);
 		}
 
+		@JSFunction
+		public void explode(double x, double y, double z, double radius) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius);
+		}
+
+		@JSFunction
+		public void addItemInventory(int id, int amount) {
+			nativeAddItemInventory(id, amount);
+		}
+
+		@JSFunction
+		public void rideAnimal(NativePointer /*Flynn*/rider, NativePointer mount) {
+			nativeRideAnimal(rider.value, mount.value);
+		}
+
+		@JSFunction
+		public void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+			nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+		}
+
+		@JSFunction
+		public void spawnCow(double x, double y, double z, String tex) { //Textures not supported
+			nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+		}
 
 		@JSFunction
 		public int getCarriedItem() {
