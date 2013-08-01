@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
+import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +34,10 @@ public class ScriptManager {
 
 	public static Set<String> enabledScripts = new HashSet<String>();
 
+	private static final int AXIS_X = 0;
+	private static final int AXIS_Y = 1;
+	private static final int AXIS_Z = 2;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		Context ctx = Context.enter();
 		Script script = ctx.compileReader(in, sourceName, 0, null);
@@ -51,7 +57,7 @@ public class ScriptManager {
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
-		String[] names = { "setTile", "print" };
+		String[] names = getAllJsFunctions(BlockHostObject.class);
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
 
 		ScriptState state = new ScriptState(script, scope, sourceName);
@@ -99,6 +105,10 @@ public class ScriptManager {
 		}
 	}
 
+	public static void attackCallback(long attacker, long victim) {
+		callScriptMethod("attackHook", attacker, victim);
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
 		nativeSetupHooks();
@@ -129,8 +139,8 @@ public class ScriptManager {
 
 	private static void setEnabled(String name, boolean state) throws IOException {
 		if (state) {
-			enabledScripts.add(name);
 			reloadScript(getScriptFile(name));
+			enabledScripts.add(name);
 		} else {
 			enabledScripts.remove(name);
 			removeScript(name);
@@ -143,8 +153,8 @@ public class ScriptManager {
 			String name = file.getAbsolutePath();
 			if (name == null || name.length() <= 0) continue;
 			if (state) {
-				enabledScripts.add(name);
 				reloadScript(getScriptFile(name));
+				enabledScripts.add(name);
 			} else {
 				enabledScripts.remove(name);
 				removeScript(name);
@@ -194,8 +204,24 @@ public class ScriptManager {
 	}
 	//end script manager controls
 
+	private static String[] getAllJsFunctions(Class clazz) {
+		List<String> allList = new ArrayList<String>();
+		for (Method met: clazz.getMethods()) {
+			if (met.getAnnotation(JSFunction.class) != null) {
+				allList.add(met.getName());
+			}
+		}
+		return allList.toArray(blankArray);
+	}
 
+	public static native float nativeGetPlayerLoc(int axis);
+	public static native long nativeGetPlayerEnt();
+	public static native long nativeGetLevel();
+	public static native void setPosition(long entity, float x, float y, float z);
+	public static native void nativeSetVel(long ent, float vel, int axis);
+	public static native int nativeGetCarriedItem();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
+	public static native void nativePreventDefault();
 
 	public static native void nativeSetupHooks();
 
@@ -216,6 +242,56 @@ public class ScriptManager {
 			return "BlockHostObject";
 		}
 		@JSFunction
+		public void print(String str) {
+			System.out.println(str);
+		}
+
+		@JSFunction
+		public double getPlayerX() {
+			return nativeGetPlayerLoc(AXIS_X);
+		}
+		@JSFunction
+		public double getPlayerY() {
+			return nativeGetPlayerLoc(AXIS_Y);
+		}
+		@JSFunction
+		public double getPlayerZ() {
+			return nativeGetPlayerLoc(AXIS_Z);
+		}
+		@JSFunction
+		public NativePointer getPlayerEnt() {
+			return new NativePointer(nativeGetPlayerEnt());
+		}
+		@JSFunction
+		public NativePointer getLevel() {
+			return new NativePointer(nativeGetLevel()); //TODO: WTF does this do?
+		}
+
+		@JSFunction
+		public void setVelX(NativePointer ent, double amount) {
+			nativeSetVel(ent.value, (float) amount, AXIS_X);
+		}
+		@JSFunction
+		public void setVelY(NativePointer ent, double amount) {
+			nativeSetVel(ent.value, (float) amount, AXIS_Y);
+		}
+		@JSFunction
+		public void setVelZ(NativePointer ent, double amount) {
+			nativeSetVel(ent.value, (float) amount, AXIS_Z);
+		}
+
+
+		@JSFunction
+		public int getCarriedItem() {
+			return nativeGetCarriedItem();
+		}
+
+		@JSFunction
+		public void preventDefault() {
+			nativePreventDefault();
+		}
+
+		@JSFunction
 		public void setTile(int x, int y, int z, int id) {
 			nativeSetTile(x, y, z, id, 0);
 		}
@@ -223,9 +299,16 @@ public class ScriptManager {
 		//public void setTile(int x, int y, int z, int id, int damage) {
 		//	nativeSetTile(x, y, z, id, damage);
 		//}
-		@JSFunction
-		public void print(String str) {
-			System.out.println(str);
+	}
+
+	private static class NativePointer extends ScriptableObject {
+		public long value;
+		public NativePointer(long value) {
+			this.value = value;
+		}
+		@Override
+		public String getClassName() {
+			return "NativePointer";
 		}
 	}
 }

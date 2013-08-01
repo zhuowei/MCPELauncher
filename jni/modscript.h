@@ -7,6 +7,60 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_X
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_X 0L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_Y
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_Y 1L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_Z
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_Z 2L
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetPlayerLoc
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetPlayerEnt
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetLevel
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLevel
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    setPosition
+ * Signature: (JFFF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_setPosition
+  (JNIEnv *, jclass, jlong, jfloat, jfloat, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetVel
+ * Signature: (JFI)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
+  (JNIEnv *, jclass, jlong, jfloat, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetCarriedItem
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
+  (JNIEnv *, jclass);
+
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetTile
@@ -17,12 +71,42 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePreventDefault
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePreventDefault
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *, jclass);
 
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_BlockHostObject */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_BlockHostObject
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_BlockHostObject
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif
