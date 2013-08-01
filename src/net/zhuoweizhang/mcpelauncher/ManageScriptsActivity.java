@@ -103,7 +103,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	/** gets the maximum number of patches this application can patch. A negative value indicates unlimited amount. */
 	protected int getMaxPatchCount() {
-		return this.getResources().getInteger(R.integer.max_num_patches);
+		return this.getResources().getInteger(R.integer.max_num_scripts);
 	}
 
 	protected void setPatchListModified() {

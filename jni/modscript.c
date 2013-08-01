@@ -8,6 +8,15 @@
 #include "mcpelauncher.h"
 #include "modscript.h"
 
+typedef struct {
+  char name[128];
+  const void* phdr;
+  int phnum;
+  unsigned entry;
+  unsigned base;
+  unsigned size;
+} soinfo2;
+
 typedef void Level;
 typedef struct {
 	void** vtable; //0
@@ -61,6 +70,8 @@ static void (*bl_Player_ride)(Player*, Entity*);
 static void (*bl_Entity_setPos)(Entity*, float, float, float);
 static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int);
 static int (*bl_Inventory_add)(void*, ItemInstance*);
+static void (*bl_Level_addEntity)(Level*, Entity*);
+static Entity* (*bl_MobFactory_createMob)(int, Level*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -219,6 +230,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	bl_Inventory_add(invPtr, instance);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type) {
+	//TODO: spawn entities, not just mobs
+	Entity* entity = bl_MobFactory_createMob(type, bl_level);
+	if (entity == NULL) {
+		//WTF?
+		return;
+	}
+	bl_Entity_setPos(entity, x, y, z);
+	bl_Level_addEntity(bl_level, entity);
+	
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz) {
 	if (bl_hasinit_script) return;
@@ -251,6 +275,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setPos = dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 	bl_Level_explode = dlsym(RTLD_DEFAULT, "_ZN5Level7explodeEP6Entityffffb");
 	bl_Inventory_add = dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
+	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
+	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+
+	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + 0xee6e6 + 1);
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
