@@ -143,6 +143,12 @@
     <Preference android:key="zz_manage_addons"
         android:title="@string/manage_addons"/>
 
+    <Preference
+        android:title="@string/pref_zz_manage_scripts">
+        <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
+                android:targetClass="net.zhuoweizhang.mcpelauncher.ManageScriptsActivity"/>
+    </Preference>
+
     </PreferenceCategory>
 
     <PreferenceCategory 
