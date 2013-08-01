@@ -350,6 +350,28 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		task.execute(id);
 	}
 
+	//the following method and array is adapted from http://modpe.cf.gy/modEditor.html
+	/**
+	 * Method to convert a Cfgy ID to a filename for downloading scripts off Treebl's server.
+	 * Each cfgy ID is a base 36 number.
+	 * Each cfgy number is the base10 representation of the ID with replaced digits. You know, because logic.
+	 */
+	private static String cfgyIdToFilename(String str) {
+		int cfgyID = Integer.parseInt(str, 36);
+		char[] cfgyFilename = Integer.toString(cfgyID).toCharArray();
+		for (int i = 0; i < cfgyFilename.length; i++) {
+			cfgyFilename[i] = cfgyMappings[(char) ((int)cfgyFilename[i] - 48)];
+		}
+
+		String retval = new String(cfgyFilename);
+		System.out.println(retval);
+		return retval;
+
+	}
+
+	/** The mapping table used to map between normal digits and Treebl digits. */
+	private static char[] cfgyMappings = new char[] {'f', 't', 'a', 'm', 'b', 'q', 'g', 'r', 'z', 'o'};
+
 	private final class FindScriptsThread implements Runnable {
 
 		public void run() {
@@ -419,7 +441,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 			try {
 				//Hurl the file to a byte array
-				url = new URL("http://cf.gy/mpescript/" + id + ".js");
+				url = new URL("http://modpe.cf.gy/mods/" + cfgyIdToFilename(id) + ".js");
 				conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestProperty("User-Agent", "BlockLauncher");
 				conn.setDoInput(true);
@@ -437,8 +459,9 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 					content = new byte[conn.getContentLength()];
 					is.read(content);
 				}
+				String contentStr = new String(content).replaceAll(" ", "+"); //WTF, Treebl.
 				//now we have the bytes, let's base64-decode it (Why, treebl?) then write it to a file
-				byte[] decoded = Base64.decode(content, Base64.DEFAULT);
+				byte[] decoded = Base64.decode(contentStr, Base64.DEFAULT);
 				fos = new FileOutputStream(file);
 				fos.write(decoded);
 				fos.flush();
@@ -464,6 +487,10 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		}
 
 		protected void onPostExecute(File file) {
+			if (file == null) {
+				Toast.makeText(ManageScriptsActivity.this, R.string.manage_patches_import_error, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			try {
 				int maxPatchCount = getMaxPatchCount();
 				if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
