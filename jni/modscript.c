@@ -39,6 +39,7 @@ static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlay
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
+static int (*bl_Level_getTile_real)(int, int, int)
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 
 static Level* bl_level;
@@ -126,6 +127,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_setTileAndData(bl_level, x, y, z, id, damage, 3); //3 = full block update
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	return bl_Level_getTile_real(x, y, z)
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePreventDefault
   (JNIEnv *env, jclass clazz) {
 	preventDefaultStatus = TRUE;
@@ -156,6 +162,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
 	if (bl_Level_setTileAndData == NULL) {
 		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to get setTileAndData: %s\n", dlerror());
+	}
+
+	bl_Level_getTile_real = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
+	if{bl_Level_getTile_real == NULL}
+	{
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to get getTile: %s\n", dlerror());
 	}
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");

@@ -221,6 +221,7 @@ public class ScriptManager {
 	public static native void nativeSetVel(long ent, float vel, int axis);
 	public static native int nativeGetCarriedItem();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
+	public static native int nativeGetTile(int x, int y, int z);
 	public static native void nativePreventDefault();
 
 	public static native void nativeSetupHooks();
@@ -299,6 +300,10 @@ public class ScriptManager {
 		//public void setTile(int x, int y, int z, int id, int damage) {
 		//	nativeSetTile(x, y, z, id, damage);
 		//}
+		@JSFunction
+		public int getTile(int x, int y, int z){
+			return nativeGetTile(x, y, z);
+		}
 	}
 
 	private static class NativePointer extends ScriptableObject {
