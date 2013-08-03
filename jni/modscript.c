@@ -52,6 +52,7 @@ typedef Player LocalPlayer;
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
+
 //This is true on the ARM/Dalvik/bionic platform
 
 //(0x23021C - 0x2301e8) / 4
@@ -72,6 +73,9 @@ static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
 static Entity* (*bl_MobFactory_createMob)(int, Level*);
+static int (*bl_Level_getTile)(Level*, int, int, int);
+static void (*bl_Level_setNightMode)(Level*, int);
+static void (*bl_Entity_setRot)(Entity*, float, float);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -84,13 +88,29 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 	bl_level = level;
 	bl_localplayer = (LocalPlayer*) player;
 	preventDefaultStatus = FALSE;
+	int itemId = 0;
+	if (itemStack != NULL) itemId = itemStack->id;
+
+	int blockId = bl_Level_getTile(level, x, y, z);
+
+#ifdef EXTREME_LOGGING
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: JavaVM = %p\n", bl_JavaVM);
+#endif
 
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+#ifdef EXTREME_LOGGING
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: env = %p\n", env);
+#endif
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIII)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemStack->id, 0); //TODO block ID
+#ifdef EXTREME_LOGGING
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: mid = %i, class = %p\n", mid, bl_scriptmanager_class);
+#endif
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId); //TODO block ID
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -243,6 +263,28 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetNightMode
+  (JNIEnv *env, jclass clazz, jboolean nightMode) {
+	bl_Level_setNightMode(bl_level, nightMode);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	return bl_Level_getTile(bl_level, x, y, z);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPositionRelative
+  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat deltax, jfloat deltay, jfloat deltaz) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	bl_Entity_setPos(entity, entity->x + deltax, entity->y + deltay, entity->z + deltaz);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetRot
+  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat yaw, jfloat pitch) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	bl_Entity_setRot(entity, yaw, pitch);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz) {
 	if (bl_hasinit_script) return;
@@ -277,6 +319,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_add = dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
+	bl_Level_getTile = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
+	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
+	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + 0xee6e6 + 1);

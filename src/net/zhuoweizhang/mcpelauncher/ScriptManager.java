@@ -75,6 +75,7 @@ public class ScriptManager {
 					((Function) obj).call(ctx, scope, scope, args);
 				} catch (Exception e) {
 					e.printStackTrace();
+					reportScriptError(state, e);
 				}
 			}
 		}
@@ -129,6 +130,15 @@ public class ScriptManager {
 	public static void reloadScript(File file) throws IOException {
 		removeScript(file.getName());
 		loadScript(file);
+	}
+
+	private static void reportScriptError(ScriptState state, Throwable t) {
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.scriptErrorCallback(state.name, t);
+			}
+		}
 	}
 
 
@@ -227,6 +237,12 @@ public class ScriptManager {
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
 	public static native void nativeSpawnEntity(float x, float y, float z, int entityType);
 
+	//0.2
+	public static native void nativeSetNightMode(boolean isNight);
+	public static native int nativeGetTile(int x, int y, int z);
+	public static native void nativeSetPositionRelative(long entity, float x, float y, float z);
+	public static native void nativeSetRot(long ent, float yaw, float pitch);
+
 	public static native void nativeSetupHooks();
 
 	public static class ScriptState {
@@ -248,6 +264,12 @@ public class ScriptManager {
 		@JSFunction
 		public void print(String str) {
 			System.out.println(str);
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.scriptPrintCallback(str);
+				}
+			}
 		}
 
 		@JSFunction
@@ -262,6 +284,7 @@ public class ScriptManager {
 		public double getPlayerZ() {
 			return nativeGetPlayerLoc(AXIS_Z);
 		}
+
 		@JSFunction
 		public NativePointer getPlayerEnt() {
 			return new NativePointer(nativeGetPlayerEnt());
@@ -327,6 +350,32 @@ public class ScriptManager {
 		@JSFunction
 		public void setTile(int x, int y, int z, int id) {
 			nativeSetTile(x, y, z, id, 0);
+		}
+
+		//standard methods introduced in API level 0.2
+		@JSFunction
+		public void clientMessage(String text) {
+			print(text); //TODO: proper client message support
+		}
+
+		@JSFunction
+		public void setNightMode(boolean isNight) {
+			nativeSetNightMode(isNight);
+		}
+
+		@JSFunction
+		public int getTile(int x, int y, int z) {
+			return nativeGetTile(x, y, z);
+		}
+
+		@JSFunction
+		public void setPositionRelative(NativePointer ent, double x, double y, double z) {
+			nativeSetPositionRelative(ent.value, (float) x, (float) y, (float) z);
+		}
+
+		@JSFunction
+		public void setRot(NativePointer ent, double yaw, double pitch) {
+			nativeSetRot(ent.value, (float) yaw, (float) pitch);
 		}
 		//@JSFunction
 		//public void setTile(int x, int y, int z, int id, int damage) {

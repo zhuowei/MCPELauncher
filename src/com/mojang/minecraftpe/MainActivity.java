@@ -258,7 +258,8 @@ public class MainActivity extends NativeActivity
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
-				ScriptManager.init(this);
+				boolean shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
+				if (shouldLoadScripts) ScriptManager.init(this);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1246,6 +1247,14 @@ public class MainActivity extends NativeActivity
 	public void leaveGameCallback() {
 	}
 
+	public void scriptPrintCallback(final String message) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				Toast.makeText(MainActivity.this, "Script: " + message, Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
@@ -1258,6 +1267,33 @@ public class MainActivity extends NativeActivity
 		} finally {
 			bytes.close();
 		}
+	}
+
+	private void reportError(final Throwable t) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				StringWriter strWriter = new StringWriter();
+				PrintWriter pWriter = new PrintWriter(strWriter);
+				t.printStackTrace(pWriter);
+				new AlertDialog.Builder(MainActivity.this).setTitle("Oh nose everything broke").setMessage(strWriter.toString()).
+					setPositiveButton(android.R.string.ok, null).
+					show();
+			}
+		});
+	}
+
+	public void scriptErrorCallback(final String scriptName, final Throwable t) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				StringWriter strWriter = new StringWriter();
+				PrintWriter pWriter = new PrintWriter(strWriter);
+				pWriter.println("Error occurred in script: " + scriptName);
+				t.printStackTrace(pWriter);
+				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).setMessage(strWriter.toString()).
+					setPositiveButton(android.R.string.ok, null).
+					show();
+			}
+		});
 	}
 
 	private class LoginWebViewClient extends WebViewClient {

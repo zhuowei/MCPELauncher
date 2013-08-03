@@ -43,6 +43,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_PATCH_INFO = 4;
 	private static final int DIALOG_IMPORT_SOURCES = 5;
 	private static final int DIALOG_IMPORT_FROM_CFGY = 6;
+	private static final int DIALOG_IMPORT_FROM_URL = 7;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
@@ -123,7 +124,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						ScriptManager.setEnabled(to, false);
 						int maxPatchCount = getMaxPatchCount();
 						if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
-							Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
+							Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 						} else {
 							ScriptManager.setEnabled(to, true);
 							afterPatchToggle(new ScriptListItem(to, true));
@@ -132,6 +133,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						findScripts();
 					} catch (Exception e) {
 						e.printStackTrace();
+						reportError(e);
 						Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG).show();
 					}
 				}
@@ -176,6 +178,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				return createImportSourcesDialog();
 			case DIALOG_IMPORT_FROM_CFGY:
 				return createImportFromCfgyDialog();
+			case DIALOG_IMPORT_FROM_URL:
+				return createImportFromUrlDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -200,7 +204,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	public void togglePatch(ScriptListItem patch) {
 		int maxPatchCount = getMaxPatchCount();
 		if (!patch.enabled && maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
-			Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		try {
@@ -311,7 +315,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	private AlertDialog createImportSourcesDialog() {
 		Resources res = this.getResources();
-		CharSequence[] options = {res.getString(R.string.script_import_from_local), res.getString(R.string.script_import_from_cfgy)};
+		CharSequence[] options = {res.getString(R.string.script_import_from_local), res.getString(R.string.script_import_from_cfgy), 
+			res.getString(R.string.script_import_from_url)};
 		return new AlertDialog.Builder(this).setTitle(R.string.script_import_from).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
@@ -320,6 +325,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						importPatchFromFile();
 					} else if (button == 1) {
 						showDialog(DIALOG_IMPORT_FROM_CFGY);
+					} else if (button == 2) {
+						showDialog(DIALOG_IMPORT_FROM_URL);
 					}
 				}
 			}).create();
@@ -332,6 +339,19 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					importFromCfgy(view.getText().toString());
+				}
+			}).
+			setNegativeButton(android.R.string.cancel, null).
+			create();
+	}
+
+	private AlertDialog createImportFromUrlDialog() {
+		final EditText view = new EditText(this);
+		return new AlertDialog.Builder(this).setTitle(R.string.script_import_from_url_enter).
+			setView(view).
+			setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					importFromUrl(view.getText().toString());
 				}
 			}).
 			setNegativeButton(android.R.string.cancel, null).
@@ -371,6 +391,25 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	/** The mapping table used to map between normal digits and Treebl digits. */
 	private static char[] cfgyMappings = new char[] {'f', 't', 'a', 'm', 'b', 'q', 'g', 'r', 'z', 'o'};
+
+	//end adapted
+	private void importFromUrl(String url) {
+		ImportScriptFromUrlTask task = new ImportScriptFromUrlTask();
+		task.execute(url);
+	}
+
+	private void reportError(final Throwable t) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				StringWriter strWriter = new StringWriter();
+				PrintWriter pWriter = new PrintWriter(strWriter);
+				t.printStackTrace(pWriter);
+				new AlertDialog.Builder(ManageScriptsActivity.this).setTitle(R.string.manage_patches_import_error).setMessage(strWriter.toString()).
+					setPositiveButton(android.R.string.ok, null).
+					show();
+			}
+		});
+	}
 
 	private final class FindScriptsThread implements Runnable {
 
@@ -426,8 +465,33 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		}
 	}
 
+	private abstract class ImportScriptTask extends AsyncTask<String, Void, File> {
+
+		protected void onPostExecute(File file) {
+			if (file == null) {
+				Toast.makeText(ManageScriptsActivity.this, R.string.manage_patches_import_error, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			try {
+				ScriptManager.setEnabled(file, false);
+				int maxPatchCount = getMaxPatchCount();
+				if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+					Toast.makeText(ManageScriptsActivity.this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
+				} else {
+					ScriptManager.setEnabled(file, true);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				reportError(e);
+				Toast.makeText(ManageScriptsActivity.this, R.string.manage_patches_import_error, Toast.LENGTH_SHORT).show();
+			}
+			findScripts();
+		}
+		
+	}
+
 	/** Import a script from Treebl's repo. */
-	private class ImportScriptFromCfgyTask extends AsyncTask<String, Void, File> {
+	private class ImportScriptFromCfgyTask extends ImportScriptTask {
 		protected File doInBackground(String... ids) {
 			String id = ids[0];
 
@@ -456,8 +520,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				if (response >= 400) return null;
 
 				if (is != null) {
-					content = new byte[conn.getContentLength()];
-					is.read(content);
+					content = bytesFromInputStream(is, conn.getContentLength() > 0 ? conn.getContentLength() : 1024);
 				}
 				String contentStr = new String(content).replaceAll(" ", "+"); //WTF, Treebl.
 				//now we have the bytes, let's base64-decode it (Why, treebl?) then write it to a file
@@ -467,6 +530,69 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				fos.flush();
 				return file;
 			} catch (Exception e) {
+				e.printStackTrace();
+				reportError(e);
+				return null;
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (Exception e) {
+					}
+				}
+				if (fos != null) {
+					try {
+						fos.close();
+					} catch (Exception e) {
+					}
+				}
+			}
+			
+		}
+		
+	}
+
+	/** Import a script from a url. */
+	private class ImportScriptFromUrlTask extends ImportScriptTask {
+		protected File doInBackground(String... ids) {
+
+			InputStream is = null;
+			byte[] content = null;
+			int response = 0;
+			FileOutputStream fos = null;
+			File file = null;
+			HttpURLConnection conn;
+			URL url;
+
+			try {
+				//Hurl the file to a byte array
+				url = new URL(ids[0]);
+				System.out.println(url);
+				String urlPath = url.getPath();
+				String fileName = urlPath.substring(urlPath.lastIndexOf("/") + 1);
+				if (fileName.length() < 1) fileName = "nameless_script.js";
+				file = new File(getDir(SCRIPTS_DIR, 0), fileName);
+				conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestProperty("User-Agent", "BlockLauncher");
+				conn.setDoInput(true);
+				conn.connect();
+				try {
+					response = conn.getResponseCode();
+					is = conn.getInputStream();
+				} catch (Exception e) {
+					is = conn.getErrorStream();
+				}
+
+				if (response >= 400) return null;
+				if (is == null) return null;
+				content = bytesFromInputStream(is, conn.getContentLength() > 0 ? conn.getContentLength() : 1024);
+				//no processing done on URL scripts
+				fos = new FileOutputStream(file);
+				fos.write(content);
+				fos.flush();
+				return file;
+			} catch (Exception e) {
+				reportError(e);
 				e.printStackTrace();
 				return null;
 			} finally {
@@ -486,24 +612,20 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			
 		}
 
-		protected void onPostExecute(File file) {
-			if (file == null) {
-				Toast.makeText(ManageScriptsActivity.this, R.string.manage_patches_import_error, Toast.LENGTH_SHORT).show();
-				return;
+	}
+
+	private static byte[] bytesFromInputStream(InputStream in, int startingLength) throws IOException {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
+		try {
+			byte[] buffer = new byte[1024];
+			int count;
+			while ((count = in.read(buffer)) != -1) {
+				bytes.write(buffer, 0, count);
 			}
-			try {
-				int maxPatchCount = getMaxPatchCount();
-				if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
-					Toast.makeText(ManageScriptsActivity.this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
-				} else {
-					ScriptManager.setEnabled(file, true);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			findScripts();
+			return bytes.toByteArray();
+		} finally {
+			bytes.close();
 		}
-		
 	}
 
 }

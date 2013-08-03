@@ -59,6 +59,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference goToForumsPreference;
 	private Preference mcoRedirectAddressPreference;
 	private Preference serverListPreference;
+	private Preference scriptEnablePreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -98,6 +99,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		if (mcoRedirectAddressPreference != null) mcoRedirectAddressPreference.setOnPreferenceClickListener(this);
 		serverListPreference = findPreference("zz_server_list");
 		if (serverListPreference != null) serverListPreference.setOnPreferenceClickListener(this);
+		scriptEnablePreference = findPreference("zz_script_enable");
+		if (scriptEnablePreference != null) {
+			scriptEnablePreference.setOnPreferenceClickListener(this);
+			//if (!scriptSupported()) {
+			//	scriptEnablePreference.setEnabled(false);
+			//}
+		}
 	}
 
 	@Override
@@ -149,6 +157,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == serverListPreference) {
 			openServerList();
 			return true;
+		} else if (pref == scriptEnablePreference) {
+			needsRestart = true;
+			return false;
 		}
 		return false;
 	}
