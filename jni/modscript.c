@@ -45,6 +45,7 @@ typedef Player LocalPlayer;
 
 #define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 13
 #define GAMEMODE_VTABLE_OFFSET_ATTACK 19
+#define GAMEMODE_VTABLE_OFFSET_TICK 9
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -76,6 +77,7 @@ static Entity* (*bl_MobFactory_createMob)(int, Level*);
 static int (*bl_Level_getTile)(Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
+static void (*bl_GameMode_tick_real)(void*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -104,13 +106,13 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 #endif
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIII)V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIIII)V");
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: mid = %i, class = %p\n", mid, bl_scriptmanager_class);
 #endif
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId); //TODO block ID
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side); //TODO block ID
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -164,6 +166,19 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
 	if (!preventDefaultStatus) bl_GameMode_attack_real(gamemode, player, entity);
+}
+
+void bl_GameMode_tick_hook(void* gamemode) {
+	JNIEnv *env;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "tickCallback", "()V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	bl_GameMode_tick_real(gamemode);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
@@ -303,6 +318,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_GameMode_attack_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackEP6PlayerP6Entity");
 	creativeVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (int) &bl_GameMode_attack_hook;
 	survivalVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (int) &bl_GameMode_attack_hook;
+	bl_GameMode_tick_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode4tickEv");
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");

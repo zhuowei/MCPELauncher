@@ -143,7 +143,7 @@
     <Preference android:key="zz_manage_addons"
         android:title="@string/manage_addons"/>
 
-    <Preference android:key="zz_script_enable"
+    <CheckBoxPreference android:key="zz_script_enable"
         android:title="@string/pref_zz_script_enable"
         android:defaultValue="true"/>
 

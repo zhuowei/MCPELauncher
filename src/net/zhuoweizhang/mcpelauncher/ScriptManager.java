@@ -81,8 +81,8 @@ public class ScriptManager {
 		}
 	}
 
-	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid) {
-		callScriptMethod("useItem", x, y, z, itemid, blockid);
+	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side) {
+		callScriptMethod("useItem", x, y, z, itemid, blockid, side);
 	}
 
 	public static void setLevelCallback(boolean hasLevel) {
@@ -108,6 +108,10 @@ public class ScriptManager {
 
 	public static void attackCallback(long attacker, long victim) {
 		callScriptMethod("attackHook", new NativePointer(attacker), new NativePointer(victim));
+	}
+
+	public static void tickCallback() {
+		callScriptMethod("bl_tickHook");
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
