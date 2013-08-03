@@ -23,7 +23,7 @@ typedef struct {
 	float x; //4
 	float y; //8
 	float z; //12
-	char filler[10];
+	char filler[9 * 4];
 	float motionX; //52
 	float motionY; //56
 	float motionZ; //60
@@ -214,13 +214,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
   (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat vel, jint axis) {
 	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	//the iOS version probably uses Entity::lerpMotion; that's too mainstream so we set velocity directly
 	switch (axis) {
 		case AXIS_X:
 			entity->motionX = vel;
+			break;
 		case AXIS_Y:
 			entity->motionY = vel;
+			break;
 		case AXIS_Z:
 			entity->motionZ = vel;
+			break;
 	}
 }
 
@@ -276,6 +280,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPositionRelative
   (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat deltax, jfloat deltay, jfloat deltaz) {
 	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	//again, the iOS implement probably uses Entity::move, but too mainstream
 	bl_Entity_setPos(entity, entity->x + deltax, entity->y + deltay, entity->z + deltaz);
 }
 
