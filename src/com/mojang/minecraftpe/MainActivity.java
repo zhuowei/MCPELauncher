@@ -79,6 +79,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_NOT_SUPPORTED = 0x1005;
 	public static final int DIALOG_UPDATE_TEXTURE_PACK = 0x1006;
 	public static final int DIALOG_INSERT_TEXT = 0x1007;
+	public static final int DIALOG_MULTIPLAYER_DISABLE_SCRIPTS = 0x1008;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -524,6 +525,8 @@ public class MainActivity extends NativeActivity
 				return createUpdateTexturePackDialog();
 			case DIALOG_INSERT_TEXT:
 				return createInsertTextDialog();
+			case DIALOG_MULTIPLAYER_DISABLE_SCRIPTS:
+				return createMultiplayerDisableScriptsDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -693,7 +696,15 @@ public class MainActivity extends NativeActivity
 			})
 			.setNegativeButton(android.R.string.cancel, null)
 			.create();
-	}	
+	}
+
+	protected Dialog createMultiplayerDisableScriptsDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(R.string.script_disabled_in_multiplayer)
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
 
 	/**
 	 * @param time Unix timestamp
@@ -1237,7 +1248,14 @@ public class MainActivity extends NativeActivity
 	 * Called by the ScriptManager when a new level is loaded.
 	 * This is for subclasses to do cleanup/disable menu items that cannot be used ingame/show ads, etc
 	 */
-	public void setLevelCallback() {
+	public void setLevelCallback(boolean isRemote) {
+		if (isRemote && ScriptManager.scripts.size() > 0) {
+			this.runOnUiThread(new Runnable() {
+				public void run() {
+					showDialog(DIALOG_MULTIPLAYER_DISABLE_SCRIPTS);
+				}
+			});
+		}
 	}
 
 	/**

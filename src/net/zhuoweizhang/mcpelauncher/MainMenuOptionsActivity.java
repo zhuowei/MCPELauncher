@@ -60,6 +60,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference mcoRedirectAddressPreference;
 	private Preference serverListPreference;
 	private Preference scriptEnablePreference;
+	private Preference manageScriptsPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -105,6 +106,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			//if (!scriptSupported()) {
 			//	scriptEnablePreference.setEnabled(false);
 			//}
+		}
+		manageScriptsPreference = findPreference("zz_manage_scripts");
+		if (manageScriptsPreference != null) {
+			if (ScriptManager.isRemote) manageScriptsPreference.setEnabled(false);
 		}
 	}
 

@@ -44,6 +44,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_IMPORT_SOURCES = 5;
 	private static final int DIALOG_IMPORT_FROM_CFGY = 6;
 	private static final int DIALOG_IMPORT_FROM_URL = 7;
+	private static final int DIALOG_VERSION_INCOMPATIBLE = 8;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
@@ -77,6 +78,9 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		importButton.setOnClickListener(this);
 		disabledString = " ".concat(getResources().getString(R.string.manage_patches_disabled));
 		ScriptManager.androidContext = this.getApplicationContext();
+		if (!versionIsSupported()) {
+			showDialog(DIALOG_VERSION_INCOMPATIBLE);
+		}
 	}
 
 	@Override
@@ -180,6 +184,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				return createImportFromCfgyDialog();
 			case DIALOG_IMPORT_FROM_URL:
 				return createImportFromUrlDialog();
+			case DIALOG_VERSION_INCOMPATIBLE:
+				return createVersionIncompatibleDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -358,6 +364,12 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			create();
 	}
 
+	private AlertDialog createVersionIncompatibleDialog() {
+		return new AlertDialog.Builder(this).setMessage(R.string.script_minecraft_version_incompatible).
+			setPositiveButton(android.R.string.ok, null).
+			create();
+	}
+
 	private boolean isValidPatch(ScriptListItem patch) {
 		if (patch.file.length() < 1) {
 			return false;
@@ -409,6 +421,14 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 					show();
 			}
 		});
+	}
+
+	private boolean versionIsSupported() {
+		try {
+			return getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0).versionCode == MinecraftConstants.MINECRAFT_VERSION_CODE;
+		} catch (PackageManager.NameNotFoundException ex) {
+			return false; //Not possible
+		}
 	}
 
 	private final class FindScriptsThread implements Runnable {

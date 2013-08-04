@@ -8,6 +8,8 @@
 #include "mcpelauncher.h"
 #include "modscript.h"
 
+typedef uint8_t cppbool;
+
 typedef struct {
   char name[128];
   const void* phdr;
@@ -17,7 +19,11 @@ typedef struct {
   unsigned size;
 } soinfo2;
 
-typedef void Level;
+typedef struct {
+	void** vtable; //0
+	char filler[13];
+	cppbool isRemote;
+} Level;
 typedef struct {
 	void** vtable; //0
 	float x; //4
@@ -128,9 +134,9 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "setLevelCallback", "(Z)V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "setLevelCallback", "(ZZ)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (int) (level != NULL));
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (int) (level != NULL), (jboolean) level->isRemote);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -306,7 +312,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
-  (JNIEnv *env, jclass clazz) {
+  (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
 	//edit the vtables of the GameMode implementations
 	bl_GameMode_useItemOn_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnEP6PlayerP5LevelP12ItemInstanceiiiiRK4Vec3");
@@ -347,7 +353,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + 0xee6e6 + 1);
+	int createMobOffset = 0xee6e6;
+	if (versionCode == 0x30007010) {
+		createMobOffset = 0xe130a;
+	} else if (versionCode == 0x40007010) {
+		createMobOffset = 0xe1322;
+	}
+	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + createMobOffset + 1);
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 

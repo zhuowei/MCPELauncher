@@ -147,7 +147,7 @@
         android:title="@string/pref_zz_script_enable"
         android:defaultValue="true"/>
 
-    <Preference
+    <Preference android:key="zz_manage_scripts"
         android:title="@string/pref_zz_manage_scripts"
         android:dependency="zz_script_enable">
         <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"

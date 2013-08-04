@@ -144,10 +144,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

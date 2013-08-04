@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.List;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
@@ -34,11 +35,15 @@ public class ScriptManager {
 
 	public static Set<String> enabledScripts = new HashSet<String>();
 
+	/** Is the currently loaded world a multiplayer world? */
+	public static boolean isRemote = false;
+
 	private static final int AXIS_X = 0;
 	private static final int AXIS_Y = 1;
 	private static final int AXIS_Z = 2;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
+		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
 		Script script = ctx.compileReader(in, sourceName, 0, null);
 		initJustLoadedScript(ctx, script, sourceName);
@@ -66,6 +71,7 @@ public class ScriptManager {
 	}
 
 	public static void callScriptMethod(String functionName, Object... args) {
+		if (isRemote) return; //No script loading/callbacks when in a remote world
 		Context ctx = Context.enter();
 		for (ScriptState state: scripts) {
 			Scriptable scope = state.scope;
@@ -85,18 +91,20 @@ public class ScriptManager {
 		callScriptMethod("useItem", x, y, z, itemid, blockid, side);
 	}
 
-	public static void setLevelCallback(boolean hasLevel) {
+	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
 		System.out.println("Level: " + hasLevel);
+		ScriptManager.isRemote = isRemote;
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
-				main.setLevelCallback();
+				main.setLevelCallback(isRemote);
 			}
 		}
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
+		ScriptManager.isRemote = false;
 		callScriptMethod("leaveGame");
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -116,7 +124,13 @@ public class ScriptManager {
 
 	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
-		nativeSetupHooks();
+		int versionCode = 0;
+		try {
+			versionCode = cxt.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0).versionCode;
+		} catch (PackageManager.NameNotFoundException e) {
+			//impossible, as if the package isn't installed, the app would've quit before loading scripts
+		}
+		nativeSetupHooks(versionCode);
 		scripts.clear();
 		androidContext = cxt.getApplicationContext();
 		loadEnabledScripts();
@@ -247,7 +261,7 @@ public class ScriptManager {
 	public static native void nativeSetPositionRelative(long entity, float x, float y, float z);
 	public static native void nativeSetRot(long ent, float yaw, float pitch);
 
-	public static native void nativeSetupHooks();
+	public static native void nativeSetupHooks(int versionCode);
 
 	public static class ScriptState {
 		public Script script;
