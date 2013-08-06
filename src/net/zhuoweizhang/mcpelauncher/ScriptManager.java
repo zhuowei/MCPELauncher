@@ -119,7 +119,7 @@ public class ScriptManager {
 	}
 
 	public static void tickCallback() {
-		callScriptMethod("bl_tickHook");
+		callScriptMethod("modTick");
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -260,6 +260,9 @@ public class ScriptManager {
 	public static native int nativeGetTile(int x, int y, int z);
 	public static native void nativeSetPositionRelative(long entity, float x, float y, float z);
 	public static native void nativeSetRot(long ent, float yaw, float pitch);
+	//0.3
+	public static native float nativeGetYaw(long ent);
+	public static native float nativeGetPitch(long ent);
 
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -275,6 +278,7 @@ public class ScriptManager {
 	}
 
 	private static class BlockHostObject extends ScriptableObject {
+		private NativePointer playerEnt = new NativePointer(0);
 		@Override
 		public String getClassName() {
 			return "BlockHostObject";
@@ -305,7 +309,8 @@ public class ScriptManager {
 
 		@JSFunction
 		public NativePointer getPlayerEnt() {
-			return new NativePointer(nativeGetPlayerEnt());
+			playerEnt.value = nativeGetPlayerEnt();
+			return playerEnt;
 		}
 		@JSFunction
 		public NativePointer getLevel() {
@@ -399,6 +404,19 @@ public class ScriptManager {
 		//public void setTile(int x, int y, int z, int id, int damage) {
 		//	nativeSetTile(x, y, z, id, damage);
 		//}
+
+		//standard methods introduced in API level 0.3
+		@JSFunction
+		public double getPitch(NativePointer ent) {
+			if (ent == null) ent = getPlayerEnt();
+			return nativeGetPitch(ent.value);
+		}
+
+		@JSFunction
+		public double getYaw(NativePointer ent) {
+			if (ent == null) ent = getPlayerEnt();
+			return nativeGetYaw(ent.value);
+		}
 	}
 
 	private static class NativePointer extends ScriptableObject {

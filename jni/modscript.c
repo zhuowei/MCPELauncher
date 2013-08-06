@@ -311,6 +311,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setRot(entity, yaw, pitch);
 }
 
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
+  (JNIEnv *env, jclass clazz, jlong entityPtr) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	return entity->pitch;
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetYaw
+  (JNIEnv *env, jclass clazz, jlong entityPtr) {
+	Entity* entity = (Entity*) (intptr_t) entityPtr;
+	return entity->yaw;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -45,6 +46,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_IMPORT_FROM_CFGY = 6;
 	private static final int DIALOG_IMPORT_FROM_URL = 7;
 	private static final int DIALOG_VERSION_INCOMPATIBLE = 8;
+	private static final int DIALOG_IMPORT_FROM_CLIPBOARD = 9;
+	private static final int DIALOG_IMPORT_FROM_CLIPBOARD_CODE = 10;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
@@ -60,6 +63,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private Button importButton;
 
 	private boolean prePatchConfigure = true;
+
+	private String importClipboardName = "";
 
 	/** Called when the activity is first created. */
 	@Override
@@ -186,6 +191,10 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				return createImportFromUrlDialog();
 			case DIALOG_VERSION_INCOMPATIBLE:
 				return createVersionIncompatibleDialog();
+			case DIALOG_IMPORT_FROM_CLIPBOARD:
+				return createImportFromClipboardDialog();
+			case DIALOG_IMPORT_FROM_CLIPBOARD_CODE:
+				return createImportFromClipboardCodeDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -202,6 +211,11 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			case DIALOG_PATCH_INFO:
 				preparePatchInfo((AlertDialog) dialog, selectedPatchItem);
 				break;
+			case DIALOG_IMPORT_FROM_CLIPBOARD_CODE:
+				AlertDialog bDialog = (AlertDialog) dialog;
+				android.text.ClipboardManager cmgr = (android.text.ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
+				CharSequence cSequence = cmgr.getText();
+				((EditText) bDialog.findViewById(20130805)).setText(cSequence);
 			default:
 				super.onPrepareDialog(dialogId, dialog);
 		}
@@ -322,7 +336,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private AlertDialog createImportSourcesDialog() {
 		Resources res = this.getResources();
 		CharSequence[] options = {res.getString(R.string.script_import_from_local), res.getString(R.string.script_import_from_cfgy), 
-			res.getString(R.string.script_import_from_url)};
+			res.getString(R.string.script_import_from_url), res.getString(R.string.script_import_from_clipboard)};
 		return new AlertDialog.Builder(this).setTitle(R.string.script_import_from).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
@@ -333,6 +347,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						showDialog(DIALOG_IMPORT_FROM_CFGY);
 					} else if (button == 2) {
 						showDialog(DIALOG_IMPORT_FROM_URL);
+					} else if (button == 3) {
+						showDialog(DIALOG_IMPORT_FROM_CLIPBOARD);
 					}
 				}
 			}).create();
@@ -367,6 +383,34 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private AlertDialog createVersionIncompatibleDialog() {
 		return new AlertDialog.Builder(this).setMessage(R.string.script_minecraft_version_incompatible).
 			setPositiveButton(android.R.string.ok, null).
+			create();
+	}
+
+	private AlertDialog createImportFromClipboardDialog() {
+		final EditText view = new EditText(this);
+		return new AlertDialog.Builder(this).setTitle(R.string.script_import_from_clipboard_name).
+			setView(view).
+			setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					importClipboardName = view.getText().toString();
+					showDialog(DIALOG_IMPORT_FROM_CLIPBOARD_CODE);
+				}
+			}).
+			setNegativeButton(android.R.string.cancel, null).
+			create();
+	}
+
+	private AlertDialog createImportFromClipboardCodeDialog() {
+		final EditText view = new EditText(this);
+		view.setId(20130805);
+		return new AlertDialog.Builder(this).setTitle(R.string.script_import_from_clipboard_code).
+			setView(view).
+			setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					importFromClipboard(view.getText().toString());
+				}
+			}).
+			setNegativeButton(android.R.string.cancel, null).
 			create();
 	}
 
@@ -429,6 +473,39 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		} catch (PackageManager.NameNotFoundException ex) {
 			return false; //Not possible
 		}
+	}
+
+	private static URL getCfgyUrl(String id) throws MalformedURLException {
+		id = id.trim();
+		boolean legacyScript = id.length() >= 6 || id.matches("[a-zA-Z]"); //more than 6 characters or contains non-numeric characters
+		if (legacyScript) {
+			return new URL("http://modpe.cf.gy/mods/" + cfgyIdToFilename(id) + ".js");
+		} else {
+			return new URL("http://betamodpe2.cf.gy/user/getScr.php?scrid=" + id);
+		}
+	}
+
+	private void importFromClipboard(String code) {
+		try {
+			File patchesFolder = getDir(SCRIPTS_DIR, 0);
+			File scriptFile = new File(patchesFolder, importClipboardName + ".js");
+			PrintWriter printWriter = new PrintWriter(scriptFile);
+			printWriter.write(code);
+			printWriter.flush();
+			printWriter.close();
+
+			ScriptManager.setEnabled(scriptFile, false);
+			int maxPatchCount = getMaxPatchCount();
+			if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+				Toast.makeText(ManageScriptsActivity.this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
+			} else {
+				ScriptManager.setEnabled(scriptFile, true);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+		findScripts();
 	}
 
 	private final class FindScriptsThread implements Runnable {
@@ -525,7 +602,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 			try {
 				//Hurl the file to a byte array
-				url = new URL("http://modpe.cf.gy/mods/" + cfgyIdToFilename(id) + ".js");
+				url = getCfgyUrl(id);
 				conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestProperty("User-Agent", "BlockLauncher");
 				conn.setDoInput(true);

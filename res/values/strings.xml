@@ -143,6 +143,9 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="script_import_from_cfgy">Treebl\'s official repo</string>
     <string name="script_import_from_bl_repo">BlockLauncher testing repo</string>
     <string name="script_import_from_url">Web address</string>
+    <string name="script_import_from_clipboard">Clipboard</string>
+    <string name="script_import_from_clipboard_name">Enter name for script</string>
+    <string name="script_import_from_clipboard_code">Code to import</string>
     <string name="script_import_from_cfgy_id">Enter the ID of the script to import</string>
     <string name="script_import_from_url_enter">Enter the address of the script to import</string>
     <string name="script_import_too_many">Upgrade to BlockLauncher Pro to patch more than one script at a time</string>
