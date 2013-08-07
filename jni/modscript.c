@@ -56,6 +56,7 @@ typedef Player LocalPlayer;
 #define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 13
 #define GAMEMODE_VTABLE_OFFSET_ATTACK 19
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
+#define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -89,17 +90,18 @@ static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
 static Entity* (*bl_Level_getEntity)(Level*, int);
+static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
-static LocalPlayer* bl_localplayer;
+static Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 static int preventDefaultStatus = 0;
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
 	JNIEnv *env;
 	bl_level = level;
-	bl_localplayer = (LocalPlayer*) player;
+	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
 	int itemId = 0;
 	if (itemStack != NULL) itemId = itemStack->id;
@@ -165,7 +167,7 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
 
 void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 	JNIEnv *env;
-	bl_localplayer = (LocalPlayer*) player;
+	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
@@ -190,6 +192,11 @@ void bl_GameMode_tick_hook(void* gamemode) {
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	bl_GameMode_tick_real(gamemode);
+}
+
+void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
+	bl_GameMode_initPlayer_real(gamemode, player);
+	bl_localplayer = player;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
@@ -355,6 +362,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_GameMode_tick_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode4tickEv");
 	creativeVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
 	survivalVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
+
+	bl_GameMode_initPlayer_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode10initPlayerEP6Player");
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (int) &bl_GameMode_initPlayer_hook;
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (int) &bl_GameMode_initPlayer_hook;
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
