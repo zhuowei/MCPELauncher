@@ -29,7 +29,9 @@ typedef struct {
 	float x; //4
 	float y; //8
 	float z; //12
-	char filler[9 * 4];
+	char filler[12];//16
+	int entityId; //28
+	char filler2[20];//32
 	float motionX; //52
 	float motionY; //56
 	float motionZ; //60
@@ -84,6 +86,7 @@ static int (*bl_Level_getTile)(Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
+static Entity* (*bl_Level_getEntity)(Level*, int);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -165,9 +168,9 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "attackCallback", "(JJ)V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "attackCallback", "(II)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (jlong) (intptr_t) player, (jlong) (intptr_t) entity);
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, player->entityId, entity->entityId);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -204,9 +207,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	preventDefaultStatus = TRUE;
 }
 
-JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
   (JNIEnv *env, jclass clazz) {
-	return (jlong) (intptr_t) bl_localplayer;
+	return bl_localplayer->entityId;
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLevel
@@ -227,14 +230,16 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPosition
-  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat x, jfloat y, jfloat z) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId, jfloat x, jfloat y, jfloat z) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
 	bl_Entity_setPos(entity, x, y, z);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
-  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat vel, jint axis) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId, jfloat vel, jint axis) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
 	//the iOS version probably uses Entity::lerpMotion; that's too mainstream so we set velocity directly
 	switch (axis) {
 		case AXIS_X:
@@ -250,10 +255,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
-  (JNIEnv *env, jclass clazz, jlong riderPtr, jlong mountPtr) {
+  (JNIEnv *env, jclass clazz, jint riderId, jint mountId) {
 	//use vtable so the rider doesn't have to be a player (useful?)
-	Entity* rider = (Entity*) (intptr_t) riderPtr;
-	Entity* mount = (Entity*) (intptr_t) mountPtr;
+	Entity* rider = bl_Level_getEntity(bl_level, riderId);
+	Entity* mount = bl_Level_getEntity(bl_level, mountId);
+	if (rider == NULL) return;
 	void* vtable = rider->vtable[19];
 	void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
 	fn(rider, mount);
@@ -299,27 +305,31 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPositionRelative
-  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat deltax, jfloat deltay, jfloat deltaz) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId, jfloat deltax, jfloat deltay, jfloat deltaz) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
 	//again, the iOS implement probably uses Entity::move, but too mainstream
 	bl_Entity_setPos(entity, entity->x + deltax, entity->y + deltay, entity->z + deltaz);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetRot
-  (JNIEnv *env, jclass clazz, jlong entityPtr, jfloat yaw, jfloat pitch) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId, jfloat yaw, jfloat pitch) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
 	bl_Entity_setRot(entity, yaw, pitch);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
-  (JNIEnv *env, jclass clazz, jlong entityPtr) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return 0.0f;
 	return entity->pitch;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetYaw
-  (JNIEnv *env, jclass clazz, jlong entityPtr) {
-	Entity* entity = (Entity*) (intptr_t) entityPtr;
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return 0.0f;
 	return entity->yaw;
 }
 
@@ -363,6 +373,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getTile = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
+	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xee6e6;

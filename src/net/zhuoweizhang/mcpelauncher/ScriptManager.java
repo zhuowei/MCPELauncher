@@ -114,8 +114,8 @@ public class ScriptManager {
 		}
 	}
 
-	public static void attackCallback(long attacker, long victim) {
-		callScriptMethod("attackHook", new NativePointer(attacker), new NativePointer(victim));
+	public static void attackCallback(int attacker, int victim) {
+		callScriptMethod("attackHook", new NativeEntity(attacker), new NativeEntity(victim));
 	}
 
 	public static void tickCallback() {
@@ -243,13 +243,13 @@ public class ScriptManager {
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
-	public static native long nativeGetPlayerEnt();
+	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
-	public static native void nativeSetPosition(long entity, float x, float y, float z);
-	public static native void nativeSetVel(long ent, float vel, int axis);
+	public static native void nativeSetPosition(int entity, float x, float y, float z);
+	public static native void nativeSetVel(int ent, float vel, int axis);
 	public static native void nativeExplode(float x, float y, float z, float radius);
 	public static native void nativeAddItemInventory(int id, int amount);
-	public static native void nativeRideAnimal(long rider, long mount);
+	public static native void nativeRideAnimal(int rider, int mount);
 	public static native int nativeGetCarriedItem();
 	public static native void nativePreventDefault();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
@@ -258,11 +258,11 @@ public class ScriptManager {
 	//0.2
 	public static native void nativeSetNightMode(boolean isNight);
 	public static native int nativeGetTile(int x, int y, int z);
-	public static native void nativeSetPositionRelative(long entity, float x, float y, float z);
-	public static native void nativeSetRot(long ent, float yaw, float pitch);
+	public static native void nativeSetPositionRelative(int entity, float x, float y, float z);
+	public static native void nativeSetRot(int ent, float yaw, float pitch);
 	//0.3
-	public static native float nativeGetYaw(long ent);
-	public static native float nativeGetPitch(long ent);
+	public static native float nativeGetYaw(int ent);
+	public static native float nativeGetPitch(int ent);
 
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -278,7 +278,7 @@ public class ScriptManager {
 	}
 
 	private static class BlockHostObject extends ScriptableObject {
-		private NativePointer playerEnt = new NativePointer(0);
+		private NativeEntity playerEnt = new NativeEntity(0);
 		@Override
 		public String getClassName() {
 			return "BlockHostObject";
@@ -308,8 +308,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public NativePointer getPlayerEnt() {
-			playerEnt.value = nativeGetPlayerEnt();
+		public NativeEntity getPlayerEnt() {
+			playerEnt.entityId = nativeGetPlayerEnt();
 			return playerEnt;
 		}
 		@JSFunction
@@ -318,21 +318,21 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setPosition(NativePointer ent, double x, double y, double z) {
-			nativeSetPosition(ent.value, (float) x, (float) y, (float) z);
+		public void setPosition(NativeEntity ent, double x, double y, double z) {
+			nativeSetPosition(ent.entityId, (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
-		public void setVelX(NativePointer ent, double amount) {
-			nativeSetVel(ent.value, (float) amount, AXIS_X);
+		public void setVelX(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_X);
 		}
 		@JSFunction
-		public void setVelY(NativePointer ent, double amount) {
-			nativeSetVel(ent.value, (float) amount, AXIS_Y);
+		public void setVelY(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_Y);
 		}
 		@JSFunction
-		public void setVelZ(NativePointer ent, double amount) {
-			nativeSetVel(ent.value, (float) amount, AXIS_Z);
+		public void setVelZ(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_Z);
 		}
 
 		@JSFunction
@@ -346,8 +346,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void rideAnimal(NativePointer /*Flynn*/rider, NativePointer mount) {
-			nativeRideAnimal(rider.value, mount.value);
+		public void rideAnimal(NativeEntity /*Flynn*/rider, NativeEntity mount) {
+			nativeRideAnimal(rider.entityId, mount.entityId);
 		}
 
 		@JSFunction
@@ -392,13 +392,13 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setPositionRelative(NativePointer ent, double x, double y, double z) {
-			nativeSetPositionRelative(ent.value, (float) x, (float) y, (float) z);
+		public void setPositionRelative(NativeEntity ent, double x, double y, double z) {
+			nativeSetPositionRelative(ent.entityId, (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
-		public void setRot(NativePointer ent, double yaw, double pitch) {
-			nativeSetRot(ent.value, (float) yaw, (float) pitch);
+		public void setRot(NativeEntity ent, double yaw, double pitch) {
+			nativeSetRot(ent.entityId, (float) yaw, (float) pitch);
 		}
 		//@JSFunction
 		//public void setTile(int x, int y, int z, int id, int damage) {
@@ -407,15 +407,15 @@ public class ScriptManager {
 
 		//standard methods introduced in API level 0.3
 		@JSFunction
-		public double getPitch(NativePointer ent) {
+		public double getPitch(NativeEntity ent) {
 			if (ent == null) ent = getPlayerEnt();
-			return nativeGetPitch(ent.value);
+			return nativeGetPitch(ent.entityId);
 		}
 
 		@JSFunction
-		public double getYaw(NativePointer ent) {
+		public double getYaw(NativeEntity ent) {
 			if (ent == null) ent = getPlayerEnt();
-			return nativeGetYaw(ent.value);
+			return nativeGetYaw(ent.entityId);
 		}
 	}
 
@@ -427,6 +427,17 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "NativePointer";
+		}
+	}
+
+	private static class NativeEntity extends ScriptableObject {
+		public int entityId;
+		public NativeEntity(int entityId) {
+			this.entityId = entityId;
+		}
+		@Override
+		public String getClassName() {	
+			return "NativeEntity";
 		}
 	}
 }

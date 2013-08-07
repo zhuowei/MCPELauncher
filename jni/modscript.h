@@ -24,9 +24,9 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetPlayerEnt
- * Signature: ()J
+ * Signature: ()I
  */
-JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
   (JNIEnv *, jclass);
 
 /*
@@ -40,18 +40,18 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetPosition
- * Signature: (JFFF)V
+ * Signature: (IFFF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPosition
-  (JNIEnv *, jclass, jlong, jfloat, jfloat, jfloat);
+  (JNIEnv *, jclass, jint, jfloat, jfloat, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetVel
- * Signature: (JFI)V
+ * Signature: (IFI)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
-  (JNIEnv *, jclass, jlong, jfloat, jint);
+  (JNIEnv *, jclass, jint, jfloat, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -72,10 +72,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeRideAnimal
- * Signature: (JJ)V
+ * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
-  (JNIEnv *, jclass, jlong, jlong);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -128,34 +128,34 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetPositionRelative
- * Signature: (JFFF)V
+ * Signature: (IFFF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPositionRelative
-  (JNIEnv *, jclass, jlong, jfloat, jfloat, jfloat);
+  (JNIEnv *, jclass, jint, jfloat, jfloat, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetRot
- * Signature: (JFF)V
+ * Signature: (IFF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetRot
-  (JNIEnv *, jclass, jlong, jfloat, jfloat);
+  (JNIEnv *, jclass, jint, jfloat, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetYaw
- * Signature: (J)F
+ * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetYaw
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetPitch
- * Signature: (J)F
+ * Signature: (I)F
  */
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
-  (JNIEnv *, jclass, jlong);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -165,6 +165,17 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *, jclass, jint);
 
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif
