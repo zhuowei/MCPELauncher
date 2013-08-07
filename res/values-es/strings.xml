@@ -141,7 +141,7 @@ Ver el hilo de Minecraft Forum para obtener una lista de contribuyentes."</strin
     <string name="script_import_from_cfgy_id">Introduzca el ID del script para importar</string>
     <string name="script_import_from_url_enter">Introduzca la dirección del script para importar</string>
     <string name="script_import_too_many">Actualiza BlockLauncher Pro para parchear más de un script al mismo tiempo</string>
-    <string name="script_execution_error">An error occurred in a ModPE Script</string>
+    <string name="script_execution_error">Se ha producido un error en un Script de ModPE</string>
     <string name="script_disabled_in_multiplayer">Sus Scripts ModPE han sido desactivados en el modo multijugador, ya que pueden causar que Blocklauncher cierre. Se volverán a habilitar cuando se desconecte del servidor.</string>
     <string name="script_minecraft_version_incompatible">ModPE scripts no son compatibles con tu versión de Minecraft PE. Algunos métodos en scripts puede no funcionar, o puede que se cierre BlockLauncher. Usalos bajo tu propio riesgo.</string>
     <string name="permlab_mcpelauncher_addon">BlockLauncher Complemento</string>
