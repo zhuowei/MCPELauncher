@@ -37,6 +37,8 @@ typedef struct {
 	float motionZ; //60
 	float yaw; //64
 	float pitch; //68
+	float prevYaw; //72
+	float prevPitch; //76
 } Entity;
 typedef Entity Player;
 typedef struct {
@@ -192,6 +194,7 @@ void bl_GameMode_tick_hook(void* gamemode) {
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
   (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return 0;
 	ItemInstance* instance = bl_Player_getCarriedItem(bl_localplayer);
 	if (instance == NULL) return 0;
 	return instance->id;
@@ -209,6 +212,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
   (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return 0;
 	return bl_localplayer->entityId;
 }
 
@@ -219,6 +223,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
   (JNIEnv *env, jclass clazz, jint axis) {
+	if (bl_localplayer == NULL) return 0;
 	switch (axis) {
 		case AXIS_X:
 			return bl_localplayer->x;
@@ -272,6 +277,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
   (JNIEnv *env, jclass clazz, jint id, jint amount) {
+	if (bl_localplayer == NULL) return;
 	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
 	instance->id = id;
 	instance->damage = 0;
