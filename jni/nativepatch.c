@@ -9,6 +9,9 @@
 
 #include <mcpelauncher.h>
 
+//I can haz Substrate?
+void MSHookFunction(void *symbol, void *replace, void **result);
+
 JavaVM* bl_JavaVM;
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_pokerface_PokerFace_mprotect
@@ -39,40 +42,7 @@ int __mprotect_no_errno_set(void * a, int n, int p)
 
 void mcpelauncher_hook(void *orig_fcn, void* new_fcn, void **orig_fcn_ptr)
 {
-    __android_log_print(ANDROID_LOG_INFO, "andhook_embed", "andhook: placing hook (orig_fcn=%p, new_fcn=%p, orig_fcn_ptr=%p)\n", 
-            orig_fcn,
-            new_fcn,
-            orig_fcn_ptr );
-
-#ifdef __arm__
-
-    int thumbMode = (int) orig_fcn & 0x1;
-
-    if (thumbMode) {
-        orig_fcn = (void*) ((int) orig_fcn - 1);
-        
-    }
-
-    unsigned char *hook = malloc( sysconf( _SC_PAGESIZE ) );
-
-    __memcpy( hook, (unsigned char *)orig_fcn, 8 );    /* save 1st 8 bytes of orig fcn */
-    *(int *)(hook + 8) = 0xf000f85f;                   /* ldr pc, [pc] */
-    *(int *)(hook + 12) = (int)orig_fcn + 9;           /* ptr to orig fcn offset */
-
-    if( __mprotect_no_errno_set( (void *)(int)hook - ((int)hook % sysconf( _SC_PAGESIZE )),
-                                 sysconf( _SC_PAGESIZE ),
-                                 PROT_EXEC|PROT_READ|PROT_WRITE ) == 0 ) {
-        if( 1 ) {
-            *((unsigned int*)orig_fcn) = 0xf000f85f; //f85ff004, actually, but half-endian swap
-            *((unsigned int*)((int)orig_fcn + 4)) = (int)new_fcn;
-
-            if( 1 ) {
-                *orig_fcn_ptr = (void*) (hook + 1) ;
-            }
-        }
-    }
-
-#endif
+	MSHookFunction(orig_fcn, new_fcn, orig_fcn_ptr);
 }
 
 int mcpelauncher_get_version() {

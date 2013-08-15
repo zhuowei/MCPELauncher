@@ -122,6 +122,11 @@ public class ScriptManager {
 		callScriptMethod("modTick");
 	}
 
+	public static void chatCallback(String str) {
+		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
+		callScriptMethod("procCmd", str.substring(1));
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
 		int versionCode = 0;

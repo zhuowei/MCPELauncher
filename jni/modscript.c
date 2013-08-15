@@ -49,7 +49,11 @@ typedef struct {
 
 typedef void Minecraft;
 
-typedef void cppstr;
+typedef struct {
+	void** vtable; //0
+	char filler[16];//4
+	char* pointer;//20
+} cppstr;
 
 typedef Player LocalPlayer;
 
@@ -91,6 +95,7 @@ static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
+static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -197,6 +202,24 @@ void bl_GameMode_tick_hook(void* gamemode) {
 void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 	bl_GameMode_initPlayer_real(gamemode, player);
 	bl_localplayer = player;
+}
+
+void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
+	cppstr* chatMessage = *((cppstr**) ((int) chatScreen + 104));
+	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %s %i\n", chatMessage->pointer);
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	jstring chatMessageJString = (*env)->NewStringUTF(env, chatMessage->pointer);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "chatCallback", "(Ljava/lang/String;)V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, chatMessageJString);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (!preventDefaultStatus) bl_ChatScreen_sendChatMessage_real(chatScreen);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
@@ -374,6 +397,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+
+	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
+	mcpelauncher_hook(sendChatMessage, &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+
 	//get the level set block method. In future versions this might link against libminecraftpe itself
 	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
 	if (bl_Level_setTileAndData == NULL) {

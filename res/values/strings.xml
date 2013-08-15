@@ -100,7 +100,7 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
-This program contains code from 2of1\'s Andhook framework; used with permission.\n
+This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 This program uses the libsuperuser library by Chainfire.\n
 For full licensing information, check the Minecraft Forums thread.\n
     </string>

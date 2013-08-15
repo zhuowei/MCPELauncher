@@ -48,6 +48,7 @@ public class PokerFace {
 	}
 
 	static {
+		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.loadLibrary("mcpelauncher");
 	}
 
