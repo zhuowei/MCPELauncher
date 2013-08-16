@@ -446,7 +446,7 @@ public class MainActivity extends NativeActivity
 
 	//added in 0.7.0:
 	//sig changed in 0.7.3. :(
-	public native void nativeLoginData(String session, String param2, String refreshToken, String fourthParam);
+	public native void nativeLoginData(String session, String param2, String refreshToken, String user);
 	public native void nativeStopThis();
 	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
 
@@ -1047,22 +1047,22 @@ public class MainActivity extends NativeActivity
 	//added in 0.7.3
 	public String getAccessToken() {
 		Log.i(TAG, "Get access token");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("refreshToken", "");
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", "");
 	}
 
 	public String getClientId() {
 		Log.i(TAG, "Get client ID");
-		return "1111111";
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("clientId", "");
 	}
 
 	public String getProfileId() {
 		Log.i(TAG, "Get profile ID");
-		return "1111111";
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("profileUuid", "");
 	}
 
 	public String getProfileName() {
 		Log.i(TAG, "Get profile name");
-		return "LOLOLOL";
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("profileName", "");
 	}
 
 	public void statsTrackEvent(String firstEvent, String secondEvent) {
@@ -1078,12 +1078,22 @@ public class MainActivity extends NativeActivity
 		return false;
 	}
 
-	public void setLoginInformation(String a, String b, String c, String d) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Login info: " + a + ":" + b + ":" + c + ":" + d);
+	public void setLoginInformation(String accessToken, String clientId, String profileUuid, String profileName) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Login info: " + accessToken + ":" + clientId + ":" + profileUuid + ":" + profileName);
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", accessToken).
+			putString("clientId", clientId).
+			putString("profileUuid", profileUuid).
+			putString("profileName", profileName).
+			apply();
 	}
 
 	public void clearLoginInformation() {
 		Log.i(TAG, "Clear login info");
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", "").
+			putString("clientId", "").
+			putString("profileUuid", "").
+			putString("profileName", "").
+			apply();
 	}
 
 	public boolean isSafeMode() {
@@ -1264,7 +1274,10 @@ public class MainActivity extends NativeActivity
 		if (session == null) return;
 		String profileName = launchUri.getQueryParameter("profileName");
 		String refreshToken = launchUri.getQueryParameter("identity");
-		nativeLoginData(session, profileName, refreshToken, "");
+		String accessToken = launchUri.getQueryParameter("accessToken");
+		String clientToken = launchUri.getQueryParameter("clientToken");
+		String profileUuid = launchUri.getQueryParameter("profileUuid");
+		nativeLoginData(accessToken, clientToken, profileUuid, profileName);
 	}
 
 	protected Intent getOptionsActivityIntent() {
