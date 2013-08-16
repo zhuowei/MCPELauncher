@@ -445,7 +445,8 @@ public class MainActivity extends NativeActivity
 	public native void nativeUnregisterThis();
 
 	//added in 0.7.0:
-	public native void nativeLoginData(String session, String param2, String refreshToken);
+	//sig changed in 0.7.3. :(
+	public native void nativeLoginData(String session, String param2, String refreshToken, String fourthParam);
 	public native void nativeStopThis();
 	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
 
@@ -998,7 +999,12 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies);
+		this.webRequest(requestId, timestamp, url, method, cookies, "");
+	}
+
+	//signature change in 0.7.3
+	public void webRequest(int requestId, long timestamp, String url, String method, String cookies, String extraParam) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies + ":" + extraParam);
 		//nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
 		url = filterUrl(url);
 		if (BuildConfig.DEBUG) Log.i(TAG, url);
@@ -1036,6 +1042,48 @@ public class MainActivity extends NativeActivity
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
 
+	}
+
+	//added in 0.7.3
+	public String getAccessToken() {
+		Log.i(TAG, "Get access token");
+		return PreferenceManager.getDefaultSharedPreferences(this).getString("refreshToken", "");
+	}
+
+	public String getClientId() {
+		Log.i(TAG, "Get client ID");
+		return "1111111";
+	}
+
+	public String getProfileId() {
+		Log.i(TAG, "Get profile ID");
+		return "1111111";
+	}
+
+	public String getProfileName() {
+		Log.i(TAG, "Get profile name");
+		return "LOLOLOL";
+	}
+
+	public void statsTrackEvent(String firstEvent, String secondEvent) {
+		Log.i(TAG, "Stats track: " + firstEvent + ":" + secondEvent);
+	}
+
+	public void statsUpdateUserData(String firstEvent, String secondEvent) {
+		Log.i(TAG, "Stats update user data: " + firstEvent + ":" + secondEvent);
+	}
+
+	public boolean isDemo() {
+		Log.i(TAG, "Is demo");
+		return false;
+	}
+
+	public void setLoginInformation(String a, String b, String c, String d) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Login info: " + a + ":" + b + ":" + c + ":" + d);
+	}
+
+	public void clearLoginInformation() {
+		Log.i(TAG, "Clear login info");
 	}
 
 	public boolean isSafeMode() {
@@ -1216,7 +1264,7 @@ public class MainActivity extends NativeActivity
 		if (session == null) return;
 		String profileName = launchUri.getQueryParameter("profileName");
 		String refreshToken = launchUri.getQueryParameter("identity");
-		nativeLoginData(session, profileName, refreshToken);
+		nativeLoginData(session, profileName, refreshToken, "");
 	}
 
 	protected Intent getOptionsActivityIntent() {
