@@ -102,6 +102,7 @@
 Некоторые части встроенного текстурпака основаны на RepetiCraft от Theevilpplz\'а, используются с его разрешения.\n
 This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 Эта программа использует библиотеку libsuperuser от Chainfire.\n
+This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
 Для получения полной информации о лицензировании проверьте тему на Minecraft Forums.\n
     </string>
     <string name="about_pro_library_credits"></string>

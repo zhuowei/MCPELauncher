@@ -100,6 +100,7 @@
  El paquete de textura de demostración, RepetiCraft, es hecho por Theevilpplz y se utiliza con permiso.
 This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
  Este programa utiliza la biblioteca libsuperuser de Chainfire.
+This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
  Para obtener información sobre la licencia completa, compruebe el hilo en los foros de minecraft. 
 "</string>
     <string name="about_pro_library_credits" />

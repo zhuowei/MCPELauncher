@@ -80,8 +80,9 @@
 Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
-This program contains a version of Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
+This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 This program uses the libsuperuser library by Chainfire.\
+This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
 For full licensing information, check the Minecraft Forums thread.\n
     </string>
     <string name="about_pro_library_credits"></string>

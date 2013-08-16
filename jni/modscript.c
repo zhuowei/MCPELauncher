@@ -313,7 +313,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	instance->damage = 0;
 	instance->count = amount;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3204));
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
 	bl_Inventory_add(invPtr, instance);
 }
 
@@ -420,11 +420,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	int createMobOffset = 0xee6e6;
+	int createMobOffset = 0xe3fe4;
 	if (versionCode == 0x30007010) {
 		createMobOffset = 0xe130a;
 	} else if (versionCode == 0x40007010) {
 		createMobOffset = 0xe1322;
+	} else if (versionCode == 0x30007020) {
+		createMobOffset = 0xee6e6;
 	}
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + createMobOffset + 1);
 

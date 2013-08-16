@@ -84,6 +84,7 @@ This program contains a modified version of NathanX\'s SlickCraft texture pack: 
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 Ce programme utilise la bibliothèque libsuperuser par Chainfire.\n
+This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
 Pour plus d\'informations de licence complète, consultez le fil Minecraft Forums.\n
     </string>
     <string name="about_pro_library_credits"></string>

@@ -64,6 +64,8 @@ public class ScriptManager {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
 		String[] names = getAllJsFunctions(BlockHostObject.class);
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
+		ScriptableObject.defineProperty(scope, "Level", new NativeLevelApi(), ScriptableObject.DONTENUM);
+		ScriptableObject.defineProperty(scope, "Player", new NativeLevelApi(), ScriptableObject.DONTENUM);
 
 		ScriptState state = new ScriptState(script, scope, sourceName);
 		script.exec(ctx, scope);
@@ -444,5 +446,83 @@ public class ScriptManager {
 		public String getClassName() {	
 			return "NativeEntity";
 		}
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj instanceof NativeEntity) {
+				return ((NativeEntity) obj).entityId == this.entityId;
+			}
+			return false;
+		}
 	}
+
+	private static class NativeLevelApi extends ScriptableObject {
+		@JSFunction
+		public void setNightMode(boolean isNight) {
+			nativeSetNightMode(isNight);
+		}
+		@JSFunction
+		public int getTile(int x, int y, int z) {
+			return nativeGetTile(x, y, z);
+		}
+		@JSFunction
+		public void explode(double x, double y, double z, double radius) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius);
+		}
+		@JSFunction
+		public void setTile(int x, int y, int z, int id) {
+			nativeSetTile(x, y, z, id, 0);
+		}
+		@JSFunction
+		public NativePointer getAddress() {
+			return new NativePointer(nativeGetLevel()); //TODO: I still don't know WTF this does.
+		}
+		@JSFunction
+		public void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+			nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+		}
+
+		@JSFunction
+		public void spawnCow(double x, double y, double z, String tex) { //Textures not supported
+			nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+		}
+		@Override
+		public String getClassName() {
+			return "NativeLevelApi";
+		}
+	}
+
+	private static class NativePlayerApi extends ScriptableObject {
+		private NativeEntity playerEnt = new NativeEntity(0);
+		@JSFunction
+		public double getX() {
+			return nativeGetPlayerLoc(AXIS_X);
+		}
+		@JSFunction
+		public double getY() {
+			return nativeGetPlayerLoc(AXIS_Y);
+		}
+		@JSFunction
+		public double getZ() {
+			return nativeGetPlayerLoc(AXIS_Z);
+		}
+		@JSFunction
+		public NativeEntity getEntity() {
+			playerEnt.entityId = nativeGetPlayerEnt();
+			return playerEnt;
+		}
+		@JSFunction
+		public int getCarriedItem() {
+			return nativeGetCarriedItem();
+		}
+		@JSFunction
+		public void addItemInventory(int id, int amount) {
+			nativeAddItemInventory(id, amount);
+		}
+		@Override
+		public String getClassName() {
+			return "NativePlayerApi";
+		}
+	}
+
 }
