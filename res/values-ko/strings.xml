@@ -29,6 +29,8 @@
     <string name="pref_zz_patch_ip_enable_summary">온라인으로 멀티플레이를 즐길 수 있습니다.</string>
     <string name="pref_zz_patch_ip">서버 IP</string>
     <string name="pref_zz_patch_ip_summary">온라인 서버의 IP 값</string>
+    <string name="pref_zz_patch_ip_port">서버 포트</string>
+    <string name="pref_zz_patch_ip_port_summary">온라인 서버의 포트 (일반적으로 19132)</string>
     <string name="pref_zz_texture_pack_enable">텍스쳐팩 사용</string>
     <string name="pref_zz_custom_dpi">사용자 DPI</string>
     <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
@@ -53,6 +55,10 @@
     <string name="pref_zz_skin_enable">스킨 덮어쓰기</string>
     <string name="pref_zz_skin">스킨 변경</string>
     <string name="pref_zz_skin_summary">.PNG 파일을 선택하여 스킨을 변경합니다. (스킨은 오직 혼자만 보여집니다.)</string>
+    <string name="pref_zz_hovercar_hide">버튼 숨기기</string>
+    <string name="pref_zz_redirect_mco">Realms을 다른 서버 목록으로 변경</string>
+    <string name="pref_zz_manage_scripts">ModPE 스크립트 관리</string>
+    <string name="pref_zz_script_enable">ModPE 스크립트 활성화</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
     <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
@@ -111,6 +117,37 @@ This program contains a version of the Cydia Substrate framework by Saurik, lice
     <string name="hovercar_title">모드 패치 관리자</string>
     <string name="hovercar_live_patch">게임 내에서 모드 패치</string>
     <string name="hovercar_options">런처 설정 (MCPE 재시작 필요)</string>
+    <string name="hovercar_insert_text">텍스트 삽입</string>
+
+    <string name="mco_redirect_none">전환하지 않기</string>
+    <string name="mco_redirect_pocketmine">PocketMine의 서버목록 사용</string>
+    <string name="mco_redirect_minepocket">MinePocket의 서버목록 사용</string>
+
+    <string name="safe_mode_exit">안전모드 끄기</string>
+    <string name="safe_mode_continue">계속</string>
+
+    <string name="server_list_add">서버 추가</string>
+    <string name="pref_zz_server_list">서버 목록</string>
+    <string name="pref_zz_server_list_summary">여기에서 선택하거나 서버 목록에 서버를 추가</string>
+    <string name="server_list_patch_address">사용하기</string>
+    <string name="server_list_name_prompt">이름: </string>
+    <string name="server_list_address_prompt">IP: </string>
+    <string name="server_list_port_prompt">포트: </string>
+
+    <string name="script_import_from">스크립트 가져오기</string>
+    <string name="script_import_from_local">SD카드에서</string>
+    <string name="script_import_from_cfgy">Treebl\'s 공식 레포</string>
+    <string name="script_import_from_bl_repo">블럭런쳐의 테스트 레포</string>
+    <string name="script_import_from_url">웹 주소</string>
+    <string name="script_import_from_clipboard">클립보드</string>
+    <string name="script_import_from_clipboard_name">스크립트의 이름을 입력하세요</string>
+    <string name="script_import_from_clipboard_code">코드를 입력하세요</string>
+    <string name="script_import_from_cfgy_id">가져올 스크립트의 ID를 입력하세요</string>
+    <string name="script_import_from_url_enter">가져올 스크립트의 주소를 입력하세요</string>
+    <string name="script_import_too_many">하나 이상의 스크립트를 가져오려면 정식 버전을 구입하세요.</string>
+    <string name="script_execution_error">ModPE 스크립트에서 오류가 발생했습니다</string>
+    <string name="script_disabled_in_multiplayer">ModPE 스크립트는 멀티에서 크래쉬가 발생할 수 있어서 자동 비활성화 됩니다. 서버에서 연결이 끊어지면 자동으로 스크립트는 활성화됩니다.</string>
+    <string name="script_minecraft_version_incompatible">ModPE 스크립트가 이 Minecraft PE버전을 지원하지 않습니다. 스크립트의 기능이 작동하지 않게 되거나, 런쳐가 크레쉬 될 수 있습니다.</string>
 
     <string name="permlab_mcpelauncher_addon">블럭런쳐 애드온</string>
     <string name="permdesc_mcpelauncher_addon">블럭런쳐에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, SD카드 사용, 그리고 마인크래프트 PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
