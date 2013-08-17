@@ -41,7 +41,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		} else if (v == setSkinButton) {
 			setSkin();
 		} else if (v == chefSpecialButton && BuildConfig.DEBUG) {
-			connectToServer();
+			scriptImport();
 		}
 	}
 
@@ -92,9 +92,14 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		}
 	}
 
-	public void connectToServer() {
-		Intent a = new Intent();
-		a.setClassName("net.zhuoweizhang.mcpelauncher.pro", "net.zhuoweizhang.mcpelauncher.pro.ServerListActivity");
-		startActivity(a);
+	public void scriptImport() {
+		Intent intent = new Intent("net.zhuoweizhang.mcpelauncher.action.IMPORT_SCRIPT");
+		Uri derp = Uri.fromFile(new File("/sdcard/winprogress/500ise_everymethod.js"));
+		intent.setDataAndType(derp, "text/plain");
+		try {
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

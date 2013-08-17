@@ -48,6 +48,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_VERSION_INCOMPATIBLE = 8;
 	private static final int DIALOG_IMPORT_FROM_CLIPBOARD = 9;
 	private static final int DIALOG_IMPORT_FROM_CLIPBOARD_CODE = 10;
+	private static final int DIALOG_IMPORT_FROM_INTENT = 11;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
@@ -86,6 +87,10 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		//if (!versionIsSupported()) {
 		//	showDialog(DIALOG_VERSION_INCOMPATIBLE);
 		//}
+		Uri data = getIntent().getData();
+		if (data != null) {
+			showDialog(DIALOG_IMPORT_FROM_INTENT);
+		}
 	}
 
 	@Override
@@ -195,6 +200,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				return createImportFromClipboardDialog();
 			case DIALOG_IMPORT_FROM_CLIPBOARD_CODE:
 				return createImportFromClipboardCodeDialog();
+			case DIALOG_IMPORT_FROM_INTENT:
+				return createImportFromIntentDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -216,6 +223,11 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				android.text.ClipboardManager cmgr = (android.text.ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
 				CharSequence cSequence = cmgr.getText();
 				((EditText) bDialog.findViewById(20130805)).setText(cSequence);
+				break;
+			case DIALOG_IMPORT_FROM_INTENT:
+				AlertDialog cDialog = (AlertDialog) dialog;
+				cDialog.setTitle(getIntent().getData().toString());
+				break;
 			default:
 				super.onPrepareDialog(dialogId, dialog);
 		}
@@ -414,6 +426,17 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			create();
 	}
 
+	private AlertDialog createImportFromIntentDialog() {
+		return new AlertDialog.Builder(this).setTitle("Unable to get script location").setMessage(R.string.script_import_from_intent_warning).
+			setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					importFromIntent();
+				}
+			}).
+			setNegativeButton(android.R.string.cancel, null).
+			create();
+	}
+
 	private boolean isValidPatch(ScriptListItem patch) {
 		if (patch.file.length() < 1) {
 			return false;
@@ -508,6 +531,13 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		findScripts();
 	}
 
+	private void importFromIntent() {
+		Uri uri = getIntent().getData();
+		ImportScriptFromIntentTask task = new ImportScriptFromIntentTask();
+		task.execute(uri);
+		
+	}
+
 	private final class FindScriptsThread implements Runnable {
 
 		public void run() {
@@ -562,7 +592,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		}
 	}
 
-	private abstract class ImportScriptTask extends AsyncTask<String, Void, File> {
+	private abstract class ImportScriptTask<I> extends AsyncTask<I, Void, File> {
 
 		protected void onPostExecute(File file) {
 			if (file == null) {
@@ -588,7 +618,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	/** Import a script from Treebl's repo. */
-	private class ImportScriptFromCfgyTask extends ImportScriptTask {
+	private class ImportScriptFromCfgyTask extends ImportScriptTask<String> {
 		protected File doInBackground(String... ids) {
 			String id = ids[0];
 
@@ -650,7 +680,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	/** Import a script from a url. */
-	private class ImportScriptFromUrlTask extends ImportScriptTask {
+	private class ImportScriptFromUrlTask extends ImportScriptTask<String> {
 		protected File doInBackground(String... ids) {
 
 			InputStream is = null;
@@ -709,6 +739,41 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			
 		}
 
+	}
+
+	private class ImportScriptFromIntentTask extends ImportScriptTask<Uri> {
+		protected File doInBackground(Uri... ids) {
+			Uri data = ids[0];
+			InputStream is = null;
+			FileOutputStream fos = null;
+			byte[] content;
+			String fileName = data.getLastPathSegment();
+			File file = new File(getDir(SCRIPTS_DIR, 0), fileName);
+			try {
+				is = getContentResolver().openInputStream(data);
+				content = bytesFromInputStream(is, 1024);
+				//no processing done on URI scripts either
+				fos = new FileOutputStream(file);
+				fos.write(content);
+				fos.flush();
+				return file;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (Exception e) {}
+				}
+				if (fos != null) {
+					try {
+						fos.close();
+					} catch (Exception e) {
+					}
+				}
+			}
+		}
 	}
 
 	private static byte[] bytesFromInputStream(InputStream in, int startingLength) throws IOException {
