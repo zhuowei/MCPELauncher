@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
+import org.mozilla.javascript.annotations.JSStaticFunction;
 
 import com.mojang.minecraftpe.MainActivity;
 
@@ -42,6 +43,8 @@ public class ScriptManager {
 	private static final int AXIS_Y = 1;
 	private static final int AXIS_Z = 2;
 
+	private static String currentScript = "Unknown";
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -64,15 +67,18 @@ public class ScriptManager {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
 		String[] names = getAllJsFunctions(BlockHostObject.class);
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
-		/*try {
-			NativeLevelApi levelApi = new NativeLevelApi();
-			levelApi.defineFunctionProperties(getAllJsFunctions(NativeLevelApi.class), NativeLevelApi.class, ScriptableObject.DONTENUM);
-			ScriptableObject.defineProperty(scope, "Level", levelApi, ScriptableObject.DONTENUM);
+		try {
+			//NativeLevelApi levelApi = new NativeLevelApi();
+			//levelApi.defineFunctionProperties(getAllJsFunctions(NativeLevelApi.class), NativeLevelApi.class, ScriptableObject.DONTENUM);
+			//ScriptableObject.defineProperty(scope, "Level", levelApi, ScriptableObject.DONTENUM);
 			ScriptableObject.defineClass(scope, NativePlayerApi.class);
-			ScriptableObject.defineProperty(scope, "Player", new NativePlayerApi(), ScriptableObject.DONTENUM);
+			ScriptableObject.defineClass(scope, NativeLevelApi.class);
+			ScriptableObject.defineClass(scope, NativeEntityApi.class);
+			ScriptableObject.defineClass(scope, NativeModPEApi.class);
+			//ScriptableObject.defineProperty(scope, "Player", new NativePlayerApi(), ScriptableObject.DONTENUM);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+		}
 
 		ScriptState state = new ScriptState(script, scope, sourceName);
 		script.exec(ctx, scope);
@@ -83,6 +89,7 @@ public class ScriptManager {
 		if (isRemote) return; //No script loading/callbacks when in a remote world
 		Context ctx = Context.enter();
 		for (ScriptState state: scripts) {
+			currentScript = state.name;
 			Scriptable scope = state.scope;
 			Object obj = scope.get(functionName, scope);
 			if (obj != null && obj instanceof Function) {
@@ -169,6 +176,16 @@ public class ScriptManager {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
 				main.scriptErrorCallback(state.name, t);
+			}
+		}
+	}
+
+	private static void scriptPrint(String str) {
+		System.out.println(str);
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.scriptPrintCallback(str, currentScript);
 			}
 		}
 	}
@@ -278,6 +295,8 @@ public class ScriptManager {
 	public static native float nativeGetYaw(int ent);
 	public static native float nativeGetPitch(int ent);
 
+	public static native void nativeSetFov(float degrees);
+
 	public static native void nativeSetupHooks(int versionCode);
 
 	public static class ScriptState {
@@ -299,13 +318,7 @@ public class ScriptManager {
 		}
 		@JSFunction
 		public void print(String str) {
-			System.out.println(str);
-			if (MainActivity.currentMainActivity != null) {
-				MainActivity main = MainActivity.currentMainActivity.get();
-				if (main != null) {
-					main.scriptPrintCallback(str);
-				}
-			}
+			scriptPrint(str);
 		}
 
 		@JSFunction
@@ -467,75 +480,151 @@ public class ScriptManager {
 		public NativeLevelApi() {
 			super();
 		}
-		@JSFunction
-		public void setNightMode(boolean isNight) {
+		@JSStaticFunction
+		public static void setNightMode(boolean isNight) {
 			nativeSetNightMode(isNight);
 		}
-		@JSFunction
-		public int getTile(int x, int y, int z) {
+		@JSStaticFunction
+		public static int getTile(int x, int y, int z) {
 			return nativeGetTile(x, y, z);
 		}
-		@JSFunction
-		public void explode(double x, double y, double z, double radius) {
+		@JSStaticFunction
+		public static void explode(double x, double y, double z, double radius) {
 			nativeExplode((float) x, (float) y, (float) z, (float) radius);
 		}
-		@JSFunction
-		public void setTile(int x, int y, int z, int id) {
+		@JSStaticFunction
+		public static void setTile(int x, int y, int z, int id) {
 			nativeSetTile(x, y, z, id, 0);
 		}
-		@JSFunction
-		public NativePointer getAddress() {
+		@JSStaticFunction
+		public static NativePointer getAddress() {
 			return new NativePointer(nativeGetLevel()); //TODO: I still don't know WTF this does.
 		}
-		@JSFunction
-		public void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+		@JSStaticFunction
+		public static void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
 			nativeSpawnEntity((float) x, (float) y, (float) z, 10);
 		}
 
-		@JSFunction
-		public void spawnCow(double x, double y, double z, String tex) { //Textures not supported
+		@JSStaticFunction
+		public static void spawnCow(double x, double y, double z, String tex) { //Textures not supported
 			nativeSpawnEntity((float) x, (float) y, (float) z, 11);
 		}
 		@Override
 		public String getClassName() {
-			return "NativeLevelApi";
+			return "Level";
 		}
 	}
 
 	private static class NativePlayerApi extends ScriptableObject {
-		private NativeEntity playerEnt = new NativeEntity(0);
+		private static NativeEntity playerEnt = new NativeEntity(0);
 		public NativePlayerApi() {
 			super();
 		}
-		@JSFunction
-		public double getX() {
+		@JSStaticFunction
+		public static double getX() {
 			return nativeGetPlayerLoc(AXIS_X);
 		}
-		@JSFunction
-		public double getY() {
+		@JSStaticFunction
+		public static double getY() {
 			return nativeGetPlayerLoc(AXIS_Y);
 		}
-		@JSFunction
-		public double getZ() {
+		@JSStaticFunction
+		public static double getZ() {
 			return nativeGetPlayerLoc(AXIS_Z);
 		}
-		@JSFunction
-		public NativeEntity getEntity() {
+		@JSStaticFunction
+		public static NativeEntity getEntity() {
 			playerEnt.entityId = nativeGetPlayerEnt();
 			return playerEnt;
 		}
-		@JSFunction
-		public int getCarriedItem() {
+		@JSStaticFunction
+		public static int getCarriedItem() {
 			return nativeGetCarriedItem();
 		}
-		@JSFunction
-		public void addItemInventory(int id, int amount) {
+		@JSStaticFunction
+		public static void addItemInventory(int id, int amount) {
 			nativeAddItemInventory(id, amount);
 		}
 		@Override
 		public String getClassName() {
-			return "NativePlayerApi";
+			return "Player";
 		}
 	}
 
+	private static class NativeEntityApi extends ScriptableObject {
+		public NativeEntityApi() {
+			super();
+		}
+		@JSStaticFunction
+		public static void setVelX(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_X);
+		}
+		@JSStaticFunction
+		public static void setVelY(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_Y);
+		}
+		@JSStaticFunction
+		public static void setVelZ(NativeEntity ent, double amount) {
+			nativeSetVel(ent.entityId, (float) amount, AXIS_Z);
+		}
+		@JSStaticFunction
+		public static void setRot(NativeEntity ent, double yaw, double pitch) {
+			nativeSetRot(ent.entityId, (float) yaw, (float) pitch);
+		}
+		@JSStaticFunction
+		public static void rideAnimal(NativeEntity /*insert funny reference*/rider, NativeEntity mount) {
+			nativeRideAnimal(rider.entityId, mount.entityId);
+		}
+		@JSStaticFunction
+		public static void setPosition(NativeEntity ent, double x, double y, double z) {
+			nativeSetPosition(ent.entityId, (float) x, (float) y, (float) z);
+		}
+		@JSStaticFunction
+		public static void setPositionRelative(NativeEntity ent, double x, double y, double z) {
+			nativeSetPositionRelative(ent.entityId, (float) x, (float) y, (float) z);
+		}
+		@JSStaticFunction
+		public static double getPitch(NativeEntity ent) {
+			return nativeGetPitch(ent.entityId);
+		}
+
+		@JSStaticFunction
+		public static double getYaw(NativeEntity ent) {
+			return nativeGetYaw(ent.entityId);
+		}
+		@Override
+		public String getClassName() {
+			return "Entity";
+		}
+	}
+
+	private static class NativeModPEApi extends ScriptableObject {
+		public NativeModPEApi() {
+			super();
+		}
+		@JSStaticFunction
+		public static void setTerrain(String url) {
+			scriptPrint("Not supported");
+		}
+		@JSStaticFunction
+		public static void setItems(String url) {
+			scriptPrint("Not supported");
+		}
+		@JSStaticFunction
+		public static void setGuiBlocks(String url) {
+			scriptPrint("Not supported");
+		}
+		@JSStaticFunction
+		public static void resetImages(String url) {
+			scriptPrint("Not supported");
+		}
+		@JSStaticFunction
+		public static void bl_setFov(double degrees) {
+			nativeSetFov((float) degrees);
+		}
+		@Override
+		public String getClassName() {
+			return "ModPE";
+		}
+	}
 }

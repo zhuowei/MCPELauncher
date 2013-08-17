@@ -1326,10 +1326,10 @@ public class MainActivity extends NativeActivity
 	public void leaveGameCallback() {
 	}
 
-	public void scriptPrintCallback(final String message) {
+	public void scriptPrintCallback(final String message, final String scriptName) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				Toast.makeText(MainActivity.this, "Script: " + message, Toast.LENGTH_SHORT).show();
+				Toast.makeText(MainActivity.this, "Script " + scriptName + ": " + message, Toast.LENGTH_SHORT).show();
 			}
 		});
 	}

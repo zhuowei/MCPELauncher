@@ -97,12 +97,14 @@ static void (*bl_GameMode_tick_real)(void*);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
+static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
 static Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 static int preventDefaultStatus = 0;
+static float bl_newfov = -1.0f;
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
 	JNIEnv *env;
@@ -227,6 +229,11 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	if (!preventDefaultStatus) bl_ChatScreen_sendChatMessage_real(chatScreen);
+}
+
+float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoolean) {
+	/*if (bl_newfov < 0)*/ return bl_GameRenderer_getFov_real(gameRenderer, datFloat, datBoolean);
+	//return bl_newfov;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
@@ -376,6 +383,11 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 	return entity->yaw;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
+  (JNIEnv *env, jclass clazz, jfloat newfov) {
+	bl_newfov = newfov;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -407,6 +419,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+
+	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
+	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
 
 	//get the level set block method. In future versions this might link against libminecraftpe itself
 	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
