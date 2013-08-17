@@ -64,8 +64,15 @@ public class ScriptManager {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
 		String[] names = getAllJsFunctions(BlockHostObject.class);
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
-		ScriptableObject.defineProperty(scope, "Level", new NativeLevelApi(), ScriptableObject.DONTENUM);
-		ScriptableObject.defineProperty(scope, "Player", new NativeLevelApi(), ScriptableObject.DONTENUM);
+		/*try {
+			NativeLevelApi levelApi = new NativeLevelApi();
+			levelApi.defineFunctionProperties(getAllJsFunctions(NativeLevelApi.class), NativeLevelApi.class, ScriptableObject.DONTENUM);
+			ScriptableObject.defineProperty(scope, "Level", levelApi, ScriptableObject.DONTENUM);
+			ScriptableObject.defineClass(scope, NativePlayerApi.class);
+			ScriptableObject.defineProperty(scope, "Player", new NativePlayerApi(), ScriptableObject.DONTENUM);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
 
 		ScriptState state = new ScriptState(script, scope, sourceName);
 		script.exec(ctx, scope);
@@ -457,6 +464,9 @@ public class ScriptManager {
 	}
 
 	private static class NativeLevelApi extends ScriptableObject {
+		public NativeLevelApi() {
+			super();
+		}
 		@JSFunction
 		public void setNightMode(boolean isNight) {
 			nativeSetNightMode(isNight);
@@ -494,6 +504,9 @@ public class ScriptManager {
 
 	private static class NativePlayerApi extends ScriptableObject {
 		private NativeEntity playerEnt = new NativeEntity(0);
+		public NativePlayerApi() {
+			super();
+		}
 		@JSFunction
 		public double getX() {
 			return nativeGetPlayerLoc(AXIS_X);

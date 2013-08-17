@@ -71,6 +71,8 @@ public final class MinecraftVersion {
 	static {
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			0x20E6E3, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET));
+		add(new MinecraftVersion(30007030, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
+			0x20E6E3, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET));
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE_0_7_2, false, LIB_LOAD_OFFSET_BEGIN_0_7_2, LIB_LOAD_OFFSET, null,
 			0x1F8624, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET_0_7_2));
 		add(new MinecraftVersion(30007010, false, 0x1f0b18, 0x1000, null,

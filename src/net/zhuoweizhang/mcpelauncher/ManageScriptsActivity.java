@@ -83,9 +83,9 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		importButton.setOnClickListener(this);
 		disabledString = " ".concat(getResources().getString(R.string.manage_patches_disabled));
 		ScriptManager.androidContext = this.getApplicationContext();
-		if (!versionIsSupported()) {
-			showDialog(DIALOG_VERSION_INCOMPATIBLE);
-		}
+		//if (!versionIsSupported()) {
+		//	showDialog(DIALOG_VERSION_INCOMPATIBLE);
+		//}
 	}
 
 	@Override

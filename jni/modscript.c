@@ -50,9 +50,10 @@ typedef struct {
 typedef void Minecraft;
 
 typedef struct {
-	void** vtable; //0
-	char filler[16];//4
-	char* pointer;//20
+	//I have no idea what this struct looks like. TODO
+	//void** vtable; //0
+	//char filler[16];//4
+	//char* pointer;//20
 } cppstr;
 
 typedef Player LocalPlayer;
@@ -205,13 +206,19 @@ void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 }
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
-	cppstr* chatMessage = *((cppstr**) ((int) chatScreen + 104));
-	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %s %i\n", chatMessage->pointer);
+	int chatMessagePtr = *((int*) ((int) chatScreen + 84));
+	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message ptr: %#x\n", chatMessagePtr);
+	char* chatMessageChars = (char*) chatMessagePtr;
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %p\n", chatMessageChars);
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %s\n", chatMessageChars);
+	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
+	char* chatMessageChars = *((char**) chatMessagePtr);*/
+
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
-	jstring chatMessageJString = (*env)->NewStringUTF(env, chatMessage->pointer);
+	jstring chatMessageJString = (*env)->NewStringUTF(env, chatMessageChars);
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "chatCallback", "(Ljava/lang/String;)V");
