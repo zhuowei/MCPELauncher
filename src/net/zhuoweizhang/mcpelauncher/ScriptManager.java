@@ -284,7 +284,7 @@ public class ScriptManager {
 	public static native int nativeGetCarriedItem();
 	public static native void nativePreventDefault();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
-	public static native void nativeSpawnEntity(float x, float y, float z, int entityType);
+	public static native int nativeSpawnEntity(float x, float y, float z, int entityType);
 
 	//0.2
 	public static native void nativeSetNightMode(boolean isNight);
@@ -294,6 +294,12 @@ public class ScriptManager {
 	//0.3
 	public static native float nativeGetYaw(int ent);
 	public static native float nativeGetPitch(int ent);
+
+	//0.4
+	public static native void nativeSetCarriedItem(int ent, int id, int count, int damage);
+
+	//0.6
+	public static native void nativeDefineItem(int itemId, int iconId, String name);
 
 	public static native void nativeSetFov(float degrees);
 
@@ -378,13 +384,15 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+		public NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+			return new NativeEntity(entityId);
 		}
 
 		@JSFunction
-		public void spawnCow(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+		public NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+			return new NativeEntity(entityId);
 		}
 
 		@JSFunction
@@ -443,6 +451,13 @@ public class ScriptManager {
 		public double getYaw(NativeEntity ent) {
 			if (ent == null) ent = getPlayerEnt();
 			return nativeGetYaw(ent.entityId);
+		}
+		//standard methods introduced in 0.4 and 0.5
+		@JSFunction
+		public NativeEntity spawnPigZombie(double x, double y, double z, int item, String tex) { //Textures not supported yet
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36);
+			nativeSetCarriedItem(entityId, item, 1, 0);
+			return new NativeEntity(entityId);
 		}
 	}
 

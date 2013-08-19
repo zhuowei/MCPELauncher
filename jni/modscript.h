@@ -104,9 +104,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSpawnEntity
- * Signature: (FFFI)V
+ * Signature: (FFFI)I
  */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
   (JNIEnv *, jclass, jfloat, jfloat, jfloat, jint);
 
 /*
@@ -156,6 +156,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
  */
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetCarriedItem
+ * Signature: (IIII)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
+  (JNIEnv *, jclass, jint, jint, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

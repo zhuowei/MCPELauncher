@@ -62,6 +62,7 @@ typedef Player LocalPlayer;
 #define GAMEMODE_VTABLE_OFFSET_ATTACK 19
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 114
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -331,16 +332,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	bl_Inventory_add(invPtr, instance);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type) {
 	//TODO: spawn entities, not just mobs
 	Entity* entity = bl_MobFactory_createMob(type, bl_level);
 	if (entity == NULL) {
 		//WTF?
-		return;
+		return -1;
 	}
 	bl_Entity_setPos(entity, x, y, z);
 	bl_Level_addEntity(bl_level, entity);
+	return entity->entityId;
 	
 }
 
@@ -381,6 +383,19 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 	Entity* entity = bl_Level_getEntity(bl_level, entityId);
 	if (entity == NULL) return 0.0f;
 	return entity->yaw;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
+  (JNIEnv *env, jclass clazz, jint entityId, jint itemId, jint itemCount, jint itemDamage) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
+	void* vtableEntry = entity->vtable[ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM];
+	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
+	ItemInstance* item = fn(entity);
+	if (item == NULL) return;
+	item->count = itemCount;
+	item->id = itemId;
+	item->damage = itemDamage;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
