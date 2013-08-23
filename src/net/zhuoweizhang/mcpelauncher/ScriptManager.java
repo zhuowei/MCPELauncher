@@ -151,6 +151,9 @@ public class ScriptManager {
 		} catch (PackageManager.NameNotFoundException e) {
 			//impossible, as if the package isn't installed, the app would've quit before loading scripts
 		}
+		if (MinecraftVersion.isAmazon()) {
+			versionCode = 0xaaaa;
+		}
 		nativeSetupHooks(versionCode);
 		scripts.clear();
 		androidContext = cxt.getApplicationContext();

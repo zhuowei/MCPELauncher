@@ -458,12 +458,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe3fe4;
-	if (versionCode == 0x30007010) {
+	if (versionCode == 30007010) {
 		createMobOffset = 0xe130a;
-	} else if (versionCode == 0x40007010) {
+	} else if (versionCode == 40007010) {
 		createMobOffset = 0xe1322;
-	} else if (versionCode == 0x30007020) {
+	} else if (versionCode == 30007020) {
 		createMobOffset = 0xee6e6;
+	} else if (versionCode == 0xaaaa) { //amazon
+		createMobOffset = 0xe3fac;
 	}
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + createMobOffset + 1);
 
