@@ -1,5 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
+import java.io.File;
+
 import java.util.*;
 
 import android.content.*;
@@ -18,6 +20,9 @@ public final class MinecraftVersion {
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
 	public final static boolean FUZZY_VERSION = false;
+
+	public static MinecraftVersion amazonVer;
+	public static Context context; //TODO remove this
 
 	public MinecraftVersion(int versionCode, boolean needsWarning, int libLoadOffsetBegin, int libLoadOffset, PatchTranslator translator,
 		int ipAddressOffset, byte[] guiBlocksPatch, byte[] guiBlocksUnpatch, byte[] noAnimationPatch, byte[] noAnimationUnpatch, int portOffset) {
@@ -43,6 +48,10 @@ public final class MinecraftVersion {
 		if (ver == null && FUZZY_VERSION) {
 			ver = getDefault();
 		}
+		//CHECK FOR AMAZON
+		if (ver.versionCode == MINECRAFT_VERSION_CODE && isAmazon()) {
+			ver = amazonVer;
+		}
 		return ver;
 	}
 
@@ -50,6 +59,10 @@ public final class MinecraftVersion {
 		MinecraftVersion ver = versions.get(versionCode);
 		if (ver == null) {
 			ver = getDefault();
+		}
+		//CHECK FOR AMAZON
+		if (ver.versionCode == MINECRAFT_VERSION_CODE && isAmazon()) {
+			ver = amazonVer;
 		}
 		return ver;
 	}
@@ -65,7 +78,23 @@ public final class MinecraftVersion {
 	}
 
 	public static MinecraftVersion getDefault() {
-		return versions.get(MINECRAFT_VERSION_CODE);
+		MinecraftVersion ver = versions.get(MINECRAFT_VERSION_CODE);
+		//CHECK FOR AMAZON
+		if (isAmazon()) {
+			ver = amazonVer;
+		}
+		return ver;
+	}
+
+	public static boolean isAmazon() {
+		try {
+			if (context == null) return false; //The main activity sets the context, prepatching is only done there so otherwise doesn't matter much
+			PackageInfo mcPkgInfo = context.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+			return mcPkgInfo.versionCode == 40007030 && mcPkgInfo.applicationInfo.targetSdkVersion == 9; //The Amazon version shares a version code but targets Gingerbread
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	static {
@@ -79,6 +108,10 @@ public final class MinecraftVersion {
 			0x1E7E3A, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1));
 		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
 			0x1E7E52, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1_AMAZON));
+
+		/* Amazon 0.7.3 shares a version code with Play, special case needed */
+		amazonVer = new MinecraftVersion(MINECRAFT_VERSION_CODE, false, 0x243380, LIB_LOAD_OFFSET, new AmazonTranslator073(),
+			0x20e6ab, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET);
 	}
 
 	public static abstract class PatchTranslator {
@@ -91,6 +124,16 @@ public final class MinecraftVersion {
 				return addr + (0xdadb4 - 0xdad74); // there's one more, but I really don't give a care
 			} else {
 				return addr + (0x174de0 - 0x174dc8);
+			}
+		}
+	}
+
+	public static class AmazonTranslator073 extends PatchTranslator {
+		public int get(int addr) {
+			if (addr <= 0xdd39e) {
+				return addr;
+			} else {
+				return addr - (0xee2d8 - 0xee2a0);
 			}
 		}
 	}

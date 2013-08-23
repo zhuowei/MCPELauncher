@@ -154,6 +154,8 @@ public class MainActivity extends NativeActivity
 			}
 		}
 
+		MinecraftVersion.context = this.getApplicationContext();
+
 		try {
 			mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
 			mcAppInfo = mcPkgInfo.applicationInfo;/*getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);*/
