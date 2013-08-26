@@ -45,6 +45,8 @@ public class ScriptManager {
 
 	private static String currentScript = "Unknown";
 
+	private static boolean requestedGraphicsReset = false;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -136,6 +138,11 @@ public class ScriptManager {
 
 	public static void tickCallback() {
 		callScriptMethod("modTick");
+		//do we have any requests for graphics reset?
+		if (requestedGraphicsReset) {
+			nativeOnGraphicsReset();
+			requestedGraphicsReset = false;
+		}
 	}
 
 	public static void chatCallback(String str) {
@@ -191,6 +198,10 @@ public class ScriptManager {
 				main.scriptPrintCallback(str, currentScript);
 			}
 		}
+	}
+
+	public static void requestGraphicsReset() {
+		requestedGraphicsReset = true;
 	}
 
 
@@ -300,6 +311,9 @@ public class ScriptManager {
 
 	//0.4
 	public static native void nativeSetCarriedItem(int ent, int id, int count, int damage);
+
+	//0.5
+	public static native void nativeOnGraphicsReset();
 
 	//0.6
 	public static native void nativeDefineItem(int itemId, int iconId, String name);
@@ -622,23 +636,33 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
-			scriptPrint("Not supported");
+			bl_overrideTexture("terrain.png", url);
 		}
 		@JSStaticFunction
 		public static void setItems(String url) {
-			scriptPrint("Not supported");
+			bl_overrideTexture("gui/items.png", url);
 		}
 		@JSStaticFunction
 		public static void setGuiBlocks(String url) {
-			scriptPrint("Not supported");
+			bl_overrideTexture("gui/gui_blocks.png", url);
 		}
 		@JSStaticFunction
-		public static void resetImages(String url) {
-			scriptPrint("Not supported");
+		public static void bl_overrideTexture(String theOverridden, String url) {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.scriptOverrideTexture(theOverridden, url);
+				}
+			}
 		}
 		@JSStaticFunction
-		public static void bl_setFov(double degrees) {
-			nativeSetFov((float) degrees);
+		public static void resetImages() {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.scriptResetImages();
+				}
+			}
 		}
 		@Override
 		public String getClassName() {

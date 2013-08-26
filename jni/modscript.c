@@ -99,6 +99,7 @@ static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
+static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 
 static Level* bl_level;
 static Minecraft* bl_minecraft;
@@ -403,6 +404,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_newfov = newfov;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
+  (JNIEnv *env, jclass clazz) {
+	bl_NinecraftApp_onGraphicsReset(bl_minecraft);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -455,6 +461,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
+	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe3fe4;

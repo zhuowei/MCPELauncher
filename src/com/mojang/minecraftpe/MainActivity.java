@@ -1336,6 +1336,18 @@ public class MainActivity extends NativeActivity
 		});
 	}
 
+	public void scriptOverrideTexture(final String theOverridden, final String url) {
+		forceTextureReload();
+	}
+
+	public void scriptResetImages() {
+		forceTextureReload();
+	}
+
+	public void forceTextureReload() {
+		ScriptManager.nativeOnGraphicsReset();
+	}
+
 	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
