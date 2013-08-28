@@ -306,12 +306,13 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	protected AlertDialog createManagePatchDialog(int enableStatus) {
 		CharSequence patchInfoStr = this.getResources().getText(R.string.manage_patches_info);
+		CharSequence viewSourceStr = this.getResources().getText(R.string.script_view_source);
 		CharSequence[] options = null;
 		if (enableStatus == -1) {
 			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete), 
-				patchInfoStr};
+				patchInfoStr, viewSourceStr};
 		} else {
-			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete), patchInfoStr,
+			options = new CharSequence[] {this.getResources().getText(R.string.manage_patches_delete), patchInfoStr, viewSourceStr,
 				(enableStatus == 0? this.getResources().getText(R.string.manage_patches_enable): 
 					this.getResources().getText(R.string.manage_patches_disable))};
 		}
@@ -330,6 +331,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 					} else if (button == 1) {
 						showDialog(DIALOG_PATCH_INFO);
 					} else if (button == 2) {
+						viewSource(selectedPatchItem);
+					} else if (button == 3) {
 						togglePatch(selectedPatchItem);
 						findScripts();
 					}
@@ -536,6 +539,24 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		ImportScriptFromIntentTask task = new ImportScriptFromIntentTask();
 		task.execute(uri);
 		
+	}
+
+	private void viewSource(ScriptListItem item) {
+		try {
+			//copy the script to the sdcard, then send an intent to view it
+			File outDir = new File(this.getExternalFilesDir(null), "scripts");
+			outDir.mkdirs();
+			File outFile = new File(outDir, item.file.getName());
+			PatchUtils.copy(item.file, outFile);
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			Uri derp = Uri.fromFile(outFile);
+			intent.setDataAndType(derp, "text/plain");
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+			//on an Android device there is always an activity to handle plain text (HTMLViewer in stock Android)
+			//so this shouldn't be hit
+		}
 	}
 
 	private final class FindScriptsThread implements Runnable {
