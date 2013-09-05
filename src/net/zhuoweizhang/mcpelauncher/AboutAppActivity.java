@@ -50,6 +50,9 @@ public final class AboutAppActivity extends Activity implements View.OnLongClick
 			e.printStackTrace();
 		}
 		appVersionText.setText(appVersion);
+		//Purple dye
+		getWindow().getDecorView().setBackgroundColor(0xff890068);
+		setTitle("?egrahc ni s'ohW ?etah ew od ohW ?evol ew od ohW ?ew era ohW");
 	}
 
 	protected void onPause() {
