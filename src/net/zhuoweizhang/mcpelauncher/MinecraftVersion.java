@@ -49,7 +49,7 @@ public final class MinecraftVersion {
 			ver = getDefault();
 		}
 		//CHECK FOR AMAZON
-		if (ver.versionCode == MINECRAFT_VERSION_CODE && isAmazon()) {
+		if (ver != null && ver.versionCode == MINECRAFT_VERSION_CODE && isAmazon()) {
 			ver = amazonVer;
 		}
 		return ver;
@@ -98,12 +98,16 @@ public final class MinecraftVersion {
 	}
 
 	static {
+		//0.7.5 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x20E6E3, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET));
-		add(new MinecraftVersion(30007030, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x20E6E3, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET));
+			0x215634, null, null, null, null, 0xe8912));
+		//0.7.3 and previous versions
+		add(new MinecraftVersion(40007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
+			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));
+		add(new MinecraftVersion(30007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
+			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE_0_7_2, false, LIB_LOAD_OFFSET_BEGIN_0_7_2, LIB_LOAD_OFFSET, null,
-			0x1F8624, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET_0_7_2));
+			0x1F8624, GUI_BLOCKS_PATCH_0_7_2, GUI_BLOCKS_UNPATCH_0_7_2, null, null, PORT_OFFSET_0_7_2));
 		add(new MinecraftVersion(30007010, false, 0x1f0b18, 0x1000, null,
 			0x1E7E3A, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1));
 		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
@@ -111,7 +115,7 @@ public final class MinecraftVersion {
 
 		/* Amazon 0.7.3 shares a version code with Play, special case needed */
 		amazonVer = new MinecraftVersion(MINECRAFT_VERSION_CODE, false, 0x243380, LIB_LOAD_OFFSET, new AmazonTranslator073(),
-			0x20e6ab, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, PORT_OFFSET);
+			0x20e6ab, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3);
 	}
 
 	public static abstract class PatchTranslator {

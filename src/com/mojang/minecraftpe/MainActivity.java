@@ -407,9 +407,11 @@ public class MainActivity extends NativeActivity
 			if (requiresGuiBlocksPatch) {
 				System.out.println("Patching guiblocks");
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-				patch.loadPatch(minecraftVersion.guiBlocksPatch);
-				//patch.applyPatch(libBytes);
-				PatchUtils.patch(libBuffer, patch);
+				if (minecraftVersion.guiBlocksPatch != null) {
+					patch.loadPatch(minecraftVersion.guiBlocksPatch);
+					//patch.applyPatch(libBytes);
+					PatchUtils.patch(libBuffer, patch);
+				} //TODO: load patches from assets
 			}
 
 			OutputStream os = new FileOutputStream(newMinecraft);
@@ -1230,9 +1232,11 @@ public class MainActivity extends NativeActivity
 			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			patch.loadPatch(patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch);
-			//patch.applyPatch(minecraftLibBuffer);
-			PatchUtils.patch(minecraftLibBuffer, patch);
+			byte[] patchData = patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch;
+			if (patchData != null) {
+				patch.loadPatch(patchData);
+				PatchUtils.patch(minecraftLibBuffer, patch);
+			} //TODO: load from assets
 		} catch (Exception ie) {
 			ie.printStackTrace();
 		}
