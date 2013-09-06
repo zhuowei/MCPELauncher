@@ -47,6 +47,11 @@ public class ScriptManager {
 
 	private static boolean requestedGraphicsReset = false;
 
+	public static boolean sensorEnabled = false;
+
+	public static float newPlayerYaw = 0;
+	public static float newPlayerPitch = 0;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -143,6 +148,12 @@ public class ScriptManager {
 			nativeOnGraphicsReset();
 			requestedGraphicsReset = false;
 		}
+		//any takers for rotating the player?
+		if (sensorEnabled) updatePlayerOrientation();
+	}
+
+	private static void updatePlayerOrientation() {
+		nativeSetRot(nativeGetPlayerEnt(), newPlayerYaw, newPlayerPitch);
 	}
 
 	public static void chatCallback(String str) {

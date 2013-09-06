@@ -1191,6 +1191,7 @@ public class MainActivity extends NativeActivity
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				showDialog(DIALOG_RUNTIME_OPTIONS);
+				resetOrientation(); //for sensor controls. TODO: better place to do this?
 			}
 		});
 	}
@@ -1391,6 +1392,10 @@ public class MainActivity extends NativeActivity
 					show();
 			}
 		});
+	}
+
+	protected void resetOrientation() {
+		//for sensor controls
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
