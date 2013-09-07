@@ -90,7 +90,7 @@ public final class MinecraftVersion {
 		try {
 			if (context == null) return false; //The main activity sets the context, prepatching is only done there so otherwise doesn't matter much
 			PackageInfo mcPkgInfo = context.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
-			return mcPkgInfo.versionCode == 40007030 && mcPkgInfo.applicationInfo.targetSdkVersion == 9; //The Amazon version shares a version code but targets Gingerbread
+			return mcPkgInfo.versionCode == 40007050 && mcPkgInfo.applicationInfo.targetSdkVersion == 9; //The Amazon version shares a version code but targets Gingerbread
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -104,6 +104,7 @@ public final class MinecraftVersion {
 		//0.7.5 Play Gingerbread
 		add(new MinecraftVersion(30007050, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			0x215634, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe8912));
+		//0.7.5 Amazon shares version code
 		//0.7.3 and previous versions
 		add(new MinecraftVersion(40007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
 			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));
@@ -116,9 +117,9 @@ public final class MinecraftVersion {
 		add(new MinecraftVersion(40007010, true, 0x001f0b18, 0x1000, new AmazonTranslator(), 
 			0x1E7E52, GUI_BLOCKS_PATCH_0_7_1, GUI_BLOCKS_UNPATCH_0_7_1, null, null, PORT_OFFSET_0_7_1_AMAZON));
 
-		/* Amazon 0.7.3 shares a version code with Play, special case needed */
-		amazonVer = new MinecraftVersion(MINECRAFT_VERSION_CODE, false, 0x243380, LIB_LOAD_OFFSET, new AmazonTranslator073(),
-			0x20e6ab, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3);
+		/* Amazon 0.7.5 shares a version code with Play, special case needed */
+		amazonVer = new MinecraftVersion(MINECRAFT_VERSION_CODE, false, 0x24a188, LIB_LOAD_OFFSET, new AmazonTranslator075(),
+			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da);
 	}
 
 	public static abstract class PatchTranslator {
@@ -135,12 +136,13 @@ public final class MinecraftVersion {
 		}
 	}
 
-	public static class AmazonTranslator073 extends PatchTranslator {
+	public static class AmazonTranslator075 extends PatchTranslator {
+		//Amazon is missing code for vibrate, so everything is shifted by a few bytes (0x38, I think)
 		public int get(int addr) {
-			if (addr <= 0xdd39e) {
+			if (addr <= 0xe0cca) {
 				return addr;
 			} else {
-				return addr - (0xee2d8 - 0xee2a0);
+				return addr - (0xe6f88 - 0xe6f50);
 			}
 		}
 	}

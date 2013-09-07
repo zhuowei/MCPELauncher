@@ -474,7 +474,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	} else if (versionCode == 30007020) {
 		createMobOffset = 0xee6e6;
 	} else if (versionCode == 0xaaaa) { //amazon
-		createMobOffset = 0xe3fac;
+		createMobOffset = 0xe80f8;
 	}
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + createMobOffset + 1);
 
