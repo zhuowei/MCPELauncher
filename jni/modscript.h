@@ -104,10 +104,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSpawnEntity
- * Signature: (FFFI)I
+ * Signature: (FFFILjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
-  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jint);
+  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeClientMessage
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
+  (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -164,6 +172,22 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
   (JNIEnv *, jclass, jint, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeOnGraphicsReset
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeDefineItem
+ * Signature: (IILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
+  (JNIEnv *, jclass, jint, jint, jstring);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

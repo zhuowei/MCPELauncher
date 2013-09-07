@@ -309,7 +309,8 @@ public class ScriptManager {
 	public static native int nativeGetCarriedItem();
 	public static native void nativePreventDefault();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
-	public static native int nativeSpawnEntity(float x, float y, float z, int entityType);
+	public static native int nativeSpawnEntity(float x, float y, float z, int entityType, String skinPath);
+	public static native void nativeClientMessage(String msg);
 
 	//0.2
 	public static native void nativeSetNightMode(boolean isNight);
@@ -413,13 +414,13 @@ public class ScriptManager {
 
 		@JSFunction
 		public NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
-			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
 			return new NativeEntity(entityId);
 		}
 
 		@JSFunction
 		public NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
-			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
 			return new NativeEntity(entityId);
 		}
 
@@ -441,7 +442,7 @@ public class ScriptManager {
 		//standard methods introduced in API level 0.2
 		@JSFunction
 		public void clientMessage(String text) {
-			print(text); //TODO: proper client message support
+			nativeClientMessage(text);
 		}
 
 		@JSFunction
@@ -483,7 +484,7 @@ public class ScriptManager {
 		//standard methods introduced in 0.4 and 0.5
 		@JSFunction
 		public NativeEntity spawnPigZombie(double x, double y, double z, int item, String tex) { //Textures not supported yet
-			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36);
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
 			nativeSetCarriedItem(entityId, item, 1, 0);
 			return new NativeEntity(entityId);
 		}
@@ -545,12 +546,12 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 10);
+			nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
 		}
 
 		@JSStaticFunction
 		public static void spawnCow(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 11);
+			nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
 		}
 		@Override
 		public String getClassName() {

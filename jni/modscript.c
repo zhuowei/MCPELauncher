@@ -77,6 +77,10 @@ typedef Player LocalPlayer;
 
 JavaVM* bl_JavaVM;
 
+//TODO share headers
+void bl_setuphooks_cppside();
+void bl_changeEntitySkin(void* entity, const char* newSkin);
+
 jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
@@ -100,9 +104,10 @@ static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
+static void* (*bl_Mob_getTexture)(Entity*);
 
-static Level* bl_level;
-static Minecraft* bl_minecraft;
+Level* bl_level;
+Minecraft* bl_minecraft;
 static Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 static int preventDefaultStatus = 0;
@@ -334,7 +339,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type) {
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
 	//TODO: spawn entities, not just mobs
 	Entity* entity = bl_MobFactory_createMob(type, bl_level);
 	if (entity == NULL) {
@@ -343,6 +348,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	}
 	bl_Entity_setPos(entity, x, y, z);
 	bl_Level_addEntity(bl_level, entity);
+
+	//skins
+	const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
+	bl_changeEntitySkin((void*) entity, skinUtfChars);
+	(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
+
 	return entity->entityId;
 	
 }
@@ -462,6 +473,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
 	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
+	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
@@ -481,6 +493,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
 	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
+
+	bl_setuphooks_cppside();
 
 	bl_hasinit_script = 1;
 
