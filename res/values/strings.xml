@@ -85,6 +85,7 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="manage_patches_enable">Enable</string>
     <string name="manage_patches_disable">Disable</string>
     <string name="manage_patches_disabled">(disabled)</string>
+    <string name="manage_patches_notfound">Patch patch_name has somehow been deleted from BlockLauncher's internal memory. patch_name has been deleted.</string>
     <string name="manage_patches_invalid_patches">These patches cannot be patched because they are not in a format that BlockLauncher recognizes:</string>
     <string name="manage_patches_info">Information</string>
     <string name="manage_patches_metadata">Author</string>
@@ -93,6 +94,7 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="skin_imported">Skin set</string>
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>
+    <string name="needs_pro">You need to upgrade to Pro to use this feature.</string>
     <string name="about_about">About BlockLauncher</string>
     <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
@@ -151,6 +153,8 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="script_import_from_url_enter">Enter the address of the script to import</string>
     <string name="script_import_too_many">Upgrade to BlockLauncher Pro to patch more than one script at a time</string>
     <string name="script_execution_error">An error occurred in a ModPE Script</string>
+    <string name="script_encoding_unrecognized">The encoding of this ModPE Script is unrecognized.</string>
+    <string name="script_nooop_methods">OOP Methods are currently not supported in BlockLauncher.</string>
     <string name="script_disabled_in_multiplayer">Your ModPE Scripts have been disabled in multiplayer, as they may cause crashes. They will be re-enabled when you disconnect from the server.</string>
     <string name="script_minecraft_version_incompatible">ModPE scripts are not supported on your version of Minecraft PE. Some methods in scripts may not function, or may crash the launcher. Use at your own risk.</string>
     <string name="script_import_from_intent_warning">Do you want to import this script? It will get access to the same resources as your BlockLauncher instance, including potentially your passwords and other sensitive information.</string>
@@ -158,5 +162,16 @@ For full licensing information, check the Minecraft Forums thread.\n
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
+    <string name="permlab_modpe_script">ModPE Script</string>
+    <string name="permdesc_modpe_script">Allows a script to manipulate the player inventory, the world, and the player location.</string>
+    <string name="perm_modpe_playerloc">The player's physical location.</string>
+    <string name="perm_modpeplayerrot">The player's rotation.</string>
+    <string name="perm_modpeblock">Editing the world's blocks.</string>
+    <string name="perm_modpeplayeraction">Detecting what you do.</string>
+    <string name="perm_modpeinv">Editing your inventory.</string>
+    <string name="perm_modpebetasupp">Not fully supported hooks/functions.</string>
+    <string name="perm_modperun">Run ModPE Scripts.</string>
+    <string name="perm_modpemobs">Manipulating the world's mobs.</string>
+    <string name="permlab_mcpelauncher_mod">Mods/Patches</string>
 
 </resources>
