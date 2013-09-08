@@ -199,6 +199,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetMobSkin
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobSkin
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: (I)V
  */

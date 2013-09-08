@@ -330,8 +330,9 @@ public class ScriptManager {
 	//0.6
 	public static native void nativeDefineItem(int itemId, int iconId, String name);
 
+	//nonstandard
 	public static native void nativeSetFov(float degrees);
-
+	public static native void nativeSetMobSkin(int ent, String str);
 	public static native void nativeSetupHooks(int versionCode);
 
 	public static class ScriptState {
@@ -487,6 +488,17 @@ public class ScriptManager {
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
 			nativeSetCarriedItem(entityId, item, 1, 0);
 			return new NativeEntity(entityId);
+		}
+
+		//nonstandard methods
+		@JSFunction
+		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
+			return new NativeEntity(entityId);
+		}
+		@JSFunction
+		public void bl_setMobSkin(NativeEntity entity, String tex) {
+			nativeSetMobSkin(entity.entityId, tex);
 		}
 	}
 

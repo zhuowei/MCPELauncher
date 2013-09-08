@@ -63,6 +63,7 @@ typedef Player LocalPlayer;
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
 #define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 114
+#define MOB_VTABLE_OFFSET_GET_TEXTURE 88
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -420,6 +421,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOn
 	bl_NinecraftApp_onGraphicsReset(bl_minecraft);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobSkin
+  (JNIEnv *env, jclass clazz, jint entityId, jstring skinPath) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
+	//skins
+	const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
+	bl_changeEntitySkin((void*) entity, skinUtfChars);
+	(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -474,6 +485,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
 	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
+	//replace the getTexture method for zombie pigmen
+	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
+	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
