@@ -298,6 +298,10 @@ public class ScriptManager {
 		return allList.toArray(blankArray);
 	}
 
+	private static boolean invalidTexName(String tex) {
+		return tex == null || tex.equals("undefined") || tex.equals("null");
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -415,12 +419,18 @@ public class ScriptManager {
 
 		@JSFunction
 		public NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+			if (invalidTexName(tex)) {
+				tex = "mob/chicken.png";
+			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
 			return new NativeEntity(entityId);
 		}
 
 		@JSFunction
 		public NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
+			if (invalidTexName(tex)) {
+				tex = "mob/cow.png";
+			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
 			return new NativeEntity(entityId);
 		}
@@ -485,6 +495,9 @@ public class ScriptManager {
 		//standard methods introduced in 0.4 and 0.5
 		@JSFunction
 		public NativeEntity spawnPigZombie(double x, double y, double z, int item, String tex) { //Textures not supported yet
+			if (invalidTexName(tex)) {
+				tex = "mob/pigzombie.png";
+			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
 			nativeSetCarriedItem(entityId, item, 1, 0);
 			return new NativeEntity(entityId);
@@ -557,13 +570,21 @@ public class ScriptManager {
 			return new NativePointer(nativeGetLevel()); //TODO: I still don't know WTF this does.
 		}
 		@JSStaticFunction
-		public static void spawnChicken(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
+		public static NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+			if (invalidTexName(tex)) {
+				tex = "mob/chicken.png";
+			}
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
+			return new NativeEntity(entityId);
 		}
 
 		@JSStaticFunction
-		public static void spawnCow(double x, double y, double z, String tex) { //Textures not supported
-			nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
+		public static NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
+			if (invalidTexName(tex)) {
+				tex = "mob/cow.png";
+			}
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
+			return new NativeEntity(entityId);
 		}
 		@Override
 		public String getClassName() {

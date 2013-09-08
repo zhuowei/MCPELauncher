@@ -62,6 +62,8 @@
     <string name="pref_zz_redirect_mco">Redirect Realms to third-party server list</string>
     <string name="pref_zz_manage_scripts">Manage ModPE Scripts</string>
     <string name="pref_zz_script_enable">Enable ModPE Scripts support</string>
+    <string name="pref_zz_sensorcontrol">Sensor controls</string>
+    <string name="pref_zz_sensorcontrol_summary">Control the player by rotating your device. Requires ModPE Scripts to be turned on.</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
