@@ -29,6 +29,7 @@ import static net.zhuoweizhang.mcpelauncher.PatchManager.blankArray;
 public class ScriptManager {
 
 	public static final String SCRIPTS_DIR = "modscripts";
+	public static final int MAX_NUM_ERRORS = 5;
 
 	public static List<ScriptState> scripts = new ArrayList<ScriptState>();
 
@@ -96,6 +97,7 @@ public class ScriptManager {
 		if (isRemote) return; //No script loading/callbacks when in a remote world
 		Context ctx = Context.enter();
 		for (ScriptState state: scripts) {
+			if (state.errors >= MAX_NUM_ERRORS) continue; //Too many errors, skip
 			currentScript = state.name;
 			Scriptable scope = state.scope;
 			Object obj = scope.get(functionName, scope);
@@ -193,10 +195,14 @@ public class ScriptManager {
 	}
 
 	private static void reportScriptError(ScriptState state, Throwable t) {
+		state.errors++;
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
 				main.scriptErrorCallback(state.name, t);
+				if (state.errors >= MAX_NUM_ERRORS) { //too many errors
+					main.scriptTooManyErrorsCallback(state.name);
+				}
 			}
 		}
 	}
@@ -343,6 +349,7 @@ public class ScriptManager {
 		public Script script;
 		public Scriptable scope;
 		public String name;
+		public int errors = 0;
 		protected ScriptState(Script script, Scriptable scope, String name) {
 			this.script = script;
 			this.scope = scope;

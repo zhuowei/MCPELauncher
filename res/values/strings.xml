@@ -157,6 +157,7 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="script_minecraft_version_incompatible">ModPE scripts are not supported on your version of Minecraft PE. Some methods in scripts may not function, or may crash the launcher. Use at your own risk.</string>
     <string name="script_import_from_intent_warning">Do you want to import this script? It will get access to the same resources as your BlockLauncher instance, including potentially your passwords and other sensitive information.</string>
     <string name="script_view_source">View source</string>
+    <string name="script_too_many_errors">has been disabled because it encountered too many errors. Sorry!</string>
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>

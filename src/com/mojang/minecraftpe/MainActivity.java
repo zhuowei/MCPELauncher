@@ -1400,6 +1400,17 @@ public class MainActivity extends NativeActivity
 		//for sensor controls
 	}
 
+	public void scriptTooManyErrorsCallback(final String scriptName) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).
+					setMessage(scriptName + " " + getResources().getString(R.string.script_too_many_errors)).
+					setPositiveButton(android.R.string.ok, null).
+					show();
+			}
+		});
+	}
+
 	private class LoginWebViewClient extends WebViewClient {
 		boolean hasFiredLaunchEvent = false;
 		@Override
