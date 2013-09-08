@@ -1016,13 +1016,14 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected String filterUrl(String url) {
-		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		return url;
+		/*String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
 		if (peoapiRedirect.equals("NONE")) return url;
 		RealmsRedirectInfo info = getRealmsRedirectInfo();
 		if (info.accountUrl != null) {
 			url.replace("account.mojang.com", info.accountUrl); //TODO: better system
 		}
-		return url.replace("peoapi.minecraft.net", peoapiRedirect);
+		return url.replace("peoapi.minecraft.net", peoapiRedirect);*/
 	}
 
 	@Override
@@ -1292,13 +1293,14 @@ public class MainActivity extends NativeActivity
 	}
 
 	public boolean isRedirectingRealms() {
-		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
-		return !peoapiRedirect.equals("NONE");
+		//String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		//return !peoapiRedirect.equals("NONE");
+		return false;
 	}
 
 	public RealmsRedirectInfo getRealmsRedirectInfo() {
-		String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
-		return RealmsRedirectInfo.targets.get(peoapiRedirect);
+		//String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		return RealmsRedirectInfo.targets.get("NONE");
 	}
 
 	private void turnOffSafeMode() {

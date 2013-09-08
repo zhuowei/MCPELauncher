@@ -24,7 +24,7 @@ public class RealmsRedirectInfo {
 
 	static {
 		add(new RealmsRedirectInfo("NONE", null, MainActivity.MOJANG_ACCOUNT_LOGIN_URL));
-		add(new RealmsRedirectInfo("peoapi.pocketmine.net", "account.pocketmine.net", "https://account.pocketmine.net/m/login"));
-		add(new RealmsRedirectInfo("peoapi.minepocket.com", "peoapi.minepocket.com", "https://peoapi.minepocket.com/m/login?app=mcpe"));
+		//add(new RealmsRedirectInfo("peoapi.pocketmine.net", "account.pocketmine.net", "https://account.pocketmine.net/m/login"));
+		//add(new RealmsRedirectInfo("peoapi.minepocket.com", "peoapi.minepocket.com", "https://peoapi.minepocket.com/m/login?app=mcpe"));
 	}
 }
