@@ -342,7 +342,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			List<String> suResult = Shell.SU.run("cp \"" + mcpeApkLoc + "\" \"" + outFile.getAbsolutePath() + "\"");
+			List<String> suResult = Shell.SU.run("cat \"" + mcpeApkLoc + "\" >\"" + outFile.getAbsolutePath() + "\"");
 			if (suResult == null) {
 				hasSu = false;
 			}
