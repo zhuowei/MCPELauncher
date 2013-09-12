@@ -520,6 +520,20 @@ public class ScriptManager {
 		public void bl_setMobSkin(NativeEntity entity, String tex) {
 			nativeSetMobSkin(entity.entityId, tex);
 		}
+		
+		@JSFunction
+		public String bl_readData(String prefName) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
+			return sPrefs.getString(prefName, "");
+		}
+
+		@JSFunction
+		public void bl_saveData(String prefName, String prefValue) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
+			SharedPreferences.Editor prefsEditor = sPrefs.edit();
+			prefsEditor.putString(prefName, prefValue);
+			prefsEditor.commit();
+		}
 	}
 
 	private static class NativePointer extends ScriptableObject {
