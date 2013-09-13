@@ -81,11 +81,13 @@ JavaVM* bl_JavaVM;
 //TODO share headers
 void bl_setuphooks_cppside();
 void bl_changeEntitySkin(void* entity, const char* newSkin);
+const char* bl_getCharArr(void* str);
 
 jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
+static void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -163,6 +165,24 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
 	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
+}
+
+void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+
+	
+	JNIEnv *env;
+
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	// Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "selectLevelCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+	
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (*env)->NewStringUTF(env, bl_getCharArr(wName)), (*env)->NewStringUTF(env, bl_getCharArr(wDir)));
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
 }
 
 void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
@@ -431,6 +451,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
 	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12NinecraftApp");
 	minecraftVtable[20] = (int) &bl_Minecraft_setLevel_hook;
+
+	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
+	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
+
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);

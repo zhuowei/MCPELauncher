@@ -37,6 +37,9 @@ public class ScriptManager {
 
 	public static Set<String> enabledScripts = new HashSet<String>();
 
+	public static String worldName;
+	public static String worldDir;
+
 	/** Is the currently loaded world a multiplayer world? */
 	public static boolean isRemote = false;
 
@@ -126,6 +129,14 @@ public class ScriptManager {
 				main.setLevelCallback(isRemote);
 			}
 		}
+	}
+
+	public static void selectLevelCallback(String wName, String wDir) {
+		System.out.println("World name: " + wName);
+		System.out.println("World dir: " + wDir);
+		
+		worldName = wName;
+		worldDir = wDir;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -549,6 +560,18 @@ public class ScriptManager {
 			prefsEditor.putString(prefName, prefValue);
 			prefsEditor.commit();
 		}
+
+		@JSFunction
+		public String bl_getWorldName() {
+			return worldName;
+		}
+
+
+		@JSFunction
+		public String bl_getWorldDir() {
+			return worldDir;
+		}
+
 	}
 
 	private static class NativePointer extends ScriptableObject {
