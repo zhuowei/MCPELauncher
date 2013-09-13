@@ -87,14 +87,15 @@ public final class MinecraftVersion {
 	}
 
 	public static boolean isAmazon() {
-		try {
+		/*try {
 			if (context == null) return false; //The main activity sets the context, prepatching is only done there so otherwise doesn't matter much
 			PackageInfo mcPkgInfo = context.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
 			return mcPkgInfo.versionCode == 40007050 && mcPkgInfo.applicationInfo.targetSdkVersion == 9; //The Amazon version shares a version code but targets Gingerbread
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
-		}
+		}*/
+		return false;
 	}
 
 	static {
@@ -104,7 +105,9 @@ public final class MinecraftVersion {
 		//0.7.5 Play Gingerbread
 		add(new MinecraftVersion(30007050, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			0x215634, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe8912));
-		//0.7.5 Amazon shares version code
+		//0.7.5 Amazon
+		add(new MinecraftVersion(40007050, false, 0x24a188, LIB_LOAD_OFFSET, new AmazonTranslator075(),
+			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da);
 		//0.7.3 and previous versions
 		add(new MinecraftVersion(40007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
 			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));

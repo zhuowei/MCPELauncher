@@ -491,7 +491,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
-	if (versionCode == 30007030 || versionCode == 40007030) {
+	if (versionCode == 40007050) {
+		createMobOffset = 0xe80f8;
+	} else if (versionCode == 30007030 || versionCode == 40007030) {
 		createMobOffset = 0xe3fe4;
 	} else if (versionCode == 30007010) {
 		createMobOffset = 0xe130a;
