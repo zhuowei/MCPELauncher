@@ -161,6 +161,7 @@ public class ScriptManager {
 	public static void chatCallback(String str) {
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
+		if (!isRemote) nativePreventDefault();
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -306,6 +307,20 @@ public class ScriptManager {
 
 	private static boolean invalidTexName(String tex) {
 		return tex == null || tex.equals("undefined") || tex.equals("null");
+	}
+
+	private static void wordWrapClientMessage(String msg) {
+		String[] portions = msg.split("\n");
+		for(int i = 0; i < portions.length; i++) {
+			String line = portions[i];
+			while(line.length() > 40) {
+				nativeClientMessage(line.substring(0, 40));
+				line = line.substring(40);
+			}
+			if (line.length() > 0) {
+				nativeClientMessage(line);
+			}
+		}
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
@@ -460,7 +475,7 @@ public class ScriptManager {
 		//standard methods introduced in API level 0.2
 		@JSFunction
 		public void clientMessage(String text) {
-			nativeClientMessage(text);
+			wordWrapClientMessage(text);
 		}
 
 		@JSFunction
