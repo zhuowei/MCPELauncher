@@ -43,6 +43,13 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	}
 }
 
+const char* bl_getCharArr(void* str){
+	std::string* mystr = static_cast<std::string*>(str);
+	std::string mystr2 = *mystr;
+	const char* cs = mystr2.c_str();
+	return cs;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
