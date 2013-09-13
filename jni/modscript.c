@@ -102,7 +102,6 @@ static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
-static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 static void* (*bl_Mob_getTexture)(Entity*);
@@ -111,7 +110,7 @@ Level* bl_level;
 Minecraft* bl_minecraft;
 static Player* bl_localplayer;
 static int bl_hasinit_script = 0;
-static int preventDefaultStatus = 0;
+int preventDefaultStatus = 0;
 static float bl_newfov = -1.0f;
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
@@ -213,30 +212,6 @@ void bl_GameMode_tick_hook(void* gamemode) {
 void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 	bl_GameMode_initPlayer_real(gamemode, player);
 	bl_localplayer = player;
-}
-
-void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
-	int chatMessagePtr = *((int*) ((int) chatScreen + 84));
-	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message ptr: %#x\n", chatMessagePtr);
-	char* chatMessageChars = (char*) chatMessagePtr;
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %p\n", chatMessageChars);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Chat message: %s\n", chatMessageChars);
-	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
-	char* chatMessageChars = *((char**) chatMessagePtr);*/
-
-	JNIEnv *env;
-	preventDefaultStatus = FALSE;
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
-
-	jstring chatMessageJString = (*env)->NewStringUTF(env, chatMessageChars);
-
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "chatCallback", "(Ljava/lang/String;)V");
-
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, chatMessageJString);
-
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
-	if (!preventDefaultStatus) bl_ChatScreen_sendChatMessage_real(chatScreen);
 }
 
 float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoolean) {
@@ -459,9 +434,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
-
-	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
-	mcpelauncher_hook(sendChatMessage, &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
 	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);

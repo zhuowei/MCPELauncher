@@ -107,7 +107,7 @@ public final class MinecraftVersion {
 			0x215634, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe8912));
 		//0.7.5 Amazon
 		add(new MinecraftVersion(40007050, false, 0x24a188, LIB_LOAD_OFFSET, new AmazonTranslator075(),
-			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da);
+			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da));
 		//0.7.3 and previous versions
 		add(new MinecraftVersion(40007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
 			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));
