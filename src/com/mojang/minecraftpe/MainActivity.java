@@ -1199,11 +1199,13 @@ public class MainActivity extends NativeActivity
 
 	protected void loadNativeAddons() {
 		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_load_native_addons", false)) return;
-		List<ApplicationInfo> apps = getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+		PackageManager pm = getPackageManager();
+		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 		for (ApplicationInfo app: apps) {
 			if (app.metaData == null) continue;
 			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
-			if (nativeLibName != null) {
+			if (nativeLibName != null && pm.checkPermission(app.packageName, "net.zhuoweizhang.mcpelauncher.ADDON") ==
+				PackageManager.PERMISSION_GRANTED) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);
