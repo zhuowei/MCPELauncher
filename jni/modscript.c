@@ -5,19 +5,11 @@
 #include <android/log.h>
 #include <jni.h>
 
+#include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
 
 typedef uint8_t cppbool;
-
-typedef struct {
-  char name[128];
-  const void* phdr;
-  int phnum;
-  unsigned entry;
-  unsigned base;
-  unsigned size;
-} soinfo2;
 
 typedef struct {
 	void** vtable; //0

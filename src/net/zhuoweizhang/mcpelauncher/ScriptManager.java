@@ -365,6 +365,7 @@ public class ScriptManager {
 
 	//0.6
 	public static native void nativeDefineItem(int itemId, int iconId, String name);
+	public static native void nativeDefineFoodItem(int itemId, int iconId, int hearts, String name);
 
 	//nonstandard
 	public static native void nativeSetFov(float degrees);
@@ -784,6 +785,17 @@ public class ScriptManager {
 				}
 			}
 		}
+
+		@JSStaticFunction
+		public static void setItem(int id, int iconx, int icony, String name) {
+			nativeDefineItem(id, (icony * 16) + iconx, name);
+		}
+
+		@JSStaticFunction
+		public static void setFoodItem(int id, int iconx, int icony, int halfhearts, String name) {
+			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";

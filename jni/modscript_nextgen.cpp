@@ -6,6 +6,7 @@
 #include <jni.h>
 #include <string>
 
+#include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
 #include "modscript_shared.h"
@@ -15,6 +16,12 @@ extern "C" {
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 
 static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
+
+static void (*bl_Item_Item)(Item*, int);
+
+static void** bl_FoodItem_vtable;
+
+static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -59,6 +66,41 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
+Item* bl_constructItem(int id) {
+	Item* retval = (Item*) ::operator new((std::size_t) 36);
+	bl_Item_Item(retval, id - 0x100);
+	return retval;
+}
+
+Item* bl_constructFoodItem(int id, int hearts) {
+	Item* retval = (Item*) ::operator new((std::size_t) 48);
+	bl_Item_Item(retval, id - 0x100);
+	retval->vtable = bl_FoodItem_vtable;
+	((int*)retval)[9] = hearts;
+	((float*) retval)[10] = 0.3f; //time to eat
+	return retval;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
+  (JNIEnv *env, jclass clazz, jint id, jint icon, jstring name) {
+	Item* item = bl_constructItem(id);
+	item->icon = icon;
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+	bl_Item_setDescriptionId(item, mystr);
+	env->ReleaseStringUTFChars(name, utfChars);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
+  (JNIEnv *env, jclass clazz, jint id, jint icon, jint halfhearts, jstring name) {
+	Item* item = bl_constructFoodItem(id, halfhearts);
+	item->icon = icon;
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+	bl_Item_setDescriptionId(item, mystr);
+	env->ReleaseStringUTFChars(name, utfChars);
+}
+
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
@@ -74,6 +116,13 @@ void bl_setuphooks_cppside() {
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+
+	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
+	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
+
+	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	int foodItemVtableOffset = 0x291a18;
+	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset);
 }
 
 } //extern
