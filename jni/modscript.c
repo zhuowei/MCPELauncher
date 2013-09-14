@@ -101,6 +101,7 @@ static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 static void* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
+static void (*bl_Level_removeEntity)(Level*, Entity*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -444,6 +445,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 	}
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveEntity
+(JNIEnv *env, jclass clazz, jint entityId) {
+Entity* entity = bl_Level_getEntity(bl_level, entityId);
+if (entity == NULL) return;
+bl_Level_removeEntity(bl_level, entity);
+}
+
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -502,6 +511,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
+	bl_Level_removeEntity = dlsym(RTLD_DEFAULT, "_ZN5Level12removeEntityEP6Entity");
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
 	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
