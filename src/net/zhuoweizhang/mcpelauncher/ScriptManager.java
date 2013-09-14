@@ -372,6 +372,8 @@ public class ScriptManager {
 	public static native void nativeSetMobSkin(int ent, String str);
 	public static native float nativeGetEntityLoc(int entity, int axis);
 	public static native void nativeSetupHooks(int versionCode);
+	public static native int nativeGetData(int x, int y, int z);
+	public static native int nativeHurtTo(int to);
 
 	public static class ScriptState {
 		public Script script;
@@ -535,6 +537,18 @@ public class ScriptManager {
 		}
 
 		//nonstandard methods
+
+		@JSFunction
+		public int getData(int x, int y, int z) {
+			return nativeGetData(x, y, z);
+		}
+
+		@JSFunction
+		public int setPlayerHealth(int value) {
+			return nativeHurtTo(value);
+		}
+
+
 		@JSFunction
 		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
