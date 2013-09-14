@@ -374,6 +374,10 @@ public class ScriptManager {
 	public static native void nativeSetupHooks(int versionCode);
 	public static native int nativeGetData(int x, int y, int z);
 	public static native int nativeHurtTo(int to);
+		
+
+	//InusualZ Addons
+public static native void nativeRemoveEntity(int entityId);
 
 	public static class ScriptState {
 		public Script script;
@@ -582,6 +586,12 @@ public class ScriptManager {
 		@JSFunction
 		public String bl_getWorldDir() {
 			return worldDir;
+		}
+		
+		@JSFunction
+		public void bl_removeEntity(NativeEntity ent) {
+			if(ent == null) return;
+			nativeRemoveEntity(ent.entityId);
 		}
 
 	}
