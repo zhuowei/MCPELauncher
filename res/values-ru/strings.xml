@@ -35,7 +35,7 @@
     <string name="pref_zz_patch_ip_port_summary">Порт сервера (обычно 19132)</string>
     <string name="pref_zz_texture_pack_enable">Использовать текстурпак</string>
     <string name="pref_zz_custom_dpi">Изменить DPI</string>
-    <string name="pref_zz_custom_dpi_summary">Подмена DPI нужна для изменения размера джойстика и количества слотов инвертаря - оставьте пустым для отключения</string>
+    <string name="pref_zz_custom_dpi_summary">Изменить стандартный DPI для изменения размера кнопок управления - оставьте пустым для отключения</string>
     <string name="pref_zz_texture_pack_demo">Демонстрационный текстурпак</string>
     <string name="pref_zz_texture_pack_demo_summary">Использовать встроенный пак Slickcraft от NathanX</string>
     <string name="pref_mp_server_visible_default">Сервер виден по умолчанию</string>
@@ -50,7 +50,7 @@
     <string name="texture_pack_unable_to_load">Не удалось загрузить текстурпак.</string>
     <string name="pref_zz_extract_original_textures">Извлечь оригинальные текстуры (требуется root)</string>
     <string name="pref_zz_extract_original_textures_summary">Сделать резервное копирование оригинального APK и установить его как текстурпак</string>
-    <string name="extracting_textures">Бэкап оригинальногр APK</string>
+    <string name="extracting_textures">Бэкап оригинального APK</string>
     <string name="extract_textures_success">Оригинальный APK успешно установлен как текстурпак.</string>
     <string name="extract_textures_error">Не удалось получить доступ к оригинальному APK.</string>
     <string name="extract_textures_no_root">Не удалось получить права суперпользователя - есть ли у вас root?</string>
@@ -62,7 +62,9 @@
     <string name="pref_zz_redirect_mco">Перенаправление Realms на сторонний список серверов</string>
     <string name="pref_zz_manage_scripts">Управление скриптами ModPE</string>
     <string name="pref_zz_script_enable">Включить поддержку скриптов ModPE</string>
-    <string name="nerdy_stuff_page">Дебаг</string>
+    <string name="pref_zz_sensorcontrol">Сенсорное управление</string>
+    <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваш девайс. Необходимо включить скрипты ModPE.</string>
+    <string name="nerdy_stuff_page">Отладка</string>
     <string name="dump_libminecraftpe">Сделать дамп libminecraftpe.so из памяти</string>
     <string name="nerdy_stuff_are_useless">Все, что находится на этой странице, практически бесполезно (для пользователей). Оно нужно для устранения ошибок.</string>
     <string name="restart_app">Перезапустить приложение</string>
@@ -78,21 +80,21 @@
     <string name="manage_patches_import_error">Не удалось импортировать патч</string>
     <string name="manage_patches_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более трех патчей</string>
     <string name="manage_patches_delete">Удалить</string>
-    <string name="manage_patches_crash_safe_mode">BlockLauncher зафиксировал краш приложения. Был активирован Безопасный Режим для предотвращения будущих крашей из-за некорректных патчей. В данном режиме все патчи отключаются.
+    <string name="manage_patches_crash_safe_mode">BlockLauncher зафиксировал вылет приложения. Был активирован Безопасный Режим для предотвращения будущих вылетов из-за некорректных патчей. В данном режиме все патчи отключаются.
 Вы хотите продолжить в безопасном режиме без патчей, или хотите вернуться в обычный режим?</string>
     <string name="manage_patches_import_confirm">Вы хотите импортировать этот патч?</string>
     <string name="manage_patches_import_done">Патч импортирован</string>
     <string name="manage_patches_enable">Включить</string>
     <string name="manage_patches_disable">Выключить</string>
     <string name="manage_patches_disabled">(отключен)</string>
-    <string name="manage_patches_invalid_patches">Следующие патчи не могут быть импортированны, поскольку они в формате, который BlockLauncher не понимает:</string>
+    <string name="manage_patches_invalid_patches">Следующие патчи не могут быть импортированы, поскольку они в формате, который BlockLauncher не понимает:</string>
     <string name="manage_patches_info">Информация</string>
     <string name="manage_patches_metadata">Автор</string>
     <string name="manage_patches_no_metadata">Информация об авторе недоступна</string>
     <string name="manage_patches_path">Путь</string>
     <string name="skin_imported">Скин импортирован</string>
     <string name="manage_addons">Управление аддонами</string>
-    <string name="get_pro">Обновить до версии Pro</string>
+    <string name="get_pro">Обновить до Pro</string>
     <string name="about_about">О BlockLauncher</string>
     <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
     <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
@@ -100,9 +102,9 @@
 Эта программа содержит код из PTPatchTool от Snowbound\'а под Общественной Лицензией Eclipse.\n
 Эта программа содержит модифицированную версию текстурпака Slickcraft от NathanX\'а, который используется с его разрешения.\n
 Некоторые части встроенного текстурпака основаны на RepetiCraft от Theevilpplz\'а, используются с его разрешения.\n
-This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
+Эта программа содержит версию фреймворка Cydia Substrate от Saurik, под лицензией GNU Lesser General Public License.\n
 Эта программа использует библиотеку libsuperuser от Chainfire.\n
-This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
+Эта программа содержит копию движка Rhino JavaScript от Mozilla project.\n
 Для получения полной информации о лицензировании проверьте тему на Minecraft Forums.\n
     </string>
     <string name="about_pro_library_credits"></string>
@@ -113,7 +115,7 @@ This program contains a copy of the Rhino JavaScript engine from the Mozilla pro
     <string name="firstlaunch_title">Добро пожаловать в BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">Спасибо за то, что попробовали BlockLauncher. BlockLauncher может запускать Minecraft Pocket Edition и добавлять дополнительные возможности, такие как патчи, аддоны, скины и текстуры.</string>
     <string name="firstlaunch_jelly_bean">Ваше устройство работает на Android версии Jelly Bean или новее, так что BlockLauncher не может получить доступ к стандартным текстурам. Был установлен демонстрационный текстурпак и вы можете тестировать лаунчер.</string>
-    <string name="firstlaunch_see_options">Для начала нажмите на иконку гаечного ключа вверху экрана. Больше информации вы можете получить в теме на Minecraft Fortums.</string>
+    <string name="firstlaunch_see_options">Для начала нажмите на иконку гаечного ключа вверху экрана. Больше информации вы можете получить в теме на Minecraft Forums.</string>
     <string name="firstlaunch_help">Помощь</string>
 
     <string name="version_mismatch_message">Данная версия Minecraft PE не поддерживается BlockLauncher\'ом. BlockLauncher будет временно запущен в безопасном режиме. Следите за обновлениями, так как поддержка может быть добавлена в новой версии.</string>
@@ -141,8 +143,8 @@ This program contains a copy of the Rhino JavaScript engine from the Mozilla pro
 	
     <string name="script_import_from">Импортировать скрипт из</string>
     <string name="script_import_from_local">Локального хранилища</string>
-    <string name="script_import_from_cfgy">Оффициального репозитория Treebl\'а</string>
-    <string name="script_import_from_bl_repo">Тестируемоего репозитория BlockLauncher\'а</string>
+    <string name="script_import_from_cfgy">Официального репозитория Treebl\'а</string>
+    <string name="script_import_from_bl_repo">Тестируемого репозитория BlockLauncher\'а</string>
     <string name="script_import_from_url">Веб адреса</string>
     <string name="script_import_from_clipboard">Буфера обмена</string>
     <string name="script_import_from_clipboard_name">Введите имя скрипта</string>
@@ -151,10 +153,13 @@ This program contains a copy of the Rhino JavaScript engine from the Mozilla pro
     <string name="script_import_from_url_enter">Введите адрес скрипта для импорта</string>
     <string name="script_import_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более одного скрипта</string>
     <string name="script_execution_error">В скрипте ModPE произошла ошибка</string>
-    <string name="script_disabled_in_multiplayer">Ваши скрипты ModPE были откючены на время использования мультиплеера, так как они могут привести к крашам приложения. После отключения от сервера они будут снова включены.</string>
-    <string name="script_minecraft_version_incompatible">Скрипты ModPE не поддерживаются вашей версией Minecraft PE. Часть скриптов может функционировать неполностью, или приводить к крашу приложения. Используйте на свой страх и риск.</string>
+    <string name="script_disabled_in_multiplayer">Ваши скрипты ModPE были отключены на время использования мультиплеера, так как они могут привести к вылетам приложения. После отключения от сервера они будут снова включены.</string>
+    <string name="script_minecraft_version_incompatible">Скрипты ModPE не поддерживаются вашей версией Minecraft PE. Часть скриптов может функционировать неполностью, или приводить к вылету приложения. Используйте на свой страх и риск.</string>
+    <string name="script_import_from_intent_warning">Вы хотите импортировать этот скрипт? Он получит доступ к тем же самым ресурсам, что и BlockLauncher, включая, возможно, ваши пароли и другую личную информацию.</string>
+    <string name="script_view_source">Открыть исходный код</string>
+    <string name="script_too_many_errors">был отключен, так как содержит слишком много ошибок. Извините!</string>
 	
     <string name="permlab_mcpelauncher_addon">Аддон BlockLauncher\'а</string>
-    <string name="permdesc_mcpelauncher_addon">Приложение может быть загруженно в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что Minecraft PE имеет разрешение.</string>
+    <string name="permdesc_mcpelauncher_addon">Приложение может быть загружено в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что Minecraft PE имеет разрешение.</string>
 
 </resources>
