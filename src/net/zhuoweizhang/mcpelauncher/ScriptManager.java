@@ -340,7 +340,7 @@ public class ScriptManager {
 	public static native void nativeSetPosition(int entity, float x, float y, float z);
 	public static native void nativeSetVel(int ent, float vel, int axis);
 	public static native void nativeExplode(float x, float y, float z, float radius);
-	public static native void nativeAddItemInventory(int id, int amount);
+	public static native void nativeAddItemInventory(int id, int amount, int damage);
 	public static native void nativeRideAnimal(int rider, int mount);
 	public static native int nativeGetCarriedItem();
 	public static native void nativePreventDefault();
@@ -369,6 +369,7 @@ public class ScriptManager {
 	//nonstandard
 	public static native void nativeSetFov(float degrees);
 	public static native void nativeSetMobSkin(int ent, String str);
+	public static native float nativeGetEntityLoc(int entity, int axis);
 	public static native void nativeSetupHooks(int versionCode);
 
 	public static class ScriptState {
@@ -441,8 +442,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void addItemInventory(int id, int amount) {
-			nativeAddItemInventory(id, amount);
+		public void addItemInventory(int id, int amount, int damage) {
+			nativeAddItemInventory(id, amount, damage);
 		}
 
 		@JSFunction
@@ -479,8 +480,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setTile(int x, int y, int z, int id) {
-			nativeSetTile(x, y, z, id, 0);
+		public void setTile(int x, int y, int z, int id, int damage) {
+			nativeSetTile(x, y, z, id, damage);
 		}
 
 		//standard methods introduced in API level 0.2
@@ -508,10 +509,6 @@ public class ScriptManager {
 		public void setRot(NativeEntity ent, double yaw, double pitch) {
 			nativeSetRot(ent.entityId, (float) yaw, (float) pitch);
 		}
-		//@JSFunction
-		//public void setTile(int x, int y, int z, int id, int damage) {
-		//	nativeSetTile(x, y, z, id, damage);
-		//}
 
 		//standard methods introduced in API level 0.3
 		@JSFunction
@@ -678,8 +675,8 @@ public class ScriptManager {
 			return nativeGetCarriedItem();
 		}
 		@JSStaticFunction
-		public static void addItemInventory(int id, int amount) {
-			nativeAddItemInventory(id, amount);
+		public static void addItemInventory(int id, int amount, int damage) {
+			nativeAddItemInventory(id, amount, damage);
 		}
 		@Override
 		public String getClassName() {
@@ -728,6 +725,25 @@ public class ScriptManager {
 		public static double getYaw(NativeEntity ent) {
 			return nativeGetYaw(ent.entityId);
 		}
+
+		@JSStaticFunction
+		public static double getX(NativeEntity ent) {
+			return nativeGetEntityLoc(ent.entityId, AXIS_X);
+		}
+		@JSStaticFunction
+		public static double getY(NativeEntity ent) {
+			return nativeGetEntityLoc(ent.entityId, AXIS_Y);
+		}
+		@JSStaticFunction
+		public static double getZ(NativeEntity ent) {
+			return nativeGetEntityLoc(ent.entityId, AXIS_Z);
+		}
+
+		@JSStaticFunction
+		public static void setCarriedItem(NativeEntity ent, int id, int count, int damage) {
+			nativeSetCarriedItem(ent.entityId, id, 1, damage);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";

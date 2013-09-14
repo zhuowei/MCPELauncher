@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_MAX_NUM_ERRORS
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_MAX_NUM_ERRORS 5L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_X
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_X 0L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_AXIS_Y
@@ -64,10 +66,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeAddItemInventory
- * Signature: (II)V
+ * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
-  (JNIEnv *, jclass, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -204,6 +206,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobSkin
   (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetEntityLoc
+ * Signature: (II)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityLoc
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

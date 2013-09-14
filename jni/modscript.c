@@ -323,11 +323,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
-  (JNIEnv *env, jclass clazz, jint id, jint amount) {
+  (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
 	if (bl_localplayer == NULL) return;
 	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
 	instance->id = id;
-	instance->damage = 0;
+	instance->damage = damage;
 	instance->count = amount;
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
@@ -424,6 +424,20 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
 	bl_changeEntitySkin((void*) entity, skinUtfChars);
 	(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityLoc
+  (JNIEnv *env, jclass clazz, jint entityId, jint axis) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return 0;
+	switch (axis) {
+		case AXIS_X:
+			return entity->x;
+		case AXIS_Y:
+			return entity->y;
+		case AXIS_Z:
+			return entity->z;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
