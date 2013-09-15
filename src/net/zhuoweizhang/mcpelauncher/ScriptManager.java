@@ -375,6 +375,8 @@ public class ScriptManager {
 	public static native int nativeHurtTo(int to);
 	public static native void nativeRemoveEntity(int entityId);
 	public static native int nativeGetEntityTypeId(int entityId);
+	public static native void nativeSetAnimalAge(int entityId, int age);
+	public static native int nativeGetAnimalAge(int entityId);
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -786,6 +788,16 @@ public class ScriptManager {
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
 			return new NativeEntity(entityId);
+		}
+
+		@JSStaticFunction
+		public static void setAnimalAge(NativeEntity animal, int age) {
+			nativeSetAnimalAge(animal.entityId, age);
+		}
+
+		@JSStaticFunction
+		public static int getAnimalAge(NativeEntity animal) {
+			return nativeGetAnimalAge(animal.entityId);
 		}
 
 		@Override

@@ -103,6 +103,7 @@ static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 static void* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Level_removeEntity)(Level*, Entity*);
+static void (*bl_AgebleMob_setAge)(Entity*, int);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -464,6 +465,20 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return fn(entity);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAnimalAge
+  (JNIEnv *env, jclass clazz, jint entityId, jint age) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_AgebleMob_setAge(entity, age);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAnimalAge
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return 0;
+	return ((int*) entity)[772];
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -526,6 +541,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
 	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
+
+	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
