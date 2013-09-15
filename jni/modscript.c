@@ -94,6 +94,7 @@ static int (*bl_Level_getTile)(Level*, int, int, int);
 static int (*bl_Level_getData) (Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
+static void (*bl_Level_setTime) (Level*, long);
 static void (*bl_GameMode_tick_real)(void*);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
@@ -384,6 +385,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setRot(entity, yaw, pitch);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
+  (JNIEnv *env, jclass clazz, jlong time) {
+	bl_Level_setTime(time);
+}
+
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_Level_getEntity(bl_level, entityId);
@@ -507,6 +513,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getTile = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
+	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
 	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
