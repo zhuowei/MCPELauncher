@@ -373,6 +373,7 @@ public class ScriptManager {
 	public static native float nativeGetEntityLoc(int entity, int axis);
 	public static native void nativeSetupHooks(int versionCode);
 	public static native int nativeGetData(int x, int y, int z);
+	public static native void nativeSetTime(long time);
 	public static native int nativeHurtTo(int to);
 		
 
@@ -542,6 +543,11 @@ public static native void nativeRemoveEntity(int entityId);
 
 		//nonstandard methods
 
+		@JSFunction
+		public void setTime(long time) {
+			return nativeSetTime(time);
+		}
+		
 		@JSFunction
 		public int getData(int x, int y, int z) {
 			return nativeGetData(x, y, z);
