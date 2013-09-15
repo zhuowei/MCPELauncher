@@ -56,6 +56,7 @@ typedef Player LocalPlayer;
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
 #define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 114
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 88
+#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 61
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -346,9 +347,11 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	bl_Level_addEntity(bl_level, entity);
 
 	//skins
-	const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
-	bl_changeEntitySkin((void*) entity, skinUtfChars);
-	(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
+	if (skinPath != NULL) {
+		const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
+		bl_changeEntitySkin((void*) entity, skinUtfChars);
+		(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
+	}
 
 	return entity->entityId;
 	
@@ -452,6 +455,14 @@ if (entity == NULL) return;
 bl_Level_removeEntity(bl_level, entity);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityTypeId
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return 0;
+	void* vtable = entity->vtable[ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID];
+	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
+	return fn(entity);
+}
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {

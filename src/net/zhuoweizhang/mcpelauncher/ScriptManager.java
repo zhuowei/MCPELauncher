@@ -76,6 +76,7 @@ public class ScriptManager {
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
+		ScriptState state = new ScriptState(script, scope, sourceName);
 		String[] names = getAllJsFunctions(BlockHostObject.class);
 		((ScriptableObject) scope).defineFunctionProperties(names, BlockHostObject.class, ScriptableObject.DONTENUM);
 		try {
@@ -86,12 +87,11 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeLevelApi.class);
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
-			//ScriptableObject.defineProperty(scope, "Player", new NativePlayerApi(), ScriptableObject.DONTENUM);
 		} catch (Exception e) {
 			e.printStackTrace();
+			reportScriptError(state, e);
 		}
 
-		ScriptState state = new ScriptState(script, scope, sourceName);
 		script.exec(ctx, scope);
 		scripts.add(state);
 	}
@@ -371,13 +371,13 @@ public class ScriptManager {
 	public static native void nativeSetFov(float degrees);
 	public static native void nativeSetMobSkin(int ent, String str);
 	public static native float nativeGetEntityLoc(int entity, int axis);
-	public static native void nativeSetupHooks(int versionCode);
 	public static native int nativeGetData(int x, int y, int z);
 	public static native int nativeHurtTo(int to);
-		
+	public static native void nativeRemoveEntity(int entityId);
+	public static native int nativeGetEntityTypeId(int entityId);
 
-	//InusualZ Addons
-public static native void nativeRemoveEntity(int entityId);
+	//setup
+	public static native void nativeSetupHooks(int versionCode);
 
 	public static class ScriptState {
 		public Script script;
@@ -555,6 +555,9 @@ public static native void nativeRemoveEntity(int entityId);
 
 		@JSFunction
 		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
+			if (invalidTexName(tex)) {
+				tex = null;
+			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
 			return new NativeEntity(entityId);
 		}
@@ -751,6 +754,8 @@ public static native void nativeRemoveEntity(int entityId);
 			return nativeGetYaw(ent.entityId);
 		}
 
+		//nonstandard
+
 		@JSStaticFunction
 		public static double getX(NativeEntity ent) {
 			return nativeGetEntityLoc(ent.entityId, AXIS_X);
@@ -767,6 +772,20 @@ public static native void nativeRemoveEntity(int entityId);
 		@JSStaticFunction
 		public static void setCarriedItem(NativeEntity ent, int id, int count, int damage) {
 			nativeSetCarriedItem(ent.entityId, id, 1, damage);
+		}
+
+		@JSStaticFunction
+		public static int getEntityTypeId(NativeEntity ent) {
+			return nativeGetEntityTypeId(ent.entityId);
+		}
+
+		@JSStaticFunction
+		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
+			if (invalidTexName(tex)) {
+				tex = null;
+			}
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
+			return new NativeEntity(entityId);
 		}
 
 		@Override
