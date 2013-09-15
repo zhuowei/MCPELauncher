@@ -545,7 +545,7 @@ public static native void nativeRemoveEntity(int entityId);
 
 		@JSFunction
 		public void setTime(long time) {
-			return nativeSetTime(time);
+			nativeSetTime(time);
 		}
 		
 		@JSFunction
