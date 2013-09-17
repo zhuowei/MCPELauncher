@@ -417,6 +417,7 @@ public class ScriptManager {
 	public static native int nativeGetEntityTypeId(int entityId);
 	public static native void nativeSetAnimalAge(int entityId, int age);
 	public static native int nativeGetAnimalAge(int entityId);
+	public static native int nativeGetCarriedData();
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -638,7 +639,11 @@ public class ScriptManager {
 			if(ent == null) return;
 			nativeRemoveEntity(ent.entityId);
 		}
-
+		
+		@JSFunction
+		public int getCarriedData() {
+			return nativeGetCarriedData();
+		}
 	}
 
 	private static class NativePointer extends ScriptableObject {
