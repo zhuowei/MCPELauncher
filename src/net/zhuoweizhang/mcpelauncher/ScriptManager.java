@@ -334,6 +334,46 @@ public class ScriptManager {
 		}
 	}
 
+	/** Returns a description of ALL the methods this ModPE runtime supports. */
+	public static String getAllApiMethodsDescriptions() {
+		StringBuilder builder = new StringBuilder();
+		appendApiMethods(builder, BlockHostObject.class, null);
+		appendApiMethods(builder, NativeModPEApi.class, "ModPE");
+		appendApiMethods(builder, NativeLevelApi.class, "Level");
+		appendApiMethods(builder, NativePlayerApi.class, "Player");
+		appendApiMethods(builder, NativeEntityApi.class, "Entity");
+		return builder.toString();
+		
+	}
+	private static void appendApiMethods(StringBuilder builder, Class<?> clazz, String namespace) {
+		for (Method met: clazz.getMethods()) {
+			if (met.getAnnotation(JSFunction.class) != null || met.getAnnotation(JSStaticFunction.class) != null) {
+				appendApiMethodDescription(builder, met, namespace);
+			}
+		}
+		builder.append("\n");
+	}
+
+	private static void appendApiMethodDescription(StringBuilder builder, Method met, String namespace) {
+		if (namespace != null) {
+			builder.append(namespace);
+			builder.append('.');
+		}
+		builder.append(met.getName());
+		builder.append('(');
+		Class[] params = met.getParameterTypes();
+		for (int i = 0; i < params.length; i++) {
+			builder.append("par");
+			builder.append(i + 1);
+			builder.append(params[i].getSimpleName().replaceAll("Native", ""));
+			if (i < params.length - 1) {
+				builder.append(", ");
+			}
+		}
+		builder.append(");\n");
+	}
+	//end method dumping code
+
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();

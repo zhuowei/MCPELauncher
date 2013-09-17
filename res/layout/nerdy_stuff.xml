@@ -33,4 +33,10 @@
             android:text="Authorized personnel only"
             android:visibility="gone"/>
 
+        <Button android:id="@+id/dump_modpe_methods"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Dump ModPE Script methods"/>
+
  </LinearLayout>

@@ -18,6 +18,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	private Button restartAppButton;
 	private Button setSkinButton;
 	private Button chefSpecialButton;
+	private Button dumpModPEMethodsButton;
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -31,6 +32,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		chefSpecialButton = (Button) findViewById(R.id.chef_special);
 		chefSpecialButton.setOnClickListener(this);
 		if (BuildConfig.DEBUG) chefSpecialButton.setVisibility(View.VISIBLE);
+		dumpModPEMethodsButton = (Button) findViewById(R.id.dump_modpe_methods);
+		dumpModPEMethodsButton.setOnClickListener(this);
 	}
 
 	public void onClick(View v) {
@@ -42,6 +45,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 			setSkin();
 		} else if (v == chefSpecialButton && BuildConfig.DEBUG) {
 			scriptImport();
+		} else if (v == dumpModPEMethodsButton) {
+			dumpModPEMethods();
 		}
 	}
 
@@ -101,5 +106,22 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void dumpModPEMethods() {
+		String allMethods = ScriptManager.getAllApiMethodsDescriptions();
+		android.text.ClipboardManager cmgr = (android.text.ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
+		cmgr.setText(allMethods);
+		try {
+			FileWriter w = new FileWriter("/sdcard/modpescript_dump.txt");
+			w.write(allMethods);
+			w.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+			
+		new AlertDialog.Builder(this).setTitle("Copied to clipboard; wrote to /sdcard/modpescript_dump.txt").setMessage(allMethods).
+			setPositiveButton(android.R.string.ok, null).
+			show();
 	}
 }
