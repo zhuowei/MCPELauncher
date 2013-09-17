@@ -104,6 +104,7 @@ static void* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Level_removeEntity)(Level*, Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
+static ItemInstance* (*bl_Player_getCarriedData)(Player*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -479,6 +480,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return ((int*) entity)[772];
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedData
+  (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return 0;
+	ItemInstance* instance = bl_Player_getCarriedData(bl_localplayer);
+	if (instance == NULL) return 0;
+	return instance->damage;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -524,6 +533,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getData = dlsym(RTLD_DEFAULT, "_ZN5Level7getDataEiii");
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
+	bl_Player_getCarriedData = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedDataEv");
 	bl_Player_ride = dlsym(RTLD_DEFAULT, "_ZN6Player4rideEP6Entity");
 	bl_Entity_setPos = dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 	bl_Level_explode = dlsym(RTLD_DEFAULT, "_ZN5Level7explodeEP6Entityffffb");
