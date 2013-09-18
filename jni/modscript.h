@@ -236,7 +236,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  * Method:    nativeHurtTo
  * Signature: (I)I
  */
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHurtTo
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHurtTo
   (JNIEnv *, jclass, jint);
 
 /*
