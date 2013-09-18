@@ -119,6 +119,10 @@ public class ScriptManager {
 		callScriptMethod("useItem", x, y, z, itemid, blockid, side);
 	}
 
+	public static void destroyBlockCallback(int x, int y, int z, int side) {
+		callScriptMethod("destroyBlock", x, y, z, side);
+	}
+
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
 		System.out.println("Level: " + hasLevel);
 		ScriptManager.isRemote = isRemote;
@@ -193,6 +197,11 @@ public class ScriptManager {
 	}
 
 	public static void removeScript(String scriptId) {
+		SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+scriptId+"Data", 0);
+		SharedPreferences.Editor prefsEditor = sPrefs.edit();
+		prefsEditor.clear();
+		prefsEditor.commit();
+
 		for (int i = scripts.size() - 1; i >= 0; i--) {
 			if (scripts.get(i).name.equals(scriptId)) {
 				scripts.remove(i);
@@ -411,12 +420,22 @@ public class ScriptManager {
 	public static native void nativeSetFov(float degrees);
 	public static native void nativeSetMobSkin(int ent, String str);
 	public static native float nativeGetEntityLoc(int entity, int axis);
-	public static native int nativeGetData(int x, int y, int z);
-	public static native int nativeHurtTo(int to);
 	public static native void nativeRemoveEntity(int entityId);
 	public static native int nativeGetEntityTypeId(int entityId);
 	public static native void nativeSetAnimalAge(int entityId, int age);
 	public static native int nativeGetAnimalAge(int entityId);
+
+     // MrARM's additions
+	public static native int nativeGetData(int x, int y, int z);
+	public static native void nativeHurtTo(int to);
+	public static native void nativeDestroyBlock(int x, int y, int z);
+	public static native long nativeGetTime();
+	public static native void nativeSetTime(long time);
+	public static native int nativeGetGameType();
+	public static native void nativeSetGameType(int type);
+	public static native void nativeSetOnFire(int entity, int howLong);
+	public static native void nativeSetSpawn(int x, int y, int z);
+	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -590,10 +609,49 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public int setPlayerHealth(int value) {
-			return nativeHurtTo(value);
+		public void setPlayerHealth(int value) {
+			nativeHurtTo(value);
 		}
 
+		@JSFunction
+		public void dropItem(double x, double y, double z, double range, int id, int count, int damage) {
+			nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
+		}
+
+		@JSFunction
+		public void setGameType(int type) {
+			nativeSetGameType(type);
+		}
+
+		@JSFunction
+		public int getGameType() {
+			return nativeGetGameType();
+		}
+
+		@JSFunction
+		public int getTime() {
+			return (int)nativeGetTime();
+		}
+
+		@JSFunction
+		public void setTime(int time) {
+			nativeSetTime((long)time);
+		}
+
+		@JSFunction
+		public void setSpawn(int x, int y, int z) {
+			nativeSetSpawn(x, y, z);
+		}
+
+		@JSFunction
+		public void bl_destroyBlock(int x, int y, int z, boolean shouldDrop) {
+			int itmId = getTile(x, y, z);
+			int itmDmg = getData(x, y, z);
+
+			nativeDestroyBlock(x, y, z);
+			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
+		}
+		
 
 		@JSFunction
 		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
@@ -619,6 +677,14 @@ public class ScriptManager {
 			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
 			SharedPreferences.Editor prefsEditor = sPrefs.edit();
 			prefsEditor.putString(prefName, prefValue);
+			prefsEditor.commit();
+		}
+
+		@JSFunction
+		public void bl_remData(String prefName) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript+"Data", 0);
+			SharedPreferences.Editor prefsEditor = sPrefs.edit();
+			prefsEditor.remove(prefName);
 			prefsEditor.commit();
 		}
 
@@ -794,6 +860,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static double getYaw(NativeEntity ent) {
 			return nativeGetYaw(ent.entityId);
+		}
+
+		@JSStaticFunction
+		public static void setOnFire(NativeEntity ent, int howLong) {
+			nativeSetOnFire(ent.entityId, howLong);
 		}
 
 		//nonstandard
