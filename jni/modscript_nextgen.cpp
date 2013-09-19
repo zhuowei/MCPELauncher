@@ -23,6 +23,10 @@ static void** bl_FoodItem_vtable;
 
 static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
+static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
+
+static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld);
+
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
@@ -101,6 +105,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
+  (JNIEnv *env, jclass clazz, jstring worlddir) {
+	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
+	std::string worlddirstr = std::string(utfChars);
+	env->ReleaseStringUTFChars(worlddir, utfChars);
+	bl_Minecraft_leaveGame(bl_minecraft, false);
+	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, NULL);
+}
+
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
@@ -119,6 +132,10 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
 	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
+
+	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
+		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
+	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb"); //hooked via vtable; we use the unhooked version here
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a18;

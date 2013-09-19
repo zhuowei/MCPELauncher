@@ -13,6 +13,7 @@ JavaVM* bl_JavaVM;
 jclass bl_scriptmanager_class;
 
 void bl_changeEntitySkin(void* entity, const char* newSkin);
+void (*bl_Minecraft_selectLevel_real)(Minecraft*, std::string const&, std::string const&, void*);
 
 typedef struct {
 	void** vtable; //0

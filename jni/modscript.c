@@ -80,7 +80,7 @@ jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
-static void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
+void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -152,24 +152,32 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	bl_localplayer = player;
 	bl_minecraft = minecraft;
 	bl_level = level;
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "setLevelCallback", "(ZZ)V");
 
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (int) (level != NULL), (jboolean) level->isRemote);
 
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
 
 	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
 }
 
 void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
-
-	
 	JNIEnv *env;
 
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
 
 	// Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "selectLevelCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
@@ -177,7 +185,9 @@ void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName
 	
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (*env)->NewStringUTF(env, bl_getCharArr(wName)), (*env)->NewStringUTF(env, bl_getCharArr(wDir)));
 
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
 
 	bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
 }
@@ -186,14 +196,20 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
 	JNIEnv *env;
 	bl_Minecraft_leaveGame_real(minecraft, thatboolean);
 
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
 
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, thatboolean);
 
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
 
 }
 

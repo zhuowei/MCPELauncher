@@ -56,6 +56,8 @@ public class ScriptManager {
 	public static float newPlayerYaw = 0;
 	public static float newPlayerPitch = 0;
 
+	private static SelectLevelRequest requestSelectLevel = null;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -163,6 +165,10 @@ public class ScriptManager {
 		}
 		//any takers for rotating the player?
 		if (sensorEnabled) updatePlayerOrientation();
+		if (requestSelectLevel != null) {
+			nativeSelectLevel(requestSelectLevel.dir);
+			requestSelectLevel = null;
+		}
 	}
 
 	private static void updatePlayerOrientation() {
@@ -412,11 +418,12 @@ public class ScriptManager {
 	public static native void nativeSetMobSkin(int ent, String str);
 	public static native float nativeGetEntityLoc(int entity, int axis);
 	public static native int nativeGetData(int x, int y, int z);
-	public static native int nativeHurtTo(int to);
+	public static native void nativeHurtTo(int to);
 	public static native void nativeRemoveEntity(int entityId);
 	public static native int nativeGetEntityTypeId(int entityId);
 	public static native void nativeSetAnimalAge(int entityId, int age);
 	public static native int nativeGetAnimalAge(int entityId);
+	public static native void nativeSelectLevel(String levelName);
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -590,8 +597,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public int setPlayerHealth(int value) {
-			return nativeHurtTo(value);
+		public void setPlayerHealth(int value) {
+			nativeHurtTo(value);
 		}
 
 
@@ -852,18 +859,18 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
-			bl_overrideTexture("terrain.png", url);
+			overrideTexture("terrain.png", url);
 		}
 		@JSStaticFunction
 		public static void setItems(String url) {
-			bl_overrideTexture("gui/items.png", url);
+			overrideTexture("gui/items.png", url);
 		}
 		@JSStaticFunction
 		public static void setGuiBlocks(String url) {
-			bl_overrideTexture("gui/gui_blocks.png", url);
+			overrideTexture("gui/gui_blocks.png", url);
 		}
 		@JSStaticFunction
-		public static void bl_overrideTexture(String theOverridden, String url) {
+		public static void overrideTexture(String theOverridden, String url) {
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
 				if (main != null) {
@@ -891,9 +898,24 @@ public class ScriptManager {
 			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
 		}
 
+		@JSStaticFunction
+		public static void selectLevel(String levelDir, String unused_levelName, String unused_levelSeed, int unused_gamemode) {
+			if (levelDir.equals(ScriptManager.worldDir)) {
+				System.err.println("Attempted to load level that is already loaded - ignore");
+				return;
+			}
+			//nativeSelectLevel(levelDir);
+			requestSelectLevel = new SelectLevelRequest();
+			requestSelectLevel.dir = levelDir;
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";
 		}
+	}
+
+	private static class SelectLevelRequest {
+		public String dir;
 	}
 }
