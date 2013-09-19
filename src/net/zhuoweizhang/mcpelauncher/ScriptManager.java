@@ -459,6 +459,14 @@ public class ScriptManager {
 		}
 	}
 
+	/*
+	 To contributors: if you are adding a BlockLauncher-specific method, please
+	 add it to one of the namespaces (Entity, Level, ModPE, Player)
+	 instead of the top-level namespace.
+	 thanks.
+	 e.g. Entity.fireLaz0rs = good, fireLaz0rs = bad, bl_fireLaz0rs = bad
+	*/
+
 	private static class BlockHostObject extends ScriptableObject {
 		private NativeEntity playerEnt = new NativeEntity(0);
 		@Override
@@ -611,57 +619,8 @@ public class ScriptManager {
 		//nonstandard methods
 
 		@JSFunction
-		public int getData(int x, int y, int z) {
-			return nativeGetData(x, y, z);
-		}
-
-		@JSFunction
-		public void setPlayerHealth(int value) {
-			nativeHurtTo(value);
-		}
-
-		@JSFunction
-		public void dropItem(double x, double y, double z, double range, int id, int count, int damage) {
-			nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
-		}
-
-		@JSFunction
-		public void setGameType(int type) {
-			nativeSetGameType(type);
-		}
-
-		@JSFunction
-		public int getGameType() {
-			return nativeGetGameType();
-		}
-
-		@JSFunction
-		public int getTime() {
-			return (int)nativeGetTime();
-		}
-
-		@JSFunction
-		public void setTime(int time) {
-			nativeSetTime((long)time);
-		}
-
-		@JSFunction
-		public void setSpawn(int x, int y, int z) {
-			nativeSetSpawn(x, y, z);
-		}
-
-		@JSFunction
-		public void bl_destroyBlock(int x, int y, int z, boolean shouldDrop) {
-			int itmId = getTile(x, y, z);
-			int itmDmg = getData(x, y, z);
-
-			nativeDestroyBlock(x, y, z);
-			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
-		}
-		
-
-		@JSFunction
 		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
+			print("Nag: update to Entity.spawnMob");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -670,46 +629,8 @@ public class ScriptManager {
 		}
 		@JSFunction
 		public void bl_setMobSkin(NativeEntity entity, String tex) {
+			print("Nag: update to Entity.setMobSkin");
 			nativeSetMobSkin(entity.entityId, tex);
-		}
-		
-		@JSFunction
-		public String bl_readData(String prefName) {
-			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
-			return sPrefs.getString(prefName, "");
-		}
-
-		@JSFunction
-		public void bl_saveData(String prefName, String prefValue) {
-			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
-			SharedPreferences.Editor prefsEditor = sPrefs.edit();
-			prefsEditor.putString(prefName, prefValue);
-			prefsEditor.commit();
-		}
-
-		@JSFunction
-		public void bl_remData(String prefName) {
-			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript+"Data", 0);
-			SharedPreferences.Editor prefsEditor = sPrefs.edit();
-			prefsEditor.remove(prefName);
-			prefsEditor.commit();
-		}
-
-		@JSFunction
-		public String bl_getWorldName() {
-			return worldName;
-		}
-
-
-		@JSFunction
-		public String bl_getWorldDir() {
-			return worldDir;
-		}
-		
-		@JSFunction
-		public void bl_removeEntity(NativeEntity ent) {
-			if(ent == null) return;
-			nativeRemoveEntity(ent.entityId);
 		}
 
 	}
@@ -785,6 +706,65 @@ public class ScriptManager {
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
 			return new NativeEntity(entityId);
 		}
+
+		//nonstandard methods
+		//thanks to MrARM
+
+		@JSStaticFunction
+		public static int getData(int x, int y, int z) {
+			return nativeGetData(x, y, z);
+		} 
+
+		@JSStaticFunction
+		public static String getWorldName() {
+			return worldName;
+		}
+
+
+		@JSStaticFunction
+		public static String getWorldDir() {
+			return worldDir;
+		}
+
+		@JSStaticFunction
+		public static void dropItem(double x, double y, double z, double range, int id, int count, int damage) {
+			nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
+		}
+
+		@JSStaticFunction
+		public static void setGameType(int type) {
+			nativeSetGameType(type);
+		}
+
+		@JSStaticFunction
+		public static int getGameType() {
+			return nativeGetGameType();
+		}
+
+		@JSStaticFunction
+		public static int getTime() {
+			return (int)nativeGetTime();
+		}
+
+		@JSStaticFunction
+		public static void setTime(int time) {
+			nativeSetTime((long)time);
+		}
+
+		@JSStaticFunction
+		public static void setSpawn(int x, int y, int z) {
+			nativeSetSpawn(x, y, z);
+		}
+
+		@JSStaticFunction
+		public static void destroyBlock(int x, int y, int z, boolean shouldDrop) {
+			int itmId = getTile(x, y, z);
+			int itmDmg = getData(x, y, z);
+
+			nativeDestroyBlock(x, y, z);
+			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Level";
@@ -820,6 +800,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void addItemInventory(int id, int amount, int damage) {
 			nativeAddItemInventory(id, amount, damage);
+		}
+		//nonstandard
+		@JSStaticFunction
+		public static void setHealth(int value) {
+			nativeHurtTo(value);
 		}
 		@Override
 		public String getClassName() {
@@ -869,12 +854,12 @@ public class ScriptManager {
 			return nativeGetYaw(ent.entityId);
 		}
 
+		//nonstandard
+
 		@JSStaticFunction
-		public static void setOnFire(NativeEntity ent, int howLong) {
+		public static void setFireTicks(NativeEntity ent, int howLong) {
 			nativeSetOnFire(ent.entityId, howLong);
 		}
-
-		//nonstandard
 
 		@JSStaticFunction
 		public static double getX(NativeEntity ent) {
@@ -916,6 +901,17 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getAnimalAge(NativeEntity animal) {
 			return nativeGetAnimalAge(animal.entityId);
+		}
+
+		@JSStaticFunction
+		public static void setMobSkin(NativeEntity entity, String tex) {
+			nativeSetMobSkin(entity.entityId, tex);
+		}
+
+		@JSStaticFunction
+		public static void remove(NativeEntity ent) {
+			if(ent == null) return;
+			nativeRemoveEntity(ent.entityId);
 		}
 
 		@Override
@@ -978,6 +974,28 @@ public class ScriptManager {
 			//nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
 			requestSelectLevel.dir = levelDir;
+		}
+
+		@JSStaticFunction
+		public static String readData(String prefName) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
+			return sPrefs.getString(prefName, "");
+		}
+
+		@JSStaticFunction
+		public static void saveData(String prefName, String prefValue) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
+			SharedPreferences.Editor prefsEditor = sPrefs.edit();
+			prefsEditor.putString(prefName, prefValue);
+			prefsEditor.commit();
+		}
+
+		@JSStaticFunction
+		public static void removeData(String prefName) {
+			SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+currentScript, 0);
+			SharedPreferences.Editor prefsEditor = sPrefs.edit();
+			prefsEditor.remove(prefName);
+			prefsEditor.commit();
 		}
 
 		@Override
