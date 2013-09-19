@@ -104,9 +104,20 @@ static void* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Level_removeEntity)(Level*, Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
+static void (*bl_GameMode_destroyBlock_real)(void*, int, int, int, int);
+static Entity* (*bl_EntityFactory_CreateEntity)(int, Level*);
+static void (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
+static long (*bl_Level_getTime)(Level*);
+static void (*bl_Level_setTime)(Level*, float);
+static void* (*bl_Level_getLevelData)(Level*);
+static void (*bl_LevelData_setSpawn)(void*, int, int, int);
+static void (*bl_LevelData_setGameType)(void*, int);
+static int (*bl_LevelData_getGameType)(void*);
+static void (*bl_Entity_setOnFire)(Entity*, int);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
+void* bl_gamemode;
 static Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 int preventDefaultStatus = 0;
@@ -245,6 +256,87 @@ void bl_GameMode_tick_hook(void* gamemode) {
 void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 	bl_GameMode_initPlayer_real(gamemode, player);
 	bl_localplayer = player;
+	bl_gamemode = gamemode;
+}
+
+void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side){
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "destroyBlockCallback", "(IIII)V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, side);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, x, y, z, side);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
+  (JNIEnv *env, jclass clazz, jlong time) {
+	if (bl_level == NULL) return 0;
+	bl_Level_setTime(bl_level, time);
+}
+
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTime
+  (JNIEnv *env, jclass clazz) {
+	if (bl_level == NULL) return 0;
+	return bl_Level_getTime(bl_level);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->id = id;
+	instance->damage = damage;
+	instance->count = count;
+
+	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level);
+	if (entity == NULL) {
+		//WTF?
+		return;
+	}
+	bl_Entity_setPos(entity, x, y, z);
+	bl_Entity_spawnAtLocation(entity, instance, range);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSpawn
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (bl_level == NULL) return;
+	void* levelData = bl_Level_getLevelData(bl_level);
+	bl_LevelData_setSpawn(levelData, x, y, z);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameType
+  (JNIEnv *env, jclass clazz, jint type) {
+	if (bl_level == NULL) return;
+	void* levelData = bl_Level_getLevelData(bl_level);
+	bl_LevelData_setGameType(levelData, type);
+}
+
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetGameType
+  (JNIEnv *env, jclass clazz) {
+	if (bl_level == NULL) return;
+	void* levelData = bl_Level_getLevelData(bl_level);
+	return bl_LevelData_getGameType(levelData);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDestroyBlock
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+
+	if(bl_gamemode == NULL) return;
+
+	bl_GameMode_destroyBlock_real(bl_gamemode, x, y, z, 2);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetOnFire
+  (JNIEnv *env, jclass clazz, jint entityId, jint howLong) {
+	Entity* entity = bl_Level_getEntity(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_Entity_setOnFire(entity, howLong);
 }
 
 float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoolean) {
@@ -524,6 +616,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
 
+	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEiiii");
+	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
+
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
@@ -554,6 +649,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Level_removeEntity = dlsym(RTLD_DEFAULT, "_ZN5Level12removeEntityEP6Entity");
+	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiP5Level");
+	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationEP12ItemInstancef");
+	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
+	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZN5Level7getTimeEv");
+	bl_Level_getLevelData = dlsym(RTLD_DEFAULT, "_ZN5Level12getLevelDataEv");
+	bl_LevelData_setSpawn = dlsym(RTLD_DEFAULT, "_ZN9LevelData8setSpawnEiii");
+	bl_LevelData_setGameType = dlsym(RTLD_DEFAULT, "_ZN9LevelData11setGameTypeEi");
+	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
+	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
+
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
 	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
