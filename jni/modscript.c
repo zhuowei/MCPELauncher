@@ -164,7 +164,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	bl_minecraft = minecraft;
 	bl_level = level;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 	}
@@ -185,7 +185,7 @@ void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 	}
@@ -208,7 +208,7 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
 	bl_Minecraft_leaveGame_real(minecraft, thatboolean);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, &env, JNI_VERSION_1_2);
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 	}
@@ -276,7 +276,7 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
   (JNIEnv *env, jclass clazz, jlong time) {
-	if (bl_level == NULL) return 0;
+	if (bl_level == NULL) return;
 	bl_Level_setTime(bl_level, time);
 }
 
@@ -319,7 +319,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetGameType
   (JNIEnv *env, jclass clazz) {
-	if (bl_level == NULL) return;
+	if (bl_level == NULL) return 0;
 	void* levelData = bl_Level_getLevelData(bl_level);
 	return bl_LevelData_getGameType(levelData);
 }
