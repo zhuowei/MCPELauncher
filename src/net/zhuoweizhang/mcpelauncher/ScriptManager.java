@@ -461,6 +461,9 @@ public class ScriptManager {
 	public static native void nativeSetSpawn(int x, int y, int z);
 	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
 
+	// KsyMC's additions
+	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
+
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -780,6 +783,20 @@ public class ScriptManager {
 
 			nativeDestroyBlock(x, y, z);
 			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
+		}
+
+		@JSStaticFunction
+		public static void playSound(double x, double y, double z, String sound, double volume, double pitch) {
+			nativePlaySound((float) x, (float) y, (float) z, sound, (float) volume, (float) pitch);
+		}
+
+		@JSStaticFunction
+		public static void playSoundEnt(NativeEntity ent, String sound, double volume, double pitch) {
+			float x = nativeGetEntityLoc(ent.entityId, AXIS_X);
+			float y = nativeGetEntityLoc(ent.entityId, AXIS_Y);
+			float z = nativeGetEntityLoc(ent.entityId, AXIS_Z);
+			
+			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
 		}
 
 		@Override
