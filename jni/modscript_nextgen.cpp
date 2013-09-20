@@ -28,6 +28,8 @@ static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::str
 
 static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld);
 
+static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
+
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
@@ -111,8 +113,20 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
 	std::string worlddirstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(worlddir, utfChars);
-	bl_Minecraft_leaveGame(bl_minecraft, false);
 	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, NULL);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
+  (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
+	bl_Minecraft_leaveGame(bl_minecraft, saveMultiplayerWorld);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
+  (JNIEnv *env, jclass clazz, jstring serverAddress, jint serverPort) {
+	const char * utfChars = env->GetStringUTFChars(serverAddress, NULL);
+	std::string addressstr = std::string(utfChars);
+	env->ReleaseStringUTFChars(serverAddress, utfChars);
+	bl_Minecraft_connectToMCOServer(bl_minecraft, addressstr, addressstr, serverPort);
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
@@ -137,6 +151,9 @@ void bl_setuphooks_cppside() {
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb"); //hooked via vtable; we use the unhooked version here
+
+	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
+		dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a18;

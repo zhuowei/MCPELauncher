@@ -58,6 +58,10 @@ public class ScriptManager {
 
 	private static SelectLevelRequest requestSelectLevel = null;
 
+	private static boolean requestLeaveGame = false;
+
+	private static JoinServerRequest requestJoinServer = null;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (isRemote) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -169,9 +173,17 @@ public class ScriptManager {
 		}
 		//any takers for rotating the player?
 		if (sensorEnabled) updatePlayerOrientation();
+		if (requestLeaveGame) {
+			nativeLeaveGame(false);
+			requestLeaveGame = false;
+		}
 		if (requestSelectLevel != null) {
 			nativeSelectLevel(requestSelectLevel.dir);
 			requestSelectLevel = null;
+		}
+		if (requestJoinServer != null) {
+			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
+			requestJoinServer = null;
 		}
 	}
 
@@ -334,6 +346,9 @@ public class ScriptManager {
 	private static boolean invalidTexName(String tex) {
 		return tex == null || tex.equals("undefined") || tex.equals("null");
 	}
+	private static boolean isValidStringParameter(String tex) {
+		return !invalidTexName(tex);
+	}
 
 	private static void wordWrapClientMessage(String msg) {
 		String[] portions = msg.split("\n");
@@ -431,6 +446,8 @@ public class ScriptManager {
 	public static native void nativeSetAnimalAge(int entityId, int age);
 	public static native int nativeGetAnimalAge(int entityId);
 	public static native void nativeSelectLevel(String levelName);
+	public static native void nativeLeaveGame(boolean saveMultiplayerWorld);
+	public static native void nativeJoinServer(String serverAddress, int serverPort);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -966,14 +983,20 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void selectLevel(String levelDir, String unused_levelName, String unused_levelSeed, int unused_gamemode) {
+		public static void selectLevel(String levelDir, String levelName, String levelSeed, int gamemode) {
 			if (levelDir.equals(ScriptManager.worldDir)) {
 				System.err.println("Attempted to load level that is already loaded - ignore");
 				return;
 			}
+			requestLeaveGame = true;
 			//nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
 			requestSelectLevel.dir = levelDir;
+			if (isValidStringParameter(levelName)) {
+				requestSelectLevel.name = levelName;
+				requestSelectLevel.seed = levelSeed;
+				requestSelectLevel.gameMode = gamemode;
+			}
 		}
 
 		@JSStaticFunction
@@ -998,6 +1021,19 @@ public class ScriptManager {
 			prefsEditor.commit();
 		}
 
+		@JSStaticFunction
+		public static void leaveGame() {
+			requestLeaveGame = true;
+		}
+
+		@JSStaticFunction
+		public static void joinServer(String serverAddress, int port) {
+			requestLeaveGame = true;
+			requestJoinServer = new JoinServerRequest();
+			requestJoinServer.serverAddress = serverAddress;
+			requestJoinServer.serverPort = port;
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";
@@ -1006,5 +1042,12 @@ public class ScriptManager {
 
 	private static class SelectLevelRequest {
 		public String dir;
+		public String name, seed;
+		public int gameMode = 0;
+	}
+
+	private static class JoinServerRequest {
+		public String serverAddress;
+		public int serverPort;
 	}
 }
