@@ -20,6 +20,7 @@ static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
 static void (*bl_Item_Item)(Item*, int);
 
 static void** bl_FoodItem_vtable;
+static void** bl_Item_vtable;
 
 static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
@@ -76,12 +77,12 @@ Item* bl_constructItem(int id) {
 	return retval;
 }
 
-Item* bl_constructFoodItem(int id, int hearts) {
+Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 	Item* retval = (Item*) ::operator new((std::size_t) 48);
 	bl_Item_Item(retval, id - 0x100);
 	retval->vtable = bl_FoodItem_vtable;
 	((int*)retval)[9] = hearts;
-	((float*) retval)[10] = 0.3f; //time to eat
+	((float*) retval)[10] = timetoeat; //time to eat
 	return retval;
 }
 
@@ -97,7 +98,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
   (JNIEnv *env, jclass clazz, jint id, jint icon, jint halfhearts, jstring name) {
-	Item* item = bl_constructFoodItem(id, halfhearts);
+	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
 	item->icon = icon;
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
@@ -139,7 +140,8 @@ void bl_setuphooks_cppside() {
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a18;
-	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset);
+	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset + 8); //I have no idea why I have to add 8.
+	bl_Item_vtable = (void**) (mcpelibhandle->base + 0x292398 + 8); //tracing out the original vtable seems to suggest this.
 }
 
 } //extern
