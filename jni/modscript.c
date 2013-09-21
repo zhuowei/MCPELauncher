@@ -114,6 +114,9 @@ static void (*bl_LevelData_setSpawn)(void*, int, int, int);
 static void (*bl_LevelData_setGameType)(void*, int);
 static int (*bl_LevelData_getGameType)(void*);
 static void (*bl_Entity_setOnFire)(Entity*, int);
+static void* (*bl_Level_getTileEntity)(Level*, int, int, int);
+static void (*bl_ChestTileEntity_setItem)(void*, int, ItemInstance*);
+static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -272,6 +275,49 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, x, y, z, side);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
+	if (bl_level == NULL) return;
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->id = id;
+	instance->damage = damage;
+	instance->count = amount;
+
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (te == NULL) return;
+	bl_ChestTileEntity_setItem(te, slot, instance);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	if (te == NULL) return -1;
+	return instance->id;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (te == NULL) return -1;
+	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	return instance->damage;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemCountChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (te == NULL) return -1;
+	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	return instance->count;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
@@ -657,6 +703,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_setSpawn = dlsym(RTLD_DEFAULT, "_ZN9LevelData8setSpawnEiii");
 	bl_LevelData_setGameType = dlsym(RTLD_DEFAULT, "_ZN9LevelData11setGameTypeEi");
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
+	bl_Level_getTileEntity = dlsym(RTLD_DEFAULT, "_ZN5Level13getTileEntityEiii");
+	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
+	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 
 	//replace the getTexture method for zombie pigmen
