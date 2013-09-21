@@ -65,6 +65,10 @@ typedef Player LocalPlayer;
 #define AXIS_Y 1
 #define AXIS_Z 2
 
+#define ITEMID 0
+#define DAMAGE 1
+#define AMOUNT 2
+
 //This is true on the ARM/Dalvik/bionic platform
 
 //(0x23021C - 0x2301e8) / 4
@@ -115,6 +119,9 @@ static void (*bl_LevelData_setGameType)(void*, int);
 static int (*bl_LevelData_getGameType)(void*);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static void (*bl_Level_playSound)(Level*, float, float, float, const char*, float, float);
+static int (*bl_Inventory_removeItem)(void*, ItemInstance*);
+static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
+static void (*bl_Mob_die_real)(void*, Entity*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -275,6 +282,21 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, x, y, z, side);
 }
 
+void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "mobDieCallback", "()V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	bl_Mob_die_real(entity1, entity2);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
   (JNIEnv *env, jclass clazz, jlong time) {
 	if (bl_level == NULL) return;
@@ -346,11 +368,19 @@ float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoo
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
-  (JNIEnv *env, jclass clazz) {
+  (JNIEnv *env, jclass clazz, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	ItemInstance* instance = bl_Player_getCarriedItem(bl_localplayer);
 	if (instance == NULL) return 0;
-	return instance->id;
+
+	switch (type) {
+		case ITEMID:
+			return instance->id;
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
@@ -595,6 +625,35 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	(*env)->ReleaseStringUTFChars(env, sound, soundUtfChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemInventory
+  (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
+	if (bl_localplayer == NULL) return;
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->id = id;
+	instance->damage = damage;
+	instance->count = amount;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
+	bl_Inventory_removeItem(invPtr, instance);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotInventory
+  (JNIEnv *env, jclass clazz, jint slot, jint type) {
+	if (bl_localplayer == NULL) return 0;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
+	ItemInstance* instance = bl_FillingContainer_getItem(invPtr, slot);
+	if (instance == NULL) return 0;
+	switch (type) {
+		case ITEMID:
+			return instance->id;
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+	}
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -626,6 +685,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEiiii");
 	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
+
+	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieEP6Entity");
+	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
@@ -667,6 +729,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_Level_playSound = dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
+	bl_Inventory_removeItem = dlsym(RTLD_DEFAULT, "_ZN9Inventory10removeItemEPK12ItemInstance");
+	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
