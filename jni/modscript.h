@@ -289,11 +289,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeRemoveItemInventory
- * Signature: (III)V
+ * Method:    nativeClearSlotInventory
+ * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemInventory
-  (JNIEnv *, jclass, jint, jint, jint);
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

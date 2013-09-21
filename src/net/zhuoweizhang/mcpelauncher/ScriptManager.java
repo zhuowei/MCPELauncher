@@ -472,7 +472,7 @@ public class ScriptManager {
 
 	// KsyMC's additions
 	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
-	public static native void nativeRemoveItemInventory(int id, int amount, int damage);
+	public static native void nativeClearSlotInventory(int slot);
 	public static native int nativeGetSlotInventory(int slot, int type);
 
 	//setup
@@ -854,8 +854,8 @@ public class ScriptManager {
 		}
 		// KsyMC's additions
 		@JSStaticFunction
-		public static void removeItemInventory(int id, int amount, int damage) {
-			nativeRemoveItemInventory(id, amount, damage);
+		public static void clearSlotInventory(int slot) {
+			nativeClearSlotInventory(slot);
 		}
 		@JSStaticFunction
 		public static int getSlotInventory(int slot) {

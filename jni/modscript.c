@@ -119,7 +119,7 @@ static void (*bl_LevelData_setGameType)(void*, int);
 static int (*bl_LevelData_getGameType)(void*);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static void (*bl_Level_playSound)(Level*, float, float, float, const char*, float, float);
-static int (*bl_Inventory_removeItem)(void*, ItemInstance*);
+static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
 
@@ -625,23 +625,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	(*env)->ReleaseStringUTFChars(env, sound, soundUtfChars);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemInventory
-  (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
+  (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
-	instance->id = id;
-	instance->damage = damage;
-	instance->count = amount;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
-	bl_Inventory_removeItem(invPtr, instance);
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	bl_FillingContainer_clearSlot(invPtr, slot);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotInventory
   (JNIEnv *env, jclass clazz, jint slot, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
 	ItemInstance* instance = bl_FillingContainer_getItem(invPtr, slot);
 	if (instance == NULL) return 0;
 	switch (type) {
@@ -729,7 +725,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_Level_playSound = dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
-	bl_Inventory_removeItem = dlsym(RTLD_DEFAULT, "_ZN9Inventory10removeItemEPK12ItemInstance");
+	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen
