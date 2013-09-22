@@ -496,10 +496,6 @@ public class ScriptManager {
 			scriptPrint(str);
 		}
 		@JSFunction
-		public void log(String str) {
-			Log.i("MCPELauncherLog", str);
-		}
-		@JSFunction
 		public double getPlayerX() {
 			return nativeGetPlayerLoc(AXIS_X);
 		}
@@ -944,6 +940,10 @@ public class ScriptManager {
 	private static class NativeModPEApi extends ScriptableObject {
 		public NativeModPEApi() {
 			super();
+		}
+		@JSFunction
+		public void log(String str) {
+		   Log.i("MCPELauncherLog", str);
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
