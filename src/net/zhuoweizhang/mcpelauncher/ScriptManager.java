@@ -47,6 +47,10 @@ public class ScriptManager {
 	private static final int AXIS_Y = 1;
 	private static final int AXIS_Z = 2;
 
+	private static final int ITEMID = 0;
+	private static final int DAMAGE = 1;
+	private static final int AMOUNT = 2;
+
 	private static String currentScript = "Unknown";
 
 	private static boolean requestedGraphicsReset = false;
@@ -121,8 +125,8 @@ public class ScriptManager {
 		}
 	}
 
-	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side) {
-		callScriptMethod("useItem", x, y, z, itemid, blockid, side);
+	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side, int itemDamage, int blockDamage) {
+		callScriptMethod("useItem", x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	}
 
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
@@ -195,6 +199,11 @@ public class ScriptManager {
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
 		if (!isRemote) nativePreventDefault();
+	}
+
+	// KsyMC's additions
+	public static void mobDieCallback() {
+		callScriptMethod("deathHook");
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -412,7 +421,7 @@ public class ScriptManager {
 	public static native void nativeExplode(float x, float y, float z, float radius);
 	public static native void nativeAddItemInventory(int id, int amount, int damage);
 	public static native void nativeRideAnimal(int rider, int mount);
-	public static native int nativeGetCarriedItem();
+	public static native int nativeGetCarriedItem(int type);
 	public static native void nativePreventDefault();
 	public static native void nativeSetTile(int x, int y, int z, int id, int damage);
 	public static native int nativeSpawnEntity(float x, float y, float z, int entityType, String skinPath);
@@ -460,6 +469,11 @@ public class ScriptManager {
 	public static native void nativeSetOnFire(int entity, int howLong);
 	public static native void nativeSetSpawn(int x, int y, int z);
 	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
+
+	// KsyMC's additions
+	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
+	public static native void nativeClearSlotInventory(int slot);
+	public static native int nativeGetSlotInventory(int slot, int type);
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -571,7 +585,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public int getCarriedItem() {
-			return nativeGetCarriedItem();
+			return nativeGetCarriedItem(ITEMID);
 		}
 
 		@JSFunction
@@ -782,6 +796,21 @@ public class ScriptManager {
 			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
 		}
 
+		// KsyMC's additions
+		@JSStaticFunction
+		public static void playSound(double x, double y, double z, String sound, double volume, double pitch) {
+			nativePlaySound((float) x, (float) y, (float) z, sound, (float) volume, (float) pitch);
+		}
+
+		@JSStaticFunction
+		public static void playSoundEnt(NativeEntity ent, String sound, double volume, double pitch) {
+			float x = nativeGetEntityLoc(ent.entityId, AXIS_X);
+			float y = nativeGetEntityLoc(ent.entityId, AXIS_Y);
+			float z = nativeGetEntityLoc(ent.entityId, AXIS_Z);
+			
+			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Level";
@@ -812,7 +841,7 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static int getCarriedItem() {
-			return nativeGetCarriedItem();
+			return nativeGetCarriedItem(ITEMID);
 		}
 		@JSStaticFunction
 		public static void addItemInventory(int id, int amount, int damage) {
@@ -822,6 +851,31 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHealth(int value) {
 			nativeHurtTo(value);
+		}
+		// KsyMC's additions
+		@JSStaticFunction
+		public static void clearSlotInventory(int slot) {
+			nativeClearSlotInventory(slot);
+		}
+		@JSStaticFunction
+		public static int getSlotInventory(int slot) {
+			return nativeGetSlotInventory(slot, ITEMID);
+		}
+		@JSStaticFunction
+		public static int getSlotInventoryData(int slot) {
+			return nativeGetSlotInventory(slot, DAMAGE);
+		}
+		@JSStaticFunction
+		public static int getSlotInventoryCount(int slot) {
+			return nativeGetSlotInventory(slot, AMOUNT);
+		}
+		@JSStaticFunction
+		public static int getCarriedItemData() {
+			return nativeGetCarriedItem(DAMAGE);
+		}
+		@JSStaticFunction
+		public static int getCarriedItemCount() {
+			return nativeGetCarriedItem(AMOUNT);
 		}
 		@Override
 		public String getClassName() {
@@ -981,6 +1035,8 @@ public class ScriptManager {
 		public static void setFoodItem(int id, int iconx, int icony, int halfhearts, String name) {
 			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
 		}
+
+		//nonstandard
 
 		@JSStaticFunction
 		public static void selectLevel(String levelDir, String levelName, String levelSeed, int gamemode) {
