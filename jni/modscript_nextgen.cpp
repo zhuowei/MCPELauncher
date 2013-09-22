@@ -30,6 +30,8 @@ static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld);
 
 static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
 
+static void (*bl_Level_playSound)(Level*, float, float, float, std::string const&, float, float);
+
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
@@ -129,6 +131,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 	bl_Minecraft_connectToMCOServer(bl_minecraft, addressstr, addressstr, serverPort);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
+	const char * utfChars = env->GetStringUTFChars(sound, NULL);
+	std::string soundstr = std::string(utfChars);
+	env->ReleaseStringUTFChars(sound, utfChars);
+	bl_Level_playSound(bl_level, x, y, z, soundstr, volume, pitch);
+}
+
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
@@ -154,6 +164,9 @@ void bl_setuphooks_cppside() {
 
 	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
+
+	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
+		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a18;

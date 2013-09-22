@@ -118,7 +118,6 @@ static void (*bl_LevelData_setSpawn)(void*, int, int, int);
 static void (*bl_LevelData_setGameType)(void*, int);
 static int (*bl_LevelData_getGameType)(void*);
 static void (*bl_Entity_setOnFire)(Entity*, int);
-static void (*bl_Level_playSound)(Level*, float, float, float, const char*, float, float);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
@@ -618,13 +617,6 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return ((int*) entity)[772];
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
-	const char * soundUtfChars = (*env)->GetStringUTFChars(env, sound, NULL);
-	bl_Level_playSound(bl_level, x, y, z, soundUtfChars, volume, pitch);
-	(*env)->ReleaseStringUTFChars(env, sound, soundUtfChars);
-}
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
   (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
@@ -724,7 +716,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_setGameType = dlsym(RTLD_DEFAULT, "_ZN9LevelData11setGameTypeEi");
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
-	bl_Level_playSound = dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
 

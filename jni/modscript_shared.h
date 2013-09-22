@@ -3,9 +3,19 @@
 extern "C" {
 #endif
 
+typedef uint8_t cppbool;
+
 typedef void Minecraft;
 
+typedef struct {
+	void** vtable; //0
+	char filler[13];
+	cppbool isRemote;
+} Level;
+
 Minecraft* bl_minecraft;
+
+Level* bl_level;
 
 extern int preventDefaultStatus;
 

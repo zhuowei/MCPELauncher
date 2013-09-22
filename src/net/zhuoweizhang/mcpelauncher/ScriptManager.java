@@ -1036,6 +1036,8 @@ public class ScriptManager {
 			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
 		}
 
+		//nonstandard
+
 		@JSStaticFunction
 		public static void selectLevel(String levelDir, String levelName, String levelSeed, int gamemode) {
 			if (levelDir.equals(ScriptManager.worldDir)) {
