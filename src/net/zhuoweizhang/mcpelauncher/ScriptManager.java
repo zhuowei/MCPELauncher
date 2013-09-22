@@ -125,8 +125,8 @@ public class ScriptManager {
 		}
 	}
 
-	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side) {
-		callScriptMethod("useItem", x, y, z, itemid, blockid, side);
+	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side, int itemDamage, int blockDamage) {
+		callScriptMethod("useItem", x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	}
 
 	public static void destroyBlockCallback(int x, int y, int z, int side) {

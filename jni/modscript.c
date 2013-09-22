@@ -136,9 +136,14 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
 	int itemId = 0;
-	if (itemStack != NULL) itemId = itemStack->id;
+	int itemDamage = 0;
+	if (itemStack != NULL) {
+		itemId = itemStack->id;
+		itemDamage = itemStack->damage;
+	}
 
 	int blockId = bl_Level_getTile(level, x, y, z);
+	int blockDamage = bl_Level_getData(level, x, y, z);
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: JavaVM = %p\n", bl_JavaVM);
@@ -151,13 +156,13 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 #endif
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIIII)V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIIIIII)V");
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: mid = %i, class = %p\n", mid, bl_scriptmanager_class);
 #endif
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side); //TODO block ID
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side, itemDamage, blockDamage);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
