@@ -16,6 +16,7 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
@@ -494,7 +495,10 @@ public class ScriptManager {
 		public void print(String str) {
 			scriptPrint(str);
 		}
-
+		@JSFunction
+		public void log(String str) {
+			Log.i("MCPELauncherLog", str);
+		}
 		@JSFunction
 		public double getPlayerX() {
 			return nativeGetPlayerLoc(AXIS_X);
