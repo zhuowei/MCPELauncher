@@ -941,7 +941,7 @@ public class ScriptManager {
 		public NativeModPEApi() {
 			super();
 		}
-		@JSFunction
+		@JSStaticFunction
 		public void log(String str) {
 		   Log.i("MCPELauncherLog", str);
 		}
