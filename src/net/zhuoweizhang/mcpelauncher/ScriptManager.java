@@ -942,7 +942,7 @@ public class ScriptManager {
 			super();
 		}
 		@JSStaticFunction
-		public void log(String str) {
+		public static void log(String str) {
 		   Log.i("MCPELauncherLog", str);
 		}
 		@JSStaticFunction
