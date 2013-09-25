@@ -250,7 +250,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	private void reportScriptLoadError(Exception e) {
-		//do nothing for now
+		reportError(e);
 	}
 
 	private void afterPatchToggle(ScriptListItem patch) {

@@ -1026,13 +1026,13 @@ public class ScriptManager {
 			requestLeaveGame = true;
 		}
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
 			requestJoinServer.serverAddress = serverAddress;
 			requestJoinServer.serverPort = port;
-		}
+		}*/
 
 		@Override
 		public String getClassName() {

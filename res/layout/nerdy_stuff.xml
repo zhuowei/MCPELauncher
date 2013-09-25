@@ -1,7 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="vertical" >
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
         <TextView android:text="@string/nerdy_stuff_are_useless"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -39,4 +43,5 @@
             android:layout_margin="20dp"
             android:text="Dump ModPE Script methods"/>
 
- </LinearLayout>
+</LinearLayout>
+</ScrollView>
