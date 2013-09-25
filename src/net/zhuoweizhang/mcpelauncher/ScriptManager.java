@@ -459,6 +459,10 @@ public class ScriptManager {
 	public static native void nativeSetGameType(int type);
 	public static native void nativeSetOnFire(int entity, int howLong);
 	public static native void nativeSetSpawn(int x, int y, int z);
+	public static native void nativeAddItemChest(int x, int y, int z, int slot, int id, int damage, int amount);
+	public static native int nativeGetItemChest(int x, int y, int z, int slot);
+	public static native int nativeGetItemDataChest(int x, int y, int z, int slot);
+	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
 	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
 
 	//setup
@@ -598,6 +602,26 @@ public class ScriptManager {
 		@JSFunction
 		public int getTile(int x, int y, int z) {
 			return nativeGetTile(x, y, z);
+		}
+
+		@JSFunction
+		public void setItemChest(int x, int y, int z, int slot, int id, int damage, int amount) {
+			nativeAddItemChest(x, y, z, slot, id, damage, amount);
+		}
+
+		@JSFunction
+		public int getItemChest(int x, int y, int z, int slot) {
+			return nativeGetItemChest(x, y, z, slot);
+		}
+
+		@JSFunction
+		public int getItemDataChest(int x, int y, int z, int slot) {
+			return nativeGetItemDataChest(x, y, z, slot);
+		}
+
+		@JSFunction
+		public int getItemCountChest(int x, int y, int z, int slot) {
+			return nativeGetItemCountChest(x, y, z, slot);
 		}
 
 		@JSFunction
