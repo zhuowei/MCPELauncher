@@ -65,6 +65,10 @@ typedef Player LocalPlayer;
 #define AXIS_Y 1
 #define AXIS_Z 2
 
+#define ITEMID 0
+#define DAMAGE 1
+#define AMOUNT 2
+
 //This is true on the ARM/Dalvik/bionic platform
 
 //(0x23021C - 0x2301e8) / 4
@@ -117,6 +121,9 @@ static void (*bl_Entity_setOnFire)(Entity*, int);
 static void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 static void (*bl_ChestTileEntity_setItem)(void*, int, ItemInstance*);
 static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
+static int (*bl_FillingContainer_clearSlot)(void*, int);
+static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
+static void (*bl_Mob_die_real)(void*, Entity*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -132,9 +139,14 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
 	int itemId = 0;
-	if (itemStack != NULL) itemId = itemStack->id;
+	int itemDamage = 0;
+	if (itemStack != NULL) {
+		itemId = itemStack->id;
+		itemDamage = itemStack->damage;
+	}
 
 	int blockId = bl_Level_getTile(level, x, y, z);
+	int blockDamage = bl_Level_getData(level, x, y, z);
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: JavaVM = %p\n", bl_JavaVM);
@@ -147,13 +159,13 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 #endif
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIIII)V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "useItemOnCallback", "(IIIIIIII)V");
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: mid = %i, class = %p\n", mid, bl_scriptmanager_class);
 #endif
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side); //TODO block ID
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side, itemDamage, blockDamage);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
@@ -277,6 +289,21 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, x, y, z, side);
 }
 
+void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "mobDieCallback", "()V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	bl_Mob_die_real(entity1, entity2);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
@@ -391,11 +418,19 @@ float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoo
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
-  (JNIEnv *env, jclass clazz) {
+  (JNIEnv *env, jclass clazz, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	ItemInstance* instance = bl_Player_getCarriedItem(bl_localplayer);
 	if (instance == NULL) return 0;
-	return instance->id;
+
+	switch (type) {
+		case ITEMID:
+			return instance->id;
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
@@ -633,6 +668,31 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return ((int*) entity)[772];
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
+  (JNIEnv *env, jclass clazz, jint slot) {
+	if (bl_localplayer == NULL) return;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	bl_FillingContainer_clearSlot(invPtr, slot);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotInventory
+  (JNIEnv *env, jclass clazz, jint slot, jint type) {
+	if (bl_localplayer == NULL) return 0;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	ItemInstance* instance = bl_FillingContainer_getItem(invPtr, slot);
+	if (instance == NULL) return 0;
+	switch (type) {
+		case ITEMID:
+			return instance->id;
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+	}
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -664,6 +724,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEiiii");
 	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
+
+	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieEP6Entity");
+	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
@@ -707,6 +770,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
 	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
+	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
+	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
