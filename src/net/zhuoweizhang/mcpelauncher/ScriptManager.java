@@ -16,6 +16,7 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
@@ -1018,6 +1019,10 @@ public class ScriptManager {
 	private static class NativeModPEApi extends ScriptableObject {
 		public NativeModPEApi() {
 			super();
+		}
+		@JSStaticFunction
+		public static void log(String str) {
+		   Log.i("MCPELauncherLog", str);
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
