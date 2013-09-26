@@ -513,7 +513,6 @@ public class ScriptManager {
 		public void print(String str) {
 			scriptPrint(str);
 		}
-
 		@JSFunction
 		public double getPlayerX() {
 			return nativeGetPlayerLoc(AXIS_X);
