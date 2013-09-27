@@ -620,26 +620,6 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setItemChest(int x, int y, int z, int slot, int id, int damage, int amount) {
-			nativeAddItemChest(x, y, z, slot, id, damage, amount);
-		}
-
-		@JSFunction
-		public int getItemChest(int x, int y, int z, int slot) {
-			return nativeGetItemChest(x, y, z, slot);
-		}
-
-		@JSFunction
-		public int getItemDataChest(int x, int y, int z, int slot) {
-			return nativeGetItemDataChest(x, y, z, slot);
-		}
-
-		@JSFunction
-		public int getItemCountChest(int x, int y, int z, int slot) {
-			return nativeGetItemCountChest(x, y, z, slot);
-		}
-
-		@JSFunction
 		public void setPositionRelative(NativeEntity ent, double x, double y, double z) {
 			nativeSetPositionRelative(ent.entityId, (float) x, (float) y, (float) z);
 		}
@@ -821,6 +801,26 @@ public class ScriptManager {
 			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
 		}
 
+		@JSStaticFunction
+		public static void setChestSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
+			nativeAddItemChest(x, y, z, slot, id, damage, amount);
+		}
+
+		@JSStaticFunction
+		public static int getChestSlot(int x, int y, int z, int slot) {
+			return nativeGetItemChest(x, y, z, slot);
+		}
+
+		@JSStaticFunction
+		public static int getChestSlotData(int x, int y, int z, int slot) {
+			return nativeGetItemDataChest(x, y, z, slot);
+		}
+
+		@JSStaticFunction
+		public static int getChestSlotCount(int x, int y, int z, int slot) {
+			return nativeGetItemCountChest(x, y, z, slot);
+		}
+
 		// KsyMC's additions
 		@JSStaticFunction
 		public static void playSound(double x, double y, double z, String sound, double volume, double pitch) {
@@ -879,19 +879,19 @@ public class ScriptManager {
 		}
 		// KsyMC's additions
 		@JSStaticFunction
-		public static void clearSlotInventory(int slot) {
+		public static void clearInventorySlot(int slot) {
 			nativeClearSlotInventory(slot);
 		}
 		@JSStaticFunction
-		public static int getSlotInventory(int slot) {
+		public static int getInventorySlot(int slot) {
 			return nativeGetSlotInventory(slot, ITEMID);
 		}
 		@JSStaticFunction
-		public static int getSlotInventoryData(int slot) {
+		public static int getInventorySlotData(int slot) {
 			return nativeGetSlotInventory(slot, DAMAGE);
 		}
 		@JSStaticFunction
-		public static int getSlotInventoryCount(int slot) {
+		public static int getInventorySlotCount(int slot) {
 			return nativeGetSlotInventory(slot, AMOUNT);
 		}
 		@JSStaticFunction
