@@ -50,6 +50,15 @@ typedef struct {
 
 typedef Player LocalPlayer;
 
+typedef struct {
+	float ticksPerSecond; //0
+	int elapsedTicks; //4
+	float renderPartialTicks; //8
+	float timerSpeed; //12
+	float elapsedPartialTicks; //16
+	
+} MCPETimer;
+
 #define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 13
 #define GAMEMODE_VTABLE_OFFSET_ATTACK 19
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
@@ -292,14 +301,25 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, int x, int y, int z, int side
 void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "mobDieCallback", "()V");
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "mobDieCallback", "(II)V");
+	int victimId = entity1->entityId;
+	int attackerId = -1;
+	if (entity2 != NULL) {
+		attackerId = entity2->entityId;
+	}
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, attackerId, victimId);
 
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
 
 	bl_Mob_die_real(entity1, entity2);
 }
@@ -691,6 +711,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 		case AMOUNT:
 			return instance->count;
 	}
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
+  (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
+	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + 3240);
+	timer->ticksPerSecond = ticksPerSecond;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks

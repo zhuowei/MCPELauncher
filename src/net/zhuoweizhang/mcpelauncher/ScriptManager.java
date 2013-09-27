@@ -203,8 +203,8 @@ public class ScriptManager {
 	}
 
 	// KsyMC's additions
-	public static void mobDieCallback() {
-		callScriptMethod("deathHook");
+	public static void mobDieCallback(int attacker, int victim) {
+		callScriptMethod("deathHook", attacker == -1? null: new NativeEntity(attacker), new NativeEntity(victim));
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -458,6 +458,7 @@ public class ScriptManager {
 	public static native void nativeSelectLevel(String levelName);
 	public static native void nativeLeaveGame(boolean saveMultiplayerWorld);
 	public static native void nativeJoinServer(String serverAddress, int serverPort);
+	public static native void nativeSetGameSpeed(float ticksPerSecond);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1118,6 +1119,11 @@ public class ScriptManager {
 			requestJoinServer.serverAddress = serverAddress;
 			requestJoinServer.serverPort = port;
 		}*/
+
+		@JSStaticFunction
+		public static void setGameSpeed(double ticksPerSecond) {
+			nativeSetGameSpeed((float) ticksPerSecond);
+		}
 
 		@Override
 		public String getClassName() {
