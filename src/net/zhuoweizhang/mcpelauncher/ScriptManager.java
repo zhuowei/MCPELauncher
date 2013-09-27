@@ -137,6 +137,7 @@ public class ScriptManager {
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
 		System.out.println("Level: " + hasLevel);
 		ScriptManager.isRemote = isRemote;
+		nativeSetGameSpeed(20.0f);
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -1057,12 +1058,12 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setItem(int id, int iconx, int icony, String name) {
+		public static void setItem(int id, int icony, int iconx, String name) {
 			nativeDefineItem(id, (icony * 16) + iconx, name);
 		}
 
 		@JSStaticFunction
-		public static void setFoodItem(int id, int iconx, int icony, int halfhearts, String name) {
+		public static void setFoodItem(int id, int icony, int iconx, int halfhearts, String name) {
 			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
 		}
 
