@@ -133,6 +133,9 @@ static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
+static void (*bl_Level_ExtinguishFire)(Level*, int, int, int, int);
+static ItemInstance* (*bl_Player_getArmor)(Player*, int);
+static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -719,6 +722,43 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExtinguishFire
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint side) {
+	bl_Level_ExtinguishFire(bl_level, x, y, z, side);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotArmor
+  (JNIEnv *env, jclass clazz, jint slot, jint type) {
+	if (bl_localplayer == NULL) return 0;
+	//Geting the item
+	ItemInstance* instance = bl_Player_getArmor(bl_localplayer, slot);
+	if(instance == NULL) return 0;
+	switch (type)
+	{
+		case ITEMID:
+			return instance->id;
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+		default:
+			return 0;
+	}
+	return 0;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetArmorSlot
+  (JNIEnv *env, jclass clazz, jint slot, jint id, jint damage) {
+	if (bl_localplayer == NULL) return;
+	//Geting the item
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->id = id;
+	instance->count = 1;
+	instance->damage = damage;
+	bl_Player_setArmor(bl_localplayer, slot, instance);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -798,6 +838,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
+	bl_Level_ExtinguishFire = dlsym(RTLD_DEFAULT, "_ZN5Level14extinguishFireEiiii");
+	bl_Player_getArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8getArmorEi");
+	bl_Player_setArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8setArmorEiPK12ItemInstance");
 
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
