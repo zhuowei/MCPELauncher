@@ -208,6 +208,23 @@ public class ScriptManager {
 		callScriptMethod("deathHook", attacker == -1? null: new NativeEntity(attacker), new NativeEntity(victim));
 	}
 
+	//Other nonstandard callbacks
+	public static void entityRemovedCallback(int entity) {
+		callScriptMethod("entityRemovedHook", new NativeEntity(entity));
+	}
+
+	public static void entityAddedCallback(int entity) {
+		callScriptMethod("entityAddedHook", new NativeEntity(entity));
+	}
+
+	public static void levelEventCallback(int player, int eventType, int x, int y, int z, int data) {
+		callScriptMethod("levelEventHook", new NativeEntity(player), eventType, x, y, z, data);
+	}
+
+	public static void blockEventCallback(int x, int y, int z, int type, int data) {
+		callScriptMethod("blockEventHook", x, y, z, type, data);
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
 		int versionCode = 0;
@@ -460,6 +477,7 @@ public class ScriptManager {
 	public static native void nativeLeaveGame(boolean saveMultiplayerWorld);
 	public static native void nativeJoinServer(String serverAddress, int serverPort);
 	public static native void nativeSetGameSpeed(float ticksPerSecond);
+	public static native void nativeGetAllEntities();
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -658,7 +676,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
-			print("Nag: update to Entity.spawnMob");
+			print("Nag: update to Level.spawnMob");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -742,6 +760,15 @@ public class ScriptManager {
 				tex = "mob/cow.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
+			return new NativeEntity(entityId);
+		}
+
+		@JSStaticFunction
+		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
+			if (invalidTexName(tex)) {
+				tex = null;
+			}
+			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
 			return new NativeEntity(entityId);
 		}
 
@@ -984,6 +1011,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
+			scriptPrint("Nag: update to Level.spawnMob");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -1010,6 +1038,12 @@ public class ScriptManager {
 		public static void remove(NativeEntity ent) {
 			if(ent == null) return;
 			nativeRemoveEntity(ent.entityId);
+		}
+
+		@JSStaticFunction
+		public static NativeEntity[] getAllEntities() {
+			nativeGetAllEntities();
+			return null;
 		}
 
 		@Override

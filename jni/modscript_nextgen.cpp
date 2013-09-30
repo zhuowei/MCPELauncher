@@ -5,11 +5,18 @@
 #include <android/log.h>
 #include <jni.h>
 #include <string>
+#include <vector>
+#include <typeinfo>
 
 #include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
+
+#define cppbool bool
+
 #include "modscript_shared.h"
+
+#include "modscript_ScriptLevelListener.hpp"
 
 extern "C" {
 
@@ -31,6 +38,10 @@ static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld);
 static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
 
 static void (*bl_Level_playSound)(Level*, float, float, float, std::string const&, float, float);
+
+static void* (*bl_Level_getAllEntities)(Level*);
+
+static void (*bl_Level_addListener)(Level*, LevelListener*);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -139,6 +150,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	bl_Level_playSound(bl_level, x, y, z, soundstr, volume, pitch);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAllEntities
+  (JNIEnv *env, jclass clazz) {
+	void* ptr = bl_Level_getAllEntities(bl_level);
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "%x, %x\n", ptr, *((void**)(ptr)));
+}
+
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
@@ -147,6 +164,11 @@ void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	(*ptrToStr) = (*newSkinString);
 	std::string* ptrToStr2 = (std::string*) (((int) entity) + 2920);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer again: %p, %i, %s\n", ptrToStr2, *((int*) ptrToStr2), ptrToStr2->c_str());
+}
+
+void bl_attachLevelListener() {
+	ScriptLevelListener* listener = new ScriptLevelListener();
+	bl_Level_addListener(bl_level, listener);
 }
 
 void bl_setuphooks_cppside() {
@@ -167,6 +189,12 @@ void bl_setuphooks_cppside() {
 
 	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
+
+	bl_Level_getAllEntities = (void* (*)(Level*))
+		dlsym(RTLD_DEFAULT, "_ZN5Level14getAllEntitiesEv");
+
+	bl_Level_addListener = (void (*) (Level*, LevelListener*))
+		dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a18;

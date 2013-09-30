@@ -1,29 +1,29 @@
+#ifndef _MODSCRIPT_SHARED_H
+#define _MODSCRIPT_SHARED_H	1
+
 #include <jni.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef uint8_t cppbool;
+#include "modscript_structs.h"
 
 typedef void Minecraft;
 
-typedef struct {
-	void** vtable; //0
-	char filler[13];
-	cppbool isRemote;
-} Level;
+extern Minecraft* bl_minecraft;
 
-Minecraft* bl_minecraft;
-
-Level* bl_level;
+extern Level* bl_level;
 
 extern int preventDefaultStatus;
 
-JavaVM* bl_JavaVM;
-jclass bl_scriptmanager_class;
+extern JavaVM* bl_JavaVM;
+extern jclass bl_scriptmanager_class;
 
 void bl_changeEntitySkin(void* entity, const char* newSkin);
-void (*bl_Minecraft_selectLevel_real)(Minecraft*, std::string const&, std::string const&, void*);
+extern void (*bl_Minecraft_selectLevel_real)(Minecraft*, std::string const&, std::string const&, void*);
+void bl_attachLevelListener();
+extern Entity* bl_removedEntity;
 
 typedef struct {
 	void** vtable; //0
@@ -42,4 +42,6 @@ typedef struct {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
