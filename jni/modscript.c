@@ -706,6 +706,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
+  (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return 0;
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
+	if (invPtr == NULL) return 0;
+	return ((int*) invPtr)[9];
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;

@@ -478,6 +478,7 @@ public class ScriptManager {
 	public static native void nativeJoinServer(String serverAddress, int serverPort);
 	public static native void nativeSetGameSpeed(float ticksPerSecond);
 	public static native void nativeGetAllEntities();
+	public static native int nativeGetSelectedSlotId();
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -762,6 +763,7 @@ public class ScriptManager {
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
 			return new NativeEntity(entityId);
 		}
+		//nonstandard methods
 
 		@JSStaticFunction
 		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
@@ -772,7 +774,6 @@ public class ScriptManager {
 			return new NativeEntity(entityId);
 		}
 
-		//nonstandard methods
 		//thanks to MrARM
 
 		@JSStaticFunction
@@ -905,6 +906,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHealth(int value) {
 			nativeHurtTo(value);
+		}
+
+		@JSStaticFunction
+		public static int getSelectedSlotId() {
+			return nativeGetSelectedSlotId();
 		}
 		// KsyMC's additions
 		@JSStaticFunction

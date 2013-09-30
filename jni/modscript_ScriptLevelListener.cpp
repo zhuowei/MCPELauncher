@@ -14,8 +14,10 @@ void ScriptLevelListener::levelEvent(Player* player, int type, int x, int y, int
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "levelEventCallback", "(IIIIII)V");
+	int entityId = 0;
+	if (player != NULL) entityId = player->entityId;
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, player->entityId, type, x, y, z, data);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entityId, type, x, y, z, data);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
