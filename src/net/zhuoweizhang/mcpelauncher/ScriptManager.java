@@ -481,6 +481,7 @@ public class ScriptManager {
 	public static native int nativeGetSelectedSlotId();
 	public static native int nativeGetMobHealth(int entityId);
 	public static native void nativeSetMobHealth(int entityId, int halfhearts);
+	public static native void nativeSetEntityRenderType(int entityId, int renderType);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1061,6 +1062,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHealth(NativeEntity ent, int halfhearts) {
 			nativeSetMobHealth(ent.entityId, halfhearts);
+		}
+
+		@JSStaticFunction
+		public static void setRenderType(NativeEntity ent, int renderType) {
+			nativeSetEntityRenderType(ent.entityId, renderType);
 		}
 
 		@Override
