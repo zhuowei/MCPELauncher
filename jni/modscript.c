@@ -380,6 +380,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDr
 	}
 	bl_Entity_setPos(entity, x, y, z);
 	bl_Entity_spawnAtLocation(entity, instance, range);
+	//TODO: WTF, MrARM: why spawn an entity, use its spawn at location to make it drop another entity,
+	//and then never use the original?!
+	//(Potential memory leak?)
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSpawn
@@ -535,7 +538,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
 	//TODO: spawn entities, not just mobs
-	Entity* entity = bl_MobFactory_createMob(type, bl_level);
+	Entity* entity;
+	if (type < 64) {
+		entity = bl_MobFactory_createMob(type, bl_level);
+	} else {
+		entity = bl_EntityFactory_CreateEntity(type, bl_level);
+	}
+
 	if (entity == NULL) {
 		//WTF?
 		return -1;
@@ -544,7 +553,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	bl_Level_addEntity(bl_level, entity);
 
 	//skins
-	if (skinPath != NULL) {
+	if (skinPath != NULL && type < 64) {
 		const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
 		bl_changeEntitySkin((void*) entity, skinUtfChars);
 		(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
@@ -712,6 +721,20 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
 	if (invPtr == NULL) return 0;
 	return ((int*) invPtr)[9];
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	return ((int*) entity)[63];
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
+  (JNIEnv *env, jclass clazz, jint entityId, jint halfhearts) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	((int*) entity)[63] = halfhearts;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
