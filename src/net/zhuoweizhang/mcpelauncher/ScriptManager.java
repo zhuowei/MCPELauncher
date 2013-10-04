@@ -506,6 +506,7 @@ public class ScriptManager {
 
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
+	public static native void nativeRemoveItemBackground();
 
 	public static class ScriptState {
 		public Script script;

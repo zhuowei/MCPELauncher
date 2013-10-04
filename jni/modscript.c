@@ -744,6 +744,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	((int*) entity)[176 / 4] = renderType;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
+  (JNIEnv *env, jclass clazz) {
+	void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");
+	int drawRedSquareInstrLoc = ((int) ItemRenderer_renderGuiItem & ~1) + (0x131264 - 0x1311c4);
+	*((int*) drawRedSquareInstrLoc) = 0xbf00bf00; //NOP
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;

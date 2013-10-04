@@ -1245,6 +1245,11 @@ public class MainActivity extends NativeActivity
 			ie.printStackTrace();
 		}
 
+		//Patch out the red item missing icon
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true)) {
+			ScriptManager.nativeRemoveItemBackground();
+		}
+
 	}
 
 	protected void loadTexturePack() {
