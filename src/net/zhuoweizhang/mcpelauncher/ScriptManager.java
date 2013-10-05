@@ -504,6 +504,11 @@ public class ScriptManager {
 	public static native void nativeClearSlotInventory(int slot);
 	public static native int nativeGetSlotInventory(int slot, int type);
 
+	//InusualZ's additions
+	public static native void nativeExtinguishFire(int x, int y, int z, int side);
+	public static native int nativeGetSlotArmor(int slot, int type);
+	public static native void nativeSetArmorSlot(int slot, int id, int damage);
+	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
 	public static native void nativeRemoveItemBackground();
@@ -869,7 +874,13 @@ public class ScriptManager {
 			
 			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
 		}
-
+		
+		//InusualZ's additions
+		@JSStaticFunction
+		public static void extinguishFire(int x, int y, int z, int side){
+			nativeExtinguishFire(x, y, z, side);
+		}
+		
 		@Override
 		public String getClassName() {
 			return "Level";
@@ -941,6 +952,24 @@ public class ScriptManager {
 		public static int getCarriedItemCount() {
 			return nativeGetCarriedItem(AMOUNT);
 		}
+		
+		//InusualZ's additions
+		
+		@JSStaticFunction
+		public static int getArmorSlot(int slot){
+			return nativeGetSlotArmor(slot, ITEMID);
+		}
+		
+		@JSStaticFunction
+		public static int getArmorSlotDamage(int slot){
+			return nativeGetSlotArmor(slot, DAMAGE);
+		}
+		
+		@JSStaticFunction
+		public static void setArmorSlot(int slot, int id, int damage){
+			nativeSetArmorSlot(slot, id, damage);
+		}
+		
 		@Override
 		public String getClassName() {
 			return "Player";
