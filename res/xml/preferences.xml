@@ -154,6 +154,10 @@
                 android:targetClass="net.zhuoweizhang.mcpelauncher.ManageScriptsActivity"/>
     </Preference>
 
+    <CheckBoxPreference android:key="zz_show_insert_text"
+        android:title="@string/pref_zz_show_insert_text"
+        android:defaultValue="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory 

@@ -80,6 +80,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_UPDATE_TEXTURE_PACK = 0x1006;
 	public static final int DIALOG_INSERT_TEXT = 0x1007;
 	public static final int DIALOG_MULTIPLAYER_DISABLE_SCRIPTS = 0x1008;
+	public static final int DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT = 0x1009;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -517,7 +518,7 @@ public class MainActivity extends NativeActivity
 			case DIALOG_CRASH_SAFE_MODE:
 				return createSafeModeDialog(R.string.manage_patches_crash_safe_mode);
 			case DIALOG_RUNTIME_OPTIONS:
-				return createRuntimeOptionsDialog();
+				return createRuntimeOptionsDialog(false);
 			case DIALOG_INVALID_PATCHES:
 				return createInvalidPatchesDialog();
 			case DIALOG_FIRST_LAUNCH:
@@ -532,6 +533,8 @@ public class MainActivity extends NativeActivity
 				return createInsertTextDialog();
 			case DIALOG_MULTIPLAYER_DISABLE_SCRIPTS:
 				return createMultiplayerDisableScriptsDialog();
+			case DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT:
+				return createRuntimeOptionsDialog(true);
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -579,11 +582,17 @@ public class MainActivity extends NativeActivity
 			.create();
 	}
 
-	protected Dialog createRuntimeOptionsDialog() {
+	protected Dialog createRuntimeOptionsDialog(final boolean hasInsertText) {
 		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
 		CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
 		CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
-		CharSequence[] options = new CharSequence[] {livePatch, insertText, optionMenu};
+		CharSequence manageModPEScripts = getResources().getString(R.string.pref_zz_manage_scripts);
+		CharSequence[] options = null;
+		if (hasInsertText) {
+			options = new CharSequence[] {livePatch, manageModPEScripts, optionMenu, insertText};
+		} else {
+			options = new CharSequence[] {livePatch, manageModPEScripts, optionMenu};
+		}
 		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
@@ -592,9 +601,12 @@ public class MainActivity extends NativeActivity
 						intent.putExtra("prePatchConfigure", false);
 						startActivity(intent);	
 					} else if (button == 1) {
-						showDialog(DIALOG_INSERT_TEXT);
+						Intent intent = new Intent(MainActivity.this, ManageScriptsActivity.class);
+						startActivity(intent);
 					} else if (button == 2) {
 						startActivity(getOptionsActivityIntent());
+					} else if (button == 3 && hasInsertText) {
+						showDialog(DIALOG_INSERT_TEXT);
 					}
 				}
 			}).create();
@@ -1046,7 +1058,6 @@ public class MainActivity extends NativeActivity
 		Log.i(TAG, "Show keyboard view");
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
-
 	}
 
 	//added in 0.7.3
@@ -1191,7 +1202,9 @@ public class MainActivity extends NativeActivity
 		hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				showDialog(DIALOG_RUNTIME_OPTIONS);
+				boolean showInsertText = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).
+					getBoolean("zz_show_insert_text", false);
+				showDialog(showInsertText? DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT: DIALOG_RUNTIME_OPTIONS);
 				resetOrientation(); //for sensor controls. TODO: better place to do this?
 			}
 		});
