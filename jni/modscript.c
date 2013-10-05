@@ -108,6 +108,7 @@ static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
+static void (*bl_Minecraft_setIsCreativeMode)(Minecraft*, int);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -397,6 +398,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (bl_level == NULL) return;
 	void* levelData = bl_Level_getLevelData(bl_level);
 	bl_LevelData_setGameType(levelData, type);
+	bl_Minecraft_setIsCreativeMode(bl_minecraft, type == 1);
 }
 
 
@@ -730,10 +732,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return ((int*) entity)[63];
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
   (JNIEnv *env, jclass clazz, jint entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return 0;
+	if (entity == NULL) return;
 	((int*) entity)[63] = halfhearts;
 }
 
@@ -836,6 +838,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
+	bl_Minecraft_setIsCreativeMode = dlsym(RTLD_DEFAULT, "_ZN9Minecraft17setIsCreativeModeEb");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
