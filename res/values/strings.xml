@@ -160,6 +160,9 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="script_view_source">View source</string>
     <string name="script_too_many_errors">has been disabled because it encountered too many errors. Sorry!</string>
 
+    <string name="selinux_broke_everything">Unfortunately, BlockLauncher cannot run on your device as security software on your phone, such as Samsung Knox or SELinux, is preventing live patching. \n\n
+We are working on a fix for this, but in the meantime, BlockLauncher functions are limited to patching .mods and loading texture packs. \n\nModPE scripts cannot be loaded, and all .mod patches require a restart.</string>
+
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
 

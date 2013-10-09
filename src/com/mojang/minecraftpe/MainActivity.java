@@ -81,6 +81,7 @@ public class MainActivity extends NativeActivity
 	public static final int DIALOG_INSERT_TEXT = 0x1007;
 	public static final int DIALOG_MULTIPLAYER_DISABLE_SCRIPTS = 0x1008;
 	public static final int DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT = 0x1009;
+	public static final int DIALOG_SELINUX_BROKE_EVERYTHING = 0x1000 + 10;
 
 	protected DisplayMetrics displayMetrics;
 
@@ -139,6 +140,8 @@ public class MainActivity extends NativeActivity
 	private Map<Integer, HurlRunner> requestMap = new HashMap<Integer, HurlRunner>();
 
 	protected MinecraftVersion minecraftVersion;
+
+	private boolean overlyZealousSELinuxSafeMode = false;
 
 	/** Called when the activity is first created. */
 
@@ -259,12 +262,15 @@ public class MainActivity extends NativeActivity
 		try {
 			if (!isSafeMode()) {
 				initPatching();
+			}
+			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
 				boolean shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
 				if (shouldLoadScripts) ScriptManager.init(this);
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -275,7 +281,11 @@ public class MainActivity extends NativeActivity
 		java.net.CookieHandler.setDefault(cookieManager);
 
 		if (isSafeMode()) {
-			showDialog(DIALOG_CRASH_SAFE_MODE);
+			if (overlyZealousSELinuxSafeMode) {
+				showDialog(DIALOG_SELINUX_BROKE_EVERYTHING);
+			} else {
+				showDialog(DIALOG_CRASH_SAFE_MODE);
+			}
 		}
 
 		System.gc();
@@ -535,6 +545,8 @@ public class MainActivity extends NativeActivity
 				return createMultiplayerDisableScriptsDialog();
 			case DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT:
 				return createRuntimeOptionsDialog(true);
+			case DIALOG_SELINUX_BROKE_EVERYTHING:
+				return createSELinuxBrokeEverythingDialog();
 			default:
 				return super.onCreateDialog(dialogId);
 		}
@@ -597,9 +609,13 @@ public class MainActivity extends NativeActivity
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					if (button == 0) {
+						if (minecraftLibBuffer == null) {
+							startActivity(getOptionsActivityIntent());
+							return;
+						}
 						Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
 						intent.putExtra("prePatchConfigure", false);
-						startActivity(intent);	
+						startActivity(intent);
 					} else if (button == 1) {
 						Intent intent = new Intent(MainActivity.this, ManageScriptsActivity.class);
 						startActivity(intent);
@@ -718,6 +734,13 @@ public class MainActivity extends NativeActivity
 	protected Dialog createMultiplayerDisableScriptsDialog() {
 		return new AlertDialog.Builder(this)
 			.setMessage(R.string.script_disabled_in_multiplayer)
+			.setPositiveButton(android.R.string.ok, null)
+			.create();
+	}
+
+	protected Dialog createSELinuxBrokeEverythingDialog() {
+		return new AlertDialog.Builder(this)
+			.setMessage(R.string.selinux_broke_everything)
 			.setPositiveButton(android.R.string.ok, null)
 			.create();
 	}
@@ -1117,6 +1140,13 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void initPatching() throws Exception {
+		/*if (BuildConfig.DEBUG) {
+			System.err.println("Skipping this to simulate Samsung");
+			System.err.println(minecraftLibBuffer);
+			overlyZealousSELinuxSafeMode = true;
+			tempSafeMode = true;
+			return;
+		}*/
 		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
 		System.out.println(Long.toString(pageSize, 16));
 		long minecraftLibLocation = findMinecraftLibLocation();
@@ -1127,6 +1157,8 @@ public class MainActivity extends NativeActivity
 		System.out.println("mprotect result is " + returnStatus);
 		if (returnStatus < 0) {
 			System.out.println("Well, that sucks!");
+			tempSafeMode = true;
+			overlyZealousSELinuxSafeMode = true;
 			return;
 		}
 		ByteBuffer buffer = PokerFace.createDirectByteBuffer(minecraftLibLocation, minecraftLibLength);
