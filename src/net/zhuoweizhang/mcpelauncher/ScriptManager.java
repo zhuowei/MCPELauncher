@@ -807,12 +807,12 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setGameType(int type) {
+		public static void setGameMode(int type) {
 			nativeSetGameType(type);
 		}
 
 		@JSStaticFunction
-		public static int getGameType() {
+		public static int getGameMode() {
 			return nativeGetGameType();
 		}
 
@@ -876,10 +876,12 @@ public class ScriptManager {
 		}
 		
 		//InusualZ's additions
+		/*
 		@JSStaticFunction
 		public static void extinguishFire(int x, int y, int z, int side){
 			nativeExtinguishFire(x, y, z, side);
 		}
+		Commented out: This is useless and can be done with just setTile */
 		
 		@Override
 		public String getClassName() {

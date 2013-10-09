@@ -3,12 +3,14 @@ package net.zhuoweizhang.mcpelauncher;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
+import java.util.*;
 
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
 import android.net.*;
 import android.os.*;
+import android.util.*;
 import android.view.*;
 import android.widget.*;
 
@@ -19,6 +21,9 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	private Button setSkinButton;
 	private Button chefSpecialButton;
 	private Button dumpModPEMethodsButton;
+
+	private static final String[] magicWords = {"nimubla", "muirab", "otrecnoc", "atled",
+		"nolispe", "etagirf", "repeeketag"};
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
@@ -34,6 +39,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		if (BuildConfig.DEBUG) chefSpecialButton.setVisibility(View.VISIBLE);
 		dumpModPEMethodsButton = (Button) findViewById(R.id.dump_modpe_methods);
 		dumpModPEMethodsButton.setOnClickListener(this);
+
+		printMagicWord();
 	}
 
 	public void onClick(View v) {
@@ -123,5 +130,21 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		new AlertDialog.Builder(this).setTitle("Copied to clipboard; wrote to /sdcard/modpescript_dump.txt").setMessage(allMethods).
 			setPositiveButton(android.R.string.ok, null).
 			show();
+	}
+
+	public void printMagicWord() {
+		int appVersion = 0;
+		try {
+			appVersion = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+		} catch (Exception e) {
+			//impossible
+		}
+		String giro = magicWords[appVersion % magicWords.length];
+		String[] lettersarr = giro.split("");
+		List<String> letters = Arrays.asList(lettersarr);
+		Collections.reverse(letters);
+		String orig = PatchManager.join(lettersarr, "");
+		Log.i("BlockLauncher", "The magic word is " + orig);
+		Log.i("BlockLauncher", "https://groups.google.com/forum/#!forum/blocklauncher-beta");
 	}
 }

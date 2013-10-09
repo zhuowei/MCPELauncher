@@ -112,6 +112,9 @@ static void (*bl_Minecraft_setIsCreativeMode)(Minecraft*, int);
 static void (*bl_Level_ExtinguishFire)(Level*, int, int, int, int);
 static ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
+static void (*bl_Inventory_clearInventoryWithDefault)(void*);
+static void (*bl_Inventory_Inventory)(void*, Player*, cppbool);
+static void (*bl_Inventory_delete1_Inventory)(void*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -401,7 +404,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (bl_level == NULL) return;
 	void* levelData = bl_Level_getLevelData(bl_level);
 	bl_LevelData_setGameType(levelData, type);
+	if (bl_localplayer == NULL) return;
 	bl_Minecraft_setIsCreativeMode(bl_minecraft, type == 1);
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	//((char*) invPtr)[32] = type == 1;
+	//bl_Inventory_clearInventoryWithDefault(invPtr);
+	bl_Inventory_delete1_Inventory(invPtr);
+	bl_Inventory_Inventory(invPtr, bl_localplayer, type == 1);
+	int dim = type == 1? 10: 0; //daylight cycle
+	bl_LevelData_setDimension(levelData, dim);
 }
 
 
@@ -881,6 +892,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 	bl_Minecraft_setIsCreativeMode = dlsym(RTLD_DEFAULT, "_ZN9Minecraft17setIsCreativeModeEb");
+	bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
+	bl_Inventory_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryC2EP6Playerb");
+	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe8130;
