@@ -99,15 +99,21 @@ public final class MinecraftVersion {
 	}
 
 	static {
-		//0.7.5 Play
+		//0.7.6 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x215634, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe8912));
+			-1, null, null, null, null, -1));
+		//0.7.6 Play Gingerbread
+		add(new MinecraftVersion(30007060, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
+			-1, null, null, null, null, -1));
+		//0.7.5 Play
+		add(new MinecraftVersion(MINECRAFT_VERSION_CODE_0_7_5, false, LIB_LOAD_OFFSET_BEGIN_0_7_5, LIB_LOAD_OFFSET, null,
+			0x215634, GUI_BLOCKS_PATCH_0_7_5, GUI_BLOCKS_UNPATCH_0_7_5, null, null, 0xe8912));
 		//0.7.5 Play Gingerbread
-		add(new MinecraftVersion(30007050, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			0x215634, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe8912));
+		add(new MinecraftVersion(30007050, false, LIB_LOAD_OFFSET_BEGIN_0_7_5, LIB_LOAD_OFFSET, null,
+			0x215634, GUI_BLOCKS_PATCH_0_7_5, GUI_BLOCKS_UNPATCH_0_7_5, null, null, 0xe8912));
 		//0.7.5 Amazon
 		add(new MinecraftVersion(40007050, false, 0x24a188, LIB_LOAD_OFFSET, new AmazonTranslator075(),
-			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da));
+			0x2155fc, GUI_BLOCKS_PATCH_0_7_5, GUI_BLOCKS_UNPATCH_0_7_5, null, null, 0xe88da));
 		//0.7.3 and previous versions
 		add(new MinecraftVersion(40007030, false, LIB_LOAD_OFFSET_BEGIN_0_7_3, LIB_LOAD_OFFSET, null,
 			0x20E6E3, GUI_BLOCKS_PATCH_0_7_3, GUI_BLOCKS_UNPATCH_0_7_3, null, null, PORT_OFFSET_0_7_3));
@@ -122,7 +128,7 @@ public final class MinecraftVersion {
 
 		/* Amazon 0.7.5 shares a version code with Play, special case needed */
 		amazonVer = new MinecraftVersion(MINECRAFT_VERSION_CODE, false, 0x24a188, LIB_LOAD_OFFSET, new AmazonTranslator075(),
-			0x2155fc, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, 0xe88da);
+			0x2155fc, GUI_BLOCKS_PATCH_0_7_5, GUI_BLOCKS_UNPATCH_0_7_5, null, null, 0xe88da);
 	}
 
 	public static abstract class PatchTranslator {

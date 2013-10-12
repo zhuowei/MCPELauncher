@@ -40,6 +40,7 @@ typedef struct {
 #define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 114
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 88
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 61
+#define PLAYER_INVENTORY_OFFSET 3124
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -406,13 +407,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_setGameType(levelData, type);
 	if (bl_localplayer == NULL) return;
 	bl_Minecraft_setIsCreativeMode(bl_minecraft, type == 1);
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	//((char*) invPtr)[32] = type == 1;
 	//bl_Inventory_clearInventoryWithDefault(invPtr);
 	bl_Inventory_delete1_Inventory(invPtr);
 	bl_Inventory_Inventory(invPtr, bl_localplayer, type == 1);
-	int dim = type == 1? 10: 0; //daylight cycle
-	bl_LevelData_setDimension(levelData, dim);
+	//int dim = type == 1? 10: 0; //daylight cycle
+	//bl_LevelData_setDimension(levelData, dim);
 }
 
 
@@ -547,7 +548,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	instance->damage = damage;
 	instance->count = amount;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	bl_Inventory_add(invPtr, instance);
 }
 
@@ -625,7 +626,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
   (JNIEnv *env, jclass clazz, jint entityId, jint itemId, jint itemCount, jint itemDamage) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	/*Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	void* vtableEntry = entity->vtable[ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM];
 	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
@@ -633,7 +634,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (item == NULL) return;
 	item->count = itemCount;
 	item->id = itemId;
-	item->damage = itemDamage;
+	item->damage = itemDamage;*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
@@ -704,7 +705,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	bl_FillingContainer_clearSlot(invPtr, slot);
 }
 
@@ -712,7 +713,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jint slot, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120)); //TODO fix this for 0.7.2
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	ItemInstance* instance = bl_FillingContainer_getItem(invPtr, slot);
 	if (instance == NULL) return 0;
 	switch (type) {
@@ -734,7 +735,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + 3120));
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	if (invPtr == NULL) return 0;
 	return ((int*) invPtr)[9];
 }
@@ -827,7 +828,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
 	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12NinecraftApp");
-	minecraftVtable[20] = (int) &bl_Minecraft_setLevel_hook;
+	minecraftVtable[21] = (int) &bl_Minecraft_setLevel_hook;
 
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
@@ -897,8 +898,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	int createMobOffset = 0xe8130;
-	if (versionCode == 40007050) {
+	int createMobOffset = 0xe7af4;
+	if (versionCode == 50007050 || versionCode == 30007050) {
+		createMobOffset = 0xe8130;
+	} else if (versionCode == 40007050) {
 		createMobOffset = 0xe80f8;
 	} else if (versionCode == 30007030 || versionCode == 40007030) {
 		createMobOffset = 0xe3fe4;

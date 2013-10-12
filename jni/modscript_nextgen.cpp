@@ -159,8 +159,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	(*ptrToStr) = (*newSkinString);
 	std::string* ptrToStr2 = (std::string*) (((int) entity) + 2920);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer again: %p, %i, %s\n", ptrToStr2, *((int*) ptrToStr2), ptrToStr2->c_str());
@@ -197,9 +197,9 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	int foodItemVtableOffset = 0x291a18;
+	int foodItemVtableOffset = 0x291a50;
 	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset + 8); //I have no idea why I have to add 8.
-	bl_Item_vtable = (void**) (mcpelibhandle->base + 0x292398 + 8); //tracing out the original vtable seems to suggest this.
+	bl_Item_vtable = (void**) (mcpelibhandle->base + 0x2923d0 + 8); //tracing out the original vtable seems to suggest this.
 }
 
 } //extern

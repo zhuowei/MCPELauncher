@@ -2,7 +2,9 @@ package net.zhuoweizhang.mcpelauncher;
 
 public final class MinecraftConstants {
 
-	public static final int LIB_LOAD_OFFSET_BEGIN = 0x24a188;
+	public static final int LIB_LOAD_OFFSET_BEGIN = 0x24abd0;
+
+	public static final int LIB_LOAD_OFFSET_BEGIN_0_7_5 = 0x24a188;
 
 	public static final int LIB_LOAD_OFFSET_BEGIN_0_7_3 = 0x244380;
 
@@ -10,13 +12,13 @@ public final class MinecraftConstants {
 
 	public static final int LIB_LOAD_OFFSET = 0x1000;
 
-	public static final byte[] GUI_BLOCKS_PATCH = {
+	public static final byte[] GUI_BLOCKS_PATCH_0_7_5 = {
   (byte) 0xff, 0x50, 0x54, 0x50, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00,
   0x00, 0x18, 0x00, 0x13, 0x0c, 0x10, 0x4f, (byte) 0xf0, (byte) 0xff, 0x30, 0x70, 0x47,
   0x00, 0x13, 0x12, 0x64, 0x00, (byte) 0xbf, 0x00, (byte) 0xbf
 	};
 
-	public static final byte[] GUI_BLOCKS_UNPATCH = {
+	public static final byte[] GUI_BLOCKS_UNPATCH_0_7_5 = {
   (byte) 0xff, 0x50, 0x54, 0x50, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x00,
   0x00, 0x18, 0x00, 0x13, 0x0c, 0x10, 0x10, (byte) 0xb5, 0x42, 0x68, (byte) 0xb2, (byte) 0xf5,
   0x00, 0x13, 0x12, 0x64, (byte) 0xff, (byte) 0xf7, 0x7c, (byte) 0xfd
@@ -58,7 +60,9 @@ public final class MinecraftConstants {
   0x00, 0x12, 0x7b, (byte) 0xbe, (byte) 0xff, (byte) 0xf7, 0x5b, (byte) 0xfb
 	};
 
-	public static final int MINECRAFT_VERSION_CODE = 50007050; //Minecraft PE 0.7.5's version code, fresh off my tablet
+	public static final int MINECRAFT_VERSION_CODE = 50007060;
+
+	public static final int MINECRAFT_VERSION_CODE_0_7_5 = 50007050; //Minecraft PE 0.7.5's version code, fresh off my tablet
 
 	public static final int MINECRAFT_VERSION_CODE_0_7_2 = 30007020; //Minecraft's version code
 
