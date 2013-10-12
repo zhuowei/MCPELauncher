@@ -101,10 +101,10 @@ public final class MinecraftVersion {
 	static {
 		//0.7.6 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			-1, null, null, null, null, -1));
+			-1, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, -1));
 		//0.7.6 Play Gingerbread
 		add(new MinecraftVersion(30007060, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			-1, null, null, null, null, -1));
+			-1, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, -1));
 		//0.7.5 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE_0_7_5, false, LIB_LOAD_OFFSET_BEGIN_0_7_5, LIB_LOAD_OFFSET, null,
 			0x215634, GUI_BLOCKS_PATCH_0_7_5, GUI_BLOCKS_UNPATCH_0_7_5, null, null, 0xe8912));

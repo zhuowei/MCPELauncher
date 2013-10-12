@@ -25,17 +25,9 @@ extern void (*bl_Minecraft_selectLevel_real)(Minecraft*, std::string const&, std
 void bl_attachLevelListener();
 extern Entity* bl_removedEntity;
 
-typedef struct {
-	void** vtable; //0
-	int itemId; //4
-	int idunno; //8
-	int icon; //12
-	int idunno2; //16
-	int idunno3; //20
-	int idunno4; //24
-	int idunno5; //28
-	std::string* description; //31
-} Item;
+extern void (*bl_ItemInstance_setId)(ItemInstance*, int);
+extern int (*bl_ItemInstance_getId)(ItemInstance*);
+ItemInstance* bl_newItemInstance(int id, int count, int damage);
 
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1

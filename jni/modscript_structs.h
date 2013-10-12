@@ -1,4 +1,10 @@
 #ifdef __cplusplus
+#define cppstr std::string
+#else
+typedef void cppstr;
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 typedef struct {
@@ -23,10 +29,28 @@ typedef struct {
 	float prevPitch; //76
 } Entity;
 typedef Entity Player;
+
 typedef struct {
-	int count;
-	int id;
-	int damage;
+	void** vtable; //0
+	int itemId; //4
+	int idunno; //8
+	int icon; //12
+	int idunno2; //16
+	int idunno3; //20
+	int idunno4; //24
+	int idunno5; //28
+	cppstr* description; //31
+} Item;
+
+typedef struct {
+	int count; //0
+	int damage; //4
+	Item* item;//8
+	void* block; //12
+	cppbool wtf; //16
+	cppbool wtf2; //17
+	cppbool wtf3; //18
+	cppbool wtf4; //19
 } ItemInstance;
 #ifdef __cplusplus
 }

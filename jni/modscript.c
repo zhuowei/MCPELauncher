@@ -15,13 +15,6 @@ typedef uint8_t cppbool;
 
 typedef void Minecraft;
 
-typedef struct {
-	//I have no idea what this struct looks like. TODO
-	//void** vtable; //0
-	//char filler[16];//4
-	//char* pointer;//20
-} cppstr;
-
 typedef Player LocalPlayer;
 
 typedef struct {
@@ -116,6 +109,8 @@ static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
 static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*, cppbool);
 static void (*bl_Inventory_delete1_Inventory)(void*);
+void (*bl_ItemInstance_setId)(ItemInstance*, int);
+int (*bl_ItemInstance_getId)(ItemInstance*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -134,6 +129,14 @@ Entity* bl_getEntityWrapper(Level* level, int entityId) {
 	return bl_Level_getEntity(level, entityId);
 }
 
+ItemInstance* bl_newItemInstance(int id, int count, int damage) {
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->damage = damage;
+	instance->count = count;
+	bl_ItemInstance_setId(instance, id);
+	return instance;
+}
+
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
 	JNIEnv *env;
 	bl_level = level;
@@ -142,7 +145,7 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 	int itemId = 0;
 	int itemDamage = 0;
 	if (itemStack != NULL) {
-		itemId = itemStack->id;
+		itemId = bl_ItemInstance_getId(itemStack);
 		itemDamage = itemStack->damage;
 	}
 
@@ -322,10 +325,7 @@ void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
-	instance->id = id;
-	instance->damage = damage;
-	instance->count = amount;
+	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
 	if (te == NULL) return;
@@ -339,7 +339,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
 	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
 	if (te == NULL) return -1;
-	return instance->id;
+	return bl_ItemInstance_getId(instance);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataChest
@@ -376,10 +376,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
-	instance->id = id;
-	instance->damage = damage;
-	instance->count = count;
+	ItemInstance* instance = bl_newItemInstance(id, count, damage);
 
 	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level);
 	if (entity == NULL) {
@@ -452,7 +449,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	switch (type) {
 		case ITEMID:
-			return instance->id;
+			return bl_ItemInstance_getId(instance);
 		case DAMAGE:
 			return instance->damage;
 		case AMOUNT:
@@ -543,10 +540,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
   (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
 	if (bl_localplayer == NULL) return;
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
-	instance->id = id;
-	instance->damage = damage;
-	instance->count = amount;
+	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	bl_Inventory_add(invPtr, instance);
@@ -626,15 +620,15 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
   (JNIEnv *env, jclass clazz, jint entityId, jint itemId, jint itemCount, jint itemDamage) {
-	/*Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	void* vtableEntry = entity->vtable[ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM];
 	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
 	ItemInstance* item = fn(entity);
 	if (item == NULL) return;
 	item->count = itemCount;
-	item->id = itemId;
-	item->damage = itemDamage;*/
+	item->damage = itemDamage;
+	bl_ItemInstance_setId(item, itemId);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
@@ -718,7 +712,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (instance == NULL) return 0;
 	switch (type) {
 		case ITEMID:
-			return instance->id;
+			return bl_ItemInstance_getId(instance);
 		case DAMAGE:
 			return instance->damage;
 		case AMOUNT:
@@ -775,7 +769,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	switch (type)
 	{
 		case ITEMID:
-			return instance->id;
+			return bl_ItemInstance_getId(instance);
 		case DAMAGE:
 			return instance->damage;
 		case AMOUNT:
@@ -790,17 +784,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint damage) {
 	if (bl_localplayer == NULL) return;
 	//Geting the item
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
-	instance->id = id;
-	instance->count = 1;
-	instance->damage = damage;
+	ItemInstance* instance = bl_newItemInstance(id, 1, damage);
 	bl_Player_setArmor(bl_localplayer, slot, instance);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
   (JNIEnv *env, jclass clazz) {
 	void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");
-	int drawRedSquareInstrLoc = ((int) ItemRenderer_renderGuiItem & ~1) + (0x131264 - 0x1311c4);
+	int drawRedSquareInstrLoc = ((int) ItemRenderer_renderGuiItem & ~1) + (0x131b38 - 0x131aa8);
 	*((int*) drawRedSquareInstrLoc) = 0xbf00bf00; //NOP
 }
 
@@ -896,6 +887,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
 	bl_Inventory_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryC2EP6Playerb");
 	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
+	bl_ItemInstance_setId = dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
+	bl_ItemInstance_getId = dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe7af4;
