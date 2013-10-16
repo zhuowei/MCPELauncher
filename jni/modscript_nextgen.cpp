@@ -18,6 +18,11 @@
 
 #include "modscript_ScriptLevelListener.hpp"
 
+typedef void RakNetInstance;
+
+#define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
+
 extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
@@ -42,6 +47,8 @@ static void (*bl_Level_playSound)(Level*, float, float, float, std::string const
 static void* (*bl_Level_getAllEntities)(Level*);
 
 static void (*bl_Level_addListener)(Level*, LevelListener*);
+
+static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -68,6 +75,28 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 		//clear the chat string
 		chatMessagePtr->clear();
 	}
+}
+
+void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* host, int port) {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jstring hostJString = env->NewStringUTF(host);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "rakNetConnectCallback", "(Ljava/lang/String;I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hostJString, port);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
 }
 
 const char* bl_getCharArr(void* str){
@@ -134,13 +163,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	bl_Minecraft_leaveGame(bl_minecraft, saveMultiplayerWorld);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
+/*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
   (JNIEnv *env, jclass clazz, jstring serverAddress, jint serverPort) {
 	const char * utfChars = env->GetStringUTFChars(serverAddress, NULL);
 	std::string addressstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(serverAddress, utfChars);
 	bl_Minecraft_connectToMCOServer(bl_minecraft, addressstr, addressstr, serverPort);
-}
+}*/
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
@@ -154,6 +183,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz) {
 	void* ptr = bl_Level_getAllEntities(bl_level);
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "%x, %x\n", ptr, *((void**)(ptr)));
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
+  (JNIEnv *env, jclass clazz, jstring host, jint port) {
+	const char* hostChars = env->GetStringUTFChars(host, NULL);
+	int rakNetOffset = ((int) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET;
+	RakNetInstance* raknetInstance = *((RakNetInstance**) rakNetOffset);
+	bl_RakNetInstance_connect_hook(raknetInstance, hostChars, port);
+	env->ReleaseStringUTFChars(host, hostChars);
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
@@ -195,6 +233,12 @@ void bl_setuphooks_cppside() {
 
 	bl_Level_addListener = (void (*) (Level*, LevelListener*))
 		dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
+
+	bl_RakNetInstance_connect_real = (void (*) (RakNetInstance*, char const*, int))
+		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
+
+	int* raknetVTable = (int*) dlsym(RTLD_DEFAULT, "_ZTV14RakNetInstance");
+	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int foodItemVtableOffset = 0x291a50;

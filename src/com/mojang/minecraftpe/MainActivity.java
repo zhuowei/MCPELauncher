@@ -1249,7 +1249,7 @@ public class MainActivity extends NativeActivity
 		for (ApplicationInfo app: apps) {
 			if (app.metaData == null) continue;
 			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
-			if (nativeLibName != null && pm.checkPermission(app.packageName, "net.zhuoweizhang.mcpelauncher.ADDON") ==
+			if (nativeLibName != null && pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
 				PackageManager.PERMISSION_GRANTED) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");

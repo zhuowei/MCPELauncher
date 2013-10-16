@@ -7,6 +7,9 @@ import java.io.Reader;
 
 import java.lang.reflect.Method;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,8 +70,12 @@ public class ScriptManager {
 
 	private static JoinServerRequest requestJoinServer = null;
 
+	/** Is ModPE script currently enabled? Set to false by multiplayer world */
+
+	private static boolean scriptingEnabled = true;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
-		if (isRemote) throw new RuntimeException("Not available in multiplayer");
+		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
 		Script script = ctx.compileReader(in, sourceName, 0, null);
 		initJustLoadedScript(ctx, script, sourceName);
@@ -108,7 +115,7 @@ public class ScriptManager {
 	}
 
 	public static void callScriptMethod(String functionName, Object... args) {
-		if (isRemote) return; //No script loading/callbacks when in a remote world
+		if (!scriptingEnabled) return; //No script loading/callbacks when in a remote world
 		Context ctx = Context.enter();
 		for (ScriptState state: scripts) {
 			if (state.errors >= MAX_NUM_ERRORS) continue; //Too many errors, skip
@@ -137,12 +144,13 @@ public class ScriptManager {
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
 		System.out.println("Level: " + hasLevel);
 		ScriptManager.isRemote = isRemote;
+		if (!isRemote) ScriptManager.scriptingEnabled = true; //all local worlds get ModPE support
 		nativeSetGameSpeed(20.0f);
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
-				main.setLevelCallback(isRemote);
+				main.setLevelCallback(!ScriptManager.scriptingEnabled);
 			}
 		}
 	}
@@ -157,6 +165,7 @@ public class ScriptManager {
 
 	public static void leaveGameCallback(boolean thatboolean) {
 		ScriptManager.isRemote = false;
+		ScriptManager.scriptingEnabled = true;
 		callScriptMethod("leaveGame");
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -225,6 +234,13 @@ public class ScriptManager {
 		callScriptMethod("blockEventHook", x, y, z, type, data);
 	}
 
+	public static void rakNetConnectCallback(String hostname, int port) {
+		Log.i("BlockLauncher", "Connecting to " + hostname + ":" + port);
+		ScriptManager.scriptingEnabled = ScriptManager.isLocalAddress(hostname);
+		Log.i("BlockLauncher", "Scripting is now " + (scriptingEnabled? "enabled" : "disabled"));
+		
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		//set up hooks
 		int versionCode = 0;
@@ -243,10 +259,12 @@ public class ScriptManager {
 	}
 
 	public static void removeScript(String scriptId) {
+		/* Don't clear data here - user can clear data by hand if needed
 		SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+scriptId+"Data", 0);
 		SharedPreferences.Editor prefsEditor = sPrefs.edit();
 		prefsEditor.clear();
 		prefsEditor.commit();
+		*/
 
 		for (int i = scripts.size() - 1; i >= 0; i--) {
 			if (scripts.get(i).name.equals(scriptId)) {
@@ -431,6 +449,21 @@ public class ScriptManager {
 		builder.append(");\n");
 	}
 	//end method dumping code
+
+	private static boolean isLocalAddress(String str) {
+		//Use Java's built-in support for this
+		try {
+			InetAddress address = InetAddress.getByName(str);
+			Log.i("BlockLauncher", str);
+			boolean retval = address.isLoopbackAddress() || address.isLinkLocalAddress() ||
+				address.isSiteLocalAddress();
+			return retval;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+		
 
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
@@ -1202,13 +1235,13 @@ public class ScriptManager {
 			requestLeaveGame = true;
 		}
 
-		/*@JSStaticFunction
+		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
 			requestJoinServer.serverAddress = serverAddress;
 			requestJoinServer.serverPort = port;
-		}*/
+		}
 
 		@JSStaticFunction
 		public static void setGameSpeed(double ticksPerSecond) {
