@@ -34,6 +34,7 @@ typedef struct {
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 88
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 61
 #define PLAYER_INVENTORY_OFFSET 3124
+#define MINECRAFT_VTABLE_OFFSET_UPDATE 12
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -111,6 +112,7 @@ static void (*bl_Inventory_Inventory)(void*, Player*, cppbool);
 static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
+static void (*bl_NinecraftApp_update_real)(Minecraft*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -121,6 +123,8 @@ int preventDefaultStatus = 0;
 static float bl_newfov = -1.0f;
 
 Entity* bl_removedEntity = NULL;
+
+int bl_frameCallbackRequested = 0;
 
 Entity* bl_getEntityWrapper(Level* level, int entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
@@ -320,6 +324,32 @@ void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
 	}
 
 	bl_Mob_die_real(entity1, entity2);
+}
+
+void bl_handleFrameCallback() {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "frameCallback", "()V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
+
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
+}
+
+void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
+	bl_NinecraftApp_update_real(minecraft);
+	if (bl_frameCallbackRequested) {
+		bl_handleFrameCallback();
+		bl_frameCallbackRequested = 0;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -795,6 +825,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 	*((int*) drawRedSquareInstrLoc) = 0xbf00bf00; //NOP
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback
+  (JNIEnv *env, jclass clazz) {
+	bl_frameCallbackRequested = 1;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
@@ -889,6 +924,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
 	bl_ItemInstance_setId = dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 	bl_ItemInstance_getId = dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
+	//replace the update method in Minecraft with our own
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
+	bl_NinecraftApp_update_real = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp6updateEv");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	int createMobOffset = 0xe7af4;

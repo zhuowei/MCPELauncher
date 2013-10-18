@@ -74,6 +74,8 @@ public class ScriptManager {
 
 	private static boolean scriptingEnabled = true;
 
+	public static String screenshotFileName = "";
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		Context ctx = Context.enter();
@@ -239,6 +241,10 @@ public class ScriptManager {
 		ScriptManager.scriptingEnabled = ScriptManager.isLocalAddress(hostname);
 		Log.i("BlockLauncher", "Scripting is now " + (scriptingEnabled? "enabled" : "disabled"));
 		
+	}
+
+	public static void frameCallback() {
+		ScreenshotHelper.takeScreenshot(screenshotFileName);
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
@@ -515,6 +521,7 @@ public class ScriptManager {
 	public static native int nativeGetMobHealth(int entityId);
 	public static native void nativeSetMobHealth(int entityId, int halfhearts);
 	public static native void nativeSetEntityRenderType(int entityId, int renderType);
+	public static native void nativeRequestFrameCallback();
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1246,6 +1253,12 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setGameSpeed(double ticksPerSecond) {
 			nativeSetGameSpeed((float) ticksPerSecond);
+		}
+
+		@JSStaticFunction
+		public static void takeScreenshot(String fileName) {
+			screenshotFileName = fileName.replace("/", "").replace("\\", "");
+			nativeRequestFrameCallback();
 		}
 
 		@Override
