@@ -40,6 +40,7 @@ Scroll to the bottom and see notice. -->
     <string name="pref_zz_custom_dpi">사용자 DPI</string>
     <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
     <string name="pref_zz_texture_pack_demo">데모 텍스쳐팩 사용</string>
+    <string name="pref_zz_texture_pack_demo_summary">NathanX 의 Slickcraft 택스쳐팩의 built-in 버전 사용</string>
     <string name="pref_mp_server_visible_default">서버를 기본적으로 보이기</string>
     <string name="pref_mp_title">멀티플레이</string>
     <string name="pref_ctrl_title">조작</string>
@@ -64,6 +65,9 @@ Scroll to the bottom and see notice. -->
     <string name="pref_zz_redirect_mco">Realms을 다른 서버 목록으로 변경</string>
     <string name="pref_zz_manage_scripts">ModPE 스크립트 관리</string>
     <string name="pref_zz_script_enable">ModPE 스크립트 활성화</string>
+    <string name="pref_zz_sensorcontrol">센서 조작</string>
+    <string name="pref_zz_sensorcontrol_summary">장치를 회전하여 플레이어를 제어합니다.Requires ModPE Scripts to be turned on.</string>
+    <string name="pref_zz_show_insert_text">\"Insert text\" 보이기</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
     <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
@@ -153,6 +157,14 @@ Scroll to the bottom and see notice. -->
     <string name="script_execution_error">ModPE 스크립트에서 오류가 발생했습니다.</string>
     <string name="script_disabled_in_multiplayer">ModPE 스크립트는 멀티플레이어 모드에서 크래시가 발생할 수 있으므로 스크립트가 비활성화 되었습니다. 서버에서 연결이 끊어지면 자동으로 스크립트는 활성화됩니다.</string>
     <string name="script_minecraft_version_incompatible">ModPE 스크립트가 이 Minecraft PE버전을 지원하지 않습니다. 스크립트의 기능이 작동하지 않게 되거나, 런처에 크래시가 발생할 수 있습니다.</string>
+    <string name="script_import_from_intent_warning">이 스크립트를 추가하시길 원하십니까? 그것은 당신의 BlockLauncher 가 암호및 다른 중요한정보를 예를들어 동일한 리소스에 대한 엑세스를 얻을것입니다. </string>
+    <string name="script_view_source">소스보기</string>
+    <string name="script_too_many_errors">너무 많은 오류때문에 스크립트가 비활성화 되었습니다. 죄송합니다!</string>
+
+
+    <string name="selinux_broke_everything">안타깝게도, BlockLauncher 는 삼성 Knox 또는 SELinux 등의 보안프로그램이 live patching을 방해하고 있어서 당신의 디바이스에서 실행할수 없습니다.\n\n
+우리는 이에대한 수정작업을 하고 있습니다. 하지만 그동안은 , BlockLauncher 기능은 모드 와 텍스쳐팩 로딩에 제한됩니다. \n\nModPE 스크립트는 불가능합니다. 그리고 모든 모드 패치는 재시작을 해야합니다..</string>
+    <!-- 제가 해석에는 소질이 없지만 둘러보다가 추가되지 않은 내용이 있어 추가하고 해석합니다. 지적및 수정 부탁드립니다.KMCPE -->
 
     <!-- Do not parse app name to localized name. Be static app name to English. -->
     <!-- 어플리케이션 이름을 한글로 번역하지 마십시오. 개발자 측에서는 어플리케이션 이름을 각자의 언어로 번역하는걸 원치 않아하십니다. -->
