@@ -38,7 +38,7 @@ static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
 static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
 
-static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld);
+static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld, bool thatotherboolean);
 
 static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
 
@@ -160,7 +160,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
-	bl_Minecraft_leaveGame(bl_minecraft, saveMultiplayerWorld);
+	bl_Minecraft_leaveGame(bl_minecraft, saveMultiplayerWorld, true);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -220,7 +220,7 @@ void bl_setuphooks_cppside() {
 
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb"); //hooked via vtable; we use the unhooked version here
+	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
 
 	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");

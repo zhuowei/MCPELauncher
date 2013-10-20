@@ -64,7 +64,7 @@ jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
 void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
-static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
+static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
@@ -229,9 +229,9 @@ void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName
 	bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
 }
 
-void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
+void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int saveLevel, int thatotherboolean) {
 	JNIEnv *env;
-	bl_Minecraft_leaveGame_real(minecraft, thatboolean);
+	bl_Minecraft_leaveGame_real(minecraft, saveLevel, thatotherboolean);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
@@ -242,7 +242,7 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatboolean) {
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, thatboolean);
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, saveLevel);
 
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
@@ -866,7 +866,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	//get a callback when the level is exited
-	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
+	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");

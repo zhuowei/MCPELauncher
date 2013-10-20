@@ -469,6 +469,11 @@ public class ScriptManager {
 			return false;
 		}
 	}
+
+	public static void takeScreenshot(String fileName) {
+		screenshotFileName = fileName.replace("/", "").replace("\\", "");
+		nativeRequestFrameCallback();
+	}
 		
 
 	public static native float nativeGetPlayerLoc(int axis);

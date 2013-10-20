@@ -5,13 +5,24 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
+import java.util.Locale;
+
+
 import android.graphics.Bitmap;
 
 import android.opengl.GLES11;
 
 import static android.opengl.GLES11.*;
 
+import android.os.Environment;
+
 import android.util.Log;
+
+import com.mojang.minecraftpe.MainActivity;
 
 public class ScreenshotHelper {
 
@@ -66,7 +77,7 @@ public class ScreenshotHelper {
 			bmp.copyPixelsFromBuffer(buf);
 			buf = null;
 
-			File file = new File("/sdcard/" + fileName + "-" + System.currentTimeMillis() + ".png");
+			File file = createOutputFile(fileName);
 			FileOutputStream fos = null;
 			try {
 				fos = new FileOutputStream(file);
@@ -82,6 +93,31 @@ public class ScreenshotHelper {
 			}
 			bmp.recycle();
 			System.gc();
+			runCallBack(file);
+		}
+
+		private File createOutputFile(String prefix) {
+			File allPicturesFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+			File picturesFolder = new File(allPicturesFolder, "BlockLauncher");
+			picturesFolder.mkdirs();
+
+			String currentTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm", Locale.US).format(new Date());
+			File retFile = new File(picturesFolder, prefix + "-" + currentTime + ".png");
+			int postFix = 1;
+			while (retFile.exists()) {
+				postFix++;
+				retFile = new File(picturesFolder, prefix + "-" + currentTime + "_" + postFix + ".png");
+			}
+			return retFile;
+		}
+
+		private void runCallBack(File file) {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.screenshotCallback(file);
+				}
+			}
 		}
 	}
 }

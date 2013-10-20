@@ -28,6 +28,7 @@ import android.content.DialogInterface;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
@@ -599,11 +600,12 @@ public class MainActivity extends NativeActivity
 		CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
 		CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
 		CharSequence manageModPEScripts = getResources().getString(R.string.pref_zz_manage_scripts);
+		CharSequence takeScreenshot = getResources().getString(R.string.take_screenshot);
 		CharSequence[] options = null;
 		if (hasInsertText) {
-			options = new CharSequence[] {livePatch, manageModPEScripts, optionMenu, insertText};
+			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu, insertText};
 		} else {
-			options = new CharSequence[] {livePatch, manageModPEScripts, optionMenu};
+			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu};
 		}
 		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
 			setItems(options, new DialogInterface.OnClickListener() {
@@ -620,8 +622,10 @@ public class MainActivity extends NativeActivity
 						Intent intent = new Intent(MainActivity.this, ManageScriptsActivity.class);
 						startActivity(intent);
 					} else if (button == 2) {
+						ScriptManager.takeScreenshot("blocklauncher");
+					} else if (button == 3) {
 						startActivity(getOptionsActivityIntent());
-					} else if (button == 3 && hasInsertText) {
+					} else if (button == 4 && hasInsertText) {
 						showDialog(DIALOG_INSERT_TEXT);
 					}
 				}
@@ -1459,6 +1463,16 @@ public class MainActivity extends NativeActivity
 					setMessage(scriptName + " " + getResources().getString(R.string.script_too_many_errors)).
 					setPositiveButton(android.R.string.ok, null).
 					show();
+			}
+		});
+	}
+
+	public void screenshotCallback(final File file) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				Toast.makeText(MainActivity.this, "Screenshot saved as " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+				MediaScannerConnection.scanFile(MainActivity.this, 
+					new String[] {file.getAbsolutePath()}, new String[] {"image/png"}, null);
 			}
 		});
 	}
