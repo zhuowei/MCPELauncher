@@ -29,6 +29,8 @@ extern void (*bl_ItemInstance_setId)(ItemInstance*, int);
 extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
 
+extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
+
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 

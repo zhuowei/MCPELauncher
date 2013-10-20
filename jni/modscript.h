@@ -335,6 +335,30 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeRequestFrameCallback
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetSignText
+ * Signature: (IIII)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
+  (JNIEnv *, jclass, jint, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetSignText
+ * Signature: (IIIILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
+  (JNIEnv *, jclass, jint, jint, jint, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetData
  * Signature: (III)I
  */
@@ -475,7 +499,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  * Signature: (IIII)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExtinguishFire
-  (JNIEnv *env, jclass clazz, jint, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -483,15 +507,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotArmor
-  (JNIEnv *env, jclass clazz, jint, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetArmorSlot
- * Signature: (III)I
+ * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetArmorSlot
-  (JNIEnv *env, jclass clazz, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

@@ -97,7 +97,7 @@ static void (*bl_LevelData_setSpawn)(void*, int, int, int);
 static void (*bl_LevelData_setGameType)(void*, int);
 static int (*bl_LevelData_getGameType)(void*);
 static void (*bl_Entity_setOnFire)(Entity*, int);
-static void* (*bl_Level_getTileEntity)(Level*, int, int, int);
+void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 static void (*bl_ChestTileEntity_setItem)(void*, int, ItemInstance*);
 static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);

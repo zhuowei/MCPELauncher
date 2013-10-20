@@ -22,6 +22,7 @@ typedef void RakNetInstance;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
+#define SIGN_TILE_ENTITY_LINE_OFFSET 68
 
 extern "C" {
 
@@ -192,6 +193,40 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 	RakNetInstance* raknetInstance = *((RakNetInstance**) rakNetOffset);
 	bl_RakNetInstance_connect_hook(raknetInstance, hostChars, port);
 	env->ReleaseStringUTFChars(host, hostChars);
+}
+
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line) {
+	if (bl_level == NULL) return NULL;
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (te == NULL) return NULL;
+	//line offsets: 68, 72, 76, 80
+	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	if (lineStr == NULL) return NULL;
+
+	jstring signJString = env->NewStringUTF(lineStr->c_str());
+	return signJString;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line, jstring newText) {
+	if (bl_level == NULL) return;
+	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (te == NULL) return;
+
+	const char * utfChars = env->GetStringUTFChars(newText, NULL);
+
+	//line offsets: 68, 72, 76, 80
+	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	if (lineStr == NULL || lineStr->length() == 0) {
+		//Workaround for C++ standard library's empty string optimization failing across libraries
+		//search FULLY_DYNAMIC_STRING
+		std::string* mystr = new std::string(utfChars);
+		*((void**) lineStr) = *((void**) mystr);
+	} else {
+		lineStr->assign(utfChars);
+	}
+	env->ReleaseStringUTFChars(newText, utfChars);
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {

@@ -527,6 +527,8 @@ public class ScriptManager {
 	public static native void nativeSetMobHealth(int entityId, int halfhearts);
 	public static native void nativeSetEntityRenderType(int entityId, int renderType);
 	public static native void nativeRequestFrameCallback();
+	public static native String nativeGetSignText(int x, int y, int z, int line);
+	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -827,6 +829,18 @@ public class ScriptManager {
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
 			return new NativeEntity(entityId);
 		}
+
+		@JSStaticFunction
+		public static String getSignText(int x, int y, int z, int line) {
+			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be 0 - 4");
+			return nativeGetSignText(x, y, z, line);
+		}
+
+		@JSStaticFunction
+		public static void setSignText(int x, int y, int z, int line, String newText) {
+			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be 0 - 4");
+			nativeSetSignText(x, y, z, line, newText);
+		}	
 
 		//thanks to MrARM
 
