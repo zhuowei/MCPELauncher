@@ -622,7 +622,17 @@ public class MainActivity extends NativeActivity
 						Intent intent = new Intent(MainActivity.this, ManageScriptsActivity.class);
 						startActivity(intent);
 					} else if (button == 2) {
-						ScriptManager.takeScreenshot("blocklauncher");
+						boolean hasLoadedScripts = 
+							PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean(
+								"zz_script_enable", true) && !isSafeMode();
+						if (hasLoadedScripts) {
+							ScriptManager.takeScreenshot("screenshot");
+						} else {
+							new AlertDialog.Builder(MainActivity.this).
+								setMessage(R.string.take_screenshot_requires_modpe_script).
+								setPositiveButton(android.R.string.ok, null).
+								show();
+						}
 					} else if (button == 3) {
 						startActivity(getOptionsActivityIntent());
 					} else if (button == 4 && hasInsertText) {
@@ -1470,7 +1480,8 @@ public class MainActivity extends NativeActivity
 	public void screenshotCallback(final File file) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				Toast.makeText(MainActivity.this, "Screenshot saved as " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this, getResources().getString(R.string.screenshot_saved_as) + " " +
+					file.getAbsolutePath(), Toast.LENGTH_LONG).show();
 				MediaScannerConnection.scanFile(MainActivity.this, 
 					new String[] {file.getAbsolutePath()}, new String[] {"image/png"}, null);
 			}

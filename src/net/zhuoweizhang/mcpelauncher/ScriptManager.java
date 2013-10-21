@@ -832,13 +832,13 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getSignText(int x, int y, int z, int line) {
-			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be 0 - 4");
+			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be in the range of 0 to 3");
 			return nativeGetSignText(x, y, z, line);
 		}
 
 		@JSStaticFunction
 		public static void setSignText(int x, int y, int z, int line, String newText) {
-			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be 0 - 4");
+			if (line < 0 || line >= 4) throw new RuntimeException("Invalid line for sign: must be in the range of 0 to 3");
 			nativeSetSignText(x, y, z, line, newText);
 		}	
 

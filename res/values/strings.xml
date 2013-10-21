@@ -160,6 +160,8 @@ For full licensing information, check the Minecraft Forums thread.\n
     <string name="script_view_source">View source</string>
     <string name="script_too_many_errors">has been disabled because it encountered too many errors. Sorry!</string>
     <string name="take_screenshot">Take screenshot</string>
+    <string name="take_screenshot_requires_modpe_script">ModPE Script support is required to take screenshots. \nYou can enable ModPE Script support in the Launcher Options page.</string>
+    <string name="screenshot_saved_as">Saved screenshot as</string>
 
     <string name="selinux_broke_everything">Unfortunately, BlockLauncher cannot run on your device as security software on your phone, such as Samsung Knox or SELinux, is preventing live patching. \n\n
 We are working on a fix for this, but in the meantime, BlockLauncher functions are limited to patching .mods and loading texture packs. \n\nModPE scripts cannot be loaded, and all .mod patches require a restart.</string>
