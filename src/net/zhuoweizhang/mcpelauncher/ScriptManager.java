@@ -78,10 +78,36 @@ public class ScriptManager {
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
-		Context ctx = Context.enter();
-		Script script = ctx.compileReader(in, sourceName, 0, null);
-		initJustLoadedScript(ctx, script, sourceName);
-		Context.exit();
+		//Rhino needs lots of recursion depth to parse nested else ifs
+		//dalvik vm/Thread.h specifies 256K as maximum stack size
+		//default thread depth is 16K (8K on old devices, 1K on super-low-end devices)
+		Thread t = new Thread(Thread.currentThread().getThreadGroup(), new ParseThread(in, sourceName), 
+			"BlockLauncher parse thread", 256*1024);
+		t.start();
+		try {
+			t.join(); //block on this thread
+		} catch (InterruptedException ie) {
+			//shouldn't happen
+		}
+	}
+
+	private static class ParseThread implements Runnable {
+		private Reader in;
+		private String sourceName;
+		public ParseThread(Reader in, String sourceName) {
+			this.in = in;
+			this.sourceName = sourceName;
+		}
+		public void run() {
+			try {
+				Context ctx = Context.enter();
+				Script script = ctx.compileReader(in, sourceName, 0, null);
+				initJustLoadedScript(ctx, script, sourceName);
+				Context.exit();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void loadScript(File file) throws IOException {
