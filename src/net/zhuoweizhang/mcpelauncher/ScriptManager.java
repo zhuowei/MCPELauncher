@@ -795,8 +795,8 @@ public class ScriptManager {
 			nativeExplode((float) x, (float) y, (float) z, (float) radius);
 		}
 		@JSStaticFunction
-		public static void setTile(int x, int y, int z, int id) {
-			nativeSetTile(x, y, z, id, 0);
+		public static void setTile(int x, int y, int z, int id, int damage) {
+			nativeSetTile(x, y, z, id, damage);
 		}
 		@JSStaticFunction
 		public static NativePointer getAddress() {
