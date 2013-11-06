@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +76,8 @@ public class ScriptManager {
 	private static boolean scriptingEnabled = true;
 
 	public static String screenshotFileName = "";
+
+	//public static Queue<Runnable> mainThreadRunnableQueue = new ArrayDeque<Runnable>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
@@ -228,6 +231,7 @@ public class ScriptManager {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
 			requestJoinServer = null;
 		}
+		//runDownloadCallbacks();
 	}
 
 	private static void updatePlayerOrientation() {
@@ -311,13 +315,13 @@ public class ScriptManager {
 		loadScript(file);
 	}
 
-	private static void reportScriptError(ScriptState state, Throwable t) {
-		state.errors++;
+	public static void reportScriptError(ScriptState state, Throwable t) {
+		if (state != null) state.errors++;
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
-				main.scriptErrorCallback(state.name, t);
-				if (state.errors >= MAX_NUM_ERRORS) { //too many errors
+				main.scriptErrorCallback(state == null? "Unknown script" : state.name, t);
+				if (state != null && state.errors >= MAX_NUM_ERRORS) { //too many errors
 					main.scriptTooManyErrorsCallback(state.name);
 				}
 			}
@@ -500,7 +504,49 @@ public class ScriptManager {
 		screenshotFileName = fileName.replace("/", "").replace("\\", "");
 		nativeRequestFrameCallback();
 	}
-		
+
+	/*private static void runDownloadCallbacks() {
+		Runnable message;
+		while ((message = mainThreadRunnableQueue.poll()) != null) {
+			message.run();
+		}
+	}*/
+
+	private static void overrideTexture(String urlString, String textureName) {
+		//download from URL
+		//saves it to ext storage's texture folder
+		//then, schedule callback
+		if (urlString == "") {
+			//clear this texture override
+			clearTextureOverride(textureName);
+			return;
+		}
+		try {
+			URL url = new URL(urlString);
+			new Thread(new ScriptTextureDownloader(url, getTextureOverrideFile(textureName))).start();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static File getTextureOverrideFile(String textureName) {
+		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
+		return new File(stagingTextures, textureName.replace("..", ""));
+	}
+
+	private static void clearTextureOverrides() {
+		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
+		Utils.clearDirectory(stagingTextures);
+		requestedGraphicsReset = true;
+	}
+
+	private static void clearTextureOverride(String texture) {
+		File file = getTextureOverrideFile(texture);
+		if (file.exists()) {
+			file.delete();
+		}
+		requestedGraphicsReset = true;
+	}
 
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
@@ -1214,21 +1260,11 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void overrideTexture(String theOverridden, String url) {
-			if (MainActivity.currentMainActivity != null) {
-				MainActivity main = MainActivity.currentMainActivity.get();
-				if (main != null) {
-					main.scriptOverrideTexture(theOverridden, url);
-				}
-			}
+			ScriptManager.overrideTexture(url, theOverridden);
 		}
 		@JSStaticFunction
 		public static void resetImages() {
-			if (MainActivity.currentMainActivity != null) {
-				MainActivity main = MainActivity.currentMainActivity.get();
-				if (main != null) {
-					main.scriptResetImages();
-				}
-			}
+			ScriptManager.clearTextureOverrides();
 		}
 
 		@JSStaticFunction

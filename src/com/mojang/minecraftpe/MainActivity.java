@@ -225,7 +225,11 @@ public class MainActivity extends NativeActivity
 
 		loadTexturePack();
 
+		textureOverrides.clear();
 		textureOverrides.add(new SkinTextureOverride(this));
+		textureOverrides.add(new ScriptOverrideTexturePack(this));
+
+		ScriptTextureDownloader.attachCache(this);
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
@@ -352,6 +356,11 @@ public class MainActivity extends NativeActivity
 			hoverCar.dismiss();
 			hoverCar = null;
 		}
+	}
+
+	public void onStop() {
+		super.onStop();
+		ScriptTextureDownloader.flushCache();
 	}
 
 	private void setFakePackage(boolean enable) {
@@ -1564,6 +1573,7 @@ public class MainActivity extends NativeActivity
 				conn.setRequestMethod(method);
 				conn.setRequestProperty("Cookie", cookies);
 				conn.setRequestProperty("User-Agent", "MCPE/Curl");
+				conn.setUseCaches(false);
 				conn.setDoInput(true);
 				if (conn instanceof HttpsURLConnection && isRedirectingRealms()) {
 					TrustModifier.relaxHostChecking(conn);
