@@ -84,7 +84,8 @@ public class ScriptManager {
 		//Rhino needs lots of recursion depth to parse nested else ifs
 		//dalvik vm/Thread.h specifies 256K as maximum stack size
 		//default thread depth is 16K (8K on old devices, 1K on super-low-end devices)
-		Thread t = new Thread(Thread.currentThread().getThreadGroup(), new ParseThread(in, sourceName), 
+		ParseThread parseRunner = new ParseThread(in, sourceName);
+		Thread t = new Thread(Thread.currentThread().getThreadGroup(), parseRunner, 
 			"BlockLauncher parse thread", 256*1024);
 		t.start();
 		try {
@@ -92,11 +93,21 @@ public class ScriptManager {
 		} catch (InterruptedException ie) {
 			//shouldn't happen
 		}
+		if (parseRunner.error != null) {
+			RuntimeException back;
+			if (parseRunner.error instanceof RuntimeException) {
+				back = (RuntimeException) parseRunner.error;
+			} else {
+				back = new RuntimeException(parseRunner.error);
+			}
+			throw back; //Thursdays
+		}
 	}
 
 	private static class ParseThread implements Runnable {
 		private Reader in;
 		private String sourceName;
+		public Exception error = null;
 		public ParseThread(Reader in, String sourceName) {
 			this.in = in;
 			this.sourceName = sourceName;
@@ -109,6 +120,7 @@ public class ScriptManager {
 				Context.exit();
 			} catch (Exception e) {
 				e.printStackTrace();
+				error = e;
 			}
 		}
 	}
