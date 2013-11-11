@@ -8,6 +8,8 @@
 #include <vector>
 #include <typeinfo>
 
+#include "utf8proc.h"
+
 #include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
@@ -18,7 +20,10 @@
 
 #include "modscript_ScriptLevelListener.hpp"
 
+#include "minecraft_colors.h"
+
 typedef void RakNetInstance;
+typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
@@ -50,6 +55,12 @@ static void* (*bl_Level_getAllEntities)(Level*);
 static void (*bl_Level_addListener)(Level*, LevelListener*);
 
 static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int);
+
+static void (*bl_Font_drawSlow_real)(Font*, char const*, int, float, float, int, bool);
+
+static int (*bl_Font_width)(Font*, std::string const&);
+
+bool bl_text_parse_color_codes = true;
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -98,6 +109,66 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	}
 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
+}
+
+void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffset, float yOffset, int color, bool isShadow) {
+	if (bl_text_parse_color_codes) {
+		char const* currentTextBegin = text; //the current coloured section
+		int currentLength = 0; //length in bytes of the current coloured section
+		const uint8_t* iteratePtr = (const uint8_t*) text; //where we are iterating
+		const uint8_t* endIteratePtr = (const uint8_t*) text + length; //once we reach here, stop iterating
+		//int lengthOfStringRemaining = length;
+		float substringOffset = xOffset; //where we draw the currently coloured section
+		int curColor = color; //the colour for the current section
+		//Loop through the string.
+		//When we find the first colour control character:
+		//call draw with text pointer at original position and length num of characters already scanned
+		//increment text pointer with characters already drawn
+		//length of scanned to 0
+		//once we get to the end of the string,
+		//call draw with text pointer and length num of characters
+
+		//to loop, we use our embedded copy of utf8proc
+		//which is the same library that MCPE uses
+
+		while(iteratePtr < endIteratePtr) {
+			int myChar = -1;
+			int bytesAdvanced = utf8proc_iterate(iteratePtr, endIteratePtr - iteratePtr, &myChar);
+			if (bytesAdvanced < 0 || myChar < 0) break;
+			iteratePtr += bytesAdvanced;
+
+			if (myChar == 0xA7 && iteratePtr < endIteratePtr) {
+				//is chat colouring code
+				bytesAdvanced = utf8proc_iterate(iteratePtr, endIteratePtr - iteratePtr, &myChar);
+				if (bytesAdvanced < 0 || myChar < 0) break;
+				iteratePtr += bytesAdvanced;
+
+				int newColor = color;
+				if (myChar >= '0' && myChar <= '9') {
+					newColor = bl_minecraft_colors[myChar - '0'];
+				} else if (myChar >= 'a' && myChar <= 'f') {
+					newColor = bl_minecraft_colors[myChar - 'a' + 10];
+				}
+
+				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+				std::string cppStringForWidth = std::string(currentTextBegin, currentLength);
+				substringOffset += bl_Font_width(font, cppStringForWidth);
+
+				curColor = newColor;
+				currentTextBegin = (const char *) iteratePtr;
+				currentLength = 0;
+
+			} else {
+				currentLength += bytesAdvanced;
+			}
+		}
+		if (currentLength > 0) {
+			bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+		}
+	} else {
+		bl_Font_drawSlow_real(font, text, length, xOffset, yOffset, color, isShadow);
+		return;
+	}
 }
 
 const char* bl_getCharArr(void* str){
@@ -229,6 +300,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTextParseColorCodes
+  (JNIEnv *env, jclass clazz, jboolean colorText) {
+	bl_text_parse_color_codes = colorText;
+}
+
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
@@ -279,6 +355,12 @@ void bl_setuphooks_cppside() {
 	int foodItemVtableOffset = 0x291a50;
 	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset + 8); //I have no idea why I have to add 8.
 	bl_Item_vtable = (void**) (mcpelibhandle->base + 0x2923d0 + 8); //tracing out the original vtable seems to suggest this.
+
+	void* fontDrawSlow = dlsym(RTLD_DEFAULT, "_ZN4Font8drawSlowEPKciffib");
+	mcpelauncher_hook(fontDrawSlow, (void*) &bl_Font_drawSlow_hook, (void**) &bl_Font_drawSlow_real);
+
+	bl_Font_width = (int (*) (Font*, std::string const&))
+		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
 }
 
 } //extern

@@ -136,6 +136,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeLevelApi.class);
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
+			ScriptableObject.putProperty(scope, "ChatColor", new NativeJavaClass(scope, ChatColor.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -433,18 +434,41 @@ public class ScriptManager {
 	}
 
 	private static void wordWrapClientMessage(String msg) {
+		//TODO: properly word wrap colour codes
+		if (msg.indexOf(ChatColor.BEGIN) >= 0) {
+			nativeClientMessage(msg);
+			return;
+		}
+
 		String[] portions = msg.split("\n");
 		for(int i = 0; i < portions.length; i++) {
 			String line = portions[i];
 			while(line.length() > 40) {
-				nativeClientMessage(line.substring(0, 40));
-				line = line.substring(40);
+				String newStr = line.substring(0, 40);//colorCodeSubstring(line, 0, 40);
+				nativeClientMessage(newStr);
+				line = line.substring(newStr.length());
 			}
 			if (line.length() > 0) {
 				nativeClientMessage(line);
 			}
 		}
 	}
+
+	/*private static String colorCodeSubstring(String line, int begin, int end) {
+		int charsCounted = 0;
+		int i;
+		for (i = begin; i < line.length(); i++) {
+			char myChar = line.charAt(i);
+			if (myChar == ChatColor.BEGIN) {
+				i++; //skip the next character as well
+			} else {
+				charsCounted++;
+				if (charsCounted == requiredChars) {
+					return line.substring(begin, i + 1);
+				}
+			}
+		}
+	}*/
 
 	/** Returns a description of ALL the methods this ModPE runtime supports. */
 	public static String getAllApiMethodsDescriptions() {
@@ -631,6 +655,7 @@ public class ScriptManager {
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
 	public static native void nativeRemoveItemBackground();
+	public static native void nativeSetTextParseColorCodes(boolean doIt);
 
 	public static class ScriptState {
 		public Script script;
