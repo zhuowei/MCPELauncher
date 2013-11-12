@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Croatian translations by QyMineAsap. Thanks! -->
+    <string name="pref_ctrl_touchscreen">Koristi ekran na dodir</string>
+    <string name="pref_ctrl_touchscreen_summary">Ako ne koristiš Xperia Play, pogledaj ovo</string>
+    <string name="pref_mp_username">Multiplayer korisničko ime</string>
+    <string name="pref_mp_username_summary">Tvoje ime, duh</string>
+    <string name="pref_texture_pack">Texture Pack</string>
+    <string name="pref_texture_pack_summary">Promijeni texture pack</string>
+    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
+    <string name="pref_ctrl_islefthanded">Ljevak</string>
+    <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
+    <string name="pref_ctrl_invertmouse">Uključi Y-axis</string>
+    <string name="pref_ctrl_invertmouse_summary">Za to vrijeme u  Australiji :)</string>
+    <string name="pref_feedback_vibration">Vibracije</string>
+    <string name="pref_feedback_vibration_summary">Vibriraj kada se kocka uništi</string>
+    <string name="pref_zz_longvibration">Vrlo duga vibracija</string>
+    <string name="pref_zz_longvibration_summary">Povečaj dužinu vibracije 5x</string>
+    <string name="pref_gfx_fancygraphics">Bolja grafika</string>
+    <string name="pref_gfx_fancygraphics_summary">Sve izgleda bolje</string>
+    <string name="pref_gfx_lowquality">Grafika lošije kvalitete</string>
+    <string name="pref_gfx_lowquality_summary">Sve izgleda lošije</string>
+    <string name="pref_game_difficultypeaceful">Miroljubivo</string>
+    <string name="pref_game_difficultypeaceful_summary">Regeneracija života, nema čudovišta</string>
+    <string name="pref_ctrl_sensitivity">Osjetljivost</string>
+    <string name="pref_ctrl_sensitivity_summary">Osjetljivost na dodir</string>
+    <string name="pref_zz_safe_mode">Opcija sigurnosti</string>
+    <string name="pref_zz_safe_mode_summary">Onesposobljava sve patchove</string>
+    <string name="pref_zz_patch_ip_enable">Preusmjeri Multiplayer</string>
+    <string name="pref_zz_patch_ip_enable_summary">Preusmjerava multiplayer konekcije na online server</string>
+    <string name="pref_zz_patch_ip">Server IP</string>
+    <string name="pref_zz_patch_ip_summary">IP addresa za online servere</string>
+    <string name="pref_zz_patch_ip_port">Server Port</string>
+    <string name="pref_zz_patch_ip_port_summary">Port za online server (inače 19132)</string>
+    <string name="pref_zz_texture_pack_enable">Koristi texture pack</string>
+    <string name="pref_zz_custom_dpi">Custom DPI</string>
+    <string name="pref_zz_custom_dpi_summary">Mijenja gustoću ekrana da promijeni veličinu kontrola - ostavi prazno za disable</string>
+    <string name="pref_zz_texture_pack_demo">Demonstriraj texture pack support</string>
+    <string name="pref_zz_texture_pack_demo_summary">Koristi ugrađenu verziju Slickcraft texture pack-a koju je napravio NathanX</string>
+    <string name="pref_mp_server_visible_default">Server visible by default</string>
+    <string name="pref_mp_title">Multiplayer</string>
+    <string name="pref_ctrl_title">Kontrole</string>
+    <string name="pref_gfx_title">Grafika</string>
+    <string name="pref_addons_title">Addons i patches</string>
+    <string name="pref_textures_title">Textures</string>
+    <string name="pref_support_title">Podrška</string>
+    <string name="pref_zz_load_native_addons">Uključi eksperimentalni addon support</string>
+    <string name="pref_zz_enable_hovercar">Uključi in-game patch manager</string>
+    <string name="texture_pack_unable_to_load">Nije moguće učitati texture pack.</string>
+    <string name="pref_zz_extract_original_textures">Extractaj orginalne texture s root pristupom</string>
+    <string name="pref_zz_extract_original_textures_summary">Backupaj originalne APK s root pristupom i zadaj kao texture pack</string>
+    <string name="extracting_textures">Backing up original APK</string>
+    <string name="extract_textures_success">Uspješno postavljen originalni APK kao texture pack.</string>
+    <string name="extract_textures_error">Nemoguće pristupiti orginalnom APK.</string>
+    <string name="extract_textures_no_root">Nemoguće dobiti superuser pristup - jesi li rootan?</string>
+    <string name="extract_textures_need_update">Čini se da koristiš texture sa starije verzije  Minecraft PE-a. Please run \"Extractaj originalne texture s root pristupom\" na ekranu s opcijama ponovno updatea texture.</string>
+    <string name="pref_zz_skin_enable">Omogući mijenjanje skina</string>
+    <string name="pref_zz_skin">Promijeni skin</string>
+    <string name="pref_zz_skin_summary">Odaberi .png dokument da promijeniš skin (samo ćeš ga ti vidjeti)</string>
+    <string name="pref_zz_hovercar_hide">Sakri patch manager gumb</string>
+    <string name="pref_zz_redirect_mco">Preusmjeri Realms na treću stranu server lista</string>
+    <string name="pref_zz_manage_scripts">Kontroliraj ModPE Scriptove</string>
+    <string name="pref_zz_script_enable">Omogući ModPE Script podršku</string>
+    <string name="pref_zz_sensorcontrol">Kontrola nad senzorima</string>
+    <string name="pref_zz_sensorcontrol_summary">Kontroliraj igrača rotirajući ekran. ModPE Scriptovi moraju biti omogućeni.</string>
+    <string name="pref_zz_show_insert_text">Pokaži \"Ubaci tekst\" opciju na in-game patch manageru</string>
+    <string name="nerdy_stuff_page">Štreberske stvari</string>
+    <string name="dump_libminecraftpe">Dump libminecraftpe.so s memorije</string>
+    <string name="nerdy_stuff_are_useless">Gotovo sve na ovoj stranici je beskorisno. Oni su tu za riješavanje bugova.</string>
+    <string name="restart_app">Restartaj aplikaciju</string>
+    <string name="manage_patches">kontroliraj patchove</string>
+    <string name="world_create_title">Stvori svijet</string>
+    <string name="world_name_prompt">Ime: </string>
+    <string name="world_seed_prompt">Seed: </string>
+    <string name="world_gamemode_prompt">Vrsta igre: </string>
+    <string name="gamemode_survival">Preživljavanje</string>
+    <string name="gamemode_creative">kreiranje</string>
+    <string name="copy_world_title">Spremi svijet</string>
+    <string name="manage_patches_import">Ubaci</string>
+    <string name="manage_patches_import_error">Neuspješno ubacivanje patcha</string>
+    <string name="manage_patches_too_many">Nadogradi na BlockLauncher Pro da možeš patchat više od 3 patcha</string>
+    <string name="manage_patches_delete">Izbriši</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher se srušio. Opcija sigurnosti je uključena da spriječi slijedeća rušenja. U opciji sigurnosti,svi patchovi su ugašeni.
+Da li želite nastaviti u opciji sigurnosti bez patchova ili se vratiti na normalnu patching opciju?</string>
+    <string name="manage_patches_import_confirm">Želiš li ubaciti ovaj patch?</string>
+    <string name="manage_patches_import_done">Patch ubačen</string>
+    <string name="manage_patches_enable">Uključi</string>
+    <string name="manage_patches_disable">Isključi</string>
+    <string name="manage_patches_disabled">(isključeno)</string>
+    <string name="manage_patches_invalid_patches">Ovi patchovi nemogu biti ubačeni zato što nisu u formatu kojiBlockLauncher prepoznaje:</string>
+    <string name="manage_patches_info">Informacije</string>
+    <string name="manage_patches_metadata">Autor</string>
+    <string name="manage_patches_no_metadata">Nema informacije o autoru</string>
+    <string name="manage_patches_path">Put</string>
+    <string name="skin_imported">Skin postavljen</string>
+    <string name="manage_addons">Upravljaj addonima</string>
+    <string name="get_pro">Upgrade to Pro</string>
+    <string name="about_about">O BlockLauncheru</string>
+    <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Ne distributiraj bez dopuštenja.</string>
+    <string name="about_librarycredits">Ovaj program koristi aFileChooser library koji je napravio Paul Burke. \n
+Ovaj program koristi dio koda koji je napravio Snowbound\'s PTPatchTool, licenciran pod Eclipse Public License. \n
+Ovaj program koristi modificianu verziju NathanX\'s Slickcraft texture packa: korišten s dopuštenjem.\n
+Dijelovi texture packa texture pack su bazirani na RepetiCraft koji je napravio Theevilpplz i korišten s dopuštenjem.\n
+Ovaj program koristi verziju Cydia Substrate frameworka koju je napravio Saurik, licenciran pod GNU Lesser General Public License.\n
+Ovaj program koristi libsuperuser library koju je napravio Chainfire.\n
+Ovaj program koristi kopiju Rhino JavaScript engina s Mozilla projekta.\n
+Za više informacija, pogledaj Minecraft Forums temu.\n
+    </string>
+    <string name="about_pro_library_credits"></string>
+    <string name="about_thankscommunity">Ova aplikacija je omogućena pomoću mnogo talentiranih prevoditelja, testera, i programera. Hvala vam.\nPogledaj Minecraft Forums temu za listu ljudi koji su pomogli.</string>
+    <string name="about_go_to_forums">Open Minecraft Forums thread for BlockLauncher</string>
+    <string name="no_minecraft_installed">BlockLauncher ne može pronaći kopiju Minecraft PE-a na ovom uređaju. Ova aplikacija je dizajnirana da patcha punu verziju Minecraft Pocket Editiona koju je napravio Mojang.</string>
+
+    <string name="firstlaunch_title">Dobrodošli na BlockLauncher!</string>
+    <string name="firstlaunch_generic_intro">Hvala Vam što isprodavate BlockLauncher. BlockLauncher starta kopiju Minecraft Pocket Editiona i dodaje dodatne funkcije kroz patcheve, addonse, skinove, i texture.</string>
+    <string name="firstlaunch_jelly_bean">Vaš uređaj radi na Android Jelly Bean ili novijem, so BlockLauncher ne može doći do oriinalnih textura. Demo texture pack je uključen tako da možete testirati BlockLauncher.</string>
+    <string name="firstlaunch_see_options">Da počnete s BlockLauncherom, kliknite na ikonu na vrhu ekrana. Za više pomoći, posjetite Minecraft Forum temu.</string>
+    <string name="firstlaunch_help">Pomoć</string>
+
+    <string name="version_mismatch_message">Ova verzija Minecraft PE nije podržana za BlockLauncher. BlockLauncher će raditi u opciji sigurnosti.  Molim Vas da provjerite za BlockLauncher nadogradnje jer ga možda podržava u novoj verziji.</string>
+
+    <string name="feature_not_supported">Ova funkcija nije podržana u BlockLauncheru.</string>
+    <string name="hovercar_title">In-game patch manager</string>
+    <string name="hovercar_live_patch">Patchaj modove u igri</string>
+    <string name="hovercar_options">Launcher opcije(restarrtanje potrebno)</string>
+    <string name="hovercar_insert_text">Ubaci tekst (problemi oko tipkovnica)</string>
+
+    <string name="mco_redirect_none">Ne preusmjeruj</string>
+    <string name="mco_redirect_pocketmine">Koristi PocketMine listu servera</string>
+    <string name="mco_redirect_minepocket">Koristi MinePocket listu servera</string>
+
+    <string name="safe_mode_exit">Vrati na normalno</string>
+    <string name="safe_mode_continue">Nastavi</string>
+
+    <string name="server_list_add">Dodaj server</string>
+    <string name="pref_zz_server_list">Lista servera</string>
+    <string name="pref_zz_server_list_summary">Izaberi ili dodaj server sa spremljene liste servera</string>
+    <string name="server_list_patch_address">Patchaj server addresu</string>
+    <string name="server_list_name_prompt">Ime: </string>
+    <string name="server_list_address_prompt">Addresa: </string>
+    <string name="server_list_port_prompt">Port: </string>
+
+    <string name="script_import_from">Ubaci script sa</string>
+    <string name="script_import_from_local">Lokalne pohrane</string>
+    <string name="script_import_from_cfgy">Treebl\'s officionalnog repoa</string>
+    <string name="script_import_from_bl_repo">BlockLauncher testing repo</string>
+    <string name="script_import_from_url">Web addresa</string>
+    <string name="script_import_from_clipboard">S prijenosnika</string>
+    <string name="script_import_from_clipboard_name">Unesi ime scriptat</string>
+    <string name="script_import_from_clipboard_code">Kodiraj za ubacivanje</string>
+    <string name="script_import_from_cfgy_id">Unesi script ID ua ubacivanje</string>
+    <string name="script_import_from_url_enter">Unesi adresu scripta za ubacivanje</string>
+    <string name="script_import_too_many">Nadogradi na BlockLauncher Pro da možeš ubacivati više od jednog scripta</string>
+    <string name="script_execution_error">Pogreška kod ModPE Scripta</string>
+    <string name="script_disabled_in_multiplayer">Vaš ModPE Scripts je ugašen u multiplayeru, jer može doći do rušenja. Biti će ponovno uključeni kada izađete sa servera.</string>
+    <string name="script_minecraft_version_incompatible">ModPE scripts nisu podržani u vašoj verziji Minecraft PE-a. Neke funkcije u scriptovima neće raditi ili će srušiti BlockLauncher. Koristite na vlastiti rizik.</string>
+    <string name="script_import_from_intent_warning">Želite ubaciti script? Dobiti će pristup svim resursima kao Vaš BlockLauncher, uključujući moguće zaporke i ostale osjetljive informacije.</string>
+    <string name="script_view_source">Vidi izvor</string>
+    <string name="script_too_many_errors">ugašen je zbog previše pogrešaka. Oprositite!</string>
+    <string name="take_screenshot">Snimi ekran</string>
+    <string name="take_screenshot_requires_modpe_script">ModPE Script podrška je potrebna za snimanje ekrana. \nMožete uključiti ModPE Script podršku u Launcher opcijama.</string>
+    <string name="screenshot_saved_as">Spremljena slika ekrana kao</string>
+
+    <string name="selinux_broke_everything">Nažalost, BlockLauncher ne može raditi na vašem uređaju kao zaštitni software , kao Samsung Knox ili SELinux, sprječava ubaivanje. \n\n
+Radimo na tome da to poopravimo, ali u međuvremenu, BlockLauncher funkcije su ograničene na ubacivanje .mods i texture packova. \n\nModPE scripts ne mogu biti ubačeni, i svi .mod patchovi zahtjevaju restartanje.</string>
+
+    <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
+    <string name="permdesc_mcpelauncher_addon">Dopušta aplikaciji da bude kao dodatak na BlockLauncher. To znači da aplikacija može doći na mrežu, spremište, i činiti sve što Minecraft PE može.</string>
+
+</resources>
