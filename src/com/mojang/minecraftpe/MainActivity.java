@@ -227,7 +227,9 @@ public class MainActivity extends NativeActivity
 
 		textureOverrides.clear();
 		textureOverrides.add(new SkinTextureOverride(this));
-		textureOverrides.add(new ScriptOverrideTexturePack(this));
+		if (allowScriptOverrideTextures()) {
+			textureOverrides.add(new ScriptOverrideTexturePack(this));
+		}
 
 		ScriptTextureDownloader.attachCache(this);
 
@@ -1495,6 +1497,10 @@ public class MainActivity extends NativeActivity
 					new String[] {file.getAbsolutePath()}, new String[] {"image/png"}, null);
 			}
 		});
+	}
+
+	protected boolean allowScriptOverrideTextures() {
+		return false;
 	}
 
 	private class LoginWebViewClient extends WebViewClient {

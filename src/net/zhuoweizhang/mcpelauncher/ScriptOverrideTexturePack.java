@@ -15,6 +15,7 @@ public class ScriptOverrideTexturePack implements TexturePack {
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
+		if (ScriptManager.androidContext == null) return null;
 		File file = ScriptManager.getTextureOverrideFile(fileName);
 		if (!file.exists()) return null;
 		return new FileInputStream(file);
