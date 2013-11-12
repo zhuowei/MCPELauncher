@@ -31,6 +31,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
@@ -1345,7 +1346,8 @@ public class MainActivity extends NativeActivity
 
 	/** enables the on-screen menu key on devices without a dedicated menu key, needed because target SDK is v15 */
 	private void enableSoftMenuKey() {
-		getWindow().addFlags(0x08000000); //FLAG_NEEDS_MENU_KEY
+		int flag = Build.VERSION.SDK_INT >= 19? 0x40000000: 0x08000000; //FLAG_NEEDS_MENU_KEY
+		getWindow().addFlags(flag); //KitKat reused old show menu key flag for transparent navbars
 	}
 
 	private void disableAllPatches() {
