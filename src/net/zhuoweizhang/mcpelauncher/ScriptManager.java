@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -79,6 +81,8 @@ public class ScriptManager {
 
 	//public static Queue<Runnable> mainThreadRunnableQueue = new ArrayDeque<Runnable>();
 
+	private static ModernWrapFactory modernWrapFactory = new ModernWrapFactory();
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		//Rhino needs lots of recursion depth to parse nested else ifs
@@ -115,6 +119,7 @@ public class ScriptManager {
 		public void run() {
 			try {
 				Context ctx = Context.enter();
+				setupContext(ctx);
 				Script script = ctx.compileReader(in, sourceName, 0, null);
 				initJustLoadedScript(ctx, script, sourceName);
 				Context.exit();
@@ -148,7 +153,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeLevelApi.class);
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
-			ScriptableObject.putProperty(scope, "ChatColor", new NativeJavaClass(scope, ChatColor.class));
+			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -161,6 +166,7 @@ public class ScriptManager {
 	public static void callScriptMethod(String functionName, Object... args) {
 		if (!scriptingEnabled) return; //No script loading/callbacks when in a remote world
 		Context ctx = Context.enter();
+		setupContext(ctx);
 		for (ScriptState state: scripts) {
 			if (state.errors >= MAX_NUM_ERRORS) continue; //Too many errors, skip
 			currentScript = state.name;
@@ -410,7 +416,12 @@ public class ScriptManager {
 		enabledScripts = new HashSet<String>(Arrays.asList(enabledScriptsStr.split(";")));
 		for (String name: enabledScripts) {
 			//load all scripts into the script interpreter
-			loadScript(getScriptFile(name));
+			File file = getScriptFile(name);
+			if (!file.exists() || !file.isFile()) {
+				Log.i("BlockLauncher", "ModPE script " + file.toString() + " doesn't exist");
+				continue;
+			}
+			loadScript(file);
 		}
 	}
 
@@ -582,6 +593,26 @@ public class ScriptManager {
 			file.delete();
 		}
 		requestedGraphicsReset = true;
+	}
+
+	public static ScriptableObject classConstantsToJSObject(Class<?> clazz) {
+		ScriptableObject obj = new NativeObject();
+		for (Field field: clazz.getFields()) {
+			if (!Modifier.isStatic(field.getModifiers()) || !field.isAccessible()) 
+				continue;
+			try {
+				obj.putConst(field.getName(), obj, field.get(null));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return obj;
+	}
+
+	public static void setupContext(Context ctx) {
+		if (android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext).getBoolean("zz_script_paranoid_mode", false)) {
+			ctx.setWrapFactory(modernWrapFactory);
+		}
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
@@ -868,7 +899,7 @@ public class ScriptManager {
 		}
 	}
 
-	private static class NativeEntity extends ScriptableObject {
+	protected static class NativeEntity extends ScriptableObject {
 		public int entityId;
 		public NativeEntity(int entityId) {
 			this.entityId = entityId;

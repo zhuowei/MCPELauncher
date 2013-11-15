@@ -281,6 +281,7 @@ public class MainActivity extends NativeActivity
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			reportError(e);
 		}
 
 		enableSoftMenuKey();
