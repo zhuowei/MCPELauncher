@@ -2,7 +2,9 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -61,6 +63,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference serverListPreference;
 	private Preference scriptEnablePreference;
 	private Preference manageScriptsPreference;
+	private ListPreference languagePreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -110,6 +113,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		manageScriptsPreference = findPreference("zz_manage_scripts");
 		if (manageScriptsPreference != null) {
 			if (ScriptManager.isRemote) manageScriptsPreference.setEnabled(false);
+		}
+		languagePreference = (ListPreference) findPreference("zz_language_override");
+		if (languagePreference != null) {
+			initLanguagePreference();
+			languagePreference.setOnPreferenceClickListener(this);
 		}
 	}
 
@@ -163,6 +171,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			openServerList();
 			return true;
 		} else if (pref == scriptEnablePreference) {
+			needsRestart = true;
+			return false;
+		} else if (pref == languagePreference) {
 			needsRestart = true;
 			return false;
 		}
@@ -316,6 +327,24 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		Intent a = new Intent();
 		a.setClassName("net.zhuoweizhang.mcpelauncher.pro", "net.zhuoweizhang.mcpelauncher.pro.ServerListActivity");
 		startActivityForResult(a, REQUEST_SERVER_LIST);
+	}
+
+	private void initLanguagePreference() {
+		String[] langList = getResources().getString(R.string.languages_supported).split(",");
+		List<String> languageNames = new ArrayList<String>();
+		languageNames.add(getResources().getString(R.string.pref_zz_language_override_default));
+		Locale currentLocale = getResources().getConfiguration().locale;
+		for (String override: langList) {
+			if (override.length() == 0) continue;
+			String[] overrideSplit = override.split("_");
+			String langName = overrideSplit[0];
+			String countryName = overrideSplit.length > 1? overrideSplit[1]: "";
+			Locale locale = new Locale(langName, countryName);
+			languageNames.add(locale.getDisplayName(currentLocale));
+			System.out.println(override + ":" + locale);
+		}
+		languagePreference.setEntries(languageNames.toArray(new String[]{}));
+		languagePreference.setEntryValues(langList);
 	}
 
 	private class ExtractTextureTask extends AsyncTask<Void, Void, Void> {

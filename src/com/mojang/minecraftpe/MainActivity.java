@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -220,7 +222,8 @@ public class MainActivity extends NativeActivity
 			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
 			finish();
 		}
-			
+
+		setLanguageOverride();
 
 		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
 
@@ -1504,6 +1507,19 @@ public class MainActivity extends NativeActivity
 
 	protected boolean allowScriptOverrideTextures() {
 		return false;
+	}
+
+	private void setLanguageOverride() {
+		String override = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_language_override", "");
+		if (override.length() == 0) return;
+		String[] overrideSplit = override.split("_");
+		String langName = overrideSplit[0];
+		String countryName = overrideSplit.length > 1? overrideSplit[1]: "";
+		Resources rez = this.getResources();
+		Configuration config = new Configuration(rez.getConfiguration());
+		DisplayMetrics metrics = rez.getDisplayMetrics();
+		config.locale = new Locale(langName, countryName);
+		rez.updateConfiguration(config, metrics);
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
