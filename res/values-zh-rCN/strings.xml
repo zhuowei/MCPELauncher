@@ -89,7 +89,7 @@
     <string name="permdesc_mcpelauncher_addon">允许在BlockLauncher里载入插件.这意味着这个应用被允许访问网络,存储,以及任何Minecraft PE被允许可以做的.</string>
     <string name="firstlaunch_title">欢迎使用BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">感谢你使用BlockLauncher!BlockLauncher可以给你的MinecraftPE添加额外的功能，通过它增加补丁，皮肤，和材质等.</string>
-    <string name="firstlaunch_jelly_bean">您的设备是果冻豆（4.2）及以上，BlockLauncher无法访问默认的材质包，已启用演示材质您可以启动测试看看.</string>
+    <string name="firstlaunch_jelly_bean">您的设备是果冻豆（4.1）及以上，BlockLauncher无法访问默认的材质包，已启用演示材质您可以启动测试看看.</string>
     <string name="firstlaunch_see_options">开始BlockLauncher请点击屏幕上方的设置按钮。更多的帮助请访问Minecraft Forum。</string>
     <string name="about_go_to_forums">访问BlockLauncher的Minecraft Forum贴子</string>
 
