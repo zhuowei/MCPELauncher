@@ -52,6 +52,14 @@ typedef struct {
 	cppbool wtf3; //18
 	cppbool wtf4; //19
 } ItemInstance;
+
+typedef struct {
+	void** vtable; //0
+	int texture; //4
+	int id; //8
+	char filler[32]; //12
+	void* material; //44
+} Tile;
 #ifdef __cplusplus
 }
 #endif

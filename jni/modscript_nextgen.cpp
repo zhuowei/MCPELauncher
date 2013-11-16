@@ -28,6 +28,12 @@ typedef void Font;
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
 #define SIGN_TILE_ENTITY_LINE_OFFSET 68
+#define BLOCK_VTABLE_SIZE 0x120
+#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 10
+#define BLOCK_VTABLE_IS_CUBE_SHAPED 4
+#define BLOCK_VTABLE_GET_RENDER_SHAPE 5
+#define BLOCK_VTABLE_GET_NAME 57
+#define BLOCK_VTABLE_GET_DESCRIPTION_ID 58
 
 extern "C" {
 
@@ -39,6 +45,9 @@ static void (*bl_Item_Item)(Item*, int);
 
 static void** bl_FoodItem_vtable;
 static void** bl_Item_vtable;
+static void** bl_Tile_vtable;
+static void** bl_TileItem_vtable;
+static Tile** bl_Tile_tiles;
 
 static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
@@ -60,7 +69,20 @@ static void (*bl_Font_drawSlow_real)(Font*, char const*, int, float, float, int,
 
 static int (*bl_Font_width)(Font*, std::string const&);
 
+static void* bl_Material_dirt;
+
+static void (*bl_Tile_Tile)(Tile*, int, void*);
+static void (*bl_TileItem_TileItem)(Item*, int);
+static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
+
 bool bl_text_parse_color_codes = true;
+
+//custom blocks
+void* bl_CustomBlock_vtable[BLOCK_VTABLE_SIZE];
+int* bl_custom_block_textures[256];
+bool bl_custom_block_opaque[256];
+int bl_custom_block_renderShape[256];
+//end custom blocks
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -176,6 +198,25 @@ const char* bl_getCharArr(void* str){
 	std::string mystr2 = *mystr;
 	const char* cs = mystr2.c_str();
 	return cs;
+}
+
+int bl_CustomBlock_getTextureHook(Tile* tile, int side, int data) {
+	int blockId = tile->id;
+	int* ptrToBlockInfo = bl_custom_block_textures[blockId];
+	if (ptrToBlockInfo == NULL) {
+		return 0;
+	}
+	return ptrToBlockInfo[(data * 6) + side];
+}
+
+bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
+	int blockId = tile->id;
+	return bl_custom_block_opaque[blockId];
+}
+
+int bl_CustomBlock_getRenderShapeHook(Tile* tile) {
+	int blockId = tile->id;
+	return bl_custom_block_renderShape[blockId];
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -320,6 +361,56 @@ void bl_attachLevelListener() {
 	bl_Level_addListener(bl_level, listener);
 }
 
+void bl_initCustomBlockVtable() {
+	//copy existing vtable
+	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
+	//set the texture getter to our overridden version
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_NAME] = bl_CustomBlock_vtable[BLOCK_VTABLE_GET_DESCRIPTION_ID];
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
+}
+
+void* bl_getMaterial(int materialType) {
+	return bl_Tile_tiles[1]->material;
+}
+
+Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, int renderShape, const char* name) {
+	if (blockId < 0 || blockId > 255) return NULL;
+	if (bl_custom_block_textures[blockId] != NULL) return NULL;
+	bl_custom_block_opaque[blockId] = opaque;
+	bl_custom_block_textures[blockId] = texture;
+	bl_custom_block_renderShape[blockId] = renderShape;
+	//Allocate memory for the block
+	Tile* retval = (Tile*) ::operator new((std::size_t) 92);
+	retval->vtable = bl_CustomBlock_vtable;
+	bl_Tile_Tile(retval, blockId, bl_getMaterial(materialType));
+	retval->vtable = bl_CustomBlock_vtable;
+	retval->material = bl_getMaterial(materialType);
+	std::string nameStr = std::string(name);
+	bl_Tile_setDescriptionId(retval, nameStr);
+	//add it to the global tile list
+	bl_Tile_tiles[blockId] = retval;
+	//now allocate the item
+	Item* tileItem = (Item*) ::operator new((std::size_t) 40);
+	tileItem->vtable = bl_TileItem_vtable;
+	bl_TileItem_TileItem(tileItem, blockId - 0x100);
+	tileItem->vtable = bl_TileItem_vtable;
+	return retval;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
+  (JNIEnv *env, jclass clazz, jint blockId, jstring name, jintArray textures, jboolean opaque, jint renderType) {
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	int* myIntArray = new int[16*6];
+	env->GetIntArrayRegion(textures, 0, 16*6, myIntArray);
+	Tile* tile = bl_createBlock(blockId, myIntArray, 1, opaque, renderType, utfChars);
+	if (tile == NULL) delete[] myIntArray;
+	env->ReleaseStringUTFChars(name, utfChars);
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -361,6 +452,18 @@ void bl_setuphooks_cppside() {
 
 	bl_Font_width = (int (*) (Font*, std::string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
+
+	bl_Tile_vtable = (void**) ((int) dlsym(RTLD_DEFAULT, "_ZTV4Tile") + 8);
+	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
+
+	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
+	bl_TileItem_TileItem = (void (*)(Item*, int)) (mcpelibhandle->base + 0x187559); //TODO amazon dlsym(RTLD_DEFAULT, "_ZN8TileItemC2Ei");
+	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
+		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
+	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88);//dlsym(RTLD_DEFAULT, "_ZTV8TileItem");
+	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
+
+	bl_initCustomBlockVtable();
 }
 
 } //extern

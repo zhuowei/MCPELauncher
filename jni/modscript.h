@@ -359,6 +359,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeDefineBlock
+ * Signature: (ILjava/lang/String;[III)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
+  (JNIEnv *, jclass, jint, jstring, jintArray, jboolean, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetData
  * Signature: (III)I
  */
@@ -533,6 +541,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
   (JNIEnv *, jclass);
 
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetTextParseColorCodes
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTextParseColorCodes
+  (JNIEnv *, jclass, jboolean);
+
 #ifdef __cplusplus
 }
 #endif
@@ -640,6 +656,17 @@ extern "C" {
 
 #ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
 #define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_ParseThread */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ParseThread
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ParseThread
 #ifdef __cplusplus
 extern "C" {
 #endif

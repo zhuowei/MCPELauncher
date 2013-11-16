@@ -211,6 +211,7 @@ public class ScriptManager {
 		
 		worldName = wName;
 		worldDir = wDir;
+		callScriptMethod("selectLevelHook");
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -615,6 +616,22 @@ public class ScriptManager {
 		}
 	}
 
+	public static int[] expandTexturesArray(Scriptable inArrayScriptable) {
+		//if the in array count is a multiple of 6,
+		//copy 6 at a time until we run out, then copy 6 from the first element.
+		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
+		int[] endArray = new int[16*6];
+		int wrap = inArrayLength % 6 == 0? 6: 1;
+		for (int i = 0; i < endArray.length; i++) {
+			if (i < inArrayLength) {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+			} else {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i % wrap)).intValue();
+			}
+		}
+		return endArray;
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -668,6 +685,7 @@ public class ScriptManager {
 	public static native void nativeRequestFrameCallback();
 	public static native String nativeGetSignText(int x, int y, int z, int line);
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
+	public static native void nativeDefineBlock(int blockId, String name, int[] textures, boolean opaque, int renderType);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1408,6 +1426,12 @@ public class ScriptManager {
 		public static void takeScreenshot(String fileName) {
 			screenshotFileName = fileName.replace("/", "").replace("\\", "");
 			nativeRequestFrameCallback();
+		}
+
+		@JSStaticFunction
+		public static void defineBlock(int blockId, String name, Scriptable textures, boolean opaque, int renderType) {
+			int[] finalTextures = expandTexturesArray(textures);
+			nativeDefineBlock(blockId, name, finalTextures, opaque, renderType);
 		}
 
 		@Override
