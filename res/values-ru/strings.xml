@@ -64,6 +64,9 @@
     <string name="pref_zz_script_enable">Включить поддержку скриптов ModPE</string>
     <string name="pref_zz_sensorcontrol">Сенсорное управление</string>
     <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваш девайс. Необходимо включить скрипты ModPE.</string>
+    <string name="pref_zz_show_insert_text">Показать опцию \"Ввести текст\ во внутриигровом управлении патчами" </string>
+    <string name="pref_zz_language_override">Язык</string>
+    <string name="pref_zz_language_override_default">По умолчанию</string>
     <string name="nerdy_stuff_page">Отладка</string>
     <string name="dump_libminecraftpe">Сделать дамп libminecraftpe.so из памяти</string>
     <string name="nerdy_stuff_are_useless">Все, что находится на этой странице, практически бесполезно (для пользователей). Оно нужно для устранения ошибок.</string>
@@ -114,7 +117,7 @@
 
     <string name="firstlaunch_title">Добро пожаловать в BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">Спасибо за то, что попробовали BlockLauncher. BlockLauncher может запускать Minecraft Pocket Edition и добавлять дополнительные возможности, такие как патчи, аддоны, скины и текстуры.</string>
-    <string name="firstlaunch_jelly_bean">Ваше устройство работает на Android версии Jelly Bean или новее, так что BlockLauncher не может получить доступ к стандартным текстурам. Был установлен демонстрационный текстурпак и вы можете тестировать лаунчер.</string>
+    <string name="firstlaunch_jelly_bean">Ваше устройство работает на Android версии Jelly Bean или новее, так что BlockLauncher не может получить доступ к стандартным текстурам. Был установлен демонстрационный текстурпак и вы можете тестировать лончер.</string>
     <string name="firstlaunch_see_options">Для начала нажмите на иконку гаечного ключа вверху экрана. Больше информации вы можете получить в теме на Minecraft Forums.</string>
     <string name="firstlaunch_help">Помощь</string>
 
@@ -123,7 +126,7 @@
     <string name="feature_not_supported">Данная возможность пока не поддерживается BlockLauncher\'ом.</string>
     <string name="hovercar_title">Внутриигровое управление патчами</string>
     <string name="hovercar_live_patch">Управление патчами</string>
-    <string name="hovercar_options">Настройки лаунчера (требуется рестарт)</string>
+    <string name="hovercar_options">Настройки лончера (требуется рестарт)</string>
     <string name="hovercar_insert_text">Ввести текст</string>
 
     <string name="mco_redirect_none">Не перенаправлять</string>
@@ -132,15 +135,15 @@
 
     <string name="safe_mode_exit">Вернуться в обычный режим</string>
     <string name="safe_mode_continue">Продолжить</string>
-	
-	<string name="server_list_add">Добавить сервер</string>
+    
+    <string name="server_list_add">Добавить сервер</string>
     <string name="pref_zz_server_list">Список серверов</string>
     <string name="pref_zz_server_list_summary">Выберите или добавьте сервер в свой список серверов</string>
     <string name="server_list_patch_address">Патчить адрес сервера</string>
     <string name="server_list_name_prompt">Название: </string>
     <string name="server_list_address_prompt">Адрес: </string>
     <string name="server_list_port_prompt">Порт: </string>
-	
+    
     <string name="script_import_from">Импортировать скрипт из</string>
     <string name="script_import_from_local">Локального хранилища</string>
     <string name="script_import_from_cfgy">Официального репозитория Treebl\'а</string>
@@ -158,7 +161,13 @@
     <string name="script_import_from_intent_warning">Вы хотите импортировать этот скрипт? Он получит доступ к тем же самым ресурсам, что и BlockLauncher, включая, возможно, ваши пароли и другую личную информацию.</string>
     <string name="script_view_source">Открыть исходный код</string>
     <string name="script_too_many_errors">был отключен, так как содержит слишком много ошибок. Извините!</string>
-	
+    <string name="take_screenshot">Сделать скриншот</string>
+    <string name="take_screenshot_requires_modpe_script">Для снятия скриншотов должна быть включена поддержка скриптов ModPE. \nВы можете включить ее в настройках BlockLauncher\'a.</string>
+    <string name="screenshot_saved_as">Скриншот сохранен в</string>
+
+    <string name="selinux_broke_everything">К сожалению, BlockLauncher не может работать на вашем устройстве в полной мере, это связано с Samsung Knox или SELinux, которые препятствуют применению патчей \"на лету\". \n\n
+Мы работаем над исправлением этого, но, в настоящее время, функции BlockLauncher\'а ограничены до применения патчей (.mod) и загрузки текстурпаков. \n\nСкрипты ModPE не могут быть загружены, также, все патчи требуют рестарта.</string>
+
     <string name="permlab_mcpelauncher_addon">Аддон BlockLauncher\'а</string>
     <string name="permdesc_mcpelauncher_addon">Приложение может быть загружено в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что Minecraft PE имеет разрешение.</string>
 
