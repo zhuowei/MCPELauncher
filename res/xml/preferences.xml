@@ -173,6 +173,8 @@
                 android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
     </Preference>
 
+    <ListPreference android:title="@string/pref_zz_language_override" android:key="zz_language_override"/>
+
     <Preference android:key="zz_about"
         android:title="@string/about_about"/>
 

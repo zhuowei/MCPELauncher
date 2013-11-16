@@ -16,6 +16,8 @@ import javax.net.ssl.*;
 import java.security.*;
 import java.security.cert.*;
 
+import java.lang.reflect.Field;
+
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
@@ -46,6 +48,8 @@ import android.webkit.*;
 import android.widget.*;
 
 import android.preference.*;
+
+import dalvik.system.PathClassLoader;
 
 import net.zhuoweizhang.mcpelauncher.*;
 
@@ -263,6 +267,8 @@ public class MainActivity extends NativeActivity
 		displayMetrics = new DisplayMetrics();
 
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+		addLibraryDirToPath(MC_NATIVE_LIBRARY_DIR);
 
 		setFakePackage(true);
 
@@ -1520,6 +1526,40 @@ public class MainActivity extends NativeActivity
 		DisplayMetrics metrics = rez.getDisplayMetrics();
 		config.locale = new Locale(langName, countryName);
 		rez.updateConfiguration(config, metrics);
+	}
+
+	private void addLibraryDirToPath(String path) {
+		try {
+			ClassLoader classLoader = getClassLoader();
+			Class<? extends ClassLoader> clazz = classLoader.getClass();
+			Field field = Utils.getDeclaredFieldRecursive(clazz, "pathList");
+			field.setAccessible(true);
+			Object pathListObj = field.get(classLoader);
+			Class<? extends Object> pathListClass = pathListObj.getClass();
+			Field natfield = Utils.getDeclaredFieldRecursive(pathListClass, "nativeLibraryDirectories");
+			natfield.setAccessible(true);
+			File[] fileList = (File[]) natfield.get(pathListObj);
+			File[] newList = addToFileList(fileList, new File(path));
+			if (fileList != newList) natfield.set(pathListObj, newList);
+			//check
+			//System.out.println("Class loader shenanigans: " + ((PathClassLoader) getClassLoader()).findLibrary("minecraftpe"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private File[] addToFileList(File[] files, File toAdd) {
+		boolean needsAdding = true;
+		for (File f: files) {
+			if (f.equals(toAdd)) {
+				//System.out.println("Already added path to list");
+				return files;
+			}
+		}
+		File[] retval = new File[files.length + 1];
+		System.arraycopy(files, 0, retval, 1, files.length);
+		retval[0] = toAdd;
+		return retval;
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
