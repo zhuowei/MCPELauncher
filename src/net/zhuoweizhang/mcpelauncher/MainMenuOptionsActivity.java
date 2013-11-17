@@ -68,6 +68,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(net.zhuoweizhang.mcpelauncher.R.xml.preferences);
 		texturePackPreference = findPreference("zz_texture_pack");

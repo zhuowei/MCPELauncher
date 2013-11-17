@@ -56,7 +56,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState)	{
+	public void onCreate(Bundle savedInstanceState) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED);
 		setContentView(R.layout.manage_patches);

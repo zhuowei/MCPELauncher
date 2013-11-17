@@ -25,6 +25,7 @@ public class ImportPatchActivity extends Activity implements View.OnClickListene
 	public TextView patchNameText, installConfirmText;
 
 	public void onCreate(Bundle icicle) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(icicle);
 		setContentView(R.layout.import_patch_confirm);
 		okButton = (Button) findViewById(R.id.ok_button);

@@ -16,6 +16,7 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
 public class ImportSkinActivity extends Activity {
 
 	public void onCreate(Bundle icicle) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(icicle);
 		
 		Intent intent = getIntent();

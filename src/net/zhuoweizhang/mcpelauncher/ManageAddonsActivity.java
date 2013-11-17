@@ -48,7 +48,8 @@ public class ManageAddonsActivity extends ListActivity/* implements View.OnClick
 
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState)	{
+	public void onCreate(Bundle savedInstanceState) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED);
 		ListView lv = getListView();

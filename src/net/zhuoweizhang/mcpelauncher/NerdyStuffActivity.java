@@ -26,6 +26,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 		"nolispe", "etagirf", "repeeketag"};
 
 	public void onCreate(Bundle icicle) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(icicle);
 		setContentView(R.layout.nerdy_stuff);
 		dumpLibMinecraftPeButton = (Button) findViewById(R.id.dump_libminecraftpe_button);

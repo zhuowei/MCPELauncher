@@ -32,6 +32,7 @@ public final class AboutAppActivity extends Activity implements View.OnLongClick
 	public FlipTask flipTask = new FlipTask();
 
 	protected void onCreate(Bundle savedInstanceState) {
+		Utils.setLanguageOverride(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.about);
 		roflField = (TextView) findViewById(R.id.rofl_text);

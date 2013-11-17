@@ -227,7 +227,7 @@ public class MainActivity extends NativeActivity
 			finish();
 		}
 
-		setLanguageOverride();
+		Utils.setLanguageOverride(this);
 
 		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
 
@@ -1515,18 +1515,6 @@ public class MainActivity extends NativeActivity
 		return false;
 	}
 
-	private void setLanguageOverride() {
-		String override = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_language_override", "");
-		if (override.length() == 0) return;
-		String[] overrideSplit = override.split("_");
-		String langName = overrideSplit[0];
-		String countryName = overrideSplit.length > 1? overrideSplit[1]: "";
-		Resources rez = this.getResources();
-		Configuration config = new Configuration(rez.getConfiguration());
-		DisplayMetrics metrics = rez.getDisplayMetrics();
-		config.locale = new Locale(langName, countryName);
-		rez.updateConfiguration(config, metrics);
-	}
 
 	private void addLibraryDirToPath(String path) {
 		try {
