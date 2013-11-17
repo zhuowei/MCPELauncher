@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Russian translation by MelomanCool of 4PDA. -->
 <resources>
     <string name="select_file">Выберите файл с SD карты</string>
@@ -64,7 +64,7 @@
     <string name="pref_zz_script_enable">Включить поддержку скриптов ModPE</string>
     <string name="pref_zz_sensorcontrol">Сенсорное управление</string>
     <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваш девайс. Необходимо включить скрипты ModPE.</string>
-    <string name="pref_zz_show_insert_text">Показать опцию \"Ввести текст\ во внутриигровом управлении патчами" </string>
+    <string name="pref_zz_show_insert_text">Показать \"Ввести текст\" во внутриигровом управлении патчами" </string>
     <string name="pref_zz_language_override">Язык</string>
     <string name="pref_zz_language_override_default">По умолчанию</string>
     <string name="nerdy_stuff_page">Отладка</string>
