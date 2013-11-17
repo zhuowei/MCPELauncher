@@ -706,6 +706,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetStepSound(int blockId, int sourceBlockId);
 	public static native void nativeBlockSetLightLevel(int blockId, int level);
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
+	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3, float v4, float v5, float v6);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1470,6 +1471,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setExplosionResistance(int blockId, double resist) {
 			nativeBlockSetExplosionResistance(blockId, (float) resist);
+		}
+		@JSStaticFunction
+		public static void setShape(int blockId, double v1, double v2, double v3, double v4, double v5, double v6) {
+			nativeBlockSetShape(blockId, (float) v1, (float) v2, (float) v3, (float) v4, (float) v5, (float) v6);
 		}
 		/*@JSStaticFunction
 		public static void setStepSound(int blockId, int sourceId) {
