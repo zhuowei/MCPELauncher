@@ -59,6 +59,15 @@ typedef struct {
 	int id; //8
 	char filler[32]; //12
 	void* material; //44
+	int filler1; //48
+	float destroyTime; //52
+	float explosionResistance; //56
+	char filler2[28]; //60
+#ifdef __cplusplus
+	std::string descriptionId; //88
+#else
+	int descriptionId; //88
+#endif
 } Tile;
 #ifdef __cplusplus
 }

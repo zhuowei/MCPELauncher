@@ -154,6 +154,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
+			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -502,6 +503,7 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeLevelApi.class, "Level");
 		appendApiMethods(builder, NativePlayerApi.class, "Player");
 		appendApiMethods(builder, NativeEntityApi.class, "Entity");
+		appendApiMethods(builder, NativeBlockApi.class, "Block");
 		return builder.toString();
 		
 	}
@@ -632,6 +634,18 @@ public class ScriptManager {
 		return endArray;
 	}
 
+	public static int[] expandColorsArray(Scriptable inArrayScriptable) {
+		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
+		int[] endArray = new int[16];
+		for (int i = 0; i < endArray.length; i++) {
+			if (i < inArrayLength) {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+			} else {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, 0)).intValue();
+			}
+		}
+		return endArray;
+	}
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -685,7 +699,13 @@ public class ScriptManager {
 	public static native void nativeRequestFrameCallback();
 	public static native String nativeGetSignText(int x, int y, int z, int line);
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
-	public static native void nativeDefineBlock(int blockId, String name, int[] textures, boolean opaque, int renderType);
+
+	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
+	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
+	public static native void nativeBlockSetExplosionResistance(int blockId, float amount);
+	public static native void nativeBlockSetStepSound(int blockId, int sourceBlockId);
+	public static native void nativeBlockSetLightLevel(int blockId, int level);
+	public static native void nativeBlockSetColor(int blockId, int[] colors);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1428,17 +1448,48 @@ public class ScriptManager {
 			nativeRequestFrameCallback();
 		}
 
-		@JSStaticFunction
-		public static void defineBlock(int blockId, String name, Scriptable textures, boolean opaque, int renderType) {
-			int[] finalTextures = expandTexturesArray(textures);
-			nativeDefineBlock(blockId, name, finalTextures, opaque, renderType);
-		}
-
 		@Override
 		public String getClassName() {
 			return "ModPE";
 		}
 	}
+
+	private static class NativeBlockApi extends ScriptableObject {
+		public NativeBlockApi() {
+		}
+		@JSStaticFunction
+		public static void defineBlock(int blockId, String name, Scriptable textures, int materialSourceId, boolean opaque, int renderType) {
+			scriptPrint("This API is still in its early stages. Stuff will change and break.");
+			int[] finalTextures = expandTexturesArray(textures);
+			nativeDefineBlock(blockId, name, finalTextures, materialSourceId, opaque, renderType);
+		}
+		@JSStaticFunction
+		public static void setDestroyTime(int blockId, double time) {
+			nativeBlockSetDestroyTime(blockId, (float) time);
+		}
+		@JSStaticFunction
+		public static void setExplosionResistance(int blockId, double resist) {
+			nativeBlockSetExplosionResistance(blockId, (float) resist);
+		}
+		/*@JSStaticFunction
+		public static void setStepSound(int blockId, int sourceId) {
+			nativeBlockSetStepSound(blockId, sourceId);
+		}*/
+		@JSStaticFunction
+		public static void setLightLevel(int blockId, int lightLevel) {
+			nativeBlockSetLightLevel(blockId, lightLevel);
+		}
+		/*@JSStaticFunction
+		public static void setColor(int blockId, Scriptable colorArray) {
+			int[] finalColors = expandColorsArray(colorArray);
+			nativeBlockSetColor(blockId, finalColors);
+		}*/
+		@Override
+		public String getClassName() {
+			return "Block";
+		}
+	}
+		
 
 	private static class SelectLevelRequest {
 		public String dir;

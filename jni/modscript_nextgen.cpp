@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <typeinfo>
+#include <map>
 
 #include "utf8proc.h"
 
@@ -48,6 +49,7 @@ static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
 static Tile** bl_Tile_tiles;
+static int* bl_Tile_lightEmission;
 
 static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
@@ -74,6 +76,7 @@ static void* bl_Material_dirt;
 static void (*bl_Tile_Tile)(Tile*, int, void*);
 static void (*bl_TileItem_TileItem)(Item*, int);
 static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
+static std::string (*bl_Tile_getDescriptionId)(Tile*);
 
 bool bl_text_parse_color_codes = true;
 
@@ -83,6 +86,8 @@ int* bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 int bl_custom_block_renderShape[256];
 //end custom blocks
+
+std::map <std::string, std::string>* bl_I18n_strings;
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -368,13 +373,17 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_NAME] = bl_CustomBlock_vtable[BLOCK_VTABLE_GET_DESCRIPTION_ID];
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
+	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_NAME] = (void*) &bl_CustomBlock_getNameHook;
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
 }
 
 void* bl_getMaterial(int materialType) {
-	return bl_Tile_tiles[1]->material;
+	Tile* baseTile = bl_Tile_tiles[materialType];
+	if (baseTile == NULL) {
+		baseTile = bl_Tile_tiles[1];
+	}
+	return baseTile->material;
 }
 
 Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, int renderShape, const char* name) {
@@ -391,6 +400,9 @@ Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, 
 	retval->material = bl_getMaterial(materialType);
 	std::string nameStr = std::string(name);
 	bl_Tile_setDescriptionId(retval, nameStr);
+	//std::string comeOut = bl_Tile_getDescriptionId(retval);
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Block added: %s\n", comeOut.c_str());
+	(*bl_I18n_strings)["tile." + nameStr + ".name"] = nameStr;
 	//add it to the global tile list
 	bl_Tile_tiles[blockId] = retval;
 	//now allocate the item
@@ -402,13 +414,47 @@ Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, 
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
-  (JNIEnv *env, jclass clazz, jint blockId, jstring name, jintArray textures, jboolean opaque, jint renderType) {
+  (JNIEnv *env, jclass clazz, jint blockId, jstring name, jintArray textures, jint materialBlockId, jboolean opaque, jint renderType) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	int* myIntArray = new int[16*6];
 	env->GetIntArrayRegion(textures, 0, 16*6, myIntArray);
-	Tile* tile = bl_createBlock(blockId, myIntArray, 1, opaque, renderType, utfChars);
+	Tile* tile = bl_createBlock(blockId, myIntArray, materialBlockId, opaque, renderType, utfChars);
 	if (tile == NULL) delete[] myIntArray;
 	env->ReleaseStringUTFChars(name, utfChars);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
+  (JNIEnv *env, jclass clazz, jint blockId, jfloat time) {
+	Tile* tile = bl_Tile_tiles[blockId];
+	if (tile == NULL) {
+		return;
+	}
+	tile->destroyTime = time;
+        if (tile->explosionResistance < time * 5.0F) {
+            tile->explosionResistance = time * 5.0F;
+        }
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetExplosionResistance
+  (JNIEnv *env, jclass clazz, jint blockId, jfloat resistance) {
+	Tile* tile = bl_Tile_tiles[blockId];
+	if (tile == NULL) {
+		return;
+	}
+	tile->explosionResistance = resistance * 3.0f;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetStepSound
+  (JNIEnv *env, jclass clazz, jint blockId, jint sourceBlockId) {
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightLevel
+  (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+	bl_Tile_lightEmission[blockId] = level;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
+  (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
 }
 
 void bl_setuphooks_cppside() {
@@ -460,10 +506,15 @@ void bl_setuphooks_cppside() {
 	bl_TileItem_TileItem = (void (*)(Item*, int)) (mcpelibhandle->base + 0x187559); //TODO amazon dlsym(RTLD_DEFAULT, "_ZN8TileItemC2Ei");
 	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
-	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88);//dlsym(RTLD_DEFAULT, "_ZTV8TileItem");
+	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88 + 8);//dlsym(RTLD_DEFAULT, "_ZTV8TileItem");
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
+	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
+	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
+		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
 	bl_initCustomBlockVtable();
+
+	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 }
 
 } //extern

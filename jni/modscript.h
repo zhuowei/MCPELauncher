@@ -360,10 +360,50 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineBlock
- * Signature: (ILjava/lang/String;[III)V
+ * Signature: (ILjava/lang/String;[IIZI)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
-  (JNIEnv *, jclass, jint, jstring, jintArray, jboolean, jint);
+  (JNIEnv *, jclass, jint, jstring, jintArray, jint, jboolean, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetDestroyTime
+ * Signature: (IF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
+  (JNIEnv *, jclass, jint, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetExplosionResistance
+ * Signature: (IF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetExplosionResistance
+  (JNIEnv *, jclass, jint, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetStepSound
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetStepSound
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetLightLevel
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightLevel
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetColor
+ * Signature: (I[I)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
+  (JNIEnv *, jclass, jint, jintArray);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -568,6 +608,17 @@ extern "C" {
 
 #ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_SelectLevelRequest
 #define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_SelectLevelRequest
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi
 #ifdef __cplusplus
 extern "C" {
 #endif
