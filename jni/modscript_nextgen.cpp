@@ -76,6 +76,7 @@ static void* bl_Material_dirt;
 static void (*bl_Tile_Tile)(Tile*, int, void*);
 static void (*bl_TileItem_TileItem)(Item*, int);
 static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
+static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
 static std::string (*bl_Tile_getDescriptionId)(Tile*);
 
 bool bl_text_parse_color_codes = true;
@@ -444,6 +445,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	tile->explosionResistance = resistance * 3.0f;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
+  (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6) {
+	Tile* tile = bl_Tile_tiles[blockId];
+	if (tile == NULL) {
+		return;
+	}
+	bl_Tile_setShape(tile, v1, v2, v3, v4, v5, v6);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetStepSound
   (JNIEnv *env, jclass clazz, jint blockId, jint sourceBlockId) {
 }
@@ -506,6 +516,8 @@ void bl_setuphooks_cppside() {
 	bl_TileItem_TileItem = (void (*)(Item*, int)) (mcpelibhandle->base + 0x187559); //TODO amazon dlsym(RTLD_DEFAULT, "_ZN8TileItemC2Ei");
 	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
+	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
+		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
 	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88 + 8);//dlsym(RTLD_DEFAULT, "_ZTV8TileItem");
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
