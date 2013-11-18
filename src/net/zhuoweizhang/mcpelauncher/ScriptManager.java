@@ -639,11 +639,12 @@ public class ScriptManager {
 		int[] endArray = new int[16];
 		for (int i = 0; i < endArray.length; i++) {
 			if (i < inArrayLength) {
-				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+				endArray[i] = (int) ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).longValue();
 			} else {
-				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, 0)).intValue();
+				endArray[i] = (int) ((Number) ScriptableObject.getProperty(inArrayScriptable, 0)).longValue();
 			}
 		}
+		Log.i("BlockLauncher", Arrays.toString(endArray));
 		return endArray;
 	}
 	public static native float nativeGetPlayerLoc(int axis);
@@ -699,6 +700,8 @@ public class ScriptManager {
 	public static native void nativeRequestFrameCallback();
 	public static native String nativeGetSignText(int x, int y, int z, int line);
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
+	public static native void nativeSetSneaking(int entityId, boolean doIt);
+	public static native String nativeGetPlayerName(int entityId);
 
 	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
@@ -1209,6 +1212,12 @@ public class ScriptManager {
 		public static void setArmorSlot(int slot, int id, int damage){
 			nativeSetArmorSlot(slot, id, damage);
 		}
+
+		/*@JSStaticFunction
+		public static String getName(NativeEntity ent) {
+			if (ent == null) ent = playerEnt;
+			return nativeGetPlayerName(ent.entityId);
+		}*/
 		
 		@Override
 		public String getClassName() {
@@ -1339,6 +1348,11 @@ public class ScriptManager {
 			nativeSetEntityRenderType(ent.entityId, renderType);
 		}
 
+		@JSStaticFunction
+		public static void setSneaking(NativeEntity ent, boolean doIt) {
+			nativeSetSneaking(ent.entityId, doIt);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -1460,7 +1474,7 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void defineBlock(int blockId, String name, Scriptable textures, int materialSourceId, boolean opaque, int renderType) {
-			scriptPrint("This API is still in its early stages. Stuff will change and break.");
+			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int[] finalTextures = expandTexturesArray(textures);
 			nativeDefineBlock(blockId, name, finalTextures, materialSourceId, opaque, renderType);
 		}
@@ -1484,11 +1498,11 @@ public class ScriptManager {
 		public static void setLightLevel(int blockId, int lightLevel) {
 			nativeBlockSetLightLevel(blockId, lightLevel);
 		}
-		/*@JSStaticFunction
+		@JSStaticFunction
 		public static void setColor(int blockId, Scriptable colorArray) {
 			int[] finalColors = expandColorsArray(colorArray);
 			nativeBlockSetColor(blockId, finalColors);
-		}*/
+		}
 		@Override
 		public String getClassName() {
 			return "Block";

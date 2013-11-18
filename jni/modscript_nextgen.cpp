@@ -35,6 +35,7 @@ typedef void Font;
 #define BLOCK_VTABLE_GET_RENDER_SHAPE 5
 #define BLOCK_VTABLE_GET_NAME 57
 #define BLOCK_VTABLE_GET_DESCRIPTION_ID 58
+#define BLOCK_VTABLE_GET_COLOR 49
 
 extern "C" {
 
@@ -78,6 +79,7 @@ static void (*bl_TileItem_TileItem)(Item*, int);
 static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
 static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
 static std::string (*bl_Tile_getDescriptionId)(Tile*);
+static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 bool bl_text_parse_color_codes = true;
 
@@ -86,6 +88,7 @@ void* bl_CustomBlock_vtable[BLOCK_VTABLE_SIZE];
 int* bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 int bl_custom_block_renderShape[256];
+int* bl_custom_block_colors[256];
 //end custom blocks
 
 std::map <std::string, std::string>* bl_I18n_strings;
@@ -225,6 +228,14 @@ int bl_CustomBlock_getRenderShapeHook(Tile* tile) {
 	return bl_custom_block_renderShape[blockId];
 }
 
+int bl_CustomBlock_getColorHook(Tile* tile, Level* level, int x, int y, int z) {
+	int blockId = tile->id;
+	int* myColours = bl_custom_block_colors[blockId];
+	if (myColours == NULL || bl_level == NULL) return 0xffffff; //I see your true colours shining through
+	int data = bl_Level_getData(bl_level, x, y, z);
+	return myColours[data];
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
@@ -256,6 +267,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
+	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
@@ -266,6 +278,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
+	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
@@ -367,6 +380,15 @@ void bl_attachLevelListener() {
 	bl_Level_addListener(bl_level, listener);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSneaking
+  (JNIEnv *env, jclass clazz, jint entityId, jboolean doIt) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	//bl_Mob_setSneaking(entity, doIt);
+	bool* movement = *((bool**) ((uintptr_t) entity + 3288));
+	movement[14] = doIt;
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
@@ -374,6 +396,10 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
+	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
+	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR + 1] = (void*) &bl_CustomBlock_getColorHook;
+	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR + 2] = (void*) &bl_CustomBlock_getColorHook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_NAME] = (void*) &bl_CustomBlock_getNameHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
@@ -389,7 +415,9 @@ void* bl_getMaterial(int materialType) {
 
 Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, int renderShape, const char* name) {
 	if (blockId < 0 || blockId > 255) return NULL;
-	if (bl_custom_block_textures[blockId] != NULL) return NULL;
+	if (bl_custom_block_textures[blockId] != NULL) {
+		delete[] bl_custom_block_textures[blockId];
+	}
 	bl_custom_block_opaque[blockId] = opaque;
 	bl_custom_block_textures[blockId] = texture;
 	bl_custom_block_renderShape[blockId] = renderShape;
@@ -465,6 +493,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
   (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
+	int* myIntArray = bl_custom_block_colors[blockId];
+	if (myIntArray == NULL) {
+		myIntArray = new int[16];
+		bl_custom_block_colors[blockId] = myIntArray;
+	}
+	env->GetIntArrayRegion(colours, 0, 16, myIntArray);
 }
 
 void bl_setuphooks_cppside() {
@@ -527,6 +561,8 @@ void bl_setuphooks_cppside() {
 	bl_initCustomBlockVtable();
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
+
+	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
 }
 
 } //extern

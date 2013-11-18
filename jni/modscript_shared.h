@@ -30,6 +30,8 @@ extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
 
 extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
+extern int (*bl_Level_getData) (Level*, int, int, int);
+Entity* bl_getEntityWrapper(Level* level, int entityId);
 
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1

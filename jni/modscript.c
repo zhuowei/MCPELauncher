@@ -75,7 +75,7 @@ static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
 static Entity* (*bl_MobFactory_createMob)(int, Level*);
 static int (*bl_Level_getTile)(Level*, int, int, int);
-static int (*bl_Level_getData) (Level*, int, int, int);
+int (*bl_Level_getData) (Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
