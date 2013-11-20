@@ -69,7 +69,7 @@
     <string name="pref_zz_show_insert_text">在螢幕上方按鈕的彈出式視窗顯示「輸入文子」選項</string>
     <string name="nerdy_stuff_page">電腦迷的東西</string><!--IDK what is nerdy. With reference to values-zh-rCN-->
     <string name="dump_libminecraftpe">在記憶體中刪除 libminecraftpe.so</string><!--I said delete-->
-    <string name="nerdy_stuff_are_useless">本頁面的大部分東西都是沒用的。它們是用來幫助解決程式錯誤的。/string>
+    <string name="nerdy_stuff_are_useless">本頁面的大部分東西都是沒用的。它們是用來幫助解決程式錯誤的。</string>
     <string name="restart_app">重新啟動 BlockLauncher</string>
     <string name="manage_patches">管理 .mod 模組</string>
     <string name="copy_world_title">Save world</string><!--?????????????????????-->
@@ -101,7 +101,6 @@
 本程式包含了 Mozilla project 的 Rhino JavaScript engine 的一個版本。\n
 在Minecraft Forums 上查看完整條款資訊。\n
     </string>
-	<!--    <string name="about_pro_library_credits"></string><!--???????????????????????//-->
     <string name="about_thankscommunity">本程式由很多具天賦的翻譯、測試員及程式設計員協助完成。謝謝。\n按下面的按鈕查看為本程式作出貢獻的人員列表。</string><!--Feels strange about translating this-->
     <string name="about_go_to_forums">開啟 BlockLauncher 在 Minecraft Forums 上的頁面。</string>
     <string name="no_minecraft_installed">BlockLauncher 未能在你的裝置上找到 Minecraft PE (完整版)。本程式必須使用 Mojang 開發的遊戲 Minecraft PE (完整版)。</string>
@@ -135,7 +134,7 @@
     <string name="server_list_patch_address">加入伺服器地址</string>
     <string name="server_list_name_prompt">名稱︰</string>
     <string name="server_list_address_prompt">IP 位址︰</string>
-    <string name="server_list_port_prompt">接入口 (port)</string>,<!--Because most people see "port" in English but don't know Chinese name. I had to search wikipedia for it-->
+    <string name="server_list_port_prompt">接入口 (port)</string><!--Because most people see "port" in English but don't know Chinese name. I had to search wikipedia for it-->
 
     <string name="script_import_from">從此處匯入模組</string>
     <string name="script_import_from_local">手機儲存空間</string>
