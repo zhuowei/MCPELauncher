@@ -36,6 +36,8 @@ typedef void Font;
 #define BLOCK_VTABLE_GET_NAME 57
 #define BLOCK_VTABLE_GET_DESCRIPTION_ID 58
 #define BLOCK_VTABLE_GET_COLOR 49
+#define BLOCK_VTABLE_GET_RENDER_LAYER 41
+#define BLOCK_VTABLE_IS_SOLID_RENDER 16
 
 extern "C" {
 
@@ -89,6 +91,7 @@ int* bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 int bl_custom_block_renderShape[256];
 int* bl_custom_block_colors[256];
+uint8_t bl_custom_block_renderLayer[256];
 //end custom blocks
 
 std::map <std::string, std::string>* bl_I18n_strings;
@@ -215,7 +218,11 @@ int bl_CustomBlock_getTextureHook(Tile* tile, int side, int data) {
 	if (ptrToBlockInfo == NULL) {
 		return 0;
 	}
-	return ptrToBlockInfo[(data * 6) + side];
+	int myIndex = (data * 6) + side;
+	if (myIndex < 0 || myIndex >= 16*6) {
+		myIndex = side;
+	}
+	return ptrToBlockInfo[myIndex];
 }
 
 bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
@@ -234,6 +241,16 @@ int bl_CustomBlock_getColorHook(Tile* tile, Level* level, int x, int y, int z) {
 	if (myColours == NULL || bl_level == NULL) return 0xffffff; //I see your true colours shining through
 	int data = bl_Level_getData(bl_level, x, y, z);
 	return myColours[data];
+}
+
+int bl_CustomBlock_getRenderLayerHook(Tile* tile) {
+	int blockId = tile->id;
+	return bl_custom_block_renderLayer[blockId];
+}
+
+bool bl_CustomBlock_isSolidRenderHook(Tile* tile) {
+	int blockId = tile->id;
+	return bl_custom_block_renderShape[blockId] == 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -397,10 +414,8 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR + 1] = (void*) &bl_CustomBlock_getColorHook;
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR + 2] = (void*) &bl_CustomBlock_getColorHook;
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_NAME] = (void*) &bl_CustomBlock_getNameHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_LAYER] = (void*) &bl_CustomBlock_getRenderLayerHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_SOLID_RENDER] = (void*) &bl_CustomBlock_isSolidRenderHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
 }
@@ -454,6 +469,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
   (JNIEnv *env, jclass clazz, jint blockId, jfloat time) {
+	if (blockId < 0 || blockId > 255) return;
 	Tile* tile = bl_Tile_tiles[blockId];
 	if (tile == NULL) {
 		return;
@@ -466,6 +482,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetExplosionResistance
   (JNIEnv *env, jclass clazz, jint blockId, jfloat resistance) {
+	if (blockId < 0 || blockId > 255) return;
 	Tile* tile = bl_Tile_tiles[blockId];
 	if (tile == NULL) {
 		return;
@@ -475,6 +492,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
   (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6) {
+	if (blockId < 0 || blockId > 255) return;
 	Tile* tile = bl_Tile_tiles[blockId];
 	if (tile == NULL) {
 		return;
@@ -488,17 +506,25 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightLevel
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+	if (blockId < 0 || blockId > 255) return;
 	bl_Tile_lightEmission[blockId] = level;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
   (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
+	if (blockId < 0 || blockId > 255) return;
 	int* myIntArray = bl_custom_block_colors[blockId];
 	if (myIntArray == NULL) {
 		myIntArray = new int[16];
 		bl_custom_block_colors[blockId] = myIntArray;
 	}
 	env->GetIntArrayRegion(colours, 0, 16, myIntArray);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
+  (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+	if (blockId < 0 || blockId > 255) return;
+	bl_custom_block_renderLayer[blockId] = (uint8_t) level;
 }
 
 void bl_setuphooks_cppside() {

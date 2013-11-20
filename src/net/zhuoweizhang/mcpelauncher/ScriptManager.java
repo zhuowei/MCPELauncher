@@ -732,6 +732,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetLightLevel(int blockId, int level);
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
 	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3, float v4, float v5, float v6);
+	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1541,6 +1542,12 @@ public class ScriptManager {
 			int[] finalColors = expandColorsArray(colorArray);
 			nativeBlockSetColor(blockId, finalColors);
 		}
+
+		@JSStaticFunction
+		public static void setRenderLayer(int blockId, int layer) {
+			nativeBlockSetRenderLayer(blockId, layer);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Block";
