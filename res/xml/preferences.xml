@@ -155,7 +155,7 @@
     </Preference>
 
     <CheckBoxPreference android:key="zz_script_paranoid_mode"
-        android:title="Paranoid mode: disable GUI scripts after restart"
+        android:title="@string/pref_zz_script_paranoid_mode"
         android:defaultValue="false"/>
 
     <CheckBoxPreference android:key="zz_show_insert_text"

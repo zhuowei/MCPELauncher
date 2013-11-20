@@ -67,6 +67,7 @@
     <string name="pref_zz_show_insert_text">Show \"Insert text\" option in in-game patch manager</string>
     <string name="pref_zz_language_override">Language</string>
     <string name="pref_zz_language_override_default">Default</string>
+    <string name="pref_zz_script_paranoid_mode">Paranoid mode: disable GUI ModPE scripts</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>

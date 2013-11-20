@@ -64,6 +64,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 	private Preference scriptEnablePreference;
 	private Preference manageScriptsPreference;
 	private ListPreference languagePreference;
+	private Preference paranoidPreference;
 	private boolean needsRestart = false;
 	/** Called when the activity is first created. */
 	@Override
@@ -120,6 +121,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			initLanguagePreference();
 			languagePreference.setOnPreferenceClickListener(this);
 		}
+		paranoidPreference = findPreference("zz_script_paranoid_mode");
+		if (paranoidPreference != null) {
+			paranoidPreference.setOnPreferenceClickListener(this);
+		}
+
 	}
 
 	@Override
@@ -174,7 +180,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		} else if (pref == scriptEnablePreference) {
 			needsRestart = true;
 			return false;
-		} else if (pref == languagePreference) {
+		} else if (pref == languagePreference || pref == paranoidPreference) {
 			needsRestart = true;
 			return false;
 		}
