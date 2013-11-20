@@ -459,15 +459,16 @@ public class ScriptManager {
 	}
 
 	private static void wordWrapClientMessage(String msg) {
-		//TODO: properly word wrap colour codes
-		if (msg.indexOf(ChatColor.BEGIN) >= 0) {
-			nativeClientMessage(msg);
-			return;
-		}
-
 		String[] portions = msg.split("\n");
 		for(int i = 0; i < portions.length; i++) {
 			String line = portions[i];
+
+			if (msg.indexOf(ChatColor.BEGIN) >= 0) {
+				//TODO: properly word wrap colour codes
+				nativeClientMessage(line);
+				continue;
+			}
+
 			while(line.length() > 40) {
 				String newStr = line.substring(0, 40);//colorCodeSubstring(line, 0, 40);
 				nativeClientMessage(newStr);
@@ -618,20 +619,41 @@ public class ScriptManager {
 		}
 	}
 
-	public static int[] expandTexturesArray(Scriptable inArrayScriptable) {
+	public static int[] expandTexturesArray(Object inArrayObj) {
+		int[] endArray = new int[16*6];
+
+		if (inArrayObj instanceof Number) {
+			int fillVal = ((Number) inArrayObj).intValue();
+			Arrays.fill(endArray, fillVal);
+			return endArray;
+		}
+		Scriptable inArrayScriptable = (Scriptable) inArrayObj;
 		//if the in array count is a multiple of 6,
 		//copy 6 at a time until we run out, then copy 6 from the first element.
 		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
-		int[] endArray = new int[16*6];
 		int wrap = inArrayLength % 6 == 0? 6: 1;
 		for (int i = 0; i < endArray.length; i++) {
+			Object myObj;
 			if (i < inArrayLength) {
-				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+				myObj = ScriptableObject.getProperty(inArrayScriptable, i);
 			} else {
-				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i % wrap)).intValue();
+				myObj = ScriptableObject.getProperty(inArrayScriptable, i % wrap);
 			}
+			endArray[i] = expandTextureCoordinate(myObj);
 		}
 		return endArray;
+	}
+
+	public static int expandTextureCoordinate(Object myObj) {
+		if (myObj instanceof Number) {
+			return ((Number) myObj).intValue();
+		} else if (myObj instanceof Scriptable) {
+			Scriptable myScriptable = (Scriptable) myObj;
+			int texRow = ((Number) ScriptableObject.getProperty(myScriptable, 0)).intValue();
+			int texCol = ((Number) ScriptableObject.getProperty(myScriptable, 1)).intValue();
+			return (texRow * 16) + texCol;
+		}
+		throw new IllegalArgumentException("Invalid texture coordinate input: " + myObj);
 	}
 
 	public static int[] expandColorsArray(Scriptable inArrayScriptable) {
@@ -1473,8 +1495,24 @@ public class ScriptManager {
 		public NativeBlockApi() {
 		}
 		@JSStaticFunction
-		public static void defineBlock(int blockId, String name, Scriptable textures, int materialSourceId, boolean opaque, int renderType) {
+		public static void defineBlock(int blockId, String name, Object textures, Object materialSourceIdSrc, Object opaqueSrc,
+			Object renderTypeSrc) {
 			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
+			int materialSourceId = 1;
+			boolean opaque = true;
+			int renderType = 0;
+			if (materialSourceIdSrc != null && materialSourceIdSrc instanceof Number) {
+				materialSourceId = ((Number) materialSourceIdSrc).intValue();
+				Log.i("BlockLauncher", "setting material source to " + materialSourceId);
+			}
+			if (opaqueSrc != null && opaqueSrc instanceof Boolean) {
+				opaque = (Boolean) opaqueSrc;
+				Log.i("BlockLauncher", "setting opaque to " + opaque);
+			}
+			if (renderTypeSrc != null && renderTypeSrc instanceof Number) {
+				renderType = ((Number) renderTypeSrc).intValue();
+				Log.i("BlockLauncher", "setting renderType to " + renderType);
+			}
 			int[] finalTextures = expandTexturesArray(textures);
 			nativeDefineBlock(blockId, name, finalTextures, materialSourceId, opaque, renderType);
 		}
