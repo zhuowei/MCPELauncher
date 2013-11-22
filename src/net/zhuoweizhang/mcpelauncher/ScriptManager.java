@@ -602,7 +602,8 @@ public class ScriptManager {
 	public static ScriptableObject classConstantsToJSObject(Class<?> clazz) {
 		ScriptableObject obj = new NativeObject();
 		for (Field field: clazz.getFields()) {
-			if (!Modifier.isStatic(field.getModifiers()) || !field.isAccessible()) 
+			int fieldModifiers = field.getModifiers();
+			if (!Modifier.isStatic(fieldModifiers) || !Modifier.isPublic(fieldModifiers)) 
 				continue;
 			try {
 				obj.putConst(field.getName(), obj, field.get(null));
