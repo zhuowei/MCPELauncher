@@ -228,7 +228,7 @@ public class ScriptManager {
 	}
 
 	public static void attackCallback(int attacker, int victim) {
-		callScriptMethod("attackHook", new NativeEntity(attacker), new NativeEntity(victim));
+		callScriptMethod("attackHook", attacker, victim);
 	}
 
 	public static void tickCallback() {
@@ -267,20 +267,20 @@ public class ScriptManager {
 
 	// KsyMC's additions
 	public static void mobDieCallback(int attacker, int victim) {
-		callScriptMethod("deathHook", attacker == -1? null: new NativeEntity(attacker), new NativeEntity(victim));
+		callScriptMethod("deathHook", attacker == -1? null: attacker, victim);
 	}
 
 	//Other nonstandard callbacks
 	public static void entityRemovedCallback(int entity) {
-		callScriptMethod("entityRemovedHook", new NativeEntity(entity));
+		callScriptMethod("entityRemovedHook", entity);
 	}
 
 	public static void entityAddedCallback(int entity) {
-		callScriptMethod("entityAddedHook", new NativeEntity(entity));
+		callScriptMethod("entityAddedHook", entity);
 	}
 
 	public static void levelEventCallback(int player, int eventType, int x, int y, int z, int data) {
-		callScriptMethod("levelEventHook", new NativeEntity(player), eventType, x, y, z, data);
+		callScriptMethod("levelEventHook", player, eventType, x, y, z, data);
 	}
 
 	public static void blockEventCallback(int x, int y, int z, int type, int data) {
@@ -787,7 +787,7 @@ public class ScriptManager {
 	*/
 
 	private static class BlockHostObject extends ScriptableObject {
-		private NativeEntity playerEnt = new NativeEntity(0);
+		private int playerEnt = 0;
 		@Override
 		public String getClassName() {
 			return "BlockHostObject";
@@ -811,8 +811,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public NativeEntity getPlayerEnt() {
-			playerEnt.entityId = nativeGetPlayerEnt();
+		public int getPlayerEnt() {
+			playerEnt = nativeGetPlayerEnt();
 			return playerEnt;
 		}
 		@JSFunction
@@ -821,21 +821,21 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setPosition(NativeEntity ent, double x, double y, double z) {
-			nativeSetPosition(ent.entityId, (float) x, (float) y, (float) z);
+		public void setPosition(int ent, double x, double y, double z) {
+			nativeSetPosition(ent, (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
-		public void setVelX(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_X);
+		public void setVelX(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_X);
 		}
 		@JSFunction
-		public void setVelY(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_Y);
+		public void setVelY(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_Y);
 		}
 		@JSFunction
-		public void setVelZ(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_Z);
+		public void setVelZ(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_Z);
 		}
 
 		@JSFunction
@@ -849,26 +849,26 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void rideAnimal(NativeEntity /*Flynn*/rider, NativeEntity mount) {
-			nativeRideAnimal(rider.entityId, mount.entityId);
+		public void rideAnimal(int /*Flynn*/rider, int mount) {
+			nativeRideAnimal(rider, mount);
 		}
 
 		@JSFunction
-		public NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+		public int spawnChicken(double x, double y, double z, String tex) { //Textures not supported
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		@JSFunction
-		public NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
+		public int spawnCow(double x, double y, double z, String tex) { //Textures not supported
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		@JSFunction
@@ -903,53 +903,53 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void setPositionRelative(NativeEntity ent, double x, double y, double z) {
-			nativeSetPositionRelative(ent.entityId, (float) x, (float) y, (float) z);
+		public void setPositionRelative(int ent, double x, double y, double z) {
+			nativeSetPositionRelative(ent, (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
-		public void setRot(NativeEntity ent, double yaw, double pitch) {
-			nativeSetRot(ent.entityId, (float) yaw, (float) pitch);
+		public void setRot(int ent, double yaw, double pitch) {
+			nativeSetRot(ent, (float) yaw, (float) pitch);
 		}
 
 		//standard methods introduced in API level 0.3
 		@JSFunction
-		public double getPitch(NativeEntity ent) {
+		public double getPitch(Integer ent) {
 			if (ent == null) ent = getPlayerEnt();
-			return nativeGetPitch(ent.entityId);
+			return nativeGetPitch(ent);
 		}
 
 		@JSFunction
-		public double getYaw(NativeEntity ent) {
+		public double getYaw(Integer ent) {
 			if (ent == null) ent = getPlayerEnt();
-			return nativeGetYaw(ent.entityId);
+			return nativeGetYaw(ent);
 		}
 		//standard methods introduced in 0.4 and 0.5
 		@JSFunction
-		public NativeEntity spawnPigZombie(double x, double y, double z, int item, String tex) { //Textures not supported yet
+		public int spawnPigZombie(double x, double y, double z, int item, String tex) { //Textures not supported yet
 			if (invalidTexName(tex)) {
 				tex = "mob/pigzombie.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
 			nativeSetCarriedItem(entityId, item, 1, 0);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		//nonstandard methods
 
 		@JSFunction
-		public NativeEntity bl_spawnMob(double x, double y, double z, int typeId, String tex) {
+		public int bl_spawnMob(double x, double y, double z, int typeId, String tex) {
 			print("Nag: update to Level.spawnMob");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 		@JSFunction
-		public void bl_setMobSkin(NativeEntity entity, String tex) {
+		public void bl_setMobSkin(int entity, String tex) {
 			print("Nag: update to Entity.setMobSkin");
-			nativeSetMobSkin(entity.entityId, tex);
+			nativeSetMobSkin(entity, tex);
 		}
 
 	}
@@ -962,25 +962,6 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "NativePointer";
-		}
-	}
-
-	protected static class NativeEntity extends ScriptableObject {
-		public int entityId;
-		public NativeEntity(int entityId) {
-			this.entityId = entityId;
-		}
-		@Override
-		public String getClassName() {	
-			return "NativeEntity";
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) return true;
-			if (obj instanceof NativeEntity) {
-				return ((NativeEntity) obj).entityId == this.entityId;
-			}
-			return false;
 		}
 	}
 
@@ -1009,31 +990,31 @@ public class ScriptManager {
 			return new NativePointer(nativeGetLevel()); //TODO: I still don't know WTF this does.
 		}
 		@JSStaticFunction
-		public static NativeEntity spawnChicken(double x, double y, double z, String tex) { //Textures not supported
+		public static int spawnChicken(double x, double y, double z, String tex) { //Textures not supported
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		@JSStaticFunction
-		public static NativeEntity spawnCow(double x, double y, double z, String tex) { //Textures not supported
+		public static int spawnCow(double x, double y, double z, String tex) { //Textures not supported
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 		//nonstandard methods
 
 		@JSStaticFunction
-		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
+		public static int spawnMob(double x, double y, double z, int typeId, String tex) {
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		@JSStaticFunction
@@ -1132,10 +1113,10 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void playSoundEnt(NativeEntity ent, String sound, double volume, double pitch) {
-			float x = nativeGetEntityLoc(ent.entityId, AXIS_X);
-			float y = nativeGetEntityLoc(ent.entityId, AXIS_Y);
-			float z = nativeGetEntityLoc(ent.entityId, AXIS_Z);
+		public static void playSoundEnt(int ent, String sound, double volume, double pitch) {
+			float x = nativeGetEntityLoc(ent, AXIS_X);
+			float y = nativeGetEntityLoc(ent, AXIS_Y);
+			float z = nativeGetEntityLoc(ent, AXIS_Z);
 			
 			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
 		}
@@ -1155,7 +1136,7 @@ public class ScriptManager {
 	}
 
 	private static class NativePlayerApi extends ScriptableObject {
-		private static NativeEntity playerEnt = new NativeEntity(0);
+		private static int playerEnt = 0;
 		public NativePlayerApi() {
 			super();
 		}
@@ -1172,8 +1153,8 @@ public class ScriptManager {
 			return nativeGetPlayerLoc(AXIS_Z);
 		}
 		@JSStaticFunction
-		public static NativeEntity getEntity() {
-			playerEnt.entityId = nativeGetPlayerEnt();
+		public static int getEntity() {
+			playerEnt = nativeGetPlayerEnt();
 			return playerEnt;
 		}
 		@JSStaticFunction
@@ -1238,9 +1219,9 @@ public class ScriptManager {
 		}
 
 		/*@JSStaticFunction
-		public static String getName(NativeEntity ent) {
+		public static String getName(int ent) {
 			if (ent == null) ent = playerEnt;
-			return nativeGetPlayerName(ent.entityId);
+			return nativeGetPlayerName(ent);
 		}*/
 		
 		@Override
@@ -1254,127 +1235,126 @@ public class ScriptManager {
 			super();
 		}
 		@JSStaticFunction
-		public static void setVelX(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_X);
+		public static void setVelX(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_X);
 		}
 		@JSStaticFunction
-		public static void setVelY(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_Y);
+		public static void setVelY(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_Y);
 		}
 		@JSStaticFunction
-		public static void setVelZ(NativeEntity ent, double amount) {
-			nativeSetVel(ent.entityId, (float) amount, AXIS_Z);
+		public static void setVelZ(int ent, double amount) {
+			nativeSetVel(ent, (float) amount, AXIS_Z);
 		}
 		@JSStaticFunction
-		public static void setRot(NativeEntity ent, double yaw, double pitch) {
-			nativeSetRot(ent.entityId, (float) yaw, (float) pitch);
+		public static void setRot(int ent, double yaw, double pitch) {
+			nativeSetRot(ent, (float) yaw, (float) pitch);
 		}
 		@JSStaticFunction
-		public static void rideAnimal(NativeEntity /*insert funny reference*/rider, NativeEntity mount) {
-			nativeRideAnimal(rider.entityId, mount.entityId);
+		public static void rideAnimal(int /*insert funny reference*/rider, int mount) {
+			nativeRideAnimal(rider, mount);
 		}
 		@JSStaticFunction
-		public static void setPosition(NativeEntity ent, double x, double y, double z) {
-			nativeSetPosition(ent.entityId, (float) x, (float) y, (float) z);
+		public static void setPosition(int ent, double x, double y, double z) {
+			nativeSetPosition(ent, (float) x, (float) y, (float) z);
 		}
 		@JSStaticFunction
-		public static void setPositionRelative(NativeEntity ent, double x, double y, double z) {
-			nativeSetPositionRelative(ent.entityId, (float) x, (float) y, (float) z);
+		public static void setPositionRelative(int ent, double x, double y, double z) {
+			nativeSetPositionRelative(ent, (float) x, (float) y, (float) z);
 		}
 		@JSStaticFunction
-		public static double getPitch(NativeEntity ent) {
-			return nativeGetPitch(ent.entityId);
+		public static double getPitch(int ent) {
+			return nativeGetPitch(ent);
 		}
 
 		@JSStaticFunction
-		public static double getYaw(NativeEntity ent) {
-			return nativeGetYaw(ent.entityId);
+		public static double getYaw(int ent) {
+			return nativeGetYaw(ent);
 		}
 
 		//nonstandard
 
 		@JSStaticFunction
-		public static void setFireTicks(NativeEntity ent, int howLong) {
-			nativeSetOnFire(ent.entityId, howLong);
+		public static void setFireTicks(int ent, int howLong) {
+			nativeSetOnFire(ent, howLong);
 		}
 
 		@JSStaticFunction
-		public static double getX(NativeEntity ent) {
-			return nativeGetEntityLoc(ent.entityId, AXIS_X);
+		public static double getX(int ent) {
+			return nativeGetEntityLoc(ent, AXIS_X);
 		}
 		@JSStaticFunction
-		public static double getY(NativeEntity ent) {
-			return nativeGetEntityLoc(ent.entityId, AXIS_Y);
+		public static double getY(int ent) {
+			return nativeGetEntityLoc(ent, AXIS_Y);
 		}
 		@JSStaticFunction
-		public static double getZ(NativeEntity ent) {
-			return nativeGetEntityLoc(ent.entityId, AXIS_Z);
-		}
-
-		@JSStaticFunction
-		public static void setCarriedItem(NativeEntity ent, int id, int count, int damage) {
-			nativeSetCarriedItem(ent.entityId, id, 1, damage);
+		public static double getZ(int ent) {
+			return nativeGetEntityLoc(ent, AXIS_Z);
 		}
 
 		@JSStaticFunction
-		public static int getEntityTypeId(NativeEntity ent) {
-			return nativeGetEntityTypeId(ent.entityId);
+		public static void setCarriedItem(int ent, int id, int count, int damage) {
+			nativeSetCarriedItem(ent, id, 1, damage);
 		}
 
 		@JSStaticFunction
-		public static NativeEntity spawnMob(double x, double y, double z, int typeId, String tex) {
+		public static int getEntityTypeId(int ent) {
+			return nativeGetEntityTypeId(ent);
+		}
+
+		@JSStaticFunction
+		public static int spawnMob(double x, double y, double z, int typeId, String tex) {
 			scriptPrint("Nag: update to Level.spawnMob");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
 			int entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
-			return new NativeEntity(entityId);
+			return entityId;
 		}
 
 		@JSStaticFunction
-		public static void setAnimalAge(NativeEntity animal, int age) {
-			nativeSetAnimalAge(animal.entityId, age);
+		public static void setAnimalAge(int animal, int age) {
+			nativeSetAnimalAge(animal, age);
 		}
 
 		@JSStaticFunction
-		public static int getAnimalAge(NativeEntity animal) {
-			return nativeGetAnimalAge(animal.entityId);
+		public static int getAnimalAge(int animal) {
+			return nativeGetAnimalAge(animal);
 		}
 
 		@JSStaticFunction
-		public static void setMobSkin(NativeEntity entity, String tex) {
-			nativeSetMobSkin(entity.entityId, tex);
+		public static void setMobSkin(int entity, String tex) {
+			nativeSetMobSkin(entity, tex);
 		}
 
 		@JSStaticFunction
-		public static void remove(NativeEntity ent) {
-			if(ent == null) return;
-			nativeRemoveEntity(ent.entityId);
+		public static void remove(int ent) {
+			nativeRemoveEntity(ent);
 		}
 
 		/*@JSStaticFunction
-		public static NativeEntity[] getAllEntities() {
+		public static int[] getAllEntities() {
 			nativeGetAllEntities();
 			return null;
 		}*/
 		@JSStaticFunction
-		public static int getHealth(NativeEntity ent) {
-			return nativeGetMobHealth(ent.entityId);
+		public static int getHealth(int ent) {
+			return nativeGetMobHealth(ent);
 		}
 
 		@JSStaticFunction
-		public static void setHealth(NativeEntity ent, int halfhearts) {
-			nativeSetMobHealth(ent.entityId, halfhearts);
+		public static void setHealth(int ent, int halfhearts) {
+			nativeSetMobHealth(ent, halfhearts);
 		}
 
 		@JSStaticFunction
-		public static void setRenderType(NativeEntity ent, int renderType) {
-			nativeSetEntityRenderType(ent.entityId, renderType);
+		public static void setRenderType(int ent, int renderType) {
+			nativeSetEntityRenderType(ent, renderType);
 		}
 
 		@JSStaticFunction
-		public static void setSneaking(NativeEntity ent, boolean doIt) {
-			nativeSetSneaking(ent.entityId, doIt);
+		public static void setSneaking(int ent, boolean doIt) {
+			nativeSetSneaking(ent, doIt);
 		}
 
 		@Override
