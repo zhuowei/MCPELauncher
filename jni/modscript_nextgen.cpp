@@ -14,6 +14,7 @@
 #include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
+#include "dobby_public.h"
 
 #define cppbool bool
 
@@ -559,9 +560,10 @@ void bl_setuphooks_cppside() {
 	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	int foodItemVtableOffset = 0x291a50;
-	bl_FoodItem_vtable = (void**) (mcpelibhandle->base + foodItemVtableOffset + 8); //I have no idea why I have to add 8.
-	bl_Item_vtable = (void**) (mcpelibhandle->base + 0x2923d0 + 8); //tracing out the original vtable seems to suggest this.
+	bl_FoodItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
+	bl_Item_vtable = (void**) ((int) dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
+	//I have no idea why I have to subtract 24 (or add 8).
+	//tracing out the original vtable seems to suggest this.
 
 	void* fontDrawSlow = dlsym(RTLD_DEFAULT, "_ZN4Font8drawSlowEPKciffib");
 	mcpelauncher_hook(fontDrawSlow, (void*) &bl_Font_drawSlow_hook, (void**) &bl_Font_drawSlow_real);
@@ -573,12 +575,14 @@ void bl_setuphooks_cppside() {
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
-	bl_TileItem_TileItem = (void (*)(Item*, int)) (mcpelibhandle->base + 0x187559); //TODO amazon dlsym(RTLD_DEFAULT, "_ZN8TileItemC2Ei");
+	bl_TileItem_TileItem = (void (*)(Item*, int)) dobby_dlsym(mcpelibhandle, "_ZN8TileItemC2Ei");
 	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
-	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88 + 8);//dlsym(RTLD_DEFAULT, "_ZTV8TileItem");
+	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88 + 8);
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Vtable at %x\n", bl_TileItem_vtable);
+	bl_TileItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
 	bl_Tile_getDescriptionId = (std::string (*)(Tile*))

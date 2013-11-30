@@ -914,14 +914,24 @@ public class ScriptManager {
 
 		//standard methods introduced in API level 0.3
 		@JSFunction
-		public double getPitch(Integer ent) {
-			if (ent == null) ent = getPlayerEnt();
+		public double getPitch(Object entObj) {
+			int ent;
+			if (entObj == null || !(entObj instanceof Number)) {
+				ent = getPlayerEnt();
+			} else {
+				ent = ((Number) entObj).intValue();
+			}
 			return nativeGetPitch(ent);
 		}
 
 		@JSFunction
-		public double getYaw(Integer ent) {
-			if (ent == null) ent = getPlayerEnt();
+		public double getYaw(Object entObj) {
+			int ent;
+			if (entObj == null || !(entObj instanceof Number)) {
+				ent = getPlayerEnt();
+			} else {
+				ent = ((Number) entObj).intValue();
+			}
 			return nativeGetYaw(ent);
 		}
 		//standard methods introduced in 0.4 and 0.5

@@ -27,6 +27,7 @@
  */
 
 #include <dobby.h>
+#include <android/log.h>
 
 static Elf_Sym* soinfo_elf_lookup(soinfo* si, unsigned hash, const char* name) {
     Elf_Sym* symtab = si->symtab;
@@ -84,7 +85,8 @@ void* dobby_dlsym(void* handle, const char* symbol) {
   sym = dlsym_handle_lookup(found, symbol);
 
   if (sym != NULL) {
-    return reinterpret_cast<void*>(sym->st_value + found->load_bias);
+    return reinterpret_cast<void*>(sym->st_value + found->base/*load_bias*/);
   }
+  __android_log_print(ANDROID_LOG_ERROR, "Dobby", "Failed when looking up %s\n", symbol);
   return NULL;
 }
