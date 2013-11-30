@@ -8,6 +8,7 @@
 #include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
+#include "dobby_public.h"
 
 typedef uint8_t cppbool;
 
@@ -934,11 +935,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_NinecraftApp_update_real = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp6updateEv");
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	int createMobOffset = 0xe7af4;
-	if (versionCode == 40007060) {
-		createMobOffset = 0xe7abc;
-	}
-	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) (mcpelibhandle->base + createMobOffset + 1);
+	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiP5Level");
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
