@@ -491,6 +491,13 @@ public class MainActivity extends NativeActivity
 	//added in 0.7.2
 	public native void nativeTypeCharacter(String character);
 
+	//added in 0.8.0
+	public native void nativeSuspend();
+	public native void nativeSetTextboxText(String text);
+	public native void nativeBackPressed();
+	public native void nativeBackSpacePressed();
+	public native void nativeReturnKeyPressed();
+
 	public void buyGame() {
 	}
 
@@ -1169,6 +1176,21 @@ public class MainActivity extends NativeActivity
 			putString("profileUuid", "").
 			putString("profileName", "").
 			apply();
+	}
+
+	//added in 0.8.0
+	public void showKeyboard(String mystr, int myint, boolean mybool) {
+		Log.i(TAG, "Show keyboard: " + mystr + ":" + myint + ":" + mybool);
+		showKeyboardView();
+	}
+
+	public void hideKeyboard() {
+		Log.i(TAG, "Hide keyboard");
+		hideKeyboardView();
+	}
+
+	public void updateTextboxText(String text) {
+		Log.i(TAG, "Update text to " + text);
 	}
 
 	public boolean isSafeMode() {
