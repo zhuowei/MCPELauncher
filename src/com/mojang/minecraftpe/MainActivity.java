@@ -151,6 +151,9 @@ public class MainActivity extends NativeActivity
 
 	private boolean overlyZealousSELinuxSafeMode = false;
 
+	protected EditText keyboardEditText;
+	protected LinearLayout contentLinearLayout;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -164,6 +167,12 @@ public class MainActivity extends NativeActivity
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+
+		try {
+			lockFile.createNewFile();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		MinecraftVersion.context = this.getApplicationContext();
@@ -305,6 +314,12 @@ public class MainActivity extends NativeActivity
 				showDialog(DIALOG_CRASH_SAFE_MODE);
 			}
 		}
+
+		contentLinearLayout = new LinearLayout(this);
+		keyboardEditText = new EditText(this);
+		contentLinearLayout.addView(keyboardEditText);
+		contentLinearLayout.requestFocus();
+		//setContentView(contentLinearLayout);
 
 		System.gc();
 
@@ -1179,13 +1194,24 @@ public class MainActivity extends NativeActivity
 	}
 
 	//added in 0.8.0
-	public void showKeyboard(String mystr, int myint, boolean mybool) {
+	public void showKeyboard(final String mystr, final int myint, final boolean mybool) {
 		Log.i(TAG, "Show keyboard: " + mystr + ":" + myint + ":" + mybool);
+		/*keyboardEditText.post(new Runnable() {
+			public void run() {
+				keyboardEditText.setText(mystr);
+				keyboardEditText.requestFocus();
+			}
+		});*/
 		showKeyboardView();
 	}
 
 	public void hideKeyboard() {
 		Log.i(TAG, "Hide keyboard");
+		/*keyboardEditText.post(new Runnable() {
+			public void run() {
+				contentLinearLayout.requestFocus();
+			}
+		});*/
 		hideKeyboardView();
 	}
 

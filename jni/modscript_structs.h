@@ -14,7 +14,8 @@ typedef struct {
 } Level;
 typedef struct {
 	void** vtable; //0
-	float x; //4
+	int filler3[7];//28 extra bytes. All others are shifted by 28.
+	float x; //4+28
 	float y; //8
 	float z; //12
 	char filler[12];//16

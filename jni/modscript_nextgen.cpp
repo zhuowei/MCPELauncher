@@ -39,6 +39,7 @@ typedef void Font;
 #define BLOCK_VTABLE_GET_COLOR 49
 #define BLOCK_VTABLE_GET_RENDER_LAYER 41
 #define BLOCK_VTABLE_IS_SOLID_RENDER 16
+#define MOB_TEXTURE_OFFSET 2948
 
 extern "C" {
 
@@ -385,7 +386,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string* newSkinString = new std::string(newSkin);
-	std::string* ptrToStr = (std::string*) (((int) entity) + 2920);
+	std::string* ptrToStr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	(*ptrToStr) = (*newSkinString);

@@ -31,11 +31,12 @@ typedef struct {
 #define GAMEMODE_VTABLE_OFFSET_ATTACK 19
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 114
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 118
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 88
-#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 61
-#define PLAYER_INVENTORY_OFFSET 3124
-#define MINECRAFT_VTABLE_OFFSET_UPDATE 12
+#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 62
+#define PLAYER_INVENTORY_OFFSET 3252
+#define MINECRAFT_VTABLE_OFFSET_UPDATE 18
+#define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 27
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -205,7 +206,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
 
 	//attach the listener
-	bl_attachLevelListener();
+	//bl_attachLevelListener();
 }
 
 void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
@@ -860,7 +861,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
 	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12NinecraftApp");
-	minecraftVtable[21] = (int) &bl_Minecraft_setLevel_hook;
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (int) &bl_Minecraft_setLevel_hook;
 
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);

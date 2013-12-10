@@ -19,7 +19,7 @@ public final class MinecraftVersion {
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
-	public final static boolean FUZZY_VERSION = false;
+	public final static boolean FUZZY_VERSION = true;
 
 	public static MinecraftVersion amazonVer;
 	public static Context context; //TODO remove this
