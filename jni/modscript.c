@@ -672,7 +672,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
   (JNIEnv *env, jclass clazz) {
-	bl_NinecraftApp_onGraphicsReset(bl_minecraft);
+	//bl_NinecraftApp_onGraphicsReset(bl_minecraft);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobSkin
@@ -898,12 +898,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
-	bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
+	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Level_removeEntity = dlsym(RTLD_DEFAULT, "_ZN5Level12removeEntityEP6Entity");
 	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiP5Level");
-	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationEP12ItemInstancef");
+	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZN5Level7getTimeEv");
 	bl_Level_getLevelData = dlsym(RTLD_DEFAULT, "_ZN5Level12getLevelDataEv");

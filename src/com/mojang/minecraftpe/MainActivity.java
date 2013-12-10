@@ -368,6 +368,7 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		nativeSuspend();
 		hideKeyboardView();
 	}
 
