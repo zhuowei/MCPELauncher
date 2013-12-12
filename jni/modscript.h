@@ -192,18 +192,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOn
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineItem
- * Signature: (IILjava/lang/String;)V
+ * Signature: (ILjava/lang/String;ILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
-  (JNIEnv *, jclass, jint, jint, jstring);
+  (JNIEnv *, jclass, jint, jstring, jint, jstring);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineFoodItem
- * Signature: (IIILjava/lang/String;)V
+ * Signature: (ILjava/lang/String;IILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *, jclass, jint, jint, jint, jstring);
+  (JNIEnv *, jclass, jint, jstring, jint, jint, jstring);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -428,6 +428,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
   (JNIEnv *, jclass, jint, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetRenderLayer
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -687,17 +695,6 @@ extern "C" {
 
 #ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeLevelApi
 #define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeLevelApi
-#ifdef __cplusplus
-extern "C" {
-#endif
-#ifdef __cplusplus
-}
-#endif
-#endif
-/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity */
-
-#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity
-#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntity
 #ifdef __cplusplus
 extern "C" {
 #endif

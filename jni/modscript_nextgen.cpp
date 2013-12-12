@@ -85,6 +85,8 @@ static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float)
 static std::string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
+static void (*bl_Item_setIcon)(Item*, std::string const&, int);
+
 bool bl_text_parse_color_codes = true;
 
 //custom blocks
@@ -265,13 +267,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 }
 
 Item* bl_constructItem(int id) {
-	Item* retval = (Item*) ::operator new((std::size_t) 36);
+	Item* retval = (Item*) ::operator new((std::size_t) 72);
 	bl_Item_Item(retval, id - 0x100);
 	return retval;
 }
 
 Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
-	Item* retval = (Item*) ::operator new((std::size_t) 48);
+	Item* retval = (Item*) ::operator new((std::size_t) 84);
 	bl_Item_Item(retval, id - 0x100);
 	retval->vtable = bl_FoodItem_vtable;
 	((int*)retval)[9] = hearts;
@@ -280,25 +282,35 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
-  (JNIEnv *env, jclass clazz, jint id, jint icon, jstring name) {
-	/*Item* item = bl_constructItem(id);
-	item->icon = icon;
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name) {
+	Item* item = bl_constructItem(id);
+
+	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
+	std::string iconNameString = std::string(iconUTFChars);
+	bl_Item_setIcon(item, iconNameString, iconIndex);
+
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
-	env->ReleaseStringUTFChars(name, utfChars);*/
+	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *env, jclass clazz, jint id, jint icon, jint halfhearts, jstring name) {
-	/*Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
-	item->icon = icon;
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jint halfhearts, jstring name) {
+	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
+
+	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
+	std::string iconNameString = std::string(iconUTFChars);
+	bl_Item_setIcon(item, iconNameString, iconIndex);
+
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
-	env->ReleaseStringUTFChars(name, utfChars);*/
+	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
@@ -581,8 +593,6 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
-	bl_TileItem_vtable = (void**) (mcpelibhandle->base + 0x294e88 + 8);
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Vtable at %x\n", bl_TileItem_vtable);
 	bl_TileItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
@@ -592,6 +602,7 @@ void bl_setuphooks_cppside() {
 	//bl_initCustomBlockVtable();
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
+	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
 }

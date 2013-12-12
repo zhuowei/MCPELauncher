@@ -83,6 +83,8 @@ public class ScriptManager {
 
 	private static ModernWrapFactory modernWrapFactory = new ModernWrapFactory();
 
+	private static boolean requestReloadAllScripts = false;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		//Rhino needs lots of recursion depth to parse nested else ifs
@@ -295,6 +297,16 @@ public class ScriptManager {
 	}
 
 	public static void frameCallback() {
+		if (requestReloadAllScripts) {
+			requestReloadAllScripts = false;
+			try {
+				loadEnabledScripts();
+			} catch (Exception e) {
+				e.printStackTrace();
+				reportScriptError(null, e);
+			}
+			return;
+		}
 		ScreenshotHelper.takeScreenshot(screenshotFileName);
 	}
 
@@ -312,7 +324,10 @@ public class ScriptManager {
 		nativeSetupHooks(versionCode);
 		scripts.clear();
 		androidContext = cxt.getApplicationContext();
-		loadEnabledScripts();
+		//loadEnabledScripts(); Minecraft blocks wouldn't be initialized when this is called
+		// call it before the first frame renders
+		requestReloadAllScripts = true;
+		nativeRequestFrameCallback();
 	}
 
 	public static void removeScript(String scriptId) {
@@ -700,8 +715,8 @@ public class ScriptManager {
 	public static native void nativeOnGraphicsReset();
 
 	//0.6
-	public static native void nativeDefineItem(int itemId, int iconId, String name);
-	public static native void nativeDefineFoodItem(int itemId, int iconId, int hearts, String name);
+	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name);
+	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name);
 
 	//nonstandard
 	public static native void nativeSetFov(float degrees);
@@ -1403,13 +1418,23 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setItem(int id, int icony, int iconx, String name) {
-			nativeDefineItem(id, (icony * 16) + iconx, name);
+		public static void setItem(int id, String iconName, int iconSubindex, String name) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			nativeDefineItem(id, iconName, iconSubindex, name);
 		}
 
 		@JSStaticFunction
-		public static void setFoodItem(int id, int icony, int iconx, int halfhearts, String name) {
-			nativeDefineFoodItem(id, (icony * 16) + iconx, halfhearts, name);
+		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name);
 		}
 
 		//nonstandard
@@ -1482,6 +1507,7 @@ public class ScriptManager {
 			return "ModPE";
 		}
 	}
+	private static final boolean HAVE_YOU_FIXED_BLOCKS = false;
 
 	private static class NativeBlockApi extends ScriptableObject {
 		public NativeBlockApi() {
@@ -1489,6 +1515,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineBlock(int blockId, String name, Object textures, Object materialSourceIdSrc, Object opaqueSrc,
 			Object renderTypeSrc) {
+			if (!HAVE_YOU_FIXED_BLOCKS) {
+				scriptPrint("Unable to initialize " + name.trim() + ": Custom blocks API not updated for 0.8.0. They will turn into UPDATE blocks.");
+				return;
+			}
 			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
 			boolean opaque = true;
