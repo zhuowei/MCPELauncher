@@ -37,6 +37,10 @@ typedef struct {
 #define PLAYER_INVENTORY_OFFSET 3252
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 18
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 27
+//this is / 4 bytes already
+#define MOB_HEALTH_OFFSET 80
+#define ENTITY_RENDER_TYPE_OFFSET 59
+
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -369,8 +373,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (bl_level == NULL) return -1;
 
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
-	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
 	if (te == NULL) return -1;
+	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	if (instance == NULL) return 0;
 	return bl_ItemInstance_getId(instance);
 }
 
@@ -381,6 +386,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
 	if (te == NULL) return -1;
 	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	if (instance == NULL) return 0;
 	return instance->damage;
 }
 
@@ -391,6 +397,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
 	if (te == NULL) return -1;
 	ItemInstance* instance = bl_ChestTileEntity_getItem(te, slot);
+	if (instance == NULL) return 0;
 	return instance->count;
 }
 
@@ -756,7 +763,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + 3240);
+	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + 3264);
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
@@ -765,28 +772,28 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (bl_localplayer == NULL) return 0;
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	if (invPtr == NULL) return 0;
-	return ((int*) invPtr)[9];
+	return ((int*) invPtr)[10];
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	return ((int*) entity)[63];
+	return ((int*) entity)[MOB_HEALTH_OFFSET];
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
   (JNIEnv *env, jclass clazz, jint entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	((int*) entity)[63] = halfhearts;
+	((int*) entity)[MOB_HEALTH_OFFSET] = halfhearts;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
   (JNIEnv *env, jclass clazz, jint entityId, jint renderType) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	((int*) entity)[176 / 4] = renderType;
+	((int*) entity)[ENTITY_RENDER_TYPE_OFFSET] = renderType;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExtinguishFire
@@ -824,9 +831,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
   (JNIEnv *env, jclass clazz) {
-	void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");
-	int drawRedSquareInstrLoc = ((int) ItemRenderer_renderGuiItem & ~1) + (0x131b38 - 0x131aa8);
-	*((int*) drawRedSquareInstrLoc) = 0xbf00bf00; //NOP
+	//void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");
+	//int drawRedSquareInstrLoc = ((int) ItemRenderer_renderGuiItem & ~1) + (0x131b38 - 0x131aa8);
+	//*((int*) drawRedSquareInstrLoc) = 0xbf00bf00; //NOP
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback

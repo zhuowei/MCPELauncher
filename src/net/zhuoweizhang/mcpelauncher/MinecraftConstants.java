@@ -2,7 +2,7 @@ package net.zhuoweizhang.mcpelauncher;
 
 public final class MinecraftConstants {
 
-	public static final int LIB_LOAD_OFFSET_BEGIN = 0x24abd0;
+	public static final int LIB_LOAD_OFFSET_BEGIN = 0x28c750;
 
 	public static final int LIB_LOAD_OFFSET = 0x1000;
 
@@ -20,6 +20,6 @@ public final class MinecraftConstants {
 
 
 
-	public static final int MINECRAFT_VERSION_CODE = 50007060;
+	public static final int MINECRAFT_VERSION_CODE = 500800010;
 
 }

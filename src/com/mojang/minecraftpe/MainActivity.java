@@ -368,7 +368,6 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		nativeSuspend();
 		hideKeyboardView();
 	}
 
@@ -389,6 +388,7 @@ public class MainActivity extends NativeActivity
 
 	public void onStop() {
 		super.onStop();
+		nativeSuspend();
 		ScriptTextureDownloader.flushCache();
 	}
 

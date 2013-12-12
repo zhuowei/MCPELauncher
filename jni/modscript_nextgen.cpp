@@ -29,7 +29,7 @@ typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
-#define SIGN_TILE_ENTITY_LINE_OFFSET 68
+#define SIGN_TILE_ENTITY_LINE_OFFSET 92
 #define BLOCK_VTABLE_SIZE 0x120
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 10
 #define BLOCK_VTABLE_IS_CUBE_SHAPED 4
@@ -281,24 +281,24 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jint icon, jstring name) {
-	Item* item = bl_constructItem(id);
+	/*Item* item = bl_constructItem(id);
 	item->icon = icon;
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
-	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(name, utfChars);*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
   (JNIEnv *env, jclass clazz, jint id, jint icon, jint halfhearts, jstring name) {
-	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
+	/*Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
 	item->icon = icon;
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
-	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(name, utfChars);*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
@@ -404,7 +404,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//bl_Mob_setSneaking(entity, doIt);
-	bool* movement = *((bool**) ((uintptr_t) entity + 3288));
+	bool* movement = *((bool**) ((uintptr_t) entity + 3416));
 	movement[14] = doIt;
 }
 
@@ -461,12 +461,12 @@ Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, 
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
   (JNIEnv *env, jclass clazz, jint blockId, jstring name, jintArray textures, jint materialBlockId, jboolean opaque, jint renderType) {
-	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	/*const char * utfChars = env->GetStringUTFChars(name, NULL);
 	int* myIntArray = new int[16*6];
 	env->GetIntArrayRegion(textures, 0, 16*6, myIntArray);
 	Tile* tile = bl_createBlock(blockId, myIntArray, materialBlockId, opaque, renderType, utfChars);
 	if (tile == NULL) delete[] myIntArray;
-	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(name, utfChars);*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
@@ -589,7 +589,7 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
 		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
-	bl_initCustomBlockVtable();
+	//bl_initCustomBlockVtable();
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 
