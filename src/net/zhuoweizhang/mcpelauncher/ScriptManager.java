@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.PrintWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -265,6 +266,9 @@ public class ScriptManager {
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
 		if (!isRemote) nativePreventDefault();
+		if (BuildConfig.DEBUG) {
+			processDebugCommand(str.substring(1));
+		}
 	}
 
 	// KsyMC's additions
@@ -685,6 +689,26 @@ public class ScriptManager {
 		Log.i("BlockLauncher", Arrays.toString(endArray));
 		return endArray;
 	}
+
+	public static void processDebugCommand(String cmd) {
+		try {
+			if (cmd.equals("dumpitems")) {
+				debugDumpItems();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void debugDumpItems() throws IOException {
+		PrintWriter out = new PrintWriter(new File("/sdcard/items.csv"));
+		for (int i = 0; i < 512; i++) {
+			String itemName = nativeGetItemName(i, 0, true);
+			if (itemName == null) continue;
+			out.println(i + "," + itemName);
+		}
+		out.close();
+	}
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -740,6 +764,7 @@ public class ScriptManager {
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
 	public static native void nativeSetSneaking(int entityId, boolean doIt);
 	public static native String nativeGetPlayerName(int entityId);
+	public static native String nativeGetItemName(int itemId, int itemDamage, boolean raw);
 
 	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
@@ -1394,7 +1419,7 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void log(String str) {
-		   Log.i("MCPELauncherLog", str);
+			Log.i("MCPELauncherLog", str);
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
@@ -1500,6 +1525,11 @@ public class ScriptManager {
 		public static void takeScreenshot(String fileName) {
 			screenshotFileName = fileName.replace("/", "").replace("\\", "");
 			nativeRequestFrameCallback();
+		}
+
+		@JSStaticFunction
+		public static String getItemName(int id, int damage, boolean raw) {
+			return nativeGetItemName(id, damage, raw);
 		}
 
 		@Override

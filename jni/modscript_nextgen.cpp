@@ -87,6 +87,9 @@ static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
 
+//static Item** bl_Item_items;
+static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
+
 bool bl_text_parse_color_codes = true;
 
 //custom blocks
@@ -420,6 +423,30 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	movement[14] = doIt;
 }
 
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
+	if (itemId <= 0 || itemId >= 512) return NULL;
+	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
+	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return NULL;
+	switch(itemId) {
+		case 95:
+		case 255:
+			//these return blank strings. Blank strings will kill libstdc++ since we are not using the same blank string.
+			return NULL;
+	}
+	std::string descriptionId = bl_ItemInstance_getDescriptionId(myStack);
+	if (descriptionId.length() <= 0) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dead tile: %i\n", itemId);
+	}
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
+	std::string returnVal = descriptionId;
+	if (!raw) {
+		returnVal = (*bl_I18n_strings)[descriptionId];
+	}
+	jstring returnValString = env->NewStringUTF(returnVal.c_str());
+	return returnValString;
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
@@ -605,6 +632,9 @@ void bl_setuphooks_cppside() {
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
+
+	//bl_Item_items = (Item**) dlsym(mcpelibhandle, "_ZN4Item5itemsE");
+	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
 }
 
 } //extern

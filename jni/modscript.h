@@ -21,6 +21,8 @@ extern "C" {
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_DAMAGE 1L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_AMOUNT
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_AMOUNT 2L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_HAVE_YOU_FIXED_BLOCKS
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_HAVE_YOU_FIXED_BLOCKS 0L
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetPlayerLoc
@@ -372,6 +374,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  */
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetItemName
+ * Signature: (IIZ)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
+  (JNIEnv *, jclass, jint, jint, jboolean);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
