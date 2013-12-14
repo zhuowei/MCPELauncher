@@ -702,10 +702,13 @@ public class ScriptManager {
 
 	private static void debugDumpItems() throws IOException {
 		PrintWriter out = new PrintWriter(new File("/sdcard/items.csv"));
+		float[] textureUVbuf = new float[6];
 		for (int i = 0; i < 512; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
 			if (itemName == null) continue;
-			out.println(i + "," + itemName);
+			boolean success = nativeGetTextureCoordinatesForItem(i, 0, textureUVbuf);
+			String itemIcon = Arrays.toString(textureUVbuf).replace("[","").replace("]","").replace(",", "|");
+			out.println(i + "," + itemName + "," + itemIcon);
 		}
 		out.close();
 	}
@@ -765,6 +768,7 @@ public class ScriptManager {
 	public static native void nativeSetSneaking(int entityId, boolean doIt);
 	public static native String nativeGetPlayerName(int entityId);
 	public static native String nativeGetItemName(int itemId, int itemDamage, boolean raw);
+	public static native boolean nativeGetTextureCoordinatesForItem(int itemId, int itemDamage, float[] output);
 
 	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);

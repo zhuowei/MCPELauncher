@@ -89,6 +89,7 @@ static void (*bl_Item_setIcon)(Item*, std::string const&, int);
 
 //static Item** bl_Item_items;
 static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
+static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 
 bool bl_text_parse_color_codes = true;
 
@@ -447,6 +448,17 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return returnValString;
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
+	if (itemId <= 0 || itemId >= 512) return false;
+	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
+	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
+	TextureUVCoordinateSet* set = bl_ItemInstance_getIcon(myStack, 0, true);
+	if (set == NULL || set->bounds == NULL) return false;
+	env->SetFloatArrayRegion(outputArray, 0, 6, set->bounds);
+	return true;
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
@@ -635,6 +647,7 @@ void bl_setuphooks_cppside() {
 
 	//bl_Item_items = (Item**) dlsym(mcpelibhandle, "_ZN4Item5itemsE");
 	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
+	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 }
 
 } //extern

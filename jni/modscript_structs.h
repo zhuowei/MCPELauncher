@@ -70,6 +70,10 @@ typedef struct {
 	int descriptionId; //88
 #endif
 } Tile;
+
+typedef struct {
+	float bounds[6];
+} TextureUVCoordinateSet;
 #ifdef __cplusplus
 }
 #endif
