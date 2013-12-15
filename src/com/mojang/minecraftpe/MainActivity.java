@@ -40,6 +40,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.text.ClipboardManager;
+import android.text.Editable;
+import android.text.Selection;
+import android.text.Spannable;
+import android.text.TextWatcher;
 import android.view.*;
 import android.view.KeyCharacterMap;
 import android.view.inputmethod.*;
@@ -152,8 +156,8 @@ public class MainActivity extends NativeActivity
 
 	private boolean overlyZealousSELinuxSafeMode = false;
 
-	protected EditText keyboardEditText;
-	protected LinearLayout contentLinearLayout;
+	private PopupWindow hiddenTextWindow;
+	private TextView hiddenTextView;
 
 	/** Called when the activity is first created. */
 
@@ -315,12 +319,6 @@ public class MainActivity extends NativeActivity
 				showDialog(DIALOG_CRASH_SAFE_MODE);
 			}
 		}
-
-		contentLinearLayout = new LinearLayout(this);
-		keyboardEditText = new EditText(this);
-		contentLinearLayout.addView(keyboardEditText);
-		contentLinearLayout.requestFocus();
-		//setContentView(contentLinearLayout);
 
 		System.gc();
 
@@ -1195,29 +1193,56 @@ public class MainActivity extends NativeActivity
 	}
 
 	//added in 0.8.0
-	public void showKeyboard(final String mystr, final int myint, final boolean mybool) {
-		Log.i(TAG, "Show keyboard: " + mystr + ":" + myint + ":" + mybool);
-		/*keyboardEditText.post(new Runnable() {
+	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
+		Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+		this.runOnUiThread(new Runnable() {
 			public void run() {
-				keyboardEditText.setText(mystr);
-				keyboardEditText.requestFocus();
+				showHiddenTextbox(mystr, maxLength, mybool);
 			}
-		});*/
-		showKeyboardView();
+		});
+		//showKeyboardView();
 	}
 
 	public void hideKeyboard() {
 		Log.i(TAG, "Hide keyboard");
-		/*keyboardEditText.post(new Runnable() {
+		this.runOnUiThread(new Runnable() {
 			public void run() {
-				contentLinearLayout.requestFocus();
+				dismissHiddenTextbox();
 			}
-		});*/
-		hideKeyboardView();
+		});
+		//hideKeyboardView();
 	}
 
 	public void updateTextboxText(String text) {
 		Log.i(TAG, "Update text to " + text);
+		if (hiddenTextView == null) return;
+		hiddenTextView.setText(text);
+	}
+
+	public void showHiddenTextbox(String text, int maxLength, boolean myBool) {
+		if (hiddenTextWindow == null) {
+			hiddenTextView = new EditText(this);
+			hiddenTextView.addTextChangedListener(new PopupTextWatcher());
+			hiddenTextView.setSingleLine(true);
+			hiddenTextWindow = new PopupWindow(hiddenTextView);
+			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			hiddenTextWindow.setFocusable(true);
+			hiddenTextWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+		}
+
+		hiddenTextView.setText(text);
+		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
+		
+		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
+		hiddenTextView.requestFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(hiddenTextView, InputMethodManager.SHOW_FORCED);
+	}
+
+	public void dismissHiddenTextbox() {
+		if (hiddenTextWindow == null) return;
+		hiddenTextWindow.dismiss();
+		hideKeyboardView();
 	}
 
 	public boolean isSafeMode() {
@@ -1614,6 +1639,20 @@ public class MainActivity extends NativeActivity
 		System.arraycopy(files, 0, retval, 1, files.length);
 		retval[0] = toAdd;
 		return retval;
+	}
+
+	private class PopupTextWatcher implements TextWatcher {
+		public void afterTextChanged(Editable e) {
+			if (BuildConfig.DEBUG) Log.i(TAG, "Text changed: " + e.toString());
+			nativeSetTextboxText(e.toString());
+			hiddenTextWindow.dismiss();
+			hiddenTextWindow.showAtLocation(MainActivity.this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
+			
+		}
+		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
+		}
+		public void onTextChanged(CharSequence c, int start, int count, int after) {
+		}
 	}
 
 	private class LoginWebViewClient extends WebViewClient {
