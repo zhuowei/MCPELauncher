@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!--Memo: Chinese Traditional translation for settings screen in portrait view (I forgot the short form of portrait)-->
+	<string name="pref_zz_skin_enable">使用自訂皮膚\n (在多人連線中別人不會看到，\n 而別人則會成為這個樣子)</string>
+	<string name="pref_zz_script_paranoid_mode">防毒模式︰禁止 ModPE 模組\n儲存 Android 程式的權限\n(只允許存取 Minecraft 世界裏的東西)</string>
+	<string name="about_go_to_forums">開啟 BlockLauncher \n在 Minecraft Forums 上的頁面。</string>
+</resources>
