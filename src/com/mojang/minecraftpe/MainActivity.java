@@ -389,7 +389,6 @@ public class MainActivity extends NativeActivity
 
 	public void onStop() {
 		super.onStop();
-		nativeSuspend();
 		ScriptTextureDownloader.flushCache();
 	}
 
