@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.text.ClipboardManager;
 import android.view.*;
 import android.view.KeyCharacterMap;
 import android.view.inputmethod.*;
@@ -51,13 +52,13 @@ import android.preference.*;
 
 import dalvik.system.PathClassLoader;
 
+import org.mozilla.javascript.RhinoException;
+
 import net.zhuoweizhang.mcpelauncher.*;
 
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
 import net.zhuoweizhang.pokerface.PokerFace;
-
-
 
 public class MainActivity extends NativeActivity
 {
@@ -1510,11 +1511,18 @@ public class MainActivity extends NativeActivity
 	private void reportError(final Throwable t) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				StringWriter strWriter = new StringWriter();
+				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				t.printStackTrace(pWriter);
 				new AlertDialog.Builder(MainActivity.this).setTitle("Oh nose everything broke").setMessage(strWriter.toString()).
 					setPositiveButton(android.R.string.ok, null).
+					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface aDialog, int button) {
+							ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+							mgr.setText(strWriter.toString());
+						}
+					}).
+							
 					show();
 			}
 		});
@@ -1523,12 +1531,22 @@ public class MainActivity extends NativeActivity
 	public void scriptErrorCallback(final String scriptName, final Throwable t) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				StringWriter strWriter = new StringWriter();
+				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				pWriter.println("Error occurred in script: " + scriptName);
+				if (t instanceof RhinoException) {
+					String lineSource = ((RhinoException) t).lineSource();
+					if (lineSource != null) pWriter.println(lineSource);
+				}
 				t.printStackTrace(pWriter);
 				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).setMessage(strWriter.toString()).
 					setPositiveButton(android.R.string.ok, null).
+					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface aDialog, int button) {
+							ClipboardManager mgr = (ClipboardManager) MainActivity.this.getSystemService(CLIPBOARD_SERVICE);
+							mgr.setText(strWriter.toString());
+						}
+					}).
 					show();
 			}
 		});

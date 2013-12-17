@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.ClipboardManager;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +32,8 @@ import android.util.Base64;
 
 import com.ipaulpro.afilechooser.FileChooserActivity;
 import com.ipaulpro.afilechooser.utils.FileUtils;
+
+import org.mozilla.javascript.RhinoException;
 
 import static net.zhuoweizhang.mcpelauncher.ScriptManager.SCRIPTS_DIR;
 import net.zhuoweizhang.mcpelauncher.patch.*;
@@ -484,11 +487,21 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private void reportError(final Throwable t) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				StringWriter strWriter = new StringWriter();
+				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
+				if (t instanceof RhinoException) {
+					String lineSource = ((RhinoException) t).lineSource();
+					if (lineSource != null) pWriter.println(lineSource);
+				}
 				t.printStackTrace(pWriter);
 				new AlertDialog.Builder(ManageScriptsActivity.this).setTitle(R.string.manage_patches_import_error).setMessage(strWriter.toString()).
 					setPositiveButton(android.R.string.ok, null).
+					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface aDialog, int button) {
+							ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+							mgr.setText(strWriter.toString());
+						}
+					}).
 					show();
 			}
 		});
