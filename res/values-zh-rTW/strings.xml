@@ -1,46 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Memo: Chinese Traditional translation by PEMapModder-->
-    <string name="pref_ctrl_touchscreen">Use Touchscreen</string>
-    <string name="pref_ctrl_touchscreen_summary">If you are not using an Xperia Play, check this</string>
-    <string name="pref_mp_username">Multiplayer Username</string>
-    <string name="pref_mp_username_summary">Your name, duh</string>
-    <string name="pref_texture_pack">Texture Pack</string>
-    <string name="pref_texture_pack_summary">Change your texture pack</string>
-    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
-    <string name="pref_ctrl_islefthanded">Lefty</string>
-    <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
-    <string name="pref_ctrl_invertmouse">Invert Y-axis</string>
-    <string name="pref_ctrl_invertmouse_summary">Meanwhile in Australia :)</string>
-    <string name="pref_feedback_vibration">Vibrate</string>
-    <string name="pref_feedback_vibration_summary">Vibrate when a block is destroyed</string>
-    <string name="pref_zz_longvibration">Extra-long vibration</string>
-    <string name="pref_zz_longvibration_summary">Increase the vibration length by 5x</string>
-    <string name="pref_gfx_fancygraphics">Fancy graphics</string>
-    <string name="pref_gfx_fancygraphics_summary">Make stuff look better</string>
-    <string name="pref_gfx_lowquality">Low quality graphics</string>
-    <string name="pref_gfx_lowquality_summary">Make stuff look worse</string>
-    <string name="pref_game_difficultypeaceful">Peaceful mode</string>
-    <string name="pref_game_difficultypeaceful_summary">Health regeneration, no monsters</string>
-    <string name="pref_ctrl_sensitivity">Sensitivity</string>
-    <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
-	<!--I don't think the above is required anymore-->
+	<string name="pref_zz_language_override">語言</string>
+    <string name="pref_zz_language_override_default">預設</string>
+    <string name="pref_zz_longvibration">特長震機</string>
+    <string name="pref_zz_longvibration_summary">把破壞方塊時的震機增至原本的五倍</string><!-- +5x->6 or 1x->5x? -->
     <string name="pref_zz_safe_mode">安全模式</string>
     <string name="pref_zz_safe_mode_summary">停用所有模組</string>
-	<!--including ModPE Scripts?-->
-    <string name="pref_zz_patch_ip_enable">Redirect Multiplayer</string><!--No longer needed until line 36, right?-->
-    <string name="pref_zz_patch_ip_enable_summary">Redirects multiplayer connections to an online server</string>
-    <string name="pref_zz_patch_ip">Server IP</string>
-    <string name="pref_zz_patch_ip_summary">The IP address of the online server</string>
-    <string name="pref_zz_patch_ip_port">Server Port</string>
-    <string name="pref_zz_patch_ip_port_summary">The port of the online server (usually 19132)</string>
     <string name="pref_zz_texture_pack_enable">使用材質包</string>
-    <string name="pref_zz_custom_dpi">Custom DPI</string><!--I think we don't need it anymore-->
-    <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
+    <string name="pref_zz_custom_dpi">自訂 DPI</string><!--I think we don't need it anymore-->
+    <string name="pref_zz_custom_dpi_summary">向 Minecraft PE 報告你裝置的實際大小，以控制 GUI 的大小</string>
     <string name="pref_zz_texture_pack_demo">模擬材質包支援</string>
     <string name="pref_zz_texture_pack_demo_summary">使用由NathanX設計的Slickcraft材質包</string>
-    <string name="pref_mp_server_visible_default">Server visible by default</string>
-	<!--seems that it is no longer used-->
     <string name="pref_mp_title">多人連線</string>
     <string name="pref_ctrl_title">觸控設定</string>
     <string name="pref_gfx_title">畫質</string>
@@ -50,33 +21,34 @@
     <string name="pref_support_title">支援</string>
     <string name="pref_zz_load_native_addons">啟用試驗性插件支援</string>
     <string name="texture_pack_unable_to_load">無法載入材質包</string>
-    <string name="pref_zz_extract_original_textures">Extract original textures with root access</string>
-    <string name="pref_zz_extract_original_textures_summary">備分原本的Minecraft PE APK 檔案 (需要root) 並把它設為材質包Backup original APK with root access and set it as the texture pack</string><!--Really need root?-->
+    <string name="pref_zz_extract_original_textures">使用 root 權限取得原本的材質</string>
+    <string name="pref_zz_extract_original_textures_summary">備分原本的Minecraft PE APK 檔案 (需要root) 並把它設為材質包</string>
     <string name="extracting_textures">備分 APK 檔案中…</string>
     <string name="extract_textures_success">成功設置原本的APK為材質包</string>
     <string name="extract_textures_error">無法取得原本的APK</string>
     <string name="extract_textures_no_root">無法取得 root 存取權——你的裝置沒有 root 嗎？</string>
     <string name="extract_textures_need_update">你似乎在使用舊版本的Minecraft PE的材質包。請在設定中使用「用 root 存取權提取原本的材質以更新材質。</string>
-    <string name="pref_zz_skin_enable">使用自訂皮膚 (在多人連線中別人不會看到，而別人則會成為這個樣子)</string>
+    <string name="pref_zz_skin_enable">使用自訂皮膚\n (在多人連線中別人不會看到，而別人則會成為這個樣子)</string>
+	<!--CHANGE IT INTO SUMMARY TO MAXIMIZE THE EFFECT-->
     <string name="pref_zz_skin">更改自訂皮膚</string>
     <string name="pref_zz_skin_summary">選擇PNG檔案作為自訂皮膚(只有你看到)</string>
     <string name="pref_zz_hovercar_hide">隱藏設定按鈕</string>
-    <string name="pref_zz_redirect_mco">Redirect Realms to third-party server list</string>
+    <string name="pref_zz_redirect_mco">把 Minecraft Realms 重新導向至第三方伺服器的列表</string>
     <string name="pref_zz_manage_scripts">管理 ModPE 模組</string>
     <string name="pref_zz_script_enable">啟用 ModPE 支援</string>
     <string name="pref_zz_sensorcontrol">感應器控制</string>
     <string name="pref_zz_sensorcontrol_summary">以搖動裝置控制方向。需啟用 ModPE 支援。</string>
-    <string name="pref_zz_show_insert_text">在螢幕上方按鈕的彈出式視窗顯示「輸入文子」選項</string>
-    <string name="nerdy_stuff_page">電腦迷的東西</string><!--IDK what is nerdy. With reference to values-zh-rCN-->
+    <string name="pref_zz_show_insert_text">在螢幕上方按鈕的彈出式視窗顯示「輸入文字」選項</string>
+    <string name="nerdy_stuff_page">電腦迷的東西</string>
     <string name="dump_libminecraftpe">在記憶體中刪除 libminecraftpe.so</string><!--I said delete-->
     <string name="nerdy_stuff_are_useless">本頁面的大部分東西都是沒用的。它們是用來幫助解決程式錯誤的。</string>
     <string name="restart_app">重新啟動 BlockLauncher</string>
     <string name="manage_patches">管理 .mod 模組</string>
-    <string name="copy_world_title">Save world</string><!--?????????????????????-->
+    <string name="copy_world_title">儲存世界</string>
     <string name="manage_patches_import">匯入</string>
     <string name="manage_patches_import_error">匯入模組失敗</string>
     <string name="manage_patches_too_many">升級至付費版以啟用三個以上的模組</string>
-    <string name="manage_patches_delete">Delete</string>
+    <string name="manage_patches_delete">刪除</string>
     <string name="manage_patches_crash_safe_mode">BlockLauncher 偵測到最近出現程式錯誤。已啟動安全模式，以防止出現更多錯誤。在安全模式中，所有模組將被停用。</string>
     <string name="manage_patches_import_confirm">確定匯入此模組？</string>
     <string name="manage_patches_import_done">已匯入模組</string>
@@ -113,7 +85,7 @@
     <string name="firstlaunch_see_options">按螢幕上方的圖案開啟設定頁。開啟 BlockLauncher 於Minecraft Forums 上的頁面以獲得支授。</string>
     <string name="firstlaunch_help">協助</string>
 
-    <string name="version_mismatch_message">BlockLauncher 不支援此版本之Minecraft PE。BlockLauncher 將暫時於安全模式執行。 BlockLauncher 有可能在將來加入此版本。</string><!--while you removed 0.7.1 to 0.7.3 support?-->
+    <string name="version_mismatch_message">BlockLauncher 不支援此版本之Minecraft PE。BlockLauncher 將暫時於安全模式執行。 BlockLauncher 有可能在將來加入此版本。</string><!--Wait for updates while you removed 0.7.1 to 0.7.3 support?-->
 
     <string name="feature_not_supported">BlockLauncher 尚未支援此功能。</string>
     <string name="hovercar_title">遊戲內模組管理器</string>
@@ -158,7 +130,7 @@
     <string name="script_minecraft_version_incompatible">BlockLauncher 不完全支援在你的版本的 Minecraft PE 上使用 ModPE 模組。請注意可能出現的風險。</string>
     <string name="script_import_from_intent_warning">確定匯入此模組？它有可能取得你的裝置內的重要資訊。</string>
     <string name="script_view_source">檢視原始碼</string>
-    <string name="script_too_many_errors">已被停用，因為出現太多錯誤了。抱歉！has been disabled because it encountered too many errors.</string>
+    <string name="script_too_many_errors">已被停用，因為出現太多錯誤了。抱歉！</string>
     <string name="take_screenshot">拍攝畫面剪輯</string>
     <string name="take_screenshot_requires_modpe_script">使用畫面剪輯前請先啟用 ModPE 模組支授。\n
 	你可於設定頁開啟 ModPE 支授。</string>
@@ -169,5 +141,6 @@
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher 插件</string>
     <string name="permdesc_mcpelauncher_addon">允許程式以插件身分載入至 BlockLauncher 。這意味着這件程式能取得網絡、SD Card及其他 Minecraft PE 獲得權限去做的事。</string>
+	<string name="pref_zz_script_paranoid_mode">防毒模式︰禁止 ModPE 模組儲存 Android 程式的權限\n(只允許存取 Minecraft 世界裏的東西)</string><!--I call it anti-virus mode-->
 
 </resources>
