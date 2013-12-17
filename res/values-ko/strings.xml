@@ -66,10 +66,11 @@ Scroll to the bottom and see notice. -->
     <string name="pref_zz_manage_scripts">ModPE 스크립트 관리</string>
     <string name="pref_zz_script_enable">ModPE 스크립트 활성화</string>
     <string name="pref_zz_sensorcontrol">센서 조작</string>
-    <string name="pref_zz_sensorcontrol_summary">장치를 회전하여 플레이어를 제어합니다.Requires ModPE Scripts to be turned on.</string>
-    <string name="pref_zz_show_insert_text">\"텍스트 산입\" 보이기</string>
+    <string name="pref_zz_sensorcontrol_summary">장치를 회전하여 플레이어를 제어합니다.사용하려면 ModPE Scripts 를 켜야합니다..</string>
+    <string name="pref_zz_show_insert_text">\"텍스트 삽입\" 보이기</string>
     <string name="pref_zz_language_override">언어</string>
     <string name="pref_zz_language_override_default">시스템 언어</string>
+    <string name="pref_zz_script_paranoid_mode">편집모드: GUI를 사용한 ModPE scripts 비활성화</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
     <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
