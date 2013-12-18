@@ -4,7 +4,7 @@
 typedef Entity TripodCamera;
 typedef void TileEntity;
 
-class ParticleType {
+enum ParticleType {
 };
 
 class LevelListener {
@@ -16,8 +16,8 @@ class LevelListener {
 		virtual void skyColorChanged() {} ; //7
 		virtual void allChanged() {} ; //8
 		virtual void takePicture(TripodCamera*, Entity*) {} ; //9
+		virtual void* addParticle(ParticleType, float, float, float, float, float, float, int) {return NULL;} ; //10
 		//removed - subtract 1 from the below
-		virtual void addParticle(ParticleType, float, float, float, float, float, float, int) {} ; //11
 		virtual void playSound(std::string const&, float, float, float, float, float) {} ; //12
 		virtual void playMusic(std::string const&, float, float, float, float) {} ; //13
 		virtual void playStreamingMusic(std::string const&, int, int, int) {} ; //14
