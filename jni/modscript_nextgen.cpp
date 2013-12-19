@@ -265,7 +265,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = (void*) (((int) bl_minecraft) + 400);
+	void* mygui = (void*) (((int) bl_minecraft) + 416);
 	bl_Gui_displayClientMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
