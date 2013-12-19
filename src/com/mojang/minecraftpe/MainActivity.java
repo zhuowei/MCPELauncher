@@ -42,6 +42,7 @@ import android.os.Environment;
 import android.os.Vibrator;
 import android.text.ClipboardManager;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextWatcher;
@@ -1220,17 +1221,25 @@ public class MainActivity extends NativeActivity
 		});
 	}
 
-	public void updateTextboxText(String text) {
+	public void updateTextboxText(final String text) {
 		if (BuildConfig.DEBUG) Log.i(TAG, "Update text to " + text);
 		if (hiddenTextView == null) return;
-		hiddenTextView.setText(text);
+		hiddenTextView.post(new Runnable() {
+			public void run() {
+				hiddenTextView.setText(text);
+			}
+		});
 	}
 
 	public void showHiddenTextbox(String text, int maxLength, boolean myBool) {
 		if (hiddenTextWindow == null) {
 			hiddenTextView = new EditText(this);
-			hiddenTextView.addTextChangedListener(new PopupTextWatcher());
+			PopupTextWatcher whoWatchesTheWatcher = new PopupTextWatcher();
+			hiddenTextView.addTextChangedListener(whoWatchesTheWatcher);
+			hiddenTextView.setOnEditorActionListener(whoWatchesTheWatcher);
 			hiddenTextView.setSingleLine(true);
+			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+			hiddenTextView.setInputType(InputType.TYPE_CLASS_TEXT);
 			LinearLayout linearLayout = new LinearLayout(this);
 			linearLayout.addView(hiddenTextView);
 			hiddenTextWindow = new PopupWindow(linearLayout);
@@ -1662,7 +1671,7 @@ public class MainActivity extends NativeActivity
 		return retval;
 	}
 
-	private class PopupTextWatcher implements TextWatcher {
+	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG) Log.i(TAG, "Text changed: " + e.toString());
 			nativeSetTextboxText(e.toString());
@@ -1671,6 +1680,12 @@ public class MainActivity extends NativeActivity
 		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
 		}
 		public void onTextChanged(CharSequence c, int start, int count, int after) {
+		}
+
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			if (BuildConfig.DEBUG) Log.i(TAG, "Editor action: " + actionId);
+			nativeReturnKeyPressed();
+			return true;
 		}
 	}
 
