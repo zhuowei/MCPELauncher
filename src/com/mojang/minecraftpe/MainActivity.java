@@ -160,6 +160,7 @@ public class MainActivity extends NativeActivity
 
 	private PopupWindow hiddenTextWindow;
 	private TextView hiddenTextView;
+	private boolean hiddenTextDismissAfterOneLine = false;
 
 	/** Called when the activity is first created. */
 
@@ -1231,7 +1232,7 @@ public class MainActivity extends NativeActivity
 		});
 	}
 
-	public void showHiddenTextbox(String text, int maxLength, boolean myBool) {
+	public void showHiddenTextbox(String text, int maxLength, boolean dismissAfterOneLine) {
 		if (hiddenTextWindow == null) {
 			hiddenTextView = new EditText(this);
 			PopupTextWatcher whoWatchesTheWatcher = new PopupTextWatcher();
@@ -1259,6 +1260,7 @@ public class MainActivity extends NativeActivity
 
 		hiddenTextView.setText(text);
 		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
+		this.hiddenTextDismissAfterOneLine = dismissAfterOneLine;
 		
 		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, -10000, 0);
 		hiddenTextView.requestFocus();
@@ -1684,7 +1686,11 @@ public class MainActivity extends NativeActivity
 
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 			if (BuildConfig.DEBUG) Log.i(TAG, "Editor action: " + actionId);
-			nativeReturnKeyPressed();
+			if (hiddenTextDismissAfterOneLine) {
+				hiddenTextWindow.dismiss();
+			} else {
+				nativeReturnKeyPressed();
+			}
 			return true;
 		}
 	}
