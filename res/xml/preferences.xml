@@ -162,6 +162,10 @@
         android:title="@string/pref_zz_show_insert_text"
         android:defaultValue="false"/>
 
+    <CheckBoxPreference android:key="zz_legacy_keyboard_input"
+        android:title="@string/pref_zz_legacy_keyboard_input"
+        android:defaultValue="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory 

@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.net.http.SslError;
@@ -1194,27 +1195,33 @@ public class MainActivity extends NativeActivity
 
 	//added in 0.8.0
 	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
-		Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+		if (BuildConfig.DEBUG) Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+		if (useLegacyKeyboardInput()) {
+			showKeyboardView();
+			return;
+		}
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				showHiddenTextbox(mystr, maxLength, mybool);
 			}
 		});
-		//showKeyboardView();
 	}
 
 	public void hideKeyboard() {
-		Log.i(TAG, "Hide keyboard");
+		if (BuildConfig.DEBUG) Log.i(TAG, "Hide keyboard");
+		if (useLegacyKeyboardInput()) {
+			hideKeyboardView();
+			return;
+		}
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				dismissHiddenTextbox();
 			}
 		});
-		//hideKeyboardView();
 	}
 
 	public void updateTextboxText(String text) {
-		Log.i(TAG, "Update text to " + text);
+		if (BuildConfig.DEBUG) Log.i(TAG, "Update text to " + text);
 		if (hiddenTextView == null) return;
 		hiddenTextView.setText(text);
 	}
@@ -1224,25 +1231,39 @@ public class MainActivity extends NativeActivity
 			hiddenTextView = new EditText(this);
 			hiddenTextView.addTextChangedListener(new PopupTextWatcher());
 			hiddenTextView.setSingleLine(true);
-			hiddenTextWindow = new PopupWindow(hiddenTextView);
+			LinearLayout linearLayout = new LinearLayout(this);
+			linearLayout.addView(hiddenTextView);
+			hiddenTextWindow = new PopupWindow(linearLayout);
 			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 			hiddenTextWindow.setFocusable(true);
 			hiddenTextWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable()); //To get back button handling for free
+			hiddenTextWindow.setClippingEnabled(false);
+			hiddenTextWindow.setTouchable(false);
+			hiddenTextWindow.setOutsideTouchable(true); //These flags were taken from a dumpsys window output of Mojang's window
+			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+				public void onDismiss() {
+					nativeBackPressed();
+				}
+			});
 		}
 
 		hiddenTextView.setText(text);
 		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
 		
-		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
+		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, -10000, 0);
 		hiddenTextView.requestFocus();
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(hiddenTextView, InputMethodManager.SHOW_FORCED);
+		showKeyboardView();
 	}
 
 	public void dismissHiddenTextbox() {
 		if (hiddenTextWindow == null) return;
 		hiddenTextWindow.dismiss();
 		hideKeyboardView();
+	}
+
+	private boolean useLegacyKeyboardInput() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_legacy_keyboard_input", false);
 	}
 
 	public boolean isSafeMode() {
@@ -1645,8 +1666,6 @@ public class MainActivity extends NativeActivity
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG) Log.i(TAG, "Text changed: " + e.toString());
 			nativeSetTextboxText(e.toString());
-			hiddenTextWindow.dismiss();
-			hiddenTextWindow.showAtLocation(MainActivity.this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
 			
 		}
 		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
