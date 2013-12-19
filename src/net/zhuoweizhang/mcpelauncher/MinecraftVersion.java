@@ -99,14 +99,14 @@ public final class MinecraftVersion {
 	}
 
 	static {
-		//0.8.0 Play
+		//0.8.1 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			-1, null, null, null, null, -1));
-		//0.8.0 Gingerbread
-		add(new MinecraftVersion(300800010, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
+		//0.8.1 Gingerbread
+		add(new MinecraftVersion(300801011, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			-1, null, null, null, null, -1));
-		//0.8.0 Amazon
-		add(new MinecraftVersion(400800010, false, 0x28c750, LIB_LOAD_OFFSET, new AmazonTranslator080(),
+		//0.8.1 Amazon
+		add(new MinecraftVersion(400801011, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, new AmazonTranslator080(),
 			-1, null, null, null, null, -1));
 	}
 
