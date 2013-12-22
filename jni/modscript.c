@@ -119,6 +119,7 @@ static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
+static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -761,6 +762,17 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	}
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetInventorySlot
+  (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
+	if (bl_localplayer == NULL) return 0;
+	//we grab the inventory instance from the player
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO Merge this into a macro
+	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
+	if (itemStack == NULL) return;
+	bl_FillingContainer_replaceSlot(invPtr, slot, itemStack);
+	free(itemStack);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
 	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + 3264);
@@ -944,6 +956,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiP5Level");
+
+	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 

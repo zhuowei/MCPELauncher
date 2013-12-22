@@ -1233,13 +1233,14 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void showHiddenTextbox(String text, int maxLength, boolean dismissAfterOneLine) {
+		int IME_FLAG_NO_FULLSCREEN = 0x02000000;
 		if (hiddenTextWindow == null) {
 			hiddenTextView = new EditText(this);
 			PopupTextWatcher whoWatchesTheWatcher = new PopupTextWatcher();
 			hiddenTextView.addTextChangedListener(whoWatchesTheWatcher);
 			hiddenTextView.setOnEditorActionListener(whoWatchesTheWatcher);
 			hiddenTextView.setSingleLine(true);
-			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT | EditorInfo.IME_FLAG_NO_EXTRACT_UI | IME_FLAG_NO_FULLSCREEN);
 			hiddenTextView.setInputType(InputType.TYPE_CLASS_TEXT);
 			LinearLayout linearLayout = new LinearLayout(this);
 			linearLayout.addView(hiddenTextView);

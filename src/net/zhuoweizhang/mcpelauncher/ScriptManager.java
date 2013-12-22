@@ -265,7 +265,15 @@ public class ScriptManager {
 	public static void chatCallback(String str) {
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
-		if (!isRemote) nativePreventDefault();
+		if (!isRemote) {
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.updateTextboxText("");
+				}
+			}
+		}
 		if (BuildConfig.DEBUG) {
 			processDebugCommand(str.substring(1));
 		}
@@ -778,6 +786,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
 	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3, float v4, float v5, float v6);
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
+	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1277,6 +1286,11 @@ public class ScriptManager {
 			if (ent == null) ent = playerEnt;
 			return nativeGetPlayerName(ent);
 		}*/
+
+		/*@JSStaticFunction
+		public static void setInventorySlot(int slot, int itemId, int count, int damage) {
+			nativeSetInventorySlot(slot, itemId, count, damage);
+		}*/
 		
 		@Override
 		public String getClassName() {
@@ -1348,7 +1362,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setCarriedItem(int ent, int id, int count, int damage) {
-			nativeSetCarriedItem(ent, id, 1, damage);
+			nativeSetCarriedItem(ent, id, count, damage);
 		}
 
 		@JSStaticFunction
@@ -1541,7 +1555,7 @@ public class ScriptManager {
 			return "ModPE";
 		}
 	}
-	private static final boolean HAVE_YOU_FIXED_BLOCKS = false;
+	private static final boolean HAVE_YOU_FIXED_BLOCKS = true;
 
 	private static class NativeBlockApi extends ScriptableObject {
 		public NativeBlockApi() {

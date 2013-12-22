@@ -58,8 +58,8 @@ typedef struct {
 	void** vtable; //0
 	int texture; //4
 	int id; //8
-	char filler[32]; //12
-	void* material; //44
+	char filler[52]; //12
+	void* material; //44 + 20
 	int filler1; //48
 	float destroyTime; //52
 	float explosionResistance; //56
