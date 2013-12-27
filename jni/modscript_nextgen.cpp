@@ -85,6 +85,8 @@ static std::string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
+static void (*bl_CreativeInventryScreen_populateTile_real)(Tile*, int, int);
+static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
 //static Item** bl_Item_items;
 static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
@@ -102,6 +104,9 @@ uint8_t bl_custom_block_renderLayer[256];
 //end custom blocks
 
 std::map <std::string, std::string>* bl_I18n_strings;
+
+int bl_addItemCreativeInvRequest[256][4];
+int bl_addItemCreativeInvRequestCount = 0;
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -210,6 +215,36 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 		bl_Font_drawSlow_real(font, text, length, xOffset, yOffset, color, isShadow);
 		return;
 	}
+}
+
+void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int damage){
+	int index = bl_addItemCreativeInvRequestCount;
+	for(int i = index; i > 0; i--){
+		if (!bl_addItemCreativeInvRequest[i][3]) continue;
+		bl_addItemCreativeInvRequest[i][3] = 0;
+
+		int id = bl_addItemCreativeInvRequest[i][0];
+
+		if (id >= 0 && id <= 255) {
+			Tile* addTile = bl_Tile_tiles[id];
+			if (addTile == NULL) continue;
+
+			bl_CreativeInventryScreen_populateTile_real(addTile, bl_addItemCreativeInvRequest[i][1], bl_addItemCreativeInvRequest[i][2]);
+		} else if (id > 0 && id < 512) {
+			ItemInstance* instance = bl_newItemInstance(id, 1, 0);
+			if (instance == NULL) continue;
+			Item* addItem = instance->item;
+
+			bl_CreativeInventryScreen_populateItem_real(addItem, bl_addItemCreativeInvRequest[i][1], bl_addItemCreativeInvRequest[i][2]);
+		}
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Add item: %d (%d)\n", id, i);
+	}
+
+	bl_CreativeInventryScreen_populateTile_real(tile, count, damage);
+}
+
+void bl_CreativeInventryScreen_populateItem_hook(Item* item, int count, int damage){
+	bl_CreativeInventryScreen_populateItem_real(item, count, damage);
 }
 
 const char* bl_getCharArr(void* str){
@@ -579,6 +614,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	bl_custom_block_renderLayer[blockId] = (uint8_t) level;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv
+  (JNIEnv *env, jclass clazz, jint id, jint count, jint damage) {
+	if (id < 0) return;
+
+	bl_addItemCreativeInvRequestCount++;
+	int index = bl_addItemCreativeInvRequestCount;
+	bl_addItemCreativeInvRequest[index][0] = id;
+	bl_addItemCreativeInvRequest[index][1] = count;
+	bl_addItemCreativeInvRequest[index][2] = damage;
+	bl_addItemCreativeInvRequest[index][3] = 1;
+	//bl_CreativeInventryScreen_populateItem_real(tile, count, damage);
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -647,6 +695,12 @@ void bl_setuphooks_cppside() {
 	//bl_Item_items = (Item**) dlsym(mcpelibhandle, "_ZN4Item5itemsE");
 	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
+
+	void* populateTile = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Tileii");
+	mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
+
+	void* populateItem = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Itemii");
+	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 }
 
 } //extern
