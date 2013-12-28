@@ -1141,12 +1141,13 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void destroyBlock(int x, int y, int z, boolean shouldDrop) {
+		public static void destroyBlock(int x, int y, int z, int dropId, int dropData) {
 			int itmId = getTile(x, y, z);
 			int itmDmg = getData(x, y, z);
 
 			nativeDestroyBlock(x, y, z);
-			if(shouldDrop) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
+			if(dropId == -1) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, itmId, 1, itmDmg);
+			else if(dropId != 0) dropItem(((double)x)+0.5, y, ((double)z)+0.5, 1, dropId, 1, dropData);
 		}
 
 		@JSStaticFunction
