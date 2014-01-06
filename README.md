@@ -36,7 +36,7 @@ git clone git@github.com:zhuowei/BlockLauncher.git
 git clone git@github.com:zhuowei/BlockLauncher-app.git
 git clone https://github.com/Chainfire/libsuperuser.git
 android update lib-project -p libsuperuser/libsuperuser -t 1
-cd BlockLauncher
+cd BlockLauncher 
 ndk-build
 cd ..
 cd BlockLauncher-app
