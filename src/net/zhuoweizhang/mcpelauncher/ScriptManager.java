@@ -1281,11 +1281,10 @@ public class ScriptManager {
 			nativeSetArmorSlot(slot, id, damage);
 		}
 
-		/*@JSStaticFunction
+		@JSStaticFunction
 		public static String getName(int ent) {
-			if (ent == null) ent = playerEnt;
 			return nativeGetPlayerName(ent);
-		}*/
+		}
 
 		/*@JSStaticFunction
 		public static void setInventorySlot(int slot, int itemId, int count, int damage) {
