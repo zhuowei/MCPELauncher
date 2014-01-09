@@ -140,7 +140,7 @@ Scroll to the bottom and see notice. -->
 
     <string name="server_list_add">서버 추가</string>
     <string name="pref_zz_server_list">서버 목록</string>
-    <string name="pref_zz_server_list_summary">여기에서 선택하거나 서버 목록에 서버를 추가</string>
+    <string name="pref_zz_server_list_summary">여기에서 선택하거나 서버 목록에 서버를 추가하세요.</string>
     <string name="server_list_patch_address">서버 목록 패치</string>
     <string name="server_list_name_prompt">이름 : </string>
     <string name="server_list_address_prompt">IP : </string>
@@ -148,7 +148,7 @@ Scroll to the bottom and see notice. -->
 
     <string name="script_import_from">스크립트 가져오기</string>
     <string name="script_import_from_local">내장 메모리로부터 가져오기</string>
-    <string name="script_import_from_cfgy">Treebl\'s 공식 저장소</string>
+    <string name="script_import_from_cfgy">Treebl의 공식 저장소</string>
     <string name="script_import_from_bl_repo">BlockLauncher의 실험적인 저장소</string>
     <string name="script_import_from_url">웹 주소</string>
     <string name="script_import_from_clipboard">클립보드</string>
@@ -161,14 +161,14 @@ Scroll to the bottom and see notice. -->
     <string name="script_disabled_in_multiplayer">ModPE 스크립트는 멀티플레이어 모드에서 크래시가 발생할 수 있으므로 스크립트가 비활성화 되었습니다. 서버에서 연결이 끊어지면 자동으로 스크립트는 활성화됩니다.</string>
     <string name="script_minecraft_version_incompatible">ModPE 스크립트가 이 Minecraft PE버전을 지원하지 않습니다. 스크립트의 기능이 작동하지 않게 되거나, 런처에 크래시가 발생할 수 있습니다.</string>
     <string name="script_import_from_intent_warning">이 스크립트를 추가하시길 원하십니까? 그것은 당신의 BlockLauncher 가 암호및 다른 중요한정보를 예를들어 동일한 리소스에 대한 엑세스를 얻을것입니다. </string>
-    <string name="script_view_source">소스보기</string>
-    <string name="script_too_many_errors">너무 많은 오류때문에 스크립트가 비활성화 되었습니다. 죄송합니다!</string>
+    <string name="script_view_source">소스 보기</string>
+    <string name="script_too_many_errors">스크립트의 오류가 너무 많이 발견되어 스크립트를 비활성화 하였습니다. 죄송합니다!</string>
     <string name="take_screenshot">스크린샷 찍기</string>
-    <string name="take_screenshot_requires_modpe_script">스크린샷을 찍기 위해서 ModPE 스크립트를 활성화 해야합니다.\n당신은 런쳐 옵션에서 ModPE 스크립트를 활성화 할 수 있습니다..</string>
-    <string name="screenshot_saved_as">스크린샷이 저장되었습니다. 경로:</string>
+    <string name="take_screenshot_requires_modpe_script">스크린샷을 찍기 위해선 ModPE 스크립트를 활성화 해야합니다.\n런쳐 옵션에서 ModPE 스크립트를 활성화 할 수 있습니다.</string>
+    <string name="screenshot_saved_as">스크린샷이 저장되었습니다. 경로 : </string>
 
-    <string name="selinux_broke_everything">안타깝게도, BlockLauncher 는 삼성 Knox 또는 SELinux 등의 보안프로그램이 live patching을 방해하고 있어서 당신의 디바이스에서 실행할수 없습니다.\n\n
-우리는 이에 대한 수정작업을 하고 있습니다. 하지만 그동안 BlockLauncher 기능은 모드 와 텍스쳐팩 로딩에 제한됩니다. \n\nModPE 스크립트는 불가능합니다. 그리고 모든 모드 패치는 재시작을 해야합니다.</string>
+    <string name="selinux_broke_everything">안타깝게도, BlockLauncher는 삼성 KNOX 또는 SELinux 등의 보안 프로그램이 라이브 패치 (Live Patching)을 방해하고 있어서 런처를 실행 할 수 없었습니다.\n\n
+이것에 대항하기 위해 어플리케이션을 수정하고 있지만, 수정이 완료되기 전까지는 모드와 텍스쳐팩, ModPE 스크립트 적용이 제한됩니다. \n\n모든 모드 패치는 런처를 재시작해야 적용됩니다.</string>
 
     <!-- Do not parse app name to localized name. Be static app name to English. -->
     <!-- 어플리케이션 이름을 한글로 번역하지 마십시오. 개발자 측에서는 어플리케이션 이름을 각자의 언어로 번역하는걸 원치 않아하십니다. -->
@@ -176,9 +176,9 @@ Scroll to the bottom and see notice. -->
 그냥 Minecraft -> 마인크래프트는... 될겁니다.. -->
     
     <string name="permlab_mcpelauncher_addon">BlockLauncher 애드온</string>
-    <string name="permdesc_mcpelauncher_addon">BlockLauncher 에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, 저장소 접근, 그리고 Minecraft PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
+    <string name="permdesc_mcpelauncher_addon">BlockLauncher에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, 저장소 접근, 그리고 Minecraft PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
 
-    <!-- 후의 번역자분들께 말씀드리겠습니다. : Koongchi
+    <!-- 후의 번역자분들께 말씀드리겠습니다. : SDKoongchi
 많은 사람들이 쓰는 어플리케이션인만큼, 번역 시에 문법 등을 잘 살려주시기 바랍니다. '.' 이나 ',' 등...
 참고로, 번역에는 위아래가 없습니다. 무슨 뜻이냐 하면, 유명한 블로거 및 마인크래프트 플레이어라고 해도
 자신의 번역이 수정되었다고 해도 따질 수 있는 게 아닙니다. 모든 사람에게 공평한 권리를 가지어 번역합시다. -->
