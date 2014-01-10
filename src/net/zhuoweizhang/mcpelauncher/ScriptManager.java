@@ -844,7 +844,7 @@ public class ScriptManager {
 	public static native int nativeGetItemChest(int x, int y, int z, int slot);
 	public static native int nativeGetItemDataChest(int x, int y, int z, int slot);
 	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
-	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
+	public static native int nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
 
 	// KsyMC's additions
 	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
@@ -1154,8 +1154,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void dropItem(double x, double y, double z, double range, int id, int count, int damage) {
-			nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
+		public static int dropItem(double x, double y, double z, double range, int id, int count, int damage) {
+			return nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
 		}
 
 		@JSStaticFunction

@@ -95,7 +95,7 @@ static void (*bl_Level_removeEntity)(Level*, Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, int, int, int, int);
 static Entity* (*bl_EntityFactory_CreateEntity)(int, Level*);
-static void (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
+static Entity* (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
 static long (*bl_Level_getTime)(Level*);
 static void (*bl_Level_setTime)(Level*, float);
 static void* (*bl_Level_getLevelData)(Level*);
@@ -414,7 +414,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 	return bl_Level_getTime(bl_level);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
 	ItemInstance* instance = bl_newItemInstance(id, count, damage);
 
@@ -424,7 +424,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDr
 		return;
 	}
 	bl_Entity_setPos(entity, x, y, z);
-	bl_Entity_spawnAtLocation(entity, instance, range);
+	Entity* entity2 = bl_Entity_spawnAtLocation(entity, instance, range);
+	return entity2->entityId;
 	//TODO: WTF, MrARM: why spawn an entity, use its spawn at location to make it drop another entity,
 	//and then never use the original?!
 	//(Potential memory leak?)
