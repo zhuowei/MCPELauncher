@@ -101,6 +101,16 @@
         android:defaultValue="false"/>
 
     <CheckBoxPreference
+        android:key="zz_texture_pack_enable"
+        android:title="Load textures from extracted APK"
+        android:defaultValue="false"/>
+
+    <Preference
+        android:key="zz_extract_original_textures"
+        android:title="@string/pref_zz_extract_original_textures"
+        android:summary="@string/pref_zz_extract_original_textures_summary"/>
+
+    <CheckBoxPreference
         android:key="zz_skin_enable"
         android:title="@string/pref_zz_skin_enable"
         android:defaultValue="false"/>

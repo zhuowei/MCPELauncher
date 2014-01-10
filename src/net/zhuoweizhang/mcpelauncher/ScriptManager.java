@@ -1690,6 +1690,8 @@ public class ScriptManager {
 		}
 
 		public void run() {
+			File skinFile = getTextureOverrideFile("images/" + skinPath);
+			if (!skinFile.exists()) return;
 			NativeEntityApi.setMobSkin(entityId, skinPath);
 		}
 	}
