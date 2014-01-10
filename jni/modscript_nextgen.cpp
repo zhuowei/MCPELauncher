@@ -40,6 +40,7 @@ typedef void Font;
 #define BLOCK_VTABLE_IS_SOLID_RENDER 19
 #define MOB_TEXTURE_OFFSET 2948
 #define PLAYER_NAME_OFFSET 3200
+#define ENTITY_VTABLE_OFFSET_IS_PLAYER 44
 
 extern "C" {
 
@@ -466,6 +467,15 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	std::string* myName = (std::string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
 	jstring returnValString = env->NewStringUTF(myName->c_str());
 	return returnValString;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsPlayer
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	void* vtable = entity->vtable[ENTITY_VTABLE_OFFSET_IS_PLAYER];
+	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
+	return fn(entity) != 0;
 }
 
 void bl_initCustomBlockVtable() {

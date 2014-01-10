@@ -86,6 +86,8 @@ public class ScriptManager {
 
 	private static boolean requestReloadAllScripts = false;
 
+	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		//Rhino needs lots of recursion depth to parse nested else ifs
@@ -255,6 +257,14 @@ public class ScriptManager {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
 			requestJoinServer = null;
 		}
+		if (runOnMainThreadList.size() > 0) {
+			synchronized(runOnMainThreadList) {
+				for (Runnable r: runOnMainThreadList) {
+					r.run();
+				}
+				runOnMainThreadList.clear();
+			}
+		}
 		//runDownloadCallbacks();
 	}
 
@@ -286,10 +296,17 @@ public class ScriptManager {
 
 	//Other nonstandard callbacks
 	public static void entityRemovedCallback(int entity) {
+		if (nativeIsPlayer(entity)) {
+			playerRemovedHandler(entity);
+		}
 		callScriptMethod("entityRemovedHook", entity);
 	}
 
 	public static void entityAddedCallback(int entity) {
+		//check if entity is player
+		if (nativeIsPlayer(entity)) {
+			playerAddedHandler(entity);
+		}
 		callScriptMethod("entityAddedHook", entity);
 	}
 
@@ -720,6 +737,30 @@ public class ScriptManager {
 		}
 		out.close();
 	}
+
+	private static void playerAddedHandler(int entityId) {
+		//load skin for player
+		String playerName = nativeGetPlayerName(entityId); //in the real service, this would be normalized
+		String skinName = "mob/" + playerName + ".png";
+		File skinFile = getTextureOverrideFile("images/" + skinName);
+		String urlString = "http://s3.amazonaws.com/MinecraftSkins/" + playerName + ".png";
+		try {
+			URL url = new URL(urlString);
+			new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(entityId, skinName))).start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	private static void playerRemovedHandler(int entityId) {
+	}
+
+	public static void runOnMainThread(Runnable run) {
+		synchronized(runOnMainThreadList) {
+			runOnMainThreadList.add(run);
+		}
+	}
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -787,6 +828,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3, float v4, float v5, float v6);
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
 	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
+	public static native boolean nativeIsPlayer(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1632,5 +1674,18 @@ public class ScriptManager {
 	private static class JoinServerRequest {
 		public String serverAddress;
 		public int serverPort;
+	}
+
+	private static class AfterSkinDownloadAction implements Runnable {
+		private int entityId;
+		private String skinPath;
+		public AfterSkinDownloadAction(int entityId, String skinPath) {
+			this.entityId = entityId;
+			this.skinPath = skinPath;
+		}
+
+		public void run() {
+			NativeEntityApi.setMobSkin(entityId, skinPath);
+		}
 	}
 }

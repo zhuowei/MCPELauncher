@@ -1636,7 +1636,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected boolean allowScriptOverrideTextures() {
-		return false;
+		return true; //Let's do this! Leeroy Jenkins!
 	}
 
 

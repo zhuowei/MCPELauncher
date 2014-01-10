@@ -7,20 +7,34 @@ public class ScriptTextureDownloader implements Runnable {
 
 	public File file;
 	public URL url;
+	public Runnable afterDownloadAction;
 
 	public ScriptTextureDownloader(URL url, File file) {
+		this(url, file, null);
+	}
+
+	public ScriptTextureDownloader(URL url, File file, Runnable afterDownloadAction) {
 		this.url = url;
 		this.file = file;
+		this.afterDownloadAction = afterDownloadAction;
 	}
 
 	public void run() {
 		//fetches the resource, stores it into the required file
 		//and then schedule a graphics reset.
-		fetch();
-		ScriptManager.requestGraphicsReset();
+		try {
+			fetch();
+			if (afterDownloadAction == null) {
+				ScriptManager.requestGraphicsReset();
+			} else {
+				ScriptManager.runOnMainThread(afterDownloadAction);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	protected void fetch() {
+	protected void fetch() throws Exception {
 		HttpURLConnection conn;
 		InputStream is = null;
 		FileOutputStream fos = null;
@@ -70,10 +84,6 @@ public class ScriptTextureDownloader implements Runnable {
 			}
 
 			fos.flush();
-		} catch (Exception e) {
-			e.printStackTrace();
-			ScriptManager.reportScriptError(null, e);
-			return;
 		} finally {
 			if (is != null) {
 				try {
