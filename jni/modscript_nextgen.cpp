@@ -316,8 +316,8 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 	Item* retval = (Item*) ::operator new((std::size_t) 84);
 	bl_Item_Item(retval, id - 0x100);
 	retval->vtable = bl_FoodItem_vtable;
-	((int*)retval)[9] = hearts;
-	((float*) retval)[10] = timetoeat; //time to eat
+	((int*)retval)[18] = hearts;
+	((float*) retval)[19] = timetoeat; //time to eat
 	return retval;
 }
 
