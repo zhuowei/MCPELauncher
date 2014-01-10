@@ -655,6 +655,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTextParseColorCodes
   (JNIEnv *, jclass, jboolean);
 
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeAddItemCreativeInv
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv
+  (JNIEnv *, jclass, jint, jint, jint);
+
 #ifdef __cplusplus
 }
 #endif

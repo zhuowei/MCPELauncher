@@ -850,6 +850,7 @@ public class ScriptManager {
 	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
 	public static native void nativeClearSlotInventory(int slot);
 	public static native int nativeGetSlotInventory(int slot, int type);
+	public static native void nativeAddItemCreativeInv(int id, int count, int damage);
 
 	//InusualZ's additions
 	public static native void nativeExtinguishFire(int x, int y, int z, int side);
@@ -1304,6 +1305,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getCarriedItemCount() {
 			return nativeGetCarriedItem(AMOUNT);
+		}
+		@JSStaticFunction
+		public static void addItemCreativeInv(int id, int count, int damage) {
+			nativeAddItemCreativeInv(id, count, damage);
 		}
 		
 		//InusualZ's additions
