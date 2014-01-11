@@ -1,200 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto">
+    xmlns:custom="http://schemas.android.com/apk/res-auto" >
 
-    <!--<PreferenceCategory 
-        android:title="@string/pref_mp_title">
-
-    <EditTextPreference
-        android:key="mp_username"
-        android:title="@string/pref_mp_username"
-        android:summary="@string/pref_mp_username_summary"
-        android:defaultValue="Steve" />
-    <CheckBoxPreference
-        android:key="mp_server_visible_default"
-        android:title="@string/pref_mp_server_visible_default"
-        android:defaultValue="true"/>
-
-    </PreferenceCategory>-->
-
-    <PreferenceCategory 
-        android:title="@string/pref_ctrl_title">
-
-    <!--<com.lukehorvat.SeekBarDialogPreference android:key="ctrl_sensitivity"
-        android:defaultValue="50"
-        android:max="100"
-        android:title="@string/pref_ctrl_sensitivity"
-        custom:progressTextSuffix="%"
-        custom:min="1" />
-
-    <CheckBoxPreference
-        android:key="ctrl_invertmouse"
-        android:title="@string/pref_ctrl_invertmouse"
-        android:summary="@string/pref_ctrl_invertmouse_summary"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference
-        android:key="ctrl_islefthanded"
-        android:title="@string/pref_ctrl_islefthanded"
-        android:summary="@string/pref_ctrl_islefthanded_summary"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference
-        android:key="ctrl_usetouchscreen"
-        android:title="@string/pref_ctrl_touchscreen"
-        android:summary="@string/pref_ctrl_touchscreen_summary"
-        android:defaultValue="true" />
-    <CheckBoxPreference
-        android:key="ctrl_usetouchjoypad"
-        android:title="@string/pref_ctrl_usetouchjoypad"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference
-        android:key="feedback_vibration"
-        android:title="@string/pref_feedback_vibration"
-        android:summary="@string/pref_feedback_vibration_summary"
-        android:defaultValue="true"/>-->
-    <CheckBoxPreference
-        android:key="zz_longvibration"
-        android:title="@string/pref_zz_longvibration"
-        android:summary="@string/pref_zz_longvibration_summary"
-        android:defaultValue="false"/>
-
+    <PreferenceCategory android:title="@string/pref_ctrl_title" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_longvibration"
+            android:summary="@string/pref_zz_longvibration_summary"
+            android:title="@string/pref_zz_longvibration" />
     </PreferenceCategory>
-
-    <PreferenceCategory 
-        android:title="@string/pref_gfx_title">
-
-    <!--<CheckBoxPreference
-        android:key="gfx_fancygraphics"
-        android:title="@string/pref_gfx_fancygraphics"
-        android:summary="@string/pref_gfx_fancygraphics_summary"
-        android:defaultValue="false"/>
-    <CheckBoxPreference
-        android:key="gfx_lowquality"
-        android:title="@string/pref_gfx_lowquality"
-        android:summary="@string/pref_gfx_lowquality_summary"
-        android:defaultValue="false"/>-->
-
-    <EditTextPreference
-        android:key="zz_custom_dpi"
-        android:title="@string/pref_zz_custom_dpi"
-        android:summary="@string/pref_zz_custom_dpi_summary"
-        android:inputType="numberDecimal"
-        android:defaultValue=""/>
-
+    <PreferenceCategory android:title="@string/pref_gfx_title" >
+        <EditTextPreference
+            android:defaultValue=""
+            android:inputType="numberDecimal"
+            android:key="zz_custom_dpi"
+            android:summary="@string/pref_zz_custom_dpi_summary"
+            android:title="@string/pref_zz_custom_dpi" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_textures_title" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_texture_pack_demo"
+            android:summary="@string/pref_zz_texture_pack_demo_summary"
+            android:title="@string/pref_zz_texture_pack_demo" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_texture_pack_enable"
+            android:title="@string/pref_zz_texture_pack_enable" />
 
-    <!--<CheckBoxPreference
-        android:key="game_difficultypeaceful"
-        android:title="@string/pref_game_difficultypeaceful"
-        android:summary="@string/pref_game_difficultypeaceful_summary"
-        android:defaultValue="false"/>-->
+        <Preference
+            android:key="zz_extract_original_textures"
+            android:summary="@string/pref_zz_extract_original_textures_summary"
+            android:title="@string/pref_zz_extract_original_textures" />
 
-    <PreferenceCategory 
-        android:title="@string/pref_textures_title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_skin_enable"
+            android:title="@string/pref_zz_skin_enable" />
 
-    <CheckBoxPreference
-        android:key="zz_texture_pack_demo"
-        android:title="@string/pref_zz_texture_pack_demo"
-        android:summary="@string/pref_zz_texture_pack_demo_summary"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference
-        android:key="zz_texture_pack_enable"
-        android:title="Load textures from extracted APK"
-        android:defaultValue="false"/>
-
-    <Preference
-        android:key="zz_extract_original_textures"
-        android:title="@string/pref_zz_extract_original_textures"
-        android:summary="@string/pref_zz_extract_original_textures_summary"/>
-
-    <CheckBoxPreference
-        android:key="zz_skin_enable"
-        android:title="@string/pref_zz_skin_enable"
-        android:defaultValue="false"/>
-
-    <Preference
-        android:key="zz_skin"
-        android:title="@string/pref_zz_skin"
-        android:summary="@string/pref_zz_skin_summary"
-        android:dependency="zz_skin_enable"/>
-
+        <Preference
+            android:dependency="zz_skin_enable"
+            android:key="zz_skin"
+            android:summary="@string/pref_zz_skin_summary"
+            android:title="@string/pref_zz_skin" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_addons_title" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_safe_mode"
+            android:summary="@string/pref_zz_safe_mode_summary"
+            android:title="@string/pref_zz_safe_mode" />
 
-    <PreferenceCategory 
-        android:title="@string/pref_addons_title">
+        <Preference
+            android:key="zz_manage_patches"
+            android:title="@string/manage_patches" />
 
-    <CheckBoxPreference
-        android:key="zz_safe_mode"
-        android:title="@string/pref_zz_safe_mode"
-        android:summary="@string/pref_zz_safe_mode_summary"
-        android:defaultValue="false"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_hovercar_hide"
+            android:title="@string/pref_zz_hovercar_hide" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_load_native_addons"
+            android:title="@string/pref_zz_load_native_addons" />
 
-    <Preference android:key="zz_manage_patches"
-        android:title="@string/manage_patches"/>
+        <Preference
+            android:key="zz_manage_addons"
+            android:title="@string/manage_addons" />
 
-    <!--<CheckBoxPreference
-        android:key="zz_enable_hovercar"
-        android:title="@string/pref_zz_enable_hovercar"
-        android:defaultValue="false"/>-->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="zz_script_enable"
+            android:title="@string/pref_zz_script_enable" />
 
-    <CheckBoxPreference
-        android:key="zz_hovercar_hide"
-        android:title="@string/pref_zz_hovercar_hide"
-        android:defaultValue="false"/>
+        <Preference
+            android:dependency="zz_script_enable"
+            android:key="zz_manage_scripts"
+            android:title="@string/pref_zz_manage_scripts" >
+            <intent
+                android:targetClass="net.zhuoweizhang.mcpelauncher.ManageScriptsActivity"
+                android:targetPackage="net.zhuoweizhang.mcpelauncher" />
+        </Preference>
 
-    <CheckBoxPreference
-        android:key="zz_load_native_addons"
-        android:title="@string/pref_zz_load_native_addons"
-        android:defaultValue="false"/>
-
-    <Preference android:key="zz_manage_addons"
-        android:title="@string/manage_addons"/>
-
-    <CheckBoxPreference android:key="zz_script_enable"
-        android:title="@string/pref_zz_script_enable"
-        android:defaultValue="true"/>
-
-    <Preference android:key="zz_manage_scripts"
-        android:title="@string/pref_zz_manage_scripts"
-        android:dependency="zz_script_enable">
-        <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
-                android:targetClass="net.zhuoweizhang.mcpelauncher.ManageScriptsActivity"/>
-    </Preference>
-
-    <CheckBoxPreference android:key="zz_script_paranoid_mode"
-        android:title="@string/pref_zz_script_paranoid_mode"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference android:key="zz_show_insert_text"
-        android:title="@string/pref_zz_show_insert_text"
-        android:defaultValue="false"/>
-
-    <CheckBoxPreference android:key="zz_legacy_keyboard_input"
-        android:title="@string/pref_zz_legacy_keyboard_input"
-        android:defaultValue="false"/>
-
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_script_paranoid_mode"
+            android:title="@string/pref_zz_script_paranoid_mode" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_show_insert_text"
+            android:title="@string/pref_zz_show_insert_text" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_legacy_keyboard_input"
+            android:title="@string/pref_zz_legacy_keyboard_input" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_support_title" >
+        <Preference android:title="@string/nerdy_stuff_page" >
+            <intent
+                android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"
+                android:targetPackage="net.zhuoweizhang.mcpelauncher" />
+        </Preference>
 
-    <PreferenceCategory 
-        android:title="@string/pref_support_title">
+        <ListPreference
+            android:key="zz_language_override"
+            android:title="@string/pref_zz_language_override" />
 
-    <Preference
-        android:title="@string/nerdy_stuff_page">
-        <intent android:targetPackage="net.zhuoweizhang.mcpelauncher"
-                android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
-    </Preference>
-
-    <ListPreference android:title="@string/pref_zz_language_override" android:key="zz_language_override"/>
-
-    <Preference android:key="zz_about"
-        android:title="@string/about_about"/>
-
-    <Preference android:key="zz_go_to_forums"
-        android:title="@string/about_go_to_forums"/>
-
+        <Preference
+            android:key="zz_about"
+            android:title="@string/about_about" />
+        <Preference
+            android:key="zz_go_to_forums"
+            android:title="@string/about_go_to_forums" />
     </PreferenceCategory>
 
 </PreferenceScreen>
