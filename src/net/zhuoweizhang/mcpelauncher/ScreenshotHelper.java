@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.Date;
@@ -14,13 +13,9 @@ import java.util.Locale;
 
 import android.graphics.Bitmap;
 
-import android.opengl.GLES11;
-
 import static android.opengl.GLES11.*;
 
 import android.os.Environment;
-
-import android.util.Log;
 
 import com.mojang.minecraftpe.MainActivity;
 

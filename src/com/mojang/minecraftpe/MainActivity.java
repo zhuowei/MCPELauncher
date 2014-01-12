@@ -1,34 +1,21 @@
 package com.mojang.minecraftpe;
 
 import java.io.*;
-
 import java.lang.ref.WeakReference;
-
 import java.nio.ByteBuffer;
-
 import java.text.DateFormat;
-
 import java.net.*;
-
 import java.util.*;
-
 import javax.net.ssl.*;
-import java.security.*;
-import java.security.cert.*;
-
 import java.lang.reflect.Field;
-
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -38,7 +25,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Vibrator;
 import android.text.ClipboardManager;
 import android.text.Editable;
@@ -47,23 +33,15 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextWatcher;
 import android.view.*;
-import android.view.KeyCharacterMap;
 import android.view.inputmethod.*;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.webkit.*;
 import android.widget.*;
-
 import android.preference.*;
-
-import dalvik.system.PathClassLoader;
-
 import org.mozilla.javascript.RhinoException;
-
 import net.zhuoweizhang.mcpelauncher.*;
-
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
-
 import net.zhuoweizhang.pokerface.PokerFace;
 
 public class MainActivity extends NativeActivity
@@ -338,25 +316,18 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (true || PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_enable_hovercar", false)) {
-			if (hoverCar == null) {
-				getWindow().getDecorView().post(new Runnable() {
-					public void run() {
-						try {
-							setupHoverCar();
-						} catch (Exception e) {
-							e.printStackTrace();
-						} //don't force close on hover car fail
-					}
-				});
-			} else {
-				hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
-			}
+		if (hoverCar == null) {
+			getWindow().getDecorView().post(new Runnable() {
+				public void run() {
+					try {
+						setupHoverCar();
+					} catch (Exception e) {
+						e.printStackTrace();
+					} //don't force close on hover car fail
+				}
+			});
 		} else {
-			if (hoverCar != null) {
-				hoverCar.dismiss();
-				hoverCar = null;
-			}
+			hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
 		}
 
 	}
@@ -653,7 +624,7 @@ public class MainActivity extends NativeActivity
 		} else {
 			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu};
 		}
-		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
+		return new AlertDialog.Builder(this).setTitle(R.string.app_name).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					if (button == 0) {
@@ -1060,6 +1031,7 @@ public class MainActivity extends NativeActivity
 	public void openLoginWindow() {
 		Log.i(TAG, "Open login window");
 		this.runOnUiThread(new Runnable() {
+			@SuppressLint("SetJavaScriptEnabled")
 			public void run() {
 				loginWebView = new WebView(MainActivity.this);
 				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -1311,8 +1283,8 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void applyPatches() throws Exception {
-		ByteBuffer buffer = minecraftLibBuffer;
-		/*buffer.position(0x1b6d50);//"v0.6.1" offset
+		/*ByteBuffer buffer = minecraftLibBuffer;
+		buffer.position(0x1b6d50);//"v0.6.1" offset
 		byte[] testBuffer = new byte[6];
 		buffer.get(testBuffer);
 		System.out.println("Before: " + Arrays.toString(testBuffer));

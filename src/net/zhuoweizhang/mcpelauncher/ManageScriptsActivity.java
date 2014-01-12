@@ -1,11 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import java.io.*;
-
 import java.net.*;
-
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -20,12 +16,8 @@ import android.content.pm.*;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.ClipboardManager;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import static android.widget.AdapterView.OnItemClickListener;
 import android.widget.*;
 import android.util.Base64;
@@ -36,10 +28,10 @@ import com.ipaulpro.afilechooser.utils.FileUtils;
 import org.mozilla.javascript.RhinoException;
 
 import static net.zhuoweizhang.mcpelauncher.ScriptManager.SCRIPTS_DIR;
+import net.zhuoweizhang.mcpelauncher.RefreshContentListThread.OnRefreshContentList;
 import net.zhuoweizhang.mcpelauncher.patch.*;
-import com.mojang.minecraftpe.*;
 
-public class ManageScriptsActivity extends ListActivity implements View.OnClickListener {
+public class ManageScriptsActivity extends ListActivity implements View.OnClickListener, OnRefreshContentList {
 
 	private static final int DIALOG_MANAGE_PATCH = 1;
 	private static final int DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED = 2;
@@ -54,15 +46,12 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_IMPORT_FROM_INTENT = 11;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
+	
+	private Thread refreshThread;
 
-	private static String enabledString = "";
-	private static String disabledString = " (disabled)";
+	private List<ContentListItem> patches;
 
-	private FindScriptsThread findScriptsThread;
-
-	private List<ScriptListItem> patches;
-
-	private ScriptListItem selectedPatchItem;
+	private ContentListItem selectedPatchItem;
 
 	private Button importButton;
 
@@ -86,13 +75,13 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		});
 		importButton = (Button) findViewById(R.id.manage_patches_import_button);
 		importButton.setOnClickListener(this);
-		disabledString = " ".concat(getResources().getString(R.string.manage_patches_disabled));
 		ScriptManager.androidContext = this.getApplicationContext();
 		//if (!versionIsSupported()) {
 		//	showDialog(DIALOG_VERSION_INCOMPATIBLE);
 		//}
 		Uri data = getIntent().getData();
 		if (data != null) {
+			System.out.println("Requested deprecated APIs. Use .api.ImportScriptActivity to avoid any troubles.");
 			showDialog(DIALOG_IMPORT_FROM_INTENT);
 		}
 	}
@@ -145,7 +134,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 							Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 						} else {
 							ScriptManager.setEnabled(to, true);
-							afterPatchToggle(new ScriptListItem(to, true));
+							afterPatchToggle(new ContentListItem(to, true));
 						}
 						setPatchListModified();
 						findScripts();
@@ -160,24 +149,11 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	private void findScripts() {
-		findScriptsThread = new FindScriptsThread();
-		new Thread(findScriptsThread).start();
+		refreshThread = new Thread(new RefreshContentListThread(this, this));
+		refreshThread.start();
 	}
 
-	private void receiveScripts(List<ScriptListItem> patches) {
-		this.patches = patches;
-		ArrayAdapter<ScriptListItem> adapter = new ArrayAdapter<ScriptListItem>(this, R.layout.patch_list_item, patches);
-		adapter.sort(new PatchListComparator());
-		setListAdapter(adapter);
-		List<String> allPaths = new ArrayList<String>(patches.size());
-		for (ScriptListItem i: patches) {
-			String name = i.file.getName();
-			allPaths.add(name);
-		}
-		ScriptManager.removeDeadEntries(allPaths);
-	}
-
-	private void openManagePatchWindow(ScriptListItem item) {
+	private void openManagePatchWindow(ContentListItem item) {
 		this.selectedPatchItem = item;
 		showDialog(item.enabled? DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED : DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED);
 	}
@@ -217,7 +193,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			case DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED:
 			case DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED:
 				AlertDialog aDialog = (AlertDialog) dialog;
-				aDialog.setTitle(selectedPatchItem.toString());
+				aDialog.setTitle(selectedPatchItem.toString(getResources()));
 				break;
 			case DIALOG_PATCH_INFO:
 				preparePatchInfo((AlertDialog) dialog, selectedPatchItem);
@@ -237,7 +213,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		}
 	}
 
-	public void togglePatch(ScriptListItem patch) {
+	public void togglePatch(ContentListItem patch) {
 		int maxPatchCount = getMaxPatchCount();
 		if (!patch.enabled && maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
 			Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
@@ -257,14 +233,14 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		reportError(e);
 	}
 
-	private void afterPatchToggle(ScriptListItem patch) {
+	private void afterPatchToggle(ContentListItem patch) {
 	}
 
 	public int getEnabledCount() {
 		return ScriptManager.getEnabledScripts().size();
 	}
 
-	public void deletePatch(ScriptListItem patch) throws Exception {
+	public void deletePatch(ContentListItem patch) throws Exception {
 		patch.enabled = false;
 		try {
 			ScriptManager.setEnabled(patch.file, false);
@@ -273,8 +249,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		patch.file.delete();
 	}
 
-	public void preparePatchInfo(AlertDialog dialog, ScriptListItem patch) {
-		dialog.setTitle(patch.toString());
+	public void preparePatchInfo(AlertDialog dialog, ContentListItem patch) {
+		dialog.setTitle(patch.toString(getResources()));
 		String patchInfo;
 		try {
 			patchInfo = getPatchInfo(patch);
@@ -284,7 +260,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		dialog.setMessage(patchInfo);
 	}
 
-	private String getPatchInfo(ScriptListItem patchItem) throws IOException {
+	private String getPatchInfo(ContentListItem patchItem) throws IOException {
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.getResources().getString(R.string.manage_patches_path));
 		builder.append(": ");
@@ -444,7 +420,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			create();
 	}
 
-	private boolean isValidPatch(ScriptListItem patch) {
+	private boolean isValidPatch(ContentListItem patch) {
 		if (patch.file.length() < 1) {
 			return false;
 		}
@@ -555,7 +531,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		
 	}
 
-	private void viewSource(ScriptListItem item) {
+	private void viewSource(ContentListItem item) {
 		try {
 			//copy the script to the sdcard, then send an intent to view it
 			File outDir = new File(this.getExternalFilesDir(null), "scripts");
@@ -570,60 +546,6 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			e.printStackTrace();
 			//on an Android device there is always an activity to handle plain text (HTMLViewer in stock Android)
 			//so this shouldn't be hit
-		}
-	}
-
-	private final class FindScriptsThread implements Runnable {
-
-		public void run() {
-			File patchesFolder = getDir(SCRIPTS_DIR, 0);
-
-			final List<ScriptListItem> patches = new ArrayList<ScriptListItem>();
-
-			combOneFolder(patchesFolder, patches);
-
-			ManageScriptsActivity.this.runOnUiThread(new Runnable() {
-				public void run() {
-					ManageScriptsActivity.this.receiveScripts(patches);
-				}
-			});
-		}
-
-		private void combOneFolder(File patchesFolder, List<ScriptListItem> patches) {
-			if (!patchesFolder.exists()) {
-				System.err.println("no storage folder");
-			} else {
-				for (File patchFile : patchesFolder.listFiles()) {
-					boolean patchEnabled = ScriptManager.isEnabled(patchFile);
-					patches.add(new ScriptListItem(patchFile, patchEnabled));
-				}
-			}
-		}
-
-	}
-
-	private final class ScriptListItem {
-		public final File file;
-		public final String displayName;
-		public boolean enabled = true;
-		public ScriptListItem(File file, boolean enabled) {
-			this.file = file;
-			this.displayName = file.getName();
-			this.enabled = enabled;
-		}
-
-		public String toString() {
-			return displayName + (enabled? enabledString: disabledString);
-		}
-	}
-
-	private final class PatchListComparator implements Comparator<ScriptListItem> {
-		public int compare(ScriptListItem a, ScriptListItem b) {
-			//System.out.println(a.toString() + ":" + b.toString() + (a.levelDat.lastModified() - b.levelDat.lastModified()));
-			return a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
-		}
-		public boolean equals(ScriptListItem a, ScriptListItem b) {
-			return a.displayName.toLowerCase().equals(b.displayName.toLowerCase());
 		}
 	}
 
@@ -823,6 +745,37 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		} finally {
 			bytes.close();
 		}
+	}
+
+	@Override
+	public void onRefreshComplete(final List<ContentListItem> items) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ContentListItem.sort(items);
+				ManageScriptsActivity.this.patches = items;
+				ArrayAdapter<ContentListItem> adapter = new ArrayAdapter<ContentListItem>(ManageScriptsActivity.this, R.layout.patch_list_item, patches);
+				setListAdapter(adapter);
+				List<String> allPaths = new ArrayList<String>(patches.size());
+				for (ContentListItem i: patches) {
+					String name = i.file.getName();
+					allPaths.add(name);
+				}
+				ScriptManager.removeDeadEntries(allPaths);
+			}
+		});
+	}
+
+	@Override
+	public List<File> getFolders() {
+		List<File> folders = new ArrayList<File>();
+		folders.add(getDir(SCRIPTS_DIR, 0));
+		return folders;
+	}
+
+	@Override
+	public boolean isEnabled(File f) {
+		return ScriptManager.isEnabled(f);
 	}
 
 }
