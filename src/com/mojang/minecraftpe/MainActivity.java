@@ -34,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -282,6 +283,8 @@ public class MainActivity extends NativeActivity
 		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
+
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
