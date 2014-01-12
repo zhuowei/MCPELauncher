@@ -1,7 +1,9 @@
-package net.zhuoweizhang.mcpelauncher;
+package net.zhuoweizhang.mcpelauncher.api;
 
 import java.io.File;
 
+import net.zhuoweizhang.mcpelauncher.R;
+import net.zhuoweizhang.mcpelauncher.Utils;
 import com.ipaulpro.afilechooser.utils.FileUtils;
 
 import android.app.Activity;

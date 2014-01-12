@@ -97,11 +97,12 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="manage_patches_metadata">Author</string>
     <string name="manage_patches_no_metadata">No author information available</string>
     <string name="manage_patches_path">Path</string>
-    <string name="skin_import_confirm">Do you want to import this skin?</string>
-    <string name="texturepack_import_confirm">Do you want to import this texturepack?</string>
+    <string name="skin_import_confirm">Do you want to set this skin?</string>
+    <string name="texturepack_import_confirm">Do you want to set this texturepack?</string>
     <string name="script_import_confirm">Do you want to import this ModPE Script?</string>
     <string name="skin_imported">Skin set</string>
     <string name="texturepack_imported">Texturepack set</string>
+    <string name="script_imported">ModPE Script imported</string>
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About BlockLauncher</string>

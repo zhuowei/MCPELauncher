@@ -1,12 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
-import java.lang.ref.WeakReference;
-
-import android.app.*;
 import android.content.*;
 import android.content.pm.*;
-import android.util.*;
-
 import com.mojang.minecraftpe.MainActivity;
 
 /**

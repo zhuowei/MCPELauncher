@@ -81,6 +81,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		//}
 		Uri data = getIntent().getData();
 		if (data != null) {
+			System.out.println("Requested deprecated APIs. Use .api.ImportScriptActivity to avoid any troubles.");
 			showDialog(DIALOG_IMPORT_FROM_INTENT);
 		}
 	}
