@@ -354,7 +354,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			public void run() {
 				ContentListItem.sort(items);
 				ManagePatchesActivity.this.patches = items;
-				ArrayAdapter<ContentListItem> adapter = new ArrayAdapter<ContentListItem>(ManagePatchesActivity.this,
+				ArrayAdapter<ContentListItem> adapter = new ContentListAdapter(ManagePatchesActivity.this,
 						R.layout.patch_list_item, patches);
 				setListAdapter(adapter);
 				List<String> allPaths = new ArrayList<String>(patches.size());

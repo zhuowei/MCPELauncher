@@ -1,7 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import android.content.res.Resources;
@@ -28,7 +28,7 @@ public class ContentListItem {
 	}
 
 	public static void sort(List<ContentListItem> list) {
-		Arrays.sort(list.toArray(new ContentListItem[0]), new ContentListItem.ContentListComparator());
+		Collections.sort(list, new ContentListItem.ContentListComparator());
 	}
 
 	public static final class ContentListComparator implements Comparator<ContentListItem> {

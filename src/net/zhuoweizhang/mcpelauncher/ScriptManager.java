@@ -78,6 +78,8 @@ public class ScriptManager {
 
 	private static boolean scriptingEnabled = true;
 
+	private static boolean scriptingInitialized = false;
+
 	public static String screenshotFileName = "";
 
 	//public static Queue<Runnable> mainThreadRunnableQueue = new ArrayDeque<Runnable>();
@@ -89,6 +91,7 @@ public class ScriptManager {
 	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
+		if (!scriptingInitialized) return;
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		//Rhino needs lots of recursion depth to parse nested else ifs
 		//dalvik vm/Thread.h specifies 256K as maximum stack size
@@ -340,6 +343,7 @@ public class ScriptManager {
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
+		scriptingInitialized = true;
 		//set up hooks
 		int versionCode = 0;
 		try {
@@ -456,10 +460,14 @@ public class ScriptManager {
 		saveEnabledScripts();
 	}
 
-	protected static void loadEnabledScripts() throws IOException {
+	public static void loadEnabledScriptsNames(android.content.Context androidContext) {
 		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 		String enabledScriptsStr = sharedPrefs.getString("enabledScripts", "");
 		enabledScripts = new HashSet<String>(Arrays.asList(enabledScriptsStr.split(";")));
+	}
+
+	protected static void loadEnabledScripts() throws IOException {
+		loadEnabledScriptsNames(androidContext);
 		for (String name: enabledScripts) {
 			//load all scripts into the script interpreter
 			File file = getScriptFile(name);
@@ -472,6 +480,8 @@ public class ScriptManager {
 	}
 
 	protected static void saveEnabledScripts() {
+		System.out.println("Saving enabled scripts!!");
+		Thread.dumpStack();
 		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 		SharedPreferences.Editor edit = sharedPrefs.edit();
 		edit.putString("enabledScripts", join(enabledScripts.toArray(blankArray), ";"));

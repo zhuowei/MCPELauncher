@@ -79,11 +79,6 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		//if (!versionIsSupported()) {
 		//	showDialog(DIALOG_VERSION_INCOMPATIBLE);
 		//}
-		Uri data = getIntent().getData();
-		if (data != null) {
-			System.out.println("Requested deprecated APIs. Use .api.ImportScriptActivity to avoid any troubles.");
-			showDialog(DIALOG_IMPORT_FROM_INTENT);
-		}
 	}
 
 	@Override
@@ -754,7 +749,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			public void run() {
 				ContentListItem.sort(items);
 				ManageScriptsActivity.this.patches = items;
-				ArrayAdapter<ContentListItem> adapter = new ArrayAdapter<ContentListItem>(ManageScriptsActivity.this, R.layout.patch_list_item, patches);
+				ArrayAdapter<ContentListItem> adapter = new ContentListAdapter(ManageScriptsActivity.this, R.layout.patch_list_item, patches);
 				setListAdapter(adapter);
 				List<String> allPaths = new ArrayList<String>(patches.size());
 				for (ContentListItem i: patches) {

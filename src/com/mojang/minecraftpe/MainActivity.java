@@ -272,6 +272,7 @@ public class MainActivity extends NativeActivity
 		setFakePackage(false);
 
 		try {
+			boolean shouldLoadScripts = false;
 			if (!isSafeMode()) {
 				initPatching();
 			}
@@ -279,8 +280,11 @@ public class MainActivity extends NativeActivity
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
-				boolean shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
+				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
 				if (shouldLoadScripts) ScriptManager.init(this);
+			}
+			if (isSafeMode() || !shouldLoadScripts) {
+				ScriptManager.loadEnabledScriptsNames(this); //in safe mode, script names, but not the actual scripts, should be loaded
 			}
 
 		} catch (Exception e) {
