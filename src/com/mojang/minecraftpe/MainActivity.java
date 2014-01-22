@@ -258,6 +258,18 @@ public class MainActivity extends NativeActivity
 
 		libLoaded = true;
 
+		try {
+			if (!isSafeMode()) {
+				initPatching();
+				if (minecraftLibBuffer != null) {
+					ScriptManager.nativePrePatch();
+				}
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+
 		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
@@ -276,9 +288,6 @@ public class MainActivity extends NativeActivity
 
 		try {
 			boolean shouldLoadScripts = false;
-			if (!isSafeMode()) {
-				initPatching();
-			}
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				//applyPatches();

@@ -40,6 +40,7 @@ typedef struct {
 //this is / 4 bytes already
 #define MOB_HEALTH_OFFSET 80
 #define ENTITY_RENDER_TYPE_OFFSET 59
+#define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 17
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -120,6 +121,8 @@ void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
+
+static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
 Minecraft* bl_minecraft;
@@ -421,7 +424,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDr
 	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level);
 	if (entity == NULL) {
 		//WTF?
-		return;
+		return 0;
 	}
 	bl_Entity_setPos(entity, x, y, z);
 	Entity* entity2 = bl_Entity_spawnAtLocation(entity, instance, range);
@@ -705,6 +708,8 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 			return entity->y;
 		case AXIS_Z:
 			return entity->z;
+		default:
+			return 0;
 	}
 }
 
@@ -765,7 +770,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetInventorySlot
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
-	if (bl_localplayer == NULL) return 0;
+	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO Merge this into a macro
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
@@ -852,6 +857,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback
   (JNIEnv *env, jclass clazz) {
 	bl_frameCallbackRequested = 1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
+  (JNIEnv *env, jclass clazz) {
+	if (!mcpelibhandle) {
+		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	}
+	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
+	void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
+	//replace the native code read asset method with the old one that went through JNI
+	appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = readAssetFile;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
@@ -955,7 +971,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
 	bl_NinecraftApp_update_real = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp6updateEv");
 
-	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	if (!mcpelibhandle) {
+		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	}
+
 	bl_MobFactory_createMob = (Entity* (*)(int, Level*)) dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiP5Level");
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");

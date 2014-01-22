@@ -871,6 +871,7 @@ public class ScriptManager {
 	public static native void nativeSetupHooks(int versionCode);
 	public static native void nativeRemoveItemBackground();
 	public static native void nativeSetTextParseColorCodes(boolean doIt);
+	public static native void nativePrePatch();
 
 	public static class ScriptState {
 		public Script script;
