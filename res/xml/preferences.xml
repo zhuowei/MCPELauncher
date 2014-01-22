@@ -17,7 +17,7 @@
             android:summary="@string/pref_zz_custom_dpi_summary"
             android:title="@string/pref_zz_custom_dpi" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_textures_title" >
+    <PreferenceCategory android:title="@string/pref_textures_title" android:key="zz_textures_group">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_texture_pack_demo"
@@ -26,7 +26,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_texture_pack_enable"
-            android:title="@string/pref_zz_texture_pack_enable" />
+            android:title="@string/pref_zz_texture_pack_enable_extracted" />
 
         <Preference
             android:key="zz_extract_original_textures"
