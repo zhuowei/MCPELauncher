@@ -64,7 +64,8 @@
     <string name="manage_addons">管理插件</string>
     <string name="get_pro">升級至完整版。</string>
     <string name="about_about">有關 BlockLauncher</string>
-    <string name="pref_zz_legacy_keyboard_input">使用0.8.0更新前的鍵盤輸入碼\n(用來解決「發出聊天訊息」鍵消失的問題)</string>
+    <string name="pref_zz_legacy_keyboard_input">使用0.8.0更新前的鍵盤輸入碼</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">用來解決「發出聊天訊息」鍵消失的問題</string>
     <string name="about_librarycredits">本程式使用由 Paul Burke 設計的 aFileChooser 。\n<!--Why you say PTPatchTool is licensed under the Eclipse Public License but not aFileChooser under the Apache License?-->
 本程式包含了 Snowbound 的 PTPatchTool 。PTPatchTool 的使用授權條款︰ Eclipse Public License. \n
 本程式包含了並獲得了許可使用 NathanX 設計的 Slickcraft 材質包。\n
@@ -142,6 +143,7 @@
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher 插件</string>
     <string name="permdesc_mcpelauncher_addon">允許程式以插件身分載入至 BlockLauncher 。這意味着這件程式能取得網絡、SD Card及其他 Minecraft PE 獲得權限去做的事。</string>
-	<string name="pref_zz_script_paranoid_mode">防毒模式︰禁止 ModPE 模組儲存 Android 程式的權限\n(只允許存取 Minecraft 世界裏的東西)</string><!--I call it anti-virus mode-->
+	<string name="pref_zz_script_paranoid_mode">不信任模式</string>
+ <string name="pref_zz_script_paranoid_mode_summary">禁止 ModPE 模組儲存 Android 程式的權限\n只允許存取 Minecraft 世界裏的東西</string>   
 
 </resources>

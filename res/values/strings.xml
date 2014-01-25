@@ -67,8 +67,10 @@
     <string name="pref_zz_show_insert_text">Show \"Insert text\" option in in-game patch manager</string>
     <string name="pref_zz_language_override">Language</string>
     <string name="pref_zz_language_override_default">Default</string>
-    <string name="pref_zz_script_paranoid_mode">Paranoid mode: disable GUI ModPE scripts</string>
+    <string name="pref_zz_script_paranoid_mode">Paranoid mode</string>
+    <string name="pref_zz_script_paranoid_mode_summary">Disable ModPE scripts' access to Android functions,\nlike deleting files and using internet</string>
     <string name="pref_zz_legacy_keyboard_input">Use old keyboard input code</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">A fix to keyboard bugs in the new 0.8.x update</string>
     <string name="pref_zz_texture_pack_enable_extracted">Use extracted original textures</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
