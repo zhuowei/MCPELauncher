@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--Memo: Chinese Traditional translation by PEMapModder-->
+    <!--Credit: @lin871106 for improvements-->
 	<string name="pref_zz_language_override">語言</string>
     <string name="pref_zz_language_override_default">預設</string>
     <string name="pref_zz_longvibration">特長震機</string>
@@ -63,7 +64,7 @@
     <string name="skin_imported">皮膚設定</string>
     <string name="manage_addons">管理插件</string>
     <string name="get_pro">升級至完整版。</string>
-    <string name="about_about">有關 BlockLauncher</string>
+    <string name="about_about">關於 BlockLauncher</string>
     <string name="pref_zz_legacy_keyboard_input">使用0.8.0更新前的鍵盤輸入碼</string>
     <string name="pref_zz_legacy_keyboard_input_summary">用來解決「發出聊天訊息」鍵消失的問題</string>
     <string name="about_librarycredits">本程式使用由 Paul Burke 設計的 aFileChooser 。\n<!--Why you say PTPatchTool is licensed under the Eclipse Public License but not aFileChooser under the Apache License?-->
@@ -108,15 +109,12 @@
     <string name="server_list_patch_address">加入伺服器地址</string>
     <string name="server_list_name_prompt">名稱︰</string>
     <string name="server_list_address_prompt">IP 位址︰</string>
-    <string name="server_list_port_prompt">接入口 (port)</string><!--Because most people see "port" in English but don't know Chinese name. I had to search wikipedia for it-->
+    <string name="server_list_port_prompt">端口 (port)</string><!--Because most people see "port" in English but don't know Chinese name. I had to search wikipedia for it-->
 
     <string name="script_import_from">從此處匯入模組</string>
     <string name="script_import_from_local">手機儲存空間</string>
     <string name="script_import_from_cfgy">Treebl 官方儲存空間\n若果你得到的是一個編號，按這裏</string>
-	<!--I added the second line saying that if the player/user gets an ID, tap here-->
-	<!--official sounds somehow misleading in this language-->
     <string name="script_import_from_bl_repo">BlockLauncher 試驗性儲存空間</string>
-	<!--Is this used?-->
     <string name="script_import_from_url">網址</string>
     <string name="script_import_from_clipboard">剪貼簿</string>
     <string name="script_import_from_clipboard_name">輸入模組名稱(自訂)</string>
@@ -125,8 +123,7 @@
 	<!--I changed it to "Paste here"-->
     <string name="script_import_from_cfgy_id">在這裏輸入ID</string>
     <string name="script_import_from_url_enter">在這裏輸入網址</string>
-    <string name="script_import_too_many">免費版一次只能啟入一個模組。升級至付費版以解除此限制。</string>
-	<!--I think "enable" is better than "patch"-->
+    <string name="script_import_too_many">免費版一次只能啟用一個模組。升級至付費版以解除此限制。</string>
     <string name="script_execution_error">此模組含有錯誤。</string>
     <string name="script_disabled_in_multiplayer">由於在多人連線中，啟用 ModPE 模組出現錯誤導致死機的風險很大，同時為免本程式成為在他人伺服器上破壞之工具，你所啟用的 ModPE 模組已被停用。當你離開此伺服器後，它們將自動被重新啟用。</string>
     <string name="script_minecraft_version_incompatible">BlockLauncher 不完全支援在你的版本的 Minecraft PE 上使用 ModPE 模組。請注意可能出現的風險。</string>
