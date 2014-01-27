@@ -847,6 +847,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Player_setArmor(bl_localplayer, slot, instance);
 }
 
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityVel
+  (JNIEnv *env, jclass clazz, jint entityId, jint axis) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	switch (axis) {
+		case AXIS_X:
+			return entity->motionX;
+		case AXIS_Y:
+			return entity->motionY;
+		case AXIS_Z:
+			return entity->motionZ;
+		default:
+			return 0;
+	}
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
   (JNIEnv *env, jclass clazz) {
 	//void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");

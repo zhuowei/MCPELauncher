@@ -839,6 +839,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
 	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
 	public static native boolean nativeIsPlayer(int entityId);
+	public static native float nativeGetEntityVel(int entity, int axis);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1480,6 +1481,19 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setSneaking(int ent, boolean doIt) {
 			nativeSetSneaking(ent, doIt);
+		}
+
+		@JSStaticFunction
+		public static double getVelX(int ent) {
+			return nativeGetEntityVel(ent, AXIS_X);
+		}
+		@JSStaticFunction
+		public static double getVelY(int ent) {
+			return nativeGetEntityVel(ent, AXIS_Y);
+		}
+		@JSStaticFunction
+		public static double getVelZ(int ent) {
+			return nativeGetEntityVel(ent, AXIS_Z);
 		}
 
 		@Override
