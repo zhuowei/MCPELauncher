@@ -1082,7 +1082,7 @@ public class MainActivity extends NativeActivity
 
 	public boolean supportsNonTouchscreen() {
 		Log.i(TAG, "Supports non touchscreen");
-		return Build.MODEL.indexOf("Xperia Play") >= 0;
+		return Build.PRODUCT.equals("Xperia Play");
 	}
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
