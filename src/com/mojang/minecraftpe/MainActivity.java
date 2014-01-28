@@ -782,7 +782,8 @@ public class MainActivity extends NativeActivity
 			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					try {
-						String[] lines=editText.getText().toString().split("\n");
+						String[] lines=editText.getText().toString().split(
+							System.getProperty("line.seperator"));
 						for (int line = 0; line < lines.length; line++) {
 							if (line!=0)
 								nativeTypeCharacter("" + ((char) 0x0A)); // I am not sure if keyboard-entered "enter" is 0x0A
