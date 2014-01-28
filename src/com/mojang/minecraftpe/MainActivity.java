@@ -761,31 +761,34 @@ public class MainActivity extends NativeActivity
 	protected Dialog createInsertTextDialog() {
 		final EditText editText = new EditText(this);
 		editText.setSingleLine(false);
+		final LinearLayout ll = new LinearLayout(this);
+		ll.setOrientation(LinearLayout.HORIZONTAL);
+		ll.addView(editText, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		Button back = new Button(this);
+		back.setText(R.string.hovercar_insert_text_backspace);
+		back.setOnClickListener(new View.OnClickListener(){
+			@Override public void onClick(View v){
+				try {
+					nativeTypeCharacter("" + ((char) 0x08)); // is this the correct method of backspace?
+				} catch (Exception e) {
+					showDialog(DIALOG_NOT_SUPPORTED);
+				}
+			}
+		});
+		ll.addView(back, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		return new AlertDialog.Builder(this)
 			.setTitle(R.string.hovercar_insert_text)
-			.setView(editText)
+			.setView(ll)
 			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					try {
 						String[] lines=editText.getText().toString().split("\n");
 						for (int line = 0; line < lines.length; line++) {
-							if (line!=0) {
+							if (line!=0)
 								nativeTypeCharacter("" + ((char) 0x0A)); // I am not sure if keyboard-entered "enter" is 0x0A
-							}
 							nativeTypeCharacter (lines[line]);
 						}
-						nativeTypeCharacter(editText.getText().toString());
 						editText.setText("");
-					} catch (UnsatisfiedLinkError e) {
-						showDialog(DIALOG_NOT_SUPPORTED);
-					}
-				}
-			})
-			.setNeutralButton(R.string.hovercar_insert_text_backspace, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					try {
-						nativeTypeCharacter ("" + ((char) 0x08)); // backspace->0x08
-						
 					} catch (UnsatisfiedLinkError e) {
 						showDialog(DIALOG_NOT_SUPPORTED);
 					}
