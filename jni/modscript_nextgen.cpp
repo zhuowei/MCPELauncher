@@ -647,6 +647,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	//bl_CreativeInventryScreen_populateItem_real(tile, count, damage);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetI18NString
+  (JNIEnv *env, jclass clazz, jstring key, jstring value) {
+
+	const char * valueUTFChars = env->GetStringUTFChars(value, NULL);
+	std::string valueNameString = std::string(valueUTFChars);
+
+	const char * keyUTFChars = env->GetStringUTFChars(key, NULL);
+	std::string keyString = std::string(keyUTFChars);
+	(*bl_I18n_strings)[keyString] = valueNameString;
+	env->ReleaseStringUTFChars(key, keyUTFChars);
+	env->ReleaseStringUTFChars(value, valueUTFChars);
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 

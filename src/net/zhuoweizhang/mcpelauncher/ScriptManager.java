@@ -480,8 +480,6 @@ public class ScriptManager {
 	}
 
 	protected static void saveEnabledScripts() {
-		System.out.println("Saving enabled scripts!!");
-		Thread.dumpStack();
 		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 		SharedPreferences.Editor edit = sharedPrefs.edit();
 		edit.putString("enabledScripts", join(enabledScripts.toArray(blankArray), ";"));
@@ -840,6 +838,7 @@ public class ScriptManager {
 	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
 	public static native boolean nativeIsPlayer(int entityId);
 	public static native float nativeGetEntityVel(int entity, int axis);
+	public static native void nativeSetI18NString(String key, String value);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1619,6 +1618,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static String getItemName(int id, int damage, boolean raw) {
 			return nativeGetItemName(id, damage, raw);
+		}
+
+		@JSStaticFunction
+		public static void langEdit(String key, String value) {
+			nativeSetI18NString(key, value);
 		}
 
 		@Override
