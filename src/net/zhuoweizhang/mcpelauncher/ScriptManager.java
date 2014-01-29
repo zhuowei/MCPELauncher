@@ -1341,7 +1341,13 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getName(int ent) {
+			if (!nativeIsPlayer(ent)) return "Not a player";
 			return nativeGetPlayerName(ent);
+		}
+
+		@JSStaticFunction
+		public static boolean isPlayer(int ent) {
+			return nativeIsPlayer(ent);
 		}
 
 		/*@JSStaticFunction
@@ -1537,6 +1543,9 @@ public class ScriptManager {
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
 			nativeDefineItem(id, iconName, iconSubindex, name);
 		}
 
@@ -1546,6 +1555,9 @@ public class ScriptManager {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
 			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name);
 		}
@@ -1641,6 +1653,9 @@ public class ScriptManager {
 			if (!HAVE_YOU_FIXED_BLOCKS) {
 				scriptPrint("Unable to initialize " + name.trim() + ": Custom blocks API not updated for 0.8.0. They will turn into UPDATE blocks.");
 				return;
+			}
+			if (blockId < 0 || blockId >= 256) {
+				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
 			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
