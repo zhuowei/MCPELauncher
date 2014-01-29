@@ -74,8 +74,8 @@
     <string name="skin_imported">Skin gesetzt</string>
     <string name="get_pro">Upgrade auf Pro</string>
     <string name="about_about">Über BlockLauncher</string>
-    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright (C) 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">Dieses Programm verwendet eine FileChooser library von Paul Burke. \n
 Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n

@@ -99,8 +99,8 @@ Voulez-vous continuer en mode sans échec sans rien ou revenir en mode de correc
     <string name="manage_addons">Gérer add-on</string>
     <string name="get_pro">Acheter la PRO</string>
     <string name="about_about">A propos de BlockLauncher</string>
-    <string name="about_copyright">Copyright  2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Droits d\'auteur 2013 Zhuowei Zhang. Ne pas distribuer sans autorisation.</string>
+    <string name="about_copyright">Copyright  2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Droits d\'auteur 2013-2014 Zhuowei Zhang. Ne pas distribuer sans autorisation.</string>
     <string name="about_librarycredits">Ce programme utilise la bibliothèque aFileChooser par Paul Burke.\n
 Ce programme contient le code de l \'Snowbound \ PTPatchTool, sous licence publique Eclipse.\n
 Ce programme contient une version modifiée de l \'NathanX \ Slickcraft pack de texture:. Utilisés avec la permission \ n

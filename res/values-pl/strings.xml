@@ -97,8 +97,8 @@ Chcesz kontynuować grę w trybie bezpiecznym czy powrócić do normalnego?</str
     <string name="manage_addons">Zarządzaj dodatkami</string>
     <string name="get_pro">Ulepsz do wersji Pro</string>
     <string name="about_about">O BlockLauncher</string>
-    <string name="about_copyright">Prawo autorskie &#169; 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Prawo autorskie &#169; 2013 Zhuowei Zhang. Nie wolno rozpowszechniać bez zgody.</string>
+    <string name="about_copyright">Prawo autorskie &#169; 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Prawo autorskie &#169; 2013-2014 Zhuowei Zhang. Nie wolno rozpowszechniać bez zgody.</string>
     <string name="about_librarycredits">Ten program używa bibliotekę aFileChooser stworzoną przez Paul Burke. \n
 Ten program zawiera kod z Snowbound\'s PTPatchTool, na licencji Eclipse Public License. \n
 Ten program zawiera zmodyfikowaną wersję NathanX\'s Slickcraft texture pack: wykorzystane za zgodą.\n

@@ -102,8 +102,8 @@ Scroll to the bottom and see notice. -->
     <string name="manage_addons">애드온 관리</string>
     <string name="get_pro">Pro 버전으로 업그레이드</string> <!-- 정식버전은 마인크래프트 PE에나 쓰고, 이 어플리케이션에는 Pro가 맞습니다. -->
     <string name="about_about">BlockLauncher 소개</string>
-    <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang.</string> <!-- 일반적으로 저작권은 영어로 작성합니다. -->
-    <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.</string>
+    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang.</string> <!-- 일반적으로 저작권은 영어로 작성합니다. -->
+    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.</string>
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플리케이션은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
 이 어플리케이션은 NathanX의 Slickcraft 텍스쳐팩에서 수정된 버전이 포함되어 있습니다.\n
