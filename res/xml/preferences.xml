@@ -85,6 +85,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_script_paranoid_mode"
+            android:summary="@string/pref_zz_script_paranoid_mode_summary"
             android:title="@string/pref_zz_script_paranoid_mode" />
         <CheckBoxPreference
             android:defaultValue="false"
@@ -93,6 +94,7 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_legacy_keyboard_input"
+            android:summary="@string/pref_zz_legacy_keyboard_input_summary"
             android:title="@string/pref_zz_legacy_keyboard_input" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_support_title" >
