@@ -55,8 +55,8 @@
     <string name="extract_textures_error">Nie udało się uzyskać uprawnień do oryginalnej aplikacji</string>
     <string name="extract_textures_no_root">Nieudało się uzyskać uprawnień root - jesteś zrootowany?</string>
     <string name="extract_textures_need_update">Wygląda na to że używasz paczki tekstur ze starego Minecraft\'a PE. Uruchom \"Extract original textures with root access\" W menu opcji aby uaktualnić paczkę tekstur</string>
-    <string name="pref_zz_skin_enable">Włącz podmianę skin\'a</string>
-    <string name="pref_zz_skin">Zmień skin\'a</string>
+    <string name="pref_zz_skin_enable">Włącz zmianę skin\'a</string>
+    <string name="pref_zz_skin">Zmień skin</string>
     <string name="pref_zz_skin_summary">Wybierz plik .png aby zmienić skin (będzie widzialny tylko dla ciebie)</string>
     <string name="pref_zz_hovercar_hide">Ukryj przycisk menu.</string>
     <string name="pref_zz_redirect_mco">Przekieruj Realms na inną listę serwerów</string>
@@ -146,7 +146,7 @@ Dla pełnej informacji licencyjnej należy sprawdzić wątek na Minecraft Forum.
     <string name="script_import_from_cfgy">Oficjalne repozytorium Treebl\'a</string>
     <string name="script_import_from_bl_repo">Testowe repozytorium BlockLauncher\'a</string>
     <string name="script_import_from_url">Adres internetowy</string>
-    <string name="script_import_from_clipboard">Schowek </string>
+    <string name="script_import_from_clipboard">Schowek</string>
     <string name="script_import_from_clipboard_name">Wpisz nazwę skryptu</string>
     <string name="script_import_from_clipboard_code">Kod do zaimportowania</string>
     <string name="script_import_from_cfgy_id">Wpisz ID skryptu do zaimportowania</string>
