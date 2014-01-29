@@ -763,7 +763,7 @@ public class MainActivity extends NativeActivity
 		editText.setSingleLine(false);
 		final LinearLayout ll = new LinearLayout(this);
 		ll.setOrientation(LinearLayout.HORIZONTAL);
-		ll.addView(editText, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		ll.addView(editText, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		Button back = new Button(this);
 		back.setText(R.string.hovercar_insert_text_backspace);
 		back.setOnClickListener(new View.OnClickListener(){
@@ -775,7 +775,7 @@ public class MainActivity extends NativeActivity
 				}
 			}
 		});
-		ll.addView(back, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		ll.addView(back, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		return new AlertDialog.Builder(this)
 			.setTitle(R.string.hovercar_insert_text)
 			.setView(ll)
@@ -783,7 +783,7 @@ public class MainActivity extends NativeActivity
 				public void onClick(DialogInterface dialogI, int button) {
 					try {
 						String[] lines=editText.getText().toString().split(
-							System.getProperty("line.seperator"));
+							"\n");
 						for (int line = 0; line < lines.length; line++) {
 							if (line!=0)
 								nativeTypeCharacter("" + ((char) 0x0A)); // I am not sure if keyboard-entered "enter" is 0x0A
