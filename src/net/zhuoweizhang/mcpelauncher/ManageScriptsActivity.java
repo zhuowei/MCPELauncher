@@ -127,7 +127,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						File to;
 						if (CoffeeScriptCompiler.isCoffeeScript(file)) {
 							to = new File(getDir(SCRIPTS_DIR, 0), CoffeeScriptCompiler.outputName(file.getName()));
-							CoffeeScriptCompiler.compileFile(this, file, to);
+							CoffeeScriptCompiler.compileFile(file, to);
 						} else {
 							to = new File(getDir(SCRIPTS_DIR, 0), file.getName());
 							PatchUtils.copy(file, to);
