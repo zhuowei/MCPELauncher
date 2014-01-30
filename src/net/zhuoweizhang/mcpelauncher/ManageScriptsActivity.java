@@ -46,6 +46,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	private static final int DIALOG_IMPORT_FROM_INTENT = 11;
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
+
+	private static final String[] ALL_SCRIPT_MIMETYPES = {"application/javascript", "text/coffeescript", "text/literate-coffeescript"};
 	
 	private Thread refreshThread;
 
@@ -101,6 +103,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		Intent target = FileUtils.createGetContentIntent();
 		target.setType("application/javascript");
 		target.setClass(this, FileChooserActivity.class);
+		target.putExtra(FileUtils.EXTRA_MIME_TYPES, ALL_SCRIPT_MIMETYPES);
 		startActivityForResult(target, REQUEST_IMPORT_PATCH);
 	}
 
@@ -121,8 +124,14 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 					final Uri uri = data.getData();
 					File file = FileUtils.getFile(uri);
 					try {
-						File to = new File(getDir(SCRIPTS_DIR, 0), file.getName());
-						PatchUtils.copy(file, to);
+						File to;
+						if (CoffeeScriptCompiler.isCoffeeScript(file)) {
+							to = new File(getDir(SCRIPTS_DIR, 0), CoffeeScriptCompiler.outputName(file.getName()));
+							CoffeeScriptCompiler.compileFile(this, file, to);
+						} else {
+							to = new File(getDir(SCRIPTS_DIR, 0), file.getName());
+							PatchUtils.copy(file, to);
+						}
 						ScriptManager.setEnabled(to, false);
 						int maxPatchCount = getMaxPatchCount();
 						if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
