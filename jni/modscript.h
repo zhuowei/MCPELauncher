@@ -21,8 +21,6 @@ extern "C" {
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_DAMAGE 1L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_AMOUNT
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_AMOUNT 2L
-#undef net_zhuoweizhang_mcpelauncher_ScriptManager_HAVE_YOU_FIXED_BLOCKS
-#define net_zhuoweizhang_mcpelauncher_ScriptManager_HAVE_YOU_FIXED_BLOCKS 1L
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetPlayerLoc
@@ -394,10 +392,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineBlock
- * Signature: (ILjava/lang/String;[IIZI)V
+ * Signature: (ILjava/lang/String;[Ljava/lang/String;[IIZI)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
-  (JNIEnv *, jclass, jint, jstring, jintArray, jint, jboolean, jint);
+  (JNIEnv *, jclass, jint, jstring, jobjectArray, jintArray, jint, jboolean, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -470,6 +468,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  */
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsPlayer
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetEntityVel
+ * Signature: (II)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityVel
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetI18NString
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetI18NString
+  (JNIEnv *, jclass, jstring, jstring);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -671,6 +685,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *, jclass);
 
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_TextureRequests */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_TextureRequests
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_TextureRequests
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif

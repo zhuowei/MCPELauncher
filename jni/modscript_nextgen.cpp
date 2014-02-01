@@ -31,7 +31,7 @@ typedef void Font;
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
 #define SIGN_TILE_ENTITY_LINE_OFFSET 92
 #define BLOCK_VTABLE_SIZE 0x144
-#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 12
+#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 13
 #define BLOCK_VTABLE_IS_CUBE_SHAPED 4
 #define BLOCK_VTABLE_GET_RENDER_SHAPE 5
 #define BLOCK_VTABLE_GET_DESCRIPTION_ID 58
@@ -93,6 +93,8 @@ static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 //static Item** bl_Item_items;
 static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
 static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
+static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
+static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
 
 bool bl_text_parse_color_codes = true;
 
@@ -260,7 +262,8 @@ TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, int side, int 
 	int blockId = tile->id;
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL) {
-		return 0;
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Block pointer IS NULL! %d\n", blockId);
+		return tile->texture;
 	}
 	int myIndex = (data * 6) + side;
 	if (myIndex < 0 || myIndex >= 16*6) {
@@ -517,7 +520,7 @@ void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
 	//set the texture getter to our overridden version
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
+	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
@@ -535,13 +538,24 @@ void* bl_getMaterial(int materialType) {
 	return baseTile->material;
 }
 
-Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, int renderShape, const char* name) {
+void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
+	Tile* sacrificialTile = bl_Tile_tiles[1]; //Oh, little Cobblestone Galatti, please sing for me again!
+	for (int i = 0; i < 16*6; i++) {
+		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet;
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
+		bl_Tile_getTextureUVCoordinateSet(mySet, sacrificialTile, textureNames[i], textureCoords[i]);
+		output[i] = mySet;
+	}
+}
+
+Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
 	}
 	bl_custom_block_opaque[blockId] = opaque;
-	//bl_custom_block_textures[blockId] = texture;
+	bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
+	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
 	bl_custom_block_renderShape[blockId] = renderShape;
 	//Allocate memory for the block
 	Tile* retval = (Tile*) ::operator new((std::size_t) 0x80);
@@ -565,12 +579,19 @@ Tile* bl_createBlock(int blockId, int texture[], int materialType, bool opaque, 
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
-  (JNIEnv *env, jclass clazz, jint blockId, jstring name, jintArray textures, jint materialBlockId, jboolean opaque, jint renderType) {
+  (JNIEnv *env, jclass clazz, jint blockId, jstring name, jobjectArray textureNames, 
+		jintArray textureCoords, jint materialBlockId, jboolean opaque, jint renderType) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	int* myIntArray = new int[16*6];
-	env->GetIntArrayRegion(textures, 0, 16*6, myIntArray);
-	Tile* tile = bl_createBlock(blockId, myIntArray, materialBlockId, opaque, renderType, utfChars);
-	if (tile == NULL) delete[] myIntArray;
+	int myIntArray[16*6];
+	env->GetIntArrayRegion(textureCoords, 0, 16*6, myIntArray);
+	std::string myStringArray[16*6];
+	for (int i = 0; i < 16*6; i++) {
+		jstring myString = (jstring) env->GetObjectArrayElement(textureNames, i);
+		const char * myStringChars = env->GetStringUTFChars(myString, NULL);
+		myStringArray[i] = myStringChars;
+		env->ReleaseStringUTFChars(myString, myStringChars);
+	}
+	Tile* tile = bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars);
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
@@ -734,6 +755,10 @@ void bl_setuphooks_cppside() {
 
 	void* populateItem = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Itemii");
 	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
+
+	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
+	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
+		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 }
 
 } //extern

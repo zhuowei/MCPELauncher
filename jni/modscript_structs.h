@@ -32,6 +32,10 @@ typedef struct {
 typedef Entity Player;
 
 typedef struct {
+	float bounds[6];
+} TextureUVCoordinateSet;
+
+typedef struct {
 	void** vtable; //0
 	int itemId; //4
 	int idunno; //8
@@ -56,10 +60,10 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	int texture; //4
-	int id; //8
-	char filler[52]; //12
-	void* material; //44 + 20
+	TextureUVCoordinateSet texture; //4
+	int id; //28
+	char filler[32]; //32
+	void* material; //64
 	int filler1; //48
 	float destroyTime; //52
 	float explosionResistance; //56
@@ -70,10 +74,6 @@ typedef struct {
 	int descriptionId; //88
 #endif
 } Tile;
-
-typedef struct {
-	float bounds[6];
-} TextureUVCoordinateSet;
 #ifdef __cplusplus
 }
 #endif

@@ -672,19 +672,34 @@ public class ScriptManager {
 		}
 	}
 
-	public static int[] expandTexturesArray(Object inArrayObj) {
+	public static TextureRequests expandTexturesArray(Object inArrayObj) {
 		int[] endArray = new int[16*6];
+		String[] stringArray = new String[16*6];
+		TextureRequests retval = new TextureRequests();
+		retval.coords = endArray;
+		retval.names = stringArray;
 
-		if (inArrayObj instanceof Number) {
-			int fillVal = ((Number) inArrayObj).intValue();
-			Arrays.fill(endArray, fillVal);
-			return endArray;
+		if (inArrayObj instanceof String) {
+			String fillVal = ((String) inArrayObj);
+			Arrays.fill(stringArray, fillVal);
+			return retval;
 		}
 		Scriptable inArrayScriptable = (Scriptable) inArrayObj;
 		//if the in array count is a multiple of 6,
 		//copy 6 at a time until we run out, then copy 6 from the first element.
 		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
 		int wrap = inArrayLength % 6 == 0? 6: 1;
+		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
+		if ((inArrayLength == 1 || inArrayLength == 2) && firstObj instanceof String) {
+			//all blocks have same tex
+			String fillVal = ((String) firstObj);
+			Arrays.fill(stringArray, fillVal);
+			if (inArrayLength == 2) {
+				int fillVal2 = ((Number) ScriptableObject.getProperty(inArrayScriptable, 1)).intValue();
+				Arrays.fill(endArray, fillVal2);
+			}
+			return retval;
+		}
 		for (int i = 0; i < endArray.length; i++) {
 			Object myObj;
 			if (i < inArrayLength) {
@@ -692,11 +707,16 @@ public class ScriptManager {
 			} else {
 				myObj = ScriptableObject.getProperty(inArrayScriptable, i % wrap);
 			}
-			endArray[i] = expandTextureCoordinate(myObj);
+			Scriptable myScriptable = (Scriptable) myObj;
+			String texName = ((String) ScriptableObject.getProperty(myScriptable, 0));
+			int texCoord = ((Number) ScriptableObject.getProperty(myScriptable, 1)).intValue();
+			endArray[i] = texCoord;
+			stringArray[i] = texName;
 		}
-		return endArray;
+		return retval;
 	}
 
+	/*
 	public static int expandTextureCoordinate(Object myObj) {
 		if (myObj instanceof Number) {
 			return ((Number) myObj).intValue();
@@ -708,6 +728,7 @@ public class ScriptManager {
 		}
 		throw new IllegalArgumentException("Invalid texture coordinate input: " + myObj);
 	}
+	*/
 
 	public static int[] expandColorsArray(Scriptable inArrayScriptable) {
 		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
@@ -827,7 +848,7 @@ public class ScriptManager {
 	public static native String nativeGetItemName(int itemId, int itemDamage, boolean raw);
 	public static native boolean nativeGetTextureCoordinatesForItem(int itemId, int itemDamage, float[] output);
 
-	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
+	public static native void nativeDefineBlock(int blockId, String name, String[] textureNames, int[] textureCoords, int materialSourceId, boolean opaque, int renderType);
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
 	public static native void nativeBlockSetExplosionResistance(int blockId, float amount);
 	public static native void nativeBlockSetStepSound(int blockId, int sourceBlockId);
@@ -1642,7 +1663,6 @@ public class ScriptManager {
 			return "ModPE";
 		}
 	}
-	private static final boolean HAVE_YOU_FIXED_BLOCKS = true;
 
 	private static class NativeBlockApi extends ScriptableObject {
 		public NativeBlockApi() {
@@ -1650,10 +1670,6 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineBlock(int blockId, String name, Object textures, Object materialSourceIdSrc, Object opaqueSrc,
 			Object renderTypeSrc) {
-			if (!HAVE_YOU_FIXED_BLOCKS) {
-				scriptPrint("Unable to initialize " + name.trim() + ": Custom blocks API not updated for 0.8.0. They will turn into UPDATE blocks.");
-				return;
-			}
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
@@ -1673,8 +1689,8 @@ public class ScriptManager {
 				renderType = ((Number) renderTypeSrc).intValue();
 				Log.i("BlockLauncher", "setting renderType to " + renderType);
 			}
-			int[] finalTextures = expandTexturesArray(textures);
-			nativeDefineBlock(blockId, name, finalTextures, materialSourceId, opaque, renderType);
+			TextureRequests finalTextures = expandTexturesArray(textures);
+			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords, materialSourceId, opaque, renderType);
 		}
 		@JSStaticFunction
 		public static void setDestroyTime(int blockId, double time) {
@@ -1738,5 +1754,9 @@ public class ScriptManager {
 			if (!skinFile.exists()) return;
 			NativeEntityApi.setMobSkin(entityId, skinPath);
 		}
+	}
+	private static class TextureRequests {
+		public String[] names;
+		public int[] coords;
 	}
 }
