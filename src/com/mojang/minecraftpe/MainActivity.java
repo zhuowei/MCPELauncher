@@ -373,6 +373,7 @@ public class MainActivity extends NativeActivity
 			hoverCar.dismiss();
 			hoverCar = null;
 		}
+		ScriptManager.destroy();
 	}
 
 	public void onStop() {

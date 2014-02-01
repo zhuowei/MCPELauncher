@@ -363,6 +363,13 @@ public class ScriptManager {
 		nativeRequestFrameCallback();
 	}
 
+	public static void destroy() {
+		scriptingInitialized = false;
+		androidContext = null;
+		scripts.clear();
+		runOnMainThreadList.clear();
+	}
+
 	public static void removeScript(String scriptId) {
 		/* Don't clear data here - user can clear data by hand if needed
 		SharedPreferences sPrefs = androidContext.getSharedPreferences("BlockLauncherModPEScript"+scriptId+"Data", 0);
