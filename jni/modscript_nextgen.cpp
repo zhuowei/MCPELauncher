@@ -263,7 +263,7 @@ TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, int side, int 
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Block pointer IS NULL! %d\n", blockId);
-		return tile->texture;
+		return &tile->texture;
 	}
 	int myIndex = (data * 6) + side;
 	if (myIndex < 0 || myIndex >= 16*6) {
@@ -542,7 +542,7 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 	Tile* sacrificialTile = bl_Tile_tiles[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet;
-		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
+		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
 		bl_Tile_getTextureUVCoordinateSet(mySet, sacrificialTile, textureNames[i], textureCoords[i]);
 		output[i] = mySet;
 	}

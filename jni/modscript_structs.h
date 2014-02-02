@@ -74,6 +74,25 @@ typedef struct {
 	int descriptionId; //88
 #endif
 } Tile;
+
+typedef struct {
+	cppbool transparent;
+	char filler1[67]; //1
+	int textureOffsetX;//68
+	int textureOffsetY;//72
+	char filler2[52];//76
+} ModelPart;
+
+typedef struct {
+	void** vtable; //0
+	char filler[24]; //4
+	ModelPart bipedHead;//28
+	ModelPart bipedBody;//156
+	ModelPart bipedRightArm;//284
+	ModelPart bipedLeftArm;//412
+	ModelPart bipedRightLeg;//540
+	ModelPart bipedLeftLeg;//668
+} HumanoidModel;
 #ifdef __cplusplus
 }
 #endif
