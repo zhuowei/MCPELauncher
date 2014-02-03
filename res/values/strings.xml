@@ -72,6 +72,9 @@
     <string name="pref_zz_legacy_keyboard_input">Use old keyboard input code</string>
     <string name="pref_zz_legacy_keyboard_input_summary">A fix to keyboard bugs in the new 0.8.x update</string>
     <string name="pref_zz_texture_pack_enable_extracted">Use extracted original textures</string>
+    <string name="pref_zz_skin_download_source">Choose skin download source</string>
+    <string name="skin_download_do_not_download">Do not download skins</string>
+    <string name="skin_download_download_pc">Download skins based on PC username</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>

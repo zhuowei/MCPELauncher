@@ -775,6 +775,7 @@ public class ScriptManager {
 	}
 
 	private static void playerAddedHandler(int entityId) {
+		if (!shouldLoadSkin()) return;
 		//load skin for player
 		String playerName = nativeGetPlayerName(entityId); //in the real service, this would be normalized
 		String skinName = "mob/" + playerName + ".png";
@@ -797,6 +798,12 @@ public class ScriptManager {
 			runOnMainThreadList.add(run);
 		}
 	}
+
+	private static boolean shouldLoadSkin() {
+		return android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext)
+			.getString("zz_skin_download_source", "mojang_pc").equals("mojang_pc");
+	}
+		
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();

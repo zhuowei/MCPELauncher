@@ -43,6 +43,12 @@
             android:key="zz_skin"
             android:summary="@string/pref_zz_skin_summary"
             android:title="@string/pref_zz_skin" />
+
+        <ListPreference android:title="@string/pref_zz_skin_download_source" android:key="zz_skin_download_source"
+            android:entries="@array/skin_download_source_names"
+            android:entryValues="@array/skin_download_sources"
+            android:defaultValue="mojang_pc"/>
+
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_addons_title" >
         <CheckBoxPreference

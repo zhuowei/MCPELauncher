@@ -5,14 +5,12 @@
         <item>@string/gamemode_creative</item>
         <item>@string/gamemode_survival</item>
     </string-array>
-    <string-array name="mco_redirect_target_names">
-        <item>@string/mco_redirect_none</item>
-        <item>@string/mco_redirect_pocketmine</item>
-        <!--<item>@string/mco_redirect_minepocket</item>-->
+    <string-array name="skin_download_source_names">
+        <item>@string/skin_download_do_not_download</item>
+        <item>@string/skin_download_download_pc</item>
     </string-array>
-    <string-array name="mco_redirect_target_addresses">
-        <item>NONE</item>
-        <item>peoapi.pocketmine.net</item>
-        <!--<item>peoapi.minepocket.com</item>-->
+    <string-array name="skin_download_sources">
+        <item>none</item>
+        <item>mojang_pc</item>
     </string-array>
 </resources>
