@@ -70,7 +70,14 @@ Scroll to the bottom and see notice. -->
     <string name="pref_zz_show_insert_text">\"텍스트 삽입\" 보이기</string>
     <string name="pref_zz_language_override">언어</string>
     <string name="pref_zz_language_override_default">시스템 언어</string>
-    <string name="pref_zz_script_paranoid_mode">편집모드: GUI를 사용한 ModPE scripts 비활성화</string>
+    <string name="pref_zz_script_paranoid_mode">편집모드</string>
+    <string name="pref_zz_script_paranoid_mode_summary">안드로이드 기능으로 ModPE 스크립트의 접근 비활성화,\n예를들면 파일삭제 또는 인터넷 사용</string>
+    <string name="pref_zz_legacy_keyboard_input">오래된 키보드 입력 코딩 사용</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">0.8.x버전 업데이트에서의 키보드 오류 수정</string>
+    <string name="pref_zz_texture_pack_enable_extracted">추출된 원래의 텍스쳐팩 사용</string>
+    <string name="pref_zz_skin_download_source">스킨 다운로드 소스 선택</string>
+    <string name="skin_download_do_not_download">스킨 다운로드하지 않기</string>
+    <string name="skin_download_download_pc">컴퓨터 닉네임에 따라 스킨을 다운로드 합니다.</string>
     <string name="nerdy_stuff_page">그 외...</string>
     <string name="dump_libminecraftpe">메모리에서 libminecraftpe.so 덤프하기</string>
     <string name="nerdy_stuff_are_useless">이 기능은 거의 쓸모가 없습니다. 그러나 버그 해결에 많은 도움이 될 것입니다.</string>
@@ -98,7 +105,12 @@ Scroll to the bottom and see notice. -->
     <string name="manage_patches_metadata">개발자</string>
     <string name="manage_patches_no_metadata">개발자 정보 없음</string>
     <string name="manage_patches_path">경로</string>
+    <string name="skin_import_confirm">이 스킨을 적용하시겠습니까?</string>
+    <string name="texturepack_import_confirm">이 텍스쳐팩을 적용하시겠습니까?</string>
+    <string name="script_import_confirm">이 ModPE 스크립트를 적용하시겠습니까?</string>
     <string name="skin_imported">스킨 설정됨</string>
+    <string name="texturepack_imported">텍스쳐팩 적용됨</string>
+    <string name="script_imported">ModPE 스크립트 적용됨</string>
     <string name="manage_addons">애드온 관리</string>
     <string name="get_pro">Pro 버전으로 업그레이드</string> <!-- 정식버전은 마인크래프트 PE에나 쓰고, 이 어플리케이션에는 Pro가 맞습니다. -->
     <string name="about_about">BlockLauncher 소개</string>
@@ -177,6 +189,8 @@ Scroll to the bottom and see notice. -->
     
     <string name="permlab_mcpelauncher_addon">BlockLauncher 애드온</string>
     <string name="permdesc_mcpelauncher_addon">BlockLauncher에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, 저장소 접근, 그리고 Minecraft PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
+    
+    <string name="hovercar_insert_text_backspace">Insert backspace</string>
 
     <!-- 후의 번역자분들께 말씀드리겠습니다. : SDKoongchi
 많은 사람들이 쓰는 어플리케이션인만큼, 번역 시에 문법 등을 잘 살려주시기 바랍니다. '.' 이나 ',' 등...
