@@ -139,6 +139,12 @@ public class ScriptManager {
 	}
 
 	public static void loadScript(File file) throws IOException {
+		if (isClassGenMode()) {
+			if (!scriptingInitialized) return;
+			if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
+			loadScriptFromInstance(ScriptTranslationCache.get(androidContext, file), file.getName());
+			return;
+		}
 		Reader in = null;
 		try {
 			in = new FileReader(file);
@@ -146,6 +152,13 @@ public class ScriptManager {
 		} finally {
 			if (in != null) in.close();
 		}
+	}
+
+	public static void loadScriptFromInstance(Script script, String sourceName) {
+		Context ctx = Context.enter();
+		setupContext(ctx);
+		initJustLoadedScript(ctx, script, sourceName);
+		Context.exit();
 	}
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -674,6 +687,7 @@ public class ScriptManager {
 	}
 
 	public static void setupContext(Context ctx) {
+		ctx.setOptimizationLevel(-1); //No dynamic translation; we interpret and/or precompile
 		if (android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext).getBoolean("zz_script_paranoid_mode", false)) {
 			ctx.setWrapFactory(modernWrapFactory);
 		}
@@ -802,6 +816,10 @@ public class ScriptManager {
 	private static boolean shouldLoadSkin() {
 		return android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext)
 			.getString("zz_skin_download_source", "mojang_pc").equals("mojang_pc");
+	}
+
+	private static boolean isClassGenMode() {
+		return false;
 	}
 		
 	public static native float nativeGetPlayerLoc(int axis);

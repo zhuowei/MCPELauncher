@@ -41,6 +41,7 @@ typedef struct {
 #define MOB_HEALTH_OFFSET 80
 #define ENTITY_RENDER_TYPE_OFFSET 59
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 17
+#define MINECRAFT_TIMER_OFFSET 3280
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -794,7 +795,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + 3264);
+	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + MINECRAFT_TIMER_OFFSET);
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
