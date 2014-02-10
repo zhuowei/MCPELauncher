@@ -16,6 +16,8 @@
 #include "modscript.h"
 #include "dobby_public.h"
 
+using namespace std;
+
 #define cppbool bool
 
 #include "modscript_shared.h"
@@ -46,7 +48,7 @@ extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 
-static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
+static void (*bl_Gui_displayClientMessage)(void*,  string const&);
 
 static void (*bl_Item_Item)(Item*, int);
 
@@ -57,15 +59,15 @@ static void** bl_TileItem_vtable;
 static Tile** bl_Tile_tiles;
 static int* bl_Tile_lightEmission;
 
-static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
+static void (*bl_Item_setDescriptionId)(Item*, string const&);
 
-static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
+static void (*bl_Minecraft_selectLevel)(Minecraft*, string const&,  string const&, void*);
 
 static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld, bool thatotherboolean);
 
-static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
+static void (*bl_Minecraft_connectToMCOServer)(Minecraft*,  string const&,  string const&, unsigned short);
 
-static void (*bl_Level_playSound)(Level*, float, float, float, std::string const&, float, float);
+static void (*bl_Level_playSound)(Level*, float, float, float,  string const&, float, float);
 
 static void* (*bl_Level_getAllEntities)(Level*);
 
@@ -75,26 +77,26 @@ static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int)
 
 static void (*bl_Font_drawSlow_real)(Font*, char const*, int, float, float, int, bool);
 
-static int (*bl_Font_width)(Font*, std::string const&);
+static int (*bl_Font_width)(Font*,  string const&);
 
 static void* bl_Material_dirt;
 
 static void (*bl_Tile_Tile)(Tile*, int, void*);
 static void (*bl_TileItem_TileItem)(Item*, int);
-static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
+static void (*bl_Tile_setDescriptionId)(Tile*, const  string&);
 static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
-static std::string (*bl_Tile_getDescriptionId)(Tile*);
+static  string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
-static void (*bl_Item_setIcon)(Item*, std::string const&, int);
+static void (*bl_Item_setIcon)(Item*,  string const&, int);
 static void (*bl_CreativeInventryScreen_populateTile_real)(Tile*, int, int);
 static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
 //static Item** bl_Item_items;
-static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
+static  string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
 static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
-static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
+static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*,  string const&, int);
 
 bool bl_text_parse_color_codes = true;
 
@@ -107,13 +109,13 @@ int* bl_custom_block_colors[256];
 uint8_t bl_custom_block_renderLayer[256];
 //end custom blocks
 
-std::map <std::string, std::string>* bl_I18n_strings;
+ map < string,  string>* bl_I18n_strings;
 
 int bl_addItemCreativeInvRequest[256][4];
 int bl_addItemCreativeInvRequestCount = 0;
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
-	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
+	 string* chatMessagePtr = ( string*) ((int) chatScreen + 84);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
 	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
 	char* chatMessageChars = *((char**) chatMessagePtr);*/
@@ -201,7 +203,7 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 				}
 
 				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
-				std::string cppStringForWidth = std::string(currentTextBegin, currentLength);
+				 string cppStringForWidth =  string(currentTextBegin, currentLength);
 				substringOffset += bl_Font_width(font, cppStringForWidth);
 
 				curColor = newColor;
@@ -252,8 +254,8 @@ void bl_CreativeInventryScreen_populateItem_hook(Item* item, int count, int dama
 }
 
 const char* bl_getCharArr(void* str){
-	std::string* mystr = static_cast<std::string*>(str);
-	std::string mystr2 = *mystr;
+	 string* mystr = static_cast< string*>(str);
+	 string mystr2 = *mystr;
 	const char* cs = mystr2.c_str();
 	return cs;
 }
@@ -303,20 +305,20 @@ bool bl_CustomBlock_isSolidRenderHook(Tile* tile) {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
-	std::string mystr = std::string(utfChars);
+	 string mystr =  string(utfChars);
 	void* mygui = (void*) (((int) bl_minecraft) + 416);
 	bl_Gui_displayClientMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
 Item* bl_constructItem(int id) {
-	Item* retval = (Item*) ::operator new((std::size_t) 72);
+	Item* retval = (Item*) ::operator new(( size_t) 72);
 	bl_Item_Item(retval, id - 0x100);
 	return retval;
 }
 
 Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
-	Item* retval = (Item*) ::operator new((std::size_t) 84);
+	Item* retval = (Item*) ::operator new(( size_t) 84);
 	bl_Item_Item(retval, id - 0x100);
 	retval->vtable = bl_FoodItem_vtable;
 	((int*)retval)[18] = hearts;
@@ -329,11 +331,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	Item* item = bl_constructItem(id);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
-	std::string iconNameString = std::string(iconUTFChars);
+	 string iconNameString =  string(iconUTFChars);
 	bl_Item_setIcon(item, iconNameString, iconIndex);
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	std::string mystr = std::string(utfChars);
+	string mystr =  string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -345,11 +347,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
-	std::string iconNameString = std::string(iconUTFChars);
+	 string iconNameString =  string(iconUTFChars);
 	bl_Item_setIcon(item, iconNameString, iconIndex);
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	std::string mystr = std::string(utfChars);
+	string mystr =  string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -359,7 +361,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
   (JNIEnv *env, jclass clazz, jstring worlddir) {
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
-	std::string worlddirstr = std::string(utfChars);
+	 string worlddirstr =  string(utfChars);
 	env->ReleaseStringUTFChars(worlddir, utfChars);
 	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, NULL);
 }
@@ -372,7 +374,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
   (JNIEnv *env, jclass clazz, jstring serverAddress, jint serverPort) {
 	const char * utfChars = env->GetStringUTFChars(serverAddress, NULL);
-	std::string addressstr = std::string(utfChars);
+	 string addressstr =  string(utfChars);
 	env->ReleaseStringUTFChars(serverAddress, utfChars);
 	bl_Minecraft_connectToMCOServer(bl_minecraft, addressstr, addressstr, serverPort);
 }*/
@@ -380,7 +382,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
 	const char * utfChars = env->GetStringUTFChars(sound, NULL);
-	std::string soundstr = std::string(utfChars);
+	 string soundstr =  string(utfChars);
 	env->ReleaseStringUTFChars(sound, utfChars);
 	bl_Level_playSound(bl_level, x, y, z, soundstr, volume, pitch);
 }
@@ -406,7 +408,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
 	if (te == NULL) return NULL;
 	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	 string* lineStr = ( string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
 	if (lineStr == NULL) return NULL;
 
 	jstring signJString = env->NewStringUTF(lineStr->c_str());
@@ -422,11 +424,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
 	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	 string* lineStr = ( string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
 	if (lineStr == NULL || lineStr->length() == 0) {
 		//Workaround for C++ standard library's empty string optimization failing across libraries
 		//search FULLY_DYNAMIC_STRING
-		std::string* mystr = new std::string(utfChars);
+		 string* mystr = new  string(utfChars);
 		*((void**) lineStr) = *((void**) mystr);
 	} else {
 		lineStr->assign(utfChars);
@@ -440,12 +442,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
-	std::string* newSkinString = new std::string(newSkin);
-	std::string* ptrToStr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
+	 string* newSkinString = new  string(newSkin);
+	 string* ptrToStr = ( string*) (((int) entity) + MOB_TEXTURE_OFFSET);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	(*ptrToStr) = (*newSkinString);
-	std::string* ptrToStr2 = (std::string*) (((int) entity) + 2920);
+	 string* ptrToStr2 = ( string*) (((int) entity) + 2920);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer again: %p, %i, %s\n", ptrToStr2, *((int*) ptrToStr2), ptrToStr2->c_str());
 }
 
@@ -474,12 +476,12 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 			//these return blank strings. Blank strings will kill libstdc++ since we are not using the same blank string.
 			return NULL;
 	}
-	std::string descriptionId = bl_ItemInstance_getDescriptionId(myStack);
+	 string descriptionId = bl_ItemInstance_getDescriptionId(myStack);
 	if (descriptionId.length() <= 0) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dead tile: %i\n", itemId);
 	}
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
-	std::string returnVal = descriptionId;
+	 string returnVal = descriptionId;
 	if (!raw) {
 		returnVal = (*bl_I18n_strings)[descriptionId];
 	}
@@ -502,7 +504,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
-	std::string* myName = (std::string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
+	 string* myName = ( string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
 	jstring returnValString = env->NewStringUTF(myName->c_str());
 	return returnValString;
 }
@@ -538,7 +540,7 @@ void* bl_getMaterial(int materialType) {
 	return baseTile->material;
 }
 
-void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
+void bl_buildTextureArray(TextureUVCoordinateSet* output[],  string textureNames[], int textureCoords[]) {
 	Tile* sacrificialTile = bl_Tile_tiles[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet;
@@ -548,7 +550,7 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 	}
 }
 
-Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
+Tile* bl_createBlock(int blockId,  string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
@@ -558,20 +560,20 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
 	bl_custom_block_renderShape[blockId] = renderShape;
 	//Allocate memory for the block
-	Tile* retval = (Tile*) ::operator new((std::size_t) 0x80);
+	Tile* retval = (Tile*) ::operator new(( size_t) 0x80);
 	retval->vtable = bl_CustomBlock_vtable;
 	bl_Tile_Tile(retval, blockId, bl_getMaterial(materialType));
 	retval->vtable = bl_CustomBlock_vtable;
 	retval->material = bl_getMaterial(materialType);
-	std::string nameStr = std::string(name);
+	 string nameStr =  string(name);
 	bl_Tile_setDescriptionId(retval, nameStr);
-	//std::string comeOut = bl_Tile_getDescriptionId(retval);
+	// string comeOut = bl_Tile_getDescriptionId(retval);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Block added: %s\n", comeOut.c_str());
 	(*bl_I18n_strings)["tile." + nameStr + ".name"] = nameStr;
 	//add it to the global tile list
 	bl_Tile_tiles[blockId] = retval;
 	//now allocate the item
-	Item* tileItem = (Item*) ::operator new((std::size_t) 76);
+	Item* tileItem = (Item*) ::operator new(( size_t) 76);
 	tileItem->vtable = bl_TileItem_vtable;
 	bl_TileItem_TileItem(tileItem, blockId - 0x100);
 	tileItem->vtable = bl_TileItem_vtable;
@@ -584,7 +586,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	int myIntArray[16*6];
 	env->GetIntArrayRegion(textureCoords, 0, 16*6, myIntArray);
-	std::string myStringArray[16*6];
+	 string myStringArray[16*6];
 	for (int i = 0; i < 16*6; i++) {
 		jstring myString = (jstring) env->GetObjectArrayElement(textureNames, i);
 		const char * myStringChars = env->GetStringUTFChars(myString, NULL);
@@ -672,32 +674,32 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jstring key, jstring value) {
 
 	const char * valueUTFChars = env->GetStringUTFChars(value, NULL);
-	std::string valueNameString = std::string(valueUTFChars);
+	 string valueNameString =  string(valueUTFChars);
 
 	const char * keyUTFChars = env->GetStringUTFChars(key, NULL);
-	std::string keyString = std::string(keyUTFChars);
+	 string keyString =  string(keyUTFChars);
 	(*bl_I18n_strings)[keyString] = valueNameString;
 	env->ReleaseStringUTFChars(key, keyUTFChars);
 	env->ReleaseStringUTFChars(value, valueUTFChars);
 }
 
 void bl_setuphooks_cppside() {
-	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
+	bl_Gui_displayClientMessage = (void (*)(void*, const  string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
-	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
+	bl_Item_setDescriptionId = (void (*)(Item*,  string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
 
-	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
+	bl_Minecraft_selectLevel = (void (*) (Minecraft*,  string const&,  string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
 
-	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
+	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*,  string const&,  string const&, unsigned short))
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
 
-	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
+	bl_Level_playSound = (void (*) (Level*, float, float, float,  string const&, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
 
 	bl_Level_getAllEntities = (void* (*)(Level*))
@@ -721,7 +723,7 @@ void bl_setuphooks_cppside() {
 	void* fontDrawSlow = dlsym(RTLD_DEFAULT, "_ZN4Font8drawSlowEPKciffib");
 	mcpelauncher_hook(fontDrawSlow, (void*) &bl_Font_drawSlow_hook, (void**) &bl_Font_drawSlow_real);
 
-	bl_Font_width = (int (*) (Font*, std::string const&))
+	bl_Font_width = (int (*) (Font*,  string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
 
 	bl_Tile_vtable = (void**) ((int) dlsym(RTLD_DEFAULT, "_ZTV4Tile") + 8);
@@ -729,25 +731,25 @@ void bl_setuphooks_cppside() {
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
 	bl_TileItem_TileItem = (void (*)(Item*, int)) dobby_dlsym(mcpelibhandle, "_ZN8TileItemC2Ei");
-	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
+	bl_Tile_setDescriptionId = (void (*)(Tile*, const  string&))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
 	bl_TileItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
-	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
+	bl_Tile_getDescriptionId = ( string (*)(Tile*))
 		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
 	bl_initCustomBlockVtable();
 
-	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
-	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
+	bl_I18n_strings = ( map < string,  string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
+	bl_Item_setIcon = (void (*)(Item*,  string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
 
 	//bl_Item_items = (Item**) dlsym(mcpelibhandle, "_ZN4Item5itemsE");
-	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
+	bl_ItemInstance_getDescriptionId = ( string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	void* populateTile = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Tileii");
@@ -757,7 +759,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
-	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
+	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*,  string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 }
 
