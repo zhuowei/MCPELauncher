@@ -920,6 +920,9 @@ public class ScriptManager {
 	public static native int nativeGetSlotArmor(int slot, int type);
 	public static native void nativeSetArmorSlot(int slot, int id, int damage);
 	
+	//Byteandahalf's additions
+	public static native float nativeGetBrightness(float x, float y, float z);
+	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
 	public static native void nativeRemoveItemBackground();
@@ -1289,6 +1292,12 @@ public class ScriptManager {
 			float z = nativeGetEntityLoc(ent, AXIS_Z);
 			
 			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
+		}
+		
+		// Byteandahalf's additions
+		@JSStaticFunction
+		public static float getBrightness(float x, float y, float z) {
+			return nativeGetBrightness(x, y, z);
 		}
 		
 		//InusualZ's additions
