@@ -87,6 +87,7 @@ int (*bl_Level_getData) (Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
+static float (*bl_Level_getBrightness)(Level*, int, int, int);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
@@ -968,6 +969,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
 	bl_Level_getTile = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
+	bl_Level_getBrightness = dlsym(RTLD_DEFAULT, "_ZN5Level13getBrightnessEiii");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
