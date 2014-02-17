@@ -921,7 +921,7 @@ public class ScriptManager {
 	public static native void nativeSetArmorSlot(int slot, int id, int damage);
 	
 	//Byteandahalf's additions
-	public static native float nativeGetBrightness(float x, float y, float z);
+	public static native int nativeGetBrightness(int x, int y, int z);
 	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1296,7 +1296,7 @@ public class ScriptManager {
 		
 		// Byteandahalf's additions
 		@JSStaticFunction
-		public static float getBrightness(float x, float y, float z) {
+		public static int getBrightness(int x, int y, int z) {
 			return nativeGetBrightness(x, y, z);
 		}
 		

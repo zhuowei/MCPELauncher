@@ -31,7 +31,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeGetPlayerEntt
+ * Method:    nativeGetPlayerEnt
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
@@ -44,14 +44,6 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  */
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLevel
   (JNIEnv *, jclass);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeGetBrightness
- * Signature: (FFF)F
- */
-JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
-  (JNIEnv *, jclass, jfloat, jfloat, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -659,6 +651,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetArmorSlot
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetBrightness
+ * Signature: (III)F
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
   (JNIEnv *, jclass, jint, jint, jint);
 
 /*

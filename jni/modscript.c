@@ -87,7 +87,7 @@ int (*bl_Level_getData) (Level*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
-static float (*bl_Level_getBrightness)(Level*, float, float, float);
+static int (*bl_Level_getRawBrightness)(Level*, int, int, int);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
@@ -543,9 +543,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 	return (jlong) (intptr_t) bl_level;
 }
 
-JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z) {
-  	return bl_Level_getBrightness(bl_level, x, y, z);
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+  	return bl_Level_getRawBrightness(bl_level, x, y, z);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
@@ -974,7 +974,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
 	bl_Level_getTile = dlsym(RTLD_DEFAULT, "_ZN5Level7getTileEiii");
-	bl_Level_getBrightness = dlsym(RTLD_DEFAULT, "_ZN5Level13getBrightnessEfff");
+	bl_Level_getRawBrightness = dlsym(RTLD_DEFAULT, "_ZN5Level16getRawBrightnessEiii");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
 	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
