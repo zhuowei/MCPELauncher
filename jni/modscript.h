@@ -47,6 +47,14 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetBrightness
+ * Signature: (FFF)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
+  (JNIEnv *, jclass, jfloat, jfloat, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetPosition
  * Signature: (IFFF)V
  */
