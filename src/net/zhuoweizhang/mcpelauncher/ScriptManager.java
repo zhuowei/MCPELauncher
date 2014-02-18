@@ -212,6 +212,10 @@ public class ScriptManager {
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("destroyBlock", x, y, z, side);
 	}
+	
+	public static void startDestroyBlockCallback(int x, int y, int z, int side) {
+		callScriptMethod("startDestroyBlock", x, y, z, side);
+	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
 		System.out.println("Level: " + hasLevel);
