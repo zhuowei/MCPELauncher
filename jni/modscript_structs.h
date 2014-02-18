@@ -93,6 +93,16 @@ typedef struct {
 	ModelPart bipedRightLeg;//540
 	ModelPart bipedLeftLeg;//668
 } HumanoidModel;
+
+typedef struct {
+	Item* item; //0
+	int wtf2; //4
+	ItemInstance itemInstance; //8
+	char letter; //28
+} RecipesType;
+
+typedef struct {
+} Recipes;
 #ifdef __cplusplus
 }
 #endif

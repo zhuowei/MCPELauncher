@@ -821,6 +821,23 @@ public class ScriptManager {
 	private static boolean isClassGenMode() {
 		return false;
 	}
+
+	private static int[] expandShapelessRecipe(Scriptable inArrayScriptable) {
+		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
+		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
+		int[] endArray = null;
+		if (firstObj instanceof Number) {
+			if (inArrayLength % 3 != 0) throw new IllegalArgumentException("Array length must be multiple of 3");
+			endArray = new int[inArrayLength];
+			for (int i = 0; i < endArray.length; i++) {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+			}	
+		} else {
+			throw new IllegalArgumentException("Method takes in an array of [itemid, itemcount, itemdamage, ...]");
+			//TODO: more types
+		}
+		return endArray;
+	}
 		
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
@@ -892,6 +909,7 @@ public class ScriptManager {
 	public static native boolean nativeIsPlayer(int entityId);
 	public static native float nativeGetEntityVel(int entity, int axis);
 	public static native void nativeSetI18NString(String key, String value);
+	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1697,6 +1715,12 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void langEdit(String key, String value) {
 			nativeSetI18NString(key, value);
+		}
+
+		@JSStaticFunction
+		public static void addShapelessRecipe(int id, int count, int damage, Scriptable ingredients) {
+			int[] expanded = expandShapelessRecipe(ingredients);
+			nativeAddShapelessRecipe(id, count, damage, expanded);
 		}
 
 		@Override

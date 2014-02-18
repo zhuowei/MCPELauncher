@@ -95,6 +95,8 @@ static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
 static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
 static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
+static Recipes* (*bl_Recipes_getInstance)();
+static void (*bl_Recipes_addShapelessRecipe)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&);
 
 bool bl_text_parse_color_codes = true;
 
@@ -681,6 +683,28 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	env->ReleaseStringUTFChars(value, valueUTFChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
+	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
+	int ingredients[ingredientsElemsCount];
+	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
+	ItemInstance* outStack = bl_newItemInstance(itemId, itemCount, itemDamage);
+	int ingredientsCount = ingredientsElemsCount / 3;
+	std::vector<RecipesType> ingredientsList;
+	for (int i = 0; i < ingredientsCount; i++) {
+		RecipesType recipeType;
+		recipeType.wtf2 = 0;
+		recipeType.item = NULL;
+		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
+		recipeType.itemInstance.count = ingredients[i * 3 + 1];
+		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3]);
+		ingredientsList.push_back(recipeType);
+	}
+	Recipes* recipes = bl_Recipes_getInstance();
+	bl_Recipes_addShapelessRecipe(recipes, *outStack, ingredientsList);
+	delete outStack;
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -759,6 +783,9 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
+	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
+	bl_Recipes_addShapelessRecipe = (void (*)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&)) 
+		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
 }
 
 } //extern
