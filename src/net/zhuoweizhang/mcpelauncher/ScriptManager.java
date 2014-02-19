@@ -1328,22 +1328,22 @@ public class ScriptManager {
 		}
 		
  		@JSFunction
-		public void setItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount) {
+		public void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
  			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
  		}
  
  		@JSFunction
-		public int getItemFurnace(int x, int y, int z, int slot) {
+		public int getFurnaceSlot(int x, int y, int z, int slot) {
  			return nativeGetItemFurnace(x, y, z, slot);
  		}
  
  		@JSFunction
- 		public int getItemDataFurnace(int x, int y, int z, int slot) {
+ 		public int getFurnaceSlotData(int x, int y, int z, int slot) {
  			return nativeGetItemDataFurnace(x, y, z, slot);
  		}
  
  		@JSFunction
- 		public int getItemCountFurnace(int x, int y, int z, int slot) {
+ 		public int getFurnaceSlotCount(int x, int y, int z, int slot) {
  			return nativeGetItemCountFurnace(x, y, z, slot);
  		}
 		
