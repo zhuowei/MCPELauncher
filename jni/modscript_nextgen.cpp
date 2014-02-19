@@ -708,12 +708,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
-  (JNIEnv *env, jclass clazz, jint inputId, outputId, outputCount, outputDamage) {
+  (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputCount, jint outputDamage) {
   	ItemInstance* outputStack = bl_newItemInstance(outputId, outputCount, outputDamage);
-  	ItemInstance* inputItem = bl_newItemInstance(inputId, null, null); //TODO: Symbol asks for an int: Healthy to shove ItemInstance into its mouth?
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, *inputItem, *outputStack);
-  }
+  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, *outputStack); //According to MCPC code, and the MCPE symbol itself, this takes inputId as a direct int
+}
 
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
