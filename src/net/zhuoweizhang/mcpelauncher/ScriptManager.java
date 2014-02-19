@@ -1722,7 +1722,7 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addShapelessRecipe(int id, int count, int damage, Scriptable ingredients) {
+		public static void addRecipe(int id, int count, int damage, Scriptable ingredients) {
 			int[] expanded = expandShapelessRecipe(ingredients);
 			nativeAddShapelessRecipe(id, count, damage, expanded);
 		}
