@@ -709,9 +709,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
-  	ItemInstance* outputStack = bl_newItemInstance(outputId, outputDamage);
+  	ItemInstance* outputStack = bl_newItemInstance(outputId, null, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, *outputStack); // Maybe inputId should be an ItemInstance rather than int?  According to MCPC code, and the MCPE symbol itself, this takes inputId as a direct int
+  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, *outputStack);
 }
 
 void bl_setuphooks_cppside() {
