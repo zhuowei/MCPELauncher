@@ -1329,22 +1329,22 @@ public class ScriptManager {
 			return nativeGetBrightness(x, y, z);
 		}
 		
- 		@JSFunction
+ 		@JSStaticFunction
 		public void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
  			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
  		}
  
- 		@JSFunction
+ 		@JSStaticFunction
 		public int getFurnaceSlot(int x, int y, int z, int slot) {
  			return nativeGetItemFurnace(x, y, z, slot);
  		}
  
- 		@JSFunction
+ 		@JSStaticFunction
  		public int getFurnaceSlotData(int x, int y, int z, int slot) {
  			return nativeGetItemDataFurnace(x, y, z, slot);
  		}
  
- 		@JSFunction
+ 		@JSStaticFunction
  		public int getFurnaceSlotCount(int x, int y, int z, int slot) {
  			return nativeGetItemCountFurnace(x, y, z, slot);
  		}
