@@ -945,6 +945,10 @@ public class ScriptManager {
 	//Byteandahalf's additions
 	public static native int nativeGetBrightness(int x, int y, int z);
 	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputCount, int outputDamage);
+	public static native void nativeAddItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount);
+ 	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
 	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1322,6 +1326,26 @@ public class ScriptManager {
 		public static int getBrightness(int x, int y, int z) {
 			return nativeGetBrightness(x, y, z);
 		}
+		
+ 		@JSFunction
+		public void setItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount) {
+ 			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
+ 		}
+ 
+ 		@JSFunction
+		public int getItemFurnace(int x, int y, int z, int slot) {
+ 			return nativeGetItemFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSFunction
+ 		public int getItemDataFurnace(int x, int y, int z, int slot) {
+ 			return nativeGetItemDataFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSFunction
+ 		public int getItemCountFurnace(int x, int y, int z, int slot) {
+ 			return nativeGetItemCountFurnace(x, y, z, slot);
+ 		}
 		
 		//InusualZ's additions
 		/*
