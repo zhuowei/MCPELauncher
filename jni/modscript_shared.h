@@ -33,6 +33,8 @@ extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 extern int (*bl_Level_getData) (Level*, int, int, int);
 Entity* bl_getEntityWrapper(Level* level, int entityId);
 
+void bl_clearNameTags();
+
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 

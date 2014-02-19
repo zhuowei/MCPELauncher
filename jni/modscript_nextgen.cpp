@@ -42,6 +42,7 @@ typedef void Font;
 #define PLAYER_NAME_OFFSET 3200
 #define ENTITY_VTABLE_OFFSET_IS_PLAYER 44
 #define MINECRAFT_GUI_OFFSET 416
+#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 
 extern "C" {
 
@@ -101,6 +102,7 @@ static void (*bl_Recipes_addShapelessRecipe)(Recipes*, ItemInstance const&, std:
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 static void (*bl_Gui_showTipMessage)(void*, std::string const&);
+static void (*bl_PlayerRenderer_renderName)(void*, Entity*, float);
 
 bool bl_text_parse_color_codes = true;
 
@@ -117,6 +119,8 @@ std::map <std::string, std::string>* bl_I18n_strings;
 
 int bl_addItemCreativeInvRequest[256][4];
 int bl_addItemCreativeInvRequestCount = 0;
+
+std::map <int, std::string> bl_nametag_map;
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -306,6 +310,37 @@ bool bl_CustomBlock_isSolidRenderHook(Tile* tile) {
 	return bl_custom_block_renderShape[blockId] == 0;
 }
 
+void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float scale) {
+	int entityId = entity->entityId;
+	if (bl_nametag_map.count(entityId) == 0) return;
+	std::string mystr = bl_nametag_map[entityId];
+	//back up the existing data at the nametag's spot, then overwrite it with our string. 
+	//This is awful code, but it might work.
+	void* ptrToName = (void*) (((uintptr_t) entity) + PLAYER_NAME_OFFSET);
+	char backup[sizeof(std::string)];
+	memcpy(backup, ptrToName, sizeof(std::string));
+	memcpy(ptrToName, &mystr, sizeof(std::string));
+
+	float* stance1 = (float*) ((uintptr_t) entity + 36); //y position
+	float* stance2 = (float*) ((uintptr_t) entity + 196); //y at last tick
+	float* entityHeightPtr = (float*) ((uintptr_t) entity + 180);
+	float backupstance1 = *stance1;
+	float backupstance2 = *stance2;
+	float entityHeight = *entityHeightPtr;
+	*stance1 = *stance1 + entityHeight;
+	*stance2 = *stance2 + entityHeight;
+
+	bl_PlayerRenderer_renderName(renderer, entity, scale);
+
+	*stance1 = backupstance1;
+	*stance2 = backupstance2;
+	memcpy(ptrToName, backup, sizeof(std::string));
+}
+
+void bl_clearNameTags() {
+	bl_nametag_map.clear();
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
@@ -394,7 +429,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAllEntities
   (JNIEnv *env, jclass clazz) {
 	void* ptr = bl_Level_getAllEntities(bl_level);
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "%x, %x\n", ptr, *((void**)(ptr)));
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "%x, %x\n", ptr, *((void**)(ptr)));
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -726,6 +761,36 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetNameTag
+  (JNIEnv *env, jclass clazz, jint entityId, jstring name) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	const char * nameUtfChars = env->GetStringUTFChars(name, NULL);
+	std::string nameString = std::string(nameUtfChars);
+	bl_nametag_map[entity->entityId] = nameString;
+	env->ReleaseStringUTFChars(name, nameUtfChars);
+}
+
+/* List of all renderers that need name tag support */
+static const char* renderersToPatch[] = {
+"_ZTV15ChickenRenderer",
+"_ZTV15CreeperRenderer",
+"_ZTV11PigRenderer",
+"_ZTV14SpiderRenderer",
+"_ZTV19HumanoidMobRenderer",
+"_ZTV11MobRenderer",
+"_ZTV13SheepRenderer"
+};
+
+
+static void patchEntityRenderers(soinfo2* mcpelibhandle) {
+	int renderersCount = sizeof(renderersToPatch) / sizeof(const char*);
+	for (int i = 0; i < renderersCount; i++) {
+		void** entityRendererVtable = (void**) dobby_dlsym(mcpelibhandle, renderersToPatch[i]);
+		entityRendererVtable[ENTITY_RENDERER_OFFSET_RENDER_NAME] = (void*) &bl_EntityRenderer_renderName_hook;
+	}
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -811,6 +876,9 @@ void bl_setuphooks_cppside() {
 	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
+
+	patchEntityRenderers(mcpelibhandle);
+	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
 }
 
 } //extern

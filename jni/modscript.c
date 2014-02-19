@@ -270,6 +270,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 
 	//attach the listener
 	bl_attachLevelListener();
+	bl_clearNameTags();
 }
 
 void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {

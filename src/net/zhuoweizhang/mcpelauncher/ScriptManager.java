@@ -915,6 +915,7 @@ public class ScriptManager {
 	public static native void nativeSetI18NString(String key, String value);
 	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
 	public static native void nativeShowTipMessage(String msg);
+	public static native void nativeEntitySetNameTag(int id, String msg);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1610,6 +1611,15 @@ public class ScriptManager {
 		public static double getVelZ(int ent) {
 			return nativeGetEntityVel(ent, AXIS_Z);
 		}
+
+		@JSStaticFunction
+		public static void setNameTag(int entity, String name) {
+			int entityType = nativeGetEntityTypeId(entity);
+			if (entityType >= 64 || (entityType == 0 && !NativePlayerApi.isPlayer(entity)))
+				throw new IllegalArgumentException("setNameTag only works on mobs");
+			nativeEntitySetNameTag(entity, name);
+		}
+
 
 		@Override
 		public String getClassName() {
