@@ -914,6 +914,7 @@ public class ScriptManager {
 	public static native float nativeGetEntityVel(int entity, int axis);
 	public static native void nativeSetI18NString(String key, String value);
 	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
+	public static native void nativeShowTipMessage(String msg);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1755,6 +1756,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
+		}
+
+		@JSStaticFunction
+		public static void showTipMessage(String msg) {
+			nativeShowTipMessage(msg);
 		}
 
 		@Override

@@ -41,6 +41,7 @@ typedef void Font;
 #define MOB_TEXTURE_OFFSET 2948
 #define PLAYER_NAME_OFFSET 3200
 #define ENTITY_VTABLE_OFFSET_IS_PLAYER 44
+#define MINECRAFT_GUI_OFFSET 416
 
 extern "C" {
 
@@ -99,6 +100,7 @@ static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapelessRecipe)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&);
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
+static void (*bl_Gui_showTipMessage)(void*, std::string const&);
 
 bool bl_text_parse_color_codes = true;
 
@@ -308,7 +310,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = (void*) (((int) bl_minecraft) + 416);
+	void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
 	bl_Gui_displayClientMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
@@ -715,6 +717,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	delete outputStack;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
+  (JNIEnv *env, jclass clazz, jstring text) {
+	const char * utfChars = env->GetStringUTFChars(text, NULL);
+	std::string mystr = std::string(utfChars);
+	void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
+	bl_Gui_showTipMessage(mygui, mystr);
+	env->ReleaseStringUTFChars(text, utfChars);
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -799,6 +810,7 @@ void bl_setuphooks_cppside() {
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
+	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
 }
 
 } //extern
