@@ -949,7 +949,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	void* tileEnt = bl_Level_getTileEntity(bl_level, x, y, z);
 	ItemInstance* instance = bl_FurnaceTileEntity_getItem(tileEnt, slot);
 	if (tileEnt == NULL) return -1;
-	return instance->id;
+	return bl_ItemInstance_getId(instance);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataFurnace
