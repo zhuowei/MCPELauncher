@@ -944,7 +944,7 @@ public class ScriptManager {
 	
 	//Byteandahalf's additions
 	public static native int nativeGetBrightness(int x, int y, int z);
-	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputCount, int outputDamage);
+	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputDamage);
 	public static native void nativeAddItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount);
  	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
  	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
@@ -1753,8 +1753,8 @@ public class ScriptManager {
 		}
 		
 		@JSStaticFunction
-		public static void addFurnaceRecipe(int inputId, int outputId, int outputCount, int outputDamage) {
-			nativeAddFurnaceRecipe(inputId, outputId, outputCount, outputDamage);
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
 		@Override
