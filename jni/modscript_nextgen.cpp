@@ -797,7 +797,7 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
-		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiP12ItemInstance");
+		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 }
 
 } //extern
