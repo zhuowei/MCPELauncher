@@ -72,7 +72,6 @@ jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
 void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
-static void (*bl_GameMode_startDestroyBlock_real)(void*, int, int, int, int);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
 static void (*bl_Level_setTileAndData) (Level*, int, int, int, int, int, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -126,6 +125,9 @@ static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 static void (*bl_HumanoidModel_constructor_real)(HumanoidModel*, float, float);
 static void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
+
+static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, int, int, int, int);
+static void (*bl_CreativeMode_startDestroyBlock_real)(void*, int, int, int, int);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -197,19 +199,48 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, player, level, itemStack, x, y, z, side, vec3);
 }
 
-void bl_GameMode_startDestroyBlock_hook(void* gamemode, int x, int y, int z, int side) {
+void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, int x, int y, int z, int side) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
-	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
+
 	
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "startDestroyBlockCallback", "(IIII)V");
 	
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, side);
 	
-	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
 	
-	if(!preventDefaultStatus) bl_GameMode_startDestroyBlock_real(gamemode, x, y, z, side);
+	if(!preventDefaultStatus) bl_SurvivalMode_startDestroyBlock_real(gamemode, x, y, z, side);
+}
+
+void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, int x, int y, int z, int side) {
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+
+	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+	}
+
+	
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "startDestroyBlockCallback", "(IIII)V");
+	
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, side);
+	
+	if (attachStatus == JNI_EDETACHED) {
+		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
+	
+	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, x, y, z, side);
 }
 
 void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* levelName, LocalPlayer* player) {
@@ -964,8 +995,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEiiii");
 	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
 	
-	void* startDestroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode17startDestroyBlockEiiii");
-	mcpelauncher_hook(startDestroyBlock, &bl_GameMode_startDestroyBlock_hook, (void**) &bl_GameMode_startDestroyBlock_real);
+	void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEiiii");
+	mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
+
+	void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEiiii");
+	mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
+
 
 	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieEP6Entity");
 	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
