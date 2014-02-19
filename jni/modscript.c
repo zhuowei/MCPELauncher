@@ -109,6 +109,8 @@ static void (*bl_Entity_setOnFire)(Entity*, int);
 void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 static void (*bl_ChestTileEntity_setItem)(void*, int, ItemInstance*);
 static ItemInstance* (*bl_ChestTileEntity_getItem)(void*, int);
+static void (*bl_FurnaceTileEntity_setItem)(void*, int, ItemInstance*);
+static ItemInstance* (*bl_FurnaceTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
@@ -930,6 +932,46 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 	}
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemFurnace
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
+	if (bl_level == NULL) return;
+	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
+
+	void* tileEnt = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (tileEnt == NULL) return;
+	bl_FurnaceTileEntity_setItem(tileEnt, slot, instance);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemFurnace
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* tileEnt = bl_Level_getTileEntity(bl_level, x, y, z);
+	ItemInstance* instance = bl_FurnaceTileEntity_getItem(tileEnt, slot);
+	if (tileEnt == NULL) return -1;
+	return bl_ItemInstance_getId(instance);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataFurnace
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* tileEnt = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (tileEnt == NULL) return -1;
+	ItemInstance* instance = bl_FurnaceTileEntity_getItem(tileEnt, slot);
+	return instance->damage;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemCountFurnace
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return -1;
+
+	void* tileEnt = bl_Level_getTileEntity(bl_level, x, y, z);
+	if (tileEnt == NULL) return -1;
+	ItemInstance* instance = bl_FurnaceTileEntity_getItem(tileEnt, slot);
+	return instance->count;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground
   (JNIEnv *env, jclass clazz) {
 	//void* ItemRenderer_renderGuiItem = dlsym(RTLD_DEFAULT, "_ZN12ItemRenderer13renderGuiItemEP4FontP8TexturesPK12ItemInstanceffffb");
@@ -1047,6 +1089,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getTileEntity = dlsym(RTLD_DEFAULT, "_ZN5Level13getTileEntityEiii");
 	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
 	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7getItemEi");
+	bl_FurnaceTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15FurnaceTileEntity7setItemEiP12ItemInstance");
+	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15FurnaceTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");

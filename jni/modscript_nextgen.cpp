@@ -97,6 +97,8 @@ static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
 static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapelessRecipe)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&);
+static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
+static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 
 bool bl_text_parse_color_codes = true;
 
@@ -705,6 +707,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	delete outStack;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
+  (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
+  	ItemInstance* outputStack = bl_newItemInstance(outputId, null, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
+  	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
+  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, *outputStack);
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -786,6 +795,9 @@ void bl_setuphooks_cppside() {
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapelessRecipe = (void (*)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&)) 
 		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
+	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
+	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
+		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 }
 
 } //extern

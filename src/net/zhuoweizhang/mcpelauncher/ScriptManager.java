@@ -944,6 +944,11 @@ public class ScriptManager {
 	
 	//Byteandahalf's additions
 	public static native int nativeGetBrightness(int x, int y, int z);
+	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputDamage);
+	public static native void nativeAddItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount);
+ 	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
 	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1321,6 +1326,26 @@ public class ScriptManager {
 		public static int getBrightness(int x, int y, int z) {
 			return nativeGetBrightness(x, y, z);
 		}
+		
+ 		@JSFunction
+		public void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
+ 			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
+ 		}
+ 
+ 		@JSFunction
+		public int getFurnaceSlot(int x, int y, int z, int slot) {
+ 			return nativeGetItemFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSFunction
+ 		public int getFurnaceSlotData(int x, int y, int z, int slot) {
+ 			return nativeGetItemDataFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSFunction
+ 		public int getFurnaceSlotCount(int x, int y, int z, int slot) {
+ 			return nativeGetItemCountFurnace(x, y, z, slot);
+ 		}
 		
 		//InusualZ's additions
 		/*
@@ -1722,9 +1747,14 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addRecipe(int id, int count, int damage, Scriptable ingredients) {
+		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
 			int[] expanded = expandShapelessRecipe(ingredients);
 			nativeAddShapelessRecipe(id, count, damage, expanded);
+		}
+		
+		@JSStaticFunction
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
 		@Override
