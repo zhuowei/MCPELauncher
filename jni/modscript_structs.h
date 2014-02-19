@@ -103,6 +103,9 @@ typedef struct {
 
 typedef struct {
 } Recipes;
+
+typedef struct {
+} FurnaceRecipes;
 #ifdef __cplusplus
 }
 #endif

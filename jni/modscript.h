@@ -488,7 +488,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeAddShapelessRecipe
- * Signature: (III[I)V
+ * Signature: (III[I])V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *, jclass, jint, jint, jint, jintArray);
@@ -515,6 +515,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHu
  * Signature: (III)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDestroyBlock
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeAddFurnaceRecipe
+ * Signature:  (III)V
+*/
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *, jclass, jint, jint, jint);
 
 /*
