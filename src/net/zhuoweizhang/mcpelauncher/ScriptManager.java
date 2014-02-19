@@ -944,6 +944,7 @@ public class ScriptManager {
 	
 	//Byteandahalf's additions
 	public static native int nativeGetBrightness(int x, int y, int z);
+	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputCount, int outputDamage);
 	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1722,9 +1723,14 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addRecipe(int id, int count, int damage, Scriptable ingredients) {
+		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
 			int[] expanded = expandShapelessRecipe(ingredients);
 			nativeAddShapelessRecipe(id, count, damage, expanded);
+		}
+		
+		@JSStaticFunction
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputCount, int outputDamage) {
+			nativeAddFurnaceRecipe(inputId, outputId, outputCount, outputDamage);
 		}
 
 		@Override
