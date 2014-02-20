@@ -1764,7 +1764,8 @@ public class ScriptManager {
 		}
 		
 		@JSStaticFunction
-		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) {
+			//TODO: Test this method with outputCount; crash?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
