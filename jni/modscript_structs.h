@@ -44,7 +44,10 @@ typedef struct {
 	int idunno3; //20
 	int idunno4; //24
 	int idunno5; //28
-	cppstr* description; //31
+	cppstr* description; //32
+	char filler[18]; //34
+	int category1; //52
+	int category2; //56
 } Item;
 
 typedef struct {
@@ -67,7 +70,9 @@ typedef struct {
 	int filler1; //48
 	float destroyTime; //52
 	float explosionResistance; //56
-	char filler2[28]; //60
+	char filler2[20]; //60
+	int category1;//80
+	int category2;//84
 #ifdef __cplusplus
 	std::string descriptionId; //88
 #else

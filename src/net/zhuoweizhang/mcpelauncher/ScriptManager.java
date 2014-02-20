@@ -175,6 +175,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
+			ScriptableObject.putProperty(scope, "ItemCategory", classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -917,6 +918,7 @@ public class ScriptManager {
 	public static native void nativeShowTipMessage(String msg);
 	public static native void nativeEntitySetNameTag(int id, String msg);
 	public static native void nativeSetStonecutterItem(int id, int status);
+	public static native void nativeSetItemCategory(int id, int category, int status);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1781,6 +1783,11 @@ public class ScriptManager {
 			nativeSetStonecutterItem(id, status? 2: 1);
 		}
 		*/
+
+		@JSStaticFunction
+		public static void setItemCategory(int id, int category, int whatever) {
+			nativeSetItemCategory(id, category, whatever);
+		}
 
 		@Override
 		public String getClassName() {

@@ -28,6 +28,7 @@ extern Entity* bl_removedEntity;
 extern void (*bl_ItemInstance_setId)(ItemInstance*, int);
 extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
+void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage);
 
 extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 extern int (*bl_Level_getData) (Level*, int, int, int);

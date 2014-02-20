@@ -150,6 +150,8 @@ int bl_addItemCreativeInvRequestCount = 0;
 std::map <int, std::string> bl_nametag_map;
 char bl_stonecutter_status[512];
 
+static Item** bl_Item_items;
+
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
@@ -393,6 +395,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 Item* bl_constructItem(int id) {
 	Item* retval = (Item*) ::operator new((std::size_t) 72);
 	bl_Item_Item(retval, id - 0x100);
+	retval->category1 = 2; //tool
+	retval->category2 = 0;
 	return retval;
 }
 
@@ -402,6 +406,8 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 	retval->vtable = bl_FoodItem_vtable;
 	((int*)retval)[18] = hearts;
 	((float*) retval)[19] = timetoeat; //time to eat
+	retval->category1 = 4; //food
+	retval->category2 = 0;
 	return retval;
 }
 
@@ -651,11 +657,15 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	(*bl_I18n_strings)["tile." + nameStr + ".name"] = nameStr;
 	//add it to the global tile list
 	bl_Tile_tiles[blockId] = retval;
+	retval->category1 = 1;
+	retval->category2 = 1;
 	//now allocate the item
 	Item* tileItem = (Item*) ::operator new((std::size_t) 76);
 	tileItem->vtable = bl_TileItem_vtable;
 	bl_TileItem_TileItem(tileItem, blockId - 0x100);
 	tileItem->vtable = bl_TileItem_vtable;
+	tileItem->category1 = 1;
+	tileItem->category2 = 1;
 	return retval;
 }
 
@@ -793,7 +803,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
-	ItemInstance* outStack = bl_newItemInstance(itemId, itemCount, itemDamage);
+	ItemInstance outStack;
+	bl_setItemInstance(&outStack, itemId, itemCount, itemDamage);
 	int ingredientsCount = ingredientsElemsCount / 2;
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
@@ -807,16 +818,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	bl_Recipes_addShapelessRecipe(recipes, *outStack, ingredientsList);
-	delete outStack;
+	bl_Recipes_addShapelessRecipe(recipes, outStack, ingredientsList);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
-  	ItemInstance* outputStack = bl_newItemInstance(outputId, 1, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
+  	ItemInstance outputStack;
+	bl_setItemInstance(&outputStack, outputId, 1, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, *outputStack);
-	delete outputStack;
+  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
@@ -861,6 +871,13 @@ static void patchEntityRenderers(soinfo2* mcpelibhandle) {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetStonecutterItem
   (JNIEnv *env, jclass clazz, jint itemId, jint status) {
 	bl_stonecutter_status[itemId] = status;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemCategory
+  (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
+	Item* myitem = bl_Item_items[itemId];
+	myitem->category1 = category;
+	myitem->category2 = mystery1;
 }
 
 void bl_setuphooks_cppside() {
@@ -956,6 +973,7 @@ void bl_setuphooks_cppside() {
 	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
 	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
 	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
+	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
 }
 
 } //extern

@@ -154,11 +154,15 @@ Entity* bl_getEntityWrapper(Level* level, int entityId) {
 	return bl_Level_getEntity(level, entityId);
 }
 
-ItemInstance* bl_newItemInstance(int id, int count, int damage) {
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
 	instance->count = count;
 	bl_ItemInstance_setId(instance, id);
+}
+
+ItemInstance* bl_newItemInstance(int id, int count, int damage) {
+	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	bl_setItemInstance(instance, id, count, damage);
 	return instance;
 }
 
