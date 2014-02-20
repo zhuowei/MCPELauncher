@@ -44,6 +44,30 @@ typedef void Font;
 #define MINECRAFT_GUI_OFFSET 416
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 
+typedef struct {
+	//union {
+	//	std::map<const int, int> pack;
+		char filler[24];
+	//}
+} ItemPack;
+
+typedef struct {
+	void** vtable; //4
+	ItemPack itemPack; //4
+} Recipe;
+
+typedef struct {
+	std::vector<Recipe*> recipes;
+} Recipes;
+
+typedef struct {
+	void** vtable;//0
+	ItemPack itemPack; //4
+	std::vector<ItemInstance> output; //28
+	int filler; //48
+} ShapelessRecipe; //52 bytes long
+
+
 extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
@@ -103,6 +127,8 @@ static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 static void (*bl_Gui_showTipMessage)(void*, std::string const&);
 static void (*bl_PlayerRenderer_renderName)(void*, Entity*, float);
+
+static void** bl_ShapelessRecipe_vtable;
 
 bool bl_text_parse_color_codes = true;
 
@@ -722,24 +748,51 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	env->ReleaseStringUTFChars(value, valueUTFChars);
 }
 
+bool bl_tryRemoveExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int itemDamage, int ingredients[], int ingredientsCount) {
+	std::vector<Recipe*>* recipesList = &recipeMgr->recipes;
+	int recipesSize = recipesList->size();
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Recipes: %i", recipesSize);
+	for (int i = recipesSize - 1; i >= 0; i--) { //TODO: inefficient?
+		Recipe* recipe = (*recipesList)[i];
+		if ((((uintptr_t) recipe->vtable) & ~0xf) != (((uintptr_t) bl_ShapelessRecipe_vtable) & ~0xf)) {
+			//not a ShapelessRecipe
+			continue;
+		}
+		ShapelessRecipe* shapeless = (ShapelessRecipe*) recipe;
+		if (shapeless->output.size() != 1) {
+			//no outputs?!
+			continue;
+		}
+		ItemInstance* myitem = &shapeless->output[0];
+		int myitemid = bl_ItemInstance_getId(myitem);
+		if (myitemid == itemId && myitem->damage == itemDamage) {
+			//TODO check existing recipe to see if recipes match.
+			recipesList->erase(recipesList->begin() + i);
+			return true;
+		}
+	}
+	return false;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
 	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
 	ItemInstance* outStack = bl_newItemInstance(itemId, itemCount, itemDamage);
-	int ingredientsCount = ingredientsElemsCount / 3;
+	int ingredientsCount = ingredientsElemsCount / 2;
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
 		RecipesType recipeType;
 		recipeType.wtf2 = 0;
 		recipeType.item = NULL;
-		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
-		recipeType.itemInstance.count = ingredients[i * 3 + 1];
-		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3]);
+		recipeType.itemInstance.damage = ingredients[i * 2 + 1];
+		recipeType.itemInstance.count = 1;
+		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 2]);
 		ingredientsList.push_back(recipeType);
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
+	bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	bl_Recipes_addShapelessRecipe(recipes, *outStack, ingredientsList);
 	delete outStack;
 }
@@ -879,6 +932,7 @@ void bl_setuphooks_cppside() {
 
 	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
+	bl_ShapelessRecipe_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15ShapelessRecipe");
 }
 
 } //extern

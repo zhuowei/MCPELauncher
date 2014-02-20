@@ -495,6 +495,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeShowTipMessage
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntitySetNameTag
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetNameTag
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetData
  * Signature: (III)I
  */

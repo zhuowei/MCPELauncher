@@ -1090,8 +1090,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getTileEntity = dlsym(RTLD_DEFAULT, "_ZN5Level13getTileEntityEiii");
 	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
 	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7getItemEi");
-	bl_FurnaceTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15FurnaceTileEntity7setItemEiP12ItemInstance");
-	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15FurnaceTileEntity7getItemEi");
+	bl_FurnaceTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN17FurnaceTileEntity7setItemEiP12ItemInstance");
+	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN17FurnaceTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");

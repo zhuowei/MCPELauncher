@@ -831,13 +831,13 @@ public class ScriptManager {
 		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
 		int[] endArray = null;
 		if (firstObj instanceof Number) {
-			if (inArrayLength % 3 != 0) throw new IllegalArgumentException("Array length must be multiple of 3");
+			if (inArrayLength % 2 != 0) throw new IllegalArgumentException("Array length must be multiple of 2");
 			endArray = new int[inArrayLength];
 			for (int i = 0; i < endArray.length; i++) {
 				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
 			}	
 		} else {
-			throw new IllegalArgumentException("Method takes in an array of [itemid, itemcount, itemdamage, ...]");
+			throw new IllegalArgumentException("Method takes in an array of [itemid, itemdamage, ...]");
 			//TODO: more types
 		}
 		return endArray;
@@ -1329,23 +1329,23 @@ public class ScriptManager {
 			return nativeGetBrightness(x, y, z);
 		}
 		
- 		@JSFunction
-		public void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
+ 		@JSStaticFunction
+		public static void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
  			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
  		}
  
- 		@JSFunction
-		public int getFurnaceSlot(int x, int y, int z, int slot) {
+ 		@JSStaticFunction
+		public static int getFurnaceSlot(int x, int y, int z, int slot) {
  			return nativeGetItemFurnace(x, y, z, slot);
  		}
  
- 		@JSFunction
- 		public int getFurnaceSlotData(int x, int y, int z, int slot) {
+ 		@JSStaticFunction
+ 		public static int getFurnaceSlotData(int x, int y, int z, int slot) {
  			return nativeGetItemDataFurnace(x, y, z, slot);
  		}
  
- 		@JSFunction
- 		public int getFurnaceSlotCount(int x, int y, int z, int slot) {
+ 		@JSStaticFunction
+ 		public static int getFurnaceSlotCount(int x, int y, int z, int slot) {
  			return nativeGetItemCountFurnace(x, y, z, slot);
  		}
 		
