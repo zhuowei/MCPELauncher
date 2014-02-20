@@ -131,6 +131,8 @@ static void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, in
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, int, int, int, int);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, int, int, int, int);
 
+static void (*bl_ChestTileEntity_openBy_real)(void*, Player*);
+
 static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
@@ -425,6 +427,23 @@ void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y
 	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
 	self->bipedHead.textureOffsetX = oldTextureOffsetX;
 	self->bipedHead.transparent = 1;
+}
+
+void bl_ChestTileEntity_openBy_hook(void* chestTile, Player* pl)
+{
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "OnChestOpenCallback", "(IIII)V");
+
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, pl->entityId, pl->x, pl->y, pl->z);
+
+	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	if (!preventDefaultStatus) bl_ChestTileEntity_openBy_real(chestTile, pl);
+	
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -1055,6 +1074,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
 	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
 
+	void* playerOpenChest = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity6openByEP6Player");
+	mcpelauncher_hook(playerOpenChest, &bl_ChestTileEntity_openBy_hook, (void**) &bl_ChestTileEntity_openBy_real);
+	
+	
 	//get the level set block method. In future versions this might link against libminecraftpe itself
 	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
 	if (bl_Level_setTileAndData == NULL) {
@@ -1098,6 +1121,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_ExtinguishFire = dlsym(RTLD_DEFAULT, "_ZN5Level14extinguishFireEiiii");
 	bl_Player_getArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8getArmorEi");
 	bl_Player_setArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8setArmorEiPK12ItemInstance");
+	
 
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
