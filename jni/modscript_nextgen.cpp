@@ -127,6 +127,7 @@ static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 static void (*bl_Gui_showTipMessage)(void*, std::string const&);
 static void (*bl_PlayerRenderer_renderName)(void*, Entity*, float);
+static bool (*bl_CraftingFilters_isStonecutterItem_real)(ItemInstance const&);
 
 static void** bl_ShapelessRecipe_vtable;
 
@@ -147,6 +148,12 @@ int bl_addItemCreativeInvRequest[256][4];
 int bl_addItemCreativeInvRequestCount = 0;
 
 std::map <int, std::string> bl_nametag_map;
+char bl_stonecutter_status[512];
+
+#define STONECUTTER_STATUS_DEFAULT 0
+#define STONECUTTER_STATUS_FORCE_FALSE 1
+#define STONECUTTER_STATUS_FORCE_TRUE 2
+
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
@@ -365,6 +372,13 @@ void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float sca
 
 void bl_clearNameTags() {
 	bl_nametag_map.clear();
+}
+
+bool bl_CraftingFilters_isStonecutterItem_hook(ItemInstance const& myitem) {
+	int itemId = bl_ItemInstance_getId((ItemInstance*) &myitem);
+	char itemStatus = bl_stonecutter_status[itemId];
+	if (itemStatus == STONECUTTER_STATUS_DEFAULT) return bl_CraftingFilters_isStonecutterItem_real(myitem);
+	return itemStatus == STONECUTTER_STATUS_FORCE_TRUE;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -844,6 +858,11 @@ static void patchEntityRenderers(soinfo2* mcpelibhandle) {
 	}
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetStonecutterItem
+  (JNIEnv *env, jclass clazz, jint itemId, jint status) {
+	bl_stonecutter_status[itemId] = status;
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -933,6 +952,10 @@ void bl_setuphooks_cppside() {
 	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
 	bl_ShapelessRecipe_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15ShapelessRecipe");
+
+	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
+	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
+	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
 }
 
 } //extern

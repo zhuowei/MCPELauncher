@@ -916,6 +916,7 @@ public class ScriptManager {
 	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
 	public static native void nativeShowTipMessage(String msg);
 	public static native void nativeEntitySetNameTag(int id, String msg);
+	public static native void nativeSetStonecutterItem(int id, int status);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1772,6 +1773,14 @@ public class ScriptManager {
 		public static void showTipMessage(String msg) {
 			nativeShowTipMessage(msg);
 		}
+
+		/* disabled since Substrate cannot hook the relevant method
+		@JSStaticFunction
+		public static void setStonecutterItem(int id, boolean status) {
+			//1: nope; 2: yep.
+			nativeSetStonecutterItem(id, status? 2: 1);
+		}
+		*/
 
 		@Override
 		public String getClassName() {
