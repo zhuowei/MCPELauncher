@@ -34,9 +34,9 @@ This program uses the Rhino JavaScript interpreter.
 6.  Under "System variables" add "ANDROID_NDK" and set the value to your ndk path. Then create a "ANDROID_SDK" system
 	 variable and set the value to your sdk path. Also add ";" + you sdk path to the SYSTEM VARIABLE'S "Path"(Not the user variable "Path" made above)
 7.  Download these repositories:
-			https://github.com/zhuowei/aFileChooser/archive/prefragments.zip
-			https://github.com/zhuowei/MCPELauncher-app/archive/master.zip
-			https://github.com/Chainfire/libsuperuser/archive/master.zip
+			git clone git@github.com:zhuowei/aFileChooser.git
+ 			git clone git@github.com:zhuowei/BlockLauncher-app.git
+ 			git clone https://github.com/Chainfire/libsuperuser.git
 8.  You'll also be needing a MCPELauncher source folder with some changes that you'll be testing. I'll assume you're a
 	 BlockLauncher developer and have this already.
 9.  Extract all of these to the same directory. Personally I would put them all in a folder named "BLBUILD" in your 
