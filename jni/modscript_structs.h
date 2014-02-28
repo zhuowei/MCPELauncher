@@ -109,6 +109,11 @@ typedef struct {
 typedef struct {
 } FurnaceRecipes;
 
+typedef struct {
+	char filler[16]; //0
+	char* text; //16;
+} RakString;
+
 #ifdef __cplusplus
 }
 #endif

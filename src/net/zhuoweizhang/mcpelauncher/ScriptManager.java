@@ -360,6 +360,28 @@ public class ScriptManager {
 		ScreenshotHelper.takeScreenshot(screenshotFileName);
 	}
 
+	public static void handleChatPacketCallback(String str) {
+		if (str == null || str.length() < 1) return;
+		callScriptMethod("serverMessageReceiveHook", str);
+		if (BuildConfig.DEBUG) {
+			System.out.println(str);
+		}
+		if (str.equals("BlockLauncher, enable scripts, please and thank you")) {
+			scriptingEnabled = true;
+		}
+	}
+
+	public static void handleMessagePacketCallback(String sender, String str) {
+		if (str == null || str.length() < 1) return;
+		callScriptMethod("chatReceiveHook", sender, str);
+		if (BuildConfig.DEBUG) {
+			System.out.println(sender + ": " + str);
+		}
+		if (str.equals("BlockLauncher, enable scripts, please and thank you")) {
+			scriptingEnabled = true;
+		}
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		scriptingInitialized = true;
 		//set up hooks

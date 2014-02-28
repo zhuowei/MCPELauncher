@@ -67,6 +67,25 @@ typedef struct {
 	int filler; //48
 } ShapelessRecipe; //52 bytes long
 
+typedef struct {
+	void** vtable; //0
+	void* filler[2]; //4
+	std::string message; //12
+} ChatPacket;
+
+typedef struct {
+	void** vtable; //0
+	void* filler[2]; //4
+	int time;
+	char started;
+} SetTimePacket;
+
+typedef struct {
+	void** vtable; //0
+	void* filler[2]; //4
+	RakString* sender; //12
+	RakString* message; //16
+} MessagePacket;
 
 extern "C" {
 
@@ -130,6 +149,11 @@ static void (*bl_PlayerRenderer_renderName)(void*, Entity*, float);
 static bool (*bl_CraftingFilters_isStonecutterItem_real)(ItemInstance const&);
 
 static void** bl_ShapelessRecipe_vtable;
+
+static void (*bl_RakNetInstance_send)(void*, void*);
+static void** bl_SetTimePacket_vtable;
+static void (*bl_Packet_Packet)(void*);
+static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*, MessagePacket*);
 
 bool bl_text_parse_color_codes = true;
 
@@ -381,6 +405,52 @@ bool bl_CraftingFilters_isStonecutterItem_hook(ItemInstance const& myitem) {
 	char itemStatus = bl_stonecutter_status[itemId];
 	if (itemStatus == STONECUTTER_STATUS_DEFAULT) return bl_CraftingFilters_isStonecutterItem_real(myitem);
 	return itemStatus == STONECUTTER_STATUS_FORCE_TRUE;
+}
+
+void bl_ClientSideNetworkHandler_handleChatPacket_hook(void* handler, void* ipaddress, ChatPacket* packet) {
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jstring messageJString = env->NewStringUTF(packet->message.c_str());
+	preventDefaultStatus = false;
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleChatPacketCallback", "(Ljava/lang/String;)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, messageJString);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	if (!preventDefaultStatus) {
+		void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
+		bl_Gui_displayClientMessage(mygui, packet->message);
+	}
+}
+
+void bl_ClientSideNetworkHandler_handleMessagePacket_hook(void* handler, void* ipaddress, MessagePacket* packet) {
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jstring senderJString = env->NewStringUTF(packet->sender->text);
+	jstring messageJString = env->NewStringUTF(packet->message->text);
+	preventDefaultStatus = false;
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleMessagePacketCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, senderJString, messageJString);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	if (!preventDefaultStatus) {
+		bl_ClientSideNetworkHandler_handleMessagePacket_real(handler, ipaddress, packet);
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -880,6 +950,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	myitem->category2 = mystery1;
 }
 
+void bl_sendIdentPacket() {
+	/*
+	 * format of the ident packet: SUBJECT TO EXTREME CHANGE!!!1eleven
+	 * Currently a SetTimePacket sent from client to server. Vanilla servers *should* ignore it, as well as old PocketMine.
+	 * The magic time value is 0x1abe11ed, and the boolean sent is false.
+	 */
+	SetTimePacket packet;
+	bl_Packet_Packet(&packet);
+	packet.vtable = (void**) (((uintptr_t) bl_SetTimePacket_vtable) + 8);
+	packet.time = 0x1abe11ed;
+	packet.started = false;
+	void* bl_raknet = (void*) (((uintptr_t) bl_minecraft) + 3144);
+	bl_RakNetInstance_send(bl_raknet, &packet);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Sent identification message");
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -974,6 +1060,15 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
 	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
 	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
+	void* handleChatPacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10ChatPacket");
+	void* handleReal;
+	mcpelauncher_hook(handleChatPacket, (void*) &bl_ClientSideNetworkHandler_handleChatPacket_hook, &handleReal);
+	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
+	bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
+	bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
+	void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
+	mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
+		(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
 }
 
 } //extern
