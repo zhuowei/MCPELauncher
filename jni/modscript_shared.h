@@ -37,6 +37,8 @@ Entity* bl_getEntityWrapper(Level* level, int entityId);
 void bl_clearNameTags();
 void bl_sendIdentPacket();
 
+extern Player* bl_localplayer;
+
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 

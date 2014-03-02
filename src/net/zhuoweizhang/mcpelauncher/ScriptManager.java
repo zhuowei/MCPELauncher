@@ -366,19 +366,23 @@ public class ScriptManager {
 		if (BuildConfig.DEBUG) {
 			System.out.println(str);
 		}
-		if (str.equals("BlockLauncher, enable scripts, please and thank you")) {
-			scriptingEnabled = true;
-		}
 	}
 
 	public static void handleMessagePacketCallback(String sender, String str) {
 		if (str == null || str.length() < 1) return;
-		callScriptMethod("chatReceiveHook", sender, str);
+		callScriptMethod("chatReceiveHook", str, sender);
 		if (BuildConfig.DEBUG) {
 			System.out.println(sender + ": " + str);
 		}
-		if (str.equals("BlockLauncher, enable scripts, please and thank you")) {
+		if (str.equals("BlockLauncher, enable scripts, please and thank you") && sender.length() == 0) {
 			scriptingEnabled = true;
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.scriptPrintCallback("Scripts have been re-enabled", "");
+				}
+			}
 		}
 	}
 
@@ -941,6 +945,7 @@ public class ScriptManager {
 	public static native void nativeEntitySetNameTag(int id, String msg);
 	public static native void nativeSetStonecutterItem(int id, int status);
 	public static native void nativeSetItemCategory(int id, int category, int status);
+	public static native void nativeSendChat(String message);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1809,6 +1814,12 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setItemCategory(int id, int category, int whatever) {
 			nativeSetItemCategory(id, category, whatever);
+		}
+
+		@JSStaticFunction
+		public static void sendChat(String message) {
+			if (!isRemote) return;
+			nativeSendChat(message);
 		}
 
 		@Override

@@ -136,7 +136,7 @@ static soinfo2* mcpelibhandle = NULL;
 Level* bl_level;
 Minecraft* bl_minecraft;
 void* bl_gamemode;
-static Player* bl_localplayer;
+Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 int preventDefaultStatus = 0;
 static float bl_newfov = -1.0f;

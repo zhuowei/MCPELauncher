@@ -154,6 +154,7 @@ static void (*bl_RakNetInstance_send)(void*, void*);
 static void** bl_SetTimePacket_vtable;
 static void (*bl_Packet_Packet)(void*);
 static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*, MessagePacket*);
+static void** bl_MessagePacket_vtable;
 
 bool bl_text_parse_color_codes = true;
 
@@ -950,6 +951,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	myitem->category2 = mystery1;
 }
 
+void bl_sendPacket(void* packet) {
+	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + 3144));
+	void* vtable = ((void***) bl_raknet)[0][14];
+	void (*fn)(void*, void*) = (void (*) (void*, void*)) vtable;
+	fn(bl_raknet, packet);
+}
+
 void bl_sendIdentPacket() {
 	/*
 	 * format of the ident packet: SUBJECT TO EXTREME CHANGE!!!1eleven
@@ -961,9 +969,24 @@ void bl_sendIdentPacket() {
 	packet.vtable = (void**) (((uintptr_t) bl_SetTimePacket_vtable) + 8);
 	packet.time = 0x1abe11ed;
 	packet.started = false;
-	void* bl_raknet = (void*) (((uintptr_t) bl_minecraft) + 3144);
-	bl_RakNetInstance_send(bl_raknet, &packet);
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Sent identification message");
+	bl_sendPacket(&packet);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
+  (JNIEnv *env, jclass clazz, jstring message) {
+	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
+	std::string* myName = (std::string*) ((intptr_t) bl_localplayer + PLAYER_NAME_OFFSET);
+	MessagePacket packet;
+	bl_Packet_Packet(&packet);
+	packet.vtable = (void**) (((uintptr_t) bl_MessagePacket_vtable) + 8);
+	packet.sender = new RakString;
+	packet.sender->text = (char*) myName->c_str();
+	packet.message = new RakString;
+	packet.message->text = (char*) messageUtfChars;
+	bl_sendPacket(&packet);
+	delete packet.sender;
+	delete packet.message;
+	env->ReleaseStringUTFChars(message, messageUtfChars);
 }
 
 void bl_setuphooks_cppside() {
@@ -1069,6 +1092,7 @@ void bl_setuphooks_cppside() {
 	void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
 	mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
 		(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
+	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
 }
 
 } //extern
