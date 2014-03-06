@@ -39,6 +39,47 @@ public class CoffeeScriptCompiler {
 	}
 
 	public static String compile(String input, boolean literate) {
+		System.gc();
+		TranslateThread parseRunner = new TranslateThread(input, literate);
+		Thread t = new Thread(Thread.currentThread().getThreadGroup(), parseRunner, 
+			"BlockLauncher parse thread", 256*1024);
+		t.start();
+		try {
+			t.join(); //block on this thread
+		} catch (InterruptedException ie) {
+			//shouldn't happen
+		}
+		System.gc();
+		if (parseRunner.error != null) {
+			RuntimeException back;
+			if (parseRunner.error instanceof RuntimeException) {
+				back = (RuntimeException) parseRunner.error;
+			} else {
+				back = new RuntimeException(parseRunner.error);
+			}
+			throw back; //Thursdays
+		}
+		return parseRunner.output;
+	}
+
+	private static class TranslateThread implements Runnable {
+		public boolean literate;
+		public String input;
+		public String output;
+		public Throwable error;
+		public TranslateThread(String input, boolean literate) {
+			this.input = input;
+			this.literate = literate;
+		}
+		public void run() {
+			try {
+				output = compileForReal(input, literate);
+			} catch (Exception e) {
+				error = e;
+			}
+		}
+	}
+	private static String compileForReal(String input, boolean literate) {
 		//set up Rhino
 		//load coffee-script.js from assets and execute it
 		//grab the compile function

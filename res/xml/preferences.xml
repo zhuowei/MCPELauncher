@@ -88,11 +88,11 @@
                 android:targetPackage="net.zhuoweizhang.mcpelauncher" />
         </Preference>
 
-        <CheckBoxPreference
+        <!--<CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_script_paranoid_mode"
             android:summary="@string/pref_zz_script_paranoid_mode_summary"
-            android:title="@string/pref_zz_script_paranoid_mode" />
+            android:title="@string/pref_zz_script_paranoid_mode" />-->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_show_insert_text"
