@@ -294,6 +294,7 @@ public class ScriptManager {
 	}
 
 	public static void chatCallback(String str) {
+		if (isRemote) nameAndShame(str);
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
 		if (!isRemote) {
@@ -870,6 +871,29 @@ public class ScriptManager {
 			//TODO: more types
 		}
 		return endArray;
+	}
+
+	private static void nameAndShame(String str) {
+		if (str == null || str.length() < 1 || str.charAt(0) == '/') return;
+		String playerName = NativePlayerApi.getName(nativeGetPlayerEnt());
+		if (playerName == null) return;
+		boolean hasShamed = true;
+		if (playerName.equalsIgnoreCase("geoffrey5787")) {
+			nativeSendChat("I steal mods and claim them as my own");
+		} else if (playerName.equalsIgnoreCase("doggerhero20011") || playerName.equalsIgnoreCase("dogger20011")) {
+			nativeSendChat("I stole from app developers, so you should steal from me!");
+		} else {
+			hasShamed = false;
+		}
+		if (hasShamed) {
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.updateTextboxText("");
+				}
+			}
+		}
 	}
 		
 	public static native float nativeGetPlayerLoc(int axis);
