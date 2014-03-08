@@ -972,6 +972,7 @@ public class ScriptManager {
 	public static native void nativeSetStonecutterItem(int id, int status);
 	public static native void nativeSetItemCategory(int id, int category, int status);
 	public static native void nativeSendChat(String message);
+	public static native String nativeEntityGetNameTag(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);

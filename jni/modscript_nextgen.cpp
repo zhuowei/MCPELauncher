@@ -989,6 +989,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	env->ReleaseStringUTFChars(message, messageUtfChars);
 }
 
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetNameTag
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	if (bl_nametag_map.count(entityId) == 0) return NULL;
+	std::string mystr = bl_nametag_map[entityId];
+	jstring returnValString = env->NewStringUTF(mystr.c_str());
+	return returnValString;
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
