@@ -77,7 +77,16 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 		texturePackEnablePreference = findPreference("zz_texture_pack_enable");
 		if (texturePackEnablePreference != null) texturePackEnablePreference.setOnPreferenceClickListener(this);
 		texturePackDemoPreference = findPreference("zz_texture_pack_demo");
-		if (texturePackDemoPreference != null) texturePackDemoPreference.setOnPreferenceClickListener(this);
+		if (texturePackDemoPreference != null) {
+			texturePackDemoPreference.setOnPreferenceClickListener(this);
+			if (!canAccessMCPE()) {
+				PreferenceGroup group = (PreferenceGroup) findPreference("zz_textures_group");
+				if (group != null) {
+					group.removePreference(texturePackDemoPreference);
+					texturePackDemoPreference = null;
+				}
+			}
+		}
 		managePatchesPreference = findPreference("zz_manage_patches");
 		managePatchesPreference.setOnPreferenceClickListener(this);
 		safeModePreference = findPreference("zz_safe_mode");
@@ -348,10 +357,19 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements Prefe
 			String countryName = overrideSplit.length > 1? overrideSplit[1]: "";
 			Locale locale = new Locale(langName, countryName);
 			languageNames.add(locale.getDisplayName(currentLocale));
-			System.out.println(override + ":" + locale);
 		}
 		languagePreference.setEntries(languageNames.toArray(new String[]{}));
 		languagePreference.setEntryValues(langList);
+	}
+
+	private boolean canAccessMCPE() {
+		try {
+			ApplicationInfo mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+			return mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
+		} catch (PackageManager.NameNotFoundException e) {
+			//not possible
+			throw new RuntimeException(e);
+		}
 	}
 
 	private class ExtractTextureTask extends AsyncTask<Void, Void, Void> {

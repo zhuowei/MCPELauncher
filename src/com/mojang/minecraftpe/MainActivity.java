@@ -1,63 +1,49 @@
 package com.mojang.minecraftpe;
 
 import java.io.*;
-
 import java.lang.ref.WeakReference;
-
 import java.nio.ByteBuffer;
-
 import java.text.DateFormat;
-
 import java.net.*;
-
 import java.util.*;
-
 import javax.net.ssl.*;
-import java.security.*;
-import java.security.cert.*;
-
 import java.lang.reflect.Field;
-
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Vibrator;
+import android.text.ClipboardManager;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.Selection;
+import android.text.Spannable;
+import android.text.TextWatcher;
 import android.view.*;
-import android.view.KeyCharacterMap;
 import android.view.inputmethod.*;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.webkit.*;
 import android.widget.*;
-
 import android.preference.*;
-
-import dalvik.system.PathClassLoader;
-
+import org.mozilla.javascript.RhinoException;
 import net.zhuoweizhang.mcpelauncher.*;
-
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
-
 import net.zhuoweizhang.pokerface.PokerFace;
-
-
 
 public class MainActivity extends NativeActivity
 {
@@ -151,8 +137,9 @@ public class MainActivity extends NativeActivity
 
 	private boolean overlyZealousSELinuxSafeMode = false;
 
-	protected EditText keyboardEditText;
-	protected LinearLayout contentLinearLayout;
+	private PopupWindow hiddenTextWindow;
+	private TextView hiddenTextView;
+	private boolean hiddenTextDismissAfterOneLine = false;
 
 	/** Called when the activity is first created. */
 
@@ -271,9 +258,23 @@ public class MainActivity extends NativeActivity
 
 		libLoaded = true;
 
+		try {
+			if (!isSafeMode()) {
+				initPatching();
+				if (minecraftLibBuffer != null) {
+					ScriptManager.nativePrePatch();
+				}
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+
 		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
+
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
@@ -286,15 +287,16 @@ public class MainActivity extends NativeActivity
 		setFakePackage(false);
 
 		try {
-			if (!isSafeMode()) {
-				initPatching();
-			}
+			boolean shouldLoadScripts = false;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				//applyPatches();
 				applyBuiltinPatches();
-				boolean shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
+				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
 				if (shouldLoadScripts) ScriptManager.init(this);
+			}
+			if (isSafeMode() || !shouldLoadScripts) {
+				ScriptManager.loadEnabledScriptsNames(this); //in safe mode, script names, but not the actual scripts, should be loaded
 			}
 
 		} catch (Exception e) {
@@ -315,12 +317,6 @@ public class MainActivity extends NativeActivity
 			}
 		}
 
-		contentLinearLayout = new LinearLayout(this);
-		keyboardEditText = new EditText(this);
-		contentLinearLayout.addView(keyboardEditText);
-		contentLinearLayout.requestFocus();
-		//setContentView(contentLinearLayout);
-
 		System.gc();
 
 		currentMainActivity = new WeakReference<MainActivity>(this);
@@ -336,25 +332,18 @@ public class MainActivity extends NativeActivity
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (true || PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_enable_hovercar", false)) {
-			if (hoverCar == null) {
-				getWindow().getDecorView().post(new Runnable() {
-					public void run() {
-						try {
-							setupHoverCar();
-						} catch (Exception e) {
-							e.printStackTrace();
-						} //don't force close on hover car fail
-					}
-				});
-			} else {
-				hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
-			}
+		if (hoverCar == null) {
+			getWindow().getDecorView().post(new Runnable() {
+				public void run() {
+					try {
+						setupHoverCar();
+					} catch (Exception e) {
+						e.printStackTrace();
+					} //don't force close on hover car fail
+				}
+			});
 		} else {
-			if (hoverCar != null) {
-				hoverCar.dismiss();
-				hoverCar = null;
-			}
+			hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
 		}
 
 	}
@@ -384,11 +373,11 @@ public class MainActivity extends NativeActivity
 			hoverCar.dismiss();
 			hoverCar = null;
 		}
+		ScriptManager.destroy();
 	}
 
 	public void onStop() {
 		super.onStop();
-		nativeSuspend();
 		ScriptTextureDownloader.flushCache();
 	}
 
@@ -652,7 +641,7 @@ public class MainActivity extends NativeActivity
 		} else {
 			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu};
 		}
-		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_title).
+		return new AlertDialog.Builder(this).setTitle(R.string.app_name).
 			setItems(options, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					if (button == 0) {
@@ -772,14 +761,35 @@ public class MainActivity extends NativeActivity
 
 	protected Dialog createInsertTextDialog() {
 		final EditText editText = new EditText(this);
-		editText.setSingleLine(true);
+		editText.setSingleLine(false);
+		final LinearLayout ll = new LinearLayout(this);
+		ll.setOrientation(LinearLayout.HORIZONTAL);
+		ll.addView(editText, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		Button back = new Button(this);
+		back.setText(R.string.hovercar_insert_text_backspace);
+		back.setOnClickListener(new View.OnClickListener(){
+			@Override public void onClick(View v){
+				try {
+					nativeTypeCharacter("" + ((char) 0x08)); // is this the correct method of backspace?
+				} catch (Exception e) {
+					showDialog(DIALOG_NOT_SUPPORTED);
+				}
+			}
+		});
+		ll.addView(back, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		return new AlertDialog.Builder(this)
 			.setTitle(R.string.hovercar_insert_text)
-			.setView(editText)
+			.setView(ll)
 			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialogI, int button) {
 					try {
-						nativeTypeCharacter(editText.getText().toString());
+						String[] lines=editText.getText().toString().split(
+							"\n");
+						for (int line = 0; line < lines.length; line++) {
+							if (line!=0)
+								nativeTypeCharacter("" + ((char) 0x0A)); // I am not sure if keyboard-entered "enter" is 0x0A
+							nativeTypeCharacter (lines[line]);
+						}
 						editText.setText("");
 					} catch (UnsatisfiedLinkError e) {
 						showDialog(DIALOG_NOT_SUPPORTED);
@@ -1059,6 +1069,7 @@ public class MainActivity extends NativeActivity
 	public void openLoginWindow() {
 		Log.i(TAG, "Open login window");
 		this.runOnUiThread(new Runnable() {
+			@SuppressLint("SetJavaScriptEnabled")
 			public void run() {
 				loginWebView = new WebView(MainActivity.this);
 				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -1093,7 +1104,7 @@ public class MainActivity extends NativeActivity
 
 	public boolean supportsNonTouchscreen() {
 		Log.i(TAG, "Supports non touchscreen");
-		return true;
+		return Build.PRODUCT.equals("Xperia Play");
 	}
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
@@ -1195,29 +1206,86 @@ public class MainActivity extends NativeActivity
 	}
 
 	//added in 0.8.0
-	public void showKeyboard(final String mystr, final int myint, final boolean mybool) {
-		Log.i(TAG, "Show keyboard: " + mystr + ":" + myint + ":" + mybool);
-		/*keyboardEditText.post(new Runnable() {
+	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+		if (useLegacyKeyboardInput()) {
+			showKeyboardView();
+			return;
+		}
+		this.runOnUiThread(new Runnable() {
 			public void run() {
-				keyboardEditText.setText(mystr);
-				keyboardEditText.requestFocus();
+				showHiddenTextbox(mystr, maxLength, mybool);
 			}
-		});*/
-		showKeyboardView();
+		});
 	}
 
 	public void hideKeyboard() {
-		Log.i(TAG, "Hide keyboard");
-		/*keyboardEditText.post(new Runnable() {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Hide keyboard");
+		if (useLegacyKeyboardInput()) {
+			hideKeyboardView();
+			return;
+		}
+		this.runOnUiThread(new Runnable() {
 			public void run() {
-				contentLinearLayout.requestFocus();
+				dismissHiddenTextbox();
 			}
-		});*/
+		});
+	}
+
+	public void updateTextboxText(final String text) {
+		if (BuildConfig.DEBUG) Log.i(TAG, "Update text to " + text);
+		if (hiddenTextView == null) return;
+		hiddenTextView.post(new Runnable() {
+			public void run() {
+				hiddenTextView.setText(text);
+			}
+		});
+	}
+
+	public void showHiddenTextbox(String text, int maxLength, boolean dismissAfterOneLine) {
+		int IME_FLAG_NO_FULLSCREEN = 0x02000000;
+		if (hiddenTextWindow == null) {
+			hiddenTextView = new EditText(this);
+			PopupTextWatcher whoWatchesTheWatcher = new PopupTextWatcher();
+			hiddenTextView.addTextChangedListener(whoWatchesTheWatcher);
+			hiddenTextView.setOnEditorActionListener(whoWatchesTheWatcher);
+			hiddenTextView.setSingleLine(true);
+			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT | EditorInfo.IME_FLAG_NO_EXTRACT_UI | IME_FLAG_NO_FULLSCREEN);
+			hiddenTextView.setInputType(InputType.TYPE_CLASS_TEXT);
+			LinearLayout linearLayout = new LinearLayout(this);
+			linearLayout.addView(hiddenTextView);
+			hiddenTextWindow = new PopupWindow(linearLayout);
+			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			hiddenTextWindow.setFocusable(true);
+			hiddenTextWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable()); //To get back button handling for free
+			hiddenTextWindow.setClippingEnabled(false);
+			hiddenTextWindow.setTouchable(false);
+			hiddenTextWindow.setOutsideTouchable(true); //These flags were taken from a dumpsys window output of Mojang's window
+			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+				public void onDismiss() {
+					nativeBackPressed();
+				}
+			});
+		}
+
+		hiddenTextView.setText(text);
+		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
+		this.hiddenTextDismissAfterOneLine = dismissAfterOneLine;
+		
+		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, -10000, 0);
+		hiddenTextView.requestFocus();
+		showKeyboardView();
+	}
+
+	public void dismissHiddenTextbox() {
+		if (hiddenTextWindow == null) return;
+		hiddenTextWindow.dismiss();
 		hideKeyboardView();
 	}
 
-	public void updateTextboxText(String text) {
-		Log.i(TAG, "Update text to " + text);
+	private boolean useLegacyKeyboardInput() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_legacy_keyboard_input", false);
 	}
 
 	public boolean isSafeMode() {
@@ -1253,8 +1321,8 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void applyPatches() throws Exception {
-		ByteBuffer buffer = minecraftLibBuffer;
-		/*buffer.position(0x1b6d50);//"v0.6.1" offset
+		/*ByteBuffer buffer = minecraftLibBuffer;
+		buffer.position(0x1b6d50);//"v0.6.1" offset
 		byte[] testBuffer = new byte[6];
 		buffer.get(testBuffer);
 		System.out.println("Before: " + Arrays.toString(testBuffer));
@@ -1510,11 +1578,18 @@ public class MainActivity extends NativeActivity
 	private void reportError(final Throwable t) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				StringWriter strWriter = new StringWriter();
+				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				t.printStackTrace(pWriter);
 				new AlertDialog.Builder(MainActivity.this).setTitle("Oh nose everything broke").setMessage(strWriter.toString()).
 					setPositiveButton(android.R.string.ok, null).
+					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface aDialog, int button) {
+							ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+							mgr.setText(strWriter.toString());
+						}
+					}).
+							
 					show();
 			}
 		});
@@ -1523,12 +1598,22 @@ public class MainActivity extends NativeActivity
 	public void scriptErrorCallback(final String scriptName, final Throwable t) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				StringWriter strWriter = new StringWriter();
+				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				pWriter.println("Error occurred in script: " + scriptName);
+				if (t instanceof RhinoException) {
+					String lineSource = ((RhinoException) t).lineSource();
+					if (lineSource != null) pWriter.println(lineSource);
+				}
 				t.printStackTrace(pWriter);
 				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).setMessage(strWriter.toString()).
 					setPositiveButton(android.R.string.ok, null).
+					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface aDialog, int button) {
+							ClipboardManager mgr = (ClipboardManager) MainActivity.this.getSystemService(CLIPBOARD_SERVICE);
+							mgr.setText(strWriter.toString());
+						}
+					}).
 					show();
 			}
 		});
@@ -1561,7 +1646,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected boolean allowScriptOverrideTextures() {
-		return false;
+		return true; //Let's do this! Leeroy Jenkins!
 	}
 
 
@@ -1597,6 +1682,28 @@ public class MainActivity extends NativeActivity
 		System.arraycopy(files, 0, retval, 1, files.length);
 		retval[0] = toAdd;
 		return retval;
+	}
+
+	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
+		public void afterTextChanged(Editable e) {
+			if (BuildConfig.DEBUG) Log.i(TAG, "Text changed: " + e.toString());
+			nativeSetTextboxText(e.toString());
+			
+		}
+		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
+		}
+		public void onTextChanged(CharSequence c, int start, int count, int after) {
+		}
+
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			if (BuildConfig.DEBUG) Log.i(TAG, "Editor action: " + actionId);
+			if (hiddenTextDismissAfterOneLine) {
+				hiddenTextWindow.dismiss();
+			} else {
+				nativeReturnKeyPressed();
+			}
+			return true;
+		}
 	}
 
 	private class LoginWebViewClient extends WebViewClient {

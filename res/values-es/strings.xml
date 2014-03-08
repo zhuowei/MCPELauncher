@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Translate by Mine_Nick95. Traducido por Mine_Nick95. -->
     <string name="select_file">Selecciona el archivo de la SD</string>
     <string name="pref_ctrl_touchscreen">Pantalla táctil</string>
     <string name="pref_ctrl_touchscreen_summary">Si no está utilizando un Xperia Play, marque esta opción</string>
@@ -61,6 +62,13 @@
     <string name="pref_zz_redirect_mco">Redireccionar Realms a otra lista de servers</string>
     <string name="pref_zz_manage_scripts">Administrar ModPE Scripts</string>
     <string name="pref_zz_script_enable">Activar soporte para ModPE Scripts</string>
+    <string name="pref_zz_sensorcontrol">Control con el sensor</string>
+    <string name="pref_zz_sensorcontrol_summary">Controla el jugador mediante la rotación de su dispositivo. Requiere ModPE Scripts para ser encendido</string>
+    <string name="pref_zz_show_insert_text">Mostrar \"Ingresar Texto\" opción en el gestor de parches en juego.</string>
+    <string name="pref_zz_language_override">Idioma</string>
+    <string name="pref_zz_language_override_default">Por defecto</string>
+    <string name="pref_zz_script_paranoid_mode">Modo Paranoico: desactiva GUI ModPE scripts</string>
+    <string name="pref_zz_legacy_keyboard_input">Utilice antiguo código de entrada de teclado</string>
     <string name="nerdy_stuff_page">Cosas Nerdy</string>
     <string name="dump_libminecraftpe">Volcado de memoria libminecraftpe.so</string>
     <string name="nerdy_stuff_are_useless">Casi todo en esta página es inútil. Ellos están aquí para la solución de problemas.</string>
@@ -77,7 +85,8 @@
     <string name="manage_patches_import_error">No se pudo importar el parche</string>
     <string name="manage_patches_too_many">Actualiza BlockLauncher Pro para obtener 3 parches más.</string>
     <string name="manage_patches_delete">Borrar</string>
-    <string name="manage_patches_crash_safe_mode">BlockLauncher ha detectado un fallo reciente. Modo seguro se ha activado para evitar futuros errores por mal funcionamiento de parches.</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher ha detectado un fallo reciente. Modo seguro se ha activado para evitar futuros errores por mal funcionamiento de parches. En este Modo, todos los parches estan desactivados.
+¿Quieres continuar en modo seguro y sin parches o volver al modo parches normal?</string>
     <string name="manage_patches_import_confirm">¿Desea importar este parche?</string>
     <string name="manage_patches_import_done">Parche importado</string>
     <string name="manage_patches_enable">Activar</string>
@@ -92,38 +101,43 @@
     <string name="manage_addons">Administrar complementos</string>
     <string name="get_pro">Actualizar a Pro</string>
     <string name="about_about">Acerca de BlockLauncher</string>
-    <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. No distribuir sin permiso.</string>
-    <string name="about_librarycredits">"Este programa utiliza la biblioteca aFileChooser por Paul Burke.
- Este programa contiene código de PTPatchTool sitiado por Snowbound's el licenciado bajo la Licencia Pública Eclipse.
- Este programa contiene una versión modificada de NathanX's Slickcraft texture pack: usado con permiso.
- El paquete de textura de demostración, RepetiCraft, es hecho por Theevilpplz y se utiliza con permiso.
-This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
- Este programa utiliza la biblioteca libsuperuser de Chainfire.
-This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
- Para obtener información sobre la licencia completa, compruebe el hilo en los foros de minecraft. 
-"</string>
+    <string name="about_copyright">Copyright (C) 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright (C) 2013-2014 Zhuowei Zhang. No distribuir sin permiso.</string>
+    <string name="about_librarycredits">"Este programa utiliza la biblioteca aFileChooser por Paul Burke.\n
+Este programa contiene código de PTPatchTool sitiado por Snowbound's el licenciado bajo la Licencia Pública Eclipse.\n
+Este programa contiene una versión modificada de NathanX's Slickcraft texture pack: usado con permiso.\n
+El paquete de textura de demostración, RepetiCraft, es hecho por Theevilpplz y se utiliza con permiso.\n
+Este programa contiene una versión del framework Cydia sustraido por Saurik, licenciado bajo la Licencia Pública General GNU.\n
+Este programa utiliza la biblioteca libsuperuser de Chainfire.\n
+Este programa contiene una copia del motor JavaScript Rhino del proyecto Mozilla.\n
+Para obtener información sobre la licencia completa, compruebe el hilo en los foros de minecraft.\n 
+    </string>
     <string name="about_pro_library_credits" />
-    <string name="about_thankscommunity">"Esta aplicación ha sido posible gracias al trabajo de muchos traductores con talento, probadores y programadores. Gracias.
-Ver el hilo de Minecraft Forum para obtener una lista de contribuyentes."</string>
+    <string name="about_thankscommunity">Esta aplicación ha sido posible gracias al trabajo de muchos traductores con talento, probadores y programadores. Gracias.\nVer el hilo de Minecraft Forum para obtener una lista de contribuyentes.</string>
     <string name="about_go_to_forums">Abrir el hilo en los foros de Minecraft para BlockLauncher</string>
     <string name="no_minecraft_installed">BlockLauncher no pudo encontrar una copia de Minecraft PE en su dispositivo. Esta aplicación está diseñada para parchear la versión completa de Minecraft Pocket Edition de Mojang.</string>
+    
     <string name="firstlaunch_title">Bienvenido a BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">Gracias por probar BlockLauncher. BlockLauncher inicia tu copia de Minecraft Pocket Edition y añade características adicionales a través de los parches, complementos, skins, y texturas.</string>
     <string name="firstlaunch_jelly_bean">El dispositivo funciona con Android Jelly Bean o más reciente, por lo BlockLauncher no puede acceder a las texturas por defecto. El paquete de textura de demostración ha sido activado para que pueda probar el lanzador.</string>
     <string name="firstlaunch_see_options">Para empezar con BlockLauncher, puntee en Opciones en el menú de título. Para más ayuda, visitar el hilo en Minecraft Forum.</string>
     <string name="firstlaunch_help">Ayuda</string>
+    
     <string name="version_mismatch_message">Esta versión de Minecraft PE no es compatible con BlockLauncher. BlockLauncher se ejecutará en modo seguro temporal. Por favor, compruebe si hay actualizaciones para BlockLauncher ya que puede añadirse una nueva versión.</string>
+    
     <string name="feature_not_supported">Esta característica todavía no se admite en BlockLauncher.</string>
     <string name="hovercar_title">Gestor de parches en el juego</string>
     <string name="hovercar_live_patch">Gestor de Parches (en juego)</string>
     <string name="hovercar_options">Opciones del Launcher (requiere reincio)</string>
     <string name="hovercar_insert_text">Insertar texto</string>
+    
     <string name="mco_redirect_none">"No redireccionar"</string>
     <string name="mco_redirect_pocketmine">"Usar servidores de PocketMine's (lista)"</string>
     <string name="mco_redirect_minepocket">"Usar servidores de MinePocket's (lista)"</string>
+    
     <string name="safe_mode_exit">Volver al normal</string>
     <string name="safe_mode_continue">Continuar</string>
+    
     <string name="server_list_add">Añadir server</string>
     <string name="pref_zz_server_list">Lista de servers</string>
     <string name="pref_zz_server_list_summary">Seleccione o agregue un servidor a la lista de servidores guardado</string>
@@ -131,6 +145,7 @@ Ver el hilo de Minecraft Forum para obtener una lista de contribuyentes."</strin
     <string name="server_list_name_prompt">Nombre:</string>
     <string name="server_list_address_prompt">Dirección:</string>
     <string name="server_list_port_prompt">Puerto:</string>
+    
     <string name="script_import_from">Importar script desde</string>
     <string name="script_import_from_local">Almacenamiento local</string>
     <string name="script_import_from_cfgy">"Treebl's official repo"</string>
@@ -145,6 +160,17 @@ Ver el hilo de Minecraft Forum para obtener una lista de contribuyentes."</strin
     <string name="script_execution_error">Se ha producido un error en un Script de ModPE</string>
     <string name="script_disabled_in_multiplayer">Sus Scripts ModPE han sido desactivados en el modo multijugador, ya que pueden causar que Blocklauncher cierre. Se volverán a habilitar cuando se desconecte del servidor.</string>
     <string name="script_minecraft_version_incompatible">ModPE scripts no son compatibles con tu versión de Minecraft PE. Algunos métodos en scripts puede no funcionar, o puede que se cierre BlockLauncher. Usalos bajo tu propio riesgo.</string>
+    <string name="script_import_from_intent_warning">¿Quieres importar este script? Se tendrá acceso a los mismos recursos que la instancia BlockLauncher, incluyendo potencialmente las contraseñas y otra información sensible.</string>
+    <string name="script_view_source">Ver código fuente</string>
+    <string name="script_too_many_errors">se ha desactivado porque se encontraron demasiados errores. ¡Lo siento!</string>    
+    <string name="take_screenshot">Capturar Pantalla</string>
+    <string name="take_screenshot_requires_modpe_script">Se requiere ModPE Script para tomar capturas de pantalla. \nPuede activar ModPE Script en la página Opciones del Launcher.</string>
+    <string name="screenshot_saved_as">Guardado de pantalla como</string>
+    
+    <string name="selinux_broke_everything">Desafortunadamente, BlockLauncher no puede ejecutarse en el dispositivo como un software de seguridad en su teléfono, tales como Samsung Knox o SELinux, es la prevención de parches en vivo.\n\n
+Estamos trabajando en una solución para esto, pero mientras tanto, las funciones BlockLauncher se limitan a parches.mods y carga textura packs.\n\nModPE scripts no se pueden cargar, y todos los parches.mod requieren un reinicio.</string>
+
     <string name="permlab_mcpelauncher_addon">BlockLauncher Complemento</string>
     <string name="permdesc_mcpelauncher_addon">Permite que la aplicación se cargue como un complemento a BlockLauncher. Esto significa que esta aplicación puede acceder a la red, el almacenamiento, y hacer cualquier cosa Minecraft PE tiene el permiso para hacerlo.</string>
+
 </resources>

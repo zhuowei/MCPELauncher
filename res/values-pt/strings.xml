@@ -54,8 +54,8 @@
   <string name="manage_patches_crash_safe_mode">BlockLauncher detectou uma parada recente. O modo de segurança foi ativado para prenevir futuros problemas com os patches.</string>
   <string name="get_pro">Atualizar para versão Pro</string>
   <string name="about_about">Sobre BlockLauncher</string>
-  <string name="about_copyright">Copyright (C) 2013 Zhuowei Zhang</string>
-  <string name="about_copyright_pro">Copyright (C) 2013 Zhuowei Zhang. Não distribua sem permissão.</string>
+  <string name="about_copyright">Copyright (C) 2013-2014 Zhuowei Zhang</string>
+  <string name="about_copyright_pro">Copyright (C) 2013-2014 Zhuowei Zhang. Não distribua sem permissão.</string>
   <string name="about_librarycredits">Esse programa usa a biblioteca aFileChooser por Paul Burke. \n
 Esse programa contém códigos do Snowbound\'s PTPatchTool, licenciado pela Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n

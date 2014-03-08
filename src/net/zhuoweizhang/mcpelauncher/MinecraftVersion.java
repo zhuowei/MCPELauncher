@@ -99,24 +99,15 @@ public final class MinecraftVersion {
 	}
 
 	static {
-		//0.8.0 Play
+		//0.8.1 Play
 		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			-1, null, null, null, null, -1));
-		//0.8.0 Gingerbread
-		add(new MinecraftVersion(300800010, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
+		//0.8.1 Gingerbread
+		add(new MinecraftVersion(300801011, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
 			-1, null, null, null, null, -1));
-		//0.8.0 Amazon
-		add(new MinecraftVersion(400800010, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, new AmazonTranslator076(),
+		//0.8.1 Amazon
+		add(new MinecraftVersion(400801011, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, new AmazonTranslator080(),
 			-1, null, null, null, null, -1));
-		/*//0.7.6 Play
-		add(new MinecraftVersion(MINECRAFT_VERSION_CODE, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			-1, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, -1));
-		//0.7.6 Play Gingerbread
-		add(new MinecraftVersion(30007060, false, LIB_LOAD_OFFSET_BEGIN, LIB_LOAD_OFFSET, null,
-			-1, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, -1));
-		//0.7.6 Amazon
-		add(new MinecraftVersion(40007060, false, 0x24a150, LIB_LOAD_OFFSET, new AmazonTranslator076(),
-			-1, GUI_BLOCKS_PATCH, GUI_BLOCKS_UNPATCH, null, null, -1));*/
 	}
 
 	public static abstract class PatchTranslator {
@@ -133,14 +124,10 @@ public final class MinecraftVersion {
 		}
 	}
 
-	public static class AmazonTranslator076 extends PatchTranslator {
+	public static class AmazonTranslator080 extends PatchTranslator {
 		//Amazon is missing code for vibrate, so everything is shifted by a few bytes (0x38, I think)
 		public int get(int addr) {
-			if (addr <= 0xe0ee8) {
-				return addr;
-			} else { //there's actually one more offset, but close enough?
-				return addr - (0x155e74 - 0x155e3c);
-			}
+			return addr - (0x1102c8 - 0x1102a0);
 		}
 	}
 }

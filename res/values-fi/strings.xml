@@ -65,7 +65,13 @@
     <string name="pref_zz_sensorcontrol">Sensoriohjaimet</string>
     <string name="pref_zz_sensorcontrol_summary">Kontrolloi pelaajaa liikuttamalla laitettasi. Vaatii ModPE Scriptien käynnistämisen.</string>
     <string name="pref_zz_show_insert_text">Näytä \"Aseta teksti\"-asetus pelinsisäisessä patchinhallinnassa</string>
-    <string name="nerdy_stuff_page">Nörttiasiaa</string>
+    <string name="pref_zz_language_override">Language</string>
+    <string name="pref_zz_language_override_default">Alkuperäinen</string>
+    <string name="pref_zz_script_paranoid_mode">Paranoidinen tila</string>
+    <string name="pref_zz_script_paranoid_mode_summary">Kytke ModPE scriptit pois päältä\' pääsy Android-funktioihin,\nkuten tiedostojen poistaminen ja internetin käyttäminen</string>
+    <string name="pref_zz_legacy_keyboard_input">Käytä vanhaa näppäimistökoodia</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">Korjaus näppäimistöbugeihin uudessa 0.8.x -päivityksessä</string>
+    <string name="nerdy_stuff_page">Nörttijuttuja</string>
     <string name="dump_libminecraftpe">Poista libminecraftpe.so muistista</string>
     <string name="nerdy_stuff_are_useless">Melkein kaikki tällä sivulla on turhaa. Ne ovat täällä ongelmien ratkaisua varten.</string>
     <string name="restart_app">Uudelleenkäynnistä applikaatio</string>
@@ -96,8 +102,8 @@
     <string name="manage_addons">Hallitse lisäosia</string>
     <string name="get_pro">Päivitä Pro-versioon</string>
     <string name="about_about">Tietoja BlockLauncherista</string>
-    <string name="about_copyright">Tekijänoikeus &#169; 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Tekijänoikeus &#169; 2013 Zhuowei Zhang. Älä jaa ilman lupaa.</string>
+    <string name="about_copyright">Tekijänoikeus &#169; 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Tekijänoikeus &#169; 2013-2014 Zhuowei Zhang. Älä jaa ilman lupaa.</string>
     <string name="about_librarycredits">Tämä ohjelma käyttää Paul Burken aFileChooseria. \n
 Tämä ohjelma sisältää koodia Snowboundin PTPatchToolista, Eclipse Public Licensen lisenssistä. \n
 Tämä ohjelma sisältää muokatun version NathanX:n Slickcraft-tekstuuripaketista:

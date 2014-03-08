@@ -15,7 +15,7 @@ public class SkinTextureOverride implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		boolean loadSkin = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("zz_skin_enable", false);
 		if (!loadSkin) return null;
-		if (fileName.equals("mob/char.png")) {
+		if (fileName.equals("images/mob/char.png")) {
 			String skinPath = context.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("player_skin", null);
 			if (skinPath == null) return null;
 			File file = new File(skinPath);

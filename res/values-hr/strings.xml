@@ -96,8 +96,8 @@ Da li želite nastaviti u opciji sigurnosti bez patchova ili se vratiti na norma
     <string name="manage_addons">Upravljaj addonima</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">O BlockLauncheru</string>
-    <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Ne distributiraj bez dopuštenja.</string>
+    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Ne distributiraj bez dopuštenja.</string>
     <string name="about_librarycredits">Ovaj program koristi aFileChooser library koji je napravio Paul Burke. \n
 Ovaj program koristi dio koda koji je napravio Snowbound\'s PTPatchTool, licenciran pod Eclipse Public License. \n
 Ovaj program koristi modificianu verziju NathanX\'s Slickcraft texture packa: korišten s dopuštenjem.\n

@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.PrintWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -77,6 +78,8 @@ public class ScriptManager {
 
 	private static boolean scriptingEnabled = true;
 
+	private static boolean scriptingInitialized = false;
+
 	public static String screenshotFileName = "";
 
 	//public static Queue<Runnable> mainThreadRunnableQueue = new ArrayDeque<Runnable>();
@@ -85,7 +88,10 @@ public class ScriptManager {
 
 	private static boolean requestReloadAllScripts = false;
 
+	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
+		if (!scriptingInitialized) return;
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
 		//Rhino needs lots of recursion depth to parse nested else ifs
 		//dalvik vm/Thread.h specifies 256K as maximum stack size
@@ -133,6 +139,12 @@ public class ScriptManager {
 	}
 
 	public static void loadScript(File file) throws IOException {
+		if (isClassGenMode()) {
+			if (!scriptingInitialized) return;
+			if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
+			loadScriptFromInstance(ScriptTranslationCache.get(androidContext, file), file.getName());
+			return;
+		}
 		Reader in = null;
 		try {
 			in = new FileReader(file);
@@ -140,6 +152,13 @@ public class ScriptManager {
 		} finally {
 			if (in != null) in.close();
 		}
+	}
+
+	public static void loadScriptFromInstance(Script script, String sourceName) {
+		Context ctx = Context.enter();
+		setupContext(ctx);
+		initJustLoadedScript(ctx, script, sourceName);
+		Context.exit();
 	}
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -156,6 +175,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
+			ScriptableObject.putProperty(scope, "ItemCategory", classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -192,6 +212,10 @@ public class ScriptManager {
 
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("destroyBlock", x, y, z, side);
+	}
+	
+	public static void startDestroyBlockCallback(int x, int y, int z, int side) {
+		callScriptMethod("startDestroyBlock", x, y, z, side);
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
@@ -254,6 +278,14 @@ public class ScriptManager {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
 			requestJoinServer = null;
 		}
+		if (runOnMainThreadList.size() > 0) {
+			synchronized(runOnMainThreadList) {
+				for (Runnable r: runOnMainThreadList) {
+					r.run();
+				}
+				runOnMainThreadList.clear();
+			}
+		}
 		//runDownloadCallbacks();
 	}
 
@@ -262,9 +294,21 @@ public class ScriptManager {
 	}
 
 	public static void chatCallback(String str) {
+		if (isRemote) nameAndShame(str);
 		if (str == null || str.length() < 1 || str.charAt(0) != '/') return;
 		callScriptMethod("procCmd", str.substring(1));
-		if (!isRemote) nativePreventDefault();
+		if (!isRemote) {
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.updateTextboxText("");
+				}
+			}
+		}
+		if (BuildConfig.DEBUG) {
+			processDebugCommand(str.substring(1));
+		}
 	}
 
 	// KsyMC's additions
@@ -274,10 +318,17 @@ public class ScriptManager {
 
 	//Other nonstandard callbacks
 	public static void entityRemovedCallback(int entity) {
+		if (nativeIsPlayer(entity)) {
+			playerRemovedHandler(entity);
+		}
 		callScriptMethod("entityRemovedHook", entity);
 	}
 
 	public static void entityAddedCallback(int entity) {
+		//check if entity is player
+		if (nativeIsPlayer(entity)) {
+			playerAddedHandler(entity);
+		}
 		callScriptMethod("entityAddedHook", entity);
 	}
 
@@ -310,7 +361,34 @@ public class ScriptManager {
 		ScreenshotHelper.takeScreenshot(screenshotFileName);
 	}
 
+	public static void handleChatPacketCallback(String str) {
+		if (str == null || str.length() < 1) return;
+		callScriptMethod("serverMessageReceiveHook", str);
+		if (BuildConfig.DEBUG) {
+			System.out.println(str);
+		}
+	}
+
+	public static void handleMessagePacketCallback(String sender, String str) {
+		if (str == null || str.length() < 1) return;
+		callScriptMethod("chatReceiveHook", str, sender);
+		if (BuildConfig.DEBUG) {
+			System.out.println(sender + ": " + str);
+		}
+		if (str.equals("BlockLauncher, enable scripts, please and thank you") && sender.length() == 0) {
+			scriptingEnabled = true;
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.scriptPrintCallback("Scripts have been re-enabled", "");
+				}
+			}
+		}
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
+		scriptingInitialized = true;
 		//set up hooks
 		int versionCode = 0;
 		try {
@@ -328,6 +406,13 @@ public class ScriptManager {
 		// call it before the first frame renders
 		requestReloadAllScripts = true;
 		nativeRequestFrameCallback();
+	}
+
+	public static void destroy() {
+		scriptingInitialized = false;
+		androidContext = null;
+		scripts.clear();
+		runOnMainThreadList.clear();
 	}
 
 	public static void removeScript(String scriptId) {
@@ -427,10 +512,14 @@ public class ScriptManager {
 		saveEnabledScripts();
 	}
 
-	protected static void loadEnabledScripts() throws IOException {
+	public static void loadEnabledScriptsNames(android.content.Context androidContext) {
 		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 		String enabledScriptsStr = sharedPrefs.getString("enabledScripts", "");
 		enabledScripts = new HashSet<String>(Arrays.asList(enabledScriptsStr.split(";")));
+	}
+
+	protected static void loadEnabledScripts() throws IOException {
+		loadEnabledScriptsNames(androidContext);
 		for (String name: enabledScripts) {
 			//load all scripts into the script interpreter
 			File file = getScriptFile(name);
@@ -630,24 +719,42 @@ public class ScriptManager {
 	}
 
 	public static void setupContext(Context ctx) {
+		ctx.setOptimizationLevel(-1); //No dynamic translation; we interpret and/or precompile
+		/*
 		if (android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext).getBoolean("zz_script_paranoid_mode", false)) {
 			ctx.setWrapFactory(modernWrapFactory);
 		}
+		*/
 	}
 
-	public static int[] expandTexturesArray(Object inArrayObj) {
+	public static TextureRequests expandTexturesArray(Object inArrayObj) {
 		int[] endArray = new int[16*6];
+		String[] stringArray = new String[16*6];
+		TextureRequests retval = new TextureRequests();
+		retval.coords = endArray;
+		retval.names = stringArray;
 
-		if (inArrayObj instanceof Number) {
-			int fillVal = ((Number) inArrayObj).intValue();
-			Arrays.fill(endArray, fillVal);
-			return endArray;
+		if (inArrayObj instanceof String) {
+			String fillVal = ((String) inArrayObj);
+			Arrays.fill(stringArray, fillVal);
+			return retval;
 		}
 		Scriptable inArrayScriptable = (Scriptable) inArrayObj;
 		//if the in array count is a multiple of 6,
 		//copy 6 at a time until we run out, then copy 6 from the first element.
 		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
 		int wrap = inArrayLength % 6 == 0? 6: 1;
+		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
+		if ((inArrayLength == 1 || inArrayLength == 2) && firstObj instanceof String) {
+			//all blocks have same tex
+			String fillVal = ((String) firstObj);
+			Arrays.fill(stringArray, fillVal);
+			if (inArrayLength == 2) {
+				int fillVal2 = ((Number) ScriptableObject.getProperty(inArrayScriptable, 1)).intValue();
+				Arrays.fill(endArray, fillVal2);
+			}
+			return retval;
+		}
 		for (int i = 0; i < endArray.length; i++) {
 			Object myObj;
 			if (i < inArrayLength) {
@@ -655,11 +762,16 @@ public class ScriptManager {
 			} else {
 				myObj = ScriptableObject.getProperty(inArrayScriptable, i % wrap);
 			}
-			endArray[i] = expandTextureCoordinate(myObj);
+			Scriptable myScriptable = (Scriptable) myObj;
+			String texName = ((String) ScriptableObject.getProperty(myScriptable, 0));
+			int texCoord = ((Number) ScriptableObject.getProperty(myScriptable, 1)).intValue();
+			endArray[i] = texCoord;
+			stringArray[i] = texName;
 		}
-		return endArray;
+		return retval;
 	}
 
+	/*
 	public static int expandTextureCoordinate(Object myObj) {
 		if (myObj instanceof Number) {
 			return ((Number) myObj).intValue();
@@ -671,6 +783,7 @@ public class ScriptManager {
 		}
 		throw new IllegalArgumentException("Invalid texture coordinate input: " + myObj);
 	}
+	*/
 
 	public static int[] expandColorsArray(Scriptable inArrayScriptable) {
 		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
@@ -685,6 +798,104 @@ public class ScriptManager {
 		Log.i("BlockLauncher", Arrays.toString(endArray));
 		return endArray;
 	}
+
+	public static void processDebugCommand(String cmd) {
+		try {
+			if (cmd.equals("dumpitems")) {
+				debugDumpItems();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void debugDumpItems() throws IOException {
+		PrintWriter out = new PrintWriter(new File("/sdcard/items.csv"));
+		float[] textureUVbuf = new float[6];
+		for (int i = 0; i < 512; i++) {
+			String itemName = nativeGetItemName(i, 0, true);
+			if (itemName == null) continue;
+			boolean success = nativeGetTextureCoordinatesForItem(i, 0, textureUVbuf);
+			String itemIcon = Arrays.toString(textureUVbuf).replace("[","").replace("]","").replace(",", "|");
+			out.println(i + "," + itemName + "," + itemIcon);
+		}
+		out.close();
+	}
+
+	private static void playerAddedHandler(int entityId) {
+		if (!shouldLoadSkin()) return;
+		//load skin for player
+		String playerName = nativeGetPlayerName(entityId); //in the real service, this would be normalized
+		String skinName = "mob/" + playerName + ".png";
+		File skinFile = getTextureOverrideFile("images/" + skinName);
+		String urlString = "http://s3.amazonaws.com/MinecraftSkins/" + playerName + ".png";
+		try {
+			URL url = new URL(urlString);
+			new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(entityId, skinName))).start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	private static void playerRemovedHandler(int entityId) {
+	}
+
+	public static void runOnMainThread(Runnable run) {
+		synchronized(runOnMainThreadList) {
+			runOnMainThreadList.add(run);
+		}
+	}
+
+	private static boolean shouldLoadSkin() {
+		return android.preference.PreferenceManager.getDefaultSharedPreferences(androidContext)
+			.getString("zz_skin_download_source", "mojang_pc").equals("mojang_pc");
+	}
+
+	private static boolean isClassGenMode() {
+		return false;
+	}
+
+	private static int[] expandShapelessRecipe(Scriptable inArrayScriptable) {
+		int inArrayLength = ((Number) ScriptableObject.getProperty(inArrayScriptable, "length")).intValue();
+		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
+		int[] endArray = null;
+		if (firstObj instanceof Number) {
+			if (inArrayLength % 2 != 0) throw new IllegalArgumentException("Array length must be multiple of 2");
+			endArray = new int[inArrayLength];
+			for (int i = 0; i < endArray.length; i++) {
+				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+			}	
+		} else {
+			throw new IllegalArgumentException("Method takes in an array of [itemid, itemdamage, ...]");
+			//TODO: more types
+		}
+		return endArray;
+	}
+
+	private static void nameAndShame(String str) {
+		if (str == null || str.length() < 1 || str.charAt(0) == '/') return;
+		String playerName = NativePlayerApi.getName(nativeGetPlayerEnt());
+		if (playerName == null) return;
+		boolean hasShamed = true;
+		if (playerName.equalsIgnoreCase("geoffrey5787")) {
+			nativeSendChat("I steal mods and claim them as my own");
+		} else if (playerName.equalsIgnoreCase("doggerhero20011") || playerName.equalsIgnoreCase("dogger20011")) {
+			nativeSendChat("I stole from app developers, so you should steal from me!");
+		} else {
+			hasShamed = false;
+		}
+		if (hasShamed) {
+			nativePreventDefault();
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.updateTextboxText("");
+				}
+			}
+		}
+	}
+		
 	public static native float nativeGetPlayerLoc(int axis);
 	public static native int nativeGetPlayerEnt();
 	public static native long nativeGetLevel();
@@ -740,8 +951,10 @@ public class ScriptManager {
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
 	public static native void nativeSetSneaking(int entityId, boolean doIt);
 	public static native String nativeGetPlayerName(int entityId);
+	public static native String nativeGetItemName(int itemId, int itemDamage, boolean raw);
+	public static native boolean nativeGetTextureCoordinatesForItem(int itemId, int itemDamage, float[] output);
 
-	public static native void nativeDefineBlock(int blockId, String name, int[] textures, int materialSourceId, boolean opaque, int renderType);
+	public static native void nativeDefineBlock(int blockId, String name, String[] textureNames, int[] textureCoords, int materialSourceId, boolean opaque, int renderType);
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
 	public static native void nativeBlockSetExplosionResistance(int blockId, float amount);
 	public static native void nativeBlockSetStepSound(int blockId, int sourceBlockId);
@@ -749,6 +962,17 @@ public class ScriptManager {
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
 	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3, float v4, float v5, float v6);
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
+	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
+	public static native boolean nativeIsPlayer(int entityId);
+	public static native float nativeGetEntityVel(int entity, int axis);
+	public static native void nativeSetI18NString(String key, String value);
+	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
+	public static native void nativeShowTipMessage(String msg);
+	public static native void nativeEntitySetNameTag(int id, String msg);
+	public static native void nativeSetStonecutterItem(int id, int status);
+	public static native void nativeSetItemCategory(int id, int category, int status);
+	public static native void nativeSendChat(String message);
+	public static native String nativeEntityGetNameTag(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -764,22 +988,32 @@ public class ScriptManager {
 	public static native int nativeGetItemChest(int x, int y, int z, int slot);
 	public static native int nativeGetItemDataChest(int x, int y, int z, int slot);
 	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
-	public static native void nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
+	public static native int nativeDropItem(float x, float y, float z, float range, int id, int count, int damage);
 
 	// KsyMC's additions
 	public static native void nativePlaySound(float x, float y, float z, String sound, float volume, float pitch);
 	public static native void nativeClearSlotInventory(int slot);
 	public static native int nativeGetSlotInventory(int slot, int type);
+	public static native void nativeAddItemCreativeInv(int id, int count, int damage);
 
 	//InusualZ's additions
 	public static native void nativeExtinguishFire(int x, int y, int z, int side);
 	public static native int nativeGetSlotArmor(int slot, int type);
 	public static native void nativeSetArmorSlot(int slot, int id, int damage);
 	
+	//Byteandahalf's additions
+	public static native int nativeGetBrightness(int x, int y, int z);
+	public static native void nativeAddFurnaceRecipe(int inputId, int outputId, int outputDamage);
+	public static native void nativeAddItemFurnace(int x, int y, int z, int slot, int id, int damage, int amount);
+ 	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
+ 	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
+	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
 	public static native void nativeRemoveItemBackground();
 	public static native void nativeSetTextParseColorCodes(boolean doIt);
+	public static native void nativePrePatch();
 
 	public static class ScriptState {
 		public Script script;
@@ -1073,8 +1307,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void dropItem(double x, double y, double z, double range, int id, int count, int damage) {
-			nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
+		public static int dropItem(double x, double y, double z, double range, int id, int count, int damage) {
+			return nativeDropItem((float) x, (float) y, (float) z, (float)range, id, count, damage);
 		}
 
 		@JSStaticFunction
@@ -1145,6 +1379,32 @@ public class ScriptManager {
 			
 			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
 		}
+		
+		// Byteandahalf's additions
+		@JSStaticFunction
+		public static int getBrightness(int x, int y, int z) {
+			return nativeGetBrightness(x, y, z);
+		}
+		
+ 		@JSStaticFunction
+		public static void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage, int amount) {
+ 			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
+ 		}
+ 
+ 		@JSStaticFunction
+		public static int getFurnaceSlot(int x, int y, int z, int slot) {
+ 			return nativeGetItemFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSStaticFunction
+ 		public static int getFurnaceSlotData(int x, int y, int z, int slot) {
+ 			return nativeGetItemDataFurnace(x, y, z, slot);
+ 		}
+ 
+ 		@JSStaticFunction
+ 		public static int getFurnaceSlotCount(int x, int y, int z, int slot) {
+ 			return nativeGetItemCountFurnace(x, y, z, slot);
+ 		}
 		
 		//InusualZ's additions
 		/*
@@ -1225,6 +1485,10 @@ public class ScriptManager {
 		public static int getCarriedItemCount() {
 			return nativeGetCarriedItem(AMOUNT);
 		}
+		@JSStaticFunction
+		public static void addItemCreativeInv(int id, int count, int damage) {
+			nativeAddItemCreativeInv(id, count, damage);
+		}
 		
 		//InusualZ's additions
 		
@@ -1243,10 +1507,20 @@ public class ScriptManager {
 			nativeSetArmorSlot(slot, id, damage);
 		}
 
-		/*@JSStaticFunction
+		@JSStaticFunction
 		public static String getName(int ent) {
-			if (ent == null) ent = playerEnt;
+			if (!nativeIsPlayer(ent)) return "Not a player";
 			return nativeGetPlayerName(ent);
+		}
+
+		@JSStaticFunction
+		public static boolean isPlayer(int ent) {
+			return nativeIsPlayer(ent);
+		}
+
+		/*@JSStaticFunction
+		public static void setInventorySlot(int slot, int itemId, int count, int damage) {
+			nativeSetInventorySlot(slot, itemId, count, damage);
 		}*/
 		
 		@Override
@@ -1319,7 +1593,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setCarriedItem(int ent, int id, int count, int damage) {
-			nativeSetCarriedItem(ent, id, 1, damage);
+			nativeSetCarriedItem(ent, id, count, damage);
 		}
 
 		@JSStaticFunction
@@ -1382,6 +1656,28 @@ public class ScriptManager {
 			nativeSetSneaking(ent, doIt);
 		}
 
+		@JSStaticFunction
+		public static double getVelX(int ent) {
+			return nativeGetEntityVel(ent, AXIS_X);
+		}
+		@JSStaticFunction
+		public static double getVelY(int ent) {
+			return nativeGetEntityVel(ent, AXIS_Y);
+		}
+		@JSStaticFunction
+		public static double getVelZ(int ent) {
+			return nativeGetEntityVel(ent, AXIS_Z);
+		}
+
+		@JSStaticFunction
+		public static void setNameTag(int entity, String name) {
+			int entityType = nativeGetEntityTypeId(entity);
+			if (entityType >= 64 || (entityType == 0 && !NativePlayerApi.isPlayer(entity)))
+				throw new IllegalArgumentException("setNameTag only works on mobs");
+			nativeEntitySetNameTag(entity, name);
+		}
+
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -1394,7 +1690,7 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void log(String str) {
-		   Log.i("MCPELauncherLog", str);
+			Log.i("MCPELauncherLog", str);
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
@@ -1424,6 +1720,9 @@ public class ScriptManager {
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
 			nativeDefineItem(id, iconName, iconSubindex, name);
 		}
 
@@ -1433,6 +1732,9 @@ public class ScriptManager {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
 			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name);
 		}
@@ -1502,12 +1804,56 @@ public class ScriptManager {
 			nativeRequestFrameCallback();
 		}
 
+		@JSStaticFunction
+		public static String getItemName(int id, int damage, boolean raw) {
+			return nativeGetItemName(id, damage, raw);
+		}
+
+		@JSStaticFunction
+		public static void langEdit(String key, String value) {
+			nativeSetI18NString(key, value);
+		}
+
+		@JSStaticFunction
+		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
+			int[] expanded = expandShapelessRecipe(ingredients);
+			nativeAddShapelessRecipe(id, count, damage, expanded);
+		}
+		
+		@JSStaticFunction
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
+		}
+
+		@JSStaticFunction
+		public static void showTipMessage(String msg) {
+			nativeShowTipMessage(msg);
+		}
+
+		/* disabled since Substrate cannot hook the relevant method
+		@JSStaticFunction
+		public static void setStonecutterItem(int id, boolean status) {
+			//1: nope; 2: yep.
+			nativeSetStonecutterItem(id, status? 2: 1);
+		}
+		*/
+
+		@JSStaticFunction
+		public static void setItemCategory(int id, int category, int whatever) {
+			nativeSetItemCategory(id, category, whatever);
+		}
+
+		@JSStaticFunction
+		public static void sendChat(String message) {
+			if (!isRemote) return;
+			nativeSendChat(message);
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";
 		}
 	}
-	private static final boolean HAVE_YOU_FIXED_BLOCKS = false;
 
 	private static class NativeBlockApi extends ScriptableObject {
 		public NativeBlockApi() {
@@ -1515,9 +1861,8 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineBlock(int blockId, String name, Object textures, Object materialSourceIdSrc, Object opaqueSrc,
 			Object renderTypeSrc) {
-			if (!HAVE_YOU_FIXED_BLOCKS) {
-				scriptPrint("Unable to initialize " + name.trim() + ": Custom blocks API not updated for 0.8.0. They will turn into UPDATE blocks.");
-				return;
+			if (blockId < 0 || blockId >= 256) {
+				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
 			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
@@ -1535,8 +1880,8 @@ public class ScriptManager {
 				renderType = ((Number) renderTypeSrc).intValue();
 				Log.i("BlockLauncher", "setting renderType to " + renderType);
 			}
-			int[] finalTextures = expandTexturesArray(textures);
-			nativeDefineBlock(blockId, name, finalTextures, materialSourceId, opaque, renderType);
+			TextureRequests finalTextures = expandTexturesArray(textures);
+			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords, materialSourceId, opaque, renderType);
 		}
 		@JSStaticFunction
 		public static void setDestroyTime(int blockId, double time) {
@@ -1585,5 +1930,24 @@ public class ScriptManager {
 	private static class JoinServerRequest {
 		public String serverAddress;
 		public int serverPort;
+	}
+
+	private static class AfterSkinDownloadAction implements Runnable {
+		private int entityId;
+		private String skinPath;
+		public AfterSkinDownloadAction(int entityId, String skinPath) {
+			this.entityId = entityId;
+			this.skinPath = skinPath;
+		}
+
+		public void run() {
+			File skinFile = getTextureOverrideFile("images/" + skinPath);
+			if (!skinFile.exists()) return;
+			NativeEntityApi.setMobSkin(entityId, skinPath);
+		}
+	}
+	private static class TextureRequests {
+		public String[] names;
+		public int[] coords;
 	}
 }

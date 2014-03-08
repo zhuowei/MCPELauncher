@@ -1,40 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="net.zhuoweizhang.mcpelauncher"
-      android:versionCode="1"
-      android:versionName="1.0.0">
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="9"/>
-    <uses-permission
-        android:name="android.permission.INTERNET"/>
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission
-        android:name="android.permission.VIBRATE"/>
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-        <activity android:name="net.zhuoweizhang.mcpelauncher.LauncherActivity"
-                  android:configChanges="orientation|keyboardHidden"
-                  android:screenOrientation="landscape"
-                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-            <meta-data android:name="android.app.lib_name"
-                  android:value="minecraftpe"/>
+    package="net.zhuoweizhang.mcpelauncher"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="9" />
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <activity
+            android:name="net.zhuoweizhang.mcpelauncher.LauncherActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="minecraftpe" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="net.zhuoweizhang.mcpelauncher.MainMenuOptionsActivity"/>
-
-        <!-- aFileChooser -->
-        <activity android:name="com.ipaulpro.afilechooser.FileChooserActivity" android:exported="false">
-            <intent-filter >
-                <action android:name="android.intent.action.GET_CONTENT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.OPENABLE" />
-                <data android:mimeType="*/*" />
-            </intent-filter>
-        </activity>
-        <activity android:name="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"/>
-        <activity android:name="net.zhuoweizhang.mcpelauncher.ManagePatchesActivity"/>
+        <activity android:name="net.zhuoweizhang.mcpelauncher.MainMenuOptionsActivity" />
     </application>
 
-</manifest> 
+</manifest>

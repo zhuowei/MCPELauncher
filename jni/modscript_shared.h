@@ -28,10 +28,16 @@ extern Entity* bl_removedEntity;
 extern void (*bl_ItemInstance_setId)(ItemInstance*, int);
 extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
+void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage);
 
 extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
 extern int (*bl_Level_getData) (Level*, int, int, int);
 Entity* bl_getEntityWrapper(Level* level, int entityId);
+
+void bl_clearNameTags();
+void bl_sendIdentPacket();
+
+extern Player* bl_localplayer;
 
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1

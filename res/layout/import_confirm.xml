@@ -28,18 +28,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView android:id="@+id/app_name"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?android:attr/textColorPrimary"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:paddingLeft="6dip"
+        android:paddingRight="6dip"
         android:shadowRadius="2"
         android:singleLine="true"
-        android:gravity="center"
-        android:layout_centerInParent="true"
-        android:paddingRight="6dip"
-        android:paddingLeft="6dip"
-        android:ellipsize="end"/>
+        android:text="@string/manage_patches_info"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <TextView
         android:id="@+id/install_confirm_question"
@@ -50,6 +51,11 @@
         android:paddingTop="20dip"
         android:paddingLeft="20dip"
         android:paddingBottom="20dip"/>
+    
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <!-- OK confirm and cancel buttons.  -->
     <LinearLayout

@@ -15,6 +15,8 @@ def main():
 	for i in list_files:
 		if not "values-" in i:
 			continue
+		if "-land" in i or "-port" in i:
+			continue
 		langinfo = i.strip()[len("values-"):].replace("-r", "_")
 		lang_list.append(langinfo)
 	lang_list.append("en") # en is the default locale

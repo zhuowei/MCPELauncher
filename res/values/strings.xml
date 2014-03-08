@@ -67,7 +67,14 @@
     <string name="pref_zz_show_insert_text">Show \"Insert text\" option in in-game patch manager</string>
     <string name="pref_zz_language_override">Language</string>
     <string name="pref_zz_language_override_default">Default</string>
-    <string name="pref_zz_script_paranoid_mode">Paranoid mode: disable GUI ModPE scripts</string>
+    <string name="pref_zz_script_paranoid_mode">Paranoid mode</string>
+    <string name="pref_zz_script_paranoid_mode_summary">Disable ModPE scripts\' access to Android functions,\nlike deleting files and using internet</string>
+    <string name="pref_zz_legacy_keyboard_input">Use old keyboard input code</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">A fix to keyboard bugs in the new 0.8.x update</string>
+    <string name="pref_zz_texture_pack_enable_extracted">Use extracted original textures</string>
+    <string name="pref_zz_skin_download_source">Choose skin download source</string>
+    <string name="skin_download_do_not_download">Do not download skins</string>
+    <string name="skin_download_download_pc">Download skins based on PC username</string>
     <string name="nerdy_stuff_page">Nerdy stuff</string>
     <string name="dump_libminecraftpe">Dump libminecraftpe.so from memory</string>
     <string name="nerdy_stuff_are_useless">Pretty much everything on this page is useless. They are here for troubleshooting bugs.</string>
@@ -96,12 +103,17 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="manage_patches_metadata">Author</string>
     <string name="manage_patches_no_metadata">No author information available</string>
     <string name="manage_patches_path">Path</string>
+    <string name="skin_import_confirm">Do you want to set this skin?</string>
+    <string name="texturepack_import_confirm">Do you want to set this texturepack?</string>
+    <string name="script_import_confirm">Do you want to import this ModPE Script?</string>
     <string name="skin_imported">Skin set</string>
+    <string name="texturepack_imported">Texturepack set</string>
+    <string name="script_imported">ModPE Script imported</string>
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About BlockLauncher</string>
-    <string name="about_copyright">Copyright &#169; 2013 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
@@ -171,5 +183,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
+    
+    <string name="hovercar_insert_text_backspace">Insert backspace</string>
 
 </resources>
