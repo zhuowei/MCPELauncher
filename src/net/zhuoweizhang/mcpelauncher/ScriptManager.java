@@ -1915,7 +1915,7 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setExternalTexture(String fileLocation) {
+		public static void setExternalTexture(int blockId, String fileLocation) {
 			//TODO: Make file out of location and patch to terrain-atlas.tga before game starts
 		}
 
