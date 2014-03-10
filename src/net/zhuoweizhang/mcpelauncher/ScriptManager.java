@@ -1914,6 +1914,11 @@ public class ScriptManager {
 			nativeBlockSetRenderLayer(blockId, layer);
 		}
 
+		@JSStaticFunction
+		public static void setExternalTexture(String fileLocation) {
+			//TODO: Make file out of location and patch to terrain-atlas.tga before game starts
+		}
+
 		@Override
 		public String getClassName() {
 			return "Block";
