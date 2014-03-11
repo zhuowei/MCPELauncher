@@ -1846,13 +1846,6 @@ public class ScriptManager {
 			nativeSetItemCategory(id, category, whatever);
 		}
 
-		@JSStaticFunction
-		public static void sendChat(String message) {
-			scriptPrint("NAG: Update to Server.sendChat().");
-			if (!isRemote) return;
-			nativeSendChat(message);
-		}
-
 		@Override
 		public String getClassName() {
 			return "ModPE";
