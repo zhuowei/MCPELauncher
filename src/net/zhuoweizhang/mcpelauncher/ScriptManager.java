@@ -861,13 +861,25 @@ public class ScriptManager {
 		Object firstObj = ScriptableObject.getProperty(inArrayScriptable, 0);
 		int[] endArray = null;
 		if (firstObj instanceof Number) {
-			if (inArrayLength % 2 != 0) throw new IllegalArgumentException("Array length must be multiple of 2");
-			endArray = new int[inArrayLength];
-			for (int i = 0; i < endArray.length; i++) {
-				endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
-			}	
+			if (inArrayLength % 3 != 0) {
+				if (inArrayLength % 2 == 0) {
+					endArray = new int[inArrayLength / 2 * 3];
+					for (int i = 0; i < endArray.length; i+= 3) {
+						endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, (i / 3 * 2))).intValue();
+						endArray[i + 1] = 1; //count
+						endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, (i / 3 * 2) + 1)).intValue(); //damage
+					}
+				} else {
+					throw new IllegalArgumentException("Array length must be multiple of 3 (this was changed in 1.6.8)");
+				}
+			} else {
+				endArray = new int[inArrayLength];
+				for (int i = 0; i < endArray.length; i++) {
+					endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, i)).intValue();
+				}
+			}
 		} else {
-			throw new IllegalArgumentException("Method takes in an array of [itemid, itemdamage, ...]");
+			throw new IllegalArgumentException("Method takes in an array of [itemid, itemCount, itemdamage, ...]");
 			//TODO: more types
 		}
 		return endArray;
@@ -1694,11 +1706,11 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void setTerrain(String url) {
-			overrideTexture("terrain.png", url);
+			overrideTexture("images/terrain-atlas.tga", url);
 		}
 		@JSStaticFunction
 		public static void setItems(String url) {
-			overrideTexture("gui/items.png", url);
+			overrideTexture("images/items-opaque.png", url);
 		}
 		@JSStaticFunction
 		public static void setGuiBlocks(String url) {

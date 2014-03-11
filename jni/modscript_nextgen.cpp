@@ -876,16 +876,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
 	ItemInstance outStack;
 	bl_setItemInstance(&outStack, itemId, itemCount, itemDamage);
-	int ingredientsCount = ingredientsElemsCount / 2;
+	int ingredientsCount = ingredientsElemsCount / 3;
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
-		RecipesType recipeType;
-		recipeType.wtf2 = 0;
-		recipeType.item = NULL;
-		recipeType.itemInstance.damage = ingredients[i * 2 + 1];
-		recipeType.itemInstance.count = 1;
-		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 2]);
-		ingredientsList.push_back(recipeType);
+		int repeatCount = ingredients[i * 3 + 1];
+		for (int repeat = 0; repeat < repeatCount; repeat++) {
+			RecipesType recipeType;
+			recipeType.wtf2 = 0;
+			recipeType.item = NULL;
+			recipeType.itemInstance.damage = ingredients[i * 3 + 2];
+			recipeType.itemInstance.count = 1;
+			bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3]);
+			ingredientsList.push_back(recipeType);
+		}
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
@@ -964,12 +967,14 @@ void bl_sendIdentPacket() {
 	 * Currently a SetTimePacket sent from client to server. Vanilla servers *should* ignore it, as well as old PocketMine.
 	 * The magic time value is 0x1abe11ed, and the boolean sent is false.
 	 */
+	/* Disable in 1.6.8 pending crash investigation
 	SetTimePacket packet;
 	bl_Packet_Packet(&packet);
 	packet.vtable = (void**) (((uintptr_t) bl_SetTimePacket_vtable) + 8);
 	packet.time = 0x1abe11ed;
 	packet.started = false;
 	bl_sendPacket(&packet);
+	*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
