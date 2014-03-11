@@ -132,6 +132,7 @@ static std::string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
+static void (*bl_Item_setMaxStackSize)(Item*, int);
 static void (*bl_CreativeInventryScreen_populateTile_real)(Tile*, int, int);
 static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
@@ -483,7 +484,7 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
-  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name) {
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
 	Item* item = bl_constructItem(id);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -492,6 +493,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
+	if(maxStackSize == NULL) bl_Item_setMaxStackSize(item, 64);
+	else bl_Item_setMaxStackSize(item, maxStackSize);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -499,7 +502,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jint halfhearts, jstring name) {
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jint halfhearts, jstring name, jint maxStackSize) {
 	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -508,6 +511,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
+	if(maxStackSize == NULL) bl_Item_setMaxStackSize(item, 64);
+	else bl_Item_setMaxStackSize(item, maxStackSize);
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -1091,6 +1096,8 @@ void bl_setuphooks_cppside() {
 	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
 	bl_ShapelessRecipe_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15ShapelessRecipe");
+	
+	bl_Item_setMaxStackSize = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeERKi");
 
 	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
 	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
