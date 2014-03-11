@@ -177,6 +177,7 @@ public class ScriptManager {
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
 			ScriptableObject.putProperty(scope, "ItemCategory", classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
+			ScriptableObject.defineClass(scope, NativeServerApi.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -609,6 +610,7 @@ public class ScriptManager {
 		appendApiMethods(builder, NativePlayerApi.class, "Player");
 		appendApiMethods(builder, NativeEntityApi.class, "Entity");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
+		appendApiMethods(builder, NativeServerApi.class, "Server");
 		return builder.toString();
 		
 	}
@@ -1799,6 +1801,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
+			scriptPrint("NAG: Update to Server.joinServer().");
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
 			requestJoinServer.serverAddress = serverAddress;
@@ -1853,12 +1856,6 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setItemCategory(int id, int category, int whatever) {
 			nativeSetItemCategory(id, category, whatever);
-		}
-
-		@JSStaticFunction
-		public static void sendChat(String message) {
-			if (!isRemote) return;
-			nativeSendChat(message);
 		}
 
 		@Override
@@ -1929,6 +1926,30 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "Block";
+		}
+	}
+	
+	private static class NativeServerApi extends ScriptableObject {
+		public NativeServerApi() {
+		}
+		
+		@JSStaticFunction
+		public static void joinServer(String serverAddress, int port) {
+			requestLeaveGame = true;
+			requestJoinServer = new JoinServerRequest();
+			requestJoinServer.serverAddress = serverAddress;
+			requestJoinServer.serverPort = port;
+		}
+		
+		@JSStaticFunction
+		public static void sendChat(String message) {
+			if (!isRemote) return;
+			nativeSendChat(message);
+		}
+		
+		@Override
+		public String getClassName() {
+			return "Server";
 		}
 	}
 		
