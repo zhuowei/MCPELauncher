@@ -132,7 +132,7 @@ static std::string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
-static void (*bl_Item_setMaxStackSize)(Item*, int size);
+static void (*bl_Item_setMaxStackSize)(Item*, int);
 static void (*bl_CreativeInventryScreen_populateTile_real)(Tile*, int, int);
 static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
