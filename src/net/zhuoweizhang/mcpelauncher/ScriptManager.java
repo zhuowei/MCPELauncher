@@ -928,8 +928,8 @@ public class ScriptManager {
 	public static native void nativeOnGraphicsReset();
 
 	//0.6
-	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name);
-	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name);
+	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name, int maxStackSize);
+	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name, int maxStackSize);
 
 	//nonstandard
 	public static native void nativeSetFov(float degrees);
@@ -1716,7 +1716,7 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setItem(int id, String iconName, int iconSubindex, String name) {
+		public static void setItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1725,11 +1725,11 @@ public class ScriptManager {
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
-			nativeDefineItem(id, iconName, iconSubindex, name);
+			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
 		}
 
 		@JSStaticFunction
-		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name) {
+		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1738,7 +1738,7 @@ public class ScriptManager {
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
-			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name);
+			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
 		}
 
 		//nonstandard
