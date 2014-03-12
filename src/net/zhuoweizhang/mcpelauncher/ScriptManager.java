@@ -174,6 +174,7 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeLevelApi.class);
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
+			ScriptableObject.defineClass(scope, NativeItemApi.class);
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
 			ScriptableObject.putProperty(scope, "ItemCategory", classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
@@ -609,6 +610,7 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeLevelApi.class, "Level");
 		appendApiMethods(builder, NativePlayerApi.class, "Player");
 		appendApiMethods(builder, NativeEntityApi.class, "Entity");
+		appendApiMethods(builder, NativeItemApi.class, "Item");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
 		appendApiMethods(builder, NativeServerApi.class, "Server");
 		return builder.toString();
@@ -1717,6 +1719,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+			scriptPrint("NAG: Update to Item.defineItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1730,6 +1733,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
+			scriptPrint("NAG: Update to Item.defineFoodItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1809,6 +1813,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getItemName(int id, int damage, boolean raw) {
+			scriptPrint("NAG: Update to Item.getItemName()");
 			return nativeGetItemName(id, damage, raw);
 		}
 
@@ -1849,6 +1854,47 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "ModPE";
+		}
+	}
+
+	private static class NativeItemApi extends ScriptableObject {
+		public NativeItemApi() {
+		}
+		
+		@JSStaticFunction
+		public static void defineItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
+		}
+
+		@JSStaticFunction
+		public static void defineFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
+		}
+		
+		@JSStaticFunction
+		public static String getItemName(int id, int damage, boolean raw) {
+			return nativeGetItemName(id, damage, raw);
+		}
+		
+		@Override
+		public String getClassName() {
+			return "Item";
 		}
 	}
 
