@@ -1907,7 +1907,7 @@ public class ScriptManager {
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
-			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
+			//scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
 			boolean opaque = true;
 			int renderType = 0;
