@@ -174,9 +174,11 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeLevelApi.class);
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
+			ScriptableObject.defineClass(scope, NativeItemApi.class);
 			ScriptableObject.putProperty(scope, "ChatColor", classConstantsToJSObject(ChatColor.class));
 			ScriptableObject.putProperty(scope, "ItemCategory", classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
+			ScriptableObject.defineClass(scope, NativeServerApi.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -608,7 +610,9 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeLevelApi.class, "Level");
 		appendApiMethods(builder, NativePlayerApi.class, "Player");
 		appendApiMethods(builder, NativeEntityApi.class, "Entity");
+		appendApiMethods(builder, NativeItemApi.class, "Item");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
+		appendApiMethods(builder, NativeServerApi.class, "Server");
 		return builder.toString();
 		
 	}
@@ -938,8 +942,8 @@ public class ScriptManager {
 	public static native void nativeOnGraphicsReset();
 
 	//0.6
-	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name);
-	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name);
+	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name, int maxStackSize);
+	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name, int maxStackSize);
 
 	//nonstandard
 	public static native void nativeSetFov(float degrees);
@@ -1726,7 +1730,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setItem(int id, String iconName, int iconSubindex, String name) {
+		public static void setItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+			scriptPrint("NAG: Update to Item.defineItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1735,11 +1740,12 @@ public class ScriptManager {
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
-			nativeDefineItem(id, iconName, iconSubindex, name);
+			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
 		}
 
 		@JSStaticFunction
-		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name) {
+		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
+			scriptPrint("NAG: Update to Item.defineFoodItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1748,7 +1754,7 @@ public class ScriptManager {
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
-			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name);
+			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
 		}
 
 		//nonstandard
@@ -1799,6 +1805,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
+			scriptPrint("NAG: Update to Server.joinServer().");
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
 			requestJoinServer.serverAddress = serverAddress;
@@ -1818,6 +1825,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getItemName(int id, int damage, boolean raw) {
+			scriptPrint("NAG: Update to Item.getItemName()");
 			return nativeGetItemName(id, damage, raw);
 		}
 
@@ -1855,15 +1863,50 @@ public class ScriptManager {
 			nativeSetItemCategory(id, category, whatever);
 		}
 
-		@JSStaticFunction
-		public static void sendChat(String message) {
-			if (!isRemote) return;
-			nativeSendChat(message);
-		}
-
 		@Override
 		public String getClassName() {
 			return "ModPE";
+		}
+	}
+
+	private static class NativeItemApi extends ScriptableObject {
+		public NativeItemApi() {
+		}
+		
+		@JSStaticFunction
+		public static void defineItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
+		}
+
+		@JSStaticFunction
+		public static void defineFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
+			try {
+				Integer.parseInt(iconName);
+				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
+			} catch (NumberFormatException e) {
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
+		}
+		
+		@JSStaticFunction
+		public static String getItemName(int id, int damage, boolean raw) {
+			return nativeGetItemName(id, damage, raw);
+		}
+		
+		@Override
+		public String getClassName() {
+			return "Item";
 		}
 	}
 
@@ -1876,7 +1919,7 @@ public class ScriptManager {
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
-			scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
+			//scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
 			boolean opaque = true;
 			int renderType = 0;
@@ -1929,6 +1972,30 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "Block";
+		}
+	}
+	
+	private static class NativeServerApi extends ScriptableObject {
+		public NativeServerApi() {
+		}
+		
+		@JSStaticFunction
+		public static void joinServer(String serverAddress, int port) {
+			requestLeaveGame = true;
+			requestJoinServer = new JoinServerRequest();
+			requestJoinServer.serverAddress = serverAddress;
+			requestJoinServer.serverPort = port;
+		}
+		
+		@JSStaticFunction
+		public static void sendChat(String message) {
+			if (!isRemote) return;
+			nativeSendChat(message);
+		}
+		
+		@Override
+		public String getClassName() {
+			return "Server";
 		}
 	}
 		
