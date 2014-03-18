@@ -192,18 +192,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOn
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineItem
- * Signature: (ILjava/lang/String;ILjava/lang/String;)V
+ * Signature: (ILjava/lang/String;ILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
-  (JNIEnv *, jclass, jint, jstring, jint, jstring);
+  (JNIEnv *, jclass, jint, jstring, jint, jstring, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineFoodItem
- * Signature: (ILjava/lang/String;IILjava/lang/String;)V
+ * Signature: (ILjava/lang/String;IILjava/lang/String;I)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *, jclass, jint, jstring, jint, jint, jstring);
+  (JNIEnv *, jclass, jint, jstring, jint, jint, jstring, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -535,6 +535,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntityGetNameTag
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetNameTag
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetData
  * Signature: (III)I
  */
@@ -829,6 +837,43 @@ extern "C" {
 }
 #endif
 #endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_serialVersionUID
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_serialVersionUID 2829861078851942586LL
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_EMPTY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_EMPTY 0L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_READONLY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_READONLY 1L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_DONTENUM
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_DONTENUM 2L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_PERMANENT
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_PERMANENT 4L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_UNINITIALIZED_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_UNINITIALIZED_CONST 8L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_CONST 13L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_QUERY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_QUERY 1L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY 2L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY_CONST 3L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY_GETTER_SETTER
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_MODIFY_GETTER_SETTER 4L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_CONVERT_ACCESSOR_TO_DATA
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_INITIAL_SLOT_SIZE
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeServerApi_INITIAL_SLOT_SIZE 4L
+#ifdef __cplusplus
+}
+#endif
+#endif
 /* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi */
 
 #ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi
@@ -862,6 +907,43 @@ extern "C" {
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi_INITIAL_SLOT_SIZE
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeBlockApi_INITIAL_SLOT_SIZE 4L
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_serialVersionUID
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_serialVersionUID 2829861078851942586LL
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_EMPTY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_EMPTY 0L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_READONLY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_READONLY 1L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_DONTENUM
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_DONTENUM 2L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_PERMANENT
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_PERMANENT 4L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_UNINITIALIZED_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_UNINITIALIZED_CONST 8L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_CONST 13L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_QUERY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_QUERY 1L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY 2L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY_CONST
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY_CONST 3L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY_GETTER_SETTER
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_MODIFY_GETTER_SETTER 4L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_CONVERT_ACCESSOR_TO_DATA
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
+#undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_INITIAL_SLOT_SIZE
+#define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeItemApi_INITIAL_SLOT_SIZE 4L
 #ifdef __cplusplus
 }
 #endif

@@ -493,8 +493,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
-	if(maxStackSize == NULL) bl_Item_setMaxStackSize(item, 64);
-	else bl_Item_setMaxStackSize(item, maxStackSize);
+	if (maxStackSize <= 0) {
+		bl_Item_setMaxStackSize(item, 64);
+	} else {
+		bl_Item_setMaxStackSize(item, maxStackSize);
+	}
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -511,8 +514,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
-	if(maxStackSize == NULL) bl_Item_setMaxStackSize(item, 64);
-	else bl_Item_setMaxStackSize(item, maxStackSize);
+	if (maxStackSize <= 0) {
+		bl_Item_setMaxStackSize(item, 64);
+	} else {
+		bl_Item_setMaxStackSize(item, maxStackSize);
+	}
 	bl_Item_setDescriptionId(item, mystr);
 	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
 	env->ReleaseStringUTFChars(name, utfChars);
