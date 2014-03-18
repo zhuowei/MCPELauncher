@@ -866,16 +866,7 @@ public class ScriptManager {
 		int[] endArray = null;
 		if (firstObj instanceof Number) {
 			if (inArrayLength % 3 != 0) {
-				if (inArrayLength % 2 == 0) {
-					endArray = new int[inArrayLength / 2 * 3];
-					for (int i = 0; i < endArray.length; i+= 3) {
-						endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, (i / 3 * 2))).intValue();
-						endArray[i + 1] = 1; //count
-						endArray[i] = ((Number) ScriptableObject.getProperty(inArrayScriptable, (i / 3 * 2) + 1)).intValue(); //damage
-					}
-				} else {
-					throw new IllegalArgumentException("Array length must be multiple of 3 (this was changed in 1.6.8)");
-				}
+				throw new IllegalArgumentException("Array length must be multiple of 3 (this was changed in 1.6.8): [itemid, itemCount, itemdamage, ...]");
 			} else {
 				endArray = new int[inArrayLength];
 				for (int i = 0; i < endArray.length; i++) {
@@ -1214,7 +1205,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public int bl_spawnMob(double x, double y, double z, int typeId, String tex) {
-			print("Nag: update to Level.spawnMob");
+			print("Nag: update to Level.spawnMob: This will be removed in 1.7");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -1223,7 +1214,7 @@ public class ScriptManager {
 		}
 		@JSFunction
 		public void bl_setMobSkin(int entity, String tex) {
-			print("Nag: update to Entity.setMobSkin");
+			print("Nag: update to Entity.setMobSkin: This will be removed in 1.7");
 			nativeSetMobSkin(entity, tex);
 		}
 
@@ -1619,7 +1610,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int spawnMob(double x, double y, double z, int typeId, String tex) {
-			scriptPrint("Nag: update to Level.spawnMob");
+			scriptPrint("Nag: update to Level.spawnMob: This will be removed in 1.7");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -1731,7 +1722,6 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
-			scriptPrint("NAG: Update to Item.defineItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1745,7 +1735,6 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
-			scriptPrint("NAG: Update to Item.defineFoodItem()");
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
@@ -1805,7 +1794,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
-			scriptPrint("NAG: Update to Server.joinServer().");
+			scriptPrint("NAG: Update to Server.joinServer(). This will be removed in 1.7");
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
 			requestJoinServer.serverAddress = serverAddress;
@@ -1824,25 +1813,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static String getItemName(int id, int damage, boolean raw) {
-			scriptPrint("NAG: Update to Item.getItemName()");
-			return nativeGetItemName(id, damage, raw);
-		}
-
-		@JSStaticFunction
 		public static void langEdit(String key, String value) {
 			nativeSetI18NString(key, value);
-		}
-
-		@JSStaticFunction
-		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
-			int[] expanded = expandShapelessRecipe(ingredients);
-			nativeAddShapelessRecipe(id, count, damage, expanded);
-		}
-		
-		@JSStaticFunction
-		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
-			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
 		@JSStaticFunction
@@ -1874,34 +1846,19 @@ public class ScriptManager {
 		}
 		
 		@JSStaticFunction
-		public static void defineItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
-			try {
-				Integer.parseInt(iconName);
-				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
-			} catch (NumberFormatException e) {
-			}
-			if (id < 0 || id >= 512) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
-			}
-			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
+		public static String getName(int id, int damage, boolean raw) {
+			return nativeGetItemName(id, damage, raw);
 		}
 
 		@JSStaticFunction
-		public static void defineFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
-			try {
-				Integer.parseInt(iconName);
-				Log.i("MCPELauncher", "The item icon for " + name.trim() + " is not updated for 0.8.0. Please ask the script author to update");
-			} catch (NumberFormatException e) {
-			}
-			if (id < 0 || id >= 512) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
-			}
-			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
+		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
+			int[] expanded = expandShapelessRecipe(ingredients);
+			nativeAddShapelessRecipe(id, count, damage, expanded);
 		}
 		
 		@JSStaticFunction
-		public static String getItemName(int id, int damage, boolean raw) {
-			return nativeGetItemName(id, damage, raw);
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 		
 		@Override
@@ -1919,7 +1876,6 @@ public class ScriptManager {
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
-			//scriptPrint("The custom blocks API is still in its early stages. Stuff will change and break.");
 			int materialSourceId = 1;
 			boolean opaque = true;
 			int renderType = 0;
