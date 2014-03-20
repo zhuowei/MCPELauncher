@@ -31,9 +31,9 @@ to build the embedded copy of PokerFace and Andhook.
 
 ```
 
-git clone git@github.com:zhuowei/aFileChooser.git
-git clone git@github.com:zhuowei/BlockLauncher.git
-git clone git@github.com:zhuowei/BlockLauncher-app.git
+git clone https://github.com/zhuowei/aFileChooser.git
+git clone https://github.com/zhuowei/MCPELauncher.git
+git clone https://github.com/zhuowei/MCPELauncher-app.git
 git clone https://github.com/Chainfire/libsuperuser.git
 android update lib-project -p libsuperuser/libsuperuser -t 1
 cd BlockLauncher
