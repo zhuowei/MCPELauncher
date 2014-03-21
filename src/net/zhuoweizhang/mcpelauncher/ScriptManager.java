@@ -120,6 +120,7 @@ public class ScriptManager {
 			}
 			throw back; //Thursdays
 		}
+		allentities.clear();
 	}
 
 	private static class ParseThread implements Runnable {
