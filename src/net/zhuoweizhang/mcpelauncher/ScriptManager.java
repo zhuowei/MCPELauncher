@@ -90,6 +90,8 @@ public class ScriptManager {
 
 	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
 
+	private static NativeArray entityList;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized) return;
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
@@ -225,6 +227,7 @@ public class ScriptManager {
 		ScriptManager.isRemote = isRemote;
 		if (!isRemote) ScriptManager.scriptingEnabled = true; //all local worlds get ModPE support
 		nativeSetGameSpeed(20.0f);
+		//entityList.clear();
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -324,6 +327,7 @@ public class ScriptManager {
 			playerRemovedHandler(entity);
 		}
 		callScriptMethod("entityRemovedHook", entity);
+		//entityList.remove(Integer.valueOf(entity));
 	}
 
 	public static void entityAddedCallback(int entity) {
@@ -332,6 +336,7 @@ public class ScriptManager {
 			playerAddedHandler(entity);
 		}
 		callScriptMethod("entityAddedHook", entity);
+		//entityList.put(entityList.getLength(), entityList, entity);
 	}
 
 	public static void levelEventCallback(int player, int eventType, int x, int y, int z, int data) {
@@ -403,6 +408,7 @@ public class ScriptManager {
 		}
 		nativeSetupHooks(versionCode);
 		scripts.clear();
+		entityList = new NativeArray(0);
 		androidContext = cxt.getApplicationContext();
 		//loadEnabledScripts(); Minecraft blocks wouldn't be initialized when this is called
 		// call it before the first frame renders
@@ -980,6 +986,10 @@ public class ScriptManager {
 	public static native void nativeSetItemCategory(int id, int category, int status);
 	public static native void nativeSendChat(String message);
 	public static native String nativeEntityGetNameTag(int entityId);
+	public static native int nativeEntityGetRiding(int entityId);
+	public static native int nativeEntityGetRider(int entityId);
+	public static native String nativeEntityGetMobSkin(int entityId);
+	public static native int nativeEntityGetRenderType(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1420,6 +1430,11 @@ public class ScriptManager {
 			nativeExtinguishFire(x, y, z, side);
 		}
 		Commented out: This is useless and can be done with just setTile */
+
+		/*@JSStaticFunction
+		public static List getEntities() {
+			return entityList;
+		}*/
 		
 		@Override
 		public String getClassName() {
@@ -1684,6 +1699,30 @@ public class ScriptManager {
 			nativeEntitySetNameTag(entity, name);
 		}
 
+		@JSStaticFunction
+		public static String getNameTag(int entity) {
+			return nativeEntityGetNameTag(entity);
+		}
+
+		@JSStaticFunction
+		public static int getRiding(int entity) {
+			return nativeEntityGetRiding(entity);
+		}
+
+		@JSStaticFunction
+		public static int getRider(int entity) {
+			return nativeEntityGetRider(entity);
+		}
+
+		@JSStaticFunction
+		public static String getMobSkin(int entity) {
+			return nativeEntityGetMobSkin(entity);
+		}
+
+		@JSStaticFunction
+		public static int getRenderType(int entity) {
+			return nativeEntityGetRenderType(entity);
+		}
 
 		@Override
 		public String getClassName() {
@@ -1954,7 +1993,27 @@ public class ScriptManager {
 			return "Server";
 		}
 	}
-		
+
+	private static class NativeGuiApi extends ScriptableObject {
+
+		public NativeGuiApi() {
+		}
+
+		@JSStaticFunction
+		public static int getScreenWidth() {
+			return 0;
+		}
+
+		@JSStaticFunction
+		public static int getScreenHeight() {
+			return 0;
+		}
+
+		@Override
+		public String getClassName() {
+			return "Gui";
+		}
+	}
 
 	private static class SelectLevelRequest {
 		public String dir;
