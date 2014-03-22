@@ -350,6 +350,7 @@ public class MainActivity extends NativeActivity
 
 	@Override
 	protected void onPause() {
+		nativeSuspend();
 		super.onPause();
 		File lockFile = new File(getFilesDir(), "running.lock");
 		try {
@@ -377,6 +378,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void onStop() {
+		nativeStopThis();
 		super.onStop();
 		ScriptTextureDownloader.flushCache();
 	}
