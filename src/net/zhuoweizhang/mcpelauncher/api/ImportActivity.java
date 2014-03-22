@@ -21,7 +21,7 @@ public abstract class ImportActivity extends Activity implements View.OnClickLis
 	public File mFile = null;
 
 	public void onCreate(Bundle icicle) {
-		Utils.setLanguageOverride(this);
+		Utils.setLanguageOverride();
 		super.onCreate(icicle);
 		setContentView(R.layout.import_confirm);
 		okButton = (Button) findViewById(R.id.ok_button);

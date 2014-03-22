@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/ab_switch_container"
+        android:actionLayout="@layout/ab_master_switch"
+        android:showAsAction="always"
+        android:title="Toggle state"
+        tools:ignore="HardcodedText"/>
+
+</menu>

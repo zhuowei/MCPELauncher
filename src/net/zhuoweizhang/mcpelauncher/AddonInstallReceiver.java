@@ -1,7 +1,9 @@
 package net.zhuoweizhang.mcpelauncher;
 
+import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 import android.content.*;
 import android.content.pm.*;
+
 import com.mojang.minecraftpe.MainActivity;
 
 /**

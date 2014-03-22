@@ -1,7 +1,7 @@
 package net.zhuoweizhang.mcpelauncher.api;
 
-import net.zhuoweizhang.mcpelauncher.MainMenuOptionsActivity;
 import net.zhuoweizhang.mcpelauncher.R;
+import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 import android.os.*;
 import android.preference.*;
 import android.widget.*;

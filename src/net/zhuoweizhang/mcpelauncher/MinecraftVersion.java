@@ -1,7 +1,5 @@
 package net.zhuoweizhang.mcpelauncher;
 
-import java.io.File;
-
 import java.util.*;
 
 import android.content.*;

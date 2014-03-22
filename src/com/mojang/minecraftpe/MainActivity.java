@@ -6,8 +6,11 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.net.*;
 import java.util.*;
+
 import javax.net.ssl.*;
+
 import java.lang.reflect.Field;
+
 import android.annotation.SuppressLint;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
@@ -40,13 +43,21 @@ import android.util.Log;
 import android.webkit.*;
 import android.widget.*;
 import android.preference.*;
+
 import org.mozilla.javascript.RhinoException;
+
 import net.zhuoweizhang.mcpelauncher.*;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
+import net.zhuoweizhang.mcpelauncher.ui.AboutAppActivity;
+import net.zhuoweizhang.mcpelauncher.ui.HoverCar;
+import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
+import net.zhuoweizhang.mcpelauncher.ui.ManagePatchesActivity;
+import net.zhuoweizhang.mcpelauncher.ui.ManageScriptsActivity;
+import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
+import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
 import net.zhuoweizhang.pokerface.PokerFace;
 
-public class MainActivity extends NativeActivity
-{
+public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/MainActivity";
 
@@ -85,7 +96,7 @@ public class MainActivity extends NativeActivity
 
 	protected boolean fakePackage = false;
 
-	public static final String[] GAME_MODES = {"creative", "survival"};
+	public static final String[] GAME_MODES = { "creative", "survival" };
 
 	private static String MC_NATIVE_LIBRARY_DIR = "/data/data/com.mojang.minecraftpe/lib/";
 	private static String MC_NATIVE_LIBRARY_LOCATION = "/data/data/com.mojang.minecraftpe/lib/libminecraftpe.so";
@@ -150,7 +161,8 @@ public class MainActivity extends NativeActivity
 		File lockFile = new File(getFilesDir(), "running.lock");
 		if (lockFile.exists()) {
 			try {
-				PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", true).apply();
+				PreferenceManager.getDefaultSharedPreferences(this).edit()
+						.putBoolean("zz_safe_mode", true).apply();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -166,7 +178,12 @@ public class MainActivity extends NativeActivity
 
 		try {
 			mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
-			mcAppInfo = mcPkgInfo.applicationInfo;/*getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);*/
+			mcAppInfo = mcPkgInfo.applicationInfo;/*
+												 * getPackageManager().
+												 * getApplicationInfo
+												 * ("com.mojang.minecraftpe",
+												 * 0);
+												 */
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
@@ -185,7 +202,8 @@ public class MainActivity extends NativeActivity
 
 			migrateToPatchManager();
 
-			SharedPreferences myprefs = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+			SharedPreferences myprefs = getSharedPreferences(
+					MainMenuOptionsActivity.PREFERENCES_NAME, 0);
 			int prepatchedVersionCode = myprefs.getInt("prepatch_version", -1);
 
 			if (prepatchedVersionCode != minecraftVersionCode) {
@@ -197,7 +215,6 @@ public class MainActivity extends NativeActivity
 				}
 			}
 
-				
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 			finish();
@@ -210,22 +227,24 @@ public class MainActivity extends NativeActivity
 			return;
 		}
 
-		
 		try {
 			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
 				minecraftApkContext = this;
 			} else {
-				minecraftApkContext = createPackageContext("com.mojang.minecraftpe", Context.CONTEXT_IGNORE_SECURITY);
+				minecraftApkContext = createPackageContext("com.mojang.minecraftpe",
+						Context.CONTEXT_IGNORE_SECURITY);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, "Can't create package context for the original APK", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Can't create package context for the original APK",
+					Toast.LENGTH_LONG).show();
 			finish();
 		}
 
-		Utils.setLanguageOverride(this);
+		Utils.setLanguageOverride();
 
-		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_demo", false);
+		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"zz_texture_pack_demo", false);
 
 		loadTexturePack();
 
@@ -245,14 +264,15 @@ public class MainActivity extends NativeActivity
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			//showDialog(DIALOG_UNABLE_TO_PATCH);
+			// showDialog(DIALOG_UNABLE_TO_PATCH);
 		}
 
 		try {
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK",
+					Toast.LENGTH_LONG).show();
 			finish();
 		}
 
@@ -264,13 +284,11 @@ public class MainActivity extends NativeActivity
 				if (minecraftLibBuffer != null) {
 					ScriptManager.nativePrePatch();
 				}
-			} 
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
-
-		nativeRegisterThis();
 
 		displayMetrics = new DisplayMetrics();
 
@@ -285,18 +303,28 @@ public class MainActivity extends NativeActivity
 		super.onCreate(savedInstanceState);
 
 		setFakePackage(false);
+		
+		nativeRegisterThis();
 
 		try {
 			boolean shouldLoadScripts = false;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
-				//applyPatches();
+				// applyPatches();
 				applyBuiltinPatches();
-				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
-				if (shouldLoadScripts) ScriptManager.init(this);
+				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+						"zz_script_enable", true);
+				if (shouldLoadScripts)
+					ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
-				ScriptManager.loadEnabledScriptsNames(this); //in safe mode, script names, but not the actual scripts, should be loaded
+				ScriptManager.loadEnabledScriptsNames(this); // in safe mode,
+																// script names,
+																// but not the
+																// actual
+																// scripts,
+																// should be
+																// loaded
 			}
 
 		} catch (Exception e) {
@@ -339,17 +367,19 @@ public class MainActivity extends NativeActivity
 						setupHoverCar();
 					} catch (Exception e) {
 						e.printStackTrace();
-					} //don't force close on hover car fail
+					} // don't force close on hover car fail
 				}
 			});
 		} else {
-			hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
+			hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+					"zz_hovercar_hide", false));
 		}
 
 	}
 
 	@Override
 	protected void onPause() {
+		nativeSuspend();
 		super.onPause();
 		File lockFile = new File(getFilesDir(), "running.lock");
 		try {
@@ -361,8 +391,8 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void onDestroy() {
-		super.onDestroy();
 		nativeUnregisterThis();
+		super.onDestroy();
 		File lockFile = new File(getFilesDir(), "running.lock");
 		try {
 			lockFile.delete();
@@ -377,6 +407,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void onStop() {
+		nativeStopThis();
 		super.onStop();
 		ScriptTextureDownloader.flushCache();
 	}
@@ -398,7 +429,8 @@ public class MainActivity extends NativeActivity
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
 		File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
-		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getBoolean("force_prepatch", true);
+		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
+				.getBoolean("force_prepatch", true);
 		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
 
 			System.out.println("Forcing new prepatch");
@@ -416,10 +448,12 @@ public class MainActivity extends NativeActivity
 
 			Set<String> patchLocs = patchMgr.getEnabledPatches();
 
-			for (String patchLoc: patchLocs) {
-				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
+			for (String patchLoc : patchLocs) {
+				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum)
+					break;
 				File patchFile = new File(patchLoc);
-				if (!patchFile.exists()) continue;
+				if (!patchFile.exists())
+					continue;
 				try {
 					com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 					patch.loadPatch(patchFile);
@@ -427,7 +461,7 @@ public class MainActivity extends NativeActivity
 						failedPatches.add(patchFile.getName());
 						continue;
 					}
-					//patch.applyPatch(libBytes);
+					// patch.applyPatch(libBytes);
 					PatchUtils.patch(libBuffer, patch);
 					patchedCount++;
 				} catch (Exception e) {
@@ -436,11 +470,16 @@ public class MainActivity extends NativeActivity
 				}
 			}
 
-			/*patchedCount = prePatchDir(libBytes, patchesDir, patchMgr, patchedCount, maxPatchNum);
-			patchedCount = prePatchDir(libBytes, new File(Environment.getExternalStorageDirectory(), 
-				"Android/data/com.snowbound.pockettool.free/Patches"), patchMgr, patchedCount, maxPatchNum);
-			patchedCount = prePatchDir(libBytes, new File(Environment.getExternalStorageDirectory(), 
-				"Android/data/com.snowbound.pockettool.free/Patches"), patchMgr, patchedCount, maxPatchNum);*/
+			/*
+			 * patchedCount = prePatchDir(libBytes, patchesDir, patchMgr,
+			 * patchedCount, maxPatchNum); patchedCount = prePatchDir(libBytes,
+			 * new File(Environment.getExternalStorageDirectory(),
+			 * "Android/data/com.snowbound.pockettool.free/Patches"), patchMgr,
+			 * patchedCount, maxPatchNum); patchedCount = prePatchDir(libBytes,
+			 * new File(Environment.getExternalStorageDirectory(),
+			 * "Android/data/com.snowbound.pockettool.free/Patches"), patchMgr,
+			 * patchedCount, maxPatchNum);
+			 */
 
 			/* patching specific built-in patches */
 			if (requiresGuiBlocksPatch) {
@@ -448,66 +487,73 @@ public class MainActivity extends NativeActivity
 				com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 				if (minecraftVersion.guiBlocksPatch != null) {
 					patch.loadPatch(minecraftVersion.guiBlocksPatch);
-					//patch.applyPatch(libBytes);
+					// patch.applyPatch(libBytes);
 					PatchUtils.patch(libBuffer, patch);
-				} //TODO: load patches from assets
+				} // TODO: load patches from assets
 			}
 
 			OutputStream os = new FileOutputStream(newMinecraft);
 			os.write(libBytes);
 			os.close();
 			hasPrePatched = true;
-			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", false).
-				putInt("prepatch_version", mcPkgInfo.versionCode).apply();
+			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
+					.putBoolean("force_prepatch", false)
+					.putInt("prepatch_version", mcPkgInfo.versionCode).apply();
 			if (failedPatches.size() > 0) {
 				showDialog(DIALOG_INVALID_PATCHES);
 			}
-				
+
 		}
 
 		MC_NATIVE_LIBRARY_DIR = patched.getCanonicalPath();
 		MC_NATIVE_LIBRARY_LOCATION = newMinecraft.getCanonicalPath();
 	}
 
-	/*private int prePatchDir(byte[] libBytes, File patchesDir, PatchManager patchMgr, int patchedCount, int maxPatchNum) throws Exception {
-		if (!patchesDir.exists()) return patchedCount;
-		File[] patches = patchesDir.listFiles();
-
-		for (File f: patches) {
-			if (maxPatchNum >= 0 && patchedCount >= maxPatchNum) break;
-			if (!patchMgr.isEnabled(f)) continue;
-			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			patch.loadPatch(f);
-			patch.applyPatch(libBytes);
-			patchedCount++;
-		}
-		return patchedCount;
-	}*/
+	/*
+	 * private int prePatchDir(byte[] libBytes, File patchesDir, PatchManager
+	 * patchMgr, int patchedCount, int maxPatchNum) throws Exception { if
+	 * (!patchesDir.exists()) return patchedCount; File[] patches =
+	 * patchesDir.listFiles();
+	 * 
+	 * for (File f: patches) { if (maxPatchNum >= 0 && patchedCount >=
+	 * maxPatchNum) break; if (!patchMgr.isEnabled(f)) continue;
+	 * com.joshuahuelsman.patchtool.PTPatch patch = new
+	 * com.joshuahuelsman.patchtool.PTPatch(); patch.loadPatch(f);
+	 * patch.applyPatch(libBytes); patchedCount++; } return patchedCount; }
+	 */
 
 	public native void nativeRegisterThis();
+
 	public native void nativeUnregisterThis();
 
-	//added in 0.7.0:
-	//sig changed in 0.7.3. :(
-	public native void nativeLoginData(String session, String param2, String refreshToken, String user);
-	public native void nativeStopThis();
-	public native void nativeWebRequestCompleted(int requestId, long param2, int param3, String param4);
+	// added in 0.7.0:
+	// sig changed in 0.7.3. :(
+	public native void nativeLoginData(String session, String param2, String refreshToken,
+			String user);
 
-	//added in 0.7.2
+	public native void nativeStopThis();
+
+	public native void nativeWebRequestCompleted(int requestId, long param2, int param3,
+			String param4);
+
+	// added in 0.7.2
 	public native void nativeTypeCharacter(String character);
 
-	//added in 0.8.0
+	// added in 0.8.0
 	public native void nativeSuspend();
+
 	public native void nativeSetTextboxText(String text);
+
 	public native void nativeBackPressed();
+
 	public native void nativeBackSpacePressed();
+
 	public native void nativeReturnKeyPressed();
 
 	public void buyGame() {
 	}
 
 	public int checkLicense() {
-		System.err.println("CheckLicense");
 		return 0;
 	}
 
@@ -516,30 +562,30 @@ public class MainActivity extends NativeActivity
 		System.out.println("displayDialog: " + dialogId);
 		inputStatus = INPUT_STATUS_CANCELLED;
 		switch (dialogId) {
-			case DIALOG_CREATE_WORLD:
-				System.out.println("World creation");
-				inputStatus = INPUT_STATUS_IN_PROGRESS;
-				runOnUiThread(new Runnable() {
-					public void run() {
-						showDialog(DIALOG_CREATE_WORLD);
-					}
-				});
-				break;
-			case DIALOG_SETTINGS:
-				System.out.println("Settings");
-				inputStatus = INPUT_STATUS_IN_PROGRESS;
-				Intent intent = getOptionsActivityIntent();
-				startActivityForResult(intent, 1234);
-				break;
-			case DIALOG_COPY_WORLD:
-				System.out.println("Copy world");
-				inputStatus = INPUT_STATUS_IN_PROGRESS;
-				runOnUiThread(new Runnable() {
-					public void run() {
-						showDialog(DIALOG_COPY_WORLD);
-					}
-				});
-				break;
+		case DIALOG_CREATE_WORLD:
+			System.out.println("World creation");
+			inputStatus = INPUT_STATUS_IN_PROGRESS;
+			runOnUiThread(new Runnable() {
+				public void run() {
+					showDialog(DIALOG_CREATE_WORLD);
+				}
+			});
+			break;
+		case DIALOG_SETTINGS:
+			System.out.println("Settings");
+			inputStatus = INPUT_STATUS_IN_PROGRESS;
+			Intent intent = getOptionsActivityIntent();
+			startActivityForResult(intent, 1234);
+			break;
+		case DIALOG_COPY_WORLD:
+			System.out.println("Copy world");
+			inputStatus = INPUT_STATUS_IN_PROGRESS;
+			runOnUiThread(new Runnable() {
+				public void run() {
+					showDialog(DIALOG_COPY_WORLD);
+				}
+			});
+			break;
 		}
 	}
 
@@ -556,77 +602,75 @@ public class MainActivity extends NativeActivity
 
 	public Dialog onCreateDialog(int dialogId) {
 		switch (dialogId) {
-			case DIALOG_CREATE_WORLD:
-				return createCreateWorldDialog();
-			case DIALOG_COPY_WORLD:
-				return createCopyWorldDialog();
-			case DIALOG_CRASH_SAFE_MODE:
-				return createSafeModeDialog(R.string.manage_patches_crash_safe_mode);
-			case DIALOG_RUNTIME_OPTIONS:
-				return createRuntimeOptionsDialog(false);
-			case DIALOG_INVALID_PATCHES:
-				return createInvalidPatchesDialog();
-			case DIALOG_FIRST_LAUNCH:
-				return createFirstLaunchDialog();
-			case DIALOG_VERSION_MISMATCH_SAFE_MODE:
-				return createSafeModeDialog(R.string.version_mismatch_message);
-			case DIALOG_NOT_SUPPORTED:
-				return createNotSupportedDialog();
-			case DIALOG_UPDATE_TEXTURE_PACK:
-				return createUpdateTexturePackDialog();
-			case DIALOG_INSERT_TEXT:
-				return createInsertTextDialog();
-			case DIALOG_MULTIPLAYER_DISABLE_SCRIPTS:
-				return createMultiplayerDisableScriptsDialog();
-			case DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT:
-				return createRuntimeOptionsDialog(true);
-			case DIALOG_SELINUX_BROKE_EVERYTHING:
-				return createSELinuxBrokeEverythingDialog();
-			default:
-				return super.onCreateDialog(dialogId);
+		case DIALOG_CREATE_WORLD:
+			return createCreateWorldDialog();
+		case DIALOG_COPY_WORLD:
+			return createCopyWorldDialog();
+		case DIALOG_CRASH_SAFE_MODE:
+			return createSafeModeDialog(R.string.manage_patches_crash_safe_mode);
+		case DIALOG_RUNTIME_OPTIONS:
+			return createRuntimeOptionsDialog(false);
+		case DIALOG_INVALID_PATCHES:
+			return createInvalidPatchesDialog();
+		case DIALOG_FIRST_LAUNCH:
+			return createFirstLaunchDialog();
+		case DIALOG_VERSION_MISMATCH_SAFE_MODE:
+			return createSafeModeDialog(R.string.version_mismatch_message);
+		case DIALOG_NOT_SUPPORTED:
+			return createNotSupportedDialog();
+		case DIALOG_UPDATE_TEXTURE_PACK:
+			return createUpdateTexturePackDialog();
+		case DIALOG_INSERT_TEXT:
+			return createInsertTextDialog();
+		case DIALOG_MULTIPLAYER_DISABLE_SCRIPTS:
+			return createMultiplayerDisableScriptsDialog();
+		case DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT:
+			return createRuntimeOptionsDialog(true);
+		case DIALOG_SELINUX_BROKE_EVERYTHING:
+			return createSELinuxBrokeEverythingDialog();
+		default:
+			return super.onCreateDialog(dialogId);
 		}
 	}
 
 	protected Dialog createCreateWorldDialog() {
 		final View textEntryView = getLayoutInflater().inflate(R.layout.create_world_dialog, null);
 		return new AlertDialog.Builder(this)
-			.setTitle(R.string.world_create_title)
-			.setView(textEntryView)
-			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					AlertDialog dialog = (AlertDialog) dialogI;
-					String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry)).getText().toString();
-					String worldSeed = ((TextView) dialog.findViewById(R.id.world_seed_entry)).getText().toString();
-					String worldGameMode = GAME_MODES[
-						((Spinner) dialog.findViewById(R.id.world_gamemode_spinner)).getSelectedItemPosition()];
-					userInputStrings = new String[] {worldName, worldSeed, worldGameMode};
-					inputStatus = INPUT_STATUS_OK;
-					
-				}
-			})
-			.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					inputStatus = INPUT_STATUS_CANCELLED;
-				}
-			})
-			.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialogI) {
-					inputStatus = INPUT_STATUS_CANCELLED;
-				}
-			})
-			.create();
+				.setTitle(R.string.world_create_title)
+				.setView(textEntryView)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						AlertDialog dialog = (AlertDialog) dialogI;
+						String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry))
+								.getText().toString();
+						String worldSeed = ((TextView) dialog.findViewById(R.id.world_seed_entry))
+								.getText().toString();
+						String worldGameMode = GAME_MODES[((Spinner) dialog
+								.findViewById(R.id.world_gamemode_spinner))
+								.getSelectedItemPosition()];
+						userInputStrings = new String[] { worldName, worldSeed, worldGameMode };
+						inputStatus = INPUT_STATUS_OK;
+
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						inputStatus = INPUT_STATUS_CANCELLED;
+					}
+				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+					public void onCancel(DialogInterface dialogI) {
+						inputStatus = INPUT_STATUS_CANCELLED;
+					}
+				}).create();
 	}
 
 	protected Dialog createSafeModeDialog(int messageRes) {
-		return new AlertDialog.Builder(this)
-			.setMessage(messageRes)
-			.setPositiveButton(R.string.safe_mode_exit, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					turnOffSafeMode();
-				}
-			})
-			.setNegativeButton(R.string.safe_mode_continue, null)
-			.create();
+		return new AlertDialog.Builder(this).setMessage(messageRes)
+				.setPositiveButton(R.string.safe_mode_exit, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						turnOffSafeMode();
+					}
+				}).setNegativeButton(R.string.safe_mode_continue, null).create();
 	}
 
 	protected Dialog createRuntimeOptionsDialog(final boolean hasInsertText) {
@@ -637,207 +681,212 @@ public class MainActivity extends NativeActivity
 		CharSequence takeScreenshot = getResources().getString(R.string.take_screenshot);
 		CharSequence[] options = null;
 		if (hasInsertText) {
-			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu, insertText};
+			options = new CharSequence[] { livePatch, manageModPEScripts, takeScreenshot,
+					optionMenu, insertText };
 		} else {
-			options = new CharSequence[] {livePatch, manageModPEScripts, takeScreenshot, optionMenu};
+			options = new CharSequence[] { livePatch, manageModPEScripts, takeScreenshot,
+					optionMenu };
 		}
-		return new AlertDialog.Builder(this).setTitle(R.string.app_name).
-			setItems(options, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					if (button == 0) {
-						if (minecraftLibBuffer == null) {
+		return new AlertDialog.Builder(this).setTitle(R.string.app_name)
+				.setItems(options, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						if (button == 0) {
+							if (minecraftLibBuffer == null) {
+								startActivity(getOptionsActivityIntent());
+								return;
+							}
+							Intent intent = new Intent(MainActivity.this,
+									ManagePatchesActivity.class);
+							intent.putExtra("prePatchConfigure", false);
+							startActivity(intent);
+						} else if (button == 1) {
+							Intent intent = new Intent(MainActivity.this,
+									ManageScriptsActivity.class);
+							startActivity(intent);
+						} else if (button == 2) {
+							boolean hasLoadedScripts = Utils.getPrefs(0).getBoolean(
+									"zz_script_enable", true)
+									&& !isSafeMode();
+							if (hasLoadedScripts) {
+								ScriptManager.takeScreenshot("screenshot");
+							} else {
+								new AlertDialog.Builder(MainActivity.this)
+										.setMessage(R.string.take_screenshot_requires_modpe_script)
+										.setPositiveButton(android.R.string.ok, null).show();
+							}
+						} else if (button == 3) {
 							startActivity(getOptionsActivityIntent());
-							return;
+						} else if (button == 4 && hasInsertText) {
+							showDialog(DIALOG_INSERT_TEXT);
 						}
-						Intent intent = new Intent(MainActivity.this, ManagePatchesActivity.class);
-						intent.putExtra("prePatchConfigure", false);
-						startActivity(intent);
-					} else if (button == 1) {
-						Intent intent = new Intent(MainActivity.this, ManageScriptsActivity.class);
-						startActivity(intent);
-					} else if (button == 2) {
-						boolean hasLoadedScripts = 
-							PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean(
-								"zz_script_enable", true) && !isSafeMode();
-						if (hasLoadedScripts) {
-							ScriptManager.takeScreenshot("screenshot");
-						} else {
-							new AlertDialog.Builder(MainActivity.this).
-								setMessage(R.string.take_screenshot_requires_modpe_script).
-								setPositiveButton(android.R.string.ok, null).
-								show();
-						}
-					} else if (button == 3) {
-						startActivity(getOptionsActivityIntent());
-					} else if (button == 4 && hasInsertText) {
-						showDialog(DIALOG_INSERT_TEXT);
 					}
-				}
-			}).create();
+				}).create();
 	}
 
 	protected Dialog createInvalidPatchesDialog() {
 		return new AlertDialog.Builder(this)
-			.setMessage(getResources().getString(R.string.manage_patches_invalid_patches) + "\n" + 
-				PatchManager.join(failedPatches.toArray(PatchManager.blankArray), "\n"))
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+				.setMessage(
+						getResources().getString(R.string.manage_patches_invalid_patches)
+								+ "\n"
+								+ PatchManager.join(failedPatches.toArray(PatchManager.blankArray),
+										"\n")).setPositiveButton(android.R.string.ok, null)
+				.create();
 	}
 
 	protected Dialog createFirstLaunchDialog() {
 		StringBuilder dialogMsg = new StringBuilder();
-		dialogMsg.append(getResources().getString(R.string.firstlaunch_generic_intro)).append("\n\n");
+		dialogMsg.append(getResources().getString(R.string.firstlaunch_generic_intro)).append(
+				"\n\n");
 		if (minecraftApkForwardLocked) {
-			dialogMsg.append(getResources().getString(R.string.firstlaunch_jelly_bean)).append("\n\n");
+			dialogMsg.append(getResources().getString(R.string.firstlaunch_jelly_bean)).append(
+					"\n\n");
 		}
 		dialogMsg.append(getResources().getString(R.string.firstlaunch_see_options)).append("\n\n");
-		return new AlertDialog.Builder(this)
-			.setTitle(R.string.firstlaunch_title)
-			.setMessage(dialogMsg.toString())
-			.setPositiveButton(android.R.string.ok, null)
-			.setNeutralButton(R.string.firstlaunch_help, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
-					startActivity(intent);
-				}
-			})
-			.create();
+		return new AlertDialog.Builder(this).setTitle(R.string.firstlaunch_title)
+				.setMessage(dialogMsg.toString()).setPositiveButton(android.R.string.ok, null)
+				.setNeutralButton(R.string.firstlaunch_help, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
+						startActivity(intent);
+					}
+				}).create();
 	}
 
 	protected Dialog createCopyWorldDialog() {
 		final View textEntryView = getLayoutInflater().inflate(R.layout.copy_world_dialog, null);
 		return new AlertDialog.Builder(this)
-			.setTitle(R.string.copy_world_title)
-			.setView(textEntryView)
-			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					AlertDialog dialog = (AlertDialog) dialogI;
-					String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry)).getText().toString();
-					userInputStrings = new String[] {worldName};
-					inputStatus = INPUT_STATUS_OK;
-				}
-			})
-			.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					inputStatus = INPUT_STATUS_CANCELLED;
-				}
-			})
-			.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				public void onCancel(DialogInterface dialogI) {
-					inputStatus = INPUT_STATUS_CANCELLED;
-				}
-			})
-			.create();
-	}	
+				.setTitle(R.string.copy_world_title)
+				.setView(textEntryView)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						AlertDialog dialog = (AlertDialog) dialogI;
+						String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry))
+								.getText().toString();
+						userInputStrings = new String[] { worldName };
+						inputStatus = INPUT_STATUS_OK;
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						inputStatus = INPUT_STATUS_CANCELLED;
+					}
+				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+					public void onCancel(DialogInterface dialogI) {
+						inputStatus = INPUT_STATUS_CANCELLED;
+					}
+				}).create();
+	}
 
 	protected Dialog createNotSupportedDialog() {
-		return new AlertDialog.Builder(this)
-			.setMessage(R.string.feature_not_supported)
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+		return new AlertDialog.Builder(this).setMessage(R.string.feature_not_supported)
+				.setPositiveButton(android.R.string.ok, null).create();
 	}
 
 	protected Dialog createUpdateTexturePackDialog() {
-		return new AlertDialog.Builder(this)
-			.setMessage(R.string.extract_textures_need_update)
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+		return new AlertDialog.Builder(this).setMessage(R.string.extract_textures_need_update)
+				.setPositiveButton(android.R.string.ok, null).create();
 	}
 
 	protected Dialog createBackupsNotSupportedDialog() {
 		return new AlertDialog.Builder(this)
-			.setMessage("Backed up versions of BlockLauncher are not supported, as" +
-				" BlockLauncher depends on updates from the application store. " +
-				" Please reinstall BlockLauncher. If you believe you received this message in error, contact zhuowei_applications@yahoo.com")
-			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					finish();
-				}
-			})
-			.setCancelable(false)
-			.create();
+				.setMessage(
+						"Backed up versions of BlockLauncher are not supported, as"
+								+ " BlockLauncher depends on updates from the application store. "
+								+ " Please reinstall BlockLauncher. If you believe you received this message in error, contact zhuowei_applications@yahoo.com")
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						finish();
+					}
+				}).setCancelable(false).create();
 	}
 
+	@SuppressWarnings("deprecation")
 	protected Dialog createInsertTextDialog() {
 		final EditText editText = new EditText(this);
 		editText.setSingleLine(false);
 		final LinearLayout ll = new LinearLayout(this);
 		ll.setOrientation(LinearLayout.HORIZONTAL);
-		ll.addView(editText, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		ll.addView(editText, ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
 		Button back = new Button(this);
 		back.setText(R.string.hovercar_insert_text_backspace);
-		back.setOnClickListener(new View.OnClickListener(){
-			@Override public void onClick(View v){
+		back.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
 				try {
-					nativeTypeCharacter("" + ((char) 0x08)); // is this the correct method of backspace?
+					nativeTypeCharacter("" + ((char) 0x08)); // is this the
+																// correct
+																// method of
+																// backspace?
 				} catch (Exception e) {
 					showDialog(DIALOG_NOT_SUPPORTED);
 				}
 			}
 		});
 		ll.addView(back, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		return new AlertDialog.Builder(this)
-			.setTitle(R.string.hovercar_insert_text)
-			.setView(ll)
-			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialogI, int button) {
-					try {
-						String[] lines=editText.getText().toString().split(
-							"\n");
-						for (int line = 0; line < lines.length; line++) {
-							if (line!=0)
-								nativeTypeCharacter("" + ((char) 0x0A)); // I am not sure if keyboard-entered "enter" is 0x0A
-							nativeTypeCharacter (lines[line]);
+		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_insert_text).setView(ll)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialogI, int button) {
+						try {
+							String[] lines = editText.getText().toString().split("\n");
+							for (int line = 0; line < lines.length; line++) {
+								if (line != 0)
+									nativeTypeCharacter("" + ((char) 0x0A)); // I
+																				// am
+																				// not
+																				// sure
+																				// if
+																				// keyboard-entered
+																				// "enter"
+																				// is
+																				// 0x0A
+								nativeTypeCharacter(lines[line]);
+							}
+							editText.setText("");
+						} catch (UnsatisfiedLinkError e) {
+							showDialog(DIALOG_NOT_SUPPORTED);
 						}
-						editText.setText("");
-					} catch (UnsatisfiedLinkError e) {
-						showDialog(DIALOG_NOT_SUPPORTED);
 					}
-				}
-			})
-			.setNegativeButton(android.R.string.cancel, null)
-			.create();
+				}).setNegativeButton(android.R.string.cancel, null).create();
 	}
 
 	protected Dialog createMultiplayerDisableScriptsDialog() {
-		return new AlertDialog.Builder(this)
-			.setMessage(R.string.script_disabled_in_multiplayer)
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+		return new AlertDialog.Builder(this).setMessage(R.string.script_disabled_in_multiplayer)
+				.setPositiveButton(android.R.string.ok, null).create();
 	}
 
 	protected Dialog createSELinuxBrokeEverythingDialog() {
-		return new AlertDialog.Builder(this)
-			.setMessage(R.string.selinux_broke_everything)
-			.setPositiveButton(android.R.string.ok, null)
-			.create();
+		return new AlertDialog.Builder(this).setMessage(R.string.selinux_broke_everything)
+				.setPositiveButton(android.R.string.ok, null).create();
 	}
 
-
 	/**
-	 * @param time Unix timestamp
+	 * @param time
+	 *            Unix timestamp
 	 * @returns a formatted time value
 	 */
 
 	public String getDateString(int time) {
 		System.out.println("getDateString: " + time);
-		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(new Date(((long) time) * 1000));
+		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(
+				new Date(((long) time) * 1000));
 	}
 
 	public byte[] getFileDataBytes(String name) {
 		System.out.println("Get file data: " + name);
 		try {
 			InputStream is = getInputStreamForAsset(name);
-			if (is == null) return null;
-			// can't always find length - use the method from 
+			if (is == null)
+				return null;
+			// can't always find length - use the method from
 			// http://www.velocityreviews.com/forums/t136788-store-whole-inputstream-in-a-string.html
 			// instead
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
-			while(true) {
+			while (true) {
 				int len = is.read(buffer);
-				if(len < 0) {
+				if (len < 0) {
 					break;
 				}
 				bout.write(buffer, 0, len);
@@ -856,14 +905,15 @@ public class MainActivity extends NativeActivity
 			for (int i = 0; i < textureOverrides.size(); i++) {
 				try {
 					is = textureOverrides.get(i).getInputStream(name);
-					if (is != null) return is;
+					if (is != null)
+						return is;
 				} catch (IOException e) {
 				}
 			}
 			if (texturePack == null) {
 				return getLocalInputStreamForAsset(name);
 			} else {
-				System.out.println("Trying to load  " +name + "from tp");
+				System.out.println("Trying to load  " + name + "from tp");
 				is = texturePack.getInputStream(name);
 				if (is == null) {
 					System.out.println("Can't load " + name + " from tp");
@@ -876,6 +926,7 @@ public class MainActivity extends NativeActivity
 			return null;
 		}
 	}
+
 	protected InputStream getLocalInputStreamForAsset(String name) {
 		InputStream is = null;
 		try {
@@ -885,7 +936,7 @@ public class MainActivity extends NativeActivity
 			try {
 				is = minecraftApkContext.getAssets().open(name);
 			} catch (Exception e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 				System.out.println("Attempting to load fallback");
 				is = getAssets().open(name);
 			}
@@ -904,7 +955,8 @@ public class MainActivity extends NativeActivity
 		System.out.println("Get image data: " + name);
 		try {
 			InputStream is = getInputStreamForAsset(name);
-			if (is == null) return null;
+			if (is == null)
+				return null;
 			Bitmap bmp = BitmapFactory.decodeStream(is);
 			int[] retval = new int[(bmp.getWidth() * bmp.getHeight()) + 2];
 			retval[0] = bmp.getWidth();
@@ -928,9 +980,10 @@ public class MainActivity extends NativeActivity
 		Map prefsMap = sharedPref.getAll();
 		Set<Map.Entry> prefsSet = prefsMap.entrySet();
 		List<String> retval = new ArrayList<String>();
-		for (Map.Entry e: prefsSet) {
+		for (Map.Entry e : prefsSet) {
 			String key = (String) e.getKey();
-			if (key.indexOf("zz_") == 0) continue;
+			if (key.indexOf("zz_") == 0)
+				continue;
 			retval.add(key);
 			if (key.equals("ctrl_sensitivity")) {
 				retval.add(Double.toString(Integer.parseInt(e.getValue().toString()) / 100.0));
@@ -951,7 +1004,8 @@ public class MainActivity extends NativeActivity
 	public float getPixelsPerMillimeter() {
 		System.out.println("Pixels per mm");
 		float val = ((float) displayMetrics.densityDpi) / 25.4f;
-		String custom = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_custom_dpi", null);
+		String custom = PreferenceManager.getDefaultSharedPreferences(this).getString(
+				"zz_custom_dpi", null);
 		if (custom != null && custom.length() > 0) {
 			try {
 				val = Float.parseFloat(custom) / 25.4f;
@@ -960,11 +1014,11 @@ public class MainActivity extends NativeActivity
 			}
 		}
 		return val;
-		
+
 	}
 
 	public String getPlatformStringVar(int a) {
-		System.out.println("getPlatformStringVar: " +a);
+		System.out.println("getPlatformStringVar: " + a);
 		return "";
 	}
 
@@ -1003,9 +1057,9 @@ public class MainActivity extends NativeActivity
 		return true;
 	}
 
-
 	public boolean isTouchscreen() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("ctrl_usetouchscreen", true);
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"ctrl_usetouchscreen", true);
 	}
 
 	public void postScreenshotToFacebook(String name, int firstInt, int secondInt, int[] thatArray) {
@@ -1023,14 +1077,16 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void vibrate(int duration) {
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_longvibration", false)) {
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_longvibration",
+				false)) {
 			duration *= 5;
 		}
 		((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(duration);
 	}
 
 	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "getKey: " + keyCode + ":" + metaState + ":" + deviceId);
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "getKey: " + keyCode + ":" + metaState + ":" + deviceId);
 		KeyCharacterMap characterMap = KeyCharacterMap.load(deviceId);
 		return characterMap.get(keyCode, metaState);
 	}
@@ -1038,11 +1094,12 @@ public class MainActivity extends NativeActivity
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
 	}
 
-	//added in 0.7.0
+	// added in 0.7.0
 	public int abortWebRequest(int requestId) {
 		Log.i(TAG, "Abort web request: " + requestId);
 		HurlRunner runner = requestMap.get(requestId);
-		if (runner != null) runner.isValid = false;
+		if (runner != null)
+			runner.isValid = false;
 		return 0;
 	}
 
@@ -1072,34 +1129,45 @@ public class MainActivity extends NativeActivity
 			@SuppressLint("SetJavaScriptEnabled")
 			public void run() {
 				loginWebView = new WebView(MainActivity.this);
-				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(
+						ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 				loginWebView.setWebViewClient(new LoginWebViewClient());
 				WebSettings settings = loginWebView.getSettings();
-				settings.setJavaScriptEnabled(true); //at least on Firefox, the webview tries to do some Ajax stuff
-				/*loginPopup = new PopupWindow(loginWebView, ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-				loginPopup.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);*/
+				settings.setJavaScriptEnabled(true); // at least on Firefox, the
+														// webview tries to do
+														// some Ajax stuff
+				/*
+				 * loginPopup = new PopupWindow(loginWebView,
+				 * ViewGroup.LayoutParams.FILL_PARENT,
+				 * ViewGroup.LayoutParams.FILL_PARENT);
+				 * loginPopup.showAtLocation(getWindow().getDecorView(),
+				 * Gravity.CENTER, 0, 0);
+				 */
 
 				loginDialog = new Dialog(MainActivity.this);
 				loginDialog.setCancelable(true);
 				loginDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				loginDialog.setContentView(loginWebView);
-				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT,
+						ViewGroup.LayoutParams.FILL_PARENT);
 				loginDialog.show();
 
 				loginWebView.loadUrl(getRealmsRedirectInfo().loginUrl);
 			}
 		});
-		//nativeLoginData("Spartan", "Warrior", "Peacock");
+		// nativeLoginData("Spartan", "Warrior", "Peacock");
 	}
 
 	public void setRefreshToken(String token) {
 		Log.i(TAG, "Set refresh token");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("refreshToken", token).apply();
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("refreshToken", token)
+				.apply();
 	}
 
 	public void setSession(String session) {
 		Log.i(TAG, "Set Session");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("sessionId", session).apply();
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("sessionId", session)
+				.apply();
 	}
 
 	public boolean supportsNonTouchscreen() {
@@ -1111,41 +1179,49 @@ public class MainActivity extends NativeActivity
 		this.webRequest(requestId, timestamp, url, method, cookies, "");
 	}
 
-	//signature change in 0.7.3
-	public void webRequest(int requestId, long timestamp, String url, String method, String cookies, String extraParam) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method + ":"+ cookies + ":" + extraParam);
-		//nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
+	// signature change in 0.7.3
+	public void webRequest(int requestId, long timestamp, String url, String method,
+			String cookies, String extraParam) {
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Web request: " + requestId + ": " + timestamp + " :" + url + ":" + method
+					+ ":" + cookies + ":" + extraParam);
+		// nativeWebRequestCompleted(requestId, timestamp, 200, "SPARTA");
 		url = filterUrl(url);
-		if (BuildConfig.DEBUG) Log.i(TAG, url);
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, url);
 		new Thread(new HurlRunner(requestId, timestamp, url, method, cookies)).start();
 	}
 
 	protected String filterUrl(String url) {
 		return url;
-		/*String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
-		if (peoapiRedirect.equals("NONE")) return url;
-		RealmsRedirectInfo info = getRealmsRedirectInfo();
-		if (info.accountUrl != null) {
-			url.replace("account.mojang.com", info.accountUrl); //TODO: better system
-		}
-		return url.replace("peoapi.minecraft.net", peoapiRedirect);*/
+		/*
+		 * String peoapiRedirect =
+		 * PreferenceManager.getDefaultSharedPreferences(
+		 * this).getString("zz_redirect_mco_address", "NONE"); if
+		 * (peoapiRedirect.equals("NONE")) return url; RealmsRedirectInfo info =
+		 * getRealmsRedirectInfo(); if (info.accountUrl != null) {
+		 * url.replace("account.mojang.com", info.accountUrl); //TODO: better
+		 * system } return url.replace("peoapi.minecraft.net", peoapiRedirect);
+		 */
 	}
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
-		if (BuildConfig.DEBUG) Log.i(TAG, event.toString());
-		if (event.getAction() == KeyEvent.ACTION_MULTIPLE && event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, event.toString());
+		if (event.getAction() == KeyEvent.ACTION_MULTIPLE
+				&& event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
 			try {
 				nativeTypeCharacter(event.getCharacters());
 				return true;
 			} catch (UnsatisfiedLinkError e) {
-				//Do nothing
+				// Do nothing
 			}
 		}
 		return super.dispatchKeyEvent(event);
 	}
 
-	//added in 0.7.2
+	// added in 0.7.2
 
 	public void showKeyboardView() {
 		Log.i(TAG, "Show keyboard view");
@@ -1153,7 +1229,7 @@ public class MainActivity extends NativeActivity
 		imm.showSoftInput(getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
 	}
 
-	//added in 0.7.3
+	// added in 0.7.3
 	public String getAccessToken() {
 		Log.i(TAG, "Get access token");
 		return PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", "");
@@ -1187,27 +1263,28 @@ public class MainActivity extends NativeActivity
 		return false;
 	}
 
-	public void setLoginInformation(String accessToken, String clientId, String profileUuid, String profileName) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Login info: " + accessToken + ":" + clientId + ":" + profileUuid + ":" + profileName);
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", accessToken).
-			putString("clientId", clientId).
-			putString("profileUuid", profileUuid).
-			putString("profileName", profileName).
-			apply();
+	public void setLoginInformation(String accessToken, String clientId, String profileUuid,
+			String profileName) {
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Login info: " + accessToken + ":" + clientId + ":" + profileUuid + ":"
+					+ profileName);
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putString("accessToken", accessToken).putString("clientId", clientId)
+				.putString("profileUuid", profileUuid).putString("profileName", profileName)
+				.apply();
 	}
 
 	public void clearLoginInformation() {
 		Log.i(TAG, "Clear login info");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", "").
-			putString("clientId", "").
-			putString("profileUuid", "").
-			putString("profileName", "").
-			apply();
+		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", "")
+				.putString("clientId", "").putString("profileUuid", "")
+				.putString("profileName", "").apply();
 	}
 
-	//added in 0.8.0
+	// added in 0.8.0
 	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
 		if (useLegacyKeyboardInput()) {
 			showKeyboardView();
 			return;
@@ -1220,7 +1297,8 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void hideKeyboard() {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Hide keyboard");
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Hide keyboard");
 		if (useLegacyKeyboardInput()) {
 			hideKeyboardView();
 			return;
@@ -1233,8 +1311,10 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void updateTextboxText(final String text) {
-		if (BuildConfig.DEBUG) Log.i(TAG, "Update text to " + text);
-		if (hiddenTextView == null) return;
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Update text to " + text);
+		if (hiddenTextView == null)
+			return;
 		hiddenTextView.post(new Runnable() {
 			public void run() {
 				hiddenTextView.setText(text);
@@ -1250,18 +1330,29 @@ public class MainActivity extends NativeActivity
 			hiddenTextView.addTextChangedListener(whoWatchesTheWatcher);
 			hiddenTextView.setOnEditorActionListener(whoWatchesTheWatcher);
 			hiddenTextView.setSingleLine(true);
-			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT | EditorInfo.IME_FLAG_NO_EXTRACT_UI | IME_FLAG_NO_FULLSCREEN);
+			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT
+					| EditorInfo.IME_FLAG_NO_EXTRACT_UI | IME_FLAG_NO_FULLSCREEN);
 			hiddenTextView.setInputType(InputType.TYPE_CLASS_TEXT);
 			LinearLayout linearLayout = new LinearLayout(this);
 			linearLayout.addView(hiddenTextView);
 			hiddenTextWindow = new PopupWindow(linearLayout);
-			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
 			hiddenTextWindow.setFocusable(true);
 			hiddenTextWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable()); //To get back button handling for free
+			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable()); // To
+																			// get
+																			// back
+																			// button
+																			// handling
+																			// for
+																			// free
 			hiddenTextWindow.setClippingEnabled(false);
 			hiddenTextWindow.setTouchable(false);
-			hiddenTextWindow.setOutsideTouchable(true); //These flags were taken from a dumpsys window output of Mojang's window
+			hiddenTextWindow.setOutsideTouchable(true); // These flags were
+														// taken from a dumpsys
+														// window output of
+														// Mojang's window
 			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
 				public void onDismiss() {
 					nativeBackPressed();
@@ -1272,41 +1363,47 @@ public class MainActivity extends NativeActivity
 		hiddenTextView.setText(text);
 		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
 		this.hiddenTextDismissAfterOneLine = dismissAfterOneLine;
-		
-		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, -10000, 0);
+
+		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(),
+				Gravity.LEFT | Gravity.TOP, -10000, 0);
 		hiddenTextView.requestFocus();
 		showKeyboardView();
 	}
 
 	public void dismissHiddenTextbox() {
-		if (hiddenTextWindow == null) return;
+		if (hiddenTextWindow == null)
+			return;
 		hiddenTextWindow.dismiss();
 		hideKeyboardView();
 	}
 
 	private boolean useLegacyKeyboardInput() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_legacy_keyboard_input", false);
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"zz_legacy_keyboard_input", false);
 	}
 
 	public boolean isSafeMode() {
-		return tempSafeMode || PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode", false);
+		return tempSafeMode
+				|| PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode",
+						false);
 	}
 
 	public void initPatching() throws Exception {
-		/*if (BuildConfig.DEBUG) {
-			System.err.println("Skipping this to simulate Samsung");
-			System.err.println(minecraftLibBuffer);
-			overlyZealousSELinuxSafeMode = true;
-			tempSafeMode = true;
-			return;
-		}*/
+		/*
+		 * if (BuildConfig.DEBUG) {
+		 * System.err.println("Skipping this to simulate Samsung");
+		 * System.err.println(minecraftLibBuffer); overlyZealousSELinuxSafeMode
+		 * = true; tempSafeMode = true; return; }
+		 */
 		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
 		System.out.println(Long.toString(pageSize, 16));
 		long minecraftLibLocation = findMinecraftLibLocation();
 		long minecraftLibLength = findMinecraftLibLength();
 		long mapPageLength = ((minecraftLibLength / pageSize) + 1) * pageSize;
-		System.out.println("Calling mprotect with " + minecraftLibLocation + " and " + mapPageLength);
-		int returnStatus = PokerFace.mprotect(minecraftLibLocation, mapPageLength, PokerFace.PROT_WRITE | PokerFace.PROT_READ | PokerFace.PROT_EXEC);
+		System.out.println("Calling mprotect with " + minecraftLibLocation + " and "
+				+ mapPageLength);
+		int returnStatus = PokerFace.mprotect(minecraftLibLocation, mapPageLength,
+				PokerFace.PROT_WRITE | PokerFace.PROT_READ | PokerFace.PROT_EXEC);
 		System.out.println("mprotect result is " + returnStatus);
 		if (returnStatus < 0) {
 			System.out.println("Well, that sucks!");
@@ -1314,23 +1411,23 @@ public class MainActivity extends NativeActivity
 			overlyZealousSELinuxSafeMode = true;
 			return;
 		}
-		ByteBuffer buffer = PokerFace.createDirectByteBuffer(minecraftLibLocation, minecraftLibLength);
-		//findMinecraftLibLocation();
+		ByteBuffer buffer = PokerFace.createDirectByteBuffer(minecraftLibLocation,
+				minecraftLibLength);
+		// findMinecraftLibLocation();
 		System.out.println("Has the byte buffer: " + buffer);
 		minecraftLibBuffer = buffer;
 	}
 
 	public void applyPatches() throws Exception {
-		/*ByteBuffer buffer = minecraftLibBuffer;
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		byte[] testBuffer = new byte[6];
-		buffer.get(testBuffer);
-		System.out.println("Before: " + Arrays.toString(testBuffer));
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		buffer.put(">9000!".getBytes());
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		buffer.get(testBuffer);
-		System.out.println("After " + Arrays.toString(testBuffer));*/
+		/*
+		 * ByteBuffer buffer = minecraftLibBuffer;
+		 * buffer.position(0x1b6d50);//"v0.6.1" offset byte[] testBuffer = new
+		 * byte[6]; buffer.get(testBuffer); System.out.println("Before: " +
+		 * Arrays.toString(testBuffer)); buffer.position(0x1b6d50);//"v0.6.1"
+		 * offset buffer.put(">9000!".getBytes());
+		 * buffer.position(0x1b6d50);//"v0.6.1" offset buffer.get(testBuffer);
+		 * System.out.println("After " + Arrays.toString(testBuffer));
+		 */
 	}
 
 	public static long findMinecraftLibLocation() throws Exception {
@@ -1338,11 +1435,13 @@ public class MainActivity extends NativeActivity
 		long minecraftLocation = -1;
 		while (scan.hasNextLine()) {
 			String line = scan.nextLine();
-			//System.out.println(line);
+			// System.out.println(line);
 			String[] parts = line.split(" ");
-			if (parts[parts.length - 1].indexOf("libminecraftpe.so") >= 0 && parts[1].indexOf("x") >= 0) {
+			if (parts[parts.length - 1].indexOf("libminecraftpe.so") >= 0
+					&& parts[1].indexOf("x") >= 0) {
 				System.out.println("Found minecraft location");
-				minecraftLocation = Long.parseLong(parts[0].substring(0, parts[0].indexOf("-")), 16);
+				minecraftLocation = Long
+						.parseLong(parts[0].substring(0, parts[0].indexOf("-")), 16);
 				break;
 			}
 		}
@@ -1351,7 +1450,12 @@ public class MainActivity extends NativeActivity
 	}
 
 	public static long findMinecraftLibLength() throws Exception {
-		return new File(MC_NATIVE_LIBRARY_LOCATION).length(); //TODO: don't hardcode the 0x1000 page for relocation .data.rel.ro.local
+		return new File(MC_NATIVE_LIBRARY_LOCATION).length(); // TODO: don't
+																// hardcode the
+																// 0x1000 page
+																// for
+																// relocation
+																// .data.rel.ro.local
 	}
 
 	public int getMaxNumPatches() {
@@ -1359,13 +1463,15 @@ public class MainActivity extends NativeActivity
 	}
 
 	public boolean doesRequireGuiBlocksPatch() {
-		if (forceFallback) return true;
+		if (forceFallback)
+			return true;
 		if (texturePack != null) {
 			try {
 				InputStream instr = texturePack.getInputStream("gui/gui_blocks.png");
-				if (instr != null) instr.close();
+				if (instr != null)
+					instr.close();
 				return instr == null;
-			} catch (Exception e) {	
+			} catch (Exception e) {
 				e.printStackTrace();
 				return false;
 			}
@@ -1384,26 +1490,33 @@ public class MainActivity extends NativeActivity
 	protected void setupHoverCar() {
 		hoverCar = new HoverCar(this);
 		hoverCar.show(getWindow().getDecorView());
-		hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_hovercar_hide", false));
+		hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"zz_hovercar_hide", false));
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				boolean showInsertText = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).
-					getBoolean("zz_show_insert_text", false);
-				showDialog(showInsertText? DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT: DIALOG_RUNTIME_OPTIONS);
-				resetOrientation(); //for sensor controls. TODO: better place to do this?
+				boolean showInsertText = PreferenceManager.getDefaultSharedPreferences(
+						MainActivity.this).getBoolean("zz_show_insert_text", false);
+				showDialog(showInsertText ? DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT
+						: DIALOG_RUNTIME_OPTIONS);
+				resetOrientation(); // for sensor controls. TODO: better place
+									// to do this?
 			}
 		});
 	}
 
 	protected void loadNativeAddons() {
-		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_load_native_addons", false)) return;
+		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"zz_load_native_addons", false))
+			return;
 		PackageManager pm = getPackageManager();
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-		for (ApplicationInfo app: apps) {
-			if (app.metaData == null) continue;
-			String nativeLibName = app.metaData.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
-			if (nativeLibName != null && pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
-				PackageManager.PERMISSION_GRANTED) {
+		for (ApplicationInfo app : apps) {
+			if (app.metaData == null)
+				continue;
+			String nativeLibName = app.metaData
+					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
+			if (nativeLibName != null
+					&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) == PackageManager.PERMISSION_GRANTED) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);
@@ -1416,13 +1529,16 @@ public class MainActivity extends NativeActivity
 
 	protected void migrateToPatchManager() {
 		try {
-			boolean enabledPatchMgr = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("patchManagerVersion", -1) > 0;
-			if (enabledPatchMgr) return;
+			boolean enabledPatchMgr = getSharedPreferences(
+					MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("patchManagerVersion", -1) > 0;
+			if (enabledPatchMgr)
+				return;
 			showDialog(DIALOG_FIRST_LAUNCH);
 			File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
 			PatchManager.getPatchManager(this).setEnabled(patchesDir.listFiles(), true);
-			System.out.println(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("enabledPatches", "LOL"));
-			
+			System.out.println(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
+					.getString("enabledPatches", "LOL"));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1430,21 +1546,23 @@ public class MainActivity extends NativeActivity
 
 	protected void applyBuiltinPatches() {
 		try {
-			//Apply guiBlocks
+			// Apply guiBlocks
 			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
 			System.out.println("Patching guiblocks: " + patchGuiBlocks);
 			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			byte[] patchData = patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch;
+			byte[] patchData = patchGuiBlocks ? minecraftVersion.guiBlocksPatch
+					: minecraftVersion.guiBlocksUnpatch;
 			if (patchData != null) {
 				patch.loadPatch(patchData);
 				PatchUtils.patch(minecraftLibBuffer, patch);
-			} //TODO: load from assets
+			} // TODO: load from assets
 		} catch (Exception ie) {
 			ie.printStackTrace();
 		}
 
-		//Patch out the red item missing icon
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true)) {
+		// Patch out the red item missing icon
+		if (PreferenceManager.getDefaultSharedPreferences(this)
+				.getBoolean("zz_script_enable", true)) {
 			ScriptManager.nativeRemoveItemBackground();
 		}
 
@@ -1452,8 +1570,10 @@ public class MainActivity extends NativeActivity
 
 	protected void loadTexturePack() {
 		try {
-			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_texture_pack_enable", false);
-			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).getString("texturePack", null);
+			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this)
+					.getBoolean("zz_texture_pack_enable", false);
+			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
+					.getString("texturePack", null);
 			if (loadTexturePack && filePath != null) {
 				File file = new File(filePath);
 				System.out.println("File!! " + file);
@@ -1471,10 +1591,14 @@ public class MainActivity extends NativeActivity
 		}
 	}
 
-	/** enables the on-screen menu key on devices without a dedicated menu key, needed because target SDK is v15 */
+	/**
+	 * enables the on-screen menu key on devices without a dedicated menu key,
+	 * needed because target SDK is v15
+	 */
 	private void enableSoftMenuKey() {
-		int flag = Build.VERSION.SDK_INT >= 19? 0x40000000: 0x08000000; //FLAG_NEEDS_MENU_KEY
-		getWindow().addFlags(flag); //KitKat reused old show menu key flag for transparent navbars
+		int flag = Build.VERSION.SDK_INT >= 19 ? 0x40000000 : 0x08000000; // FLAG_NEEDS_MENU_KEY
+		getWindow().addFlags(flag); // KitKat reused old show menu key flag for
+									// transparent navbars
 	}
 
 	private void disableAllPatches() {
@@ -1485,7 +1609,8 @@ public class MainActivity extends NativeActivity
 	protected void loginLaunchCallback(Uri launchUri) {
 		loginDialog.dismiss();
 		String session = launchUri.getQueryParameter("sessionId");
-		if (session == null) return;
+		if (session == null)
+			return;
 		String profileName = launchUri.getQueryParameter("profileName");
 		String refreshToken = launchUri.getQueryParameter("identity");
 		String accessToken = launchUri.getQueryParameter("accessToken");
@@ -1499,19 +1624,25 @@ public class MainActivity extends NativeActivity
 	}
 
 	public boolean isRedirectingRealms() {
-		//String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
-		//return !peoapiRedirect.equals("NONE");
+		// String peoapiRedirect =
+		// PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address",
+		// "NONE");
+		// return !peoapiRedirect.equals("NONE");
 		return false;
 	}
 
 	public RealmsRedirectInfo getRealmsRedirectInfo() {
-		//String peoapiRedirect = PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address", "NONE");
+		// String peoapiRedirect =
+		// PreferenceManager.getDefaultSharedPreferences(this).getString("zz_redirect_mco_address",
+		// "NONE");
 		return RealmsRedirectInfo.targets.get("NONE");
 	}
 
 	private void turnOffSafeMode() {
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_safe_mode", false).commit();
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).commit();
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putBoolean("zz_safe_mode", false).commit();
+		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
+				.putBoolean("force_prepatch", true).commit();
 		finish();
 		NerdyStuffActivity.forceRestart(this);
 	}
@@ -1520,9 +1651,11 @@ public class MainActivity extends NativeActivity
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 	}
+
 	/**
-	 * Called by the ScriptManager when a new level is loaded.
-	 * This is for subclasses to do cleanup/disable menu items that cannot be used ingame/show ads, etc
+	 * Called by the ScriptManager when a new level is loaded. This is for
+	 * subclasses to do cleanup/disable menu items that cannot be used
+	 * ingame/show ads, etc
 	 */
 	public void setLevelCallback(boolean isRemote) {
 		if (isRemote && ScriptManager.scripts.size() > 0) {
@@ -1535,8 +1668,9 @@ public class MainActivity extends NativeActivity
 	}
 
 	/**
-	 * Called by the ScriptManager when exiting to the main menu.
-	 * This is for subclasses to do cleanup/disable menu items that cannot be used ingame/show ads, etc
+	 * Called by the ScriptManager when exiting to the main menu. This is for
+	 * subclasses to do cleanup/disable menu items that cannot be used
+	 * ingame/show ads, etc
 	 */
 	public void leaveGameCallback() {
 	}
@@ -1544,7 +1678,8 @@ public class MainActivity extends NativeActivity
 	public void scriptPrintCallback(final String message, final String scriptName) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				Toast.makeText(MainActivity.this, "Script " + scriptName + ": " + message, Toast.LENGTH_SHORT).show();
+				Toast.makeText(MainActivity.this, "Script " + scriptName + ": " + message,
+						Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
@@ -1561,7 +1696,8 @@ public class MainActivity extends NativeActivity
 		ScriptManager.nativeOnGraphicsReset();
 	}
 
-	private static String stringFromInputStream(InputStream in, int startingLength) throws IOException {
+	private static String stringFromInputStream(InputStream in, int startingLength)
+			throws IOException {
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream(startingLength);
 		try {
 			byte[] buffer = new byte[1024];
@@ -1581,16 +1717,19 @@ public class MainActivity extends NativeActivity
 				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				t.printStackTrace(pWriter);
-				new AlertDialog.Builder(MainActivity.this).setTitle("Oh nose everything broke").setMessage(strWriter.toString()).
-					setPositiveButton(android.R.string.ok, null).
-					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface aDialog, int button) {
-							ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-							mgr.setText(strWriter.toString());
-						}
-					}).
-							
-					show();
+				new AlertDialog.Builder(MainActivity.this)
+						.setTitle("Oh nose everything broke")
+						.setMessage(strWriter.toString())
+						.setPositiveButton(android.R.string.ok, null)
+						.setNeutralButton(android.R.string.copy,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface aDialog, int button) {
+										ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+										mgr.setText(strWriter.toString());
+									}
+								}).
+
+						show();
 			}
 		});
 	}
@@ -1603,33 +1742,39 @@ public class MainActivity extends NativeActivity
 				pWriter.println("Error occurred in script: " + scriptName);
 				if (t instanceof RhinoException) {
 					String lineSource = ((RhinoException) t).lineSource();
-					if (lineSource != null) pWriter.println(lineSource);
+					if (lineSource != null)
+						pWriter.println(lineSource);
 				}
 				t.printStackTrace(pWriter);
-				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).setMessage(strWriter.toString()).
-					setPositiveButton(android.R.string.ok, null).
-					setNeutralButton(android.R.string.copy, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface aDialog, int button) {
-							ClipboardManager mgr = (ClipboardManager) MainActivity.this.getSystemService(CLIPBOARD_SERVICE);
-							mgr.setText(strWriter.toString());
-						}
-					}).
-					show();
+				new AlertDialog.Builder(MainActivity.this)
+						.setTitle(R.string.script_execution_error)
+						.setMessage(strWriter.toString())
+						.setPositiveButton(android.R.string.ok, null)
+						.setNeutralButton(android.R.string.copy,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface aDialog, int button) {
+										ClipboardManager mgr = (ClipboardManager) MainActivity.this
+												.getSystemService(CLIPBOARD_SERVICE);
+										mgr.setText(strWriter.toString());
+									}
+								}).show();
 			}
 		});
 	}
 
 	protected void resetOrientation() {
-		//for sensor controls
+		// for sensor controls
 	}
 
 	public void scriptTooManyErrorsCallback(final String scriptName) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.script_execution_error).
-					setMessage(scriptName + " " + getResources().getString(R.string.script_too_many_errors)).
-					setPositiveButton(android.R.string.ok, null).
-					show();
+				new AlertDialog.Builder(MainActivity.this)
+						.setTitle(R.string.script_execution_error)
+						.setMessage(
+								scriptName + " "
+										+ getResources().getString(R.string.script_too_many_errors))
+						.setPositiveButton(android.R.string.ok, null).show();
 			}
 		});
 	}
@@ -1637,18 +1782,19 @@ public class MainActivity extends NativeActivity
 	public void screenshotCallback(final File file) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
-				Toast.makeText(MainActivity.this, getResources().getString(R.string.screenshot_saved_as) + " " +
-					file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-				MediaScannerConnection.scanFile(MainActivity.this, 
-					new String[] {file.getAbsolutePath()}, new String[] {"image/png"}, null);
+				Toast.makeText(
+						MainActivity.this,
+						getResources().getString(R.string.screenshot_saved_as) + " "
+								+ file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+				MediaScannerConnection.scanFile(MainActivity.this,
+						new String[] { file.getAbsolutePath() }, new String[] { "image/png" }, null);
 			}
 		});
 	}
 
 	protected boolean allowScriptOverrideTextures() {
-		return true; //Let's do this! Leeroy Jenkins!
+		return true; // Let's do this! Leeroy Jenkins!
 	}
-
 
 	private void addLibraryDirToPath(String path) {
 		try {
@@ -1658,13 +1804,16 @@ public class MainActivity extends NativeActivity
 			field.setAccessible(true);
 			Object pathListObj = field.get(classLoader);
 			Class<? extends Object> pathListClass = pathListObj.getClass();
-			Field natfield = Utils.getDeclaredFieldRecursive(pathListClass, "nativeLibraryDirectories");
+			Field natfield = Utils.getDeclaredFieldRecursive(pathListClass,
+					"nativeLibraryDirectories");
 			natfield.setAccessible(true);
 			File[] fileList = (File[]) natfield.get(pathListObj);
 			File[] newList = addToFileList(fileList, new File(path));
-			if (fileList != newList) natfield.set(pathListObj, newList);
-			//check
-			//System.out.println("Class loader shenanigans: " + ((PathClassLoader) getClassLoader()).findLibrary("minecraftpe"));
+			if (fileList != newList)
+				natfield.set(pathListObj, newList);
+			// check
+			// System.out.println("Class loader shenanigans: " +
+			// ((PathClassLoader) getClassLoader()).findLibrary("minecraftpe"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1672,9 +1821,9 @@ public class MainActivity extends NativeActivity
 
 	private File[] addToFileList(File[] files, File toAdd) {
 		boolean needsAdding = true;
-		for (File f: files) {
+		for (File f : files) {
 			if (f.equals(toAdd)) {
-				//System.out.println("Already added path to list");
+				// System.out.println("Already added path to list");
 				return files;
 			}
 		}
@@ -1686,17 +1835,21 @@ public class MainActivity extends NativeActivity
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
-			if (BuildConfig.DEBUG) Log.i(TAG, "Text changed: " + e.toString());
+			if (BuildConfig.DEBUG)
+				Log.i(TAG, "Text changed: " + e.toString());
 			nativeSetTextboxText(e.toString());
-			
+
 		}
+
 		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
 		}
+
 		public void onTextChanged(CharSequence c, int start, int count, int after) {
 		}
 
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-			if (BuildConfig.DEBUG) Log.i(TAG, "Editor action: " + actionId);
+			if (BuildConfig.DEBUG)
+				Log.i(TAG, "Editor action: " + actionId);
 			if (hiddenTextDismissAfterOneLine) {
 				hiddenTextWindow.dismiss();
 			} else {
@@ -1708,12 +1861,15 @@ public class MainActivity extends NativeActivity
 
 	private class LoginWebViewClient extends WebViewClient {
 		boolean hasFiredLaunchEvent = false;
+
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			Uri tempUri = Uri.parse(url);
-			if (BuildConfig.DEBUG) Log.i(TAG, tempUri.toString());
+			if (BuildConfig.DEBUG)
+				Log.i(TAG, tempUri.toString());
 			String endHost = getRealmsRedirectInfo().accountUrl;
-			if (endHost == null) endHost = "account.mojang.com";
+			if (endHost == null)
+				endHost = "account.mojang.com";
 			if (tempUri.getHost().equals(endHost)) {
 				if (tempUri.getPath().equals("/m/launch")) {
 					loginLaunchCallback(tempUri);
@@ -1727,8 +1883,9 @@ public class MainActivity extends NativeActivity
 			}
 
 		}
+
 		@Override
-		public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
+		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
 			if (isRedirectingRealms()) {
 				handler.proceed();
 				return;
@@ -1739,9 +1896,11 @@ public class MainActivity extends NativeActivity
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			Uri tempUri = Uri.parse(url);
-			if (BuildConfig.DEBUG) Log.i(TAG, "PageStarted: " + tempUri.toString());
+			if (BuildConfig.DEBUG)
+				Log.i(TAG, "PageStarted: " + tempUri.toString());
 			String endHost = getRealmsRedirectInfo().accountUrl;
-			if (endHost == null) endHost = "account.mojang.com";
+			if (endHost == null)
+				endHost = "account.mojang.com";
 			if (tempUri.getHost().equals(endHost)) {
 				if (tempUri.getPath().equals("/m/launch") && !hasFiredLaunchEvent) {
 					loginLaunchCallback(tempUri);
@@ -1766,7 +1925,7 @@ public class MainActivity extends NativeActivity
 			this.strurl = url;
 			this.method = method;
 			this.cookies = cookies;
-			synchronized(requestMap) {
+			synchronized (requestMap) {
 				requestMap.put(requestId, this);
 			}
 		}
@@ -1796,7 +1955,8 @@ public class MainActivity extends NativeActivity
 				}
 
 				if (is != null) {
-					content = stringFromInputStream(is, conn.getContentLength() < 0? 1024: conn.getContentLength());
+					content = stringFromInputStream(is,
+							conn.getContentLength() < 0 ? 1024 : conn.getContentLength());
 				}
 
 			} catch (Exception e) {
@@ -1810,16 +1970,17 @@ public class MainActivity extends NativeActivity
 				}
 			}
 
-			if (content != null && BuildConfig.DEBUG) Log.i(TAG, url + ":" + response + ":" + content);
-			
+			if (content != null && BuildConfig.DEBUG)
+				Log.i(TAG, url + ":" + response + ":" + content);
+
 			if (isValid) {
 				nativeWebRequestCompleted(requestId, timestamp, response, content);
 			}
-			synchronized(requestMap) {
+			synchronized (requestMap) {
 				requestMap.remove(this);
 			}
 		}
-		
-	}	
+
+	}
 
 }

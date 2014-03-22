@@ -1,8 +1,11 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import android.content.*;
+
 import java.util.*;
 import java.io.*;
+
+import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 
 public class PatchManager {
 

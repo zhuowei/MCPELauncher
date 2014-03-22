@@ -1,6 +1,8 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import java.io.*;
+
+import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 import android.content.*;
 import android.preference.*;
 
