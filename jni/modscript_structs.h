@@ -27,7 +27,11 @@ typedef struct {
 	float yaw; //64
 	float pitch; //68
 	float prevYaw; //72
-	float prevPitch; //76
+	float prevPitch; //76 (104 after shift)
+	char filler4[128]; //108
+	int renderType; //236
+	int rider; //240
+	int riding; //244
 } Entity;
 typedef Entity Player;
 
