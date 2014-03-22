@@ -89,6 +89,12 @@ public class ScriptManager {
 	private static boolean requestReloadAllScripts = false;
 
 	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
+	
+	/*About get all*/
+	public static List<Integer> allentities = new ArrayList<Integer>();
+	
+	public static List<Integer> allplayers = new ArrayList<Integer>();
+	/**/
 
 	private static NativeArray entityList;
 
@@ -116,6 +122,7 @@ public class ScriptManager {
 			}
 			throw back; //Thursdays
 		}
+		allentities.clear();
 	}
 
 	private static class ParseThread implements Runnable {
@@ -326,6 +333,7 @@ public class ScriptManager {
 		if (nativeIsPlayer(entity)) {
 			playerRemovedHandler(entity);
 		}
+		allentities.remove(allentities.indexOf(entity));
 		callScriptMethod("entityRemovedHook", entity);
 		//entityList.remove(Integer.valueOf(entity));
 	}
@@ -335,6 +343,7 @@ public class ScriptManager {
 		if (nativeIsPlayer(entity)) {
 			playerAddedHandler(entity);
 		}
+		allentities.add(entity);
 		callScriptMethod("entityAddedHook", entity);
 		//entityList.put(entityList.getLength(), entityList, entity);
 	}
@@ -833,6 +842,7 @@ public class ScriptManager {
 	}
 
 	private static void playerAddedHandler(int entityId) {
+		allplayers.add(entityId);
 		if (!shouldLoadSkin()) return;
 		//load skin for player
 		String playerName = nativeGetPlayerName(entityId); //in the real service, this would be normalized
@@ -849,6 +859,7 @@ public class ScriptManager {
 	}
 
 	private static void playerRemovedHandler(int entityId) {
+		allplayers.remove(allplayers.indexOf(entityId));
 	}
 
 	public static void runOnMainThread(Runnable run) {
@@ -1653,11 +1664,6 @@ public class ScriptManager {
 			nativeRemoveEntity(ent);
 		}
 
-		/*@JSStaticFunction
-		public static int[] getAllEntities() {
-			nativeGetAllEntities();
-			return null;
-		}*/
 		@JSStaticFunction
 		public static int getHealth(int ent) {
 			return nativeGetMobHealth(ent);
@@ -1697,6 +1703,17 @@ public class ScriptManager {
 			if (entityType >= 64 || (entityType == 0 && !NativePlayerApi.isPlayer(entity)))
 				throw new IllegalArgumentException("setNameTag only works on mobs");
 			nativeEntitySetNameTag(entity, name);
+		}
+		
+		
+		// KMCPE's additions
+		@JSStaticFunction
+		public static int[] getAll() {
+			int[] entities = new int[allentities.size()];
+			for(int n=0;entities.length>n;n++){
+				entities[n]=allentities.get(n);
+			}
+			return entities;
 		}
 
 		@JSStaticFunction
@@ -1986,6 +2003,25 @@ public class ScriptManager {
 		public static void sendChat(String message) {
 			if (!isRemote) return;
 			nativeSendChat(message);
+		}
+		
+		// KMCPE's additions
+		@JSStaticFunction
+		public static int[] getAllPlayers() {
+			int[] players = new int[allplayers.size()];
+			for(int n=0;players.length>n;n++){
+				players[n]=allplayers.get(n);
+			}
+			return players;
+		}
+		
+		@JSStaticFunction
+		public static String[] getAllPlayerNames() {
+			String[] players = new String[allplayers.size()];
+			for(int n=0;players.length>n;n++){
+				players[n]=nativeGetPlayerName(allplayers.get(n));
+			}
+			return players;
 		}
 		
 		@Override
