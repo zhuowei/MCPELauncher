@@ -1,0 +1,364 @@
+package net.zhuoweizhang.mcpelauncher.ui;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import net.zhuoweizhang.mcpelauncher.R;
+import net.zhuoweizhang.mcpelauncher.ScriptManager;
+import net.zhuoweizhang.mcpelauncher.Utils;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.*;
+import de.ankri.views.Switch;
+
+public class MainMenuOptionsActivity extends PreferenceActivity implements
+		Preference.OnPreferenceClickListener, SwitchPreference.OnCheckedChangeListener {
+
+	public static final String PREFERENCES_NAME = "mcpelauncherprefs";
+	public static final int REQUEST_MANAGE_TEXTURES = 5;
+	public static final int REQUEST_MANAGE_PATCHES = 6;
+	public static final int REQUEST_MANAGE_SKINS = 7;
+	public static final int REQUEST_MANAGE_ADDONS = 8;
+	public static final int REQUEST_SERVER_LIST = 9;
+	public static final int REQUEST_MANAGE_SCRIPTS = 10;
+
+	public static final String PRO_APP_ID = "net.zhuoweizhang.mcpelauncher.pro";
+
+	public static final String GOOGLE_PLAY_URL = "market://details?id=";
+
+	private boolean needsRestart = false;
+	public static boolean isManagingAddons = false;
+
+	private SwitchPreference texturepackPreference;
+	private SwitchPreference addonsPreference;
+	private SwitchPreference scriptsPreference;
+	private SwitchPreference skinPreference;
+	private Preference patchesPreference;
+	private Preference safeModePreference;
+	private ListPreference languagePreference;
+	private Preference goToForumsPreference;
+	private Preference getProPreference;
+	private Preference aboutPreference;
+	private Preference paranoidPreference;
+
+	protected Thread ui = new Thread(new Runnable() {
+		protected WeakReference<MainMenuOptionsActivity> activity = null;
+
+		@Override
+		public void run() {
+			activity = new WeakReference<MainMenuOptionsActivity>(MainMenuOptionsActivity.this);
+			while (activity.get() != null) {
+				updateTP();
+				updateSkin();
+				synchronized (ui) {
+					try {
+						ui.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			System.gc();
+		}
+
+		protected void updateTP() {
+			MainMenuOptionsActivity a = activity.get();
+			final SwitchPreference p = a.texturepackPreference;
+			String sum = null;
+			if ((p.content != null) && (p.content.isChecked())) {
+				SharedPreferences prefs = Utils.getPrefs(1);
+				if (prefs.getBoolean("zz_texture_pack_demo", false)) {
+					sum = a.getString(R.string.textures_demo);
+				} else {
+					prefs = a.getSharedPreferences("mcpelauncherprefs", 0);
+					sum = prefs.getString("texturePack", null);
+				}
+			}
+			final String sm = sum;
+			a.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					p.setSummary(sm);
+				}
+			});
+			a = null;
+		}
+
+		protected void updateSkin() {
+			MainMenuOptionsActivity a = activity.get();
+			final SwitchPreference p = a.skinPreference;
+			String sum = null;
+			if ((p.content != null) && (p.content.isChecked())) {
+				SharedPreferences prefs = Utils.getPrefs(1);
+				prefs = a.getSharedPreferences("mcpelauncherprefs", 0);
+				sum = prefs.getString("player_skin", null);
+			}
+			final String sm = sum;
+			a.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					p.setSummary(sm);
+				}
+			});
+			a = null;
+		}
+	});
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		Utils.setLanguageOverride();
+		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(net.zhuoweizhang.mcpelauncher.R.xml.preferences);
+
+		texturepackPreference = (SwitchPreference) findPreference("zz_texture_pack_enable");
+		if (texturepackPreference != null) {
+			texturepackPreference.setOnPreferenceClickListener(this);
+			texturepackPreference.setListener(this);
+		}
+
+		patchesPreference = findPreference("zz_manage_patches");
+		if (patchesPreference != null) {
+			patchesPreference.setOnPreferenceClickListener(this);
+		}
+
+		safeModePreference = findPreference("zz_safe_mode");
+		if (safeModePreference != null) {
+			safeModePreference.setOnPreferenceClickListener(this);
+		}
+
+		aboutPreference = findPreference("zz_about");
+		if (aboutPreference != null) {
+			aboutPreference.setOnPreferenceClickListener(this);
+		}
+
+		getProPreference = findPreference("zz_get_pro");
+		if (getProPreference != null) {
+			getProPreference.setOnPreferenceClickListener(this);
+		}
+
+		goToForumsPreference = findPreference("zz_go_to_forums");
+		if (goToForumsPreference != null) {
+			goToForumsPreference.setOnPreferenceClickListener(this);
+		}
+
+		addonsPreference = (SwitchPreference) findPreference("zz_load_native_addons");
+		if (addonsPreference != null) {
+			addonsPreference.setOnPreferenceClickListener(this);
+		}
+
+		skinPreference = (SwitchPreference) findPreference("zz_skin_enable");
+		if (skinPreference != null) {
+			skinPreference.setListener(this);
+			skinPreference.setOnPreferenceClickListener(this);
+		}
+
+		scriptsPreference = (SwitchPreference) findPreference("zz_script_enable");
+		if (scriptsPreference != null) {
+			scriptsPreference.setListener(this);
+			scriptsPreference.setOnPreferenceClickListener(this);
+			if (ScriptManager.isRemote)
+				scriptsPreference.setEnabled(false);
+		}
+
+		languagePreference = (ListPreference) findPreference("zz_language_override");
+		if (languagePreference != null) {
+			initLanguagePreference();
+			languagePreference.setOnPreferenceClickListener(this);
+		}
+
+		paranoidPreference = findPreference("zz_script_paranoid_mode");
+		if (paranoidPreference != null) {
+			paranoidPreference.setOnPreferenceClickListener(this);
+		}
+		
+		ui.start();
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (needsRestart) {
+			forceRestart();
+		} else {
+			super.onBackPressed();
+		}
+	}
+
+	public boolean onPreferenceClick(Preference pref) {
+		synchronized (ui) {
+			ui.notifyAll();
+		}
+		if (pref == patchesPreference) {
+			managePatches();
+			return true;
+		} else if (pref == safeModePreference) {
+			needsRestart = true;
+			return false; // Don't eat it
+		} else if (pref == texturepackPreference) {
+			manageTexturepacks();
+			return true;
+		} else if (pref == getProPreference) {
+			startGetPro();
+			return true;
+		} else if (pref == aboutPreference) {
+			startAbout();
+			return true;
+		} else if (pref == addonsPreference) {
+			manageAddons();
+			return true;
+		} else if (pref == scriptsPreference) {
+			manageScripts();
+			return true;
+		} else if (pref == skinPreference) {
+			manageSkins();
+			return true;
+		} else if (pref == goToForumsPreference) {
+			goToForums();
+			return true;
+		} else if (pref == languagePreference || pref == paranoidPreference) {
+			needsRestart = true;
+			return false;
+		}
+		return false;
+	}
+
+	@Override
+	public void onCheckedChange(Switch data) {
+		needsRestart = true;
+		synchronized (ui) {
+			ui.notifyAll();
+		}
+		if (data == texturepackPreference.content) {
+			File f = ManageTexturepacksActivity.REQUEST_ENABLE;
+			if (!data.isChecked())
+				f = ManageTexturepacksActivity.REQUEST_DISABLE;
+			ManageTexturepacksActivity.setTexturepack(f, null);
+		}
+	}
+
+	protected void managePatches() {
+		Intent intent = new Intent(this, ManagePatchesActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_PATCHES);
+	}
+
+	protected void manageAddons() {
+		isManagingAddons = true;
+		Intent intent = new Intent(this, ManageAddonsActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_ADDONS);
+	}
+
+	protected void manageScripts() {
+		Intent intent = new Intent(this, ManageScriptsActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_SCRIPTS);
+	}
+
+	protected void manageTexturepacks() {
+		Intent intent = new Intent(this, ManageTexturepacksActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_TEXTURES);
+	}
+
+	protected void manageSkins() {
+		Intent intent = new Intent(this, ManageSkinsActivity.class);
+		startActivityForResult(intent, REQUEST_MANAGE_SKINS);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		synchronized (ui) {
+			ui.notifyAll();
+		}
+		switch (requestCode) {
+		case REQUEST_MANAGE_PATCHES:
+			if (resultCode == RESULT_OK) {
+				forceRestart();
+			}
+			break;
+		case REQUEST_MANAGE_ADDONS:
+			isManagingAddons = false;
+			if (resultCode == RESULT_OK) {
+				forceRestart();
+			}
+			break;
+		case REQUEST_SERVER_LIST:
+			if (resultCode == RESULT_OK) {
+				onBackPressed();
+			}
+			break;
+		case REQUEST_MANAGE_SCRIPTS:
+		case REQUEST_MANAGE_TEXTURES:
+		case REQUEST_MANAGE_SKINS:
+			if (resultCode == RESULT_OK) {
+				forceRestart();
+			}
+			break;
+		}
+	}
+
+	private void startAbout() {
+		startActivity(new Intent(this, AboutAppActivity.class));
+	}
+
+	private void startGetPro() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		// intent.setData(Uri.parse(GOOGLE_PLAY_URL + PRO_APP_ID));
+		intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
+		try {
+			this.startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void goToForums() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(AboutAppActivity.FORUMS_PAGE_URL));
+		try {
+			this.startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Forces the app to be restarted by calling System.exit(0), Android
+	 * automatically re-launches the activity behind this one when the vm exits,
+	 * so to go back to the main activity, use the AlarmService to launch the
+	 * home screen intent 1 second later.
+	 */
+	private void forceRestart() {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(200);
+					System.exit(0);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
+	private void initLanguagePreference() {
+		String[] langList = getResources().getString(R.string.languages_supported).split(",");
+		List<String> languageNames = new ArrayList<String>();
+		languageNames.add(getResources().getString(R.string.pref_zz_language_override_default));
+		Locale currentLocale = getResources().getConfiguration().locale;
+		for (String override : langList) {
+			if (override.length() == 0)
+				continue;
+			String[] overrideSplit = override.split("_");
+			String langName = overrideSplit[0];
+			String countryName = overrideSplit.length > 1 ? overrideSplit[1] : "";
+			Locale locale = new Locale(langName, countryName);
+			languageNames.add(locale.getDisplayName(currentLocale));
+		}
+		languagePreference.setEntries(languageNames.toArray(new String[] {}));
+		languagePreference.setEntryValues(langList);
+	}
+
+}

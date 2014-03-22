@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <style name="ButtonBar" parent="@android:style/Holo.ButtonBar">
+        
+    </style>
+    <style name="ButtonBar.Button" parent="@android:style/Widget.Holo.Button.Borderless">
+        
+    </style>
+    
+</resources>

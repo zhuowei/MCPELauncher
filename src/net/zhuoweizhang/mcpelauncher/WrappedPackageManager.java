@@ -19,7 +19,6 @@ package net.zhuoweizhang.mcpelauncher;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
@@ -31,21 +30,15 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.RemoteException;
-
-import android.test.mock.MockPackageManager;
 
 import java.util.List;
 
 /**
- * A mock {@link android.content.pm.PackageManager} class.  All methods are non-functional and throw
- * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you 
- * need.
+ * A mock {@link android.content.pm.PackageManager} class.  All methods are functional.
+ * Override it to provide the operations that you need.
  */
 public class WrappedPackageManager extends PackageManager {
 
@@ -403,4 +396,30 @@ public class WrappedPackageManager extends PackageManager {
     public boolean isSafeMode() {
         return wrapped.isSafeMode();
     }
+
+	@Override
+	public List<PackageInfo> getPackagesHoldingPermissions(String[] permissions, int flags) {
+		return wrapped.getPackagesHoldingPermissions(permissions, flags);
+	}
+
+	@Override
+	public List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags) {
+		return wrapped.queryIntentContentProviders(intent, flags);
+	}
+
+	@Override
+	public void verifyPendingInstall(int id, int verificationCode) {
+		wrapped.verifyPendingInstall(id, verificationCode);
+	}
+
+	@Override
+	public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+			long millisecondsToDelay) {
+		wrapped.extendVerificationTimeout(id, verificationCodeAtTimeout, millisecondsToDelay);
+	}
+
+	@Override
+	public void setInstallerPackageName(String targetPackage, String installerPackageName) {
+		wrapped.setInstallerPackageName(targetPackage, installerPackageName);
+	}
 }

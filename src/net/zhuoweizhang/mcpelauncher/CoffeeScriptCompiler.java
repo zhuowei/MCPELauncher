@@ -1,13 +1,20 @@
 package net.zhuoweizhang.mcpelauncher;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.*;
 
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 public class CoffeeScriptCompiler {
-
 
 	public static boolean isCoffeeScript(File input) {
 		return input.getName().toLowerCase().endsWith(".coffee") || isLiterateCoffeeScript(input);

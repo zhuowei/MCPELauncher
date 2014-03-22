@@ -13,7 +13,6 @@ public class RedirectPackageManager extends WrappedPackageManager {
 	}
 
 	@Override
-
 	public ActivityInfo getActivityInfo(ComponentName className, int flags) throws NameNotFoundException {
 		ActivityInfo retval = wrapped.getActivityInfo(className, flags);
 		retval.applicationInfo.nativeLibraryDir = nativeLibraryDir;

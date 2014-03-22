@@ -17,7 +17,14 @@
             android:summary="@string/pref_zz_custom_dpi_summary"
             android:title="@string/pref_zz_custom_dpi" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_textures_title" android:key="zz_textures_group">
+    <PreferenceCategory
+        android:key="zz_textures_group"
+        android:title="@string/pref_textures_title" >
+        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
+            android:defaultValue="false"
+            android:key="zz_texture_pack_enable"
+            android:title="@string/pref_texture_pack" />
+        <!--
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_texture_pack_demo"
@@ -27,28 +34,16 @@
             android:defaultValue="false"
             android:key="zz_texture_pack_enable"
             android:title="@string/pref_zz_texture_pack_enable_extracted" />
-
         <Preference
             android:key="zz_extract_original_textures"
             android:summary="@string/pref_zz_extract_original_textures_summary"
             android:title="@string/pref_zz_extract_original_textures" />
+        -->
 
-        <CheckBoxPreference
+        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
             android:defaultValue="false"
             android:key="zz_skin_enable"
             android:title="@string/pref_zz_skin_enable" />
-
-        <Preference
-            android:dependency="zz_skin_enable"
-            android:key="zz_skin"
-            android:summary="@string/pref_zz_skin_summary"
-            android:title="@string/pref_zz_skin" />
-
-        <ListPreference android:title="@string/pref_zz_skin_download_source" android:key="zz_skin_download_source"
-            android:entries="@array/skin_download_source_names"
-            android:entryValues="@array/skin_download_sources"
-            android:defaultValue="mojang_pc"/>
-
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_addons_title" >
         <CheckBoxPreference
@@ -65,34 +60,24 @@
             android:defaultValue="false"
             android:key="zz_hovercar_hide"
             android:title="@string/pref_zz_hovercar_hide" />
-        <CheckBoxPreference
+
+        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
             android:defaultValue="false"
             android:key="zz_load_native_addons"
-            android:title="@string/pref_zz_load_native_addons" />
-
-        <Preference
-            android:key="zz_manage_addons"
             android:title="@string/manage_addons" />
-
-        <CheckBoxPreference
+        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
             android:defaultValue="true"
             android:key="zz_script_enable"
             android:title="@string/pref_zz_script_enable" />
 
-        <Preference
-            android:dependency="zz_script_enable"
-            android:key="zz_manage_scripts"
-            android:title="@string/pref_zz_manage_scripts" >
-            <intent
-                android:targetClass="net.zhuoweizhang.mcpelauncher.ManageScriptsActivity"
-                android:targetPackage="net.zhuoweizhang.mcpelauncher" />
-        </Preference>
 
-        <!--<CheckBoxPreference
+        <!--
+            <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_script_paranoid_mode"
             android:summary="@string/pref_zz_script_paranoid_mode_summary"
-            android:title="@string/pref_zz_script_paranoid_mode" />-->
+            android:title="@string/pref_zz_script_paranoid_mode" />
+        -->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_show_insert_text"
