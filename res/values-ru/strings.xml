@@ -1,174 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Russian translation by MelomanCool of 4PDA. -->
+<!-- Russian translation by MelomanCool -->
 <resources>
     <string name="select_file">Выберите файл с SD карты</string>
-    <string name="pref_ctrl_touchscreen">Использовать тачскрин</string>
-    <string name="pref_ctrl_touchscreen_summary">Если вы играете не на Xperia Play, поставьте галочку</string>
-    <string name="pref_mp_username">Имя в мультиплеере</string>
-    <string name="pref_mp_username_summary">Ваш ник</string>
     <string name="pref_texture_pack">Текстурпак</string>
-    <string name="pref_texture_pack_summary">Выбрать текстурпак</string>
-    <string name="pref_ctrl_usetouchjoypad">Управление с ПК</string>
-    <string name="pref_ctrl_islefthanded">Управление для левшей</string>
-    <string name="pref_ctrl_islefthanded_summary">Отзеркаливает схему управления</string>
-    <string name="pref_ctrl_invertmouse">Инвертировать управление по Y</string>
-    <string name="pref_ctrl_invertmouse_summary">Тем временем в Австралии :)</string>
-    <string name="pref_feedback_vibration">Вибрация</string>
-    <string name="pref_feedback_vibration_summary">Включать вибрацию после уничтожения блока</string>
-    <string name="pref_zz_longvibration">Очень долгая вибрация</string>
-    <string name="pref_zz_longvibration_summary">Увеличить время вибрации в 5 раз</string>
-    <string name="pref_gfx_fancygraphics">Высокоуровневая графика</string>
-    <string name="pref_gfx_fancygraphics_summary">Повышает качество графики</string>
-    <string name="pref_gfx_lowquality">Низкоуровневая графика</string>
-    <string name="pref_gfx_lowquality_summary">Понижает качество графики</string>
-    <string name="pref_game_difficultypeaceful">Дружелюбный режим</string>
-    <string name="pref_game_difficultypeaceful_summary">Восстановление сердечек, отсутствие монстров</string>
-    <string name="pref_ctrl_sensitivity">Чувствительность</string>
-    <string name="pref_ctrl_sensitivity_summary">Чувствительность тачскрина</string>
+    <string name="pref_texture_pack_summary">Выбор текстурпака</string>
+    <string name="pref_zz_longvibration">Долгая вибрация</string>
+    <string name="pref_zz_longvibration_summary">Вибрация дольше в 5 раз</string>
     <string name="pref_zz_safe_mode">Безопасный режим</string>
-    <string name="pref_zz_safe_mode_summary">Отключает все патчи</string>
-    <string name="pref_zz_patch_ip_enable">Использовать свой адрес сервера</string>
-    <string name="pref_zz_patch_ip_enable_summary">Перенаправляет соединение на мультиплеерный сервер</string>
-    <string name="pref_zz_patch_ip">IP сервера</string>
-    <string name="pref_zz_patch_ip_summary">IP адрес сервера</string>
-    <string name="pref_zz_patch_ip_port">Порт сервера</string>
-    <string name="pref_zz_patch_ip_port_summary">Порт сервера (обычно 19132)</string>
-    <string name="pref_zz_texture_pack_enable">Использовать текстурпак</string>
-    <string name="pref_zz_custom_dpi">Изменить DPI</string>
-    <string name="pref_zz_custom_dpi_summary">Изменить стандартный DPI для изменения размера кнопок управления - оставьте пустым для отключения</string>
+    <string name="pref_zz_safe_mode_summary">Отключение всех модификаций игры</string>
+    <string name="pref_zz_texture_pack_enable">Текстурпак</string>
+    <string name="pref_zz_custom_dpi">Изменение DPI</string>
+    <string name="pref_zz_custom_dpi_summary">Изменение стандартной плотности пикселей для изменения размеров интерфейса. Очистите для отключения.</string>
     <string name="pref_zz_texture_pack_demo">Демонстрационный текстурпак</string>
-    <string name="pref_zz_texture_pack_demo_summary">Использовать встроенный пак Slickcraft от NathanX</string>
-    <string name="pref_mp_server_visible_default">Сервер виден по умолчанию</string>
-    <string name="pref_mp_title">Мультиплеер</string>
+    <string name="pref_zz_texture_pack_demo_summary">Использовать встроеный текстурпак Slickcraft</string>
     <string name="pref_ctrl_title">Управление</string>
     <string name="pref_gfx_title">Графика</string>
-    <string name="pref_addons_title">Аддоны и патчи</string>
+    <string name="pref_addons_title">Модификации</string>
     <string name="pref_textures_title">Текстуры</string>
     <string name="pref_support_title">Поддержка</string>
-    <string name="pref_zz_load_native_addons">Включить экспериментальную поддержку аддонов</string>
-    <string name="pref_zz_enable_hovercar">Включить внутриигровое управление патчами</string>
-    <string name="texture_pack_unable_to_load">Не удалось загрузить текстурпак.</string>
-    <string name="pref_zz_extract_original_textures">Извлечь оригинальные текстуры (требуется root)</string>
-    <string name="pref_zz_extract_original_textures_summary">Сделать резервное копирование оригинального APK и установить его как текстурпак</string>
-    <string name="extracting_textures">Бэкап оригинального APK</string>
-    <string name="extract_textures_success">Оригинальный APK успешно установлен как текстурпак.</string>
-    <string name="extract_textures_error">Не удалось получить доступ к оригинальному APK.</string>
-    <string name="extract_textures_no_root">Не удалось получить права суперпользователя - есть ли у вас root?</string>
-    <string name="extract_textures_need_update">Вы используете текстуры из старой версии Minecraft PE. Пожалуйста, запустите \"Извлечь оригинальные текстуры (требуется root)\" на экране настроек еще раз чтобы обновить текстуры.</string>
-    <string name="pref_zz_skin_enable">Использовать свой скин</string>
-    <string name="pref_zz_skin">Выбрать скин</string>
-    <string name="pref_zz_skin_summary">Выбрать файл .png для изменения скина (будет видно только Вам)</string>
-    <string name="pref_zz_hovercar_hide">Скрыть кнопку менеджера патчей</string>
-    <string name="pref_zz_redirect_mco">Перенаправление Realms на сторонний список серверов</string>
-    <string name="pref_zz_manage_scripts">Управление скриптами ModPE</string>
-    <string name="pref_zz_script_enable">Включить поддержку скриптов ModPE</string>
-    <string name="pref_zz_sensorcontrol">Сенсорное управление</string>
-    <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваш девайс. Необходимо включить скрипты ModPE.</string>
-    <string name="pref_zz_show_insert_text">Показать \"Ввести текст\" во внутриигровом управлении патчами" </string>
-    <string name="pref_zz_language_override">Язык</string>
-    <string name="pref_zz_language_override_default">По умолчанию</string>
+    <string name="pref_zz_load_native_addons">Аддоны BL</string>
+    <string name="pref_zz_enable_hovercar">Внутриигровые настройки</string>
+    <string name="texture_pack_unable_to_load">Не удалось загрузить текстурпак</string>
+    <string name="pref_zz_extract_original_textures">Извлечение оригинальных текстур</string>
+    <string name="pref_zz_extract_original_textures_summary">Резервное копирование APK MCPE с root доступом и установка его как текстурпак</string>
+    <string name="extracting_textures">Резервное копирование APK</string>
+    <string name="extract_textures_success">Успешно зарезервировано и установлено!</string>
+    <string name="extract_textures_error">Нет доступа к APK</string>
+    <string name="extract_textures_no_root">Не удалось получить root права</string>
+    <string name="extract_textures_need_update">Похоже, что вы используете текстуры к старому Minecraft PE. Заново запустите резервное копирование для обновления.</string>
+    <string name="pref_zz_skin_enable">Скин</string>
+    <string name="pref_zz_skin">Скин</string>
+    <string name="pref_zz_skin_summary">Выбор .png файла как Ваш скин(видимо только Вам)</string>
+    <string name="pref_zz_hovercar_hide">Прозрачная кнопка настроек</string>
+    <string name="pref_zz_manage_scripts">ModPE Script</string>
+    <string name="pref_zz_script_enable">ModPE Script</string>
+    <string name="pref_zz_show_insert_text">\"Ввод текста\" в меню кнопки настроек</string>
+    <string name="pref_zz_language_override">Язык BL</string>
+    <string name="pref_zz_language_override_default">Системный</string>
+    <string name="pref_zz_script_paranoid_mode">Режим защиты</string>
+    <string name="pref_zz_script_paranoid_mode_summary">Запрет доступа ModPE Script к системным функциям</string>
+    <string name="pref_zz_legacy_keyboard_input">Старая система ввода текста</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">Не использовать систему ввода из 0.8.x</string>
+    <string name="pref_zz_texture_pack_enable_extracted">Зарезервированные текстуры</string>
+    <string name="pref_zz_skin_download_source">Скины с PC</string>
+    <string name="skin_download_do_not_download">Не скачивать</string>
+    <string name="skin_download_download_pc">Скачивать скины с PC версии MC</string>
     <string name="nerdy_stuff_page">Отладка</string>
-    <string name="dump_libminecraftpe">Сделать дамп libminecraftpe.so из памяти</string>
-    <string name="nerdy_stuff_are_useless">Все, что находится на этой странице, практически бесполезно (для пользователей). Оно нужно для устранения ошибок.</string>
-    <string name="restart_app">Перезапустить приложение</string>
-    <string name="manage_patches">Управление патчами</string>
-    <string name="world_create_title">Создать мир</string>
-    <string name="world_name_prompt">Название:</string>
-    <string name="world_seed_prompt">Сид:</string>
-    <string name="world_gamemode_prompt">Режим игры:</string>
-    <string name="gamemode_survival">Выживание</string>
-    <string name="gamemode_creative">Креатив</string>
-    <string name="copy_world_title">Сохранить мир</string>
+    <string name="dump_libminecraftpe">Дамп libminecraftpe.so</string>
+    <string name="nerdy_stuff_are_useless">Не нужно обычным пользователям. Для разработчиков.</string>
+    <string name="restart_app">Рестарт</string>
+    <string name="manage_patches">PTPatch</string>
     <string name="manage_patches_import">Добавить</string>
-    <string name="manage_patches_import_error">Не удалось импортировать патч</string>
-    <string name="manage_patches_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более трех патчей</string>
+    <string name="manage_patches_import_error">Не удалось испортировать патч</string>
+    <string name="manage_patches_too_many">Купите BlockLauncher Pro для использования более 3 патчей</string>
     <string name="manage_patches_delete">Удалить</string>
-    <string name="manage_patches_crash_safe_mode">BlockLauncher зафиксировал вылет приложения. Был активирован Безопасный Режим для предотвращения будущих вылетов из-за некорректных патчей. В данном режиме все патчи отключаются.
-Вы хотите продолжить в безопасном режиме без патчей, или хотите вернуться в обычный режим?</string>
-    <string name="manage_patches_import_confirm">Вы хотите импортировать этот патч?</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher зафиксировал вылет. Был включен безопасный режим. Все модификации игры отключены. Отключить его?</string>
+    <string name="manage_patches_import_confirm">Вы уверены, что хотите импортировать этот патч?</string>
     <string name="manage_patches_import_done">Патч импортирован</string>
     <string name="manage_patches_enable">Включить</string>
-    <string name="manage_patches_disable">Выключить</string>
+    <string name="manage_patches_disable">Отключить</string>
     <string name="manage_patches_disabled">(отключен)</string>
-    <string name="manage_patches_invalid_patches">Следующие патчи не могут быть импортированы, поскольку они в формате, который BlockLauncher не понимает:</string>
+    <string name="manage_patches_invalid_patches">BlockLauncher не смог прочитать данный патч:</string>
     <string name="manage_patches_info">Информация</string>
     <string name="manage_patches_metadata">Автор</string>
-    <string name="manage_patches_no_metadata">Информация об авторе недоступна</string>
+    <string name="manage_patches_no_metadata">Автор неизвестен</string>
     <string name="manage_patches_path">Путь</string>
-    <string name="skin_imported">Скин импортирован</string>
-    <string name="manage_addons">Управление аддонами</string>
-    <string name="get_pro">Обновить до Pro</string>
+    <string name="skin_import_confirm">Вы уверены, что хотите установить этот скин?</string>
+    <string name="texturepack_import_confirm">Вы уверены, что хотите установить этот текстурпак?</string>
+    <string name="script_import_confirm">Вы уверены, что хотите импортировать этот ModPE Script?</string>
+    <string name="skin_imported">Скин установлен</string>
+    <string name="texturepack_imported">Текстурпак установлен</string>
+    <string name="script_imported">ModPE Script импортирован</string>
+    <string name="manage_addons">Аддоны BL</string>
+    <string name="get_pro">Купить BlockLauncher Pro</string>
     <string name="about_about">О BlockLauncher</string>
     <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
-    <string name="about_librarycredits">Эта программа использует библиотеку aFileChooser от Пола Берка.\n
-Эта программа содержит код из PTPatchTool от Snowbound\'а под Общественной Лицензией Eclipse.\n
-Эта программа содержит модифицированную версию текстурпака Slickcraft от NathanX\'а, который используется с его разрешения.\n
-Некоторые части встроенного текстурпака основаны на RepetiCraft от Theevilpplz\'а, используются с его разрешения.\n
-Эта программа содержит версию фреймворка Cydia Substrate от Saurik, под лицензией GNU Lesser General Public License.\n
-Эта программа использует библиотеку libsuperuser от Chainfire.\n
-Эта программа содержит копию движка Rhino JavaScript от Mozilla project.\n
-Для получения полной информации о лицензировании проверьте тему на Minecraft Forums.\n
-    </string>
+    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Не распостраняйте без разрешения.</string>
+    <string name="about_librarycredits">Программа содержит aFileChooser от Paul Burke. \n
+Программа содержит PTPatchTool от Snowbound, лицензированноe под Eclipse Public License. \n
+Программа содержит модификацию текстурпака Slickcraft от NathanX с его разрешения.\n
+Программа содержит части текстурпака RepetiCraft от Theevilpplz and used with permission.\n
+Программа содержит Cydia Substrate framework от Saurik, лицензированное под GNU LGPL.\n
+Программа содержит libsuperuser от Chainfire.\n
+Программа содержит Rhino JavaScript engine от Mozilla project.\n
+Посетите тему на Minecraft Forums для дополнительной информации.\n
+</string>
     <string name="about_pro_library_credits"></string>
-    <string name="about_thankscommunity">Это приложение появилось благодаря работе многих талантливых переводчиков, тестеров и программистов. Благодарю Вас.\nПросмотреть тему на Minecraft Forums, чтобы увидеть список участников.</string>
-    <string name="about_go_to_forums">Открыть тему BlockLauncher\'а на Minecraft Forums</string>
-    <string name="no_minecraft_installed">BlockLauncher не обнаружил Minecraft PE на вашем устройстве. Данное приложение разработано для того, чтобы патчить полную версию Minecraft Pocket Edition от Mojang.</string>
-
-    <string name="firstlaunch_title">Добро пожаловать в BlockLauncher!</string>
-    <string name="firstlaunch_generic_intro">Спасибо за то, что попробовали BlockLauncher. BlockLauncher может запускать Minecraft Pocket Edition и добавлять дополнительные возможности, такие как патчи, аддоны, скины и текстуры.</string>
-    <string name="firstlaunch_jelly_bean">Ваше устройство работает на Android версии Jelly Bean или новее, так что BlockLauncher не может получить доступ к стандартным текстурам. Был установлен демонстрационный текстурпак и вы можете тестировать лончер.</string>
-    <string name="firstlaunch_see_options">Для начала нажмите на иконку гаечного ключа вверху экрана. Больше информации вы можете получить в теме на Minecraft Forums.</string>
-    <string name="firstlaunch_help">Помощь</string>
-
-    <string name="version_mismatch_message">Данная версия Minecraft PE не поддерживается BlockLauncher\'ом. BlockLauncher будет временно запущен в безопасном режиме. Следите за обновлениями, так как поддержка может быть добавлена в новой версии.</string>
-
-    <string name="feature_not_supported">Данная возможность пока не поддерживается BlockLauncher\'ом.</string>
-    <string name="hovercar_title">Внутриигровое управление патчами</string>
-    <string name="hovercar_live_patch">Управление патчами</string>
-    <string name="hovercar_options">Настройки лончера (требуется рестарт)</string>
-    <string name="hovercar_insert_text">Ввести текст</string>
-
-    <string name="mco_redirect_none">Не перенаправлять</string>
-    <string name="mco_redirect_pocketmine">Использовать список серверов PocketMine</string>
-    <string name="mco_redirect_minepocket">Использовать список серверов MinePocket</string>
-
-    <string name="safe_mode_exit">Вернуться в обычный режим</string>
+    <string name="about_thankscommunity">Без работы многих переводчиков, разработчиков и тестировщиков BL не существовал бы. Благодарю Вас.\nПосетите GitHub для получения информации о их вкладе.</string>
+    <string name="about_go_to_forums">Открыть тему BlockLauncher на Minecraft Forums</string>
+    <string name="no_minecraft_installed">BlockLauncher не обнаружил Minecraft PE на устройстве. Установите полную версию Minecraft Pocket Edition от Mojang.</string>
+    <string name="firstlaunch_title">Добро пожаловать!</string>
+    <string name="firstlaunch_generic_intro">Спасибо за интерес к BlockLauncher. BlockLauncher запускает Minecraft Pocket Edition и добавляет возможность установки патчей, аддонов, скриптов, скинов и текстур.</string>
+    <string name="firstlaunch_jelly_bean">У Вас установлен Android версии Jelly Bean или новее, поэтому BlockLauncher не может загрузить оригинальные текстуры MCPE. Был установлен встроенный текстурпак.</string>
+    <string name="firstlaunch_see_options">Сейчас нажмите на иконку гаечного ключа, чтобы открыть меню BL. Опробуйте все его возможности прямо сейчас!</string>
+    <string name="firstlaunch_help">Тема на Minecraft Forums</string>
+    <string name="version_mismatch_message">Ваша версия Minecraft PE не поддерживается. BlockLauncher запущен в безопасном режиме. Проверьте наличие обновлений BlockLauncher, которые могут добавить поддерку данной версии.</string>
+    <string name="feature_not_supported">Эта опция пока что не поддерживается в BlockLauncher</string>
+    <string name="hovercar_title">Меню BlockLauncher</string>
+    <string name="hovercar_live_patch">Патчи PTPatch</string>
+    <string name="hovercar_options">Настройки BL</string>
+    <string name="hovercar_insert_text">Ввод текста</string>
+    <string name="safe_mode_exit">Отключить</string>
     <string name="safe_mode_continue">Продолжить</string>
-    
-    <string name="server_list_add">Добавить сервер</string>
-    <string name="pref_zz_server_list">Список серверов</string>
-    <string name="pref_zz_server_list_summary">Выберите или добавьте сервер в свой список серверов</string>
-    <string name="server_list_patch_address">Патчить адрес сервера</string>
-    <string name="server_list_name_prompt">Название: </string>
-    <string name="server_list_address_prompt">Адрес: </string>
-    <string name="server_list_port_prompt">Порт: </string>
-    
-    <string name="script_import_from">Импортировать скрипт из</string>
-    <string name="script_import_from_local">Локального хранилища</string>
-    <string name="script_import_from_cfgy">Официального репозитория Treebl\'а</string>
-    <string name="script_import_from_bl_repo">Тестируемого репозитория BlockLauncher\'а</string>
-    <string name="script_import_from_url">Веб адреса</string>
-    <string name="script_import_from_clipboard">Буфера обмена</string>
-    <string name="script_import_from_clipboard_name">Введите имя скрипта</string>
-    <string name="script_import_from_clipboard_code">Код для импорта</string>
-    <string name="script_import_from_cfgy_id">Введите ID скрипта для импорта</string>
-    <string name="script_import_from_url_enter">Введите адрес скрипта для импорта</string>
-    <string name="script_import_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более одного скрипта</string>
-    <string name="script_execution_error">В скрипте ModPE произошла ошибка</string>
-    <string name="script_disabled_in_multiplayer">Ваши скрипты ModPE были отключены на время использования мультиплеера, так как они могут привести к вылетам приложения. После отключения от сервера они будут снова включены.</string>
-    <string name="script_minecraft_version_incompatible">Скрипты ModPE не поддерживаются вашей версией Minecraft PE. Часть скриптов может функционировать неполностью, или приводить к вылету приложения. Используйте на свой страх и риск.</string>
-    <string name="script_import_from_intent_warning">Вы хотите импортировать этот скрипт? Он получит доступ к тем же самым ресурсам, что и BlockLauncher, включая, возможно, ваши пароли и другую личную информацию.</string>
-    <string name="script_view_source">Открыть исходный код</string>
-    <string name="script_too_many_errors">был отключен, так как содержит слишком много ошибок. Извините!</string>
-    <string name="take_screenshot">Сделать скриншот</string>
-    <string name="take_screenshot_requires_modpe_script">Для снятия скриншотов должна быть включена поддержка скриптов ModPE. \nВы можете включить ее в настройках BlockLauncher\'a.</string>
-    <string name="screenshot_saved_as">Скриншот сохранен в</string>
-
-    <string name="selinux_broke_everything">К сожалению, BlockLauncher не может работать на вашем устройстве в полной мере, это связано с Samsung Knox или SELinux, которые препятствуют применению патчей \"на лету\". \n\n
-Мы работаем над исправлением этого, но, в настоящее время, функции BlockLauncher\'а ограничены до применения патчей (.mod) и загрузки текстурпаков. \n\nСкрипты ModPE не могут быть загружены, также, все патчи требуют рестарта.</string>
-
-    <string name="permlab_mcpelauncher_addon">Аддон BlockLauncher\'а</string>
-    <string name="permdesc_mcpelauncher_addon">Приложение может быть загружено в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что Minecraft PE имеет разрешение.</string>
-
+    <string name="script_import_from">Импорт скрипта</string>
+    <string name="script_import_from_local">Память телефона</string>
+    <string name="script_import_from_cfgy">Репозиторий Treebl</string>
+    <string name="script_import_from_bl_repo">Репозиторий BlockLauncher</string>
+    <string name="script_import_from_url">URL адрес</string>
+    <string name="script_import_from_clipboard">Буфер обмена</string>
+    <string name="script_import_from_clipboard_name">Имя скрипта</string>
+    <string name="script_import_from_clipboard_code">Код скрипта</string>
+    <string name="script_import_from_cfgy_id">ID скрипта</string>
+    <string name="script_import_from_url_enter">URL адрес скрипта</string>
+    <string name="script_import_too_many">Купите BlockLauncher Pro чтобы испортировать больше скриптов</string>
+    <string name="script_execution_error">Вылет ModPE Script</string>
+    <string name="script_disabled_in_multiplayer">ModPE Script отключены в мультиплеере. Они будут включены после выхода с сервера.</string>
+    <string name="script_minecraft_version_incompatible">ModPE Script не поддерживается в Вашей версии Minecraft PE. Могут быть вылеты игры. Используйте на Ваш страх и риск.</string>
+    <string name="script_import_from_intent_warning">Вы уверены, что хотите импортировать этот ModPE Script?</string>
+    <string name="script_view_source">Код скрипта</string>
+    <string name="script_too_many_errors">был отключен</string>
+    <string name="take_screenshot">Скриншот</string>
+    <string name="take_screenshot_requires_modpe_script">Требуется ModPE Script для снятия скриншотов.\nВключите ModPE Script в настройках BL.</string>
+    <string name="screenshot_saved_as">Сохранено как</string>
+    <string name="selinux_broke_everything">К сожалению, BlockLauncher не может работать на устройствах с включенным Samsung Knox или SELinux, так как они блокируют его функционал. \n\n
+Мы работаем над этим, а пока BlockLauncher ограничен в функционале. \n\nModPE Script отключен, импорт PTPatch патчей требует перезапуска игры.</string>
+    <string name="permlab_mcpelauncher_addon">Аддон BlockLauncher</string>
+    <string name="permdesc_mcpelauncher_addon">Разрешает приложению быть загруженным в BlockLauncher. Оно сможет получить доступ ко всему, к чему имеет доступ Minecraft PE.</string>
+    <string name="hovercar_insert_text_backspace">Стереть символ</string>
+    <string name="textures_select">Импорт</string>
+    <string name="textures_demo">Демо</string>
+    <string name="textures_extract">Оригинальные</string>
 </resources>

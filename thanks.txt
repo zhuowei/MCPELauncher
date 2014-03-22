@@ -1,0 +1,14 @@
+[							]
+[		FULL LIST OF		]
+[		USED LIBS IN		]
+[		THIS PROJECT		]
+[							]
+
+big thanks to their authors and contributors!
+
+* aFileChooser - Paul Burke
+* Pokerface - Zhuowei Zhang
+* SwitchCompatLibrary - ankri
+* PTPatch - Snowbound
+* Rhino - Mozilla
+* Slickcraft - NathanX
