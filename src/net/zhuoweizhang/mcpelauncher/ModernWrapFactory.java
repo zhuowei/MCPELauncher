@@ -1,6 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import org.mozilla.javascript.*;
+
 import android.util.Log;
 
 /**
@@ -8,6 +9,7 @@ Because they are not classic
 Disables wrapping of Java class objects
 */
 
+@SuppressWarnings("rawtypes")
 public class ModernWrapFactory extends WrapFactory {
 
 	public static final String TAG = "BlockLauncher/ModernWrapFactory";

@@ -10,14 +10,17 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class Utils {
 	protected static Context mContext = null;
-
-	public Utils(Context con) {
-		mContext = con;
+	
+	public static void setContext(Context context) {
+		mContext = context;
 	}
 
 	public static void clearDirectory(File dir) {
@@ -64,6 +67,38 @@ public class Utils {
 		if (r.length() >= replacement.length())
 			r = r.substring(replacement.length());
 		return r;
+	}
+
+	public static boolean hasTooManyPatches() {
+		int maxPatchCount = getMaxPatches();
+		return maxPatchCount >= 0 && getEnabledPatches().size() >= maxPatchCount;
+	}
+
+	public static boolean hasTooManyScripts() {
+		int maxPatchCount = getMaxScripts();
+		return maxPatchCount >= 0 && getEnabledScripts().size() >= maxPatchCount;
+	}
+	
+	public static int getMaxPatches() {
+		return mContext.getResources().getInteger(R.integer.max_num_patches);
+	}
+	
+	public static int getMaxScripts() {
+		return mContext.getResources().getInteger(R.integer.max_num_scripts);
+	}
+
+	public static Set<String> getEnabledPatches() {
+		return new HashSet<String>(Arrays.asList(Utils.getPrefs(1).getString("enabledPatches", "")
+				.split(";")));
+	}
+
+	public static Set<String> getEnabledScripts() {
+		return new HashSet<String>(Arrays.asList(Utils.getPrefs(1).getString("enabledScripts", "")
+				.split(";")));
+	}
+	
+	public static boolean isPro() {
+		return mContext.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro");
 	}
 
 	/**

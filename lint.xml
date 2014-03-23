@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="Typos">
+        <ignore path="res/values-de/strings.xml" />
+        <ignore path="res/values-es/strings.xml" />
+    </issue>
+</lint>

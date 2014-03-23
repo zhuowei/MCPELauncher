@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Russian translation by MelomanCool -->
+<!-- Shorter Russian translation by STALKER_2010 -->
 <resources>
-    <string name="select_file">Выберите файл с SD карты</string>
+    <string name="select_file">Выбор файла</string>
     <string name="pref_texture_pack">Текстурпак</string>
     <string name="pref_texture_pack_summary">Выбор текстурпака</string>
     <string name="pref_zz_longvibration">Долгая вибрация</string>
@@ -49,7 +49,7 @@
     <string name="dump_libminecraftpe">Дамп libminecraftpe.so</string>
     <string name="nerdy_stuff_are_useless">Не нужно обычным пользователям. Для разработчиков.</string>
     <string name="restart_app">Рестарт</string>
-    <string name="manage_patches">PTPatch</string>
+    <string name="manage_patches">Патчи PTPatch</string>
     <string name="manage_patches_import">Добавить</string>
     <string name="manage_patches_import_error">Не удалось испортировать патч</string>
     <string name="manage_patches_too_many">Купите BlockLauncher Pro для использования более 3 патчей</string>
@@ -74,8 +74,8 @@
     <string name="manage_addons">Аддоны BL</string>
     <string name="get_pro">Купить BlockLauncher Pro</string>
     <string name="about_about">О BlockLauncher</string>
-    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Не распостраняйте без разрешения.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Не распостраняйте без разрешения.</string>
     <string name="about_librarycredits">Программа содержит aFileChooser от Paul Burke. \n
 Программа содержит PTPatchTool от Snowbound, лицензированноe под Eclipse Public License. \n
 Программа содержит модификацию текстурпака Slickcraft от NathanX с его разрешения.\n
@@ -87,7 +87,7 @@
 </string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">Без работы многих переводчиков, разработчиков и тестировщиков BL не существовал бы. Благодарю Вас.\nПосетите GitHub для получения информации о их вкладе.</string>
-    <string name="about_go_to_forums">Открыть тему BlockLauncher на Minecraft Forums</string>
+    <string name="about_go_to_forums">BlockLauncher на Minecraft Forums</string>
     <string name="no_minecraft_installed">BlockLauncher не обнаружил Minecraft PE на устройстве. Установите полную версию Minecraft Pocket Edition от Mojang.</string>
     <string name="firstlaunch_title">Добро пожаловать!</string>
     <string name="firstlaunch_generic_intro">Спасибо за интерес к BlockLauncher. BlockLauncher запускает Minecraft Pocket Edition и добавляет возможность установки патчей, аддонов, скриптов, скинов и текстур.</string>
@@ -130,4 +130,13 @@
     <string name="textures_select">Импорт</string>
     <string name="textures_demo">Демо</string>
     <string name="textures_extract">Оригинальные</string>
+    <string name="plurals_patches_one">патча</string>
+    <string name="plurals_patches_more">патчей</string>
+    <string name="plurals_patches_no">Нет патчей</string>
+    <string name="plurals_scripts_one">скрипта</string>
+    <string name="plurals_scripts_more">скриптов</string>
+    <string name="plurals_scripts_no">Нет скриптов</string>
+    <string name="nerdy_stuff_dump_modpe">Дамп методов ModPE Script</string>
+    <string name="nerdy_stuff_set_skin">Установить скин /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">Вход воспрещен!</string>
 </resources>

@@ -212,7 +212,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						}
 						ScriptManager.setEnabled(to, false);
 						int maxPatchCount = getMaxPatchCount();
-						if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+						if (Utils.hasTooManyScripts()) {
 							Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 						} else {
 							ScriptManager.setEnabled(to, true);
@@ -297,7 +297,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	public void togglePatch(ContentListItem patch) {
 		int maxPatchCount = getMaxPatchCount();
-		if (!patch.enabled && maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+		if (!patch.enabled && Utils.hasTooManyScripts()) {
 			Toast.makeText(this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -316,10 +316,6 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	private void afterPatchToggle(ContentListItem patch) {
-	}
-
-	public int getEnabledCount() {
-		return ScriptManager.getEnabledScripts().size();
 	}
 
 	public void deletePatch(ContentListItem patch) throws Exception {
@@ -594,7 +590,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 			ScriptManager.setEnabled(scriptFile, false);
 			int maxPatchCount = getMaxPatchCount();
-			if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+			if (Utils.hasTooManyScripts()) {
 				Toast.makeText(ManageScriptsActivity.this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 			} else {
 				ScriptManager.setEnabled(scriptFile, true);
@@ -641,7 +637,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			try {
 				ScriptManager.setEnabled(file, false);
 				int maxPatchCount = getMaxPatchCount();
-				if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+				if (Utils.hasTooManyScripts()) {
 					Toast.makeText(ManageScriptsActivity.this, R.string.script_import_too_many, Toast.LENGTH_SHORT).show();
 				} else {
 					ScriptManager.setEnabled(file, true);
@@ -658,6 +654,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	/** Import a script from Treebl's repo. */
 	private class ImportScriptFromCfgyTask extends ImportScriptTask<String> {
+		@SuppressWarnings("resource")
 		protected File doInBackground(String... ids) {
 			String id = ids[0];
 

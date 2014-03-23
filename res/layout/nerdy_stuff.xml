@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-<LinearLayout
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
-        <TextView android:text="@string/nerdy_stuff_are_useless"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="16pt"/>
+            android:text="@string/nerdy_stuff_are_useless"
+            android:textSize="16pt" />
+
         <Button
             android:id="@+id/dump_libminecraftpe_button"
             android:layout_width="fill_parent"
@@ -24,24 +28,27 @@
             android:layout_margin="20dp"
             android:text="@string/restart_app" />
 
-        <Button android:id="@+id/set_skin_button"
+        <Button
+            android:id="@+id/dump_modpe_methods"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="Set skin to /sdcard/skin.png"/>
+            android:text="@string/nerdy_stuff_dump_modpe" />
 
-        <Button android:id="@+id/chef_special"
+        <Button
+            android:id="@+id/set_skin_button"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="Authorized personnel only"
-            android:visibility="gone"/>
+            android:text="@string/nerdy_stuff_set_skin" />
 
-        <Button android:id="@+id/dump_modpe_methods"
+        <Button
+            android:id="@+id/chef_special"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="Dump ModPE Script methods"/>
+            android:text="@string/nerdy_stuff_secret"
+            android:visibility="gone" />
+    </LinearLayout>
 
-</LinearLayout>
 </ScrollView>

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.mojang.minecraftpe.MainActivity;
+
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.Utils;
@@ -39,7 +41,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private SwitchPreference scriptsPreference;
 	private SwitchPreference skinPreference;
 	private Preference patchesPreference;
-	private Preference safeModePreference;
+	private CheckBoxPreference safeModePreference;
 	private ListPreference languagePreference;
 	private Preference goToForumsPreference;
 	private Preference getProPreference;
@@ -55,6 +57,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			while (activity.get() != null) {
 				updateTP();
 				updateSkin();
+				updatePatches();
+				updateScripts();
 				synchronized (ui) {
 					try {
 						ui.wait();
@@ -107,6 +111,62 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			});
 			a = null;
 		}
+
+		protected void updatePatches() {
+			MainMenuOptionsActivity a = activity.get();
+			final Preference p = a.patchesPreference;
+			String sum = null;
+			if ((a.safeModePreference != null) && (a.safeModePreference.isChecked())) {
+				int count = getDir(MainActivity.PT_PATCHES_DIR, 0).listFiles().length;
+				if (!Utils.isPro() && (Utils.getMaxPatches() != -1)) {
+					count = Math.min(Utils.getMaxPatches(), count);
+				}
+				String descr = getString(R.string.plurals_patches_more);
+				if (count == 1)
+					descr = getString(R.string.plurals_patches_one);
+				if (count == 0) {
+					sum = getString(R.string.plurals_patches_no);
+				} else {
+					sum = Utils.getEnabledPatches().size() + "/" + count + " " + descr;
+				}
+			}
+			final String sm = sum;
+			a.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					p.setSummary(sm);
+				}
+			});
+			a = null;
+		}
+
+		protected void updateScripts() {
+			MainMenuOptionsActivity a = activity.get();
+			final SwitchPreference p = a.scriptsPreference;
+			String sum = null;
+			if ((p.content != null) && (p.content.isChecked())) {
+				int count = getDir(ScriptManager.SCRIPTS_DIR, 0).listFiles().length;
+				if (!Utils.isPro() && (Utils.getMaxScripts() != -1)) {
+					count = Math.min(Utils.getMaxScripts(), count);
+				}
+				String descr = getString(R.string.plurals_scripts_more);
+				if (count == 1)
+					descr = getString(R.string.plurals_scripts_one);
+				if (count == 0) {
+					sum = getString(R.string.plurals_scripts_no);
+				} else {
+					sum = Utils.getEnabledScripts().size() + "/" + count + " " + descr;
+				}
+			}
+			final String sm = sum;
+			a.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					p.setSummary(sm);
+				}
+			});
+			a = null;
+		}
 	});
 
 	@SuppressWarnings("deprecation")
@@ -127,7 +187,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			patchesPreference.setOnPreferenceClickListener(this);
 		}
 
-		safeModePreference = findPreference("zz_safe_mode");
+		safeModePreference = (CheckBoxPreference) findPreference("zz_safe_mode");
 		if (safeModePreference != null) {
 			safeModePreference.setOnPreferenceClickListener(this);
 		}
@@ -176,7 +236,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		if (paranoidPreference != null) {
 			paranoidPreference.setOnPreferenceClickListener(this);
 		}
-		
+
 		ui.start();
 	}
 
@@ -238,6 +298,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			if (!data.isChecked())
 				f = ManageTexturepacksActivity.REQUEST_DISABLE;
 			ManageTexturepacksActivity.setTexturepack(f, null);
+		} else if (data == skinPreference.content) {
+			File f = ManageSkinsActivity.REQUEST_ENABLE;
+			if (!data.isChecked())
+				f = ManageSkinsActivity.REQUEST_DISABLE;
+			ManageSkinsActivity.setSkin(f, null);
 		}
 	}
 

@@ -20,6 +20,7 @@ import java.util.List;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.util.Log;
 import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 
@@ -254,7 +255,7 @@ public class ScriptManager {
 			ScriptManager.scriptingEnabled = true; // all local worlds get ModPE
 													// support
 		nativeSetGameSpeed(20.0f);
-		//entityList.clear();
+		// entityList.clear();
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -361,7 +362,7 @@ public class ScriptManager {
 		int entityIndex = allentities.indexOf(entity);
 		if (entityIndex >= 0) allentities.remove(entityIndex);
 		callScriptMethod("entityRemovedHook", entity);
-		//entityList.remove(Integer.valueOf(entity));
+		// entityList.remove(Integer.valueOf(entity));
 	}
 
 	public static void entityAddedCallback(int entity) {
@@ -371,7 +372,7 @@ public class ScriptManager {
 		}
 		allentities.add(entity);
 		callScriptMethod("entityAddedHook", entity);
-		//entityList.put(entityList.getLength(), entityList, entity);
+		// entityList.put(entityList.getLength(), entityList, entity);
 	}
 
 	public static void levelEventCallback(int player, int eventType, int x, int y, int z, int data) {
@@ -601,7 +602,7 @@ public class ScriptManager {
 
 	// end script manager controls
 
-	private static String[] getAllJsFunctions(Class clazz) {
+	private static String[] getAllJsFunctions(Class<? extends ScriptableObject> clazz) {
 		List<String> allList = new ArrayList<String>();
 		for (Method met : clazz.getMethods()) {
 			if (met.getAnnotation(JSFunction.class) != null) {
@@ -684,7 +685,7 @@ public class ScriptManager {
 		}
 		builder.append(met.getName());
 		builder.append('(');
-		Class[] params = met.getParameterTypes();
+		Class<?>[] params = met.getParameterTypes();
 		for (int i = 0; i < params.length; i++) {
 			builder.append("par");
 			builder.append(i + 1);
@@ -870,7 +871,8 @@ public class ScriptManager {
 	}
 
 	private static void debugDumpItems() throws IOException {
-		PrintWriter out = new PrintWriter(new File("/sdcard/items.csv"));
+		PrintWriter out = new PrintWriter(new File(Environment.getExternalStorageDirectory(),
+				"/items.csv"));
 		float[] textureUVbuf = new float[6];
 		for (int i = 0; i < 512; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
@@ -933,7 +935,8 @@ public class ScriptManager {
 		int[] endArray = null;
 		if (firstObj instanceof Number) {
 			if (inArrayLength % 3 != 0) {
-				throw new IllegalArgumentException("Array length must be multiple of 3 (this was changed in 1.6.8): [itemid, itemCount, itemdamage, ...]");
+				throw new IllegalArgumentException(
+						"Array length must be multiple of 3 (this was changed in 1.6.8): [itemid, itemCount, itemdamage, ...]");
 			} else {
 				endArray = new int[inArrayLength];
 				for (int i = 0; i < endArray.length; i++) {
@@ -1022,9 +1025,12 @@ public class ScriptManager {
 	// 0.5
 	public static native void nativeOnGraphicsReset();
 
-	//0.6
-	public static native void nativeDefineItem(int itemId, String iconName, int iconId, String name, int maxStackSize);
-	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId, int hearts, String name, int maxStackSize);
+	// 0.6
+	public static native void nativeDefineItem(int itemId, String iconName, int iconId,
+			String name, int maxStackSize);
+
+	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId,
+			int hearts, String name, int maxStackSize);
 
 	// nonstandard
 	public static native void nativeSetFov(float degrees);
@@ -1114,9 +1120,13 @@ public class ScriptManager {
 	public static native void nativeSendChat(String message);
 
 	public static native String nativeEntityGetNameTag(int entityId);
+
 	public static native int nativeEntityGetRiding(int entityId);
+
 	public static native int nativeEntityGetRider(int entityId);
+
 	public static native String nativeEntityGetMobSkin(int entityId);
+
 	public static native int nativeEntityGetRenderType(int entityId);
 	public static native void nativeSetCameraEntity(int entityId);
 
@@ -1984,7 +1994,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setItem(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+		public static void setItem(int id, String iconName, int iconSubindex, String name,
+				int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim()
@@ -1998,7 +2009,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts, String name, int maxStackSize) {
+		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts,
+				String name, int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
 				Log.i("MCPELauncher", "The item icon for " + name.trim()
@@ -2129,12 +2141,29 @@ public class ScriptManager {
 			int[] expanded = expandShapelessRecipe(ingredients);
 			nativeAddShapelessRecipe(id, count, damage, expanded);
 		}
-		
+
 		@JSStaticFunction
-		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do
+																							// I
+																							// need
+																							// a
+																							// count?
+																							// If
+																							// not,
+																							// should
+																							// I
+																							// just
+																							// fill
+																							// it
+																							// with
+																							// null,
+																							// or
+																							// skip
+																							// it
+																							// completely?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
-		
+
 		@Override
 		public String getClassName() {
 			return "Item";
@@ -2213,11 +2242,11 @@ public class ScriptManager {
 			return "Block";
 		}
 	}
-	
+
 	private static class NativeServerApi extends ScriptableObject {
 		public NativeServerApi() {
 		}
-		
+
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
 			requestLeaveGame = true;
@@ -2225,10 +2254,11 @@ public class ScriptManager {
 			requestJoinServer.serverAddress = serverAddress;
 			requestJoinServer.serverPort = port;
 		}
-		
+
 		@JSStaticFunction
 		public static void sendChat(String message) {
-			if (!isRemote) return;
+			if (!isRemote)
+				return;
 			nativeSendChat(message);
 		}
 
