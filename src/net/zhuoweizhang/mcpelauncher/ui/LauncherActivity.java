@@ -6,7 +6,7 @@ import android.os.Bundle;
 public class LauncherActivity extends com.mojang.minecraftpe.MainActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		new Utils(getApplicationContext());
+		Utils.setContext(getApplicationContext());
 		super.onCreate(savedInstanceState);
 	}
 }

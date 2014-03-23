@@ -16,7 +16,7 @@
     <string name="pref_zz_longvibration">Extra-lange Vibration</string>
     <string name="pref_zz_longvibration_summary">Verlängert die Vibrations Länge um 5x</string>
     <string name="pref_gfx_fancygraphics">Schöne Grafik</string>
-    <string name="pref_gfx_fancygraphics_summary">Macht Leaves... schöner</string>
+    <string name="pref_gfx_fancygraphics_summary">Macht Leaves&#8230; schöner</string>
     <string name="pref_gfx_lowquality">Niedrige Grafikquallität</string>
     <string name="pref_gfx_lowquality_summary">Dinge werden schlechter aussehen</string>
     <string name="pref_game_difficultypeaceful">Friedlicher Modus</string>
@@ -74,8 +74,8 @@
     <string name="skin_imported">Skin gesetzt</string>
     <string name="get_pro">Upgrade auf Pro</string>
     <string name="about_about">Über BlockLauncher</string>
-    <string name="about_copyright">Copyright (C) 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright (C) 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">Dieses Programm verwendet eine FileChooser library von Paul Burke. \n
 Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n

@@ -181,6 +181,18 @@ public class ManageTexturepacksActivity extends ListActivity {
 		setTexturepack(f, this);
 	}
 
+	CompoundButton.OnCheckedChangeListener ls = new CompoundButton.OnCheckedChangeListener() {
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			if (isChecked) {
+				setTexturepack(REQUEST_ENABLE);
+			} else {
+				setTexturepack(REQUEST_DISABLE);
+			}
+			loadHistory();
+		}
+	};
+
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -189,17 +201,7 @@ public class ManageTexturepacksActivity extends ListActivity {
 			master = (CompoundButton) menu.findItem(R.id.ab_switch_container).getActionView()
 					.findViewById(R.id.ab_switch);
 			if (master != null) {
-				master.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-					@Override
-					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-						if (isChecked) {
-							setTexturepack(REQUEST_ENABLE);
-						} else {
-							setTexturepack(REQUEST_DISABLE);
-						}
-						loadHistory();
-					}
-				});
+				master.setOnCheckedChangeListener(ls);
 				refreshABToggle();
 			} else {
 				System.err.println("WTF?");
@@ -212,7 +214,9 @@ public class ManageTexturepacksActivity extends ListActivity {
 
 	protected void refreshABToggle() {
 		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
+			master.setOnCheckedChangeListener(null);
 			master.setChecked(isEnabled());
+			master.setOnCheckedChangeListener(ls);
 		}
 	}
 
@@ -287,6 +291,9 @@ public class ManageTexturepacksActivity extends ListActivity {
 		protected void onPostExecute(Void result) {
 			dialog.dismiss();
 			if (outFile.exists()) {
+				adapter.add(outFile);
+				adapter.notifyDataSetChanged();
+				saveHistory();
 				setTexturepack(outFile);
 				Toast.makeText(ManageTexturepacksActivity.this, R.string.extract_textures_success,
 						Toast.LENGTH_SHORT).show();

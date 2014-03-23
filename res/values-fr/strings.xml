@@ -99,8 +99,8 @@ Voulez-vous continuer en mode sans échec sans rien ou revenir en mode de correc
     <string name="manage_addons">Gérer add-on</string>
     <string name="get_pro">Acheter la PRO</string>
     <string name="about_about">A propos de BlockLauncher</string>
-    <string name="about_copyright">Copyright  2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Droits d\'auteur 2013-2014 Zhuowei Zhang. Ne pas distribuer sans autorisation.</string>
+    <string name="about_copyright">Copyright  2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Droits d\'auteur 2013&#8211;2014 Zhuowei Zhang. Ne pas distribuer sans autorisation.</string>
     <string name="about_librarycredits">Ce programme utilise la bibliothèque aFileChooser par Paul Burke.\n
 Ce programme contient le code de l \'Snowbound \ PTPatchTool, sous licence publique Eclipse.\n
 Ce programme contient une version modifiée de l \'NathanX \ Slickcraft pack de texture:. Utilisés avec la permission \ n
@@ -114,7 +114,7 @@ Pour des informations complètes de licences, consultez les forums Minecraft fil
     <string name="about_go_to_forums">Ouvrir les sujet minecraft pour BlockLauncher</string>
     <string name="no_minecraft_installed">BlockLauncher ne peut pas trouver une copie de Minecraft PE sur votre appareil. Cette application est conçue pour patcher la version complète de Minecraft Pocket Edition par Mojang.</string>
     <string name="firstlaunch_title">Bienvenue sur BlockLauncher!</string>
-    <string name="firstlaunch_generic_intro">Merci d\'utiliser block launcher... Merci à vous de contribuer à l\'app</string>
+    <string name="firstlaunch_generic_intro">Merci d\'utiliser block launcher&#8230; Merci à vous de contribuer à l\'app</string>
     <string name="firstlaunch_jelly_bean">Votre appareil fonctionne avec Android Jelly Bean ou plus récent, de sorte BlockLauncher ne peut pas accéder les textures par défaut. Le pack de texture de démonstration a été activé afin que vous puissiez tester le lanceur.</string>
     <string name="firstlaunch_see_options">Pour commencer à BlockLauncher, appuyez sur l\'icône de la clé en haut de l\'écran. Pour plus d\'aide, visitez le fil Minecraft Forum.</string>
     <string name="firstlaunch_help">Aide</string>
@@ -152,7 +152,7 @@ Pour des informations complètes de licences, consultez les forums Minecraft fil
     <string name="script_minecraft_version_incompatible">Le script n\'est pas compatible avec votre version,veuillez le désactiver si vous ne voulez pas de crash. </string>
     <string name="script_import_from_intent_warning">Voulez vous importer un script ? ils peuvent peut-être récupérer des mdp (pas sûr)</string>
     <string name="script_view_source">Voir source</string>
-    <string name="script_too_many_errors">Désactivés désolé...</string>
+    <string name="script_too_many_errors">Désactivés désolé&#8230;</string>
     <string name="take_screenshot">Prendre un screenshot</string>
     <string name="take_screenshot_requires_modpe_script">L\'option modPE doit être activée pour prendre un screenshot.\nVous pouvez l\'activer dans les options de block launcher</string>
     <string name="screenshot_saved_as">Screenshot sauvergardé dans:</string>

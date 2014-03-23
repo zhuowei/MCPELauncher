@@ -73,9 +73,7 @@ public class PatchManager {
 	}
 
 	protected void loadEnabledPatches() {
-		SharedPreferences sharedPrefs = context.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
-		String enabledPatchesStr = sharedPrefs.getString("enabledPatches", "");
-		enabledPatches = new HashSet<String>(Arrays.asList(enabledPatchesStr.split(";")));
+		enabledPatches = Utils.getEnabledPatches();
 	}
 
 	protected void saveEnabledPatches() {

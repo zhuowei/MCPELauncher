@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Russian translation by MelomanCool of 4PDA. -->
+<!-- Russian translation by MelomanCool -->
 <resources>
     <string name="select_file">Выберите файл с SD карты</string>
     <string name="pref_ctrl_touchscreen">Использовать тачскрин</string>
@@ -99,8 +99,8 @@
     <string name="manage_addons">Управление аддонами</string>
     <string name="get_pro">Обновить до Pro</string>
     <string name="about_about">О BlockLauncher</string>
-    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">Эта программа использует библиотеку aFileChooser от Пола Берка.\n
 Эта программа содержит код из PTPatchTool от Snowbound\'а под Общественной Лицензией Eclipse.\n
 Эта программа содержит модифицированную версию текстурпака Slickcraft от NathanX\'а, который используется с его разрешения.\n

@@ -112,8 +112,8 @@ Apakah kamu mau melanjutkan di Safe Mode tanpa patch atau kembali ke mode normal
     <string name="manage_addons">Kelola addons</string>
     <string name="get_pro">Upgrade ke Pro</string>
     <string name="about_about">Tentang BlockLauncher</string>
-    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Jangan mendistribusikan tanpa izin.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Jangan mendistribusikan tanpa izin.</string>
     <string name="about_librarycredits">Program ini menggunakan library aFileChooser oleh Paul Burke. \n
 Program ini berisi kode dari Snowbound\'s PTPatchTool, berlisensi di bawah Eclipse Public License. \n
 Program ini berisi versi modifikasi NathanX\'s Slickcraft tekstur pack: digunakan dengan izin.\n

@@ -100,9 +100,6 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	 * gets the maximum number of patches this application can patch. A negative
 	 * value indicates unlimited amount.
 	 */
-	protected int getMaxPatchCount() {
-		return this.getResources().getInteger(R.integer.max_num_patches);
-	}
 
 	protected void setPatchListModified() {
 		setResult(RESULT_OK);
@@ -121,8 +118,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 					File to = new File(getDir(PT_PATCHES_DIR, 0), file.getName());
 					PatchUtils.copy(file, to);
 					PatchManager.getPatchManager(this).setEnabled(to, false);
-					int maxPatchCount = getMaxPatchCount();
-					if (maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+					if (Utils.hasTooManyPatches()) {
 						Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
 					} else {
 						PatchManager.getPatchManager(this).setEnabled(to, true);
@@ -185,8 +181,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	}
 
 	public void togglePatch(ContentListItem patch) {
-		int maxPatchCount = getMaxPatchCount();
-		if (!patch.enabled && maxPatchCount >= 0 && getEnabledCount() >= maxPatchCount) {
+		if (!patch.enabled && Utils.hasTooManyPatches()) {
 			Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -250,10 +245,6 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	public int getEnabledCount() {
-		return PatchManager.getPatchManager(this).getEnabledPatches().size();
 	}
 
 	public void deletePatch(ContentListItem patch) throws Exception {

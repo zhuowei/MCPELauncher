@@ -1,6 +1,5 @@
 package net.zhuoweizhang.mcpelauncher.patch;
 
-import java.io.*;
 import java.util.*;
 
 public abstract class Patch {

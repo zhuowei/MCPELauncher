@@ -57,6 +57,8 @@ import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
 import net.zhuoweizhang.pokerface.PokerFace;
 
+@SuppressLint("SdCardPath")
+@SuppressWarnings("deprecation")
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/MainActivity";
@@ -178,12 +180,7 @@ public class MainActivity extends NativeActivity {
 
 		try {
 			mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
-			mcAppInfo = mcPkgInfo.applicationInfo;/*
-												 * getPackageManager().
-												 * getApplicationInfo
-												 * ("com.mojang.minecraftpe",
-												 * 0);
-												 */
+			mcAppInfo = mcPkgInfo.applicationInfo;
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
@@ -428,7 +425,6 @@ public class MainActivity extends NativeActivity {
 		File patched = getDir("patched", 0);
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
-		File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
 		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
 				.getBoolean("force_prepatch", true);
 		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
@@ -444,9 +440,8 @@ public class MainActivity extends NativeActivity {
 
 			int patchedCount = 0;
 			int maxPatchNum = getMaxNumPatches();
-			PatchManager patchMgr = PatchManager.getPatchManager(this);
 
-			Set<String> patchLocs = patchMgr.getEnabledPatches();
+			Set<String> patchLocs = Utils.getEnabledPatches();
 
 			for (String patchLoc : patchLocs) {
 				if (maxPatchNum >= 0 && patchedCount >= maxPatchNum)
@@ -801,7 +796,6 @@ public class MainActivity extends NativeActivity {
 				}).setCancelable(false).create();
 	}
 
-	@SuppressWarnings("deprecation")
 	protected Dialog createInsertTextDialog() {
 		final EditText editText = new EditText(this);
 		editText.setSingleLine(false);
@@ -1130,7 +1124,7 @@ public class MainActivity extends NativeActivity {
 			public void run() {
 				loginWebView = new WebView(MainActivity.this);
 				loginWebView.setLayoutParams(new ViewGroup.LayoutParams(
-						ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+						ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 				loginWebView.setWebViewClient(new LoginWebViewClient());
 				WebSettings settings = loginWebView.getSettings();
 				settings.setJavaScriptEnabled(true); // at least on Firefox, the
@@ -1148,8 +1142,8 @@ public class MainActivity extends NativeActivity {
 				loginDialog.setCancelable(true);
 				loginDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				loginDialog.setContentView(loginWebView);
-				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT,
-						ViewGroup.LayoutParams.FILL_PARENT);
+				loginDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+						ViewGroup.LayoutParams.MATCH_PARENT);
 				loginDialog.show();
 
 				loginWebView.loadUrl(getRealmsRedirectInfo().loginUrl);
@@ -1930,6 +1924,7 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 
+		@SuppressWarnings("resource")
 		public void run() {
 			InputStream is = null;
 			String content = null;

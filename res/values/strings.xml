@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="textOn">ON</string>
-    <string name="textOff">OFF</string>
+    <string name="textOn" translatable="false" tools:ignore="MissingTranslation">ON</string>
+    <string name="textOff" translatable="false" tools:ignore="MissingTranslation">OFF</string>
     <!-- Do not translate the app name, as I prefer the name to be consistent. Just remove the app_name line in the translations. -->
-    <string name="app_name">BlockLauncher</string>
+    <string name="app_name" translatable="false" tools:ignore="MissingTranslation">BlockLauncher</string>
     <string name="pref_ctrl_touchscreen">Use Touchscreen</string>
     <string name="pref_ctrl_touchscreen_summary">If you are not using an Xperia Play, check this</string>
     <string name="pref_mp_username">Multiplayer Username</string>
     <string name="pref_mp_username_summary">Your name, duh</string>
     <string name="pref_texture_pack">Texture Pack</string>
     <string name="pref_texture_pack_summary">Change your texture pack</string>
+    <!--
     <string name="pref_ctrl_usetouchjoypad">Split touch</string>
     <string name="pref_ctrl_islefthanded">Lefty</string>
     <string name="pref_ctrl_islefthanded_summary">Mirrors the control scheme</string>
@@ -18,8 +19,10 @@
     <string name="pref_ctrl_invertmouse_summary">Meanwhile in Australia :)</string>
     <string name="pref_feedback_vibration">Vibrate</string>
     <string name="pref_feedback_vibration_summary">Vibrate when a block is destroyed</string>
+    -->
     <string name="pref_zz_longvibration">Extra-long vibration</string>
     <string name="pref_zz_longvibration_summary">Increase the vibration length by 5x</string>
+    <!--
     <string name="pref_gfx_fancygraphics">Fancy graphics</string>
     <string name="pref_gfx_fancygraphics_summary">Make stuff look better</string>
     <string name="pref_gfx_lowquality">Low quality graphics</string>
@@ -28,14 +31,17 @@
     <string name="pref_game_difficultypeaceful_summary">Health regeneration, no monsters</string>
     <string name="pref_ctrl_sensitivity">Sensitivity</string>
     <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
+    -->
     <string name="pref_zz_safe_mode">Safe mode</string>
     <string name="pref_zz_safe_mode_summary">Disables all patches</string>
+    <!--
     <string name="pref_zz_patch_ip_enable">Redirect Multiplayer</string>
     <string name="pref_zz_patch_ip_enable_summary">Redirects multiplayer connections to an online server</string>
     <string name="pref_zz_patch_ip">Server IP</string>
     <string name="pref_zz_patch_ip_summary">The IP address of the online server</string>
     <string name="pref_zz_patch_ip_port">Server Port</string>
     <string name="pref_zz_patch_ip_port_summary">The port of the online server (usually 19132)</string>
+    -->
     <string name="pref_zz_texture_pack_enable">Use texture pack</string>
     <string name="pref_zz_custom_dpi">Custom DPI</string>
     <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
@@ -115,8 +121,8 @@ Do you want to continue in Safe Mode without patches or return to normal patchin
     <string name="manage_addons">Manage addons</string>
     <string name="get_pro">Upgrade to Pro</string>
     <string name="about_about">About BlockLauncher</string>
-    <string name="about_copyright">Copyright &#169; 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright &#169; 2013-2014 Zhuowei Zhang. Do not distribute without permission.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">This program uses the aFileChooser library by Paul Burke. \n
 This program contains code from Snowbound\'s PTPatchTool, licensed under the Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
@@ -140,11 +146,14 @@ For full licensing information, check the Minecraft Forums thread.\n</string>
     <string name="hovercar_live_patch">Patch mods in-game</string>
     <string name="hovercar_options">Launcher options (restart required)</string>
     <string name="hovercar_insert_text">Insert text (keyboard issue workaround)</string>
+    <!--
     <string name="mco_redirect_none">Don\'t redirect</string>
     <string name="mco_redirect_pocketmine">Use PocketMine\'s server list</string>
     <string name="mco_redirect_minepocket">Use MinePocket\'s server list</string>
+    -->
     <string name="safe_mode_exit">Return to normal</string>
     <string name="safe_mode_continue">Continue</string>
+    <!--
     <string name="server_list_add">Add server</string>
     <string name="pref_zz_server_list">Server list</string>
     <string name="pref_zz_server_list_summary">Select from or add a server to your saved server list</string>
@@ -152,6 +161,7 @@ For full licensing information, check the Minecraft Forums thread.\n</string>
     <string name="server_list_name_prompt">Name: </string>
     <string name="server_list_address_prompt">Address: </string>
     <string name="server_list_port_prompt">Port: </string>
+    -->
     <string name="script_import_from">Import script from</string>
     <string name="script_import_from_local">Local storage</string>
     <string name="script_import_from_cfgy">Treebl\'s official repo</string>
@@ -180,5 +190,14 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="textures_select">Select</string>
     <string name="textures_demo">Demo</string>
     <string name="textures_extract">Extract original</string>
+    <string name="plurals_patches_one">patch</string>
+    <string name="plurals_patches_more">patches</string>
+    <string name="plurals_patches_no">No patches</string>
+    <string name="plurals_scripts_one">script</string>
+    <string name="plurals_scripts_more">scripts</string>
+    <string name="plurals_scripts_no">No scripts</string>
+    <string name="nerdy_stuff_dump_modpe">Dump ModPE Script methods</string>
+    <string name="nerdy_stuff_set_skin">Set skin to /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">Authorized personnel only</string>
 
 </resources>

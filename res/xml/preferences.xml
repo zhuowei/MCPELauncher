@@ -24,21 +24,6 @@
             android:defaultValue="false"
             android:key="zz_texture_pack_enable"
             android:title="@string/pref_texture_pack" />
-        <!--
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="zz_texture_pack_demo"
-            android:summary="@string/pref_zz_texture_pack_demo_summary"
-            android:title="@string/pref_zz_texture_pack_demo" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="zz_texture_pack_enable"
-            android:title="@string/pref_zz_texture_pack_enable_extracted" />
-        <Preference
-            android:key="zz_extract_original_textures"
-            android:summary="@string/pref_zz_extract_original_textures_summary"
-            android:title="@string/pref_zz_extract_original_textures" />
-        -->
 
         <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
             android:defaultValue="false"
@@ -69,15 +54,6 @@
             android:defaultValue="true"
             android:key="zz_script_enable"
             android:title="@string/pref_zz_script_enable" />
-
-
-        <!--
-            <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="zz_script_paranoid_mode"
-            android:summary="@string/pref_zz_script_paranoid_mode_summary"
-            android:title="@string/pref_zz_script_paranoid_mode" />
-        -->
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_show_insert_text"
@@ -91,7 +67,7 @@
     <PreferenceCategory android:title="@string/pref_support_title" >
         <Preference android:title="@string/nerdy_stuff_page" >
             <intent
-                android:targetClass="net.zhuoweizhang.mcpelauncher.NerdyStuffActivity"
+                android:targetClass="net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity"
                 android:targetPackage="net.zhuoweizhang.mcpelauncher" />
         </Preference>
 

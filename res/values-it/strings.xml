@@ -44,7 +44,7 @@
     <string name="texture_pack_unable_to_load">Impossibile caricare Pacchetto grafico.</string>
     <string name="pref_zz_extract_original_textures">Estrai il Pacchetto grafico originale con i permessi di root</string>
     <string name="pref_zz_extract_original_textures_summary">Backup l\'APK originale con i permessi di root e impostalo come Pacchetto Grafico</string>
-    <string name="extracting_textures">Backup dell\'APK orginale in corso...</string>
+    <string name="extracting_textures">Backup dell\'APK orginale in corso&#8230;</string>
     <string name="extract_textures_success">Impostato con successo l\'APK originale come Pacchetto grafico.</string>
     <string name="extract_textures_error">Impossibile accedere all\'APK originale.</string>
     <string name="extract_textures_no_root">Impossibile avere l\'accesso come SuperUser - hai i permessi root?</string>
@@ -75,8 +75,8 @@
     <string name="skin_imported">Imposta Skin</string>
     <string name="get_pro">Compra la versione Pro</string>
     <string name="about_about">Info su BlockLauncher</string>
-    <string name="about_copyright">Copyright (C) 2013-2014 Zhuowei Zhang</string>
-    <string name="about_copyright_pro">Copyright (C) 2013-2014 Zhuowei Zhang. Non distribuire senza permesso.</string>
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Non distribuire senza permesso.</string>
     <string name="about_librarycredits">Questo programma usa la aFileChooser library di Paul Burke. \n
 Questo programma contiene codice da Snowbound\'s PTPatchTool, licenza sotto l\' Eclipse Public License. \n
 This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
