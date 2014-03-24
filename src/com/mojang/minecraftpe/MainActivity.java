@@ -42,8 +42,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.webkit.*;
 import android.widget.*;
-import android.preference.*;
-
 import org.mozilla.javascript.RhinoException;
 
 import net.zhuoweizhang.mcpelauncher.*;
@@ -158,16 +156,9 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		System.out.println("oncreate");
-
 		File lockFile = new File(getFilesDir(), "running.lock");
 		if (lockFile.exists()) {
-			try {
-				PreferenceManager.getDefaultSharedPreferences(this).edit()
-						.putBoolean("zz_safe_mode", true).apply();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", true).apply();
 		}
 
 		try {
@@ -199,8 +190,7 @@ public class MainActivity extends NativeActivity {
 
 			migrateToPatchManager();
 
-			SharedPreferences myprefs = getSharedPreferences(
-					MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+			SharedPreferences myprefs = Utils.getPrefs(1);
 			int prepatchedVersionCode = myprefs.getInt("prepatch_version", -1);
 
 			if (prepatchedVersionCode != minecraftVersionCode) {
@@ -240,13 +230,12 @@ public class MainActivity extends NativeActivity {
 
 		Utils.setLanguageOverride();
 
-		forceFallback = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"zz_texture_pack_demo", false);
+		forceFallback = Utils.getPrefs(0).getBoolean("zz_texture_pack_demo", false);
 
 		loadTexturePack();
 
 		textureOverrides.clear();
-		textureOverrides.add(new SkinTextureOverride(this));
+		textureOverrides.add(new SkinTextureOverride());
 		if (allowScriptOverrideTextures()) {
 			textureOverrides.add(new ScriptOverrideTexturePack(this));
 		}
@@ -299,9 +288,9 @@ public class MainActivity extends NativeActivity {
 
 		super.onCreate(savedInstanceState);
 
-		setFakePackage(false);
-		
 		nativeRegisterThis();
+
+		setFakePackage(false);
 
 		try {
 			boolean shouldLoadScripts = false;
@@ -309,19 +298,14 @@ public class MainActivity extends NativeActivity {
 				loadNativeAddons();
 				// applyPatches();
 				applyBuiltinPatches();
-				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-						"zz_script_enable", true);
+				shouldLoadScripts = Utils.getPrefs(0).getBoolean("zz_script_enable", true);
 				if (shouldLoadScripts)
 					ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
-				ScriptManager.loadEnabledScriptsNames(this); // in safe mode,
-																// script names,
-																// but not the
-																// actual
-																// scripts,
-																// should be
-																// loaded
+				ScriptManager.loadEnabledScriptsNames(this);
+				// in safe mode, script names, but not the actual scripts,
+				// should be loaded
 			}
 
 		} catch (Exception e) {
@@ -368,8 +352,7 @@ public class MainActivity extends NativeActivity {
 				}
 			});
 		} else {
-			hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-					"zz_hovercar_hide", false));
+			hoverCar.setVisible(!Utils.getPrefs(0).getBoolean("zz_hovercar_hide", false));
 		}
 
 	}
@@ -425,8 +408,7 @@ public class MainActivity extends NativeActivity {
 		File patched = getDir("patched", 0);
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
-		boolean forcePrePatch = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
-				.getBoolean("force_prepatch", true);
+		boolean forcePrePatch = Utils.getPrefs(1).getBoolean("force_prepatch", true);
 		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
 
 			System.out.println("Forcing new prepatch");
@@ -491,8 +473,7 @@ public class MainActivity extends NativeActivity {
 			os.write(libBytes);
 			os.close();
 			hasPrePatched = true;
-			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
-					.putBoolean("force_prepatch", false)
+			Utils.getPrefs(1).edit().putBoolean("force_prepatch", false)
 					.putInt("prepatch_version", mcPkgInfo.versionCode).apply();
 			if (failedPatches.size() > 0) {
 				showDialog(DIALOG_INVALID_PATCHES);
@@ -826,15 +807,9 @@ public class MainActivity extends NativeActivity {
 							String[] lines = editText.getText().toString().split("\n");
 							for (int line = 0; line < lines.length; line++) {
 								if (line != 0)
-									nativeTypeCharacter("" + ((char) 0x0A)); // I
-																				// am
-																				// not
-																				// sure
-																				// if
-																				// keyboard-entered
-																				// "enter"
-																				// is
-																				// 0x0A
+									nativeTypeCharacter("" + ((char) 0x0A));
+								// I am not sure if keyboard-entered "enter" is
+								// 0x0A
 								nativeTypeCharacter(lines[line]);
 							}
 							editText.setText("");
@@ -970,7 +945,7 @@ public class MainActivity extends NativeActivity {
 
 	public String[] getOptionStrings() {
 		System.err.println("OptionStrings");
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences sharedPref = Utils.getPrefs(0);
 		Map prefsMap = sharedPref.getAll();
 		Set<Map.Entry> prefsSet = prefsMap.entrySet();
 		List<String> retval = new ArrayList<String>();
@@ -998,8 +973,7 @@ public class MainActivity extends NativeActivity {
 	public float getPixelsPerMillimeter() {
 		System.out.println("Pixels per mm");
 		float val = ((float) displayMetrics.densityDpi) / 25.4f;
-		String custom = PreferenceManager.getDefaultSharedPreferences(this).getString(
-				"zz_custom_dpi", null);
+		String custom = Utils.getPrefs(0).getString("zz_custom_dpi", null);
 		if (custom != null && custom.length() > 0) {
 			try {
 				val = Float.parseFloat(custom) / 25.4f;
@@ -1052,8 +1026,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean isTouchscreen() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"ctrl_usetouchscreen", true);
+		return Utils.getPrefs(0).getBoolean("ctrl_usetouchscreen", true);
 	}
 
 	public void postScreenshotToFacebook(String name, int firstInt, int secondInt, int[] thatArray) {
@@ -1071,8 +1044,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void vibrate(int duration) {
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_longvibration",
-				false)) {
+		if (Utils.getPrefs(0).getBoolean("zz_longvibration", false)) {
 			duration *= 5;
 		}
 		((Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(duration);
@@ -1099,12 +1071,12 @@ public class MainActivity extends NativeActivity {
 
 	public String getRefreshToken() {
 		Log.i(TAG, "Get Refresh token");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("refreshToken", "");
+		return Utils.getPrefs(0).getString("refreshToken", "");
 	}
 
 	public String getSession() {
 		Log.i(TAG, "Get Session");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("sessionId", "");
+		return Utils.getPrefs(0).getString("sessionId", "");
 	}
 
 	public String getWebRequestContent(int requestId) {
@@ -1153,20 +1125,27 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void setRefreshToken(String token) {
-		Log.i(TAG, "Set refresh token");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("refreshToken", token)
-				.apply();
+		Utils.getPrefs(0).edit().putString("refreshToken", token).apply();
 	}
 
 	public void setSession(String session) {
-		Log.i(TAG, "Set Session");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("sessionId", session)
-				.apply();
+		Utils.getPrefs(0).edit().putString("sessionId", session).apply();
 	}
 
 	public boolean supportsNonTouchscreen() {
-		Log.i(TAG, "Supports non touchscreen");
-		return Build.PRODUCT.equals("Xperia Play");
+		boolean xperia = false;
+		boolean play = false;
+		String[] data = new String[3];
+		data[0] = Build.MODEL.toLowerCase(Locale.ENGLISH);
+		data[1] = Build.DEVICE.toLowerCase(Locale.ENGLISH);
+		data[2] = Build.PRODUCT.toLowerCase(Locale.ENGLISH);
+		for (String s : data) {
+			if (s.indexOf("xperia") >= 0)
+				xperia = true;
+			if (s.indexOf("play") >= 0)
+				play = true;
+		}
+		return xperia && play;
 	}
 
 	public void webRequest(int requestId, long timestamp, String url, String method, String cookies) {
@@ -1226,22 +1205,22 @@ public class MainActivity extends NativeActivity {
 	// added in 0.7.3
 	public String getAccessToken() {
 		Log.i(TAG, "Get access token");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("accessToken", "");
+		return Utils.getPrefs(0).getString("accessToken", "");
 	}
 
 	public String getClientId() {
 		Log.i(TAG, "Get client ID");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("clientId", "");
+		return Utils.getPrefs(0).getString("clientId", "");
 	}
 
 	public String getProfileId() {
 		Log.i(TAG, "Get profile ID");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("profileUuid", "");
+		return Utils.getPrefs(0).getString("profileUuid", "");
 	}
 
 	public String getProfileName() {
 		Log.i(TAG, "Get profile name");
-		return PreferenceManager.getDefaultSharedPreferences(this).getString("profileName", "");
+		return Utils.getPrefs(0).getString("profileName", "");
 	}
 
 	public void statsTrackEvent(String firstEvent, String secondEvent) {
@@ -1262,17 +1241,15 @@ public class MainActivity extends NativeActivity {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, "Login info: " + accessToken + ":" + clientId + ":" + profileUuid + ":"
 					+ profileName);
-		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.putString("accessToken", accessToken).putString("clientId", clientId)
-				.putString("profileUuid", profileUuid).putString("profileName", profileName)
-				.apply();
+		Utils.getPrefs(0).edit().putString("accessToken", accessToken)
+				.putString("clientId", clientId).putString("profileUuid", profileUuid)
+				.putString("profileName", profileName).apply();
 	}
 
 	public void clearLoginInformation() {
 		Log.i(TAG, "Clear login info");
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putString("accessToken", "")
-				.putString("clientId", "").putString("profileUuid", "")
-				.putString("profileName", "").apply();
+		Utils.getPrefs(0).edit().putString("accessToken", "").putString("clientId", "")
+				.putString("profileUuid", "").putString("profileName", "").apply();
 	}
 
 	// added in 0.8.0
@@ -1334,19 +1311,13 @@ public class MainActivity extends NativeActivity {
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			hiddenTextWindow.setFocusable(true);
 			hiddenTextWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable()); // To
-																			// get
-																			// back
-																			// button
-																			// handling
-																			// for
-																			// free
+			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable());
+			// To get back button handling for free
 			hiddenTextWindow.setClippingEnabled(false);
 			hiddenTextWindow.setTouchable(false);
-			hiddenTextWindow.setOutsideTouchable(true); // These flags were
-														// taken from a dumpsys
-														// window output of
-														// Mojang's window
+			hiddenTextWindow.setOutsideTouchable(true);
+			// These flags were taken from a dumpsys window output of Mojang's
+			// window
 			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
 				public void onDismiss() {
 					nativeBackPressed();
@@ -1372,23 +1343,14 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean useLegacyKeyboardInput() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"zz_legacy_keyboard_input", false);
+		return Utils.getPrefs(0).getBoolean("zz_legacy_keyboard_input", false);
 	}
 
 	public boolean isSafeMode() {
-		return tempSafeMode
-				|| PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_safe_mode",
-						false);
+		return tempSafeMode || Utils.getPrefs(0).getBoolean("zz_safe_mode", false);
 	}
 
 	public void initPatching() throws Exception {
-		/*
-		 * if (BuildConfig.DEBUG) {
-		 * System.err.println("Skipping this to simulate Samsung");
-		 * System.err.println(minecraftLibBuffer); overlyZealousSELinuxSafeMode
-		 * = true; tempSafeMode = true; return; }
-		 */
 		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
 		System.out.println(Long.toString(pageSize, 16));
 		long minecraftLibLocation = findMinecraftLibLocation();
@@ -1413,15 +1375,16 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void applyPatches() throws Exception {
-		/*
-		 * ByteBuffer buffer = minecraftLibBuffer;
-		 * buffer.position(0x1b6d50);//"v0.6.1" offset byte[] testBuffer = new
-		 * byte[6]; buffer.get(testBuffer); System.out.println("Before: " +
-		 * Arrays.toString(testBuffer)); buffer.position(0x1b6d50);//"v0.6.1"
-		 * offset buffer.put(">9000!".getBytes());
-		 * buffer.position(0x1b6d50);//"v0.6.1" offset buffer.get(testBuffer);
-		 * System.out.println("After " + Arrays.toString(testBuffer));
-		 */
+		// ByteBuffer buffer = minecraftLibBuffer;
+		// buffer.position(0x1b6d50);// "v0.6.1" offset
+		// byte[] testBuffer = new byte[6];
+		// buffer.get(testBuffer);
+		// System.out.println("Before: " + Arrays.toString(testBuffer));
+		// buffer.position(0x1b6d50);// "v0.6.1" offset
+		// buffer.put(">9000!".getBytes());
+		// buffer.position(0x1b6d50);// "v0.6.1" offset
+		// buffer.get(testBuffer);
+		// System.out.println("After " + Arrays.toString(testBuffer));
 	}
 
 	public static long findMinecraftLibLocation() throws Exception {
@@ -1444,12 +1407,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public static long findMinecraftLibLength() throws Exception {
-		return new File(MC_NATIVE_LIBRARY_LOCATION).length(); // TODO: don't
-																// hardcode the
-																// 0x1000 page
-																// for
-																// relocation
-																// .data.rel.ro.local
+		return new File(MC_NATIVE_LIBRARY_LOCATION).length();
+		// TODO: don't hardcode the 0x1000 page for relocation data.rel.ro.local
 	}
 
 	public int getMaxNumPatches() {
@@ -1484,23 +1443,20 @@ public class MainActivity extends NativeActivity {
 	protected void setupHoverCar() {
 		hoverCar = new HoverCar(this);
 		hoverCar.show(getWindow().getDecorView());
-		hoverCar.setVisible(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"zz_hovercar_hide", false));
+		hoverCar.setVisible(!Utils.getPrefs(0).getBoolean("zz_hovercar_hide", false));
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				boolean showInsertText = PreferenceManager.getDefaultSharedPreferences(
-						MainActivity.this).getBoolean("zz_show_insert_text", false);
+				boolean showInsertText = Utils.getPrefs(0).getBoolean("zz_show_insert_text", false);
 				showDialog(showInsertText ? DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT
 						: DIALOG_RUNTIME_OPTIONS);
-				resetOrientation(); // for sensor controls. TODO: better place
-									// to do this?
+				resetOrientation();
+				// for sensor controls. TODO: better place to do this?
 			}
 		});
 	}
 
 	protected void loadNativeAddons() {
-		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"zz_load_native_addons", false))
+		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", false))
 			return;
 		PackageManager pm = getPackageManager();
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
@@ -1523,16 +1479,13 @@ public class MainActivity extends NativeActivity {
 
 	protected void migrateToPatchManager() {
 		try {
-			boolean enabledPatchMgr = getSharedPreferences(
-					MainMenuOptionsActivity.PREFERENCES_NAME, 0).getInt("patchManagerVersion", -1) > 0;
+			boolean enabledPatchMgr = Utils.getPrefs(1).getInt("patchManagerVersion", -1) > 0;
 			if (enabledPatchMgr)
 				return;
 			showDialog(DIALOG_FIRST_LAUNCH);
 			File patchesDir = this.getDir(PT_PATCHES_DIR, 0);
 			PatchManager.getPatchManager(this).setEnabled(patchesDir.listFiles(), true);
-			System.out.println(getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
-					.getString("enabledPatches", "LOL"));
-
+			System.out.println(Utils.getPrefs(1).getString("enabledPatches", "LOL"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1555,8 +1508,7 @@ public class MainActivity extends NativeActivity {
 		}
 
 		// Patch out the red item missing icon
-		if (PreferenceManager.getDefaultSharedPreferences(this)
-				.getBoolean("zz_script_enable", true)) {
+		if (Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
 			ScriptManager.nativeRemoveItemBackground();
 		}
 
@@ -1564,10 +1516,8 @@ public class MainActivity extends NativeActivity {
 
 	protected void loadTexturePack() {
 		try {
-			boolean loadTexturePack = PreferenceManager.getDefaultSharedPreferences(this)
-					.getBoolean("zz_texture_pack_enable", false);
-			String filePath = getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
-					.getString("texturePack", null);
+			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
+			String filePath = Utils.getPrefs(1).getString("texturePack", null);
 			if (loadTexturePack && filePath != null) {
 				File file = new File(filePath);
 				System.out.println("File!! " + file);
@@ -1591,8 +1541,8 @@ public class MainActivity extends NativeActivity {
 	 */
 	private void enableSoftMenuKey() {
 		int flag = Build.VERSION.SDK_INT >= 19 ? 0x40000000 : 0x08000000; // FLAG_NEEDS_MENU_KEY
-		getWindow().addFlags(flag); // KitKat reused old show menu key flag for
-									// transparent navbars
+		getWindow().addFlags(flag);
+		// KitKat reused old show menu key flag for transparent navbars
 	}
 
 	private void disableAllPatches() {
@@ -1633,10 +1583,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void turnOffSafeMode() {
-		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.putBoolean("zz_safe_mode", false).commit();
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
-				.putBoolean("force_prepatch", true).commit();
+		Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", false).commit();
+		Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).commit();
 		finish();
 		NerdyStuffActivity.forceRestart(this);
 	}

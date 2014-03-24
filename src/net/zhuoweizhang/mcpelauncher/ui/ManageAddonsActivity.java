@@ -96,13 +96,13 @@ public class ManageAddonsActivity extends ListActivity {
 		findAddons();
 		refreshABToggle();
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
 		refreshABToggle();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -119,8 +119,7 @@ public class ManageAddonsActivity extends ListActivity {
 
 	protected void setAddonListModified() {
 		setResult(RESULT_OK);
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
-				.putBoolean("force_prepatch", true).apply();
+		Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 	}
 
 	private void findAddons() {

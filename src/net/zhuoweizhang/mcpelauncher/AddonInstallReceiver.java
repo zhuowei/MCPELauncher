@@ -29,7 +29,7 @@ public class AddonInstallReceiver extends BroadcastReceiver {
 			System.out.println("MCPELauncher: " + packageName);
 			if (isMinecraftUpdate) {
 				System.out.println("Detected Minecraft PE upgrade");
-				context.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true).commit();
+				Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).commit();
 			} else if (!MainActivity.loadedAddons.contains(packageName)) { //is not currently loaded
 				ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
 				//appInfo.dump(new LogPrinter(4, "MCPELauncher"), "");

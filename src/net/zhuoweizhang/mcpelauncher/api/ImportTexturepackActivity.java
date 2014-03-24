@@ -1,9 +1,8 @@
 package net.zhuoweizhang.mcpelauncher.api;
 
 import net.zhuoweizhang.mcpelauncher.R;
-import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
+import net.zhuoweizhang.mcpelauncher.Utils;
 import android.os.*;
-import android.preference.*;
 import android.widget.*;
 
 public class ImportTexturepackActivity extends ImportActivity {
@@ -15,9 +14,8 @@ public class ImportTexturepackActivity extends ImportActivity {
 
 	@Override
 	protected void startImport() {
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
-				.putString("texturePack", mFile.getAbsolutePath()).apply();
-		PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("zz_texture_pack_enable", true).apply();
+		Utils.getPrefs(1).edit().putString("texturePack", mFile.getAbsolutePath()).apply();
+		Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", true).apply();
 		Toast.makeText(this, R.string.texturepack_imported, Toast.LENGTH_LONG).show();
 		finish();
 	}

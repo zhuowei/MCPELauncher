@@ -8,6 +8,7 @@ import java.util.Set;
 
 import net.zhuoweizhang.mcpelauncher.PatchManager;
 import net.zhuoweizhang.mcpelauncher.R;
+import net.zhuoweizhang.mcpelauncher.Utils;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 import android.os.Bundle;
@@ -29,22 +30,19 @@ public class ImportPatchActivity extends ImportActivity {
 			PatchUtils.copy(mFile, to);
 		} catch (IOException e) {
 			e.printStackTrace();
-			Toast.makeText(this, R.string.manage_patches_import_error,
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG).show();
 			return;
 		}
 		setResult(RESULT_OK);
 		boolean hasTooManyPatches = hasTooManyPatches();
 		PatchManager.getPatchManager(this).setEnabled(to, false);
 		if (hasTooManyPatches) {
-			Toast.makeText(this, R.string.manage_patches_too_many,
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_LONG).show();
 			finish();
 			return;
 		}
 		PatchManager.getPatchManager(this).setEnabled(to, true);
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0)
-				.edit().putBoolean("force_prepatch", true).apply();
+		Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 		if (MainActivity.libLoaded) {
 			new Thread(new Runnable() {
 				public void run() {
@@ -56,16 +54,13 @@ public class ImportPatchActivity extends ImportActivity {
 				}
 			}).start();
 		}
-		Toast.makeText(this, R.string.manage_patches_import_done,
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, R.string.manage_patches_import_done, Toast.LENGTH_SHORT).show();
 		finish();
 	}
 
 	public boolean hasTooManyPatches() {
-		int maxPatchCount = this.getResources().getInteger(
-				R.integer.max_num_patches);
-		Set<String> enabledPatches = PatchManager.getPatchManager(this)
-				.getEnabledPatches();
+		int maxPatchCount = this.getResources().getInteger(R.integer.max_num_patches);
+		Set<String> enabledPatches = PatchManager.getPatchManager(this).getEnabledPatches();
 		return maxPatchCount >= 0 && enabledPatches.size() >= maxPatchCount;
 	}
 

@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class Utils {
 	protected static Context mContext = null;
-	
+
 	public static void setContext(Context context) {
 		mContext = context;
 	}
@@ -44,8 +44,7 @@ public class Utils {
 
 	public static void setLanguageOverride() {
 		requireInit();
-		String override = PreferenceManager.getDefaultSharedPreferences(mContext).getString(
-				"zz_language_override", "");
+		String override = getPrefs(0).getString("zz_language_override", "");
 		if (override.length() == 0)
 			return;
 		String[] overrideSplit = override.split("_");
@@ -78,11 +77,11 @@ public class Utils {
 		int maxPatchCount = getMaxScripts();
 		return maxPatchCount >= 0 && getEnabledScripts().size() >= maxPatchCount;
 	}
-	
+
 	public static int getMaxPatches() {
 		return mContext.getResources().getInteger(R.integer.max_num_patches);
 	}
-	
+
 	public static int getMaxScripts() {
 		return mContext.getResources().getInteger(R.integer.max_num_scripts);
 	}
@@ -96,7 +95,7 @@ public class Utils {
 		return new HashSet<String>(Arrays.asList(Utils.getPrefs(1).getString("enabledScripts", "")
 				.split(";")));
 	}
-	
+
 	public static boolean isPro() {
 		return mContext.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro");
 	}

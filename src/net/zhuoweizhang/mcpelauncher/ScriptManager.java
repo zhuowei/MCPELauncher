@@ -22,8 +22,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
-import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
-
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
 import org.mozilla.javascript.annotations.JSStaticFunction;
@@ -551,10 +549,7 @@ public class ScriptManager {
 	}
 
 	public static void loadEnabledScriptsNames(android.content.Context androidContext) {
-		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(
-				MainMenuOptionsActivity.PREFERENCES_NAME, 0);
-		String enabledScriptsStr = sharedPrefs.getString("enabledScripts", "");
-		enabledScripts = new HashSet<String>(Arrays.asList(enabledScriptsStr.split(";")));
+		enabledScripts = Utils.getEnabledScripts();
 	}
 
 	protected static void loadEnabledScripts() throws IOException {
@@ -571,8 +566,7 @@ public class ScriptManager {
 	}
 
 	protected static void saveEnabledScripts() {
-		SharedPreferences sharedPrefs = androidContext.getSharedPreferences(
-				MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+		SharedPreferences sharedPrefs = Utils.getPrefs(1);
 		SharedPreferences.Editor edit = sharedPrefs.edit();
 		edit.putString("enabledScripts", join(enabledScripts.toArray(blankArray), ";"));
 		edit.putInt("scriptManagerVersion", 1);
@@ -986,7 +980,6 @@ public class ScriptManager {
 
 	public static native void nativeClientMessage(String msg);
 
-	// 0.2
 	public static native void nativeSetNightMode(boolean isNight);
 
 	public static native int nativeGetTile(int x, int y, int z);
@@ -995,18 +988,14 @@ public class ScriptManager {
 
 	public static native void nativeSetRot(int ent, float yaw, float pitch);
 
-	// 0.3
 	public static native float nativeGetYaw(int ent);
 
 	public static native float nativeGetPitch(int ent);
 
-	// 0.4
 	public static native void nativeSetCarriedItem(int ent, int id, int count, int damage);
 
-	// 0.5
 	public static native void nativeOnGraphicsReset();
 
-	// 0.6
 	public static native void nativeDefineItem(int itemId, String iconName, int iconId,
 			String name, int maxStackSize);
 
@@ -1016,7 +1005,6 @@ public class ScriptManager {
 	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId,
 			int hearts, String name);
 
-	// nonstandard
 	public static native void nativeSetFov(float degrees);
 
 	public static native void nativeSetMobSkin(int ent, String str);
@@ -1197,12 +1185,10 @@ public class ScriptManager {
 		}
 	}
 
-	/*
-	 * To contributors: if you are adding a BlockLauncher-specific method,
-	 * please add it to one of the namespaces (Entity, Level, ModPE, Player)
-	 * instead of the top-level namespace. thanks. e.g. Entity.fireLaz0rs =
-	 * good, fireLaz0rs = bad, bl_fireLaz0rs = bad
-	 */
+	// To contributors: if you are adding a BlockLauncher-specific method,
+	// please add it to one of the namespaces (Entity, Level, ModPE, Player)
+	// instead of the top-level namespace. thanks.
+	// e.g. Entity.fireLaz0rs = good, fireLaz0rs = bad, bl_fireLaz0rs = bad
 
 	private static class BlockHostObject extends ScriptableObject {
 		private int playerEnt = 0;
@@ -1240,8 +1226,8 @@ public class ScriptManager {
 
 		@JSFunction
 		public NativePointer getLevel() {
-			return new NativePointer(nativeGetLevel()); // TODO: WTF does this
-														// do?
+			return new NativePointer(nativeGetLevel());
+			// TODO: WTF does this do?
 		}
 
 		@JSFunction
@@ -1280,9 +1266,7 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public int spawnChicken(double x, double y, double z, String tex) { // Textures
-																			// not
-																			// supported
+		public int spawnChicken(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
@@ -1291,9 +1275,7 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public int spawnCow(double x, double y, double z, String tex) { // Textures
-																		// not
-																		// supported
+		public int spawnCow(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
@@ -1316,7 +1298,6 @@ public class ScriptManager {
 			nativeSetTile(x, y, z, id, damage);
 		}
 
-		// standard methods introduced in API level 0.2
 		@JSFunction
 		public void clientMessage(String text) {
 			wordWrapClientMessage(text);
@@ -1342,7 +1323,6 @@ public class ScriptManager {
 			nativeSetRot(ent, (float) yaw, (float) pitch);
 		}
 
-		// standard methods introduced in API level 0.3
 		@JSFunction
 		public double getPitch(Object entObj) {
 			int ent;
@@ -1365,12 +1345,8 @@ public class ScriptManager {
 			return nativeGetYaw(ent);
 		}
 
-		// standard methods introduced in 0.4 and 0.5
 		@JSFunction
-		public int spawnPigZombie(double x, double y, double z, int item, String tex) { // Textures
-																						// not
-																						// supported
-																						// yet
+		public int spawnPigZombie(double x, double y, double z, int item, String tex) {
 			if (invalidTexName(tex)) {
 				tex = "mob/pigzombie.png";
 			}
@@ -1383,7 +1359,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public int bl_spawnMob(double x, double y, double z, int typeId, String tex) {
-			print("Nag: update to Level.spawnMob: This will be removed in 1.7");
+			print("Deprecated: use Level.spawnMob, to be removed in 1.7");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -1393,7 +1369,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public void bl_setMobSkin(int entity, String tex) {
-			print("Nag: update to Entity.setMobSkin: This will be removed in 1.7");
+			print("Deprecated: use Entity.setMobSkin, to be removed in 1.7");
 			nativeSetMobSkin(entity, tex);
 		}
 
@@ -1439,14 +1415,13 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static NativePointer getAddress() {
-			return new NativePointer(nativeGetLevel()); // TODO: I still don't
-														// know WTF this does.
+			// TODO: I still don't know WTF this does.
+			scriptPrint("Deprecated: unknown aim");
+			return new NativePointer(nativeGetLevel());
 		}
 
 		@JSStaticFunction
-		public static int spawnChicken(double x, double y, double z, String tex) { // Textures
-																					// not
-																					// supported
+		public static int spawnChicken(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
@@ -1455,9 +1430,7 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static int spawnCow(double x, double y, double z, String tex) { // Textures
-																				// not
-																				// supported
+		public static int spawnCow(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
@@ -1840,7 +1813,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int spawnMob(double x, double y, double z, int typeId, String tex) {
-			scriptPrint("Nag: update to Level.spawnMob: This will be removed in 1.7");
+			scriptPrint("Deprecated: use Level.spawnMob, to be removed in 1.7");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -2126,24 +2099,9 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do
-																							// I
-																							// need
-																							// a
-																							// count?
-																							// If
-																							// not,
-																							// should
-																							// I
-																							// just
-																							// fill
-																							// it
-																							// with
-																							// null,
-																							// or
-																							// skip
-																							// it
-																							// completely?
+		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) {
+			// Do I need a count? If not, should I just fill it with null, or
+			// skip it completely?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
