@@ -77,7 +77,7 @@ public class PatchManager {
 	}
 
 	protected void saveEnabledPatches() {
-		SharedPreferences sharedPrefs = context.getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0);
+		SharedPreferences sharedPrefs = Utils.getPrefs(1);
 		SharedPreferences.Editor edit = sharedPrefs.edit();
 		edit.putString("enabledPatches", join(enabledPatches.toArray(blankArray), ";"));
 		edit.putBoolean("force_prepatch", true);

@@ -30,7 +30,8 @@ import net.zhuoweizhang.mcpelauncher.ui.RefreshContentListThread.OnRefreshConten
 
 import com.mojang.minecraftpe.*;
 
-public class ManagePatchesActivity extends ListActivity implements View.OnClickListener, OnRefreshContentList {
+public class ManagePatchesActivity extends ListActivity implements View.OnClickListener,
+		OnRefreshContentList {
 
 	private static final int DIALOG_MANAGE_PATCH = 1;
 	private static final int DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED = 2;
@@ -103,8 +104,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 
 	protected void setPatchListModified() {
 		setResult(RESULT_OK);
-		getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true)
-				.apply();
+		Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 	}
 
 	@Override
@@ -119,7 +119,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 					PatchUtils.copy(file, to);
 					PatchManager.getPatchManager(this).setEnabled(to, false);
 					if (Utils.hasTooManyPatches()) {
-						Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT).show();
+						Toast.makeText(this, R.string.manage_patches_too_many, Toast.LENGTH_SHORT)
+								.show();
 					} else {
 						PatchManager.getPatchManager(this).setEnabled(to, true);
 						afterPatchToggle(new ContentListItem(to, true));
@@ -128,7 +129,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 					findPatches();
 				} catch (Exception e) {
 					e.printStackTrace();
-					Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG).show();
+					Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG)
+							.show();
 				}
 			}
 			break;
@@ -143,9 +145,11 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	private void openManagePatchWindow(ContentListItem item) {
 		this.selectedPatchItem = item;
 		if (prePatchConfigure || canLivePatch(item)) {
-			showDialog(item.enabled ? DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED : DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED);
+			showDialog(item.enabled ? DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED
+					: DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED);
 		} else {
-			Toast.makeText(this, "This patch cannot be disabled in game.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "This patch cannot be disabled in game.", Toast.LENGTH_SHORT)
+					.show();
 		}
 	}
 
@@ -195,7 +199,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			PatchManager.getPatchManager(this).setEnabled(patch.file, false);
 			new AlertDialog.Builder(this)
 					.setMessage(
-							getResources().getString(R.string.manage_patches_invalid_patches) + " " + patch.displayName)
+							getResources().getString(R.string.manage_patches_invalid_patches) + " "
+									+ patch.displayName)
 					.setPositiveButton(android.R.string.ok, null).show();
 			return;
 		}
@@ -204,8 +209,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		} else if (canLivePatch(patch)) {
 			try {
 				livePatch(patch);
-				getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit()
-						.putBoolean("force_prepatch", true).apply();
+				Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 				/* defer the prepatch until it is needed next time */
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -216,7 +220,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	}
 
 	public void livePatch(ContentListItem patchItem) throws Exception {
-		ApplicationInfo mcAppInfo = getPackageManager().getApplicationInfo("com.mojang.minecraftpe", 0);
+		ApplicationInfo mcAppInfo = getPackageManager().getApplicationInfo(
+				"com.mojang.minecraftpe", 0);
 		File patched = getDir("patched", 0);
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		new File(patched, "libminecraftpe.so");
@@ -251,8 +256,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		patch.enabled = false;
 		if (!prePatchConfigure) {
 			livePatch(patch);
-			getSharedPreferences(MainMenuOptionsActivity.PREFERENCES_NAME, 0).edit().putBoolean("force_prepatch", true)
-					.apply();
+			Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 		}
 		setPatchListModified();
 		patch.file.delete();
@@ -298,13 +302,15 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		CharSequence patchInfoStr = this.getResources().getText(R.string.manage_patches_info);
 		CharSequence[] options = null;
 		if (enableStatus == -1) {
-			options = new CharSequence[] { this.getResources().getText(R.string.manage_patches_delete), patchInfoStr };
+			options = new CharSequence[] {
+					this.getResources().getText(R.string.manage_patches_delete), patchInfoStr };
 		} else {
 			options = new CharSequence[] {
 					this.getResources().getText(R.string.manage_patches_delete),
 					patchInfoStr,
-					(enableStatus == 0 ? this.getResources().getText(R.string.manage_patches_enable) : this
-							.getResources().getText(R.string.manage_patches_disable)) };
+					(enableStatus == 0 ? this.getResources()
+							.getText(R.string.manage_patches_enable) : this.getResources().getText(
+							R.string.manage_patches_disable)) };
 		}
 
 		return new AlertDialog.Builder(this).setTitle("Patch name goes here")
@@ -331,8 +337,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	private AlertDialog createPatchInfoDialog() {
 		return new AlertDialog.Builder(this).setTitle("Whoops! info fail")
 				// will get filled in by prepare
-				.setMessage("Whoops - try again, this is a tiny fail").setPositiveButton(android.R.string.ok, null)
-				.create();
+				.setMessage("Whoops - try again, this is a tiny fail")
+				.setPositiveButton(android.R.string.ok, null).create();
 	}
 
 	private boolean isValidPatch(ContentListItem patch) {
@@ -349,15 +355,16 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			public void run() {
 				ContentListItem.sort(items);
 				ManagePatchesActivity.this.patches = items;
-				ArrayAdapter<ContentListItem> adapter = new ContentListAdapter(ManagePatchesActivity.this,
-						R.layout.patch_list_item, patches);
+				ArrayAdapter<ContentListItem> adapter = new ContentListAdapter(
+						ManagePatchesActivity.this, R.layout.patch_list_item, patches);
 				setListAdapter(adapter);
 				List<String> allPaths = new ArrayList<String>(patches.size());
 				for (ContentListItem i : patches) {
 					String name = i.file.getAbsolutePath();
 					allPaths.add(name);
 				}
-				PatchManager.getPatchManager(ManagePatchesActivity.this).removeDeadEntries(allPaths);
+				PatchManager.getPatchManager(ManagePatchesActivity.this)
+						.removeDeadEntries(allPaths);
 			}
 		});
 	}

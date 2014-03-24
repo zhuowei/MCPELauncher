@@ -11,11 +11,15 @@ import com.mojang.minecraftpe.MainActivity;
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.Utils;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.Menu;
+import android.widget.CompoundButton;
 import de.ankri.views.Switch;
 
 public class MainMenuOptionsActivity extends PreferenceActivity implements
@@ -35,6 +39,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 
 	private boolean needsRestart = false;
 	public static boolean isManagingAddons = false;
+
+	protected CompoundButton master = null;
 
 	private SwitchPreference texturepackPreference;
 	private SwitchPreference addonsPreference;
@@ -66,6 +72,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 						e.printStackTrace();
 					}
 				}
+				activity.get().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						refreshABToggle();
+					}
+				});
 			}
 			System.gc();
 		}
@@ -79,7 +91,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 				if (prefs.getBoolean("zz_texture_pack_demo", false)) {
 					sum = a.getString(R.string.textures_demo);
 				} else {
-					prefs = a.getSharedPreferences("mcpelauncherprefs", 0);
+					prefs = Utils.getPrefs(1);
 					sum = prefs.getString("texturePack", null);
 				}
 			}
@@ -99,7 +111,6 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			String sum = null;
 			if ((p.content != null) && (p.content.isChecked())) {
 				SharedPreferences prefs = Utils.getPrefs(1);
-				prefs = a.getSharedPreferences("mcpelauncherprefs", 0);
 				sum = prefs.getString("player_skin", null);
 			}
 			final String sm = sum;
@@ -424,6 +435,52 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 		languagePreference.setEntries(languageNames.toArray(new String[] {}));
 		languagePreference.setEntryValues(langList);
+	}
+
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getMenuInflater().inflate(R.menu.ab_master, menu);
+			master = (CompoundButton) menu.findItem(R.id.ab_switch_container).getActionView()
+					.findViewById(R.id.ab_switch);
+			if (master != null) {
+				master.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						togglePrefs(!isChecked);
+						SharedPreferences.Editor sh = Utils.getPrefs(0).edit();
+						sh.putBoolean("zz_safe_mode", isChecked);
+						sh.apply();
+						refreshABToggle();
+					}
+				});
+				refreshABToggle();
+			} else {
+				System.err.println("WTF?");
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	protected void refreshABToggle() {
+		boolean safeMode = Utils.getPrefs(0).getBoolean("zz_safe_mode", false);
+		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
+			master.setChecked(safeMode);
+		}
+		togglePrefs(safeMode);
+	}
+
+	protected void togglePrefs(boolean safeMode) {
+		if (safeMode == skinPreference.isEnabled()) {
+			skinPreference.setEnabled(!safeMode);
+			texturepackPreference.setEnabled(!safeMode);
+			addonsPreference.setEnabled(!safeMode);
+			scriptsPreference.setEnabled(!safeMode);
+			needsRestart = true;
+		}
 	}
 
 }
