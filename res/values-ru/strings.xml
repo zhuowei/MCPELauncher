@@ -139,4 +139,5 @@
     <string name="nerdy_stuff_dump_modpe">Дамп методов ModPE Script</string>
     <string name="nerdy_stuff_set_skin">Установить скин /sdcard/skin.png</string>
     <string name="nerdy_stuff_secret">Вход воспрещен!</string>
+    <string name="pref_other_title">Прочее</string>
 </resources>
