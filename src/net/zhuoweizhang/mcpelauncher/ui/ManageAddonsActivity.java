@@ -3,6 +3,7 @@ package net.zhuoweizhang.mcpelauncher.ui;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.Utils;
 import android.annotation.SuppressLint;
@@ -18,7 +19,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,6 +27,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 
+@SuppressWarnings("deprecation")
 public class ManageAddonsActivity extends ListActivity {
 
 	private static final int DIALOG_MANAGE_PATCH = 1;
@@ -73,8 +74,7 @@ public class ManageAddonsActivity extends ListActivity {
 						} else {
 							((ArrayAdapter<?>) getListAdapter()).clear();
 						}
-						SharedPreferences.Editor sh = PreferenceManager
-								.getDefaultSharedPreferences(ManageAddonsActivity.this).edit();
+						SharedPreferences.Editor sh = Utils.getPrefs(0).edit();
 						sh.putBoolean("zz_load_native_addons", isChecked);
 						sh.apply();
 						refreshABToggle();
@@ -111,9 +111,7 @@ public class ManageAddonsActivity extends ListActivity {
 
 	protected void refreshABToggle() {
 		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
-			SharedPreferences sh = PreferenceManager
-					.getDefaultSharedPreferences(ManageAddonsActivity.this);
-			master.setChecked(sh.getBoolean("zz_load_native_addons", false));
+			master.setChecked(Utils.getPrefs(0).getBoolean("zz_load_native_addons", false));
 		}
 	}
 

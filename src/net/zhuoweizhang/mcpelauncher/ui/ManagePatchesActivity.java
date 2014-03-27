@@ -4,15 +4,19 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.*;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Menu;
 import android.view.View;
 import static android.widget.AdapterView.OnItemClickListener;
 import android.widget.*;
@@ -30,6 +34,7 @@ import net.zhuoweizhang.mcpelauncher.ui.RefreshContentListThread.OnRefreshConten
 
 import com.mojang.minecraftpe.*;
 
+@SuppressWarnings("deprecation")
 public class ManagePatchesActivity extends ListActivity implements View.OnClickListener,
 		OnRefreshContentList {
 
@@ -51,6 +56,8 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 	private byte[] libBytes = null;
 
 	private boolean prePatchConfigure = true;
+
+	protected CompoundButton master = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -346,6 +353,44 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 			return false;
 		}
 		return true;
+	}
+
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getMenuInflater().inflate(R.menu.ab_master, menu);
+			master = (CompoundButton) menu.findItem(R.id.ab_switch_container).getActionView()
+					.findViewById(R.id.ab_switch);
+			if (master != null) {
+				master.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						if (isChecked) {
+							findPatches();
+						} else {
+							((ArrayAdapter<?>) getListAdapter()).clear();
+						}
+						SharedPreferences.Editor sh = Utils.getPrefs(0).edit();
+						sh.putBoolean("zz_manage_patches", isChecked);
+						sh.apply();
+						refreshABToggle();
+					}
+				});
+				refreshABToggle();
+			} else {
+				System.err.println("WTF?");
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	protected void refreshABToggle() {
+		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
+			master.setChecked(Utils.getPrefs(0).getBoolean("zz_manage_patches", false));
+		}
 	}
 
 	@Override

@@ -40,11 +40,14 @@ import android.view.*;
 import android.view.inputmethod.*;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.webkit.*;
 import android.widget.*;
+
 import org.mozilla.javascript.RhinoException;
 
 import net.zhuoweizhang.mcpelauncher.*;
+import static net.zhuoweizhang.mcpelauncher.Utils.isSafeMode;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 import net.zhuoweizhang.mcpelauncher.ui.AboutAppActivity;
 import net.zhuoweizhang.mcpelauncher.ui.HoverCar;
@@ -131,7 +134,7 @@ public class MainActivity extends NativeActivity {
 
 	public boolean minecraftApkForwardLocked = false;
 
-	public boolean tempSafeMode = false;
+	public static boolean tempSafeMode = false;
 
 	public String session = "";
 	public String refreshToken = "";
@@ -142,7 +145,7 @@ public class MainActivity extends NativeActivity {
 
 	private Dialog loginDialog;
 
-	private Map<Integer, HurlRunner> requestMap = new HashMap<Integer, HurlRunner>();
+	private SparseArray<HurlRunner> requestMap = new SparseArray<HurlRunner>();
 
 	protected MinecraftVersion minecraftVersion;
 
@@ -245,7 +248,7 @@ public class MainActivity extends NativeActivity {
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
 		try {
-			if (!isSafeMode()) {
+			if (!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) {
 				prePatch();
 			}
 		} catch (Exception e) {
@@ -297,8 +300,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				applyBuiltinPatches();
-				shouldLoadScripts = Utils.getPrefs(0).getBoolean("zz_script_enable", true);
-				if (shouldLoadScripts)
+				if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
 					ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
@@ -373,11 +375,8 @@ public class MainActivity extends NativeActivity {
 		nativeUnregisterThis();
 		super.onDestroy();
 		File lockFile = new File(getFilesDir(), "running.lock");
-		try {
+		if (lockFile.exists())
 			lockFile.delete();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		if (hoverCar != null) {
 			hoverCar.dismiss();
 			hoverCar = null;
@@ -389,6 +388,7 @@ public class MainActivity extends NativeActivity {
 		nativeStopThis();
 		super.onStop();
 		ScriptTextureDownloader.flushCache();
+		System.gc();
 	}
 
 	private void setFakePackage(boolean enable) {
@@ -948,8 +948,8 @@ public class MainActivity extends NativeActivity {
 		Map prefsMap = sharedPref.getAll();
 		Set<Map.Entry> prefsSet = prefsMap.entrySet();
 		List<String> retval = new ArrayList<String>();
-		for (Map.Entry e : prefsSet) {
-			String key = (String) e.getKey();
+		for (Map.Entry<String, ?> e : prefsSet) {
+			String key = e.getKey();
 			if (key.indexOf("zz_") == 0)
 				continue;
 			retval.add(key);
@@ -1166,15 +1166,17 @@ public class MainActivity extends NativeActivity {
 
 	protected String filterUrl(String url) {
 		return url;
-		/*
-		 * String peoapiRedirect =
-		 * PreferenceManager.getDefaultSharedPreferences(
-		 * this).getString("zz_redirect_mco_address", "NONE"); if
-		 * (peoapiRedirect.equals("NONE")) return url; RealmsRedirectInfo info =
-		 * getRealmsRedirectInfo(); if (info.accountUrl != null) {
-		 * url.replace("account.mojang.com", info.accountUrl); //TODO: better
-		 * system } return url.replace("peoapi.minecraft.net", peoapiRedirect);
-		 */
+		// String peoapiRedirect =
+		// Utils.getPrefs(0).getString("zz_redirect_mco_address", "NONE");
+		// if (peoapiRedirect.equals("NONE"))
+		// return url;
+		// RealmsRedirectInfo info = getRealmsRedirectInfo();
+		// if (info.accountUrl != null) {
+		// url.replace("account.mojang.com", info.accountUrl);
+		// // TODO: better system
+		// }
+		// return url.replace("peoapi.minecraft.net", peoapiRedirect);
+
 	}
 
 	@Override
@@ -1345,10 +1347,6 @@ public class MainActivity extends NativeActivity {
 		return Utils.getPrefs(0).getBoolean("zz_legacy_keyboard_input", false);
 	}
 
-	public boolean isSafeMode() {
-		return tempSafeMode || Utils.getPrefs(0).getBoolean("zz_safe_mode", false);
-	}
-
 	public void initPatching() throws Exception {
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
@@ -1453,9 +1451,10 @@ public class MainActivity extends NativeActivity {
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			String filePath = Utils.getPrefs(1).getString("texturePack", null);
-			if (loadTexturePack && filePath != null) {
+			if (!isSafeMode() && loadTexturePack && (filePath != null)) {
 				File file = new File(filePath);
-				System.out.println("File!! " + file);
+				if (BuildConfig.DEBUG)
+					System.out.println("File!! " + file);
 				if (!file.exists()) {
 					texturePack = null;
 				} else {
@@ -1481,7 +1480,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void disableAllPatches() {
-		Log.i(TAG, "Disabling all patches");
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Disabling all patches");
 		PatchManager.getPatchManager(this).disableAllPatches();
 	}
 
@@ -1829,7 +1829,11 @@ public class MainActivity extends NativeActivity {
 					response = conn.getResponseCode();
 					is = conn.getInputStream();
 				} catch (Exception e) {
-					is = conn.getErrorStream();
+					try {
+						is = conn.getErrorStream();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				}
 
 				if (is != null) {
@@ -1855,7 +1859,7 @@ public class MainActivity extends NativeActivity {
 				nativeWebRequestCompleted(requestId, timestamp, response, content);
 			}
 			synchronized (requestMap) {
-				requestMap.remove(this);
+				requestMap.remove(requestMap.indexOfValue(this));
 			}
 		}
 
