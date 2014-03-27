@@ -12,7 +12,7 @@ typedef struct {
 	char filler[13];
 	cppbool isRemote;
 } Level;
-typedef struct {
+typedef struct Entity_t{
 	void** vtable; //0
 	int filler3[7];//28 extra bytes. All others are shifted by 28.
 	float x; //4+28
@@ -30,8 +30,8 @@ typedef struct {
 	float prevPitch; //76 (104 after shift)
 	char filler4[128]; //108
 	int renderType; //236
-	int rider; //240
-	int riding; //244
+	struct Entity_t* rider; //240
+	struct Entity_t* riding; //244
 } Entity;
 typedef Entity Player;
 
