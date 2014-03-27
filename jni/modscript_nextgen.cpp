@@ -44,6 +44,7 @@ typedef void Font;
 #define MINECRAFT_GUI_OFFSET 416
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 3184
 
 typedef struct {
 	//union {
@@ -1040,6 +1041,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	return entity->renderType;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	Entity** camera = (Entity**) (((int) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
+	*camera = entity;
 }
 
 void bl_setuphooks_cppside() {

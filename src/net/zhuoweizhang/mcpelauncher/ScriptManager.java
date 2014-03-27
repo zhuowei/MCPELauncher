@@ -98,6 +98,9 @@ public class ScriptManager {
 
 	private static NativeArray entityList;
 
+	private static String serverAddress = null;
+	private static int serverPort = 0;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized) return;
 		if (!scriptingEnabled) throw new RuntimeException("Not available in multiplayer");
@@ -263,6 +266,8 @@ public class ScriptManager {
 				main.leaveGameCallback();
 			}
 		}
+		serverAddress = null;
+		serverPort = 0;
 	}
 
 	public static void attackCallback(int attacker, int victim) {
@@ -333,7 +338,8 @@ public class ScriptManager {
 		if (nativeIsPlayer(entity)) {
 			playerRemovedHandler(entity);
 		}
-		allentities.remove(allentities.indexOf(entity));
+		int entityIndex = allentities.indexOf(entity);
+		if (entityIndex >= 0) allentities.remove(entityIndex);
 		callScriptMethod("entityRemovedHook", entity);
 		//entityList.remove(Integer.valueOf(entity));
 	}
@@ -360,7 +366,8 @@ public class ScriptManager {
 		Log.i("BlockLauncher", "Connecting to " + hostname + ":" + port);
 		ScriptManager.scriptingEnabled = ScriptManager.isLocalAddress(hostname);
 		Log.i("BlockLauncher", "Scripting is now " + (scriptingEnabled? "enabled" : "disabled"));
-		
+		serverAddress = hostname;
+		serverPort = port;
 	}
 
 	public static void frameCallback() {
@@ -859,7 +866,8 @@ public class ScriptManager {
 	}
 
 	private static void playerRemovedHandler(int entityId) {
-		allplayers.remove(allplayers.indexOf(entityId));
+		int entityIndex = allplayers.indexOf(entityId);
+		if (entityIndex >= 0) allplayers.remove(entityIndex);
 	}
 
 	public static void runOnMainThread(Runnable run) {
@@ -1001,6 +1009,7 @@ public class ScriptManager {
 	public static native int nativeEntityGetRider(int entityId);
 	public static native String nativeEntityGetMobSkin(int entityId);
 	public static native int nativeEntityGetRenderType(int entityId);
+	public static native void nativeSetCameraEntity(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1886,9 +1895,14 @@ public class ScriptManager {
 		}
 		*/
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void setItemCategory(int id, int category, int whatever) {
 			nativeSetItemCategory(id, category, whatever);
+		}*/
+
+		@JSStaticFunction
+		public static void setCamera(int entityId) {
+			nativeSetCameraEntity(entityId);
 		}
 
 		@Override
@@ -2003,6 +2017,16 @@ public class ScriptManager {
 		public static void sendChat(String message) {
 			if (!isRemote) return;
 			nativeSendChat(message);
+		}
+
+		@JSStaticFunction
+		public static String getAddress() {
+			return serverAddress;
+		}
+
+		@JSStaticFunction
+		public static int getPort() {
+			return serverPort;
 		}
 		
 		// KMCPE's additions
