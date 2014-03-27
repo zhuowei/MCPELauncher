@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import com.mojang.minecraftpe.MainActivity;
+
 public class Utils {
 	protected static Context mContext = null;
 
@@ -87,13 +89,17 @@ public class Utils {
 	}
 
 	public static Set<String> getEnabledPatches() {
-		return new HashSet<String>(Arrays.asList(Utils.getPrefs(1).getString("enabledPatches", "")
+		return new HashSet<String>(Arrays.asList(getPrefs(1).getString("enabledPatches", "")
 				.split(";")));
 	}
 
 	public static Set<String> getEnabledScripts() {
-		return new HashSet<String>(Arrays.asList(Utils.getPrefs(1).getString("enabledScripts", "")
+		return new HashSet<String>(Arrays.asList(getPrefs(1).getString("enabledScripts", "")
 				.split(";")));
+	}
+
+	public static boolean isSafeMode() {
+		return (MainActivity.libLoaded && MainActivity.tempSafeMode) || getPrefs(0).getBoolean("zz_safe_mode", false);
 	}
 
 	public static boolean isPro() {

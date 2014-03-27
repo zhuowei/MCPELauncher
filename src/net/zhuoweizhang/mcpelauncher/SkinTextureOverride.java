@@ -9,7 +9,7 @@ public class SkinTextureOverride implements TexturePack {
 
 	public InputStream getInputStream(String fileName) throws IOException {
 		boolean loadSkin = Utils.getPrefs(0).getBoolean("zz_skin_enable", false);
-		if (!loadSkin) return null;
+		if (!loadSkin || Utils.isSafeMode()) return null;
 		if (fileName.equals("images/mob/char.png")) {
 			String skinPath = Utils.getPrefs(1).getString("player_skin", null);
 			if (skinPath == null) return null;

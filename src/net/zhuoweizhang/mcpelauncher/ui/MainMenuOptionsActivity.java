@@ -11,15 +11,11 @@ import com.mojang.minecraftpe.MainActivity;
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.Utils;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.*;
-import android.view.Menu;
-import android.widget.CompoundButton;
 import de.ankri.views.Switch;
 
 public class MainMenuOptionsActivity extends PreferenceActivity implements
@@ -40,14 +36,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private boolean needsRestart = false;
 	public static boolean isManagingAddons = false;
 
-	protected CompoundButton master = null;
-
+	private SwitchPreference patchesPreference;
 	private SwitchPreference texturepackPreference;
 	private SwitchPreference addonsPreference;
 	private SwitchPreference scriptsPreference;
 	private SwitchPreference skinPreference;
-	private Preference patchesPreference;
-	private CheckBoxPreference safeModePreference;
+	private SwitchPreference safeModePreference;
 	private ListPreference languagePreference;
 	private Preference goToForumsPreference;
 	private Preference getProPreference;
@@ -61,6 +55,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		public void run() {
 			activity = new WeakReference<MainMenuOptionsActivity>(MainMenuOptionsActivity.this);
 			while (activity.get() != null) {
+				updateStates();
 				updateTP();
 				updateSkin();
 				updatePatches();
@@ -72,12 +67,6 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 						e.printStackTrace();
 					}
 				}
-				activity.get().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						refreshABToggle();
-					}
-				});
 			}
 			System.gc();
 		}
@@ -125,9 +114,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 
 		protected void updatePatches() {
 			MainMenuOptionsActivity a = activity.get();
-			final Preference p = a.patchesPreference;
+			final SwitchPreference p = a.patchesPreference;
 			String sum = null;
-			if ((a.safeModePreference != null) && (a.safeModePreference.isChecked())) {
+			if ((p.content != null) && (p.content.isChecked())) {
 				int count = getDir(MainActivity.PT_PATCHES_DIR, 0).listFiles().length;
 				if (!Utils.isPro() && (Utils.getMaxPatches() != -1)) {
 					count = Math.min(Utils.getMaxPatches(), count);
@@ -178,44 +167,65 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			});
 			a = null;
 		}
+		
+		protected void updateStates() {
+			activity.get().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					togglePrefs();
+				}
+			});
+		}
 	});
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Utils.setLanguageOverride();
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(net.zhuoweizhang.mcpelauncher.R.xml.preferences);
+		
+		setUp();
+
+		ui.start();
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (needsRestart) {
+			forceRestart();
+		} else {
+			super.onBackPressed();
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		setPreferenceScreen(null);
+		setUp();
+		if (!ui.isAlive()) ui.start();
+	}
+	
+	@SuppressWarnings("deprecation")
+	protected void setUp() {
+		addPreferencesFromResource(R.xml.preferences);
 
 		texturepackPreference = (SwitchPreference) findPreference("zz_texture_pack_enable");
 		if (texturepackPreference != null) {
-			texturepackPreference.setOnPreferenceClickListener(this);
 			texturepackPreference.setListener(this);
+			texturepackPreference.setOnPreferenceClickListener(this);
 		}
 
-		patchesPreference = findPreference("zz_manage_patches");
+		patchesPreference = (SwitchPreference) findPreference("zz_manage_patches");
 		if (patchesPreference != null) {
+			patchesPreference.setListener(this);
 			patchesPreference.setOnPreferenceClickListener(this);
 		}
 
-		safeModePreference = (CheckBoxPreference) findPreference("zz_safe_mode");
+		safeModePreference = (SwitchPreference) findPreference("zz_safe_mode");
 		if (safeModePreference != null) {
+			safeModePreference.setListener(this);
 			safeModePreference.setOnPreferenceClickListener(this);
-		}
-
-		aboutPreference = findPreference("zz_about");
-		if (aboutPreference != null) {
-			aboutPreference.setOnPreferenceClickListener(this);
-		}
-
-		getProPreference = findPreference("zz_get_pro");
-		if (getProPreference != null) {
-			getProPreference.setOnPreferenceClickListener(this);
-		}
-
-		goToForumsPreference = findPreference("zz_go_to_forums");
-		if (goToForumsPreference != null) {
-			goToForumsPreference.setOnPreferenceClickListener(this);
 		}
 
 		addonsPreference = (SwitchPreference) findPreference("zz_load_native_addons");
@@ -248,15 +258,19 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			paranoidPreference.setOnPreferenceClickListener(this);
 		}
 
-		ui.start();
-	}
+		aboutPreference = findPreference("zz_about");
+		if (aboutPreference != null) {
+			aboutPreference.setOnPreferenceClickListener(this);
+		}
 
-	@Override
-	public void onBackPressed() {
-		if (needsRestart) {
-			forceRestart();
-		} else {
-			super.onBackPressed();
+		getProPreference = findPreference("zz_get_pro");
+		if (getProPreference != null) {
+			getProPreference.setOnPreferenceClickListener(this);
+		}
+
+		goToForumsPreference = findPreference("zz_go_to_forums");
+		if (goToForumsPreference != null) {
+			goToForumsPreference.setOnPreferenceClickListener(this);
 		}
 	}
 
@@ -267,9 +281,6 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		if (pref == patchesPreference) {
 			managePatches();
 			return true;
-		} else if (pref == safeModePreference) {
-			needsRestart = true;
-			return false; // Don't eat it
 		} else if (pref == texturepackPreference) {
 			manageTexturepacks();
 			return true;
@@ -437,44 +448,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		languagePreference.setEntryValues(langList);
 	}
 
-	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getMenuInflater().inflate(R.menu.ab_master, menu);
-			master = (CompoundButton) menu.findItem(R.id.ab_switch_container).getActionView()
-					.findViewById(R.id.ab_switch);
-			if (master != null) {
-				master.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-					@Override
-					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-						togglePrefs(!isChecked);
-						SharedPreferences.Editor sh = Utils.getPrefs(0).edit();
-						sh.putBoolean("zz_safe_mode", isChecked);
-						sh.apply();
-						refreshABToggle();
-					}
-				});
-				refreshABToggle();
-			} else {
-				System.err.println("WTF?");
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	protected void refreshABToggle() {
-		boolean safeMode = Utils.getPrefs(0).getBoolean("zz_safe_mode", false);
-		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
-			master.setChecked(safeMode);
-		}
-		togglePrefs(safeMode);
-	}
-
-	protected void togglePrefs(boolean safeMode) {
+	protected void togglePrefs() {
+		boolean safeMode = Utils.isSafeMode();
 		if (safeMode == skinPreference.isEnabled()) {
+			patchesPreference.setEnabled(!safeMode);
 			skinPreference.setEnabled(!safeMode);
 			texturepackPreference.setEnabled(!safeMode);
 			addonsPreference.setEnabled(!safeMode);

@@ -33,7 +33,7 @@
     <string name="pref_ctrl_sensitivity_summary">Touch sensitivity</string>
     -->
     <string name="pref_zz_safe_mode">Safe mode</string>
-    <string name="pref_zz_safe_mode_summary">Disables all patches</string>
+    <string name="pref_zz_safe_mode_summary">Disables all modifications</string>
     <!--
     <string name="pref_zz_patch_ip_enable">Redirect Multiplayer</string>
     <string name="pref_zz_patch_ip_enable_summary">Redirects multiplayer connections to an online server</string>
