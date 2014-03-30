@@ -101,6 +101,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		Intent target = FileUtils.createGetContentIntent();
 		target.setType("application/x-ptpatch");
 		target.setClass(this, FileChooserActivity.class);
+		target.putExtra(FileUtils.EXTRA_SORT_METHOD, FileUtils.SORT_LAST_MODIFIED);
 		startActivityForResult(target, REQUEST_IMPORT_PATCH);
 	}
 

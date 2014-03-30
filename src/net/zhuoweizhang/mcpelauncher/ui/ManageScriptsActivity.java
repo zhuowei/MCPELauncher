@@ -182,6 +182,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		target.setType("application/javascript");
 		target.setClass(this, FileChooserActivity.class);
 		target.putExtra(FileUtils.EXTRA_MIME_TYPES, ALL_SCRIPT_MIMETYPES);
+		target.putExtra(FileUtils.EXTRA_SORT_METHOD, FileUtils.SORT_LAST_MODIFIED);
 		startActivityForResult(target, REQUEST_IMPORT_PATCH);
 	}
 
