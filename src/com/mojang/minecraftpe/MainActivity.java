@@ -290,7 +290,6 @@ public class MainActivity extends NativeActivity
 			boolean shouldLoadScripts = false;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
-				//applyPatches();
 				applyBuiltinPatches();
 				shouldLoadScripts = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true);
 				if (shouldLoadScripts) ScriptManager.init(this);
@@ -1295,61 +1294,14 @@ public class MainActivity extends NativeActivity
 	}
 
 	public void initPatching() throws Exception {
-		/*if (BuildConfig.DEBUG) {
-			System.err.println("Skipping this to simulate Samsung");
-			System.err.println(minecraftLibBuffer);
-			overlyZealousSELinuxSafeMode = true;
-			tempSafeMode = true;
-			return;
-		}*/
-		long pageSize = PokerFace.sysconf(PokerFace._SC_PAGESIZE);
-		System.out.println(Long.toString(pageSize, 16));
-		long minecraftLibLocation = findMinecraftLibLocation();
 		long minecraftLibLength = findMinecraftLibLength();
-		long mapPageLength = ((minecraftLibLength / pageSize) + 1) * pageSize;
-		System.out.println("Calling mprotect with " + minecraftLibLocation + " and " + mapPageLength);
-		int returnStatus = PokerFace.mprotect(minecraftLibLocation, mapPageLength, PokerFace.PROT_WRITE | PokerFace.PROT_READ | PokerFace.PROT_EXEC);
-		System.out.println("mprotect result is " + returnStatus);
-		if (returnStatus < 0) {
+		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
+		if (!success) {
 			System.out.println("Well, that sucks!");
 			tempSafeMode = true;
 			overlyZealousSELinuxSafeMode = true;
 			return;
 		}
-		ByteBuffer buffer = PokerFace.createDirectByteBuffer(minecraftLibLocation, minecraftLibLength);
-		//findMinecraftLibLocation();
-		System.out.println("Has the byte buffer: " + buffer);
-		minecraftLibBuffer = buffer;
-	}
-
-	public void applyPatches() throws Exception {
-		/*ByteBuffer buffer = minecraftLibBuffer;
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		byte[] testBuffer = new byte[6];
-		buffer.get(testBuffer);
-		System.out.println("Before: " + Arrays.toString(testBuffer));
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		buffer.put(">9000!".getBytes());
-		buffer.position(0x1b6d50);//"v0.6.1" offset
-		buffer.get(testBuffer);
-		System.out.println("After " + Arrays.toString(testBuffer));*/
-	}
-
-	public static long findMinecraftLibLocation() throws Exception {
-		Scanner scan = new Scanner(new File("/proc/self/maps"));
-		long minecraftLocation = -1;
-		while (scan.hasNextLine()) {
-			String line = scan.nextLine();
-			//System.out.println(line);
-			String[] parts = line.split(" ");
-			if (parts[parts.length - 1].indexOf("libminecraftpe.so") >= 0 && parts[1].indexOf("x") >= 0) {
-				System.out.println("Found minecraft location");
-				minecraftLocation = Long.parseLong(parts[0].substring(0, parts[0].indexOf("-")), 16);
-				break;
-			}
-		}
-		scan.close();
-		return minecraftLocation;
 	}
 
 	public static long findMinecraftLibLength() throws Exception {
@@ -1431,25 +1383,7 @@ public class MainActivity extends NativeActivity
 	}
 
 	protected void applyBuiltinPatches() {
-		try {
-			//Apply guiBlocks
-			boolean patchGuiBlocks = doesRequireGuiBlocksPatch();
-			System.out.println("Patching guiblocks: " + patchGuiBlocks);
-			com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-			byte[] patchData = patchGuiBlocks? minecraftVersion.guiBlocksPatch : minecraftVersion.guiBlocksUnpatch;
-			if (patchData != null) {
-				patch.loadPatch(patchData);
-				PatchUtils.patch(minecraftLibBuffer, patch);
-			} //TODO: load from assets
-		} catch (Exception ie) {
-			ie.printStackTrace();
-		}
-
-		//Patch out the red item missing icon
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("zz_script_enable", true)) {
-			ScriptManager.nativeRemoveItemBackground();
-		}
-
+		//do nothing
 	}
 
 	protected void loadTexturePack() {

@@ -3,19 +3,32 @@ package net.zhuoweizhang.mcpelauncher.patch;
 import java.io.*;
 import java.nio.*;
 
+import com.mojang.minecraftpe.MainActivity;
+
+import net.zhuoweizhang.mcpelauncher.MaraudersMap;
 import net.zhuoweizhang.mcpelauncher.MinecraftVersion;
 
 public final class PatchUtils {
 
 	public static MinecraftVersion minecraftVersion = null;
 
+	private PatchUtils(){}
+
+	private static ByteBuffer positionBuf(ByteBuffer buf, int addr) {
+		if (buf == MainActivity.minecraftLibBuffer && addr >= 0 && addr < MaraudersMap.minecraftTextBuffer.capacity()) {
+			buf = MaraudersMap.minecraftTextBuffer;
+		}
+		buf.position(addr);
+		return buf;
+	}
+
 	public static void patch(ByteBuffer buf, com.joshuahuelsman.patchtool.PTPatch patch) {
 		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
 		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
 			int addr = patch.getNextAddr();
 			if (translator != null) addr = translator.get(addr);
-			buf.position(addr);
-			buf.put(patch.getNextData());
+			ByteBuffer newBuf = positionBuf(buf, addr);
+			newBuf.put(patch.getNextData());
 		}
 	}
 
@@ -25,11 +38,11 @@ public final class PatchUtils {
 		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
 			int addr = patch.getNextAddr();
 			if (translator != null) addr = translator.get(addr);
-			buf.position(addr);
+			ByteBuffer newBuf = positionBuf(buf, addr);
 			originalBuf.position(addr);
 			byte[] nextData = new byte[patch.getDataLength()];
 			originalBuf.get(nextData);
-			buf.put(nextData);
+			newBuf.put(nextData);
 		}
 	}
 

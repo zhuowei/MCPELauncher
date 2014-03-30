@@ -47,6 +47,9 @@ public class PokerFace {
 		return (ByteBuffer) cons.newInstance(address, (int) length);
 	}
 
+	public static void init() {
+	}
+
 	static {
 		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("mcpelauncher_tinysubstrate");

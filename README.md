@@ -16,7 +16,7 @@ This program contains code from Snowbound\'s PTPatchTool, licensed under the Ecl
 
 The demonstration texture pack, RepetiCraft, is made by Theevilpplz and used with permission.
 
-This program contains a version of Saurik's Cydia Substrate: source at https://docs.google.com/file/d/0B-fqnmBSesbtdDNYTk43V1dnMmc/edit?usp=sharing
+This program contains a version of Saurik's Cydia Substrate: source at https://drive.google.com/file/d/0B50ApLKOyu8bX3VnRmYzNUcxT0U/edit?usp=sharing
 
 This program uses the libsuperuser library by Chainfire.
 
