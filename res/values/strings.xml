@@ -130,7 +130,7 @@ Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and us
 This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 This program uses the libsuperuser library by Chainfire.\n
 This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
-For full licensing information, check the Minecraft Forums thread.\n</string>
+For full licensing information, check the Minecraft Forums thread.\n</string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
     <string name="about_go_to_forums">Open Minecraft Forums thread for BlockLauncher</string>
