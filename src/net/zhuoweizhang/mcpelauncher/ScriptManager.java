@@ -1045,6 +1045,7 @@ public class ScriptManager {
  	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
  	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
  	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
+ 	public static native void nativeSetItemMaxDamage(int id, int maxDamage);
 	
 	//setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1929,6 +1930,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) { // Do I need a count? If not, should I just fill it with null, or skip it completely?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
+		}
+		
+		@JSStaticFunction
+		public static void setMaxDamage(int id, int maxDamage) {
+			nativeSetItemMaxDamage(id, maxDamage);
 		}
 		
 		@Override
