@@ -36,7 +36,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private boolean needsRestart = false;
 	public static boolean isManagingAddons = false;
 
-	private SwitchPreference patchesPreference;
+	private Preference patchesPreference;
 	private SwitchPreference texturepackPreference;
 	private SwitchPreference addonsPreference;
 	private SwitchPreference scriptsPreference;
@@ -113,7 +113,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 
 		protected void updatePatches() {
-			MainMenuOptionsActivity a = activity.get();
+			/*MainMenuOptionsActivity a = activity.get();
 			final SwitchPreference p = a.patchesPreference;
 			String sum = null;
 			if ((p.content != null) && (p.content.isChecked())) {
@@ -137,7 +137,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 					p.setSummary(sm);
 				}
 			});
-			a = null;
+			a = null;*/
 		}
 
 		protected void updateScripts() {
@@ -216,9 +216,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			texturepackPreference.setOnPreferenceClickListener(this);
 		}
 
-		patchesPreference = (SwitchPreference) findPreference("zz_manage_patches");
+		patchesPreference = (Preference) findPreference("zz_manage_patches");
 		if (patchesPreference != null) {
-			patchesPreference.setListener(this);
+			//patchesPreference.setListener(this);
 			patchesPreference.setOnPreferenceClickListener(this);
 		}
 
@@ -449,7 +449,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	}
 
 	protected void togglePrefs() {
-		boolean safeMode = Utils.isSafeMode();
+		/*boolean safeMode = Utils.isSafeMode();
 		if (safeMode == skinPreference.isEnabled()) {
 			patchesPreference.setEnabled(!safeMode);
 			skinPreference.setEnabled(!safeMode);
@@ -457,7 +457,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			addonsPreference.setEnabled(!safeMode);
 			scriptsPreference.setEnabled(!safeMode);
 			needsRestart = true;
-		}
+		}*/
 	}
 
 }

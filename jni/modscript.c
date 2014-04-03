@@ -256,7 +256,6 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	bl_minecraft = minecraft;
 	bl_level = level;
 
-	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -271,6 +270,8 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
+
+	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
 
 	//attach the listener
 	bl_attachLevelListener();

@@ -1344,7 +1344,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean useLegacyKeyboardInput() {
-		return Utils.getPrefs(0).getBoolean("zz_legacy_keyboard_input", false);
+		return false;
+		//return Utils.getPrefs(0).getBoolean("zz_legacy_keyboard_input", false);
 	}
 
 	public void initPatching() throws Exception {

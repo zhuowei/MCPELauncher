@@ -531,8 +531,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id, jint maxDamage) {
+	if (id <= 0 || id >= 512) return;
 	Item* item = bl_Item_items[id];
-	if(item = null) return;
+	if(item == NULL) return;
 	bl_Item_setMaxDamage(item, maxDamage);
 }
 
@@ -563,12 +564,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	std::string soundstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(sound, utfChars);
 	bl_Level_playSound(bl_level, x, y, z, soundstr, volume, pitch);
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAllEntities
-  (JNIEnv *env, jclass clazz) {
-	void* ptr = bl_Level_getAllEntities(bl_level);
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "%x, %x\n", ptr, *((void**)(ptr)));
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer

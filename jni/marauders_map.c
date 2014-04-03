@@ -62,7 +62,7 @@ static void* marauder_translation_function(void* input) {
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_remapText
   (JNIEnv *env, jclass clazz, jlong addr, jlong len, jstring tempFilePath) {
 	const char * pathChars = (*env)->GetStringUTFChars(env, tempFilePath, NULL);
-	int status = marauder_remap_text((void *)(uintptr_t) addr, len, pathChars);
+	int status = marauder_remap_text((uintptr_t) addr, len, pathChars);
 	(*env)->ReleaseStringUTFChars(env, tempFilePath, pathChars);
 	return status == 0? -1: remapped_text_offset;
 }
