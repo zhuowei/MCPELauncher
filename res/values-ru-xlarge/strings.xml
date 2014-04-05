@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Russian translation by MelomanCool -->
-<resources>
-    <string name="select_file">Выберите файл с SD карты</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="pref_ctrl_touchscreen">Использовать тачскрин</string>
     <string name="pref_ctrl_touchscreen_summary">Если вы играете не на Xperia Play, поставьте галочку</string>
     <string name="pref_mp_username">Имя в мультиплеере</string>
     <string name="pref_mp_username_summary">Ваш ник</string>
     <string name="pref_texture_pack">Текстурпак</string>
     <string name="pref_texture_pack_summary">Выбрать текстурпак</string>
+	<!--
     <string name="pref_ctrl_usetouchjoypad">Управление с ПК</string>
     <string name="pref_ctrl_islefthanded">Управление для левшей</string>
     <string name="pref_ctrl_islefthanded_summary">Отзеркаливает схему управления</string>
@@ -15,8 +16,10 @@
     <string name="pref_ctrl_invertmouse_summary">Тем временем в Австралии :)</string>
     <string name="pref_feedback_vibration">Вибрация</string>
     <string name="pref_feedback_vibration_summary">Включать вибрацию после уничтожения блока</string>
+	-->
     <string name="pref_zz_longvibration">Очень долгая вибрация</string>
     <string name="pref_zz_longvibration_summary">Увеличить время вибрации в 5 раз</string>
+	<!--
     <string name="pref_gfx_fancygraphics">Высокоуровневая графика</string>
     <string name="pref_gfx_fancygraphics_summary">Повышает качество графики</string>
     <string name="pref_gfx_lowquality">Низкоуровневая графика</string>
@@ -25,14 +28,17 @@
     <string name="pref_game_difficultypeaceful_summary">Восстановление сердечек, отсутствие монстров</string>
     <string name="pref_ctrl_sensitivity">Чувствительность</string>
     <string name="pref_ctrl_sensitivity_summary">Чувствительность тачскрина</string>
+	-->
     <string name="pref_zz_safe_mode">Безопасный режим</string>
     <string name="pref_zz_safe_mode_summary">Отключает все патчи</string>
+	<!--
     <string name="pref_zz_patch_ip_enable">Использовать свой адрес сервера</string>
     <string name="pref_zz_patch_ip_enable_summary">Перенаправляет соединение на мультиплеерный сервер</string>
     <string name="pref_zz_patch_ip">IP сервера</string>
     <string name="pref_zz_patch_ip_summary">IP адрес сервера</string>
     <string name="pref_zz_patch_ip_port">Порт сервера</string>
     <string name="pref_zz_patch_ip_port_summary">Порт сервера (обычно 19132)</string>
+	-->
     <string name="pref_zz_texture_pack_enable">Использовать текстурпак</string>
     <string name="pref_zz_custom_dpi">Изменить DPI</string>
     <string name="pref_zz_custom_dpi_summary">Изменить стандартный DPI для изменения размера кнопок управления - оставьте пустым для отключения</string>
@@ -46,7 +52,7 @@
     <string name="pref_textures_title">Текстуры</string>
     <string name="pref_support_title">Поддержка</string>
     <string name="pref_zz_load_native_addons">Включить экспериментальную поддержку аддонов</string>
-    <string name="pref_zz_enable_hovercar">Включить внутриигровое управление патчами</string>
+    <string name="pref_zz_enable_hovercar">Меню BL в игре</string>
     <string name="texture_pack_unable_to_load">Не удалось загрузить текстурпак.</string>
     <string name="pref_zz_extract_original_textures">Извлечь оригинальные текстуры (требуется root)</string>
     <string name="pref_zz_extract_original_textures_summary">Сделать резервное копирование оригинального APK и установить его как текстурпак</string>
@@ -63,10 +69,18 @@
     <string name="pref_zz_manage_scripts">Управление скриптами ModPE</string>
     <string name="pref_zz_script_enable">Включить поддержку скриптов ModPE</string>
     <string name="pref_zz_sensorcontrol">Сенсорное управление</string>
-    <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваш девайс. Необходимо включить скрипты ModPE.</string>
-    <string name="pref_zz_show_insert_text">Показать \"Ввести текст\" во внутриигровом управлении патчами" </string>
+    <string name="pref_zz_sensorcontrol_summary">Управляйте игроком поворачивая ваше устройство. Необходимо включить скрипты ModPE.</string>
+    <string name="pref_zz_show_insert_text">Кнопка \"Ввод текста\" в меню BL" </string>
     <string name="pref_zz_language_override">Язык</string>
     <string name="pref_zz_language_override_default">По умолчанию</string>
+    <string name="pref_zz_script_paranoid_mode">Режим паранойи</string>
+    <string name="pref_zz_script_paranoid_mode_summary">Отключает скриптам ModPE доступ к функциям Android\'а,\nтаким как удаление файлов и доступ в интернет</string>
+    <string name="pref_zz_legacy_keyboard_input">Старый код ввода с клавиатуры</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">Исправление проблем с клавиатурой в 0.8.x</string>
+    <string name="pref_zz_texture_pack_enable_extracted">Использовать распакованные оригинальные текстуры</string>
+    <string name="pref_zz_skin_download_source">PC скины</string>
+    <string name="skin_download_do_not_download">Не скачивать скины</string>
+    <string name="skin_download_download_pc">Скачивать скины соответствующие нику на PC</string>
     <string name="nerdy_stuff_page">Отладка</string>
     <string name="dump_libminecraftpe">Сделать дамп libminecraftpe.so из памяти</string>
     <string name="nerdy_stuff_are_useless">Все, что находится на этой странице, практически бесполезно (для пользователей). Оно нужно для устранения ошибок.</string>
@@ -80,22 +94,27 @@
     <string name="gamemode_creative">Креатив</string>
     <string name="copy_world_title">Сохранить мир</string>
     <string name="manage_patches_import">Добавить</string>
-    <string name="manage_patches_import_error">Не удалось импортировать патч</string>
-    <string name="manage_patches_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более трех патчей</string>
+    <string name="manage_patches_import_error">Не удалось добавить патч</string>
+    <string name="manage_patches_too_many">Обновите BlockLauncher до версии Pro, чтобы использовать более трех патчей</string>
     <string name="manage_patches_delete">Удалить</string>
     <string name="manage_patches_crash_safe_mode">BlockLauncher зафиксировал вылет приложения. Был активирован Безопасный Режим для предотвращения будущих вылетов из-за некорректных патчей. В данном режиме все патчи отключаются.
 Вы хотите продолжить в безопасном режиме без патчей, или хотите вернуться в обычный режим?</string>
-    <string name="manage_patches_import_confirm">Вы хотите импортировать этот патч?</string>
-    <string name="manage_patches_import_done">Патч импортирован</string>
+    <string name="manage_patches_import_confirm">Вы хотите добавить этот патч?</string>
+    <string name="manage_patches_import_done">Патч добавлен</string>
     <string name="manage_patches_enable">Включить</string>
     <string name="manage_patches_disable">Выключить</string>
     <string name="manage_patches_disabled">(отключен)</string>
-    <string name="manage_patches_invalid_patches">Следующие патчи не могут быть импортированы, поскольку они в формате, который BlockLauncher не понимает:</string>
+    <string name="manage_patches_invalid_patches">Следующие патчи не могут быть добавлены, поскольку они в формате, который BlockLauncher не поддерживает:</string>
     <string name="manage_patches_info">Информация</string>
     <string name="manage_patches_metadata">Автор</string>
     <string name="manage_patches_no_metadata">Информация об авторе недоступна</string>
     <string name="manage_patches_path">Путь</string>
-    <string name="skin_imported">Скин импортирован</string>
+    <string name="skin_import_confirm">Вы хотите установить этот скин?</string>
+    <string name="texturepack_import_confirm">Вы хотите установить этот текстурпак?</string>
+    <string name="script_import_confirm">Вы хотите добавить этот скрипт ModPE?</string>
+    <string name="skin_imported">Скин добавлен</string>
+    <string name="texturepack_imported">Текстурпак установлен</string>
+	<string name="script_imported">Скрипт ModPE добавлен</string>
     <string name="manage_addons">Управление аддонами</string>
     <string name="get_pro">Обновить до Pro</string>
     <string name="about_about">О BlockLauncher</string>
@@ -108,13 +127,11 @@
 Эта программа содержит версию фреймворка Cydia Substrate от Saurik, под лицензией GNU Lesser General Public License.\n
 Эта программа использует библиотеку libsuperuser от Chainfire.\n
 Эта программа содержит копию движка Rhino JavaScript от Mozilla project.\n
-Для получения полной информации о лицензировании проверьте тему на Minecraft Forums.\n
-    </string>
+Для получения полной информации о лицензировании проверьте тему на Minecraft Forums.\n</string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">Это приложение появилось благодаря работе многих талантливых переводчиков, тестеров и программистов. Благодарю Вас.\nПросмотреть тему на Minecraft Forums, чтобы увидеть список участников.</string>
     <string name="about_go_to_forums">Открыть тему BlockLauncher\'а на Minecraft Forums</string>
     <string name="no_minecraft_installed">BlockLauncher не обнаружил Minecraft PE на вашем устройстве. Данное приложение разработано для того, чтобы патчить полную версию Minecraft Pocket Edition от Mojang.</string>
-
     <string name="firstlaunch_title">Добро пожаловать в BlockLauncher!</string>
     <string name="firstlaunch_generic_intro">Спасибо за то, что попробовали BlockLauncher. BlockLauncher может запускать Minecraft Pocket Edition и добавлять дополнительные возможности, такие как патчи, аддоны, скины и текстуры.</string>
     <string name="firstlaunch_jelly_bean">Ваше устройство работает на Android версии Jelly Bean или новее, так что BlockLauncher не может получить доступ к стандартным текстурам. Был установлен демонстрационный текстурпак и вы можете тестировать лончер.</string>
@@ -124,18 +141,18 @@
     <string name="version_mismatch_message">Данная версия Minecraft PE не поддерживается BlockLauncher\'ом. BlockLauncher будет временно запущен в безопасном режиме. Следите за обновлениями, так как поддержка может быть добавлена в новой версии.</string>
 
     <string name="feature_not_supported">Данная возможность пока не поддерживается BlockLauncher\'ом.</string>
-    <string name="hovercar_title">Внутриигровое управление патчами</string>
-    <string name="hovercar_live_patch">Управление патчами</string>
-    <string name="hovercar_options">Настройки лончера (требуется рестарт)</string>
+    <string name="hovercar_title">Меню BL</string>
+    <string name="hovercar_live_patch">Патчи</string>
+    <string name="hovercar_options">Настройки BL</string>
     <string name="hovercar_insert_text">Ввести текст</string>
-
+	<!--
     <string name="mco_redirect_none">Не перенаправлять</string>
     <string name="mco_redirect_pocketmine">Использовать список серверов PocketMine</string>
     <string name="mco_redirect_minepocket">Использовать список серверов MinePocket</string>
-
-    <string name="safe_mode_exit">Вернуться в обычный режим</string>
+	-->
+    <string name="safe_mode_exit">Обычный режим</string>
     <string name="safe_mode_continue">Продолжить</string>
-    
+	<!--
     <string name="server_list_add">Добавить сервер</string>
     <string name="pref_zz_server_list">Список серверов</string>
     <string name="pref_zz_server_list_summary">Выберите или добавьте сервер в свой список серверов</string>
@@ -143,32 +160,46 @@
     <string name="server_list_name_prompt">Название: </string>
     <string name="server_list_address_prompt">Адрес: </string>
     <string name="server_list_port_prompt">Порт: </string>
-    
-    <string name="script_import_from">Импортировать скрипт из</string>
-    <string name="script_import_from_local">Локального хранилища</string>
-    <string name="script_import_from_cfgy">Официального репозитория Treebl\'а</string>
-    <string name="script_import_from_bl_repo">Тестируемого репозитория BlockLauncher\'а</string>
-    <string name="script_import_from_url">Веб адреса</string>
-    <string name="script_import_from_clipboard">Буфера обмена</string>
-    <string name="script_import_from_clipboard_name">Введите имя скрипта</string>
-    <string name="script_import_from_clipboard_code">Код для импорта</string>
-    <string name="script_import_from_cfgy_id">Введите ID скрипта для импорта</string>
-    <string name="script_import_from_url_enter">Введите адрес скрипта для импорта</string>
-    <string name="script_import_too_many">Обновите BlockLauncher до версии Pro, чтобы одновременно использовать более одного скрипта</string>
+	-->
+    <string name="script_import_from">Добавление скрипта</string>
+    <string name="script_import_from_local">Память устройства</string>
+    <string name="script_import_from_cfgy">Репозиторий Treebl\'а</string>
+    <string name="script_import_from_bl_repo">Репозиторий BlockLauncher\'а</string>
+    <string name="script_import_from_url">URL</string>
+    <string name="script_import_from_clipboard">Буфер обмена</string>
+    <string name="script_import_from_clipboard_name">Имя скрипта</string>
+    <string name="script_import_from_clipboard_code">Код скрипта</string>
+    <string name="script_import_from_cfgy_id">ID скрипта</string>
+    <string name="script_import_from_url_enter">URL скрипта</string>
+    <string name="script_import_too_many">Обновите BlockLauncher до версии Pro, чтобы использовать более одного скрипта</string>
     <string name="script_execution_error">В скрипте ModPE произошла ошибка</string>
     <string name="script_disabled_in_multiplayer">Ваши скрипты ModPE были отключены на время использования мультиплеера, так как они могут привести к вылетам приложения. После отключения от сервера они будут снова включены.</string>
-    <string name="script_minecraft_version_incompatible">Скрипты ModPE не поддерживаются вашей версией Minecraft PE. Часть скриптов может функционировать неполностью, или приводить к вылету приложения. Используйте на свой страх и риск.</string>
-    <string name="script_import_from_intent_warning">Вы хотите импортировать этот скрипт? Он получит доступ к тем же самым ресурсам, что и BlockLauncher, включая, возможно, ваши пароли и другую личную информацию.</string>
-    <string name="script_view_source">Открыть исходный код</string>
+    <string name="script_minecraft_version_incompatible">Скрипты ModPE не поддерживаются вашей версией Minecraft PE. Некоторые скрипты могут функционировать частично, или приводить к вылету приложения. Используйте на свой страх и риск.</string>
+    <string name="script_import_from_intent_warning">Вы хотите добавить этот скрипт? Он получит доступ к тем же самым ресурсам, что и BlockLauncher, включая, возможно, ваши пароли и другую личную информацию.</string>
+    <string name="script_view_source">Исходный код</string>
     <string name="script_too_many_errors">был отключен, так как содержит слишком много ошибок. Извините!</string>
-    <string name="take_screenshot">Сделать скриншот</string>
+    <string name="take_screenshot">Скриншот</string>
     <string name="take_screenshot_requires_modpe_script">Для снятия скриншотов должна быть включена поддержка скриптов ModPE. \nВы можете включить ее в настройках BlockLauncher\'a.</string>
     <string name="screenshot_saved_as">Скриншот сохранен в</string>
-
     <string name="selinux_broke_everything">К сожалению, BlockLauncher не может работать на вашем устройстве в полной мере, это связано с Samsung Knox или SELinux, которые препятствуют применению патчей \"на лету\". \n\n
-Мы работаем над исправлением этого, но, в настоящее время, функции BlockLauncher\'а ограничены до применения патчей (.mod) и загрузки текстурпаков. \n\nСкрипты ModPE не могут быть загружены, также, все патчи требуют рестарта.</string>
-
+Мы работаем над исправлением этого, но, в настоящее время, функции BlockLauncher\'а ограничены до применения патчей (.mod) и загрузки текстурпаков. \n\nСкрипты ModPE не могут быть загружены, а все патчи требуют рестарта.</string>
     <string name="permlab_mcpelauncher_addon">Аддон BlockLauncher\'а</string>
-    <string name="permdesc_mcpelauncher_addon">Приложение может быть загружено в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что Minecraft PE имеет разрешение.</string>
+    <string name="permdesc_mcpelauncher_addon">Приложение может быть загружено в BlockLauncher как аддон. Это означает, что данное приложение сможет получить доступ к сети, памяти и делать все, на что имеет разрешение Minecraft PE.</string>
+	<string name="hovercar_insert_text_backspace">Вставить backspace</string>
+    
+    <string name="textures_select">Выбрать</string>
+    <string name="textures_demo">Демо</string>
+    <string name="textures_extract">Оригинальные</string>
+    <string name="textures_clear_script_texture_overrides">Отменить изменения текстур скриптами</string>
+    <string name="plurals_patches_one">патч</string>
+    <string name="plurals_patches_more">патчей</string>
+    <string name="plurals_patches_no">Нет патчей</string>
+    <string name="plurals_scripts_one">скрипт</string>
+    <string name="plurals_scripts_more">скриптов</string>
+    <string name="plurals_scripts_no">Нет скриптов</string>
+    <string name="nerdy_stuff_dump_modpe">Дамп методов ModPE</string>
+    <string name="nerdy_stuff_set_skin">Использовать скин /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">Посторонним вход воспрещен</string>
+    <string name="pref_other_title">Другое</string>
 
 </resources>
