@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Do not translate the app name, as I prefer the name to be consistent. Just remove the app_name line in the translations. -->
+    <string name="app_name">BlockLauncher</string>
     <string name="pref_ctrl_touchscreen">Verwende Touchscreen</string>
     <string name="pref_ctrl_touchscreen_summary">Wenn du kein Xperia Play verwendest, wähle das</string>
     <string name="pref_mp_username">Multiplayer Benutzername</string>
@@ -38,6 +40,8 @@
     <string name="pref_ctrl_title">Steuerung</string>
     <string name="pref_gfx_title">Grafiken</string>
     <string name="pref_addons_title">Addons und Patches</string>
+    <string name="pref_textures_title">Textures</string>
+    <string name="pref_support_title">Unterstützung</string>
     <string name="pref_zz_load_native_addons"> Aktivieren Sie zusätzliche Addon Unterstützung</string>
     <string name="pref_zz_enable_hovercar">Erlaubt In-Game Patch Manager</string>
     <string name="texture_pack_unable_to_load">Konnte das Texture Pack nicht laden.</string>
