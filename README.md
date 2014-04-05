@@ -30,13 +30,13 @@ This program uses the Rhino JavaScript interpreter.
 3.  Download Apache ANT and extract it somewhere with NO SPACES. Personally I would put it in:    C:/
 4.  Setup Environment variables by pressing START, right clicking on Computer, then clicking "Advanced system settings" on 		the left side
 5.  Under "User variables" add "ANT_HOME" and the value is wherever you saved Apache ANT to. Also in "User variables",  
-     add a variable called "Path"(if it's not already there). Add to it ";%ANT_HOME%/bin"
-6.  Under "System variables" add "ANDROID_NDK" and set the value to your ndk path. Then create a "ANDROID_SDK" system
+     add a variable called "Path" (if it's not already there). Add to it ";%ANT_HOME%/bin"
+6.  Under "System variables" add ANDROID_NDK" and set the value to your ndk path. Then create a ANDROID_SDK system
 	 variable and set the value to your sdk path. Also add ";" + you sdk path to the SYSTEM VARIABLE'S "Path"(Not the user variable "Path" made above)
-7.  Download these repositories:
-			git clone git@github.com:zhuowei/aFileChooser.git
- 			git clone git@github.com:zhuowei/BlockLauncher-app.git
- 			git clone https://github.com/Chainfire/libsuperuser.git
+7.  Download these repositories:<pre>
+			`git clone git@github.com:zhuowei/aFileChooser.git`
+ 			`git clone git@github.com:zhuowei/BlockLauncher-app.git`
+ 			`git clone https://github.com/Chainfire/libsuperuser.git`</pre>
 8.  You'll also be needing a MCPELauncher source folder with some changes that you'll be testing. I'll assume you're a
 	 BlockLauncher developer and have this already.
 9.  Extract all of these to the same directory. Personally I would put them all in a folder named "BLBUILD" in your 
@@ -59,17 +59,17 @@ This program uses the Rhino JavaScript interpreter.
 			aFileChooser:
 				<desktop>/BLBUILD/aFileChooser/aFileChooser/(files)
 12.  Edit MCPELauncher/local.properties to point to your sdk
-13.  Open your cmd prompt: Type in "cd <desktop>/BLBUILD/MCPELauncher"
-	   Now type: "ndk-build" This should compile all of BlockLauncher's native code
-14.  Type "cd <desktop>/BLBUILD/libsuperuser" then type "android update lib-project -p libsuperuser -t 1"
-      Type "cd <desktop>/BLBUILD/aFileChooser" then type "android update lib-project -p aFileChooser -t 1"
-      Type "cd <desktop>/BLBUILD" then type "android update project -p MCPELauncher-app -t 1"
-      Type "cd <desktop>/BLBUILD" then type "android update project -p <desktop>\BLBUILD\MCPELauncher"
+13.  Open your cmd prompt: Type in `cd <desktop>/BLBUILD/MCPELauncher`
+	   Now type: `ndk-build` This should compile all of BlockLauncher's native code
+14.  Type `cd <desktop>/BLBUILD/libsuperuser` then type `android update lib-project -p libsuperuser -t 1`
+      Type `cd <desktop>/BLBUILD/aFileChooser` then type `android update lib-project -p aFileChooser -t 1`
+      Type `cd <desktop>/BLBUILD` then type `android update project -p MCPELauncher-app -t 1`
+      Type `cd <desktop>/BLBUILD` then type `android update project -p <desktop>\BLBUILD\MCPELauncher`
 15.  Edit project.properties in this way:
 			MCPELauncher: Ensure  target=10
 			aFileChooser: Ensure  target=10
 			libsuperuser: Ensure  target=10
 			MCPELauncher-app: Ensure  target=17
-16.  Type "cd <desktop>/BLBUILD/MCPELauncher-app" then type "ant clean debug"
+16.  Type `cd <desktop>/BLBUILD/MCPELauncher-app` then type `ant clean debug`
 
 17.  The build apk is MCPELauncher-app/bin/MCPELauncherApp-debug.apk

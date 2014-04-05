@@ -1,10 +1,10 @@
-[							]
-[		FULL LIST OF		]
-[		USED LIBS IN		]
-[		THIS PROJECT		]
-[							]
+[                   ]
+[   FULL LIST OF    ]
+[   USED LIBS IN    ]
+[   THIS PROJECT    ]
+[                   ]
 
-big thanks to their authors and contributors!
+Big thanks to their authors and contributors!
 
 * aFileChooser - Paul Burke
 * Pokerface - Zhuowei Zhang
