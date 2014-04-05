@@ -1,10 +1,8 @@
-```
 [                   ]
 [   FULL LIST OF    ]
 [   USED LIBS IN    ]
 [   THIS PROJECT    ]
 [                   ]
-```
 
 Big thanks to their authors and contributors!
 
