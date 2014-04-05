@@ -1210,7 +1210,7 @@ public class ScriptManager {
 	// instead of the top-level namespace. thanks.
 	// e.g. Entity.fireLaz0rs = good, fireLaz0rs = bad, bl_fireLaz0rs = bad
 
-	private static class BlockHostObject extends ScriptableObject {
+	private static class BlockHostObject extends ImporterTopLevel {
 		private int playerEnt = 0;
 
 		@Override

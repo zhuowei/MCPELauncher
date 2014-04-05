@@ -356,7 +356,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		return true;
 	}
 
-	/*@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -386,12 +386,12 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 		} else {
 			return false;
 		}
-	}*/
+	}
 
 	protected void refreshABToggle() {
-		/*if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
-			master.setChecked(Utils.getPrefs(0).getBoolean("zz_manage_patches", false));
-		}*/
+		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
+			master.setChecked(Utils.getPrefs(0).getBoolean("zz_manage_patches", true));
+		}
 	}
 
 	@Override

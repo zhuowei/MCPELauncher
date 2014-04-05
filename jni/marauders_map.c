@@ -54,7 +54,7 @@ static void* marauder_translation_function(void* input) {
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Input %x", addr);
 	if (addr >= original_text_offset && addr < original_text_offset + remapped_text_length) {
 		addr = (addr - original_text_offset) + remapped_text_offset;
-		__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Remapping to %x", addr);
+		//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Remapping to %x", addr);
 	}
 	return (void*) addr;
 }
@@ -74,5 +74,5 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_setTransl
 	strcpy(newChar, pathChars);
 	MSSetAddressTranslationFunction(marauder_translation_function, newChar);
 	(*env)->ReleaseStringUTFChars(env, tempFilePath, pathChars);
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Set translation function");
+	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Set translation function");
 }
