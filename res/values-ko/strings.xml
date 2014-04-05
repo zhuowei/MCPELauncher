@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 번역자들을 위해 안내 사항이 있습니다. by Koongchi
-페이지를 맨 아래로 내려주세요. -->
-    <!-- There's some notice for Korean translators. by Koongchi
-Scroll to the bottom and see notice. -->
          
     <string name="pref_ctrl_touchscreen">터치스크린 사용</string>
     <string name="pref_ctrl_touchscreen_summary">Xperia Play를 사용하지 않는 경우 체크하세요.</string>
@@ -11,6 +7,7 @@ Scroll to the bottom and see notice. -->
     <string name="pref_mp_username_summary">멀티플레이어 모드에서 보여지는 이름입니다.</string>
     <string name="pref_texture_pack">텍스쳐팩</string>
     <string name="pref_texture_pack_summary">텍스쳐팩을 선택할 수 있습니다.</string>
+    <!--
     <string name="pref_ctrl_usetouchjoypad">조이패드 터치 (Split 터치)</string>
     <string name="pref_ctrl_islefthanded">왼손잡이 컨트롤</string>
     <string name="pref_ctrl_islefthanded_summary">컨트롤 버튼들의 자리가 반대로 바뀝니다.</string>
@@ -18,8 +15,10 @@ Scroll to the bottom and see notice. -->
     <string name="pref_ctrl_invertmouse_summary">Y축의 방향을 반전시킵니다.</string>
     <string name="pref_feedback_vibration">진동</string>
     <string name="pref_feedback_vibration_summary">블럭이 제거될 때 진동을 울립니다.</string>
+    -->
     <string name="pref_zz_longvibration">아주 긴 진동</string>
     <string name="pref_zz_longvibration_summary">진동의 길이를 5배 이상 늘입니다.</string>
+    <!--
     <string name="pref_gfx_fancygraphics">고급 그래픽</string>
     <string name="pref_gfx_fancygraphics_summary">화려한 그래픽을 사용합니다.</string>
     <string name="pref_gfx_lowquality">저급 그래픽</string>
@@ -28,14 +27,17 @@ Scroll to the bottom and see notice. -->
     <string name="pref_game_difficultypeaceful_summary">체력이 자동으로 회복되고, 몬스터가 나타나지 않습니다.</string>
     <string name="pref_ctrl_sensitivity">민감도</string>
     <string name="pref_ctrl_sensitivity_summary">터치 민감도를 설정합니다.</string>
+    -->
     <string name="pref_zz_safe_mode">안전 모드</string>
-    <string name="pref_zz_safe_mode_summary">모든 패치를 비활성화 합니다.</string>
+    <string name="pref_zz_safe_mode_summary">모든 편집사항을 비활성화 합니다.</string>
+    <!--
     <string name="pref_zz_patch_ip_enable">멀티플레이 IP 패치</string>
     <string name="pref_zz_patch_ip_enable_summary">온라인으로 멀티플레이를 즐길 수 있습니다.</string>
     <string name="pref_zz_patch_ip">서버 IP</string>
     <string name="pref_zz_patch_ip_summary">온라인 서버의 IP</string>
     <string name="pref_zz_patch_ip_port">서버 포트(Port)</string>
     <string name="pref_zz_patch_ip_port_summary">온라인 서버의 포트 (일반적으로 19132)</string>
+    -->
     <string name="pref_zz_texture_pack_enable">텍스쳐팩 사용</string>
     <string name="pref_zz_custom_dpi">사용자 DPI</string>
     <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
@@ -112,9 +114,9 @@ Scroll to the bottom and see notice. -->
     <string name="texturepack_imported">텍스쳐팩 적용됨</string>
     <string name="script_imported">ModPE 스크립트 적용됨</string>
     <string name="manage_addons">애드온 관리</string>
-    <string name="get_pro">Pro 버전으로 업그레이드</string> <!-- 정식버전은 마인크래프트 PE에나 쓰고, 이 어플리케이션에는 Pro가 맞습니다. -->
+    <string name="get_pro">Pro 버전으로 업그레이드</string>
     <string name="about_about">BlockLauncher 소개</string>
-    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang.</string> <!-- 일반적으로 저작권은 영어로 작성합니다. -->
+    <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang.</string>
     <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. 아무 권한 없이 수정 및 배포하지 마십시오.</string>
     <string name="about_librarycredits">이 어플은 Paul Burke의 aFileChooser 라이브러리를 사용합니다. \n
 이 어플리케이션은 Snowbound의 PTPatchTool 코드를 사용하였고, Eclipse Public License를 따릅니다. \n
@@ -142,14 +144,14 @@ Scroll to the bottom and see notice. -->
     <string name="hovercar_live_patch">게임 내에서 모드 패치</string>
     <string name="hovercar_options">런처 설정 (MCPE 재시작 필요)</string>
     <string name="hovercar_insert_text">텍스트 삽입</string>
-
+    <!--
     <string name="mco_redirect_none">전환하지 않기</string>
     <string name="mco_redirect_pocketmine">PocketMine의 서버목록 사용</string>
     <string name="mco_redirect_minepocket">MinePocket의 서버목록 사용</string>
-
+    -->
     <string name="safe_mode_exit">안전모드 끄기</string>
     <string name="safe_mode_continue">계속</string>
-
+    <!--
     <string name="server_list_add">서버 추가</string>
     <string name="pref_zz_server_list">서버 목록</string>
     <string name="pref_zz_server_list_summary">여기에서 선택하거나 서버 목록에 서버를 추가하세요.</string>
@@ -157,7 +159,7 @@ Scroll to the bottom and see notice. -->
     <string name="server_list_name_prompt">이름 : </string>
     <string name="server_list_address_prompt">IP : </string>
     <string name="server_list_port_prompt">포트 : </string>
-
+    -->
     <string name="script_import_from">스크립트 가져오기</string>
     <string name="script_import_from_local">내장 메모리로부터 가져오기</string>
     <string name="script_import_from_cfgy">Treebl의 공식 저장소</string>
@@ -182,19 +184,28 @@ Scroll to the bottom and see notice. -->
     <string name="selinux_broke_everything">안타깝게도, BlockLauncher는 삼성 KNOX 또는 SELinux 등의 보안 프로그램이 라이브 패치 (Live Patching)을 방해하고 있어서 런처를 실행 할 수 없었습니다.\n\n
 이것에 대항하기 위해 어플리케이션을 수정하고 있지만, 수정이 완료되기 전까지는 모드와 텍스쳐팩, ModPE 스크립트 적용이 제한됩니다. \n\n모든 모드 패치는 런처를 재시작해야 적용됩니다.</string>
 
-    <!-- Do not parse app name to localized name. Be static app name to English. -->
-    <!-- 어플리케이션 이름을 한글로 번역하지 마십시오. 개발자 측에서는 어플리케이션 이름을 각자의 언어로 번역하는걸 원치 않아하십니다. -->
-    <!-- 예를 들자면, Minecraft PE나 BlockLauncher가 될 수 있죠.
-그냥 Minecraft -> 마인크래프트는... 될겁니다.. -->
+    <!-- 앱 이름은 번역하지 말아주십시오 -->
     
     <string name="permlab_mcpelauncher_addon">BlockLauncher 애드온</string>
     <string name="permdesc_mcpelauncher_addon">BlockLauncher에서 애드온을 불러올 수 있게 해줍니다. 이 뜻은 네트워크 접속, 저장소 접근, 그리고 Minecraft PE의 권한을 사용하게 해 줄 수 있다는 말입니다.</string>
+    <string name="hovercar_insert_text_backspace">글자 지우기</string>
     
-    <string name="hovercar_insert_text_backspace">Insert backspace</string>
+    <string name="textures_select">선택</string>
+    <string name="textures_demo">데모</string>
+    <string name="textures_extract">기본 사용</string>
+    
+    <string name="plurals_patches_one">패치</string>
+    <string name="plurals_patches_more">패치들</string>
+    <string name="plurals_patches_no">패치 내용이 없습니다.</string>
+    <string name="plurals_scripts_one">스크립트</string>
+    <string name="plurals_scripts_more">스크립트들</string>
+    <string name="plurals_scripts_no">스크립트가 없습니다.</string>
+    <string name="nerdy_stuff_dump_modpe">ModPE 스크립트 메소드(method) 덤프(dump)하기</string>
+    <string name="nerdy_stuff_set_skin">스킨을 /sdcard/skin.png로 설정합니다.</string>
+    <string name="nerdy_stuff_secret">권한을 받은 사람만 가능합니다.</string>
+    <string name="pref_other_title">그 외</string>
 
-    <!-- 후의 번역자분들께 말씀드리겠습니다. : SDKoongchi
-많은 사람들이 쓰는 어플리케이션인만큼, 번역 시에 문법 등을 잘 살려주시기 바랍니다. '.' 이나 ',' 등...
-참고로, 번역에는 위아래가 없습니다. 무슨 뜻이냐 하면, 유명한 블로거 및 마인크래프트 플레이어라고 해도
-자신의 번역이 수정되었다고 해도 따질 수 있는 게 아닙니다. 모든 사람에게 공평한 권리를 가지어 번역합시다. -->
+
+    <!-- 여러 사람이 사용하는 앱인 만큼 최대한 차연스럽게 번역합시다. -->
     
 </resources>
