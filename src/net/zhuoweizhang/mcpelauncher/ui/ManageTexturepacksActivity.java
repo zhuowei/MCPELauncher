@@ -131,7 +131,7 @@ public class ManageTexturepacksActivity extends ListActivity {
 			List<String> res = new ArrayList<String>();
 			for (int l = 0; l < adapter.getCount(); l++) {
 				File f = adapter.getItem(l);
-				if (f.exists() && f.canRead() && !f.getAbsolutePath().equals(REQUEST_DEMO.getAbsolutePath()))
+				if (f.exists() && f.canRead())
 					res.add(f.getAbsolutePath());
 			}
 			out = Utils.join(res, ";");
