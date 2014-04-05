@@ -51,7 +51,7 @@ int marauder_remap_text(uintptr_t originalBegin, size_t length, const char* shar
 
 static void* marauder_translation_function(void* input) {
 	uintptr_t addr = (uintptr_t) input;
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Input %x", addr);
+	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Input %x", addr);
 	if (addr >= original_text_offset && addr < original_text_offset + remapped_text_length) {
 		addr = (addr - original_text_offset) + remapped_text_offset;
 		//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Remapping to %x", addr);

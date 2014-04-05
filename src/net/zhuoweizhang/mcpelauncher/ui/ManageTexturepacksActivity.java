@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -35,6 +36,8 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import net.zhuoweizhang.mcpelauncher.ScriptManager;
 
 public class ManageTexturepacksActivity extends ListActivity {
 	protected TexturesAdapter adapter;
@@ -76,6 +79,7 @@ public class ManageTexturepacksActivity extends ListActivity {
 					}
 				});
 		setResult(RESULT_CANCELED);
+		loadHistory();
 	}
 
 	@Override
@@ -94,7 +98,6 @@ public class ManageTexturepacksActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		loadHistory();
 		refreshABToggle();
 	}
 
@@ -113,7 +116,7 @@ public class ManageTexturepacksActivity extends ListActivity {
 			SharedPreferences sh = Utils.getPrefs(0);
 			String data = sh.getString("textures_history", "");
 			for (String s : data.split(";")) {
-				File f = new File(s.replace("\\w", " "));
+				File f = new File(s);
 				if (!f.exists() || !f.canRead())
 					continue;
 				adapter.add(f);
@@ -126,10 +129,10 @@ public class ManageTexturepacksActivity extends ListActivity {
 		if (isEnabled()) {
 			String out = "";
 			List<String> res = new ArrayList<String>();
-			for (int l = 1; l < adapter.getCount(); l++) {
+			for (int l = 0; l < adapter.getCount(); l++) {
 				File f = adapter.getItem(l);
-				if (f.exists() && f.canRead())
-					res.add(f.getAbsolutePath().intern().replace(" ", "\\w"));
+				if (f.exists() && f.canRead() && !f.getAbsolutePath().equals(REQUEST_DEMO.getAbsolutePath()))
+					res.add(f.getAbsolutePath());
 			}
 			out = Utils.join(res, ";");
 			SharedPreferences.Editor sh = Utils.getPrefs(0).edit();
@@ -206,10 +209,9 @@ public class ManageTexturepacksActivity extends ListActivity {
 			} else {
 				System.err.println("WTF?");
 			}
-			return true;
-		} else {
-			return false;
 		}
+		menu.add(getResources().getString(R.string.textures_clear_script_texture_overrides));
+		return true;
 	}
 
 	protected void refreshABToggle() {
@@ -218,6 +220,15 @@ public class ManageTexturepacksActivity extends ListActivity {
 			master.setChecked(isEnabled());
 			master.setOnCheckedChangeListener(ls);
 		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+		if (item.getTitle().equals(getResources().getString(R.string.textures_clear_script_texture_overrides))) {
+			ScriptManager.clearTextureOverrides();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	protected boolean canAccessMCPE() {

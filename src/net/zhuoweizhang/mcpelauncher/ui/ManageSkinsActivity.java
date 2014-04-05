@@ -100,6 +100,7 @@ public class ManageSkinsActivity extends ListActivity {
 					}
 				});
 		setResult(RESULT_CANCELED);
+		loadHistory();
 	}
 
 	@Override
@@ -118,7 +119,6 @@ public class ManageSkinsActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		loadHistory();
 		refreshABToggle();
 	}
 
@@ -135,7 +135,7 @@ public class ManageSkinsActivity extends ListActivity {
 			SharedPreferences sh = Utils.getPrefs(1);
 			String data = sh.getString("skins_history", "");
 			for (String s : data.split(";")) {
-				File f = new File(s.replace("\\w", " "));
+				File f = new File(s);
 				if (!f.exists() || !f.canRead())
 					continue;
 				adapter.add(f);
@@ -151,7 +151,7 @@ public class ManageSkinsActivity extends ListActivity {
 			for (int l = 0; l < adapter.getCount(); l++) {
 				File f = adapter.getItem(l);
 				if (f.exists() && f.canRead())
-					res.add(f.getAbsolutePath().replace(" ", "\\w"));
+					res.add(f.getAbsolutePath());
 			}
 			out = Utils.join(res, ";");
 			SharedPreferences.Editor sh = Utils.getPrefs(1).edit();

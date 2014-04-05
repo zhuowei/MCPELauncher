@@ -1452,7 +1452,7 @@ public class MainActivity extends NativeActivity {
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			String filePath = Utils.getPrefs(1).getString("texturePack", null);
-			if (!isSafeMode() && loadTexturePack && (filePath != null)) {
+			if (loadTexturePack && (filePath != null)) {
 				File file = new File(filePath);
 				if (BuildConfig.DEBUG)
 					System.out.println("File!! " + file);

@@ -740,7 +740,7 @@ public class ScriptManager {
 		return new File(stagingTextures, textureName.replace("..", ""));
 	}
 
-	private static void clearTextureOverrides() {
+	public static void clearTextureOverrides() {
 		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
 		Utils.clearDirectory(stagingTextures);
 		requestedGraphicsReset = true;
@@ -2087,11 +2087,6 @@ public class ScriptManager {
 		 * status? 2: 1); }
 		 */
 
-		/*@JSStaticFunction
-		public static void setItemCategory(int id, int category, int whatever) {
-			nativeSetItemCategory(id, category, whatever);
-		}*/
-
 		@JSStaticFunction
 		public static void setCamera(int entityId) {
 			nativeSetCameraEntity(entityId);
@@ -2128,6 +2123,12 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setMaxDamage(int id, int maxDamage) {
 			nativeSetItemMaxDamage(id, maxDamage);
+		}
+
+		/* This doesn't actually work, and has never worked, but people wanted it to be re-added. I dunno why. */
+		@JSStaticFunction
+		public static void setCategory(int id, int category, int whatever) {
+			nativeSetItemCategory(id, category, whatever);
 		}
 
 		@Override

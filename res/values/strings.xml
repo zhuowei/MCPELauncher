@@ -191,6 +191,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="textures_select">Select</string>
     <string name="textures_demo">Demo</string>
     <string name="textures_extract">Extract original</string>
+    <string name="textures_clear_script_texture_overrides">Clear script texture overrides</string>
     <string name="plurals_patches_one">patch</string>
     <string name="plurals_patches_more">patches</string>
     <string name="plurals_patches_no">No patches</string>
