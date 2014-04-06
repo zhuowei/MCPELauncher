@@ -26,7 +26,9 @@ public class Utils {
 	}
 
 	public static void clearDirectory(File dir) {
-		for (File f : dir.listFiles()) {
+		File[] fileList = dir.listFiles();
+		if (fileList == null) return;
+		for (File f : fileList) {
 			if (f.isDirectory()) {
 				clearDirectory(f);
 			}
