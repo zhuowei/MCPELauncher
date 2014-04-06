@@ -28,6 +28,8 @@ import org.mozilla.javascript.annotations.JSStaticFunction;
 
 import com.mojang.minecraftpe.MainActivity;
 
+import net.zhuoweizhang.mcpelauncher.api.modpe.*;
+
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
 import static net.zhuoweizhang.mcpelauncher.PatchManager.blankArray;
 
@@ -202,6 +204,7 @@ public class ScriptManager {
 					classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 			ScriptableObject.defineClass(scope, NativeServerApi.class);
+			RendererManager.defineClasses(scope);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);

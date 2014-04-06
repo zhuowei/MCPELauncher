@@ -19,6 +19,7 @@ public final class MaraudersMap {
 		 * otherwise set to writable
 		 */
 		if (patchingInitialized) return true;
+		boolean useOldCode = new File("/sdcard/useoldcode.txt").exists();
 		boolean success = true;
 		patchingInitialized = true;
 		Scanner scan = new Scanner(new File("/proc/self/maps"));
@@ -32,7 +33,14 @@ public final class MaraudersMap {
 				long end = Long.parseLong(parts[0].substring(parts[0].indexOf("-") + 1), 16);
 				long len = end - loc;
 				if (parts[1].indexOf("x") >= 0) {
-					long newLoc = remapText(loc, len, new File(patchedDir, "libminecraftpe_text_section").getAbsolutePath());
+					long newLoc;
+					if (!useOldCode) {
+						newLoc = remapText(loc, len, new File(patchedDir, "libminecraftpe_text_section").getAbsolutePath());
+					} else {
+						newLoc = loc;
+						int returnStatus = PokerFace.mprotect(loc, len, PokerFace.PROT_WRITE | PokerFace.PROT_READ | PokerFace.PROT_EXEC);
+						if (returnStatus < 0) success = false;
+					}
 					success = success && (newLoc >= 0);
 					if (newLoc > 0) {
 						MainActivity.minecraftLibBuffer = PokerFace.createDirectByteBuffer(loc, minecraftLibLength);

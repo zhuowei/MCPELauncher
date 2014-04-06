@@ -85,8 +85,18 @@ typedef struct {
 } Tile;
 
 typedef struct {
-	cppbool transparent;
-	char filler1[67]; //1
+	char filler0[692]; //0
+} Cube;
+
+typedef struct {
+	cppbool transparent; //0
+	char filler0[3]; //1
+	float offsetX; //4
+	float offsetY; //8
+	float offsetZ; //12
+	char filler1[44]; //16: note that 32 contains a std::vector
+	int textureWidth; //60
+	int textureHeight; //64
 	int textureOffsetX;//68
 	int textureOffsetY;//72
 	char filler2[52];//76
@@ -117,6 +127,13 @@ typedef struct {
 	char filler[16]; //0
 	char* text; //16;
 } RakString;
+
+typedef void EntityRenderer;
+
+typedef struct {
+	void** vtable;
+	void* model;
+} MobRenderer;
 
 #ifdef __cplusplus
 }

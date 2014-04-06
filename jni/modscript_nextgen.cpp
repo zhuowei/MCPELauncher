@@ -1162,6 +1162,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
 		(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
 	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
+	bl_renderManager_init(mcpelibhandle);
 }
 
 } //extern

@@ -126,7 +126,7 @@ int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 static void (*bl_HumanoidModel_constructor_real)(HumanoidModel*, float, float);
-static void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
+void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, int, int, int, int);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, int, int, int, int);

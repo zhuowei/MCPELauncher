@@ -39,6 +39,9 @@ void bl_sendIdentPacket();
 
 extern Player* bl_localplayer;
 
+void bl_renderManager_init(void* libHandle);
+extern void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
+
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 
