@@ -741,6 +741,7 @@ public class ScriptManager {
 	}
 
 	public static void clearTextureOverrides() {
+		if (androidContext == null) return;
 		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
 		Utils.clearDirectory(stagingTextures);
 		requestedGraphicsReset = true;
