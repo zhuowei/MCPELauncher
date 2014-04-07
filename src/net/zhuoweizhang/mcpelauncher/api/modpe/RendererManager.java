@@ -8,6 +8,7 @@ public class RendererManager {
 	private static native void nativeModelAddBox(int rendererId, String modelPart, float xOffset, float yOffset, float zOffset,
 		int width, int height, int depth, float scale, int textureX, int textureY, boolean transparent);
 	private static native void nativeModelClear(int rendererId, String modelPart);
+	private static native boolean nativeModelPartExists(int rendererId, String modelPart);
 
 	public static void defineClasses(Scriptable scope) throws Exception {
 		ScriptableObject.defineClass(scope, NativeRendererApi.class);
@@ -51,6 +52,8 @@ public class RendererManager {
 			this.rendererId = rendererId;
 		}
 		public NativeModelPart getPart(String name) {
+			boolean partExists = nativeModelPartExists(rendererId, name);
+			if (!partExists) throw new RuntimeException("The model part " + name + " does not exist.");
 			return new NativeModelPart(rendererId, name);
 		}
 	}
@@ -65,14 +68,15 @@ public class RendererManager {
 			this.modelPartName = modelPartName;
 		}
 
-		public void setTextureOffset(int textureX, int textureY) {
-			this.setTextureOffset(textureX, textureY, false);
+		public NativeModelPart setTextureOffset(int textureX, int textureY) {
+			return this.setTextureOffset(textureX, textureY, false);
 		}
 
-		public void setTextureOffset(int textureX, int textureY, boolean transparent) {
+		public NativeModelPart setTextureOffset(int textureX, int textureY, boolean transparent) {
 			this.textureX = textureX;
 			this.textureY = textureY;
 			this.transparent = transparent;
+			return this;
 		}
 
 		public void addBox(float xOffset, float yOffset, float zOffset, int width, int height, int depth) {
@@ -85,8 +89,9 @@ public class RendererManager {
 				this.textureX, this.textureY, this.transparent);
 		}
 
-		public void clear() {
+		public NativeModelPart clear() {
 			nativeModelClear(rendererId, modelPartName);
+			return this;
 		}
 	}
 }

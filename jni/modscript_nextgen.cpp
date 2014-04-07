@@ -182,6 +182,13 @@ char bl_stonecutter_status[512];
 
 static Item** bl_Item_items;
 
+static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
+static std::string (*bl_CompoundTag_getString)(void*, std::string);
+static void (*bl_CompoundTag_putLong)(void*, std::string, long);
+static long (*bl_CompoundTag_getLong)(void*, std::string);
+static void (*bl_Entity_saveWithoutId_real)(Entity*, void*);
+static int (*bl_Entity_load_real)(Entity*, void*);
+
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
@@ -457,6 +464,18 @@ void bl_ClientSideNetworkHandler_handleMessagePacket_hook(void* handler, void* i
 	if (!preventDefaultStatus) {
 		bl_ClientSideNetworkHandler_handleMessagePacket_real(handler, ipaddress, packet);
 	}
+}
+
+void bl_Entity_saveWithoutId_hook(Entity* entity, void* compoundTag) {
+	int entityId = entity->entityId;
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Saving entity with id %d", entityId);
+	bl_Entity_saveWithoutId_real(entity, compoundTag);
+}
+
+int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
+	int entityId = entity->entityId;
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Loading entity with id %d", entityId);
+	return bl_Entity_load_real(entity, compoundTag);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -1162,6 +1181,18 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
 		(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
 	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
+	bl_CompoundTag_putString = (void (*)(void*, std::string, std::string))
+		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
+	bl_CompoundTag_getString = (std::string (*)(void*, std::string))
+		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag9getStringERKSs");
+	bl_CompoundTag_putLong = (void (*)(void*, std::string, long))
+		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag7putLongERKSsl");
+	bl_CompoundTag_getLong = (long (*)(void*, std::string))
+		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag7getLongERKSs");
+	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN6Entity13saveWithoutIdEP11CompoundTag");
+	mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
+	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadEP11CompoundTag");
+	mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 	bl_renderManager_init(mcpelibhandle);
 }
 

@@ -66,6 +66,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelPartExists
+  (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
+	jboolean exists;
+	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
+	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
+	exists = part != NULL;
+	env->ReleaseStringUTFChars(modelPartName, utfChars);
+	return exists;
+}
+
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
