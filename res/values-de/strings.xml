@@ -82,7 +82,7 @@
     <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Do not distribute without permission.</string>
     <string name="about_librarycredits">Dieses Programm verwendet eine FileChooser library von Paul Burke. \n
 Dieses Programm beinhaltet Code von Snowbound \'s PTPatchTool, lizenziert unter der Eclipse Public License. \n
-This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
+Dieses Programm beinhaltet eine veränderte Version von NathanX\'s Slickcraft Textur Packet: verwändert mit Erlaubnis\n.
 Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
 This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
 This program uses the libsuperuser library by Chainfire.\
@@ -91,7 +91,7 @@ For full licensing information, check the Minecraft Forums thread.\n
 The german translation has been made by SuperChipsLP
     </string>
     <string name="about_pro_library_credits"></string>
-    <string name="about_thankscommunity">This application was made possible by the work of many talented translators, testers, and programmers. Thank you.\nView the Minecraft Forums thread for a list of contributors.</string>
+    <string name="about_thankscommunity">Dieses Applikation war möglich durch die Arbeit von viele talentierter Übersetzer, Prüfer, Programmierer. Vielen Dank.\nSehen Sie die Minecraft Forums Sätze zu einen Liste von Mitarbeiter anzusehen.</string>
     <string name="about_go_to_forums">Öffne den Minecraft Forums thread für BlockLauncher</string>
     <string name="no_minecraft_installed">BlockLauncher konnte keine Minecraft Pocket Edition Kopie auf ihrem Gerät finden.</string>
 
