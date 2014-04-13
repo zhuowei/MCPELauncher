@@ -196,7 +196,7 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
 	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
 	char* chatMessageChars = *((char**) chatMessagePtr);*/
 	const char* chatMessageChars = chatMessagePtr->c_str();
@@ -1063,7 +1063,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	return entity->renderType;
+	return bl_renderManager_getRenderType(entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity

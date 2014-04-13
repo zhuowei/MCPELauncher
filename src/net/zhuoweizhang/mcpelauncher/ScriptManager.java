@@ -100,6 +100,7 @@ public class ScriptManager {
 
 	private static String serverAddress = null;
 	private static int serverPort = 0;
+	private static Map<Integer, String> entityUUIDs = new HashMap<Integer, String>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)

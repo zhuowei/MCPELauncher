@@ -66,6 +66,8 @@ void bl_setuphooks_cppside();
 void bl_changeEntitySkin(void* entity, const char* newSkin);
 const char* bl_getCharArr(void* str);
 void bl_attachLevelListener();
+void bl_renderManager_setRenderType(Entity* entity, int type);
+void bl_renderManager_clearRenderTypes();
 
 jclass bl_scriptmanager_class;
 
@@ -276,6 +278,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	//attach the listener
 	bl_attachLevelListener();
 	bl_clearNameTags();
+	bl_renderManager_clearRenderTypes();
 	if (level->isRemote) {
 		bl_sendIdentPacket();
 	}
@@ -889,7 +892,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint entityId, jint renderType) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	((int*) entity)[ENTITY_RENDER_TYPE_OFFSET] = renderType;
+	bl_renderManager_setRenderType(entity, renderType);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExtinguishFire

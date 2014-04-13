@@ -9,6 +9,7 @@ public class RendererManager {
 		int width, int height, int depth, float scale, int textureX, int textureY, boolean transparent);
 	private static native void nativeModelClear(int rendererId, String modelPart);
 	private static native boolean nativeModelPartExists(int rendererId, String modelPart);
+	private static native int nativeCreateHumanoidRenderer();
 
 	public static void defineClasses(Scriptable scope) throws Exception {
 		ScriptableObject.defineClass(scope, NativeRendererApi.class);
@@ -28,6 +29,11 @@ public class RendererManager {
 			}
 			return null; //TODO: named renderers
 		}
+		@JSStaticFunction
+		public static NativeRenderer createHumanoidRenderer() {
+			int id = nativeCreateHumanoidRenderer();
+			return new NativeRenderer(id);
+		}
 		@Override
 		public String getClassName() {
 			return "Renderer";
@@ -39,7 +45,7 @@ public class RendererManager {
 		public NativeRenderer(int id) {
 			this.rendererId = id;
 		}
-		public int renderType() {
+		public int getRenderType() {
 			return rendererId;
 		}
 		public NativeModel getModel() {

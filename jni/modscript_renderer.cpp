@@ -2,9 +2,11 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <map>
 #include <dlfcn.h>
 #include <android/log.h>
 
+#include "mcpelauncher.h"
 #define cppbool bool
 
 #include "modscript_renderer_jni.h"
@@ -18,8 +20,25 @@ static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_MeshBuffer_reset)(void*);
 
+static void (*bl_EntityRenderDispatcher_assign)(void*, int, EntityRenderer*);
+
+static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float);
+
+static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, HumanoidModel*, float);
+
+static std::vector<EntityRenderer*> bl_entityRenderers;
+
+static std::map<int, int> bl_renderTypeMap;
+
+static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
+
 ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
-	MobRenderer* renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(bl_EntityRenderDispatcher_getInstance(), rendererId);
+	MobRenderer* renderer;
+	if (rendererId < 0x1000) {
+		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(bl_EntityRenderDispatcher_getInstance(), rendererId);
+	} else {
+		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
+	}
 	HumanoidModel* model = (HumanoidModel*) renderer->model; //TODO: make sure that this is indeed a humanoid model
 	if (strcmp(modelPartName, "head") == 0) {
 		return &model->bipedHead;
@@ -41,6 +60,50 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 void bl_renderManager_invalidateModelPart(ModelPart* part) {
 	void* meshBuffer = (void*) ((uintptr_t) part + 84);
 	bl_MeshBuffer_reset(meshBuffer);
+}
+
+int bl_renderManager_addRenderer(EntityRenderer* renderer) {
+	bl_entityRenderers.push_back(renderer);
+	int rendererId = 0x1000 + (bl_entityRenderers.size() - 1);
+	return rendererId;
+}
+
+int bl_renderManager_createHumanoidRenderer() {
+	HumanoidModel* model = (HumanoidModel*) operator new(800);
+	bl_HumanoidModel_HumanoidModel(model, 0, 0);
+	MobRenderer* renderer = (MobRenderer*) operator new(44);
+	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, 0);
+	return bl_renderManager_addRenderer((EntityRenderer*) renderer);
+}
+
+EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
+	int entityId = entity->entityId;
+	if (bl_renderTypeMap.count(entityId) != 0) {
+		return bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
+	}
+	return bl_EntityRenderDispatcher_getRenderer_real(dispatcher, entity);
+}
+
+void bl_renderManager_setRenderType(Entity* entity, int renderType) {
+	int entityId = entity->entityId;
+	if (renderType >= 0x1000) {
+		bl_renderTypeMap[entityId] = renderType;
+	} else {
+		bl_renderTypeMap.erase(entityId);
+		entity->renderType = renderType;
+	}
+}
+
+int bl_renderManager_getRenderType(Entity* entity) {
+	int entityId = entity->entityId;
+	if (bl_renderTypeMap.count(entityId) != 0) {
+		return bl_renderTypeMap[entityId];
+	}
+	return entity->renderType;
+}
+
+void bl_renderManager_clearRenderTypes() {
+	bl_renderTypeMap.clear();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelAddBox
@@ -76,6 +139,11 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_Renderer
 	return exists;
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
+  (JNIEnv *env, jclass clazz) {
+	return bl_renderManager_createHumanoidRenderer();
+}
+
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
@@ -83,6 +151,15 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getInstanceEv");
 	bl_MeshBuffer_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN10MeshBuffer5resetEv");
+	bl_EntityRenderDispatcher_assign = (void (*)(void*, int, EntityRenderer*))
+		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6assignE16EntityRendererIdP14EntityRenderer");
+	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float))
+		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
+	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, float))
+		dlsym(mcpelibhandle, "_ZN19HumanoidMobRendererC1EP13HumanoidModelf");
+	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererEP6Entity");
+	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook, 
+		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
 }
 
 } //extern "C"
