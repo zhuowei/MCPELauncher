@@ -8,31 +8,10 @@
     <string name="pref_mp_username_summary">Twoje imię</string>
     <string name="pref_texture_pack">Paczki tekstur</string>
     <string name="pref_texture_pack_summary">Zmień swoją paczkę tekstur</string>
-    <string name="pref_ctrl_usetouchjoypad">Split touch</string>
-    <string name="pref_ctrl_islefthanded">Leworęczny</string>
-    <string name="pref_ctrl_islefthanded_summary">Odwróć schemat sterowania</string>
-    <string name="pref_ctrl_invertmouse">Odwróć oś Y</string>
-    <string name="pref_ctrl_invertmouse_summary">Tymczasem w Australii :)</string>
-    <string name="pref_feedback_vibration">Wibracje</string>
-    <string name="pref_feedback_vibration_summary">Wibruj gdy blok zostanie zniszczony</string>
     <string name="pref_zz_longvibration">Długa wibracja</string>
     <string name="pref_zz_longvibration_summary">Pięciokrotne zwiększenie długości wibracji</string>
-    <string name="pref_gfx_fancygraphics">Zaawansowana grafika</string>
-    <string name="pref_gfx_fancygraphics_summary">Lepszy wygląd</string>
-    <string name="pref_gfx_lowquality">Słaba jakość grafiki</string>
-    <string name="pref_gfx_lowquality_summary">Gorszy wygląd</string>
-    <string name="pref_game_difficultypeaceful">Tryb Pokojowy</string>
-    <string name="pref_game_difficultypeaceful_summary">Regeneracja zdrowia, bez potworów</string>
-    <string name="pref_ctrl_sensitivity">Czułość</string>
-    <string name="pref_ctrl_sensitivity_summary">Czułość dotyku</string>
     <string name="pref_zz_safe_mode">Tryb bezpieczny</string>
     <string name="pref_zz_safe_mode_summary">Dezaktywuje wszystkie modyfikacje</string>
-    <string name="pref_zz_patch_ip_enable">Przekierowywanie MultiPlayer</string>
-    <string name="pref_zz_patch_ip_enable_summary">Przekierowuje połączenie do serwerów</string>
-    <string name="pref_zz_patch_ip">Adres IP serwera</string>
-    <string name="pref_zz_patch_ip_summary">Adres IP serwera</string>
-    <string name="pref_zz_patch_ip_port">Port</string>
-    <string name="pref_zz_patch_ip_port_summary">Port serwera (zazwyczaj 19132)</string>
     <string name="pref_zz_texture_pack_enable">Użyj Paczki tekstur</string>
     <string name="pref_zz_custom_dpi">Niestandardowe DPI</string>
     <string name="pref_zz_custom_dpi_summary">Change the reported screen density to change size of controls - leave blank to disable</string>
@@ -126,20 +105,10 @@ Dla pełnej informacji licencyjnej należy sprawdzić wątek na Minecraft Forum.
     <string name="hovercar_options">Opcje launcher\'a (Wymagany restart)</string>
     <string name="hovercar_insert_text">Wprowadź tekst (obejście problemu z klawiaturą)</string>
 
-    <string name="mco_redirect_none">Nie przekierowuj</string>
-    <string name="mco_redirect_pocketmine">Użyj listy serwerów PocketMine</string>
-    <string name="mco_redirect_minepocket">Użyj listy serwerów MinePocket</string>
 
     <string name="safe_mode_exit">Powrót do normalnego stanu</string>
     <string name="safe_mode_continue">Kontynuuj</string>
 
-    <string name="server_list_add">Dodaj serwer</string>
-    <string name="pref_zz_server_list">Lista serwerów</string>
-    <string name="pref_zz_server_list_summary">Wybierz lub dodaj serwer z twojej listy serwerów</string>
-    <string name="server_list_patch_address">Załaduj adres serwera</string>
-    <string name="server_list_name_prompt">Nazwa: </string>
-    <string name="server_list_address_prompt">Adres: </string>
-    <string name="server_list_port_prompt">Port: </string>
 
     <string name="script_import_from">Importuj skrypt z</string>
     <string name="script_import_from_local">Pamięć</string>
