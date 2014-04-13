@@ -58,11 +58,11 @@
             android:defaultValue="false"
             android:key="zz_show_insert_text"
             android:title="@string/pref_zz_show_insert_text" />
-        <!--<CheckBoxPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_legacy_keyboard_input"
             android:summary="@string/pref_zz_legacy_keyboard_input_summary"
-            android:title="@string/pref_zz_legacy_keyboard_input" />-->
+            android:title="@string/pref_zz_legacy_keyboard_input" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_support_title" >
         <Preference android:title="@string/nerdy_stuff_page" >

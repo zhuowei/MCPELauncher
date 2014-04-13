@@ -19,7 +19,8 @@ public final class MaraudersMap {
 		 * otherwise set to writable
 		 */
 		if (patchingInitialized) return true;
-		boolean useOldCode = new File("/sdcard/useoldcode.txt").exists();
+		boolean useOldCode = Utils.getPrefs(0).getBoolean("zz_legacy_live_patch", false);
+		System.out.println("Live patching is running in " + (useOldCode? "legacy" : "normal") + " mode");
 		boolean success = true;
 		patchingInitialized = true;
 		Scanner scan = new Scanner(new File("/proc/self/maps"));

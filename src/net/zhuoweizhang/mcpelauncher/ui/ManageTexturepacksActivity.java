@@ -91,7 +91,8 @@ public class ManageTexturepacksActivity extends ListActivity {
 			File file = FileUtils.getFile(uri);
 			adapter.add(file);
 			adapter.notifyDataSetChanged();
-			saveHistory();
+			setTexturepack(file);
+			finish();
 		}
 	}
 

@@ -47,6 +47,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference getProPreference;
 	private Preference aboutPreference;
 	private Preference paranoidPreference;
+	private Preference legacyLivePatchPreference;
 
 	protected Thread ui = new Thread(new Runnable() {
 		protected WeakReference<MainMenuOptionsActivity> activity = null;
@@ -258,6 +259,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			paranoidPreference.setOnPreferenceClickListener(this);
 		}
 
+		legacyLivePatchPreference = findPreference("zz_legacy_live_patch");
+		if (legacyLivePatchPreference != null) {
+			legacyLivePatchPreference.setOnPreferenceClickListener(this);
+		}
+
 		aboutPreference = findPreference("zz_about");
 		if (aboutPreference != null) {
 			aboutPreference.setOnPreferenceClickListener(this);
@@ -302,7 +308,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		} else if (pref == goToForumsPreference) {
 			goToForums();
 			return true;
-		} else if (pref == languagePreference || pref == paranoidPreference) {
+		} else if (pref == languagePreference || pref == paranoidPreference || pref == legacyLivePatchPreference) {
 			needsRestart = true;
 			return false;
 		}
@@ -362,13 +368,13 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		switch (requestCode) {
 		case REQUEST_MANAGE_PATCHES:
 			if (resultCode == RESULT_OK) {
-				forceRestart();
+				needsRestart = true;
 			}
 			break;
 		case REQUEST_MANAGE_ADDONS:
 			isManagingAddons = false;
 			if (resultCode == RESULT_OK) {
-				forceRestart();
+				needsRestart = true;
 			}
 			break;
 		case REQUEST_SERVER_LIST:
@@ -380,7 +386,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		case REQUEST_MANAGE_TEXTURES:
 		case REQUEST_MANAGE_SKINS:
 			if (resultCode == RESULT_OK) {
-				forceRestart();
+				needsRestart = true;
 			}
 			break;
 		}

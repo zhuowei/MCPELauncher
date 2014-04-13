@@ -112,7 +112,8 @@ public class ManageSkinsActivity extends ListActivity {
 			File file = FileUtils.getFile(uri);
 			adapter.add(file);
 			adapter.notifyDataSetChanged();
-			saveHistory();
+			setSkin(file);
+			finish();
 		}
 	}
 
