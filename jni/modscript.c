@@ -68,6 +68,7 @@ const char* bl_getCharArr(void* str);
 void bl_attachLevelListener();
 void bl_renderManager_setRenderType(Entity* entity, int type);
 void bl_renderManager_clearRenderTypes();
+void bl_cppNewLevelInit();
 
 jclass bl_scriptmanager_class;
 
@@ -279,6 +280,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 	bl_attachLevelListener();
 	bl_clearNameTags();
 	bl_renderManager_clearRenderTypes();
+	bl_cppNewLevelInit();
 	if (level->isRemote) {
 		bl_sendIdentPacket();
 	}

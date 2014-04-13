@@ -14,9 +14,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -100,7 +103,7 @@ public class ScriptManager {
 
 	private static String serverAddress = null;
 	private static int serverPort = 0;
-	private static Map<Integer, String> entityUUIDs = new HashMap<Integer, String>();
+	private static Map<Integer, String> entityUUIDMap = new HashMap<Integer, String>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -129,7 +132,6 @@ public class ScriptManager {
 			}
 			throw back; // Thursdays
 		}
-		allentities.clear();
 	}
 
 	private static class ParseThread implements Runnable {
@@ -257,7 +259,9 @@ public class ScriptManager {
 			ScriptManager.scriptingEnabled = true; // all local worlds get ModPE
 													// support
 		nativeSetGameSpeed(20.0f);
-		// entityList.clear();
+		allentities.clear();
+		allplayers.clear();
+		entityUUIDMap.clear();
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -977,6 +981,21 @@ public class ScriptManager {
 		}
 	}
 
+	private static String getEntityUUID(int entityId) {
+		String uuid = entityUUIDMap.get(entityId);
+		if (uuid != null) return uuid;
+		long[] uuidParts = nativeEntityGetUUID(entityId);
+		if (uuidParts == null) return null;
+		long lsb = Long.reverseBytes(uuidParts[0]);
+		long msb = Long.reverseBytes(uuidParts[1]);
+		UUID uuidObj = new UUID(lsb, msb);
+		System.out.println(uuidObj);
+		if (uuidObj.version() != 4) throw new RuntimeException("Invalid entity UUID");
+		uuid = uuidObj.toString();
+		entityUUIDMap.put(entityId, uuid);
+		return uuid;
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native int nativeGetPlayerEnt();
@@ -1123,6 +1142,7 @@ public class ScriptManager {
 
 	public static native int nativeEntityGetRenderType(int entityId);
 	public static native void nativeSetCameraEntity(int entityId);
+	public static native long[] nativeEntityGetUUID(int entityId);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1931,6 +1951,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getRenderType(int entity) {
 			return nativeEntityGetRenderType(entity);
+		}
+
+		@JSStaticFunction
+		public static String getUniqueId(int entity) {
+			return getEntityUUID(entity);
 		}
 
 		@Override

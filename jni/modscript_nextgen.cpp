@@ -8,6 +8,7 @@
 #include <vector>
 #include <typeinfo>
 #include <map>
+#include <array>
 
 #include "utf8proc.h"
 
@@ -15,6 +16,7 @@
 #include "mcpelauncher.h"
 #include "modscript.h"
 #include "dobby_public.h"
+#include "simpleuuid.h"
 
 #define cppbool bool
 
@@ -184,10 +186,13 @@ static Item** bl_Item_items;
 
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
-static void (*bl_CompoundTag_putLong)(void*, std::string, long);
-static long (*bl_CompoundTag_getLong)(void*, std::string);
+static void (*bl_CompoundTag_putLong)(void*, std::string const&, long); //note the parameter fail on the part of Mojang devs. Sigh.
+static int64_t (*bl_CompoundTag_getLong)(void*, std::string const&);
+static Tag* (*bl_CompoundTag_get)(void*, std::string const&);
 static void (*bl_Entity_saveWithoutId_real)(Entity*, void*);
 static int (*bl_Entity_load_real)(Entity*, void*);
+
+static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -466,15 +471,43 @@ void bl_ClientSideNetworkHandler_handleMessagePacket_hook(void* handler, void* i
 	}
 }
 
+std::array<unsigned char, 16> bl_getEntityUUID(int entityId) {
+	if (bl_entityUUIDMap.count(entityId) != 0) {
+		return bl_entityUUIDMap[entityId];
+	}
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Generating uuid for entity %d\n", entityId);
+	// generate a new uuid
+	std::array<unsigned char, 16> newuuid;
+	uuid_t uuidT;
+	uuid_generate_random(uuidT);
+	memcpy(newuuid.data(), uuidT, sizeof(uuidT));
+	bl_entityUUIDMap[entityId] = newuuid;
+	return newuuid;
+}
+
 void bl_Entity_saveWithoutId_hook(Entity* entity, void* compoundTag) {
 	int entityId = entity->entityId;
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Saving entity with id %d", entityId);
+	std::array<unsigned char, 16> uuidBytes = bl_getEntityUUID(entityId);
+	int64_t* uuidLongs = (int64_t*) uuidBytes.data();
+	bl_CompoundTag_putLong(compoundTag, "UUIDLeast", uuidLongs[0]);
+	bl_CompoundTag_putLong(compoundTag, "UUIDMost", uuidLongs[1]);
+	LongTag* leastTag = (LongTag*) bl_CompoundTag_get(compoundTag, "UUIDLeast");
+	LongTag* mostTag = (LongTag*) bl_CompoundTag_get(compoundTag, "UUIDMost");
+	leastTag->value = uuidLongs[0];
+	mostTag->value = uuidLongs[1];
 	bl_Entity_saveWithoutId_real(entity, compoundTag);
 }
 
 int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 	int entityId = entity->entityId;
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Loading entity with id %d", entityId);
+	int64_t msl = bl_CompoundTag_getLong(compoundTag, "UUIDMost");
+	if (msl != 0) {
+		std::array<unsigned char, 16> newuuid;
+		int64_t* uuidLongs = (int64_t*) newuuid.data();
+		uuidLongs[0] = bl_CompoundTag_getLong(compoundTag, "UUIDLeast");
+		uuidLongs[1] = msl;
+		bl_entityUUIDMap[entityId] = newuuid;
+	}
 	return bl_Entity_load_real(entity, compoundTag);
 }
 
@@ -1074,6 +1107,21 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	*camera = entity;
 }
 
+JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return NULL;
+	std::array<unsigned char, 16> uuidBytes = bl_getEntityUUID(entityId);
+	jlong* uuidLongs = (jlong*) uuidBytes.data();
+	jlongArray uuidArray = env->NewLongArray(2);
+	env->SetLongArrayRegion(uuidArray, 0, 2, uuidLongs);
+	return uuidArray;
+}
+
+void bl_cppNewLevelInit() {
+	bl_entityUUIDMap.clear();
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -1185,10 +1233,12 @@ void bl_setuphooks_cppside() {
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
 	bl_CompoundTag_getString = (std::string (*)(void*, std::string))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag9getStringERKSs");
-	bl_CompoundTag_putLong = (void (*)(void*, std::string, long))
+	bl_CompoundTag_putLong = (void (*)(void*, std::string const&, long))
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag7putLongERKSsl");
-	bl_CompoundTag_getLong = (long (*)(void*, std::string))
+	bl_CompoundTag_getLong = (int64_t (*)(void*, std::string const&))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag7getLongERKSs");
+	bl_CompoundTag_get = (Tag* (*)(void*, std::string const&))
+		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag3getERKSs");
 	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN6Entity13saveWithoutIdEP11CompoundTag");
 	mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
 	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadEP11CompoundTag");

@@ -135,6 +135,14 @@ typedef struct {
 	void* model;
 } MobRenderer;
 
+typedef void Tag;
+
+typedef struct {
+	void** vtable; //0
+	char filler[12]; //4
+	int64_t value; //16
+} LongTag;
+
 #ifdef __cplusplus
 }
 #endif
