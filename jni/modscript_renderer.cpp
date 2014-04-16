@@ -108,12 +108,15 @@ void bl_renderManager_clearRenderTypes() {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelAddBox
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat xOffset, jfloat yOffset, jfloat zOffset,
-    jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent) {
+    jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent,
+    jfloat textureWidth, jfloat textureHeight) {
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	part->textureOffsetX = textureX;
 	part->textureOffsetY = textureY;
 	part->transparent = transparent;
+	part->textureWidth = textureWidth;
+	part->textureHeight = textureHeight;
 	bl_ModelPart_addBox(part, xOffset, yOffset, zOffset, width, height, depth, scale);
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
@@ -142,6 +145,17 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_Renderer
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
   (JNIEnv *env, jclass clazz) {
 	return bl_renderManager_createHumanoidRenderer();
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelSetRotationPoint
+  (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat x, jfloat y, jfloat z) {
+	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
+	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
+	part->offsetX = x;
+	part->offsetY = y;
+	part->offsetZ = z;
+	bl_renderManager_invalidateModelPart(part);
+	env->ReleaseStringUTFChars(modelPartName, utfChars);
 }
 
 void bl_renderManager_init(void* mcpelibhandle) {

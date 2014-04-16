@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
  * Method:    nativeModelAddBox
- * Signature: (ILjava/lang/String;FFFIIIFIIZ)V
+ * Signature: (ILjava/lang/String;FFFIIIFIIZFF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelAddBox
-  (JNIEnv *, jclass, jint, jstring, jfloat, jfloat, jfloat, jint, jint, jint, jfloat, jint, jint, jboolean);
+  (JNIEnv *, jclass, jint, jstring, jfloat, jfloat, jfloat, jint, jint, jint, jfloat, jint, jint, jboolean, jfloat, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
@@ -22,6 +22,30 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelClear
   (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
+ * Method:    nativeModelPartExists
+ * Signature: (ILjava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelPartExists
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
+ * Method:    nativeCreateHumanoidRenderer
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
+ * Method:    nativeModelSetRotationPoint
+ * Signature: (ILjava/lang/String;FFF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelSetRotationPoint
+  (JNIEnv *, jclass, jint, jstring, jfloat, jfloat, jfloat);
 
 #ifdef __cplusplus
 }
@@ -34,32 +58,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_serialVersionUID
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_serialVersionUID 2829861078851942586LL
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_EMPTY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_EMPTY 0L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_READONLY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_READONLY 1L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_DONTENUM
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_DONTENUM 2L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_PERMANENT
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_PERMANENT 4L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_UNINITIALIZED_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_UNINITIALIZED_CONST 8L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_CONST 13L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_QUERY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_QUERY 1L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY 2L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY_CONST 3L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY_GETTER_SETTER
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_MODIFY_GETTER_SETTER 4L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_CONVERT_ACCESSOR_TO_DATA
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_INITIAL_SLOT_SIZE
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModelPart_INITIAL_SLOT_SIZE 4L
 #ifdef __cplusplus
 }
 #endif
@@ -71,32 +69,17 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_serialVersionUID
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_serialVersionUID 2829861078851942586LL
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_EMPTY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_EMPTY 0L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_READONLY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_READONLY 1L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_DONTENUM
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_DONTENUM 2L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_PERMANENT
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_PERMANENT 4L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_UNINITIALIZED_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_UNINITIALIZED_CONST 8L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_CONST 13L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_QUERY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_QUERY 1L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY 2L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY_CONST
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY_CONST 3L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY_GETTER_SETTER
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_MODIFY_GETTER_SETTER 4L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_CONVERT_ACCESSOR_TO_DATA
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
-#undef net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_INITIAL_SLOT_SIZE
-#define net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeModel_INITIAL_SLOT_SIZE 4L
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeRenderer */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeRenderer
+#define _Included_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_NativeRenderer
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif

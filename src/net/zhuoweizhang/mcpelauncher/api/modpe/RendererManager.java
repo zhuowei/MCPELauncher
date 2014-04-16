@@ -6,10 +6,12 @@ import org.mozilla.javascript.annotations.*;
 public class RendererManager {
 
 	private static native void nativeModelAddBox(int rendererId, String modelPart, float xOffset, float yOffset, float zOffset,
-		int width, int height, int depth, float scale, int textureX, int textureY, boolean transparent);
+		int width, int height, int depth, float scale, int textureX, int textureY, boolean transparent,
+		float textureWidth, float textureHeight);
 	private static native void nativeModelClear(int rendererId, String modelPart);
 	private static native boolean nativeModelPartExists(int rendererId, String modelPart);
 	private static native int nativeCreateHumanoidRenderer();
+	public static native void nativeModelSetRotationPoint(int rendererId, String modelPart, float x, float y, float z);
 
 	public static void defineClasses(Scriptable scope) throws Exception {
 		ScriptableObject.defineClass(scope, NativeRendererApi.class);
@@ -69,6 +71,7 @@ public class RendererManager {
 		private String modelPartName;
 		private int textureX, textureY;
 		private boolean transparent;
+		private float textureWidth = 64.0f, textureHeight = 32.0f;
 		private NativeModelPart(int rendererId, String modelPartName) {
 			this.rendererId = rendererId;
 			this.modelPartName = modelPartName;
@@ -92,11 +95,23 @@ public class RendererManager {
 		public void addBox(float xOffset, float yOffset, float zOffset, int width, int height, int depth, float scale) {
 			nativeModelAddBox(rendererId, modelPartName, xOffset, yOffset, zOffset, 
 				width, height, depth, scale,
-				this.textureX, this.textureY, this.transparent);
+				this.textureX, this.textureY, this.transparent,
+				this.textureWidth, this.textureHeight);
 		}
 
 		public NativeModelPart clear() {
 			nativeModelClear(rendererId, modelPartName);
+			return this;
+		}
+
+		public NativeModelPart setTextureSize(float width, float height) {
+			this.textureWidth = width;
+			this.textureHeight = height;
+			return this;
+		}
+
+		public NativeModelPart setRotationPoint(float x, float y, float z) {
+			nativeModelSetRotationPoint(rendererId, modelPartName, x, y, z);
 			return this;
 		}
 	}
