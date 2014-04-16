@@ -726,6 +726,7 @@ public class ScriptManager {
 	 */
 
 	private static void overrideTexture(String urlString, String textureName) {
+		if (androidContext == null) return;
 		// download from URL
 		// saves it to ext storage's texture folder
 		// then, schedule callback
@@ -744,6 +745,7 @@ public class ScriptManager {
 	}
 
 	public static File getTextureOverrideFile(String textureName) {
+		if (androidContext == null) return null;
 		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
 		return new File(stagingTextures, textureName.replace("..", ""));
 	}
@@ -757,7 +759,7 @@ public class ScriptManager {
 
 	private static void clearTextureOverride(String texture) {
 		File file = getTextureOverrideFile(texture);
-		if (file.exists()) {
+		if (file != null && file.exists()) {
 			file.delete();
 		}
 		requestedGraphicsReset = true;
@@ -900,6 +902,7 @@ public class ScriptManager {
 															// normalized
 		String skinName = "mob/" + playerName + ".png";
 		File skinFile = getTextureOverrideFile("images/" + skinName);
+		if (skinFile == null) return;
 		String urlString = "http://s3.amazonaws.com/MinecraftSkins/" + playerName + ".png";
 		try {
 			URL url = new URL(urlString);
@@ -2337,7 +2340,7 @@ public class ScriptManager {
 
 		public void run() {
 			File skinFile = getTextureOverrideFile("images/" + skinPath);
-			if (!skinFile.exists())
+			if (skinFile == null || !skinFile.exists())
 				return;
 			NativeEntityApi.setMobSkin(entityId, skinPath);
 		}
