@@ -608,35 +608,43 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
+	@Deprecated
 	protected Dialog createCreateWorldDialog() {
-		final View textEntryView = getLayoutInflater().inflate(R.layout.create_world_dialog, null);
-		return new AlertDialog.Builder(this)
-				.setTitle(R.string.world_create_title)
-				.setView(textEntryView)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialogI, int button) {
-						AlertDialog dialog = (AlertDialog) dialogI;
-						String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry))
-								.getText().toString();
-						String worldSeed = ((TextView) dialog.findViewById(R.id.world_seed_entry))
-								.getText().toString();
-						String worldGameMode = GAME_MODES[((Spinner) dialog
-								.findViewById(R.id.world_gamemode_spinner))
-								.getSelectedItemPosition()];
-						userInputStrings = new String[] { worldName, worldSeed, worldGameMode };
-						inputStatus = INPUT_STATUS_OK;
-
-					}
-				})
-				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialogI, int button) {
-						inputStatus = INPUT_STATUS_CANCELLED;
-					}
-				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
-					public void onCancel(DialogInterface dialogI) {
-						inputStatus = INPUT_STATUS_CANCELLED;
-					}
-				}).create();
+		return null;
+		// final View textEntryView =
+		// getLayoutInflater().inflate(R.layout.create_world_dialog, null);
+		// return new AlertDialog.Builder(this)
+		// .setTitle(R.string.world_create_title)
+		// .setView(textEntryView)
+		// .setPositiveButton(android.R.string.ok, new
+		// DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialogI, int button) {
+		// AlertDialog dialog = (AlertDialog) dialogI;
+		// String worldName = ((TextView)
+		// dialog.findViewById(R.id.world_name_entry))
+		// .getText().toString();
+		// String worldSeed = ((TextView)
+		// dialog.findViewById(R.id.world_seed_entry))
+		// .getText().toString();
+		// String worldGameMode = GAME_MODES[((Spinner) dialog
+		// .findViewById(R.id.world_gamemode_spinner))
+		// .getSelectedItemPosition()];
+		// userInputStrings = new String[] { worldName, worldSeed, worldGameMode
+		// };
+		// inputStatus = INPUT_STATUS_OK;
+		//
+		// }
+		// })
+		// .setNegativeButton(android.R.string.cancel, new
+		// DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialogI, int button) {
+		// inputStatus = INPUT_STATUS_CANCELLED;
+		// }
+		// }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+		// public void onCancel(DialogInterface dialogI) {
+		// inputStatus = INPUT_STATUS_CANCELLED;
+		// }
+		// }).create();
 	}
 
 	protected Dialog createSafeModeDialog(int messageRes) {
@@ -728,29 +736,31 @@ public class MainActivity extends NativeActivity {
 				}).create();
 	}
 
+	@Deprecated
 	protected Dialog createCopyWorldDialog() {
-		final View textEntryView = getLayoutInflater().inflate(R.layout.copy_world_dialog, null);
-		return new AlertDialog.Builder(this)
-				.setTitle(R.string.copy_world_title)
-				.setView(textEntryView)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialogI, int button) {
-						AlertDialog dialog = (AlertDialog) dialogI;
-						String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry))
-								.getText().toString();
-						userInputStrings = new String[] { worldName };
-						inputStatus = INPUT_STATUS_OK;
-					}
-				})
-				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialogI, int button) {
-						inputStatus = INPUT_STATUS_CANCELLED;
-					}
-				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
-					public void onCancel(DialogInterface dialogI) {
-						inputStatus = INPUT_STATUS_CANCELLED;
-					}
-				}).create();
+		return null;
+//		final View textEntryView = getLayoutInflater().inflate(R.layout.copy_world_dialog, null);
+//		return new AlertDialog.Builder(this)
+//				.setTitle(R.string.copy_world_title)
+//				.setView(textEntryView)
+//				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialogI, int button) {
+//						AlertDialog dialog = (AlertDialog) dialogI;
+//						String worldName = ((TextView) dialog.findViewById(R.id.world_name_entry))
+//								.getText().toString();
+//						userInputStrings = new String[] { worldName };
+//						inputStatus = INPUT_STATUS_OK;
+//					}
+//				})
+//				.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialogI, int button) {
+//						inputStatus = INPUT_STATUS_CANCELLED;
+//					}
+//				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+//					public void onCancel(DialogInterface dialogI) {
+//						inputStatus = INPUT_STATUS_CANCELLED;
+//					}
+//				}).create();
 	}
 
 	protected Dialog createNotSupportedDialog() {

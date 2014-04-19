@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto" >
-    <PreferenceCategory
-        android:key="zz_textures_group"
-        android:title="@string/pref_textures_title" >
+
+    <PreferenceCategory android:title="@string/pref_textures_title" >
         <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
             android:defaultValue="false"
             android:key="zz_texture_pack_enable"
@@ -33,23 +32,21 @@
             android:title="@string/pref_zz_script_enable" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_ctrl_title" >
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="zz_longvibration"
-            android:summary="@string/pref_zz_longvibration_summary"
-            android:title="@string/pref_zz_longvibration" />
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/pref_gfx_title" >
+    <PreferenceScreen
+        android:title="@string/pref_other_title" >
         <EditTextPreference
             android:defaultValue=""
             android:inputType="numberDecimal"
             android:key="zz_custom_dpi"
             android:summary="@string/pref_zz_custom_dpi_summary"
             android:title="@string/pref_zz_custom_dpi" />
-    </PreferenceCategory>
+        
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_longvibration"
+            android:summary="@string/pref_zz_longvibration_summary"
+            android:title="@string/pref_zz_longvibration" />
 
-    <PreferenceCategory android:title="@string/pref_other_title" >
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_hovercar_hide"
@@ -63,7 +60,13 @@
             android:key="zz_legacy_keyboard_input"
             android:summary="@string/pref_zz_legacy_keyboard_input_summary"
             android:title="@string/pref_zz_legacy_keyboard_input" />
-    </PreferenceCategory>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_legacy_live_patch"
+            android:summary="@string/pref_zz_legacy_live_patch_summary"
+            android:title="@string/pref_zz_legacy_live_patch" />
+    </PreferenceScreen>
+
     <PreferenceCategory android:title="@string/pref_support_title" >
         <Preference android:title="@string/nerdy_stuff_page" >
             <intent
@@ -78,9 +81,6 @@
         <Preference
             android:key="zz_about"
             android:title="@string/about_about" />
-        <Preference
-            android:key="zz_go_to_forums"
-            android:title="@string/about_go_to_forums" />
     </PreferenceCategory>
 
 </PreferenceScreen>

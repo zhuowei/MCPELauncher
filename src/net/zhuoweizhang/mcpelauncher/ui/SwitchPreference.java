@@ -1,7 +1,6 @@
 package net.zhuoweizhang.mcpelauncher.ui;
 
 import net.zhuoweizhang.mcpelauncher.R;
-import de.ankri.views.Switch;
 import android.content.Context;
 import android.preference.Preference;
 import android.util.AttributeSet;
@@ -9,8 +8,8 @@ import android.view.View;
 import android.widget.CompoundButton;
 
 public class SwitchPreference extends Preference implements
-		android.widget.CompoundButton.OnCheckedChangeListener {
-	public Switch content = null;
+		CompoundButton.OnCheckedChangeListener {
+	public CompoundButton content = null;
 	protected OnCheckedChangeListener listener = null;
 
 	public SwitchPreference(Context context) {
@@ -31,7 +30,7 @@ public class SwitchPreference extends Preference implements
 	@Override
 	protected void onBindView(View view) {
 		super.onBindView(view);
-		content = (Switch) view.findViewById(R.id.switch_widget);
+		content = (CompoundButton) view.findViewById(R.id.switch_widget);
 		if (content != null) {
 			content.setOnCheckedChangeListener(this);
 			content.setChecked(getPersistedBoolean(false));
@@ -53,6 +52,6 @@ public class SwitchPreference extends Preference implements
 	}
 
 	public interface OnCheckedChangeListener {
-		public void onCheckedChange(Switch data);
+		public void onCheckedChange(CompoundButton data);
 	}
 }
