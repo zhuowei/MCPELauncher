@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pref_ctrl_touchscreen">Usa Touchscreen</string>
-    <string name="pref_ctrl_touchscreen_summary">Se non stai usando un Xperia Play, abilitalo</string>
-    <string name="pref_mp_username">Nome in Multiplayer</string>
+    <string name="pref_ctrl_touchscreen">Usa il Touchscreen</string>
+    <string name="pref_ctrl_touchscreen_summary">Se non stai usando un Xperia Play, abilitami</string>
+    <string name="pref_mp_username">Nome utente in Multiplayer</string>
     <string name="pref_mp_username_summary">Il tuo nome, no?</string>
-    <string name="pref_texture_pack">Pacchetti Grafici</string>
-    <string name="pref_texture_pack_summary">Cambia il tuo pacchetto grafico</string>
+    <string name="pref_texture_pack">Texture Pack</string>
+    <string name="pref_texture_pack_summary">Cambia la tua texture pack</string>
     <string name="pref_zz_longvibration">Vibrazione più lunga</string>
-    <string name="pref_zz_longvibration_summary">Aumenta la durata della vibrazione di 5</string>
-    <string name="pref_zz_safe_mode">Modalità salvo</string>
+    <string name="pref_zz_longvibration_summary">Moltiplica per 5 la durata della vibrazione</string>
+    <string name="pref_zz_safe_mode">Modalità Sicura</string>
     <string name="pref_zz_safe_mode_summary">Disabilita tutte le patch</string>
-    <string name="pref_zz_texture_pack_enable">Usa pacchetto grafico</string>
-    <string name="pref_zz_custom_dpi">DPI personalizzato</string>
-    <string name="pref_zz_custom_dpi_summary">Modificarlo per cambiare la grandezza dei controlli - Lasciare vuoto per disabilitarlo</string>
-    <string name="pref_zz_texture_pack_demo">Demo del supporto per Pacchetti Grafici</string>
-    <string name="pref_zz_texture_pack_demo_summary">Usa il Pacchetto Grafico istallato nel launcher (Slickcraft pack by NathanX)</string>
+    <string name="pref_zz_texture_pack_enable">Usa una texture pack</string>
+    <string name="pref_zz_custom_dpi">DPI personalizzata</string>
+    <string name="pref_zz_custom_dpi_summary">Cambia la densità di pixel per modificare la dimensione dei controlli - Lasciare vuoto per disabilitarlo</string>
+    <string name="pref_zz_texture_pack_demo">Texture pack d\'esempio</string>
+    <string name="pref_zz_texture_pack_demo_summary">Usa la texture pack fornita con il launcher (Slickcraft pack di NathanX)</string>
     <string name="pref_mp_server_visible_default">Server sempre visibile</string>
     <string name="pref_mp_title">Multiplayer</string>
     <string name="pref_ctrl_title">Controlli</string>
     <string name="pref_gfx_title">Grafica</string>
     <string name="pref_addons_title">Addons e Patch</string>
-    <string name="pref_zz_load_native_addons">Abilita add-ons sperimentali</string>
-    <string name="pref_zz_enable_hovercar">Abilita patching nel gioco</string>
-    <string name="texture_pack_unable_to_load">Impossibile caricare Pacchetto grafico.</string>
-    <string name="pref_zz_extract_original_textures">Estrai il Pacchetto grafico originale con i permessi di root</string>
-    <string name="pref_zz_extract_original_textures_summary">Backup l\'APK originale con i permessi di root e impostalo come Pacchetto Grafico</string>
+    <string name="pref_zz_load_native_addons">Abilita il supporto sperimentale per gli add-ons</string>
+    <string name="pref_zz_enable_hovercar">Abilita patching durante il gioco</string>
+    <string name="texture_pack_unable_to_load">Impossibile applicare la texture pack.</string>
+    <string name="pref_zz_extract_original_textures">Estrai il Pacchetto grafico originale grazie ai permessi di root</string>
+    <string name="pref_zz_extract_original_textures_summary">Esegui un backup della texture pack originale grazie ai permessi di root e utilizzala come texture pack.</string>
     <string name="extracting_textures">Backup dell\'APK orginale in corso&#8230;</string>
-    <string name="extract_textures_success">Impostato con successo l\'APK originale come Pacchetto grafico.</string>
+    <string name="extract_textures_success">Impostato con successo la texture pack originale come texture pack.</string>
     <string name="extract_textures_error">Impossibile accedere all\'APK originale.</string>
-    <string name="extract_textures_no_root">Impossibile avere l\'accesso come SuperUser - hai i permessi root?</string>
+    <string name="extract_textures_no_root">Impossibile ottenere l\'accesso da SuperUser - hai i permessi di root?</string>
     <string name="pref_zz_skin_enable">Abilita skin personalizzata</string>
     <string name="pref_zz_skin">Cambia skin</string>
-    <string name="pref_zz_skin_summary">Seleziona il file .png per cambiare skin (sarà visibile solo a te!)</string>
+    <string name="pref_zz_skin_summary">Seleziona il file .png per cambiare la skin (sarà visibile solo a te!)</string>
     <string name="nerdy_stuff_page">Opzioni avanzate</string>
     <string name="dump_libminecraftpe">Ripristina libminecraftpe.so dalla memoria</string>
-    <string name="nerdy_stuff_are_useless">LA maggior parte delle cose qui sono utili. Ci sono per bug improvvisi!</string>
+    <string name="nerdy_stuff_are_useless">Buona parte delle opzioni qui sono inutili. Servono per risolvere i bug improvvisi!</string>
     <string name="restart_app">Riavvia app</string>
-    <string name="manage_patches">Modifica patch</string>
+    <string name="manage_patches">Gestisci le patches</string>
     <string name="world_create_title">Crea mondo</string>
     <string name="world_name_prompt">Nome: </string>
-    <string name="world_seed_prompt">Seme: </string>
+    <string name="world_seed_prompt">Seed: </string>
     <string name="world_gamemode_prompt">Modalità di gioco: </string>
     <string name="gamemode_survival">Sopravvivenza</string>
     <string name="gamemode_creative">Creativa</string>
     <string name="manage_patches_import">Importa</string>
-    <string name="manage_patches_import_error">Impossibile importare patch</string>
-    <string name="manage_patches_too_many">Compra BlockLauncher Pro per inserire più di 3 patch!</string>
+    <string name="manage_patches_import_error">Impossibile importare la patch</string>
+    <string name="manage_patches_too_many">Compra BlockLauncher Pro per utilizzare più di 3 patch!</string>
     <string name="manage_patches_delete">Elimina</string>
-    <string name="manage_patches_crash_safe_mode">BlockLauncher ha riconosciuto un crash recente. La modalità Salvo è stata attivata per prevenire crash dovuti alle patch.</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher ha riscontrato un recente crash. La modalità sicura è stata attivata per prevenire crash dovuti alle patches.</string>
     <string name="manage_patches_import_confirm">Vuoi importare questa patch?</string>
     <string name="manage_patches_import_done">Patch importata</string>
     <string name="manage_patches_enable">Abilita</string>
@@ -58,21 +58,21 @@
     <string name="about_about">Info su BlockLauncher</string>
     <string name="about_copyright">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang</string>
     <string name="about_copyright_pro">Copyright &#169; 2013&#8211;2014 Zhuowei Zhang. Non distribuire senza permesso.</string>
-    <string name="about_librarycredits">Questo programma usa la aFileChooser library di Paul Burke. \n
+    <string name="about_librarycredits">Questo programma usa la libreria aFileChooser di Paul Burke. \n
 Questo programma contiene codice da Snowbound\'s PTPatchTool, licenza sotto l\' Eclipse Public License. \n
-This program contains a modified version of NathanX\'s Slickcraft texture pack: used with permission.\n
-Parts of the built-in texture pack is based on RepetiCraft by Theevilpplz and used with permission.\n
-This program contains a version of the Cydia Substrate framework by Saurik, licensed under the GNU Lesser General Public License.\n
-Questo progranma usa la libsuperuser library di Chainfire.\n
-This program contains a copy of the Rhino JavaScript engine from the Mozilla project.\n
+Questo programma contiene la versione modificata della texture pack Slickcraft di NathanX: utilizzata con il suo permesso.\n
+Parte della texture pack inclusa è basata sulla RepetiCraft di Theevilpplz ed è stata utilizzata con il suo permesso.\n
+Questo programma contiene una versione del Cydia Substrate framework di Saurik, rilasciata sotto licenza GNU Lesser General Public License.\n
+Questo progranma usa la libreria libsuperuser di Chainfire.\n
+Questo programma contiene una copia dell\'engine Rhino JavaScript del Mozilla project.\n
 Per la licenza completa, apri il thread su Minecraft Forum.\n
     </string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity">Lo sviluppo di questa app è stata possibile grazie al lavoro di molti traduttori esperti, tester, e programmatori. Grazie.\nVisita il thread su Minecraft Forum per la lista completa dei contributori.</string>
     <string name="about_go_to_forums">Apri il thread su Minecraft Forums di BlockLauncher</string>
-    <string name="no_minecraft_installed">BlockLauncher non ha trovato una copia di Minecraft PE sul tuo dispositivo. Questa app è stata sviluppata solo a scopo di usare le patch su una versione completa di Minecraft Pocket Edition by MojangAB.</string>
+    <string name="no_minecraft_installed">BlockLauncher non ha trovato una copia di Minecraft PE sul tuo dispositivo. Questa app è stata sviluppata con il solo scopo di usare le patch su una versione completa di Minecraft Pocket Edition di MojangAB.</string>
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
-    <string name="permdesc_mcpelauncher_addon">Permette all\'applicazione di essere caricata come add-on in BlockLauncher. Questo fa si che l\'app può accedere al network, e tutto ciò che Minecraft PE ha i permessi di fare.</string>
+    <string name="permdesc_mcpelauncher_addon">Permette all\'applicazione di essere caricata come add-on in BlockLauncher. Questo fa si che l\'app possa accedere alla rete, e a tutto ciò che Minecraft PE ha i permessi di fare.</string>
 
 </resources>
