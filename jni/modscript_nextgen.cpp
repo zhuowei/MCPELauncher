@@ -163,6 +163,10 @@ static void (*bl_Packet_Packet)(void*);
 static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*, MessagePacket*);
 static void** bl_MessagePacket_vtable;
 
+// Custom block renderers
+static void (*bl_TileRenderer_tesselateBlockInWorld)(Tile*, int, int, int);
+
+
 bool bl_text_parse_color_codes = true;
 
 //custom blocks
@@ -1116,6 +1120,20 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 	jlongArray uuidArray = env->NewLongArray(2);
 	env->SetLongArrayRegion(uuidArray, 0, 2, uuidLongs);
 	return uuidArray;
+}
+
+// Custom block renderers
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRenderStandardBlock
+  (JNIEnv *env jclass clazz, jint blockId, jint x, jint y, jint z) {
+  	Tile* tile = bl_Tile_tiles[blockId];
+  	if(tile == NULL) return;
+  	
+  	bl_TileRenderer_tesselateBlockinWorld(tile, x, y, z);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddVertex
+  () {
+  	// BLANK FOR NOW
 }
 
 void bl_cppNewLevelInit() {
