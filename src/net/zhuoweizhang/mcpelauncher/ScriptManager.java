@@ -207,6 +207,7 @@ public class ScriptManager {
 					classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 			ScriptableObject.defineClass(scope, NativeServerApi.class);
+			ScriptableObject.defineClass(scope, NativeBlockRendererApi.class);
 			RendererManager.defineClasses(scope);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -665,6 +666,7 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeItemApi.class, "Item");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
 		appendApiMethods(builder, NativeServerApi.class, "Server");
+		appendApiMethods(builder, NativeBlockRendererApi.class, "BlockRenderer");
 		return builder.toString();
 
 	}
@@ -1210,6 +1212,12 @@ public class ScriptManager {
 	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
 
  	public static native void nativeSetItemMaxDamage(int id, int maxDamage);
+ 	
+ 	// Custom block renderers
+ 	public static native void nativeRenderStandardBlock(int blockId, int x, int y, int z);
+ 	
+ 	public static native void nativeRenderCrossBlock(int blockId, int x, int y, int z);
+
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2315,6 +2323,26 @@ public class ScriptManager {
 		@Override
 		public String getClassName() {
 			return "Gui";
+		}
+	}
+	
+	private static class NativeBlockRendererApi extends ScriptableObject {
+		public NativeBlockRendererApi() {
+		}
+		
+		@JSStaticFunction
+		public static void renderStandardBlock(int blockId, int x, int y, int z) {
+			nativeRenderStandardBlock(blockId, x, y, z);
+		}
+		
+		@JSStaticFunction
+		public static void renderCrossBlock(int blockId, int x, int y, int z) {
+			nativeRenderCrossBlock(blockId, x, y, z);
+		}
+		
+		@Override
+		public String getClassName() {
+			return "BlockRenderer";
 		}
 	}
 
