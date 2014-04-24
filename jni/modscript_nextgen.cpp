@@ -969,7 +969,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
   	ItemInstance outputStack;
-	bl_setItemInstance(&outputStack, outputId, 1, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
+	bl_setItemInstance(&outputStack, outputId, 1, outputDamage);
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
   	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
 }
@@ -1131,9 +1131,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
   	bl_TileRenderer_tesselateBlockinWorld(tile, x, y, z);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddVertex
-  () {
-  	// BLANK FOR NOW
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddVertexUV
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint blockId) {
+  	// TODO: Convert textures on Java side with bitwise/bitshift operators
+  	bl_Tesselator_vertexUV(x, y, z);
 }
 
 void bl_cppNewLevelInit() {
