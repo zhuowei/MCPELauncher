@@ -1160,10 +1160,20 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
   	bl_TileRenderer_tesselateBlockinWorld(tile, x, y, z);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddVertexUV
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint blockId) {
-  	// TODO: Convert textures on Java side with bitwise/bitshift operators
-  	bl_Tesselator_vertexUV(x, y, z);
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRenderCrossBlock
+  (JNIEnv *env, jclass clazz, jint blockId, jint x, jint y, jint z) {
+	Tile* tile = bl_Tile_tiles[blockId];
+	if(tile == NULL) return;
+	
+	bl_TileRenderer_tesselateCrossInWorld(tile, x, y, z);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRenderTorchBlock
+  (JNIEnv *env, jclass clazz, jint blockId, jint x, jint y, jint z) {
+  	Tile* tile = bl_Tile_tiles[blockId];
+  	if(tile == NULL) return;
+  	
+  	bl_TileRenderer_tesselateTorchInWorld(tile, x, y, z);
 }
 
 void bl_cppNewLevelInit() {
