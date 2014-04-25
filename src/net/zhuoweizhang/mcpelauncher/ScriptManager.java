@@ -1511,6 +1511,7 @@ public class ScriptManager {
 			return entityId;
 		}
 
+
 		@JSStaticFunction
 		public static String getSignText(int x, int y, int z, int line) {
 			if (line < 0 || line >= 4)
@@ -2344,6 +2345,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void renderCross(int blockId, int x, int y, int z) {
 			nativeRenderCrossBlock(blockId, x, y, z);
+		}
+		
+		@JSStaticFunction
+		public static void renderTorch(int blockId, int x, int y, int z) {
+			nativeRenderTorchBlock(blockId, x, y, z);
 		}
 		
 		@Override
