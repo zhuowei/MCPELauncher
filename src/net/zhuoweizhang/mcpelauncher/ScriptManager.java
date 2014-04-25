@@ -298,6 +298,10 @@ public class ScriptManager {
 	public static void attackCallback(int attacker, int victim) {
 		callScriptMethod("attackHook", attacker, victim);
 	}
+	
+	public static void blockRendererCallback(int blockId, int x, int y, int z) {
+		callScriptMethod("renderBlockHook", blockId, x, y, z);
+	}
 
 	public static void tickCallback() {
 		callScriptMethod("modTick");
@@ -1217,6 +1221,8 @@ public class ScriptManager {
  	public static native void nativeRenderStandardBlock(int blockId, int x, int y, int z);
  	
  	public static native void nativeRenderCrossBlock(int blockId, int x, int y, int z);
+ 	
+ 	public static native void nativeRenderTorchBlock(int blockId, int x, int y, int z);
 
 
 	// setup
@@ -2331,12 +2337,12 @@ public class ScriptManager {
 		}
 		
 		@JSStaticFunction
-		public static void renderStandardBlock(int blockId, int x, int y, int z) {
+		public static void renderBlock(int blockId, int x, int y, int z) {
 			nativeRenderStandardBlock(blockId, x, y, z);
 		}
 		
 		@JSStaticFunction
-		public static void renderCrossBlock(int blockId, int x, int y, int z) {
+		public static void renderCross(int blockId, int x, int y, int z) {
 			nativeRenderCrossBlock(blockId, x, y, z);
 		}
 		
