@@ -1210,6 +1210,10 @@ public class ScriptManager {
 	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
 
  	public static native void nativeSetItemMaxDamage(int id, int maxDamage);
+	
+	public static native int nativeGetBlockRenderShape(int blockId);
+	
+	public static native void nativeSetBlockRenderShape(int blockId, int renderType);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2205,6 +2209,16 @@ public class ScriptManager {
 			nativeBlockSetDestroyTime(blockId, (float) time);
 		}
 
+		@JSStaticFunction
+		public static int getRenderType(int blockId) {
+			return nativeGetBlockRenderShape(blockId);
+		}
+
+		@JSStaticFunction
+		public static void setRenderType(int blockId, int renderType) {
+			nativeSetBlockRenderShape(blockId, renderType);
+		}
+		
 		@JSStaticFunction
 		public static void setExplosionResistance(int blockId, double resist) {
 			nativeBlockSetExplosionResistance(blockId, (float) resist);

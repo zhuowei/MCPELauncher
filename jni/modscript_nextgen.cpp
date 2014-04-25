@@ -520,6 +520,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
+JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
+  (JNIEnv *env, jclass clazz, jint blockId) {
+	Tile* tile = bl_Tile_tiles[blockId];
+	if(tile == NULL) return 0;
+	
+	return bl_CustomBlock_getRenderShapeHook(tile);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
+  (JNIEnv *env, jclass clazz, jint blockId, jint renderType) {
+	  bl_custom_block_renderShape[blockId] = renderType;
+}
+
 Item* bl_constructItem(int id) {
 	Item* retval = (Item*) ::operator new((std::size_t) 72);
 	bl_Item_Item(retval, id - 0x100);
