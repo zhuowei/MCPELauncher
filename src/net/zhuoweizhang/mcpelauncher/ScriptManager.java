@@ -726,7 +726,6 @@ public class ScriptManager {
 	 */
 
 	private static void overrideTexture(String urlString, String textureName) {
-		if (androidContext == null) return;
 		// download from URL
 		// saves it to ext storage's texture folder
 		// then, schedule callback
@@ -745,7 +744,6 @@ public class ScriptManager {
 	}
 
 	public static File getTextureOverrideFile(String textureName) {
-		if (androidContext == null) return null;
 		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
 		return new File(stagingTextures, textureName.replace("..", ""));
 	}
@@ -759,7 +757,7 @@ public class ScriptManager {
 
 	private static void clearTextureOverride(String texture) {
 		File file = getTextureOverrideFile(texture);
-		if (file != null && file.exists()) {
+		if (file.exists()) {
 			file.delete();
 		}
 		requestedGraphicsReset = true;
@@ -902,7 +900,6 @@ public class ScriptManager {
 															// normalized
 		String skinName = "mob/" + playerName + ".png";
 		File skinFile = getTextureOverrideFile("images/" + skinName);
-		if (skinFile == null) return;
 		String urlString = "http://s3.amazonaws.com/MinecraftSkins/" + playerName + ".png";
 		try {
 			URL url = new URL(urlString);
@@ -1090,6 +1087,8 @@ public class ScriptManager {
 	public static native void nativeSetSneaking(int entityId, boolean doIt);
 
 	public static native String nativeGetPlayerName(int entityId);
+	
+	public static native void nativeSwingArm();
 
 	public static native String nativeGetItemName(int itemId, int itemDamage, boolean raw);
 
@@ -1169,11 +1168,7 @@ public class ScriptManager {
 	public static native void nativeAddItemChest(int x, int y, int z, int slot, int id, int damage,
 			int amount);
 
-	public static native int nativeGetItemChest(int x, int y, int z, int slot);
-
-	public static native int nativeGetItemDataChest(int x, int y, int z, int slot);
-
-	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
+	public static native int nativeGetItemChest(int x, int y, int z, int slot, int type);
 
 	public static native int nativeDropItem(float x, float y, float z, float range, int id,
 			int count, int damage);
@@ -1203,13 +1198,13 @@ public class ScriptManager {
 	public static native void nativeAddItemFurnace(int x, int y, int z, int slot, int id,
 			int damage, int amount);
 
-	public static native int nativeGetItemFurnace(int x, int y, int z, int slot);
-
-	public static native int nativeGetItemDataFurnace(int x, int y, int z, int slot);
-
-	public static native int nativeGetItemCountFurnace(int x, int y, int z, int slot);
+	public static native int nativeGetItemFurnace(int x, int y, int z, int slot, int type);
 
  	public static native void nativeSetItemMaxDamage(int id, int maxDamage);
+	
+	public static native int nativeGetBlockRenderShape(int id);
+	
+	public static native void nativeSetBlockRenderShape(int id, int shape);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1577,17 +1572,17 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int getChestSlot(int x, int y, int z, int slot) {
-			return nativeGetItemChest(x, y, z, slot);
+			return nativeGetItemChest(x, y, z, slot, 0);
 		}
 
 		@JSStaticFunction
 		public static int getChestSlotData(int x, int y, int z, int slot) {
-			return nativeGetItemDataChest(x, y, z, slot);
+			return nativeGetItemChest(x, y, z, slot, 1);
 		}
 
 		@JSStaticFunction
 		public static int getChestSlotCount(int x, int y, int z, int slot) {
-			return nativeGetItemCountChest(x, y, z, slot);
+			return nativeGetItemChest(x, y, z, slot, 2);
 		}
 
 		// KsyMC's additions
@@ -1620,17 +1615,17 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int getFurnaceSlot(int x, int y, int z, int slot) {
-			return nativeGetItemFurnace(x, y, z, slot);
+			return nativeGetItemFurnace(x, y, z, slot, 0);
 		}
 
 		@JSStaticFunction
 		public static int getFurnaceSlotData(int x, int y, int z, int slot) {
-			return nativeGetItemDataFurnace(x, y, z, slot);
+			return nativeGetItemFurnace(x, y, z, slot, 1);
 		}
 
 		@JSStaticFunction
 		public static int getFurnaceSlotCount(int x, int y, int z, int slot) {
-			return nativeGetItemCountFurnace(x, y, z, slot);
+			return nativeGetItemFurnace(x, y, z, slot, 2);
 		}
 
 		@Override
@@ -1681,6 +1676,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHealth(int value) {
 			nativeHurtTo(value);
+		}
+		
+		@JSStaticFunction
+		public static void swingArm() {
+			nativeSwingArm();
 		}
 
 		@JSStaticFunction
@@ -2204,6 +2204,16 @@ public class ScriptManager {
 		public static void setDestroyTime(int blockId, double time) {
 			nativeBlockSetDestroyTime(blockId, (float) time);
 		}
+		
+		@JSStaticFunction
+		public static int getRenderType(int blockId) {
+			nativeGetBlockRenderShape(blockId);
+		}
+		
+		@JSStaticFunction
+		public static void setRenderType(int blockId, int renderType) {
+			nativeSetBlockRenderShape(blockId, renderType);
+		}
 
 		@JSStaticFunction
 		public static void setExplosionResistance(int blockId, double resist) {
@@ -2340,7 +2350,7 @@ public class ScriptManager {
 
 		public void run() {
 			File skinFile = getTextureOverrideFile("images/" + skinPath);
-			if (skinFile == null || !skinFile.exists())
+			if (!skinFile.exists())
 				return;
 			NativeEntityApi.setMobSkin(entityId, skinPath);
 		}
