@@ -520,7 +520,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
+JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId) {
 	Tile* tile = bl_Tile_tiles[blockId];
 	if(tile == NULL) return 0;
