@@ -164,7 +164,11 @@ static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*
 static void** bl_MessagePacket_vtable;
 
 // Custom block renderers
+static void (*bl_TileRenderer_tesselateInWorld)(Tile*, int, int, int);
+
 static void (*bl_TileRenderer_tesselateBlockInWorld)(Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateCrossInWorld)(Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateTorchInWorld)(Tile*, int, int, int);
 
 
 bool bl_text_parse_color_codes = true;
@@ -250,6 +254,31 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	}
 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
+}
+
+void bl_TileRenderer_tesselateInWorld_hook(Tile* tile, int x, int y, int z) {
+	JNIEnv *env;
+	
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if(attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+	
+	int blockId = tile->id;
+	
+	// Don't allow PREVENT_DEFAULT_STATUS to be invoked, as it would break all block rendering in the game
+	// And nuke everything, leaving only pigs, cows, sheep, and chickens
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(III)V");
+	
+	// TODO: The above is missing one argument
+	
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, blockId, x, y, z);
+	
+	if(attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	
+	bl_TileRenderer_tesselateInWorld_real(tile, x, y, z);
 }
 
 void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffset, float yOffset, int color, bool isShadow) {
@@ -1200,6 +1229,18 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
 	bl_initCustomBlockVtable();
+	
+	// This method switches out the Tile* render type and calls into the render type's respective tesselator
+	bl_TileRenderer_tesselateInWorld = (void(*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
+	
+	
+	// To render a standard block into the world; Use Tile::setShape to change the size and shape of it
+	bl_TileRenderer_tesselateBlockInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateBlockInWorldEP4Tileiii");
+	// To render a cross block into the world; Use the tesselator to render a vertexUV into the location, in a cross shape
+	bl_TileRenderer_tesselateCrossInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateCrossInWorldEP4Tileiii");
+	// To render a torch into the world at the given location. I think I can hook the angled torch renderer to make a torch at an angle
+	// That's an experiment for later.
+	bl_TileRenderer_tesselateTorchInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateTorchInWorldEP4Tileiii");
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
@@ -1219,7 +1260,7 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
-	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
+	bl_Recipes_getInstance =Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapelessRecipe = (void (*)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&)) 
 		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
