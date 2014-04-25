@@ -164,7 +164,7 @@ static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*
 static void** bl_MessagePacket_vtable;
 
 // Custom block renderers
-static void (*bl_TileRenderer_tesselateInWorld)(Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateInWorld_real)(Tile*, int, int, int);
 
 static void (*bl_TileRenderer_tesselateBlockInWorld)(Tile*, int, int, int);
 static void (*bl_TileRenderer_tesselateCrossInWorld)(Tile*, int, int, int);
@@ -1241,7 +1241,7 @@ void bl_setuphooks_cppside() {
 	bl_initCustomBlockVtable();
 	
 	// This method switches out the Tile* render type and calls into the render type's respective tesselator
-	bl_TileRenderer_tesselateInWorld = (void(*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
+	bl_TileRenderer_tesselateInWorld_real = (void(*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
 	
 	
 	// To render a standard block into the world; Use Tile::setShape to change the size and shape of it
