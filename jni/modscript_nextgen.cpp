@@ -268,9 +268,9 @@ void bl_TileRenderer_tesselateInWorld_hook(Tile* tile, int x, int y, int z) {
 	
 	// Don't allow PREVENT_DEFAULT_STATUS to be invoked, as it would break all block rendering in the game
 	// And nuke everything, leaving only pigs, cows, sheep, and chickens
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(III)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(ZIII)V");
 	
-	// TODO: The above is missing one argument
+	// TODO: Get information on the above
 	
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, blockId, x, y, z);
 	
@@ -1270,7 +1270,7 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
-	bl_Recipes_getInstance =Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
+	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapelessRecipe = (void (*)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&)) 
 		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
