@@ -164,11 +164,13 @@ static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*
 static void** bl_MessagePacket_vtable;
 
 // Custom block renderers
-static void (*bl_TileRenderer_tesselateInWorld_real)(Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateInWorld_real)(void*, Tile*, int, int, int);
 
-static void (*bl_TileRenderer_tesselateBlockInWorld)(Tile*, int, int, int);
-static void (*bl_TileRenderer_tesselateCrossInWorld)(Tile*, int, int, int);
-static void (*bl_TileRenderer_tesselateTorchInWorld)(Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateBlockInWorld)(void*, Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateCrossInWorld)(void*, Tile*, int, int, int);
+static void (*bl_TileRenderer_tesselateTorchInWorld)(void*, Tile*, int, int, int);
+
+static void* bl_TileRenderer_instance;
 
 
 bool bl_text_parse_color_codes = true;
@@ -256,13 +258,15 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
 }
 
-void bl_TileRenderer_tesselateInWorld_hook(Tile* tile, int x, int y, int z) {
+void bl_TileRenderer_tesselateInWorld_hook(void* tileRenderer, Tile* tile, int x, int y, int z) {
 	JNIEnv *env;
 	
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if(attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
+
+	bl_TileRenderer_instance = tileRenderer;
 	
 	int blockId = tile->id;
 	
@@ -275,7 +279,7 @@ void bl_TileRenderer_tesselateInWorld_hook(Tile* tile, int x, int y, int z) {
 		bl_JavaVM->DetachCurrentThread();
 	}
 	
-	bl_TileRenderer_tesselateInWorld_real(tile, x, y, z);
+	bl_TileRenderer_tesselateInWorld_real(tileRenderer, tile, x, y, z);
 }
 
 void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffset, float yOffset, int color, bool isShadow) {
@@ -1167,7 +1171,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
   	Tile* tile = bl_Tile_tiles[blockId];
   	if(tile == NULL) return;
   	
-  	bl_TileRenderer_tesselateBlockInWorld(tile, x, y, z);
+  	bl_TileRenderer_tesselateBlockInWorld(bl_TileRenderer_instance, tile, x, y, z);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRenderCrossBlock
@@ -1175,7 +1179,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 	Tile* tile = bl_Tile_tiles[blockId];
 	if(tile == NULL) return;
 	
-	bl_TileRenderer_tesselateCrossInWorld(tile, x, y, z);
+	bl_TileRenderer_tesselateCrossInWorld(bl_TileRenderer_instance, tile, x, y, z);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRenderTorchBlock
@@ -1183,7 +1187,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
   	Tile* tile = bl_Tile_tiles[blockId];
   	if(tile == NULL) return;
   	
-  	bl_TileRenderer_tesselateTorchInWorld(tile, x, y, z);
+  	bl_TileRenderer_tesselateTorchInWorld(bl_TileRenderer_instance, tile, x, y, z);
 }
 
 void bl_cppNewLevelInit() {
@@ -1255,12 +1259,12 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(bl_TileRenderer_tesselateInWorld, (void*) &bl_TileRenderer_tesselateInWorld_hook, (void**) &bl_TileRenderer_tesselateInWorld_real);
 	
 	// To render a standard block into the world; Use Tile::setShape to change the size and shape of it
-	bl_TileRenderer_tesselateBlockInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateBlockInWorldEP4Tileiii");
+	bl_TileRenderer_tesselateBlockInWorld = (void (*)(void*, Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateBlockInWorldEP4Tileiii");
 	// To render a cross block into the world; Use the tesselator to render a vertexUV into the location, in a cross shape
-	bl_TileRenderer_tesselateCrossInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateCrossInWorldEP4Tileiii");
+	bl_TileRenderer_tesselateCrossInWorld = (void (*)(void*, Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateCrossInWorldEP4Tileiii");
 	// To render a torch into the world at the given location. I think I can hook the angled torch renderer to make a torch at an angle
 	// That's an experiment for later.
-	bl_TileRenderer_tesselateTorchInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateTorchInWorldEP4Tileiii");
+	bl_TileRenderer_tesselateTorchInWorld = (void (*)(void*, Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateTorchInWorldEP4Tileiii");
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
