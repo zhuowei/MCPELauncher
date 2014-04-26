@@ -266,11 +266,8 @@ void bl_TileRenderer_tesselateInWorld_hook(Tile* tile, int x, int y, int z) {
 	
 	int blockId = tile->id;
 	
-	// Don't allow PREVENT_DEFAULT_STATUS to be invoked, as it would break all block rendering in the game
-	// And nuke everything, leaving only pigs, cows, sheep, and chickens
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(ZIII)V");
-	
-	// TODO: Get information on the above
+	// Don't allow PREVENT_DEFAULT_STATUS to be invoked, as it would nuke all block rendering in the game
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(IIII)V");
 	
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, blockId, x, y, z);
 	
