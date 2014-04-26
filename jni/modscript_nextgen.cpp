@@ -259,16 +259,19 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 }
 
 void bl_TileRenderer_tesselateInWorld_hook(void* tileRenderer, Tile* tile, int x, int y, int z) {
+	bl_TileRenderer_instance = tileRenderer;
+	
+	int blockId = tile->id;
+	if (bl_custom_block_renderShape[blockId] != -1) {
+		bl_TileRenderer_tesselateInWorld_real(tileRenderer, tile, x, y, z);
+		return;
+	}
 	JNIEnv *env;
 	
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if(attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
-
-	bl_TileRenderer_instance = tileRenderer;
-	
-	int blockId = tile->id;
 	
 	// Don't allow PREVENT_DEFAULT_STATUS to be invoked, as it would nuke all block rendering in the game
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockRendererCallback", "(IIII)V");
