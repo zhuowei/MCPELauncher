@@ -1,73 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!--Memo: Chinese Traditional translation by PEMapModder-->
-    <!--Credit: @lin871106 for improvements-->
-	<string name="pref_zz_language_override">語言</string>
-    <string name="pref_zz_language_override_default">預設</string>
-    <string name="pref_zz_longvibration">特長震機</string>
-    <string name="pref_zz_longvibration_summary">把破壞方塊時的震機增至原本的五倍</string><!-- +5x->6 or 1x->5x? -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--<string name="textOn" translatable="false" tools:ignore="MissingTranslation">ON</string>
+    <string name="textOff" translatable="false" tools:ignore="MissingTranslation">OFF</string>-->
+    <string name="pref_ctrl_touchscreen">使用觸控螢幕</string>
+    <string name="pref_ctrl_touchscreen_summary">如果你不是使用Xperia，請選擇這個</string>
+    <string name="pref_mp_username">多人遊戲玩家名稱</string>
+    <string name="pref_mp_username_summary">您的名字</string>
+    <string name="pref_texture_pack">材質包</string>
+    <string name="pref_texture_pack_summary">更換材質包</string>
+    <string name="pref_zz_longvibration">超長震機</string>
+    <string name="pref_zz_longvibration_summary">震機時間延長至５倍</string> <!--Make it clear - increase vibration to x ms * 5 = 5 ms or x ms * (1 + 5) = 6 ms? (increase to 5 times or increase by 5 times?)-->
     <string name="pref_zz_safe_mode">安全模式</string>
-    <string name="pref_zz_safe_mode_summary">停用所有模組</string>
+    <string name="pref_zz_safe_mode_summary">停用所有修改</string>
     <string name="pref_zz_texture_pack_enable">使用材質包</string>
-    <string name="pref_zz_custom_dpi">自訂 DPI</string><!--I think we don't need it anymore-->
-    <string name="pref_zz_custom_dpi_summary">向 Minecraft PE 報告你裝置的實際大小，以控制 GUI 的大小</string>
-    <string name="pref_zz_texture_pack_demo">模擬材質包支援</string>
+    <string name="pref_zz_custom_dpi">自訂 DPI</string>
+    <string name="pref_zz_custom_dpi_summary">更改您裝置的模擬大小，以控制 GUI 的大小 - 留空以使用預設值</string>
+    <string name="pref_zz_texture_pack_demo">支援模擬材質包</string>
     <string name="pref_zz_texture_pack_demo_summary">使用由NathanX設計的Slickcraft材質包</string>
-    <string name="pref_mp_title">多人連線</string>
+    <string name="pref_mp_server_visible_default">伺服器預設可見</string>
+    <string name="pref_mp_title">多人遊戲</string>
     <string name="pref_ctrl_title">觸控設定</string>
     <string name="pref_gfx_title">畫質</string>
-    <string name="pref_addons_title">插件及模組</string>
+    <string name="pref_addons_title">插件與模組</string>
     <string name="pref_textures_title">材質包</string>
-	<!--Does this mean texture packs? If not, delete the last character/change it into 材質-->
     <string name="pref_support_title">支援</string>
-    <string name="pref_zz_load_native_addons">啟用試驗性插件支援</string>
-    <string name="texture_pack_unable_to_load">無法載入材質包</string>
-    <string name="pref_zz_extract_original_textures">使用 root 權限取得原本的材質</string>
-    <string name="pref_zz_extract_original_textures_summary">備分原本的Minecraft PE APK 檔案 (需要root) 並把它設為材質包</string>
-    <string name="extracting_textures">備分 APK 檔案中…</string>
-    <string name="extract_textures_success">成功設置原本的APK為材質包</string>
-    <string name="extract_textures_error">無法取得原本的APK</string>
-    <string name="extract_textures_no_root">無法取得 root 存取權——你的裝置沒有 root 嗎？</string>
-    <string name="extract_textures_need_update">你似乎在使用舊版本的Minecraft PE的材質包。請在設定中使用「用 root 存取權提取原本的材質以更新材質。</string>
-    <string name="pref_zz_skin_enable">使用自訂皮膚\n (在多人連線中別人不會看到，而別人則會成為這個樣子)</string>
-	<!--CHANGE IT INTO SUMMARY TO MAXIMIZE THE EFFECT-->
-    <string name="pref_zz_skin">更改自訂皮膚</string>
-    <string name="pref_zz_skin_summary">選擇PNG檔案作為自訂皮膚(只有你看到)</string>
+    <string name="pref_zz_load_native_addons">啟用支援試驗性插件</string>
+    <string name="pref_zz_enable_hovercar">啟用遊戲內模組管理器</string>
+    <string name="texture_pack_unable_to_load">無法載入材質包。</string>
+    <string name="pref_zz_extract_original_textures">提取原始材質包(需要root權限)</string>
+    <string name="pref_zz_extract_original_textures_summary">備份原版APK，並設定它的材質包(需要root權限)</string>
+    <string name="extracting_textures">正在備份原版的APK</string>
+    <string name="extract_textures_success">成功設定成原版APK的材質包</string>
+    <string name="extract_textures_error">無法獲取原版APK</string>
+    <string name="extract_textures_no_root">無法取得root權限 你確定有root嗎？</string>
+    <string name="extract_textures_need_update">您似乎在使用Minecraft PE舊版的材質包。請在設定中使用『提取原始材質包(需root權限)』以更新材質</string>
+    <string name="pref_zz_skin_enable">使用自訂皮膚</string>
+    <string name="pref_zz_skin">更換皮膚</string>
+    <string name="pref_zz_skin_summary">選擇PNG檔來作為皮膚(只有自己看得到)</string>
     <string name="pref_zz_hovercar_hide">隱藏設定按鈕</string>
-    <string name="pref_zz_redirect_mco">把 Minecraft Realms 重新導向至第三方伺服器的列表</string>
-    <string name="pref_zz_manage_scripts">管理 ModPE 模組</string>
-    <string name="pref_zz_script_enable">啟用 ModPE 支援</string>
-    <string name="pref_zz_sensorcontrol">感應器控制</string>
-    <string name="pref_zz_sensorcontrol_summary">以搖動裝置控制方向。需啟用 ModPE 支援。</string>
-    <string name="pref_zz_show_insert_text">在螢幕上方按鈕的彈出式視窗顯示「輸入文字」選項</string>
-    <string name="nerdy_stuff_page">電腦迷的東西</string>
-    <string name="dump_libminecraftpe">在記憶體中刪除 libminecraftpe.so</string><!--I said delete-->
-    <string name="nerdy_stuff_are_useless">本頁面的大部分東西都是沒用的。它們是用來幫助解決程式錯誤的。</string>
-    <string name="restart_app">重新啟動 BlockLauncher</string>
-    <string name="manage_patches">管理 .mod 模組</string>
+    <string name="pref_zz_redirect_mco">重新導向至第三方伺服器列表</string>
+    <string name="pref_zz_manage_scripts">管理插件(.js)</string>
+    <string name="pref_zz_script_enable">啟用支援插件(.js)</string>
+    <string name="pref_zz_sensorcontrol">控制感應器</string>
+    <string name="pref_zz_sensorcontrol_summary">轉動裝置來控制玩家方向【必需啟用支援插件(.js)】</string>
+    <string name="pref_zz_show_insert_text">在遊戲中模組管理器顯示“輸入文字”選項</string>
+    <string name="pref_zz_language_override">選擇語言</string>
+    <string name="pref_zz_language_override_default">預設</string>
+    <string name="pref_zz_script_paranoid_mode">不信任模式</string>
+    <string name="pref_zz_script_paranoid_mode_summary">禁止插件(.js)取得 Android 程式的權限\n只允許存取 Minecraft PE 世界裡的東西</string>
+    <string name="pref_zz_legacy_keyboard_input">使用舊式鍵盤</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">用來解決「Enter」鍵消失的問題</string>
+    <string name="pref_zz_texture_pack_enable_extracted">使用取出的原版材質包</string>
+    <string name="pref_zz_skin_download_source">PC 皮膚</string>
+    <string name="skin_download_do_not_download">不要下載皮膚</string>
+    <string name="skin_download_download_pc">輸入PC名稱來下載皮膚</string>
+    <string name="nerdy_stuff_page">測試功能</string>
+    <string name="dump_libminecraftpe">在記憶體中刪除 libminecraftpe.so</string>
+    <string name="nerdy_stuff_are_useless">本頁面的東西幾乎是沒用的，它們只是用來協助程式解決錯誤而已</string>
+    <string name="restart_app">重新啟動程式</string>
+    <string name="manage_patches">管理模組(.mod)</string>
+    <string name="world_create_title">新增世界</string>
+    <string name="world_name_prompt">名稱：</string>
+    <string name="world_seed_prompt">種子碼：</string>
+    <string name="world_gamemode_prompt">遊戲模式：</string>
+    <string name="gamemode_survival">生存模式</string>
+    <string name="gamemode_creative">創造模式</string>
     <string name="copy_world_title">儲存世界</string>
-    <string name="manage_patches_import">匯入</string>
-    <string name="manage_patches_import_error">匯入模組失敗</string>
+    <string name="manage_patches_import">導入</string>
+    <string name="manage_patches_import_error">導入模組失敗</string>
     <string name="manage_patches_too_many">升級至付費版以啟用三個以上的模組</string>
     <string name="manage_patches_delete">刪除</string>
-    <string name="manage_patches_crash_safe_mode">BlockLauncher 偵測到最近出現程式錯誤。已啟動安全模式，以防止出現更多錯誤。在安全模式中，所有模組將被停用。</string>
-    <string name="manage_patches_import_confirm">確定匯入此模組？</string>
-    <string name="manage_patches_import_done">已匯入模組</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher 偵測到程式出現錯誤，已啟動安全模式，來防止更多錯誤。在安全模式中，所有模組將被停用。
+請問您要繼續在安全模式下(沒有模組)還是回到正常模式？</string>
+    <string name="manage_patches_import_confirm">您想導入這個模組嗎？</string>
+    <string name="manage_patches_import_done">導入模組(.mod)</string>
     <string name="manage_patches_enable">啟用</string>
     <string name="manage_patches_disable">停用</string>
-    <string name="manage_patches_disabled">(己被停用)</string>
-    <string name="manage_patches_invalid_patches">以下模組將不被支援，因為它們並不是正確的格式︰</string>
+    <string name="manage_patches_disabled">(已被停用)</string>
+    <string name="manage_patches_invalid_patches">以下模組將不被支援，因為它們並不是正確的格式：</string>
     <string name="manage_patches_info">資訊</string>
     <string name="manage_patches_metadata">作者</string>
     <string name="manage_patches_no_metadata">作者資訊不存在</string>
     <string name="manage_patches_path">路徑</string>
-    <string name="skin_imported">皮膚設定</string>
+    <string name="skin_import_confirm">您想設成這個皮膚嗎？</string>
+    <string name="texturepack_import_confirm">您想設成這個材質包嗎？</string>
+    <string name="script_import_confirm">您想設成這個插件(.js)嗎？</string>
+    <string name="skin_imported">皮膚設定成功</string>
+    <string name="texturepack_imported">材質包設定成功</string>
+    <string name="script_imported">插件(.js)設定成功</string>
     <string name="manage_addons">管理插件</string>
-    <string name="get_pro">升級至完整版。</string>
+    <string name="get_pro">升級到完整版</string>
     <string name="about_about">關於 BlockLauncher</string>
-    <string name="pref_zz_legacy_keyboard_input">使用0.8.0更新前的鍵盤輸入碼</string>
-    <string name="pref_zz_legacy_keyboard_input_summary">用來解決「發出聊天訊息」鍵消失的問題</string>
-    <string name="about_librarycredits">本程式使用由 Paul Burke 設計的 aFileChooser 。\n<!--Why you say PTPatchTool is licensed under the Eclipse Public License but not aFileChooser under the Apache License?-->
+    <string name="about_copyright">版權所有© 2013-2014 Zhuowei Zhang</string>
+    <string name="about_copyright_pro">版權所有© 2013-2014 Zhuowei Zhang 未經允許請勿轉發</string>
+    <string name="about_librarycredits">本程式使用由 Paul Burke 設計的 aFileChooser. \n
 本程式包含了 Snowbound 的 PTPatchTool 。PTPatchTool 的使用授權條款︰ Eclipse Public License. \n
 本程式包含了並獲得了許可使用 NathanX 設計的 Slickcraft 材質包。\n
 本程式所包含之 Slickcraft 材質包包含了 Theevilpplz 設計的材質包 RepetiCraft 的一部分。此行為已獲得許可。\n
@@ -75,62 +102,66 @@
 本程式使用了 Chainfire 的 libsuperuser library。\n
 本程式包含了 Mozilla project 的 Rhino JavaScript engine 的一個版本。\n
 在Minecraft Forums 上查看完整條款資訊。\n
-    </string>
-    <string name="about_thankscommunity">本程式由很多具天賦的翻譯、測試員及程式設計員協助完成。謝謝。\n按下面的按鈕查看為本程式作出貢獻的人員列表。</string><!--Feels strange about translating this-->
-    <string name="about_go_to_forums">開啟 BlockLauncher 在 Minecraft Forums 上的頁面。</string>
-    <string name="no_minecraft_installed">BlockLauncher 未能在你的裝置上找到 Minecraft PE (完整版)。本程式必須使用 Mojang 開發的遊戲 Minecraft PE (完整版)。</string>
-	<!--I said things as if people don't know what Minecraft is when they download this app. Also I added (full version) in the first sentence-->
-
-    <string name="firstlaunch_title">謝謝使用 BlockLauncher!</string><!--I changed it to thanks for using BlockLauncher-->
-    <string name="firstlaunch_generic_intro">謝謝使用 BlockLauncher 。 BlockLauncher 執行你裝置上的 Minecraft Pocket Edition (當個創世神手機版)，並透過模組、插件、材質包和皮膚加入了額外的功能。</string><!--Somewhere I saw that translation of Minecraft. BTW should I translate "skin" literally?-->
-    <string name="firstlaunch_jelly_bean">你的手機在 Android 4.1 或以上執行。 BlockLauncher 有可能因為系統權限導致無法取得預設材質。模擬用材質包將被啟用，以供試驗。</string>
-	<!--Then why can I? So I added "might"-->
-    <string name="firstlaunch_see_options">按螢幕上方的圖案開啟設定頁。開啟 BlockLauncher 於Minecraft Forums 上的頁面以獲得支授。</string>
-    <string name="firstlaunch_help">協助</string>
-
-    <string name="version_mismatch_message">BlockLauncher 不支援此版本之Minecraft PE。BlockLauncher 將暫時於安全模式執行。 BlockLauncher 有可能在將來加入此版本。</string><!--Wait for updates while you removed 0.7.1 to 0.7.3 support?-->
-
-    <string name="feature_not_supported">BlockLauncher 尚未支援此功能。</string>
-    <string name="hovercar_title">遊戲內模組管理器</string>
-    <string name="hovercar_live_patch">遊戲內管理 .mod 模組</string>
-    <string name="hovercar_options">設定 (有可能需要重新啟動)</string>
-    <string name="hovercar_insert_text">輸入文字 (解決鍵盤問題)</string>
-
-
+ヾ夜の曲_繁化組 edwinyoo44 翻譯 \n </string>
+    <string name="about_pro_library_credits"></string>
+    <string name="about_thankscommunity"> 本程式由很多有才華的翻譯員、測試員及程式設計員協助完成。謝謝。\n按下面的按鈕查看為本程式作出貢獻的人員列表。 </string>
+    <string name="about_go_to_forums">打開在 Minecraft 論壇上的 BlockLauncher 頁面</string>
+    <string name="no_minecraft_installed">BlockLauncher 未能在你的裝置上找到 Minecraft PE (完整版)
+本程式必須使用 Mojang 開發的 Minecraft PE (完整版) </string>
+    <string name="firstlaunch_title">歡迎使用 BlockLauncher！</string>
+    <string name="firstlaunch_generic_intro">感謝使用 BlockLauncher，BlockLauncher 執行你裝置上的 Minecraft PE ，並透過模組、插件、材質包與皮膚加入了額外的功能。</string>
+    <string name="firstlaunch_jelly_bean">你的手機在 Android 4.1 (含)以上執行。 BlockLauncher 有可能因為系統權限導致無法取得預設材質。模擬材質包將被啟用，以供試驗。</string>
+    <string name="firstlaunch_see_options">按螢幕上方的板手圖案開啟設定頁。開啟在 Minecraft 論壇上的 BlockLauncher 頁面獲得更多幫助</string>
+    <string name="firstlaunch_help">幫助</string>
+    <string name="version_mismatch_message">BlockLauncher 不支援此版本的Minecraft PE，BlockLauncher 將暫時於安全模式執行，BlockLauncher 有可能在將來加入此版本。</string>
+    <string name="feature_not_supported">BlockLauncher 尚未支援此功能</string>
+    <string name="hovercar_title">遊戲中模組管理器</string>
+    <string name="hovercar_live_patch">遊戲中管理模組(.mod)</string>
+    <string name="hovercar_options">設定(需重啟程式)</string>
+    <string name="hovercar_insert_text">輸入文字(解決鍵盤問題)</string>
     <string name="safe_mode_exit">取消安全模式</string>
     <string name="safe_mode_continue">繼續</string>
-
-
-    <string name="script_import_from">從此處匯入模組</string>
+    <string name="script_import_from">從這裡導入模組</string>
     <string name="script_import_from_local">手機儲存空間</string>
-    <string name="script_import_from_cfgy">Treebl 官方儲存空間\n若果你得到的是一個編號，按這裏</string>
-    <string name="script_import_from_bl_repo">BlockLauncher 試驗性儲存空間</string>
+    <string name="script_import_from_cfgy">Treebl 官方儲存空間\n(如果你得到的是編號，按這裡)</string>
+    <string name="script_import_from_bl_repo">BlockLauncher 試驗儲存空間</string>
     <string name="script_import_from_url">網址</string>
     <string name="script_import_from_clipboard">剪貼簿</string>
     <string name="script_import_from_clipboard_name">輸入模組名稱(自訂)</string>
-	<!--I added "(custom)"-->
-    <string name="script_import_from_clipboard_code">在這裏貼上</string>
-	<!--I changed it to "Paste here"-->
-    <string name="script_import_from_cfgy_id">在這裏輸入ID</string>
-    <string name="script_import_from_url_enter">在這裏輸入網址</string>
+    <string name="script_import_from_clipboard_code">在這裡貼上</string>
+    <string name="script_import_from_cfgy_id">在這裡輸入ID</string>
+    <string name="script_import_from_url_enter">在這裡輸入網址</string>
     <string name="script_import_too_many">免費版一次只能啟用一個模組。升級至付費版以解除此限制。</string>
-    <string name="script_execution_error">此模組含有錯誤。</string>
-    <string name="script_disabled_in_multiplayer">由於在多人連線中，啟用 ModPE 模組出現錯誤導致死機的風險很大，同時為免本程式成為在他人伺服器上破壞之工具，你所啟用的 ModPE 模組已被停用。當你離開此伺服器後，它們將自動被重新啟用。</string>
-    <string name="script_minecraft_version_incompatible">BlockLauncher 不完全支援在你的版本的 Minecraft PE 上使用 ModPE 模組。請注意可能出現的風險。</string>
-    <string name="script_import_from_intent_warning">確定匯入此模組？它有可能取得你的裝置內的重要資訊。</string>
+    <string name="script_execution_error">此模組有 Bug</string>
+    <string name="script_disabled_in_multiplayer">在多人連線中，使用插件，導致當機的風險很大，同時避免本程式成為在他人伺服器上破壞的工具，你所使用的所有插件已被停用。當你從伺服器斷開連接後，它們將被重新啟用。</string>
+    <string name="script_minecraft_version_incompatible">模組不支援您的 Minecraft PE版本。在模組中的一些功能可能無法正常運行或可能會停止回應。請您自己承擔的風險。</string>
+    <string name="script_import_from_intent_warning">你確定要導入此模組？它有可能取得你的裝置內的密碼和其他敏感資訊。 </string>
     <string name="script_view_source">檢視原始碼</string>
-    <string name="script_too_many_errors">已被停用，因為出現太多錯誤了。抱歉！</string>
-    <string name="take_screenshot">拍攝畫面剪輯</string>
-    <string name="take_screenshot_requires_modpe_script">使用畫面剪輯前請先啟用 ModPE 模組支授。\n
-	你可於設定頁開啟 ModPE 支授。</string>
-    <string name="screenshot_saved_as">畫面剪輯儲存於</string>
-
-    <string name="selinux_broke_everything">不幸地，你的手機安裝了Samsung Knox或SELinux之類的安全軟件，令本程式無法於你的手機上進行遊戲內安裝模組及使用ModPE Scripts(ModPE模組)。\n\n
-我們正在為此尋求解決方法，但在此之前，本程式之功能限於安裝材質包及.mod類型的模組/補丁，(須重新啟動以使之生效)而不包括ModPE模組。</string>
-
+    <string name="script_too_many_errors">已被停用，因為出現了太多錯誤。對不起！</string>
+    <string name="take_screenshot">螢幕截圖</string>
+    <string name="take_screenshot_requires_modpe_script">使用螢幕截圖前請先啟用支援插件(.js)。 </string>
+    <string name="screenshot_saved_as">螢幕截圖儲存於</string>
+    <string name="selinux_broke_everything"> 不幸地，你的手機安裝了Samsung Knox或SELinux之類的安全軟體，使本程式無法於你的手機上進行遊戲內安裝模組(.mod)及使用插件(.js)。\n\n
+我們正在尋求解決方法，但在此之前，本程式之功能限於安裝材質包及模組(.mod)，(需重新啟動)而不包括插件(.js)。</string>
     <string name="permlab_mcpelauncher_addon">BlockLauncher 插件</string>
     <string name="permdesc_mcpelauncher_addon">允許程式以插件身分載入至 BlockLauncher 。這意味着這件程式能取得網絡、SD Card及其他 Minecraft PE 獲得權限去做的事。</string>
-	<string name="pref_zz_script_paranoid_mode">不信任模式</string>
- <string name="pref_zz_script_paranoid_mode_summary">禁止 ModPE 模組儲存 Android 程式的權限\n只允許存取 Minecraft 世界裏的東西</string>   
+    <string name="hovercar_insert_text_backspace">插入 Backspace</string>
+    
+    <string name="textures_select">選擇</string>
+    <string name="textures_demo">模擬</string>
+    <string name="textures_extract">提取原始</string>
+    <!--<string name="textures_clear_script_texture_overrides">Clear script texture overrides</string>
+    <string name="plurals_patches_one">patch</string>
+    <string name="plurals_patches_more">patches</string>
+    <string name="plurals_patches_no">No patches</string>
+    <string name="plurals_scripts_one">script</string>
+    <string name="plurals_scripts_more">scripts</string>
+    <string name="plurals_scripts_no">No scripts</string>
+    <string name="nerdy_stuff_dump_modpe">Dump ModPE Script methods</string>
+    <string name="nerdy_stuff_set_skin">Set skin to /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">Authorized personnel only</string>
+    <string name="pref_other_title">Other</string>
+    <string name="pref_zz_legacy_live_patch">Use old live patching code from BlockLauncher 1.6.8</string>
+    <string name="pref_zz_legacy_live_patch_summary">Turn this on if BlockLauncher stopped working after the 1.6.9 update.</string>-->
 
 </resources>
