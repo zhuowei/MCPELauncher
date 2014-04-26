@@ -115,8 +115,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	part->textureOffsetX = textureX;
 	part->textureOffsetY = textureY;
 	part->transparent = transparent;
-	part->textureWidth = textureWidth;
-	part->textureHeight = textureHeight;
+	if (textureWidth > 0) part->textureWidth = textureWidth;
+	if (textureHeight > 0) part->textureHeight = textureHeight;
 	bl_ModelPart_addBox(part, xOffset, yOffset, zOffset, width, height, depth, scale);
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);

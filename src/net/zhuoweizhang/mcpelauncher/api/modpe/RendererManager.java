@@ -71,7 +71,7 @@ public class RendererManager {
 		private String modelPartName;
 		private int textureX, textureY;
 		private boolean transparent;
-		private float textureWidth = 64.0f, textureHeight = 32.0f;
+		private float textureWidth = -1f, textureHeight = -1f;
 		private NativeModelPart(int rendererId, String modelPartName) {
 			this.rendererId = rendererId;
 			this.modelPartName = modelPartName;
