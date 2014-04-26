@@ -1251,9 +1251,8 @@ void bl_setuphooks_cppside() {
 	bl_initCustomBlockVtable();
 	
 	// This method switches out the Tile* render type and calls into the render type's respective tesselator
-	bl_TileRenderer_tesselateInWorld = (void(*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
+	void* bl_TileRenderer_tesselateInWorld = (void(*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
 	mcpelauncher_hook(bl_TileRenderer_tesselateInWorld, (void*) &bl_TileRenderer_tesselateInWorld_hook, (void**) &bl_TileRenderer_tesselateInWorld_real);
-	
 	
 	// To render a standard block into the world; Use Tile::setShape to change the size and shape of it
 	bl_TileRenderer_tesselateBlockInWorld = (void (*)(Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateBlockInWorldEP4Tileiii");
