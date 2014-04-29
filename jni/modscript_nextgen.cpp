@@ -165,6 +165,7 @@ static void** bl_MessagePacket_vtable;
 
 // Custom block renderers
 static void (*bl_TileRenderer_tesselateInWorld_real)(void*, Tile*, int, int, int);
+static void (*bl_TileRenderer_canRender_real)(void*, int); // Can we please see the block in hand?
 
 static void (*bl_TileRenderer_tesselateBlockInWorld)(void*, Tile*, int, int, int);
 static void (*bl_TileRenderer_tesselateCrossInWorld)(void*, Tile*, int, int, int);
@@ -286,6 +287,17 @@ void bl_TileRenderer_tesselateInWorld_hook(void* tileRenderer, Tile* tile, int x
 	}
 	
 	bl_TileRenderer_tesselateInWorld_real(tileRenderer, tile, x, y, z);
+}
+
+void bl_TileRenderer_canRender_hook(void* tileRenderer, int renderType) {
+	/** 
+	 * Fix rendering in hand, inventory, and on the ground.
+	*/
+	bl_TileRenderer_instance = tileRenderer;
+	if(renderType > 100) {
+		return true;
+	}
+	bl_TileRenderer_canRender_real(tileRenderer, renderType);
 }
 
 void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffset, float yOffset, int color, bool isShadow) {
@@ -1263,6 +1275,8 @@ void bl_setuphooks_cppside() {
 	// This method switches out the Tile* render type and calls into the render type's respective tesselator
 	void* bl_TileRenderer_tesselateInWorld = dlsym(RTLD_DEFAULT, "_ZN12TileRenderer16tesselateInWorldEP4Tileiii");
 	mcpelauncher_hook(bl_TileRenderer_tesselateInWorld, (void*) &bl_TileRenderer_tesselateInWorld_hook, (void**) &bl_TileRenderer_tesselateInWorld_real);
+	void* bl_TileRenderer_canRender = dlsym(RTLD_DEFAULT, "_ZN12TileRenderer9canRenderEi");
+	mcpelauncher_hook(bl_TileRenderer_canRender, (void*) &bl_TileRenderer_canRender_hook, (void**) &bl_TileRenderer_canRender_real);
 	
 	// To render a standard block into the world; Use Tile::setShape to change the size and shape of it
 	bl_TileRenderer_tesselateBlockInWorld = (void (*)(void*, Tile*, int, int, int)) dlsym(RTLD_DEFAULT, "_ZN12TileRenderer21tesselateBlockInWorldEP4Tileiii");
