@@ -194,6 +194,8 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 
 static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
+static void (*bl_Level_addParticle)(Level*, int, float, float, float, float, float, float, int);
+
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
@@ -1131,6 +1133,11 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 	return uuidArray;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
+  (JNIEnv *env, jclass clazz, jint type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
+	bl_Level_addParticle(bl_level, type, x, y, z, xVel, yVel, zVel, data);
+}
+
 void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
@@ -1256,6 +1263,8 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
 	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadEP11CompoundTag");
 	mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
+	bl_Level_addParticle = (void (*)(Level*, int, float, float, float, float, float, float, int))
+		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeffffffi");
 	bl_renderManager_init(mcpelibhandle);
 }
 

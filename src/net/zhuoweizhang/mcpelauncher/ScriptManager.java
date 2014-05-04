@@ -208,6 +208,8 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 			ScriptableObject.defineClass(scope, NativeServerApi.class);
 			RendererManager.defineClasses(scope);
+			ScriptableObject.putProperty(scope, "ParticleType",
+					classConstantsToJSObject(ParticleType.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -338,7 +340,10 @@ public class ScriptManager {
 	public static void chatCallback(String str) {
 		if (isRemote)
 			nameAndShame(str);
-		if (str == null || str.length() < 1 || str.charAt(0) != '/')
+		if (str == null || str.length() < 1)
+			return;
+		callScriptMethod("chatHook", str);
+		if (str.charAt(0) != '/')
 			return;
 		callScriptMethod("procCmd", str.substring(1));
 		if (!isRemote) {
@@ -1146,6 +1151,7 @@ public class ScriptManager {
 	public static native int nativeEntityGetRenderType(int entityId);
 	public static native void nativeSetCameraEntity(int entityId);
 	public static native long[] nativeEntityGetUUID(int entityId);
+	public static native void nativeLevelAddParticle(int type, float x, float y, float z, float xVel, float yVel, float zVel, int data);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -1637,6 +1643,11 @@ public class ScriptManager {
 			return nativeGetItemCountFurnace(x, y, z, slot);
 		}
 
+		@JSStaticFunction
+		public static void addParticle(int type, double x, double y, double z, double xVel, double yVel, double zVel, int size) {
+			if (type < 0 || type > 15) throw new RuntimeException("Invalid particle type " + type + ": should be between 0 and 15");
+			nativeLevelAddParticle(type, (float) x, (float) y, (float) z, (float) xVel, (float) yVel, (float) zVel, size);
+		}
 		@Override
 		public String getClassName() {
 			return "Level";

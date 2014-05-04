@@ -405,22 +405,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
   (JNIEnv *, jclass, jint, jfloat);
 
-/* 
- * Class:	  net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:	  nativeGetBlockRenderShape
- * Signature: (I)I
- */
-JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
-  (JNIEnv *, jclass, jint); 
-  
-/* 
- * Class:	  net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:	  nativeSetBlockRenderShape
- * Signature: (II)V
- */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
-  (JNIEnv *, jclass, jint, jint); 
- 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeBlockSetExplosionResistance
@@ -604,6 +588,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  */
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
   (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelAddParticle
+ * Signature: (IFFFFFFI)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
+  (JNIEnv *, jclass, jint, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -827,6 +819,22 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetBlockRenderShape
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetBlockRenderShape
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
   (JNIEnv *, jclass, jint, jint);
 
 /*
