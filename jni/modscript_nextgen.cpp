@@ -30,7 +30,7 @@ typedef void RakNetInstance;
 typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3104
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3144
 #define SIGN_TILE_ENTITY_LINE_OFFSET 92
 #define BLOCK_VTABLE_SIZE 0x144
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 13
@@ -195,6 +195,9 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
 static void (*bl_Level_addParticle)(Level*, int, float, float, float, float, float, float, int);
+static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
+static void (*bl_ProgressScreen_ProgressScreen)(void*);
+static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -636,10 +639,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
   (JNIEnv *env, jclass clazz, jstring host, jint port) {
 	const char* hostChars = env->GetStringUTFChars(host, NULL);
+	bl_Minecraft_locateMultiplayer(bl_minecraft); //to set up the client network handler
 	int rakNetOffset = ((int) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET;
 	RakNetInstance* raknetInstance = *((RakNetInstance**) rakNetOffset);
 	bl_RakNetInstance_connect_hook(raknetInstance, hostChars, port);
 	env->ReleaseStringUTFChars(host, hostChars);
+	// put up the progress screen (since otherwise Minecraft PE closes itself?!)
+	void* progressScreen = operator new(92);
+	bl_ProgressScreen_ProgressScreen(progressScreen);
+	bl_Minecraft_setScreen(bl_minecraft, progressScreen);
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
@@ -1265,6 +1273,9 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 	bl_Level_addParticle = (void (*)(Level*, int, float, float, float, float, float, float, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeffffffi");
+	bl_Minecraft_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN9Minecraft9setScreenEP6Screen");
+	bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
+	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_renderManager_init(mcpelibhandle);
 }
 

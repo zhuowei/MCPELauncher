@@ -2098,15 +2098,6 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void joinServer(String serverAddress, int port) {
-			scriptPrint("NAG: Update to Server.joinServer(). This will be removed in 1.7");
-			requestLeaveGame = true;
-			requestJoinServer = new JoinServerRequest();
-			requestJoinServer.serverAddress = serverAddress;
-			requestJoinServer.serverPort = port;
-		}
-
-		@JSStaticFunction
 		public static void setGameSpeed(double ticksPerSecond) {
 			nativeSetGameSpeed((float) ticksPerSecond);
 		}
@@ -2276,7 +2267,14 @@ public class ScriptManager {
 		public static void joinServer(String serverAddress, int port) {
 			requestLeaveGame = true;
 			requestJoinServer = new JoinServerRequest();
-			requestJoinServer.serverAddress = serverAddress;
+			String resolvedAddress;
+			try {
+				InetAddress address = InetAddress.getByName(serverAddress);
+				resolvedAddress = address.getHostAddress();
+			} catch (UnknownHostException e) {
+				throw new RuntimeException(e);
+			}
+			requestJoinServer.serverAddress = resolvedAddress;
 			requestJoinServer.serverPort = port;
 		}
 
