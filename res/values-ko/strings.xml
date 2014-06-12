@@ -7,16 +7,16 @@
     <string name="pref_mp_username_summary">멀티플레이어 모드에서 보여지는 이름입니다.</string>
     <string name="pref_texture_pack">텍스쳐팩</string>
     <string name="pref_texture_pack_summary">텍스쳐팩을 선택할 수 있습니다.</string>
-    <!--
-    -->
+    
+    
     <string name="pref_zz_longvibration">아주 긴 진동</string>
     <string name="pref_zz_longvibration_summary">진동의 길이를 5배 이상 늘입니다.</string>
-    <!--
-    -->
+    
+    
     <string name="pref_zz_safe_mode">안전 모드</string>
     <string name="pref_zz_safe_mode_summary">모든 편집사항을 비활성화 합니다.</string>
-    <!--
-    -->
+    
+    
     <string name="pref_zz_texture_pack_enable">텍스쳐팩 사용</string>
     <string name="pref_zz_custom_dpi">사용자 DPI</string>
     <string name="pref_zz_custom_dpi_summary">화면의 DPI를 변경하면 몇몇 요소가 DPI에 맞게 크기가 조절됩니다. 비워두시면 비활성화됩니다.</string>
@@ -123,12 +123,12 @@
     <string name="hovercar_live_patch">게임 내에서 모드 패치</string>
     <string name="hovercar_options">런처 설정 (MCPE 재시작 필요)</string>
     <string name="hovercar_insert_text">텍스트 삽입</string>
-    <!--
-    -->
+    
+    
     <string name="safe_mode_exit">안전모드 끄기</string>
     <string name="safe_mode_continue">계속</string>
-    <!--
-    -->
+    
+    
     <string name="script_import_from">스크립트 가져오기</string>
     <string name="script_import_from_local">내장 메모리로부터 가져오기</string>
     <string name="script_import_from_cfgy">Treebl의 공식 저장소</string>
@@ -162,7 +162,7 @@
     <string name="textures_select">선택</string>
     <string name="textures_demo">데모</string>
     <string name="textures_extract">기본 사용</string>
-    
+    <string name="textures_clear_script_texture_overrides">스크립트 텍스쳐 overrides를 정리합니다</string>
     <string name="plurals_patches_one">패치</string>
     <string name="plurals_patches_more">패치들</string>
     <string name="plurals_patches_no">패치 내용이 없습니다.</string>
@@ -173,8 +173,10 @@
     <string name="nerdy_stuff_set_skin">스킨을 /sdcard/skin.png로 설정합니다.</string>
     <string name="nerdy_stuff_secret">권한을 받은 사람만 가능합니다.</string>
     <string name="pref_other_title">그 외</string>
+    <string name="pref_zz_legacy_live_patch">BlockLauncher 1.6.8의 전 라이브패치(live patching) 코드를 사용합니다</string>
+    <string name="pref_zz_legacy_live_patch_summary">BlockLauncher가 1.6.9 업데이트 이후 작동이 멈춤다면 이것을 작동합니다</string>
 
 
-    <!-- 여러 사람이 사용하는 앱인 만큼 최대한 차연스럽게 번역합시다. -->
+    <!-- 여러 사람이 사용하는 앱인 만큼 최대한 자연스럽게 번역합시다. -->
     
 </resources>
