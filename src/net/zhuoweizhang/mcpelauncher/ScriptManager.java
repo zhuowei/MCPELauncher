@@ -104,6 +104,7 @@ public class ScriptManager {
 	private static String serverAddress = null;
 	private static int serverPort = 0;
 	private static Map<Integer, String> entityUUIDMap = new HashMap<Integer, String>();
+	private static boolean nextTickCallsSetLevel = false;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -210,6 +211,8 @@ public class ScriptManager {
 			RendererManager.defineClasses(scope);
 			ScriptableObject.putProperty(scope, "ParticleType",
 					classConstantsToJSObject(ParticleType.class));
+			ScriptableObject.putProperty(scope, "EntityType",
+					classConstantsToJSObject(EntityType.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -255,6 +258,7 @@ public class ScriptManager {
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
+		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
 		ScriptManager.isRemote = isRemote;
 		if (!isRemote)
@@ -280,6 +284,7 @@ public class ScriptManager {
 		worldName = wName;
 		worldDir = wDir;
 		callScriptMethod("selectLevelHook");
+		nextTickCallsSetLevel = true;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -301,6 +306,9 @@ public class ScriptManager {
 	}
 
 	public static void tickCallback() {
+		if (nextTickCallsSetLevel) {
+			setLevelCallback(true, false);
+		}
 		callScriptMethod("modTick");
 		// do we have any requests for graphics reset?
 		if (requestedGraphicsReset) {
@@ -367,7 +375,7 @@ public class ScriptManager {
 
 	// Other nonstandard callbacks
 	public static void entityRemovedCallback(int entity) {
-		if (nativeIsPlayer(entity)) {
+		if (NativePlayerApi.isPlayer(entity)) {
 			playerRemovedHandler(entity);
 		}
 		int entityIndex = allentities.indexOf(entity);
@@ -378,7 +386,7 @@ public class ScriptManager {
 
 	public static void entityAddedCallback(int entity) {
 		// check if entity is player
-		if (nativeIsPlayer(entity)) {
+		if (NativePlayerApi.isPlayer(entity)) {
 			playerAddedHandler(entity);
 		}
 		allentities.add(entity);
@@ -1121,8 +1129,6 @@ public class ScriptManager {
 
 	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
 
-	public static native boolean nativeIsPlayer(int entityId);
-
 	public static native float nativeGetEntityVel(int entity, int axis);
 
 	public static native void nativeSetI18NString(String key, String value);
@@ -1758,14 +1764,14 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getName(int ent) {
-			if (!nativeIsPlayer(ent))
+			if (!isPlayer(ent))
 				return "Not a player";
 			return nativeGetPlayerName(ent);
 		}
 
 		@JSStaticFunction
 		public static boolean isPlayer(int ent) {
-			return nativeIsPlayer(ent);
+			return NativeEntityApi.getEntityTypeId(ent) == EntityType.PLAYER;
 		}
 
 		/*
@@ -1930,7 +1936,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setNameTag(int entity, String name) {
 			int entityType = nativeGetEntityTypeId(entity);
-			if (entityType >= 64 || (entityType == 0 && !NativePlayerApi.isPlayer(entity)))
+			if (entityType >= 64)
 				throw new IllegalArgumentException("setNameTag only works on mobs");
 			nativeEntitySetNameTag(entity, name);
 		}

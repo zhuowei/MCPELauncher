@@ -14,13 +14,11 @@
 
 extern "C" {
 
-static void* (*bl_EntityRenderDispatcher_getInstance)();
+static void* bl_EntityRenderDispatcher_instance;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_MeshBuffer_reset)(void*);
-
-static void (*bl_EntityRenderDispatcher_assign)(void*, int, EntityRenderer*);
 
 static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float);
 
@@ -35,7 +33,7 @@ static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Enti
 ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
 	MobRenderer* renderer;
 	if (rendererId < 0x1000) {
-		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(bl_EntityRenderDispatcher_getInstance(), rendererId);
+		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(bl_EntityRenderDispatcher_instance, rendererId);
 	} else {
 		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
 	}
@@ -55,6 +53,7 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 	} else {
 		return NULL;
 	}
+	return NULL;
 }
 
 void bl_renderManager_invalidateModelPart(ModelPart* part) {
@@ -69,7 +68,7 @@ int bl_renderManager_addRenderer(EntityRenderer* renderer) {
 }
 
 int bl_renderManager_createHumanoidRenderer() {
-	HumanoidModel* model = (HumanoidModel*) operator new(800);
+	HumanoidModel* model = (HumanoidModel*) operator new(728);
 	bl_HumanoidModel_HumanoidModel(model, 0, 0);
 	MobRenderer* renderer = (MobRenderer*) operator new(44);
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, 0);
@@ -161,18 +160,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
-	bl_EntityRenderDispatcher_getInstance = (void* (*)())
-		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getInstanceEv");
+	bl_EntityRenderDispatcher_instance =
+		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_MeshBuffer_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN10MeshBuffer5resetEv");
-	bl_EntityRenderDispatcher_assign = (void (*)(void*, int, EntityRenderer*))
-		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6assignE16EntityRendererIdP14EntityRenderer");
 	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float))
 		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, float))
 		dlsym(mcpelibhandle, "_ZN19HumanoidMobRendererC1EP13HumanoidModelf");
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererEP6Entity");
-	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook, 
+	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
 		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
 }
 

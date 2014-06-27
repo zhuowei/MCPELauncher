@@ -30,8 +30,8 @@ extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage);
 
-extern void* (*bl_Level_getTileEntity)(Level*, int, int, int);
-extern int (*bl_Level_getData) (Level*, int, int, int);
+extern void* (*bl_TileSource_getTileEntity)(TileSource*, int, int, int);
+extern int (*bl_TileSource_getData) (TileSource*, int, int, int);
 Entity* bl_getEntityWrapper(Level* level, int entityId);
 
 void bl_clearNameTags();

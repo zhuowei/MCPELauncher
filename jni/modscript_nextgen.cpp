@@ -26,12 +26,15 @@
 
 #include "minecraft_colors.h"
 
+#define DLSYM_DEBUG
+
 typedef void RakNetInstance;
 typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3144
-#define SIGN_TILE_ENTITY_LINE_OFFSET 92
+// from SignTileEntity::save(CompoundTag*)
+#define SIGN_TILE_ENTITY_LINE_OFFSET 96
 #define BLOCK_VTABLE_SIZE 0x144
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 13
 #define BLOCK_VTABLE_IS_CUBE_SHAPED 4
@@ -40,13 +43,17 @@ typedef void Font;
 #define BLOCK_VTABLE_GET_COLOR 55
 #define BLOCK_VTABLE_GET_RENDER_LAYER 46
 #define BLOCK_VTABLE_IS_SOLID_RENDER 19
-#define MOB_TEXTURE_OFFSET 2948
-#define PLAYER_NAME_OFFSET 3200
-#define ENTITY_VTABLE_OFFSET_IS_PLAYER 44
-#define MINECRAFT_GUI_OFFSET 416
+// Mob::getTexture
+#define MOB_TEXTURE_OFFSET 2956
+// found in PlayerRenderer::renderName
+#define PLAYER_NAME_OFFSET 3164
+// found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
+#define MINECRAFT_GUI_OFFSET 440
+// found in LevelRenderer::renderNameTags
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 3184
+#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 132
 
 typedef struct {
 	//union {
@@ -186,9 +193,9 @@ static Item** bl_Item_items;
 
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
-static void (*bl_CompoundTag_putLong)(void*, std::string const&, long); //note the parameter fail on the part of Mojang devs. Sigh.
+static void (*bl_CompoundTag_putLong)(void*, std::string const&, long long);
 static int64_t (*bl_CompoundTag_getLong)(void*, std::string const&);
-static Tag* (*bl_CompoundTag_get)(void*, std::string const&);
+//static Tag* (*bl_CompoundTag_get)(void*, std::string const&);
 static void (*bl_Entity_saveWithoutId_real)(Entity*, void*);
 static int (*bl_Entity_load_real)(Entity*, void*);
 
@@ -203,9 +210,16 @@ static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
 
+#ifdef DLSYM_DEBUG
+
+void* debug_dlsym(void* handle, const char* symbol);
+
+#define dlsym debug_dlsym
+#endif //DLSYM_DEBUG
+
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
-	std::string* chatMessagePtr = (std::string*) ((int) chatScreen + 84);
+	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
 	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
 	char* chatMessageChars = *((char**) chatMessagePtr);*/
@@ -378,7 +392,7 @@ int bl_CustomBlock_getColorHook(Tile* tile, Level* level, int x, int y, int z) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
 	if (myColours == NULL || bl_level == NULL) return 0xffffff; //I see your true colours shining through
-	int data = bl_Level_getData(bl_level, x, y, z);
+	int data = bl_TileSource_getData(bl_level->tileSource, x, y, z);
 	return myColours[data];
 }
 
@@ -496,23 +510,25 @@ void bl_Entity_saveWithoutId_hook(Entity* entity, void* compoundTag) {
 	int64_t* uuidLongs = (int64_t*) uuidBytes.data();
 	bl_CompoundTag_putLong(compoundTag, "UUIDLeast", uuidLongs[0]);
 	bl_CompoundTag_putLong(compoundTag, "UUIDMost", uuidLongs[1]);
+	/*
 	LongTag* leastTag = (LongTag*) bl_CompoundTag_get(compoundTag, "UUIDLeast");
 	LongTag* mostTag = (LongTag*) bl_CompoundTag_get(compoundTag, "UUIDMost");
 	leastTag->value = uuidLongs[0];
 	mostTag->value = uuidLongs[1];
+	*/
 	bl_Entity_saveWithoutId_real(entity, compoundTag);
 }
 
 int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 	int entityId = entity->entityId;
-	int64_t msl = bl_CompoundTag_getLong(compoundTag, "UUIDMost");
+	/*int64_t msl = bl_CompoundTag_getLong(compoundTag, "UUIDMost");
 	if (msl != 0) {
 		std::array<unsigned char, 16> newuuid;
 		int64_t* uuidLongs = (int64_t*) newuuid.data();
 		uuidLongs[0] = bl_CompoundTag_getLong(compoundTag, "UUIDLeast");
 		uuidLongs[1] = msl;
 		bl_entityUUIDMap[entityId] = newuuid;
-	}
+	}*/
 	return bl_Entity_load_real(entity, compoundTag);
 }
 
@@ -539,7 +555,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 Item* bl_constructItem(int id) {
-	Item* retval = (Item*) ::operator new((std::size_t) 72);
+	Item* retval = (Item*) ::operator new((std::size_t) 76);
 	bl_Item_Item(retval, id - 0x100);
 	retval->category1 = 2; //tool
 	retval->category2 = 0;
@@ -547,11 +563,11 @@ Item* bl_constructItem(int id) {
 }
 
 Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
-	Item* retval = (Item*) ::operator new((std::size_t) 84);
+	Item* retval = (Item*) ::operator new((std::size_t) 88);
 	bl_Item_Item(retval, id - 0x100);
 	retval->vtable = bl_FoodItem_vtable;
-	((int*)retval)[18] = hearts;
-	((float*) retval)[19] = timetoeat; //time to eat
+	((int*)retval)[19] = hearts;
+	((float*) retval)[20] = timetoeat; //time to eat
 	retval->category1 = 4; //food
 	retval->category2 = 0;
 	return retval;
@@ -653,7 +669,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line) {
 	if (bl_level == NULL) return NULL;
-	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
 	if (te == NULL) return NULL;
 	//line offsets: 68, 72, 76, 80
 	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
@@ -666,7 +682,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line, jstring newText) {
 	if (bl_level == NULL) return;
-	void* te = bl_Level_getTileEntity(bl_level, x, y, z);
+	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
 	if (te == NULL) return;
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
@@ -753,15 +769,6 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	std::string* myName = (std::string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
 	jstring returnValString = env->NewStringUTF(myName->c_str());
 	return returnValString;
-}
-
-JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsPlayer
-  (JNIEnv *env, jclass clazz, jint entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return 0;
-	void* vtable = entity->vtable[ENTITY_VTABLE_OFFSET_IS_PLAYER];
-	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
-	return fn(entity) != 0;
 }
 
 void bl_initCustomBlockVtable() {
@@ -961,7 +968,7 @@ bool bl_tryRemoveExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, i
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
-	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
+	/*int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
 	ItemInstance outStack;
@@ -982,7 +989,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	bl_Recipes_addShapelessRecipe(recipes, outStack, ingredientsList);
+	bl_Recipes_addShapelessRecipe(recipes, outStack, ingredientsList);*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
@@ -1014,13 +1021,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 /* List of all renderers that need name tag support */
 static const char* renderersToPatch[] = {
+"_ZTV11MobRenderer",
+"_ZTV11PigRenderer",
+"_ZTV12WolfRenderer",
+"_ZTV13SheepRenderer",
+"_ZTV13SlimeRenderer",
+"_ZTV14SpiderRenderer",
 "_ZTV15ChickenRenderer",
 "_ZTV15CreeperRenderer",
-"_ZTV11PigRenderer",
-"_ZTV14SpiderRenderer",
+"_ZTV16EnderManRenderer",
+"_ZTV16VillagerRenderer",
+"_ZTV18SilverfishRenderer",
 "_ZTV19HumanoidMobRenderer",
-"_ZTV11MobRenderer",
-"_ZTV13SheepRenderer"
+"_ZTV19MushroomCowRenderer"
 };
 
 
@@ -1261,20 +1274,23 @@ void bl_setuphooks_cppside() {
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
 	bl_CompoundTag_getString = (std::string (*)(void*, std::string))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag9getStringERKSs");
-	bl_CompoundTag_putLong = (void (*)(void*, std::string const&, long))
-		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag7putLongERKSsl");
+	bl_CompoundTag_putLong = (void (*)(void*, std::string const&, long long))
+		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag7putLongERKSsx");
+	/*
 	bl_CompoundTag_getLong = (int64_t (*)(void*, std::string const&))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag7getLongERKSs");
 	bl_CompoundTag_get = (Tag* (*)(void*, std::string const&))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag3getERKSs");
-	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN6Entity13saveWithoutIdEP11CompoundTag");
-	mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
-	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadEP11CompoundTag");
-	mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
+	*/
+	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN6Entity13saveWithoutIdER11CompoundTag");
+	//mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
+	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadER11CompoundTag");
+	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 	bl_Level_addParticle = (void (*)(Level*, int, float, float, float, float, float, float, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeffffffi");
 	bl_Minecraft_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN9Minecraft9setScreenEP6Screen");
-	bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
+	// FIXME: this constructor no longer exists; use Screen::Screen with a ProgressScreen vtable
+	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_renderManager_init(mcpelibhandle);
 }

@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Vibrator;
 import android.text.ClipboardManager;
 import android.text.Editable;
@@ -1341,6 +1342,19 @@ public class MainActivity extends NativeActivity {
 			return;
 		hiddenTextWindow.dismiss();
 		hideKeyboardView();
+	}
+
+	// added in 0.9.0
+	public String[] getBroadcastAddresses() {
+		// TODO: can we use this for server patching?
+		Log.i(TAG, "get broadcast addresses");
+		return new String[] {"255.255.255.255"};
+	}
+
+	public long getTotalMemory() {
+		long retval = Debug.getNativeHeapSize();
+		Log.i(TAG, "Get total memory: " + retval);
+		return retval;
 	}
 
 	private boolean useLegacyKeyboardInput() {

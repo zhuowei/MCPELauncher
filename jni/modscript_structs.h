@@ -7,31 +7,49 @@ typedef void cppstr;
 #ifdef __cplusplus
 extern "C" {
 #endif
+typedef unsigned short FullTile;
+typedef void TileSource;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+} Vec3;
+
+typedef struct {
+	int x;
+	int y;
+	int z;
+} TilePos;
+
 typedef struct {
 	void** vtable; //0
-	char filler[13];
-	cppbool isRemote;
+	char filler[4]; //4
+	cppbool isRemote; //8?
+	char filler2[2959];//9
+	TileSource* tileSource;//2968
 } Level;
 typedef struct Entity_t{
+//todo: 60 = tile source, 68 = level
 	void** vtable; //0
 	int filler3[7];//28 extra bytes. All others are shifted by 28.
 	float x; //4+28
 	float y; //8
 	float z; //12
-	char filler[12];//16
-	int entityId; //28
-	char filler2[20];//32
-	float motionX; //52
+	char filler[8];//16
+	int entityId; //28 - 4 + 28 - argh, too hard. found in Arrow::Arrow(Mob*)
+	char filler2[28];//32
+	float motionX; //52 - 4 + 28 + 8 = 84 found in Entity::rideTick()
 	float motionY; //56
 	float motionZ; //60
-	float yaw; //64
+	float yaw; //64 - 4 + 28 + 8 = 96
 	float pitch; //68
 	float prevYaw; //72
-	float prevPitch; //76 (104 after shift)
-	char filler4[128]; //108
-	int renderType; //236
-	struct Entity_t* rider; //240
-	struct Entity_t* riding; //244
+	float prevPitch; //76 (104 + 4 after shift)
+	char filler4[132]; //108 +4
+	int renderType; //236 + 8 = 244; found in the render dispatcher
+	struct Entity_t* rider; //240 + 8
+	struct Entity_t* riding; //244 + 8
 } Entity;
 typedef Entity Player;
 
@@ -88,6 +106,7 @@ typedef struct {
 	char filler0[692]; //0
 } Cube;
 
+// from ModelPart::setPos, ModelPart::setTexSize
 typedef struct {
 	cppbool transparent; //0
 	char filler0[3]; //1
@@ -99,18 +118,20 @@ typedef struct {
 	int textureHeight; //64
 	int textureOffsetX;//68
 	int textureOffsetY;//72
-	char filler2[52];//76
+	char filler2[40];//76
 } ModelPart;
+
+// from HumanoidModel::render
 
 typedef struct {
 	void** vtable; //0
 	char filler[24]; //4
 	ModelPart bipedHead;//28
-	ModelPart bipedBody;//156
-	ModelPart bipedRightArm;//284
-	ModelPart bipedLeftArm;//412
-	ModelPart bipedRightLeg;//540
-	ModelPart bipedLeftLeg;//668
+	ModelPart bipedBody;//144
+	ModelPart bipedRightArm;//260
+	ModelPart bipedLeftArm;//376
+	ModelPart bipedRightLeg;//492
+	ModelPart bipedLeftLeg;//608
 } HumanoidModel;
 
 typedef struct {
