@@ -130,6 +130,7 @@ static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 static void (*bl_HumanoidModel_constructor_real)(HumanoidModel*, float, float);
 void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
+static void (*bl_GameRenderer_getFov_real)(float, bool);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, int, int, int, int);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, int, int, int, int);
@@ -142,13 +143,14 @@ void* bl_gamemode;
 Player* bl_localplayer;
 static int bl_hasinit_script = 0;
 int preventDefaultStatus = 0;
-static float bl_newfov = -1.0f;
 
 Entity* bl_removedEntity = NULL;
 
 int bl_frameCallbackRequested = 0;
 
 static int bl_hasinit_prepatch = 0;
+
+static float BL_GAMERENDERER_FOV = 70;
 
 Entity* bl_getEntityWrapper(Level* level, int entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
@@ -440,6 +442,10 @@ void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y
 	self->bipedHead.transparent = 1;
 }
 
+float bl_GameRenderer_getFov_hook(float hi, bool yo) {
+	return BL_GAMERENDERER_FOV;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
@@ -487,6 +493,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong time) {
 	if (bl_level == NULL) return;
 	bl_Level_setTime(bl_level, time);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
+  (JNIEnv *env, jclass clazz, jfloat fov) {
+  	BL_GAMERENDERER_FOV = fov;
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTime
@@ -758,11 +769,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	item->count = itemCount;
 	item->damage = itemDamage;
 	bl_ItemInstance_setId(item, itemId);
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
-  (JNIEnv *env, jclass clazz, jfloat newfov) {
-	bl_newfov = newfov;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
@@ -1065,8 +1071,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
-	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
-	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
+	void* bl_GameRenderer_getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
+	mcpelauncher_hook(bl_GameRenderer_getFov, (void*) &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
 
 	//get the level set block method. In future versions this might link against libminecraftpe itself
 	bl_Level_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN5Level14setTileAndDataEiiiiii");
