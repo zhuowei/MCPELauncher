@@ -93,7 +93,6 @@ static void (*bl_GameMode_tick_real)(void*);
 static int (*bl_Level_getRawBrightness)(Level*, int, int, int);
 static Entity* (*bl_Level_getEntity)(Level*, int);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
-static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 static void* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
