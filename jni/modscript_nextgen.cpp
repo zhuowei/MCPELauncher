@@ -155,7 +155,8 @@ static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bo
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
 static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
-static void (*bl_Recipes_addShapelessRecipe)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&);
+static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
+	std::vector<RecipesType> const&);
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 static void (*bl_Gui_showTipMessage)(void*, std::string const&);
@@ -966,13 +967,25 @@ bool bl_tryRemoveExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, i
 	return false;
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
-  (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
-	/*int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jobjectArray shape, jintArray ingredientsArray) {
+	std::vector<std::string> shapeVector;
+	int shapeLength = env->GetArrayLength(shape);
+	for (int i = 0; i < shapeLength; i++) {
+		jstring myString = (jstring) env->GetObjectArrayElement(shape, i);
+		const char * myStringChars = env->GetStringUTFChars(myString, NULL);
+		shapeVector.emplace_back(myStringChars);
+		env->ReleaseStringUTFChars(myString, myStringChars);
+	}
+	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
+
 	ItemInstance outStack;
 	bl_setItemInstance(&outStack, itemId, itemCount, itemDamage);
+	std::vector<ItemInstance> outStacks;
+	outStacks.push_back(outStack);
+
 	int ingredientsCount = ingredientsElemsCount / 3;
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
@@ -983,13 +996,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 			recipeType.item = NULL;
 			recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 			recipeType.itemInstance.count = 1;
-			bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3]);
+			bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3 + 1]);
+			recipeType.letter = (char) ingredients[i * 3];
 			ingredientsList.push_back(recipeType);
 		}
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
-	bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	bl_Recipes_addShapelessRecipe(recipes, outStack, ingredientsList);*/
+	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
+	bl_Recipes_addShapedRecipe(recipes, outStacks, shapeVector, ingredientsList);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
@@ -1242,8 +1256,9 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
-	bl_Recipes_addShapelessRecipe = (void (*)(Recipes*, ItemInstance const&, std::vector<RecipesType> const&)) 
-		dlsym(mcpelibhandle, "_ZN7Recipes18addShapelessRecipeERK12ItemInstanceRKSt6vectorINS_4TypeESaIS4_EE");
+	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
+		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,
+		"_ZN7Recipes15addShapedRecipeERKSt6vectorI12ItemInstanceSaIS1_EERKS0_ISsSaISsEERKS0_INS_4TypeESaISA_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");

@@ -7,7 +7,7 @@ typedef void cppstr;
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef unsigned short FullTile;
+typedef unsigned int FullTile;
 typedef void TileSource;
 
 typedef struct {
@@ -26,8 +26,8 @@ typedef struct {
 	void** vtable; //0
 	char filler[4]; //4
 	cppbool isRemote; //8?
-	char filler2[2959];//9
-	TileSource* tileSource;//2968
+	char filler2[2963];//9
+	TileSource* tileSource;//2972
 } Level;
 typedef struct Entity_t{
 //todo: 60 = tile source, 68 = level

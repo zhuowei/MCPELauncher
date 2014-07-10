@@ -83,7 +83,7 @@ void bl_sendIdentPacket();
 
 jclass bl_scriptmanager_class;
 
-static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, int, void*);
+static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, signed char, void*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
 void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
@@ -200,7 +200,8 @@ static void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 	setPos(entity, x, y, z);
 }
 
-void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack, int x, int y, int z, int side, void* vec3) {
+void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack,
+	int x, int y, int z, signed char side, void* vec3) {
 	JNIEnv *env;
 	bl_level = level;
 	bl_localplayer = player;
@@ -1050,7 +1051,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
 	void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
-	appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = readAssetFile;
+	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = readAssetFile;
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
 	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);

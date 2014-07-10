@@ -1133,7 +1133,7 @@ public class ScriptManager {
 
 	public static native void nativeSetI18NString(String key, String value);
 
-	public static native void nativeAddShapelessRecipe(int id, int count, int damage,
+	public static native void nativeAddShapedRecipe(int id, int count, int damage, String[] shape,
 			int[] ingredients);
 
 	public static native void nativeShowTipMessage(String msg);
@@ -1480,7 +1480,6 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static NativePointer getAddress() {
 			// TODO: I still don't know WTF this does.
-			scriptPrint("Deprecated: unknown aim");
 			return new NativePointer(nativeGetLevel());
 		}
 
@@ -2153,9 +2152,38 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredients) {
-			int[] expanded = expandShapelessRecipe(ingredients);
-			nativeAddShapelessRecipe(id, count, damage, expanded);
+		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredientsScriptable) {
+			int[] expanded = expandShapelessRecipe(ingredientsScriptable);
+			System.out.println(Arrays.toString(expanded));
+			StringBuilder temprow = new StringBuilder();
+			char nextchar = 'a';
+			int[] ingredients = new int[expanded.length];
+			for (int i = 0; i < expanded.length; i+=3) {
+				int inputid = expanded[i];
+				int inputcount = expanded[i + 1];
+				int inputdamage = expanded[i + 2];
+				char mychar = nextchar++;
+				for (int a = 0; a < inputcount; a++) {
+					temprow.append(mychar);
+				}
+				ingredients[i] = mychar;
+				ingredients[i + 1] = inputid;
+				ingredients[i + 2] = inputdamage;
+			}
+			int temprowLength = temprow.length();
+			if (temprowLength > 9) throw new RuntimeException("Too many ingredients in shapeless recipe: max of 9 slots");
+			// if the temp row is <= 4, make a 2x2 recipe, otherwise, make a 3x3 recipe
+			int width = (temprowLength <= 4? 2: 3);
+			String[] shape = new String[temprowLength / width + (temprowLength % width != 0? 1: 0)];
+			for (int i = 0; i < shape.length; i++) {
+				int begin = i * width;
+				int end = begin + width;
+				if (end > temprowLength) end = temprowLength;
+				shape[i] = temprow.substring(begin, end);
+			}
+			System.out.println(Arrays.toString(shape));
+			System.out.println(Arrays.toString(ingredients));
+			nativeAddShapedRecipe(id, count, damage, shape, ingredients);
 		}
 
 		@JSStaticFunction
@@ -2163,6 +2191,29 @@ public class ScriptManager {
 			// Do I need a count? If not, should I just fill it with null, or
 			// skip it completely?
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
+		}
+
+		@JSStaticFunction
+		public static void addShapedRecipe(int id, int count, int damage, Scriptable shape, Scriptable ingredients) {
+			int shapeArrayLength = ((Number) ScriptableObject.getProperty(shape, "length"))
+				.intValue();
+			String[] shapeArray = new String[shapeArrayLength];
+			for (int i = 0; i < shapeArrayLength; i++) {
+				shapeArray[i] = ScriptableObject.getProperty(shape, i).toString();
+			}
+			int ingredientsArrayLength = ((Number) ScriptableObject.getProperty(ingredients, "length"))
+				.intValue();
+			if (shapeArray.length % 3 != 0) throw new RuntimeException("Shape array must be [\"?\", id, damage, ...]");
+			int[] ingredientsArray = new int[ingredientsArrayLength];
+			for (int i = 0; i < ingredientsArrayLength; i++) {
+				Object str = ScriptableObject.getProperty(ingredients, i);
+				if (i % 3 == 0) {
+					ingredientsArray[i] = str.toString().charAt(0);
+				} else {
+					ingredientsArray[i] = ((Number) str).intValue();
+				}
+			}
+			nativeAddShapedRecipe(id, count, damage, shapeArray, ingredientsArray);
 		}
 
 		@JSStaticFunction

@@ -3,6 +3,7 @@ package com.mojang.minecraftpe;
 import java.io.*;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.net.*;
 import java.util.*;
@@ -841,11 +842,21 @@ public class MainActivity extends NativeActivity {
 		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(
 				new Date(((long) time) * 1000));
 	}
-
 	public byte[] getFileDataBytes(String name) {
+		byte[] bytes = getFileDataBytes(name, false);
+		if (name.endsWith(".meta")) { // hack for people trying to use 0.8.1 textures on 0.9.0
+			String fileStr = new String(bytes, Charset.forName("UTF-8"));
+			if (fileStr.contains("additonal_textures")) {
+				bytes = getFileDataBytes(name, true);
+			}
+		}
+		return bytes;
+	}
+
+	private byte[] getFileDataBytes(String name, boolean forceInternal) {
 		System.out.println("Get file data: " + name);
 		try {
-			InputStream is = getInputStreamForAsset(name);
+			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
 			if (is == null)
 				return null;
 			// can't always find length - use the method from
