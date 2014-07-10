@@ -2027,8 +2027,8 @@ public class ScriptManager {
 				int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
-				Log.i("MCPELauncher", "The item icon for " + name.trim()
-						+ " is not updated for 0.8.0. Please ask the script author to update");
+				throw new IllegalArgumentException("The item icon for " + name.trim()
+					+ " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
 			if (id < 0 || id >= 512) {
@@ -2042,8 +2042,8 @@ public class ScriptManager {
 				String name, int maxStackSize) {
 			try {
 				Integer.parseInt(iconName);
-				Log.i("MCPELauncher", "The item icon for " + name.trim()
-						+ " is not updated for 0.8.0. Please ask the script author to update");
+				throw new IllegalArgumentException("The item icon for " + name.trim()
+					+ " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
 			if (id < 0 || id >= 512) {
