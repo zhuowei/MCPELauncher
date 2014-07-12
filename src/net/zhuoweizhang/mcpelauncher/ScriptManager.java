@@ -257,10 +257,10 @@ public class ScriptManager {
 		callScriptMethod("startDestroyBlock", x, y, z, side);
 	}
 
-	public static void setLevelCallback(boolean hasLevel, boolean isRemote) {
+	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
-		ScriptManager.isRemote = isRemote;
+		//ScriptManager.isRemote = isRemote;
 		if (!isRemote)
 			ScriptManager.scriptingEnabled = true; // all local worlds get ModPE
 													// support
@@ -307,7 +307,7 @@ public class ScriptManager {
 
 	public static void tickCallback() {
 		if (nextTickCallsSetLevel) {
-			setLevelCallback(true, false);
+			setLevelCallback(true, nativeLevelIsRemote());
 		}
 		callScriptMethod("modTick");
 		// do we have any requests for graphics reset?
@@ -740,6 +740,11 @@ public class ScriptManager {
 
 	private static void overrideTexture(String urlString, String textureName) {
 		if (androidContext == null) return;
+		if (textureName.contains("terrain-atlas.tga") || textureName.contains("items-opaque.png")) {
+			scriptPrint("cannot override " + textureName);
+			return;
+		}
+
 		// download from URL
 		// saves it to ext storage's texture folder
 		// then, schedule callback
@@ -1235,6 +1240,8 @@ public class ScriptManager {
 	public static native void nativeSetTextParseColorCodes(boolean doIt);
 
 	public static native void nativePrePatch();
+
+	public static native boolean nativeLevelIsRemote();
 
 	public static class ScriptState {
 		public Script script;

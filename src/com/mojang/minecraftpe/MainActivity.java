@@ -173,6 +173,7 @@ public class MainActivity extends NativeActivity {
 		}
 
 		MinecraftVersion.context = this.getApplicationContext();
+		boolean needsToClearOverrides = false;
 
 		try {
 			mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
@@ -202,6 +203,7 @@ public class MainActivity extends NativeActivity {
 				System.out.println("Version updated; forcing prepatch");
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
+				needsToClearOverrides = true;
 				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
@@ -315,6 +317,8 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			reportError(e);
 		}
+
+		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		enableSoftMenuKey();
 
@@ -1238,6 +1242,9 @@ public class MainActivity extends NativeActivity {
 
 	public void statsTrackEvent(String firstEvent, String secondEvent) {
 		Log.i(TAG, "Stats track: " + firstEvent + ":" + secondEvent);
+		if (firstEvent.equals("start_game")) {
+			ScriptManager.isRemote = !secondEvent.startsWith("{\"server_type\": \"Local\"");
+		}
 	}
 
 	public void statsUpdateUserData(String firstEvent, String secondEvent) {

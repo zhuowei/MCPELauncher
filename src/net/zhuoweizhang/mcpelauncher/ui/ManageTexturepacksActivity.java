@@ -296,6 +296,8 @@ public class ManageTexturepacksActivity extends ListActivity {
 				hasSu = false;
 			}
 
+			ScriptManager.clearTextureOverrides();
+
 			return null;
 		}
 

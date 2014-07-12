@@ -1173,6 +1173,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	bl_Level_addParticle(bl_level, type, x, y, z, xVel, yVel, zVel, data);
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
+  (JNIEnv *env, jclass clazz) {
+	return bl_level->isRemote;
+}
+
 void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
