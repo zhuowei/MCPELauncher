@@ -2161,7 +2161,6 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredientsScriptable) {
 			int[] expanded = expandShapelessRecipe(ingredientsScriptable);
-			System.out.println(Arrays.toString(expanded));
 			StringBuilder temprow = new StringBuilder();
 			char nextchar = 'a';
 			int[] ingredients = new int[expanded.length];
@@ -2188,8 +2187,6 @@ public class ScriptManager {
 				if (end > temprowLength) end = temprowLength;
 				shape[i] = temprow.substring(begin, end);
 			}
-			System.out.println(Arrays.toString(shape));
-			System.out.println(Arrays.toString(ingredients));
 			nativeAddShapedRecipe(id, count, damage, shape, ingredients);
 		}
 
@@ -2210,7 +2207,9 @@ public class ScriptManager {
 			}
 			int ingredientsArrayLength = ((Number) ScriptableObject.getProperty(ingredients, "length"))
 				.intValue();
-			if (shapeArray.length % 3 != 0) throw new RuntimeException("Shape array must be [\"?\", id, damage, ...]");
+			if (ingredientsArrayLength % 3 != 0) {
+				throw new RuntimeException("Ingredients array must be [\"?\", id, damage, ...]");
+			}
 			int[] ingredientsArray = new int[ingredientsArrayLength];
 			for (int i = 0; i < ingredientsArrayLength; i++) {
 				Object str = ScriptableObject.getProperty(ingredients, i);
@@ -2220,6 +2219,8 @@ public class ScriptManager {
 					ingredientsArray[i] = ((Number) str).intValue();
 				}
 			}
+			//System.out.println(Arrays.toString(shapeArray));
+			//System.out.println(Arrays.toString(ingredientsArray));
 			nativeAddShapedRecipe(id, count, damage, shapeArray, ingredientsArray);
 		}
 
@@ -2250,7 +2251,7 @@ public class ScriptManager {
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
-			int materialSourceId = 1;
+			int materialSourceId = 17; // wood
 			boolean opaque = true;
 			int renderType = 0;
 			if (materialSourceIdSrc != null && materialSourceIdSrc instanceof Number) {

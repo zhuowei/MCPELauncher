@@ -111,7 +111,7 @@ static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Entity_remove)(Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, Player*, int, int, int, signed char);
-static Entity* (*bl_EntityFactory_CreateEntity)(int, Level*);
+static Entity* (*bl_EntityFactory_CreateEntity)(int, TileSource*);
 static Entity* (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
 static long (*bl_Level_getTime)(Level*);
 static void (*bl_Level_setTime)(Level*, float);
@@ -540,7 +540,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDr
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
 	ItemInstance* instance = bl_newItemInstance(id, count, damage);
 
-	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level);
+	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level->tileSource);
 	if (entity == NULL) {
 		//WTF?
 		return 0;
@@ -731,7 +731,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	if (type < 64) {
 		entity = bl_MobFactory_createMob(type, bl_level->tileSource, &pos, NULL); //the last two vec3s are pos and rot
 	} else {
-		entity = bl_EntityFactory_CreateEntity(type, bl_level);
+		entity = bl_EntityFactory_CreateEntity(type, bl_level->tileSource);
 	}
 
 	if (entity == NULL) {
@@ -1137,7 +1137,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
-	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiP5Level");
+	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiP10TileSource");
 	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZNK5Level7getTimeEv");

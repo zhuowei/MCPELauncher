@@ -35,14 +35,9 @@ typedef void Font;
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 3144
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
-#define BLOCK_VTABLE_SIZE 0x144
-#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 13
-#define BLOCK_VTABLE_IS_CUBE_SHAPED 4
-#define BLOCK_VTABLE_GET_RENDER_SHAPE 5
-#define BLOCK_VTABLE_GET_DESCRIPTION_ID 58
-#define BLOCK_VTABLE_GET_COLOR 55
-#define BLOCK_VTABLE_GET_RENDER_LAYER 46
-#define BLOCK_VTABLE_IS_SOLID_RENDER 19
+#define BLOCK_VTABLE_SIZE 0x128
+#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
+#define BLOCK_VTABLE_GET_COLOR 46
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2956
 // found in PlayerRenderer::renderName
@@ -77,6 +72,15 @@ typedef struct {
 	std::vector<ItemInstance> output; //28
 	int filler; //48
 } ShapelessRecipe; //52 bytes long
+
+typedef struct {
+	void** vtable;//0
+	ItemPack itemPack; //4
+	char filler2[12]; //28
+	ItemInstance* output; //40
+	int filler; //48
+} ShapedRecipe; //52 bytes long
+
 
 typedef struct {
 	void** vtable; //0
@@ -149,10 +153,9 @@ static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-//static Item** bl_Item_items;
 static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
 static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
-static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, int, int);
+static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
@@ -365,7 +368,7 @@ const char* bl_getCharArr(void* str){
 	return cs;
 }
 
-TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, int side, int data) {
+TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, signed char side, int data) {
 	int blockId = tile->id;
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL) {
@@ -389,11 +392,11 @@ int bl_CustomBlock_getRenderShapeHook(Tile* tile) {
 	return bl_custom_block_renderShape[blockId];
 }
 
-int bl_CustomBlock_getColorHook(Tile* tile, Level* level, int x, int y, int z) {
+int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y, int z) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
 	if (myColours == NULL || bl_level == NULL) return 0xffffff; //I see your true colours shining through
-	int data = bl_TileSource_getData(bl_level->tileSource, x, y, z);
+	int data = bl_TileSource_getData(tileSource, x, y, z);
 	return myColours[data];
 }
 
@@ -559,7 +562,7 @@ Item* bl_constructItem(int id) {
 	Item* retval = (Item*) ::operator new((std::size_t) 76);
 	bl_Item_Item(retval, id - 0x100);
 	retval->category1 = 2; //tool
-	retval->category2 = 0;
+	//retval->category2 = 0;
 	return retval;
 }
 
@@ -570,7 +573,7 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 	((int*)retval)[19] = hearts;
 	((float*) retval)[20] = timetoeat; //time to eat
 	retval->category1 = 4; //food
-	retval->category2 = 0;
+	//retval->category2 = 0;
 	return retval;
 }
 
@@ -775,18 +778,16 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
+
 	//set the texture getter to our overridden version
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_CUBE_SHAPED] = (void*) &bl_CustomBlock_isCubeShapedHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_SHAPE] = (void*) &bl_CustomBlock_getRenderShapeHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_RENDER_LAYER] = (void*) &bl_CustomBlock_getRenderLayerHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_IS_SOLID_RENDER] = (void*) &bl_CustomBlock_isSolidRenderHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
 }
 
 void* bl_getMaterial(int materialType) {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "get material: %d", materialType);
 	Tile* baseTile = bl_Tile_tiles[materialType];
 	if (baseTile == NULL) {
 		baseTile = bl_Tile_tiles[1];
@@ -814,7 +815,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
 	bl_custom_block_renderShape[blockId] = renderShape;
 	//Allocate memory for the block
-	Tile* retval = (Tile*) ::operator new((std::size_t) 0x80);
+	// size found before the Tile::Tile constructor for tile ID #4
+	Tile* retval = (Tile*) ::operator new((std::size_t) 0x8c);
 	retval->vtable = bl_CustomBlock_vtable;
 	bl_Tile_Tile(retval, blockId, bl_getMaterial(materialType));
 	retval->vtable = bl_CustomBlock_vtable;
@@ -827,14 +829,12 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//add it to the global tile list
 	bl_Tile_tiles[blockId] = retval;
 	retval->category1 = 1;
-	retval->category2 = 1;
 	//now allocate the item
-	Item* tileItem = (Item*) ::operator new((std::size_t) 76);
+	Item* tileItem = (Item*) ::operator new((std::size_t) 84);
 	tileItem->vtable = bl_TileItem_vtable;
 	bl_TileItem_TileItem(tileItem, blockId - 0x100);
 	tileItem->vtable = bl_TileItem_vtable;
 	tileItem->category1 = 1;
-	tileItem->category2 = 1;
 	return retval;
 }
 
@@ -967,6 +967,20 @@ bool bl_tryRemoveExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, i
 	return false;
 }
 
+bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int itemDamage, int ingredients[], int ingredientsCount) {
+	std::vector<Recipe*>* recipesList = &recipeMgr->recipes;
+	int recipesSize = recipesList->size();
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Recipes: %i", recipesSize);
+	for (int i = recipesSize - 1; i >= 0; i--) { //TODO: inefficient?
+		Recipe* recipe = (*recipesList)[i];
+		ShapedRecipe* shaped = (ShapedRecipe*) recipe;
+		ItemInstance* myitem = shaped->output;
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Recipe: id %d count %d damage %d",
+			bl_ItemInstance_getId(myitem), myitem->count, myitem->damage);
+	}
+	return false;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jobjectArray shape, jintArray ingredientsArray) {
 	std::vector<std::string> shapeVector;
@@ -989,17 +1003,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	int ingredientsCount = ingredientsElemsCount / 3;
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
-		int repeatCount = ingredients[i * 3 + 1];
-		for (int repeat = 0; repeat < repeatCount; repeat++) {
-			RecipesType recipeType;
-			recipeType.wtf2 = 0;
-			recipeType.item = NULL;
-			recipeType.itemInstance.damage = ingredients[i * 3 + 2];
-			recipeType.itemInstance.count = 1;
-			bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3 + 1]);
-			recipeType.letter = (char) ingredients[i * 3];
-			ingredientsList.push_back(recipeType);
-		}
+		RecipesType recipeType;
+		recipeType.wtf2 = 0;
+		recipeType.item = NULL;
+		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
+		recipeType.itemInstance.count = 1;
+		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3 + 1]);
+		recipeType.letter = (char) ingredients[i * 3];
+		ingredientsList.push_back(recipeType);
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
@@ -1068,7 +1079,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
 	Item* myitem = bl_Item_items[itemId];
 	myitem->category1 = category;
-	myitem->category2 = mystery1;
+	//myitem->category2 = mystery1;
 }
 
 void bl_sendPacket(void* packet) {
@@ -1201,8 +1212,8 @@ void bl_setuphooks_cppside() {
 	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
 
-	bl_Level_getAllEntities = (void* (*)(Level*))
-		dlsym(RTLD_DEFAULT, "_ZN5Level14getAllEntitiesEv");
+	//bl_Level_getAllEntities = (void* (*)(Level*))
+	//	dlsym(RTLD_DEFAULT, "_ZN5Level14getAllEntitiesEv");
 
 	bl_Level_addListener = (void (*) (Level*, LevelListener*))
 		dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
@@ -1240,6 +1251,23 @@ void bl_setuphooks_cppside() {
 	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
 		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
+#if 0
+#define CHECKVTABLE(actualfn) \
+	if (vtable[i] == actualfn) { \
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Found "#actualfn" at %d", i); \
+	}
+	{
+	void** vtable = bl_Tile_vtable;
+	void* getTexture = dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
+	void* getColor = dlsym(mcpelibhandle, "_ZN4Tile8getColorEP10TileSourceiii");
+
+	for (int i = 0; i < BLOCK_VTABLE_SIZE / 4; i++) {
+		CHECKVTABLE(getTexture);
+		CHECKVTABLE(getColor);
+	}
+	}
+#endif
+
 	bl_initCustomBlockVtable();
 
 	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
@@ -1247,7 +1275,6 @@ void bl_setuphooks_cppside() {
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
 
-	//bl_Item_items = (Item**) dlsym(mcpelibhandle, "_ZN4Item5itemsE");
 	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
@@ -1257,7 +1284,7 @@ void bl_setuphooks_cppside() {
 	void* populateItem = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Itemii");
 	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
-	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, int, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEii");
+	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
@@ -1271,7 +1298,6 @@ void bl_setuphooks_cppside() {
 
 	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
-	bl_ShapelessRecipe_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15ShapelessRecipe");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEi");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");

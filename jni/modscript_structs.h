@@ -55,21 +55,25 @@ typedef Entity Player;
 
 typedef struct {
 	float bounds[6];
+	int idunno;
+	void* textureFile;
 } TextureUVCoordinateSet;
 
 typedef struct {
 	void** vtable; //0
-	int itemId; //4
-	int idunno; //8
-	int icon; //12
-	int idunno2; //16
-	int idunno3; //20
-	int idunno4; //24
-	int idunno5; //28
-	cppstr* description; //32
-	char filler[18]; //34
-	int category1; //52
-	int category2; //56
+	int maxStackSize; //4
+	int idunno2; //8
+	int idunno; //12
+	int icon; //16
+	int itemId; //20
+	int maxDamage; //24
+	int idunno4; //28 <- actually a texture UV coordinate set
+	int idunno5; //32
+	cppstr* description; //36
+	char filler[20]; //40
+	int category1; //60
+	cppbool idunnobool1; //64
+	cppbool stackedByData; //65
 } Item;
 
 typedef struct {
@@ -85,20 +89,21 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	TextureUVCoordinateSet texture; //4
-	int id; //28
-	char filler[32]; //32
-	void* material; //64
-	int filler1; //48
-	float destroyTime; //52
-	float explosionResistance; //56
-	char filler2[20]; //60
-	int category1;//80
-	int category2;//84
+	float idunnofloat1; //4
+	char aabbfiller[28]; //8
+	TextureUVCoordinateSet texture; //36
+	unsigned char id; //68
+	char filler[39]; //69 (insert rude joke here)
+	void* material; //108
+	int filler2; //112
+	float destroyTime; //116
+	float explosionResistance; //120
+	int category1; //124
+	char filler3[8]; //128
 #ifdef __cplusplus
-	std::string descriptionId; //88
+	std::string descriptionId; //136
 #else
-	int descriptionId; //88
+	int descriptionId; //136
 #endif
 } Tile;
 
