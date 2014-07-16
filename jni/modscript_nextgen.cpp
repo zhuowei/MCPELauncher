@@ -49,6 +49,8 @@ typedef void Font;
 #define MOB_TARGET_OFFSET 3156
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 3184
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 132
+// found in BuyButton::render of all things
+#define MINECRAFT_TEXTURES_OFFSET 420
 
 typedef struct {
 	//union {
@@ -209,6 +211,7 @@ static void (*bl_Level_addParticle)(Level*, int, float, float, float, float, flo
 static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
+static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -221,6 +224,7 @@ void* debug_dlsym(void* handle, const char* symbol);
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
 
+void bl_forceTextureLoad(std::string const&);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
@@ -710,11 +714,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
-	std::string* newSkinString = new std::string(newSkin);
+	std::string newSkinString(newSkin);
 	std::string* ptrToStr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
-	(*ptrToStr) = (*newSkinString);
+	*ptrToStr = newSkinString;
+	bl_forceTextureLoad(newSkinString);
 }
 
 void bl_attachLevelListener() {
@@ -1189,6 +1194,28 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return bl_level->isRemote;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
+  (JNIEnv *env, jclass clazz) {
+	for (int i = 1; i < 0x100; i++) {
+		if (bl_Tile_tiles[i] == NULL) {
+			char name[100];
+			snprintf(name, sizeof(name), "Missing block ID: %d", i);
+			std::string textureNames[16*6];
+			for (int a = 0; a < 16*6; a++) {
+				textureNames[a] = "missing_tile";
+			}
+			int textureCoords[16*6];
+			memset(textureCoords, 0, sizeof(textureCoords));
+			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
+		}
+	}
+}
+
+void bl_forceTextureLoad(std::string const& name) {
+	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
+	bl_Textures_getTextureData(textures, name);
+}
+
 void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
@@ -1338,6 +1365,8 @@ void bl_setuphooks_cppside() {
 	// FIXME: this constructor no longer exists; use Screen::Screen with a ProgressScreen vtable
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
+	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
+		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
 	bl_renderManager_init(mcpelibhandle);
 }
 

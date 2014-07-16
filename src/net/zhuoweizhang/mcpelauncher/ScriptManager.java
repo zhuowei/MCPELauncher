@@ -414,6 +414,9 @@ public class ScriptManager {
 		if (requestReloadAllScripts) {
 			requestReloadAllScripts = false;
 			try {
+				if (!new File("/sdcard/mcpelauncher_do_not_create_placeholder_blocks").exists()) {
+					nativeDefinePlaceholderBlocks();
+				}
 				loadEnabledScripts();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1231,6 +1234,8 @@ public class ScriptManager {
 	public static native int nativeGetBlockRenderShape(int blockId);
 	
 	public static native void nativeSetBlockRenderShape(int blockId, int renderType);
+
+	public static native void nativeDefinePlaceholderBlocks();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2177,7 +2182,12 @@ public class ScriptManager {
 				ingredients[i + 2] = inputdamage;
 			}
 			int temprowLength = temprow.length();
-			if (temprowLength > 9) throw new RuntimeException("Too many ingredients in shapeless recipe: max of 9 slots");
+			if (temprowLength > 9) {
+				print("Too many ingredients in shapeless recipe: max of 9 slots" +
+					", the extra items have been ignored");
+				temprow.delete(9, temprow.length());
+				temprowLength = temprow.length();
+			}
 			// if the temp row is <= 4, make a 2x2 recipe, otherwise, make a 3x3 recipe
 			int width = (temprowLength <= 4? 2: 3);
 			String[] shape = new String[temprowLength / width + (temprowLength % width != 0? 1: 0)];
