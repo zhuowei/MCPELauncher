@@ -40,7 +40,7 @@ typedef struct {
 // from Player::getCarriedItem
 #define PLAYER_INVENTORY_OFFSET 3212
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 20
-#define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 28
+#define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 29
 // this is / 4 bytes already; found in Mob::actuallyHurt
 #define MOB_HEALTH_OFFSET 82
 #define ENTITY_RENDER_TYPE_OFFSET 59
@@ -1088,6 +1088,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
 	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12NinecraftApp");
+
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (int) &bl_Minecraft_setLevel_hook;
 
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
@@ -1168,8 +1169,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_ItemInstance_setId = dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 	bl_ItemInstance_getId = dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	//replace the update method in Minecraft with our own
-	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
 	bl_NinecraftApp_update_real = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp6updateEv");
+#if 0
+	for (int i = 0; i < 40; i++) {
+		if (minecraftVtable[i] == (int) bl_NinecraftApp_update_real) {
+			__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "vtable: %d", i);
+		}
+	}
+#endif
+
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
 
 	if (!mcpelibhandle) {
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);

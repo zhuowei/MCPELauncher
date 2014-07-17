@@ -723,8 +723,10 @@ void bl_changeEntitySkin(void* entity, const char* newSkin) {
 }
 
 void bl_attachLevelListener() {
+	/* FIXME
 	ScriptLevelListener* listener = new ScriptLevelListener();
 	bl_Level_addListener(bl_level, listener);
+	*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSneaking
@@ -792,7 +794,6 @@ void bl_initCustomBlockVtable() {
 }
 
 void* bl_getMaterial(int materialType) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "get material: %d", materialType);
 	Tile* baseTile = bl_Tile_tiles[materialType];
 	if (baseTile == NULL) {
 		baseTile = bl_Tile_tiles[1];

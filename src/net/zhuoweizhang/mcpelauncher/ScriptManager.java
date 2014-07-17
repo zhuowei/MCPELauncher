@@ -2183,7 +2183,7 @@ public class ScriptManager {
 			}
 			int temprowLength = temprow.length();
 			if (temprowLength > 9) {
-				print("Too many ingredients in shapeless recipe: max of 9 slots" +
+				scriptPrint("Too many ingredients in shapeless recipe: max of 9 slots" +
 					", the extra items have been ignored");
 				temprow.delete(9, temprow.length());
 				temprowLength = temprow.length();

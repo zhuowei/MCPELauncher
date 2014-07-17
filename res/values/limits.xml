@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="max_num_patches">3</integer>
-    <integer name="max_num_scripts">2</integer>
+    <integer name="max_num_scripts">4</integer>
 </resources>
