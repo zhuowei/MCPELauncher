@@ -163,5 +163,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="pref_other_title">Other</string>
     <string name="pref_zz_legacy_live_patch">Use old live patching code from BlockLauncher 1.6.8</string>
     <string name="pref_zz_legacy_live_patch_summary">Turn this on if BlockLauncher stopped working after the 1.6.9 update.</string>
+    <string name="previous_command">Prev</string>
+    <string name="next_command">Next</string>
 
 </resources>

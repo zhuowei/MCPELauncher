@@ -156,6 +156,9 @@ public class MainActivity extends NativeActivity {
 	private PopupWindow hiddenTextWindow;
 	private TextView hiddenTextView;
 	private boolean hiddenTextDismissAfterOneLine = false;
+	private PopupWindow commandHistoryWindow;
+	private View commandHistoryView;
+
 
 	/** Called when the activity is first created. */
 
@@ -1349,6 +1352,8 @@ public class MainActivity extends NativeActivity {
 		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
 		this.hiddenTextDismissAfterOneLine = dismissAfterOneLine;
 
+		showCommandHistoryWindow();
+
 		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(),
 				Gravity.LEFT | Gravity.TOP, -10000, 0);
 		hiddenTextView.requestFocus();
@@ -1359,6 +1364,7 @@ public class MainActivity extends NativeActivity {
 		if (hiddenTextWindow == null)
 			return;
 		hiddenTextWindow.dismiss();
+		hideCommandHistoryWindow();
 		hideKeyboardView();
 	}
 
@@ -1740,6 +1746,24 @@ public class MainActivity extends NativeActivity {
 		System.arraycopy(files, 0, retval, 1, files.length);
 		retval[0] = toAdd;
 		return retval;
+	}
+
+	private void showCommandHistoryWindow() {
+		/*
+		if (commandHistoryWindow == null) {
+			commandHistoryView = this.getLayoutInflater().inflate(R.layout.chat_history_popup, null);
+			commandHistoryWindow = new PopupWindow(commandHistoryView, ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT, false);
+			commandHistoryWindow.setOutsideTouchable(false);
+		}
+		commandHistoryWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
+		*/
+	}
+
+	private void hideCommandHistoryWindow() {
+		/*
+		commandHistoryWindow.dismiss();
+		*/
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
