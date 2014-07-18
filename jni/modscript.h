@@ -208,10 +208,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetFov
- * Signature: (F)V
+ * Signature: (FZ)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
-  (JNIEnv *, jclass, jfloat);
+  (JNIEnv *, jclass, jfloat, jboolean);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -463,14 +463,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeIsPlayer
- * Signature: (I)Z
- */
-JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsPlayer
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeGetEntityVel
  * Signature: (II)F
  */
@@ -487,11 +479,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeAddShapelessRecipe
- * Signature: (III[I)V
+ * Method:    nativeAddShapedRecipe
+ * Signature: (III[Ljava/lang/String;[I)V
  */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
-  (JNIEnv *, jclass, jint, jint, jint, jintArray);
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
+  (JNIEnv *, jclass, jint, jint, jint, jobjectArray, jintArray);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -839,6 +831,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeDefinePlaceholderBlocks
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: (I)V
  */
@@ -867,6 +867,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelIsRemote
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

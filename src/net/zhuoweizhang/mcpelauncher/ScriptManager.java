@@ -1070,7 +1070,7 @@ public class ScriptManager {
 			int hearts, String name, int maxStackSize);
 
 	// nonstandard
-	public static native void nativeSetFov(float degrees);
+	public static native void nativeSetFov(float degrees, boolean override);
 
 	public static native void nativeSetMobSkin(int ent, String str);
 
@@ -2135,17 +2135,19 @@ public class ScriptManager {
 			nativeShowTipMessage(msg);
 		}
 
-		/*
-		 * disabled since Substrate cannot hook the relevant method
-		 * 
-		 * @JSStaticFunction public static void setStonecutterItem(int id,
-		 * boolean status) { //1: nope; 2: yep. nativeSetStonecutterItem(id,
-		 * status? 2: 1); }
-		 */
-
 		@JSStaticFunction
 		public static void setCamera(int entityId) {
 			nativeSetCameraEntity(entityId);
+		}
+
+		@JSStaticFunction
+		public static void setFov(double fov) {
+			nativeSetFov((float) fov, true);
+		}
+
+		@JSStaticFunction
+		public static void resetFov() {
+			nativeSetFov(0.0f, false);
 		}
 
 		@Override

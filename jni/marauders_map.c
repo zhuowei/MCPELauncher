@@ -17,6 +17,7 @@ static uintptr_t remapped_text_offset = 0;
 static uintptr_t original_text_offset = 0;
 static size_t remapped_text_length = 0;
 static int remapped_text_fd = -1;
+static int isTranslating = 0;
 
 int marauder_remap_text(uintptr_t originalBegin, size_t length, const char* sharedPath) {
 	/* I solumnly swear that I am up to no good.
@@ -49,7 +50,8 @@ int marauder_remap_text(uintptr_t originalBegin, size_t length, const char* shar
 	return 1;
 }
 
-static void* marauder_translation_function(void* input) {
+void* bl_marauder_translation_function(void* input) {
+	if (!isTranslating) return input;
 	uintptr_t addr = (uintptr_t) input;
 	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Input %x", addr);
 	if (addr >= original_text_offset && addr < original_text_offset + remapped_text_length) {
@@ -72,7 +74,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_setTransl
 	const char * pathChars = (*env)->GetStringUTFChars(env, tempFilePath, NULL);
 	char* newChar = malloc(strlen(pathChars) + 1);
 	strcpy(newChar, pathChars);
-	MSSetAddressTranslationFunction(marauder_translation_function, newChar);
+	isTranslating = 1;
+	MSSetAddressTranslationFunction(bl_marauder_translation_function, newChar);
 	(*env)->ReleaseStringUTFChars(env, tempFilePath, pathChars);
 	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Set translation function");
 }

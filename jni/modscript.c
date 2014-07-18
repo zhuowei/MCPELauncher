@@ -51,6 +51,7 @@ typedef struct {
 // from Minecraft::selectLevel
 #define MINECRAFT_LEVEL_OFFSET 3212
 #define MINECRAFT_LOCAL_PLAYER_OFFSET 3216
+#define GAMERENDERER_GETFOV_SIZE 0xb8
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -80,6 +81,7 @@ void bl_renderManager_clearRenderTypes();
 void bl_cppNewLevelInit();
 void bl_clearNameTags();
 void bl_sendIdentPacket();
+void* bl_marauder_translation_function(void* input);
 
 jclass bl_scriptmanager_class;
 
@@ -102,8 +104,9 @@ static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
 static int (*bl_TileSource_getRawBrightness)(TileSource*, int, int, int, cppbool);
-static Entity* (*bl_Level_getEntity)(Level*, int);
+static Entity* (*bl_Level_getEntity)(Level*, int, cppbool);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
+static float (*bl_GameRenderer_getFov)(void*, float, int);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 static void* (*bl_Mob_getTexture)(Entity*);
@@ -160,6 +163,9 @@ int bl_frameCallbackRequested = 0;
 
 static int bl_hasinit_prepatch = 0;
 
+static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
+static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
+
 #ifdef DLSYM_DEBUG
 
 void* debug_dlsym(void* handle, const char* symbol) {
@@ -179,7 +185,7 @@ Entity* bl_getEntityWrapper(Level* level, int entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
 		return bl_removedEntity;
 	}
-	return bl_Level_getEntity(level, entityId);
+	return bl_Level_getEntity(level, entityId, 0 /* false */);
 }
 
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
@@ -604,8 +610,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoolean) {
-	/*if (bl_newfov < 0)*/ return bl_GameRenderer_getFov_real(gameRenderer, datFloat, datBoolean);
-	//return bl_newfov;
+	return bl_newfov;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
@@ -810,8 +815,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
-  (JNIEnv *env, jclass clazz, jfloat newfov) {
+  (JNIEnv *env, jclass clazz, jfloat newfov, jboolean override) {
 	bl_newfov = newfov;
+	if (override) {
+		memcpy((void*) ((uintptr_t) bl_marauder_translation_function(bl_GameRenderer_getFov) & ~1),
+			getFovHooked, sizeof(getFovHooked));
+	} else {
+		memcpy((void*) ((uintptr_t) bl_marauder_translation_function(bl_GameRenderer_getFov) & ~1),
+			getFovOriginal, sizeof(getFovOriginal));
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
@@ -1112,7 +1124,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
-	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
+	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
+	mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
+	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
+	// start off with original FOV
+	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, sizeof(getFovOriginal));
+	bl_GameRenderer_getFov = getFov;
 
 	//get the level set block method. In future versions this might link against libminecraftpe itself
 	bl_TileSource_setTileAndData = dlsym(RTLD_DEFAULT, "_ZN10TileSource14setTileAndDataEiii8FullTilei");
@@ -1133,7 +1150,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_TileSource_getRawBrightness = dlsym(RTLD_DEFAULT, "_ZN10TileSource16getRawBrightnessEiiib");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
-	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEi");
+	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEib");
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
