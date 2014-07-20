@@ -46,7 +46,8 @@ typedef struct {
 #define MOB_HEALTH_OFFSET 82
 #define ENTITY_RENDER_TYPE_OFFSET 59
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 17
-#define MINECRAFT_TIMER_OFFSET 3280
+// from calls to Timer::advanceTime
+#define MINECRAFT_TIMER_OFFSET 3272
 // from Entity::setPos(Vec3 const&)
 #define ENTITY_VTABLE_OFFSET_SETPOS 4
 // from Minecraft::selectLevel

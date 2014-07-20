@@ -158,6 +158,9 @@ public class MainActivity extends NativeActivity {
 	private boolean hiddenTextDismissAfterOneLine = false;
 	private PopupWindow commandHistoryWindow;
 	private View commandHistoryView;
+	private List<String> commandHistoryList = new ArrayList<String>();
+	private Button prevButton, nextButton;
+	private int commandHistoryIndex = 0;
 
 
 	/** Called when the activity is first created. */
@@ -1311,6 +1314,19 @@ public class MainActivity extends NativeActivity {
 			return;
 		hiddenTextView.post(new Runnable() {
 			public void run() {
+				boolean commandHistory = true;
+				if (commandHistory) {
+					if (commandHistoryList.size() >= 1 && commandHistoryList.get(commandHistoryList.size() - 1).
+						length() <= 0) {
+						commandHistoryList.set(commandHistoryList.size() - 1, text);
+					} else {
+						commandHistoryList.add(text);
+					}
+					setCommandHistoryIndex(commandHistoryList.size() - 1);
+					if (BuildConfig.DEBUG) {
+						Log.i(TAG, commandHistoryIndex + ":" + commandHistoryList);
+					}
+				}
 				hiddenTextView.setText(text);
 			}
 		});
@@ -1318,8 +1334,28 @@ public class MainActivity extends NativeActivity {
 
 	public void showHiddenTextbox(String text, int maxLength, boolean dismissAfterOneLine) {
 		int IME_FLAG_NO_FULLSCREEN = 0x02000000;
+		boolean commandHistory = true;
 		if (hiddenTextWindow == null) {
-			hiddenTextView = new EditText(this);
+			if (commandHistory) {
+				commandHistoryView = this.getLayoutInflater().inflate(R.layout.chat_history_popup,
+					null);
+				hiddenTextView = (TextView) commandHistoryView.findViewById(R.id.hidden_text_view);
+				prevButton = (Button) commandHistoryView.findViewById(R.id.command_history_previous);
+				nextButton = (Button) commandHistoryView.findViewById(R.id.command_history_next);
+				View.OnClickListener listener = new View.OnClickListener() {
+					public void onClick(View v) {
+						if (v == prevButton) {
+							navigateCommandHistory(-1);
+						} else if (v == nextButton) {
+							navigateCommandHistory(1);
+						}
+					}
+				};
+				prevButton.setOnClickListener(listener);
+				nextButton.setOnClickListener(listener);
+			} else {
+				hiddenTextView = new EditText(this);
+			}
 			PopupTextWatcher whoWatchesTheWatcher = new PopupTextWatcher();
 			hiddenTextView.addTextChangedListener(whoWatchesTheWatcher);
 			hiddenTextView.setOnEditorActionListener(whoWatchesTheWatcher);
@@ -1327,9 +1363,13 @@ public class MainActivity extends NativeActivity {
 			hiddenTextView.setImeOptions(EditorInfo.IME_ACTION_NEXT
 					| EditorInfo.IME_FLAG_NO_EXTRACT_UI | IME_FLAG_NO_FULLSCREEN);
 			hiddenTextView.setInputType(InputType.TYPE_CLASS_TEXT);
-			LinearLayout linearLayout = new LinearLayout(this);
-			linearLayout.addView(hiddenTextView);
-			hiddenTextWindow = new PopupWindow(linearLayout);
+			if (commandHistory) {
+				hiddenTextWindow = new PopupWindow(commandHistoryView);
+			} else {
+				LinearLayout linearLayout = new LinearLayout(this);
+				linearLayout.addView(hiddenTextView);
+				hiddenTextWindow = new PopupWindow(linearLayout);
+			}
 			hiddenTextWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
 			hiddenTextWindow.setFocusable(true);
@@ -1337,7 +1377,7 @@ public class MainActivity extends NativeActivity {
 			hiddenTextWindow.setBackgroundDrawable(new ColorDrawable());
 			// To get back button handling for free
 			hiddenTextWindow.setClippingEnabled(false);
-			hiddenTextWindow.setTouchable(false);
+			hiddenTextWindow.setTouchable(commandHistory);
 			hiddenTextWindow.setOutsideTouchable(true);
 			// These flags were taken from a dumpsys window output of Mojang's
 			// window
@@ -1348,14 +1388,19 @@ public class MainActivity extends NativeActivity {
 			});
 		}
 
+		if (commandHistory) {
+			commandHistoryList.add(text);
+			setCommandHistoryIndex(commandHistoryList.size() - 1);
+		}
+
 		hiddenTextView.setText(text);
 		Selection.setSelection((Spannable) hiddenTextView.getText(), text.length());
 		this.hiddenTextDismissAfterOneLine = dismissAfterOneLine;
 
-		showCommandHistoryWindow();
+		int xLoc = commandHistory? 0: -10000;
 
 		hiddenTextWindow.showAtLocation(this.getWindow().getDecorView(),
-				Gravity.LEFT | Gravity.TOP, -10000, 0);
+				Gravity.LEFT | Gravity.TOP, xLoc, 0);
 		hiddenTextView.requestFocus();
 		showKeyboardView();
 	}
@@ -1364,7 +1409,6 @@ public class MainActivity extends NativeActivity {
 		if (hiddenTextWindow == null)
 			return;
 		hiddenTextWindow.dismiss();
-		hideCommandHistoryWindow();
 		hideKeyboardView();
 	}
 
@@ -1748,22 +1792,23 @@ public class MainActivity extends NativeActivity {
 		return retval;
 	}
 
-	private void showCommandHistoryWindow() {
-		/*
-		if (commandHistoryWindow == null) {
-			commandHistoryView = this.getLayoutInflater().inflate(R.layout.chat_history_popup, null);
-			commandHistoryWindow = new PopupWindow(commandHistoryView, ViewGroup.LayoutParams.WRAP_CONTENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT, false);
-			commandHistoryWindow.setOutsideTouchable(false);
+	private void navigateCommandHistory(int direction) {
+		if (BuildConfig.DEBUG) {
+			Log.i(TAG, commandHistoryIndex + ":" + commandHistoryList);
 		}
-		commandHistoryWindow.showAtLocation(this.getWindow().getDecorView(), Gravity.LEFT | Gravity.TOP, 0, 0);
-		*/
+		int newIndex = commandHistoryIndex + direction;
+		if (newIndex < 0) newIndex = 0;
+		if (newIndex >= commandHistoryList.size()) newIndex = commandHistoryList.size() - 1;
+		setCommandHistoryIndex(newIndex);
+		String newCommand = commandHistoryList.get(newIndex);
+		hiddenTextView.setText(newCommand);
+		Selection.setSelection((Spannable) hiddenTextView.getText(), newCommand.length());
 	}
 
-	private void hideCommandHistoryWindow() {
-		/*
-		commandHistoryWindow.dismiss();
-		*/
+	private void setCommandHistoryIndex(int index) {
+		commandHistoryIndex = index;
+		prevButton.setEnabled(index != 0);
+		nextButton.setEnabled(index != commandHistoryList.size() - 1);
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
@@ -1771,7 +1816,15 @@ public class MainActivity extends NativeActivity {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Text changed: " + e.toString());
 			nativeSetTextboxText(e.toString());
-
+			boolean commandHistory = true;
+			if (commandHistory) {
+				if (BuildConfig.DEBUG) {
+					Log.i(TAG, commandHistoryIndex + ":" + commandHistoryList);
+				}
+				if (commandHistoryIndex >= 0 && commandHistoryIndex < commandHistoryList.size()) {
+					commandHistoryList.set(commandHistoryIndex, e.toString());
+				}
+			}
 		}
 
 		public void beforeTextChanged(CharSequence c, int start, int count, int after) {
