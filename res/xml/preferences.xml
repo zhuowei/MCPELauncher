@@ -75,6 +75,12 @@
             android:key="zz_language_override"
             android:title="@string/pref_zz_language_override" />
 
+        <Preference android:title="@string/advertising_privacy_policy" >
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://www.google.com/policies/privacy/partners/"/>
+        </Preference>
+
         <Preference
             android:key="zz_about"
             android:title="@string/about_about" />
