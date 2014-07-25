@@ -212,6 +212,7 @@ static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
+static int (*bl_LevelRenderer_fixedViewDistance_real)(void*);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1221,6 +1222,17 @@ void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
 
+int bl_LevelRenderer_fixedViewDistance_hook(void* levelRenderer) {
+	void* thingy = *((void**) ((uintptr_t) levelRenderer + 20));
+	if (thingy == NULL) return 96;
+	bool overrideBool = *((bool*) ((uintptr_t) thingy + 8));
+	if (overrideBool) return 96;
+	void* thingy2 = *((void**) ((uintptr_t) levelRenderer + 212));
+	if (thingy2 == NULL) return 96;
+	int distance = *((int*) ((uintptr_t) thingy2 + 72));
+	return distance;
+}
+
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -1368,6 +1380,9 @@ void bl_setuphooks_cppside() {
 	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
+	void* bl_LevelRenderer_fixedViewDistance = dlsym(mcpelibhandle, "_ZNK13LevelRenderer18_fixedViewDistanceEv");
+	mcpelauncher_hook(bl_LevelRenderer_fixedViewDistance, (void*) &bl_LevelRenderer_fixedViewDistance_hook,
+		(void**) &bl_LevelRenderer_fixedViewDistance_real);
 	bl_renderManager_init(mcpelibhandle);
 }
 

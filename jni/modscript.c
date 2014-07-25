@@ -34,8 +34,9 @@ typedef struct {
 #define GAMEMODE_VTABLE_OFFSET_TICK 9
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
 // from HumanoidMobRenderer::additionalRendering
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 120
-#define MOB_VTABLE_OFFSET_GET_TEXTURE 88
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 121
+// from MobRenderer::render
+#define MOB_VTABLE_OFFSET_GET_TEXTURE 91
 // from Entity::save
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 63
 // from Player::getCarriedItem
@@ -51,8 +52,8 @@ typedef struct {
 // from Entity::setPos(Vec3 const&)
 #define ENTITY_VTABLE_OFFSET_SETPOS 4
 // from Minecraft::selectLevel
-#define MINECRAFT_LEVEL_OFFSET 3212
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 3216
+#define MINECRAFT_LEVEL_OFFSET 3188
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 3192
 #define GAMERENDERER_GETFOV_SIZE 0xb8
 
 #define LOG_TAG "BlockLauncher/ModScript"
@@ -1178,7 +1179,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//replace the getTexture method for zombie pigmen
 	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
-	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
+	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 	bl_Minecraft_setIsCreativeMode = dlsym(RTLD_DEFAULT, "_ZN9Minecraft17setIsCreativeModeEb");
