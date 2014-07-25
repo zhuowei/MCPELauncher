@@ -32,7 +32,8 @@ typedef void RakNetInstance;
 typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3144
+// After the call to RakNetInstance::RakNetInstance
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3160
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
 #define BLOCK_VTABLE_SIZE 0x128
@@ -43,14 +44,16 @@ typedef void Font;
 // found in PlayerRenderer::renderName
 #define PLAYER_NAME_OFFSET 3164
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
-#define MINECRAFT_GUI_OFFSET 440
+#define MINECRAFT_GUI_OFFSET 416
 // found in LevelRenderer::renderNameTags
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 3184
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 132
 // found in BuyButton::render of all things
-#define MINECRAFT_TEXTURES_OFFSET 420
+#define MINECRAFT_TEXTURES_OFFSET 400
+// found in LocalPlayer::isSneaking
+#define PLAYER_MOVEMENT_OFFSET 3388
 
 typedef struct {
 	//union {
@@ -735,7 +738,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//bl_Mob_setSneaking(entity, doIt);
-	bool* movement = *((bool**) ((uintptr_t) entity + 3416));
+	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
 	movement[14] = doIt;
 }
 
@@ -1222,17 +1225,6 @@ void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
 
-int bl_LevelRenderer_fixedViewDistance_hook(void* levelRenderer) {
-	void* thingy = *((void**) ((uintptr_t) levelRenderer + 20));
-	if (thingy == NULL) return 96;
-	bool overrideBool = *((bool*) ((uintptr_t) thingy + 8));
-	if (overrideBool) return 96;
-	void* thingy2 = *((void**) ((uintptr_t) levelRenderer + 212));
-	if (thingy2 == NULL) return 96;
-	int distance = *((int*) ((uintptr_t) thingy2 + 72));
-	return distance;
-}
-
 void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
@@ -1380,9 +1372,6 @@ void bl_setuphooks_cppside() {
 	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
-	void* bl_LevelRenderer_fixedViewDistance = dlsym(mcpelibhandle, "_ZNK13LevelRenderer18_fixedViewDistanceEv");
-	mcpelauncher_hook(bl_LevelRenderer_fixedViewDistance, (void*) &bl_LevelRenderer_fixedViewDistance_hook,
-		(void**) &bl_LevelRenderer_fixedViewDistance_real);
 	bl_renderManager_init(mcpelibhandle);
 }
 
