@@ -54,6 +54,10 @@ typedef void Font;
 #define MINECRAFT_TEXTURES_OFFSET 400
 // found in LocalPlayer::isSneaking
 #define PLAYER_MOVEMENT_OFFSET 3388
+// found way, way inside GameRenderer::pick, around the call to HitResult::HitResult(Entity*)
+#define MINECRAFT_HIT_RESULT_OFFSET 2684
+// found in TouchscreenInput::canInteract
+#define MINECRAFT_HIT_ENTITY_OFFSET 2716
 
 typedef struct {
 	//union {
@@ -1214,6 +1218,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
 		}
 	}
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
+  (JNIEnv *env, jclass clazz) {
+	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
+	if (objectMouseOver->type != HIT_RESULT_ENTITY) return -1;
+	Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
+	if (hoverEntity == NULL) return -1;
+	return hoverEntity->entityId;
 }
 
 void bl_forceTextureLoad(std::string const& name) {

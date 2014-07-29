@@ -1237,6 +1237,8 @@ public class ScriptManager {
 
 	public static native void nativeDefinePlaceholderBlocks();
 
+	public static native int nativePlayerGetPointedEntity();
+
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -1783,6 +1785,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static boolean isPlayer(int ent) {
 			return NativeEntityApi.getEntityTypeId(ent) == EntityType.PLAYER;
+		}
+
+		@JSStaticFunction
+		public static int getPointedEntity() {
+			return nativePlayerGetPointedEntity();
 		}
 
 		/*

@@ -169,6 +169,21 @@ typedef struct {
 	int64_t value; //16
 } LongTag;
 
+#define HIT_RESULT_BLOCK 0
+#define HIT_RESULT_ENTITY 1
+#define HIT_RESULT_NONE 2
+
+typedef struct {
+	int type; //0
+	int side; //4
+	int x; //8
+	int y; //12
+	int z; //16
+	Vec3 hitVec; //20
+	Entity* entity; //32
+	unsigned char filler1; //36
+} HitResult;
+
 #ifdef __cplusplus
 }
 #endif
