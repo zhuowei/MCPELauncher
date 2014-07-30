@@ -1239,6 +1239,8 @@ public class ScriptManager {
 
 	public static native int nativePlayerGetPointedEntity();
 
+	public static native int nativePlayerGetPointedBlock(int type);
+
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -1790,6 +1792,36 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getPointedEntity() {
 			return nativePlayerGetPointedEntity();
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockX() {
+			return nativePlayerGetPointedBlock(AXIS_X);
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockY() {
+			return nativePlayerGetPointedBlock(AXIS_Y);
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockZ() {
+			return nativePlayerGetPointedBlock(AXIS_Z);
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockId() {
+			return nativePlayerGetPointedBlock(0x10 + 0);
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockData() {
+			return nativePlayerGetPointedBlock(0x10 + 1);
+		}
+
+		@JSStaticFunction
+		public static int getPointedBlockSide() {
+			return nativePlayerGetPointedBlock(0x10 + 2);
 		}
 
 		/*

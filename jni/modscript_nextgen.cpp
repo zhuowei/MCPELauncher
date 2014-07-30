@@ -59,6 +59,14 @@ typedef void Font;
 // found in TouchscreenInput::canInteract
 #define MINECRAFT_HIT_ENTITY_OFFSET 2716
 
+#define AXIS_X 0
+#define AXIS_Y 1
+#define AXIS_Z 2
+
+#define BLOCK_ID (0x10 + 0)
+#define BLOCK_DATA (0x10 + 1)
+#define BLOCK_SIDE (0x10 + 2)
+
 typedef struct {
 	//union {
 	//	std::map<const int, int> pack;
@@ -1227,6 +1235,28 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
 	if (hoverEntity == NULL) return -1;
 	return hoverEntity->entityId;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
+  (JNIEnv *env, jclass clazz, jint axis) {
+	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
+	if (objectMouseOver->type != HIT_RESULT_BLOCK) return -1;
+	switch (axis) {
+		case AXIS_X:
+			return objectMouseOver->x;
+		case AXIS_Y:
+			return objectMouseOver->y;
+		case AXIS_Z:
+			return objectMouseOver->z;
+		case BLOCK_SIDE:
+			return objectMouseOver->side;
+		case BLOCK_ID:
+			return bl_TileSource_getTile(bl_level->tileSource,
+				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+		case BLOCK_DATA:
+			return bl_TileSource_getData(bl_level->tileSource,
+				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+	}
 }
 
 void bl_forceTextureLoad(std::string const& name) {

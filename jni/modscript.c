@@ -102,7 +102,7 @@ static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
 static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec3*);
-static int (*bl_TileSource_getTile)(TileSource*, int, int, int);
+int (*bl_TileSource_getTile)(TileSource*, int, int, int);
 int (*bl_TileSource_getData) (TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
@@ -121,7 +121,7 @@ static void (*bl_GameMode_destroyBlock_real)(void*, Player*, int, int, int, sign
 static Entity* (*bl_EntityFactory_CreateEntity)(int, TileSource*);
 static Entity* (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
 static long (*bl_Level_getTime)(Level*);
-static void (*bl_Level_setTime)(Level*, float);
+static void (*bl_Level_setTime)(Level*, long); //yes, that's a 32-bit long. I have no clue why this was float before.
 static void* (*bl_Level_getLevelData)(Level*);
 static void (*bl_LevelData_setSpawn)(void*, TilePos*);
 static void (*bl_LevelData_setGameType)(void*, int);
