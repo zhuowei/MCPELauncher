@@ -161,12 +161,34 @@ public class MainActivity extends NativeActivity {
 	private List<String> commandHistoryList = new ArrayList<String>();
 	private Button prevButton, nextButton;
 	private int commandHistoryIndex = 0;
+	/* restarter */
+	private static boolean hasAlreadyInited = false;
+	private static boolean globalRestart = false;
+	private static long lastDestroyTime = 0;
+	private static final int MILLISECONDS_FOR_WORLD_SAVE = 3000; //3 seconds
 
 
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		if (hasAlreadyInited) {
+			globalRestart = true;
+			if (lastDestroyTime != 0) {
+				long elapsedTime = System.currentTimeMillis() - lastDestroyTime;
+				if (elapsedTime < MILLISECONDS_FOR_WORLD_SAVE) {
+					try {
+						if (BuildConfig.DEBUG) Log.i(TAG, "Bae caught me slipping for " + elapsedTime);
+						Thread.sleep(elapsedTime);
+					} catch (InterruptedException ie) {}
+				}
+			}
+			// restart if already initialized before
+			finish();
+			NerdyStuffActivity.forceRestart(this, 1000, false);
+			System.exit(0);
+		}
+		hasAlreadyInited = true;
 		File lockFile = new File(getFilesDir(), "running.lock");
 		if (lockFile.exists()) {
 			Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", true).apply();
@@ -384,6 +406,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void onDestroy() {
+		if (globalRestart) {
+			super.onDestroy();
+			return;
+		}
 		nativeUnregisterThis();
 		super.onDestroy();
 		File lockFile = new File(getFilesDir(), "running.lock");
@@ -394,6 +420,10 @@ public class MainActivity extends NativeActivity {
 			hoverCar = null;
 		}
 		ScriptManager.destroy();
+		lastDestroyTime = System.currentTimeMillis();
+		Thread presidentMadagascar = new Thread(new ShutdownTask());
+		presidentMadagascar.setDaemon(true);
+		presidentMadagascar.start();
 	}
 
 	public void onStop() {
@@ -1972,6 +2002,15 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 
+	}
+
+	private class ShutdownTask implements Runnable {
+		public void run() {
+			try {
+				Thread.sleep(MILLISECONDS_FOR_WORLD_SAVE); // to give the worlds some time to save
+			} catch (InterruptedException ie) {}
+			if (!globalRestart) System.exit(0);
+		}
 	}
 
 }

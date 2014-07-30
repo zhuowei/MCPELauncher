@@ -87,14 +87,19 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	 * home screen intent 1 second later.
 	 */
 	public static void forceRestart(Activity activity) {
+		forceRestart(activity, 1000, true);
+	}
+
+	public static void forceRestart(Activity activity, int delay, boolean exit) {
 
 		AlarmManager alarmMgr = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
-		long timeMillis = SystemClock.elapsedRealtime() + 1000; // .5 seconds
+		long timeMillis = SystemClock.elapsedRealtime() + delay;
 		Intent intent = activity.getPackageManager().getLaunchIntentForPackage(
 				activity.getPackageName());
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis,
 				PendingIntent.getActivity(activity, 0, intent, 0));
+		if (!exit) return;
 		new Thread(new Runnable() {
 			public void run() {
 				try {
