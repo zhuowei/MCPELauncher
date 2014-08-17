@@ -456,6 +456,10 @@ public class ScriptManager {
 		}
 	}
 
+	public static void explodeCallback(int entity, float x, float y, float z, float power, boolean onFire) {
+		callScriptMethod("explodeHook", entity, x, y, z, power, onFire);
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		scriptingInitialized = true;
 		// set up hooks
@@ -1020,6 +1024,10 @@ public class ScriptManager {
 		return uuid;
 	}
 
+	private static void addIcon(String fileName, String url, String textureName, int textureIndex) {
+		AtlasIcon icon = new AtlasIcon(url, textureName, textureIndex);
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native int nativeGetPlayerEnt();
@@ -1240,6 +1248,9 @@ public class ScriptManager {
 	public static native int nativePlayerGetPointedEntity();
 
 	public static native int nativePlayerGetPointedBlock(int type);
+
+	public static native int nativeLevelGetBiome(int x, int z);
+	public static native String nativeLevelGetBiomeName(int x, int z);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1669,6 +1680,18 @@ public class ScriptManager {
 			if (type < 0 || type > 15) throw new RuntimeException("Invalid particle type " + type + ": should be between 0 and 15");
 			nativeLevelAddParticle(type, (float) x, (float) y, (float) z, (float) xVel, (float) yVel, (float) zVel, size);
 		}
+
+		@JSStaticFunction
+		public static int getBiome(int x, int z) {
+			return nativeLevelGetBiome(x, z);
+		}
+
+		@JSStaticFunction
+		public static String getBiomeName(int x, int z) {
+			return nativeLevelGetBiomeName(x, z);
+		}
+
+
 		@Override
 		public String getClassName() {
 			return "Level";
@@ -2286,6 +2309,12 @@ public class ScriptManager {
 			nativeSetItemCategory(id, category, whatever);
 		}
 
+		@JSStaticFunction
+		public static void addIcon(String url, String name, int index) {
+			ScriptManager.addIcon("items", url, name, index);
+		}
+
+
 		@Override
 		public String getClassName() {
 			return "Item";
@@ -2367,6 +2396,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setRenderLayer(int blockId, int layer) {
 			nativeBlockSetRenderLayer(blockId, layer);
+		}
+
+		@JSStaticFunction
+		public static void addIcon(String url, String name, int index) {
+			ScriptManager.addIcon("terrain", url, name, index);
 		}
 
 		@Override

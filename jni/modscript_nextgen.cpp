@@ -229,6 +229,8 @@ static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 static bool (*bl_Level_addEntity_real)(Level*, Entity*);
 static void (*bl_Level_onEntityRemoved_real)(Level*, Entity*);
+static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
+static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -600,6 +602,29 @@ static void bl_Level_onEntityRemoved_hook(Level* level, Entity* entity) {
 		bl_JavaVM->DetachCurrentThread();
 	}
 	bl_Level_onEntityRemoved_real(level, entity);
+}
+
+static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y, float z, float power, bool onFire) {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	preventDefaultStatus = false;
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "explodeCallback", "(IFFFFZ)V");
+
+	int id = entity != NULL? entity->entityId: -1;
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, id, x, y, z, power, onFire);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	if (!preventDefaultStatus) bl_Level_explode_real(level, entity, x, y, z, power, onFire);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -1305,6 +1330,31 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	}
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetBiome
+  (JNIEnv *env, jclass clazz, jint x, jint z) {
+	if (bl_level == NULL) return NULL;
+	TilePos pos;
+	pos.x = x;
+	pos.y = 64;
+	pos.z = z;
+	Biome* biome = bl_TileSource_getBiome(bl_level->tileSource, pos);
+	if (biome == NULL) return NULL;
+	return biome->id;
+}
+
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetBiomeName
+  (JNIEnv *env, jclass clazz, jint x, jint z) {
+	if (bl_level == NULL) return NULL;
+	TilePos pos;
+	pos.x = x;
+	pos.y = 64;
+	pos.z = z;
+	Biome* biome = bl_TileSource_getBiome(bl_level->tileSource, pos);
+	if (biome == NULL) return NULL;
+	jstring retval = env->NewStringUTF(biome->name.c_str());
+	return retval;
+}
+
 void bl_forceTextureLoad(std::string const& name) {
 	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
 	bl_Textures_getTextureData(textures, name);
@@ -1465,6 +1515,8 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level15onEntityRemovedER6Entity");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_onEntityRemoved_hook, (void**) &bl_Level_onEntityRemoved_real);
+
+	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
 	bl_renderManager_init(mcpelibhandle);
 }
 

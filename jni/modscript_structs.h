@@ -1,7 +1,9 @@
 #ifdef __cplusplus
 #define cppstr std::string
 #else
-typedef void cppstr;
+typedef struct {
+	char* contents;
+} cppstr;
 #endif
 
 #ifdef __cplusplus
@@ -100,11 +102,7 @@ typedef struct {
 	float explosionResistance; //120
 	int category1; //124
 	char filler3[8]; //128
-#ifdef __cplusplus
-	std::string descriptionId; //136
-#else
-	int descriptionId; //136
-#endif
+	cppstr descriptionId; //136
 } Tile;
 
 typedef struct {
@@ -183,6 +181,14 @@ typedef struct {
 	Entity* entity; //32
 	unsigned char filler1; //36
 } HitResult;
+
+typedef struct {
+	void** vtable; //0
+	char filler[40]; //4
+	cppstr name; //44 from Biome::setName
+	char filler2[92-48]; //48
+	int id; //92 from Biome::Biome
+} Biome;
 
 #ifdef __cplusplus
 }
