@@ -39,6 +39,10 @@
             android:key="zz_longvibration"
             android:summary="@string/pref_zz_longvibration_summary"
             android:title="@string/pref_zz_longvibration" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="zz_command_history"
+            android:title="@string/pref_zz_command_history" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_gfx_title" >
         <EditTextPreference
@@ -63,6 +67,11 @@
             android:key="zz_legacy_keyboard_input"
             android:summary="@string/pref_zz_legacy_keyboard_input_summary"
             android:title="@string/pref_zz_legacy_keyboard_input" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_legacy_live_patch"
+            android:summary="@string/pref_zz_legacy_live_patch_summary"
+            android:title="@string/pref_zz_legacy_live_patch" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_support_title" >
         <Preference android:title="@string/nerdy_stuff_page" >

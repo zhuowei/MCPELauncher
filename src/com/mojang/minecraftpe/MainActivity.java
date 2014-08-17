@@ -348,7 +348,7 @@ public class MainActivity extends NativeActivity {
 
 		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
-		enableSoftMenuKey();
+		//enableSoftMenuKey();
 
 		java.net.CookieManager cookieManager = new java.net.CookieManager();
 		java.net.CookieHandler.setDefault(cookieManager);
@@ -1344,7 +1344,7 @@ public class MainActivity extends NativeActivity {
 			return;
 		hiddenTextView.post(new Runnable() {
 			public void run() {
-				boolean commandHistory = true;
+				boolean commandHistory = isCommandHistoryEnabled();
 				if (commandHistory) {
 					if (commandHistoryList.size() >= 1 && commandHistoryList.get(commandHistoryList.size() - 1).
 						length() <= 0) {
@@ -1364,7 +1364,7 @@ public class MainActivity extends NativeActivity {
 
 	public void showHiddenTextbox(String text, int maxLength, boolean dismissAfterOneLine) {
 		int IME_FLAG_NO_FULLSCREEN = 0x02000000;
-		boolean commandHistory = true;
+		boolean commandHistory = isCommandHistoryEnabled();
 		if (hiddenTextWindow == null) {
 			if (commandHistory) {
 				commandHistoryView = this.getLayoutInflater().inflate(R.layout.chat_history_popup,
@@ -1560,9 +1560,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void loadTexturePack() {
+		String filePath = null;
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
-			String filePath = Utils.getPrefs(1).getString("texturePack", null);
+			filePath = Utils.getPrefs(1).getString("texturePack", null);
 			if (loadTexturePack && (filePath != null)) {
 				File file = new File(filePath);
 				if (BuildConfig.DEBUG)
@@ -1577,7 +1578,7 @@ public class MainActivity extends NativeActivity {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(this, R.string.texture_pack_unable_to_load, Toast.LENGTH_LONG).show();
+			reportError(e, R.string.texture_pack_unable_to_load, filePath + ": size is " + new File(filePath).length());
 		}
 	}
 
@@ -1701,20 +1702,30 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void reportError(final Throwable t) {
+		reportError(t, R.string.report_error_title, null);
+	}
+
+	private void reportError(final Throwable t, final int messageId, final String extraData) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				final StringWriter strWriter = new StringWriter();
 				PrintWriter pWriter = new PrintWriter(strWriter);
 				t.printStackTrace(pWriter);
+				final String msg;
+				if (extraData != null) {
+					msg = extraData + "\n" + strWriter.toString();
+				} else {
+					msg = strWriter.toString();
+				}
 				new AlertDialog.Builder(MainActivity.this)
-						.setTitle("Oh nose everything broke")
-						.setMessage(strWriter.toString())
+						.setTitle(messageId)
+						.setMessage(msg)
 						.setPositiveButton(android.R.string.ok, null)
 						.setNeutralButton(android.R.string.copy,
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface aDialog, int button) {
 										ClipboardManager mgr = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-										mgr.setText(strWriter.toString());
+										mgr.setText(msg);
 									}
 								}).
 
@@ -1841,12 +1852,16 @@ public class MainActivity extends NativeActivity {
 		nextButton.setEnabled(index != commandHistoryList.size() - 1);
 	}
 
+	private boolean isCommandHistoryEnabled() {
+		return Utils.getPrefs(0).getBoolean("zz_command_history", true);
+	}
+
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Text changed: " + e.toString());
 			nativeSetTextboxText(e.toString());
-			boolean commandHistory = true;
+			boolean commandHistory = isCommandHistoryEnabled();
 			if (commandHistory) {
 				if (BuildConfig.DEBUG) {
 					Log.i(TAG, commandHistoryIndex + ":" + commandHistoryList);

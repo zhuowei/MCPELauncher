@@ -227,7 +227,8 @@ static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
-static int (*bl_LevelRenderer_fixedViewDistance_real)(void*);
+static bool (*bl_Level_addEntity_real)(Level*, Entity*);
+static void (*bl_Level_onEntityRemoved_real)(Level*, Entity*);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -554,6 +555,51 @@ int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 		bl_entityUUIDMap[entityId] = newuuid;
 	}*/
 	return bl_Entity_load_real(entity, compoundTag);
+}
+
+static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
+	JNIEnv *env;
+
+	bool retval = bl_Level_addEntity_real(level, entity);
+
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	return retval;
+}
+
+static void bl_Level_onEntityRemoved_hook(Level* level, Entity* entity) {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	bl_removedEntity = entity;
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
+
+	bl_removedEntity = NULL;
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	bl_Level_onEntityRemoved_real(level, entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -1415,6 +1461,10 @@ void bl_setuphooks_cppside() {
 	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
+	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityEP6Entity");
+	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level15onEntityRemovedER6Entity");
+	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_onEntityRemoved_hook, (void**) &bl_Level_onEntityRemoved_real);
 	bl_renderManager_init(mcpelibhandle);
 }
 

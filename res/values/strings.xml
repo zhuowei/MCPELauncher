@@ -165,5 +165,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="pref_zz_legacy_live_patch_summary">Turn this on if BlockLauncher stopped working after the 1.6.9 update.</string>
     <string name="previous_command">Prev</string>
     <string name="next_command">Next</string>
+    <string name="pref_zz_command_history">Enable command history on chat screen</string>
     <string name="advertising_privacy_policy">Advertising privacy policy</string>
+    <string name="report_error_title">Oh nose everything broke</string>
 </resources>
