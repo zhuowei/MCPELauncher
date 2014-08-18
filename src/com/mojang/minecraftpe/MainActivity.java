@@ -1523,6 +1523,7 @@ public class MainActivity extends NativeActivity {
 		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", false))
 			return;
 		PackageManager pm = getPackageManager();
+		AddonManager addonManager = AddonManager.getAddonManager(this);
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 		for (ApplicationInfo app : apps) {
 			if (app.metaData == null)
@@ -1530,7 +1531,9 @@ public class MainActivity extends NativeActivity {
 			String nativeLibName = app.metaData
 					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
 			if (nativeLibName != null
-					&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) == PackageManager.PERMISSION_GRANTED) {
+				&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
+					PackageManager.PERMISSION_GRANTED
+				&& addonManager.isEnabled(app.packageName)) {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);

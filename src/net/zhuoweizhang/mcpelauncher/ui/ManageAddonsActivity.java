@@ -27,6 +27,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 
+import net.zhuoweizhang.mcpelauncher.AddonManager;
+
 @SuppressWarnings("deprecation")
 public class ManageAddonsActivity extends ListActivity {
 
@@ -117,20 +119,22 @@ public class ManageAddonsActivity extends ListActivity {
 
 	protected void setAddonListModified() {
 		setResult(RESULT_OK);
-		Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
+		//Utils.getPrefs(1).edit().putBoolean("force_prepatch", true).apply();
 	}
 
 	private void findAddons() {
 		PackageManager pm = getPackageManager();
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 		List<AddonListItem> addonListItems = new ArrayList<AddonListItem>();
+		AddonManager manager = AddonManager.getAddonManager(this);
 		for (ApplicationInfo app : apps) {
 			if (app.metaData == null)
 				continue;
 			String nativeLibName = app.metaData
 					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
 			if (nativeLibName != null) {
-				AddonListItem itm = new AddonListItem(app, true);
+				boolean enabled = manager.isEnabled(app.packageName);
+				AddonListItem itm = new AddonListItem(app, enabled);
 				itm.displayName = pm.getApplicationLabel(app).toString() + " " + itm.displayName;
 				addonListItems.add(itm);
 			}
@@ -140,6 +144,14 @@ public class ManageAddonsActivity extends ListActivity {
 
 	private void receiveAddons(List<AddonListItem> addons) {
 		this.addons = addons;
+
+		List<String> allPaths = new ArrayList<String>(addons.size());
+		for (AddonListItem i : addons) {
+			String name = i.appInfo.packageName;
+			allPaths.add(name);
+		}
+		AddonManager.getAddonManager(this).removeDeadEntries(allPaths);
+
 		ArrayAdapter<AddonListItem> adapter = new ArrayAdapter<AddonListItem>(this,
 				R.layout.patch_list_item, addons);
 		adapter.sort(new AddonListComparator());
@@ -148,9 +160,7 @@ public class ManageAddonsActivity extends ListActivity {
 
 	private void openManageAddonWindow(AddonListItem item) {
 		this.selectedAddonItem = item;
-		// showDialog(item.enabled? DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED :
-		// DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED);
-		showDialog(DIALOG_MANAGE_PATCH);
+		showDialog(item.enabled? DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED : DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED);
 	}
 
 	public Dialog onCreateDialog(int dialogId) {
@@ -180,6 +190,13 @@ public class ManageAddonsActivity extends ListActivity {
 	}
 
 	public void toggleAddon(AddonListItem addon) {
+		AddonManager.getAddonManager(this).setEnabled(addon.appInfo.packageName, !addon.enabled);
+		addon.enabled = !addon.enabled;
+		afterAddonToggle(addon);
+	}
+
+	private void afterAddonToggle(AddonListItem patch) {
+		setAddonListModified(); // should really be called requestPrePatch
 	}
 
 	public void deleteAddon(AddonListItem addon) throws Exception {
