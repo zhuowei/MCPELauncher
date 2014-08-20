@@ -1252,6 +1252,15 @@ public class ScriptManager {
 	public static native int nativeLevelGetBiome(int x, int z);
 	public static native String nativeLevelGetBiomeName(int x, int z);
 
+	public static native int nativeLevelGetGrassColor(int x, int z);
+	public static native void nativeLevelSetGrassColor(int x, int z, int val);
+
+	public static native boolean nativePlayerIsFlying();
+	public static native void nativePlayerSetFlying(boolean val);
+
+	public static native boolean nativePlayerCanFly();
+	public static native void nativePlayerSetCanFly(boolean val);
+
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -1691,6 +1700,15 @@ public class ScriptManager {
 			return nativeLevelGetBiomeName(x, z);
 		}
 
+		@JSStaticFunction
+		public static int getGrassColor(int x, int z) {
+			return nativeLevelGetGrassColor(x, z);
+		}
+
+		@JSStaticFunction
+		public static void setGrassColor(int x, int z, int color) {
+			nativeLevelSetGrassColor(x, z, color);
+		}
 
 		@Override
 		public String getClassName() {
@@ -1852,6 +1870,26 @@ public class ScriptManager {
 		 * itemId, int count, int damage) { nativeSetInventorySlot(slot, itemId,
 		 * count, damage); }
 		 */
+
+		@JSStaticFunction
+		public static boolean isFlying() {
+			return nativePlayerIsFlying();
+		}
+
+		@JSStaticFunction
+		public static void setFlying(boolean val) {
+			nativePlayerSetFlying(val);
+		}
+
+		@JSStaticFunction
+		public static boolean canFly() {
+			return nativePlayerCanFly();
+		}
+
+		@JSStaticFunction
+		public static void setCanFly(boolean val) {
+			nativePlayerSetCanFly(val);
+		}
 
 		@Override
 		public String getClassName() {

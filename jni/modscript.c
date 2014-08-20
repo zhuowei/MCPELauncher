@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <android/log.h>
 #include <jni.h>
@@ -12,7 +13,7 @@
 
 #define DLSYM_DEBUG
 
-typedef uint8_t cppbool;
+typedef bool cppbool;
 
 #include "modscript_structs.h"
 

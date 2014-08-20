@@ -58,6 +58,8 @@ typedef void Font;
 #define MINECRAFT_HIT_RESULT_OFFSET 2684
 // found in TouchscreenInput::canInteract
 #define MINECRAFT_HIT_ENTITY_OFFSET 2716
+// found in GameMode::initPlayer
+#define PLAYER_ABILITIES_OFFSET 3168
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -231,6 +233,8 @@ static bool (*bl_Level_addEntity_real)(Level*, Entity*);
 static void (*bl_Level_onEntityRemoved_real)(Level*, Entity*);
 static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
 static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
+static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
+static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1355,6 +1359,54 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return retval;
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetGrassColor
+  (JNIEnv *env, jclass clazz, jint x, jint z) {
+	if (bl_level == NULL) return NULL;
+	TilePos pos;
+	pos.x = x;
+	pos.y = 64;
+	pos.z = z;
+	return bl_TileSource_getGrassColor(bl_level->tileSource, pos);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetGrassColor
+  (JNIEnv *env, jclass clazz, jint x, jint z, jint color) {
+	if (bl_level == NULL) return;
+	TilePos pos;
+	pos.x = x;
+	pos.y = 64;
+	pos.z = z;
+	bl_TileSource_setGrassColor(bl_level->tileSource, color, pos, 3); //if you recall, 3 = full block update
+}
+
+static Abilities* bl_getAbilities(Player* player) {
+	return ((Abilities*) ((uintptr_t) player + PLAYER_ABILITIES_OFFSET));
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerIsFlying
+  (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return false;
+	return bl_getAbilities(bl_localplayer)->flying;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetFlying
+  (JNIEnv *env, jclass clazz, jboolean val) {
+	if (bl_localplayer == NULL) return;
+	bl_getAbilities(bl_localplayer)->flying = val;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerCanFly
+  (JNIEnv *env, jclass clazz) {
+	if (bl_localplayer == NULL) return false;
+	return bl_getAbilities(bl_localplayer)->mayFly;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetCanFly
+  (JNIEnv *env, jclass clazz, jboolean val) {
+	if (bl_localplayer == NULL) return;
+	bl_getAbilities(bl_localplayer)->mayFly = val;
+}
+
 void bl_forceTextureLoad(std::string const& name) {
 	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
 	bl_Textures_getTextureData(textures, name);
@@ -1517,6 +1569,9 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_onEntityRemoved_hook, (void**) &bl_Level_onEntityRemoved_real);
 
 	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
+	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
+	bl_TileSource_setGrassColor = (void (*)(TileSource*, int, TilePos&, int))
+		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
 	bl_renderManager_init(mcpelibhandle);
 }
 

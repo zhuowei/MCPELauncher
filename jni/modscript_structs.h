@@ -27,7 +27,7 @@ typedef struct {
 typedef struct {
 	void** vtable; //0
 	char filler[4]; //4
-	cppbool isRemote; //8?
+	bool isRemote; //8?
 	char filler2[2963];//9
 	TileSource* tileSource;//2972
 } Level;
@@ -74,8 +74,8 @@ typedef struct {
 	cppstr* description; //36
 	char filler[20]; //40
 	int category1; //60
-	cppbool idunnobool1; //64
-	cppbool stackedByData; //65
+	bool idunnobool1; //64
+	bool stackedByData; //65
 } Item;
 
 typedef struct {
@@ -83,10 +83,10 @@ typedef struct {
 	int damage; //4
 	Item* item;//8
 	void* block; //12
-	cppbool wtf; //16
-	cppbool wtf2; //17
-	cppbool wtf3; //18
-	cppbool wtf4; //19
+	bool wtf; //16
+	bool wtf2; //17
+	bool wtf3; //18
+	bool wtf4; //19
 } ItemInstance;
 
 typedef struct {
@@ -111,7 +111,7 @@ typedef struct {
 
 // from ModelPart::setPos, ModelPart::setTexSize
 typedef struct {
-	cppbool transparent; //0
+	bool transparent; //0
 	char filler0[3]; //1
 	float offsetX; //4
 	float offsetY; //8
@@ -189,6 +189,13 @@ typedef struct {
 	char filler2[92-48]; //48
 	int id; //92 from Biome::Biome
 } Biome;
+
+typedef struct {
+	bool invulnerable; // from Desktop Edition's PlayerAbilities and also CreativeMode::initAbilities
+	bool flying;
+	bool mayFly;
+	bool instabuild;
+} Abilities;
 
 #ifdef __cplusplus
 }
