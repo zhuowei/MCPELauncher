@@ -2,6 +2,7 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.FileReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.PrintWriter;
@@ -14,12 +15,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import java.util.zip.*;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -166,6 +170,10 @@ public class ScriptManager {
 			if (!scriptingEnabled)
 				throw new RuntimeException("Not available in multiplayer");
 			loadScriptFromInstance(ScriptTranslationCache.get(androidContext, file), file.getName());
+			return;
+		}
+		if (isPackagedScript(file)) {
+			loadPackagedScript(file);
 			return;
 		}
 		Reader in = null;
@@ -1026,6 +1034,35 @@ public class ScriptManager {
 
 	private static void addIcon(String fileName, String url, String textureName, int textureIndex) {
 		AtlasIcon icon = new AtlasIcon(url, textureName, textureIndex);
+	}
+
+	private static boolean isPackagedScript(File file) {
+		return file.getName().toLowerCase().endsWith(".modpkg");
+	}
+
+	private static void loadPackagedScript(File file) throws IOException {
+		ZipFile zipFile = null;
+		try {
+			zipFile = new ZipFile(file);
+			ZipEntry entry;
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while(entries.hasMoreElements()) {
+				entry = entries.nextElement();
+				Reader reader = null;
+				String name = entry.getName();
+				System.out.println(name);
+				if (!name.startsWith("script/") || !name.toLowerCase().endsWith(".js")) continue;
+				try {
+					reader = new InputStreamReader(zipFile.getInputStream(entry));
+					loadScript(reader, file.getName());
+				} finally {
+					if (reader != null) reader.close();
+				}
+				break;
+			}
+		} finally {
+			if (zipFile != null) zipFile.close();
+		}
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);

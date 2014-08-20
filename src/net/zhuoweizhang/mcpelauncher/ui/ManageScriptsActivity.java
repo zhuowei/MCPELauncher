@@ -72,7 +72,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	private static final int REQUEST_IMPORT_PATCH = 212;
 
-	private static final String[] ALL_SCRIPT_MIMETYPES = {"application/javascript", "text/coffeescript", "text/literate-coffeescript"};
+	private static final String[] ALL_SCRIPT_MIMETYPES = {"application/javascript", "text/coffeescript", "text/literate-coffeescript",
+		"application/x-mpep"};
 	
 	private Thread refreshThread;
 

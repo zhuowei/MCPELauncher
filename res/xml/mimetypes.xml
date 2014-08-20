@@ -4,4 +4,5 @@
 <type mimetype="application/javascript" extension=".js"/>
 <type mimetype="text/coffeescript" extension=".coffee"/>
 <type mimetype="text/literate-coffeescript" extension=".litcoffee"/>
+<type mimetype="application/x-mpep" extension=".modpkg"/>
 </MimeTypes>
