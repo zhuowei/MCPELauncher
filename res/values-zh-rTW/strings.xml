@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!--Memo: Chinese Traditional translation by PEMapModder-->
     <!--Memo: edwinyoo44 for again-->
     <string name="pref_ctrl_touchscreen">使用觸控螢幕</string>
