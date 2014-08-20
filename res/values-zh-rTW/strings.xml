@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!--Memo: Chinese Traditional translation rewritten by ヾ夜の曲_edwinyoo44-->
-    <!--<string name="textOn" translatable="false" tools:ignore="MissingTranslation">ON</string>
-    <string name="textOff" translatable="false" tools:ignore="MissingTranslation">OFF</string>-->
+    <!--Memo: Chinese Traditional translation by PEMapModder-->
+    <!--Memo: edwinyoo44 for again-->
     <string name="pref_ctrl_touchscreen">使用觸控螢幕</string>
     <string name="pref_ctrl_touchscreen_summary">如果你不是使用Xperia，請選擇這個</string>
     <string name="pref_mp_username">多人遊戲玩家名稱</string>
@@ -10,7 +9,7 @@
     <string name="pref_texture_pack">材質包</string>
     <string name="pref_texture_pack_summary">更換材質包</string>
     <string name="pref_zz_longvibration">超長震機</string>
-    <string name="pref_zz_longvibration_summary">震機時間延長至５倍</string> <!--Make it clear - increase vibration to x ms * 5 = 5 ms or x ms * (1 + 5) = 6 ms? (increase to 5 times or increase by 5 times?)-->
+    <string name="pref_zz_longvibration_summary">破壞震動延長五倍</string>
     <string name="pref_zz_safe_mode">安全模式</string>
     <string name="pref_zz_safe_mode_summary">停用所有修改</string>
     <string name="pref_zz_texture_pack_enable">使用材質包</string>
@@ -41,7 +40,7 @@
     <string name="pref_zz_hovercar_hide">隱藏設定按鈕</string>
     <string name="pref_zz_redirect_mco">重新導向至第三方伺服器列表</string>
     <string name="pref_zz_manage_scripts">管理插件(.js)</string>
-    <string name="pref_zz_script_enable">啟用支援插件(.js)</string>
+    <string name="pref_zz_script_enable">管理插件(.js)</string>
     <string name="pref_zz_sensorcontrol">控制感應器</string>
     <string name="pref_zz_sensorcontrol_summary">轉動裝置來控制玩家方向【必需啟用支援插件(.js)】</string>
     <string name="pref_zz_show_insert_text">在遊戲中模組管理器顯示“輸入文字”選項</string>
@@ -89,7 +88,7 @@
     <string name="skin_imported">皮膚設定成功</string>
     <string name="texturepack_imported">材質包設定成功</string>
     <string name="script_imported">插件(.js)設定成功</string>
-    <string name="manage_addons">管理插件</string>
+    <string name="manage_addons">啟用支援插件(.js)</string>
     <string name="get_pro">升級到完整版</string>
     <string name="about_about">關於 BlockLauncher</string>
     <string name="about_copyright">版權所有© 2013-2014 Zhuowei Zhang</string>
@@ -101,8 +100,7 @@
 本程式包含了 Saurik 的 Cydia Substrate framework 的一個版本。Cydia Substrate framework 的使用授權條款︰ GNU Lesser General Public License.\n
 本程式使用了 Chainfire 的 libsuperuser library。\n
 本程式包含了 Mozilla project 的 Rhino JavaScript engine 的一個版本。\n
-在Minecraft Forums 上查看完整條款資訊。\n
-ヾ夜の曲_繁化組 edwinyoo44 翻譯 \n </string>
+在Minecraft Forums 上查看完整條款資訊。\n </string>
     <string name="about_pro_library_credits"></string>
     <string name="about_thankscommunity"> 本程式由很多有才華的翻譯員、測試員及程式設計員協助完成。謝謝。\n按下面的按鈕查看為本程式作出貢獻的人員列表。 </string>
     <string name="about_go_to_forums">打開在 Minecraft 論壇上的 BlockLauncher 頁面</string>
@@ -150,18 +148,18 @@
     <string name="textures_select">選擇</string>
     <string name="textures_demo">模擬</string>
     <string name="textures_extract">提取原始</string>
-    <!--<string name="textures_clear_script_texture_overrides">Clear script texture overrides</string>
-    <string name="plurals_patches_one">patch</string>
-    <string name="plurals_patches_more">patches</string>
-    <string name="plurals_patches_no">No patches</string>
-    <string name="plurals_scripts_one">script</string>
-    <string name="plurals_scripts_more">scripts</string>
-    <string name="plurals_scripts_no">No scripts</string>
-    <string name="nerdy_stuff_dump_modpe">Dump ModPE Script methods</string>
-    <string name="nerdy_stuff_set_skin">Set skin to /sdcard/skin.png</string>
-    <string name="nerdy_stuff_secret">Authorized personnel only</string>
-    <string name="pref_other_title">Other</string>
-    <string name="pref_zz_legacy_live_patch">Use old live patching code from BlockLauncher 1.6.8</string>
-    <string name="pref_zz_legacy_live_patch_summary">Turn this on if BlockLauncher stopped working after the 1.6.9 update.</string>-->
+    <string name="textures_clear_script_texture_overrides">Clear script texture overrides</string>
+    <string name="plurals_patches_one">模組</string>
+    <string name="plurals_patches_more">模組</string>
+    <string name="plurals_patches_no">無模組</string>
+    <string name="plurals_scripts_one">插件</string>
+    <string name="plurals_scripts_more">插件</string>
+    <string name="plurals_scripts_no">無插件</string>
+    <string name="nerdy_stuff_dump_modpe">製作MCPE插件方法</string>
+    <string name="nerdy_stuff_set_skin">設定皮膚在 /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">只有經過授權的人員</string>
+    <string name="pref_other_title">其他</string>
+    <string name="pref_zz_legacy_live_patch">使用1.6.8舊的直播代碼</string>
+    <string name="pref_zz_legacy_live_patch_summary">如果BlockLauncher無法在1.6.9運行，請開啟這選項</string>
 
 </resources>
