@@ -60,6 +60,9 @@ typedef void Font;
 #define MINECRAFT_HIT_ENTITY_OFFSET 2716
 // found in GameMode::initPlayer
 #define PLAYER_ABILITIES_OFFSET 3168
+// found in Minecraft constructor
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3160
+#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -1197,8 +1200,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_sendPacket(void* packet) {
-	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + 3144));
-	void* vtable = ((void***) bl_raknet)[0][14];
+	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
+	void* vtable = ((void***) bl_raknet)[0][RAKNET_INSTANCE_VTABLE_OFFSET_SEND];
 	void (*fn)(void*, void*) = (void (*) (void*, void*)) vtable;
 	fn(bl_raknet, packet);
 }
