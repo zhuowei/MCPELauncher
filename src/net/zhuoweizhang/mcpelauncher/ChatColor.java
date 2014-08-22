@@ -17,5 +17,7 @@ public class ChatColor {
 	RED = BEGIN + "c",
 	LIGHT_PURPLE = BEGIN + "d",
 	YELLOW = BEGIN + "e",
-	WHITE = BEGIN + "f";
+	WHITE = BEGIN + "f",
+	BOLD = BEGIN + "l",
+	RESET = BEGIN + "r";
 }

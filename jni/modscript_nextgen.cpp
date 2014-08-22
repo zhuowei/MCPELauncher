@@ -69,6 +69,8 @@ typedef void Font;
 #define BLOCK_DATA (0x10 + 1)
 #define BLOCK_SIDE (0x10 + 2)
 
+#define TEXT_BOLD 1
+
 typedef struct {
 	//union {
 	//	std::map<const int, int> pack;
@@ -307,6 +309,7 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 		//int lengthOfStringRemaining = length;
 		float substringOffset = xOffset; //where we draw the currently coloured section
 		int curColor = color; //the colour for the current section
+		int flags = 0;
 		//Loop through the string.
 		//When we find the first colour control character:
 		//call draw with text pointer at original position and length num of characters already scanned
@@ -330,18 +333,28 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 				if (bytesAdvanced < 0 || myChar < 0) break;
 				iteratePtr += bytesAdvanced;
 
-				int newColor = color;
+				int newColor = curColor;
+				bool newFlags = flags;
 				if (myChar >= '0' && myChar <= '9') {
 					newColor = bl_minecraft_colors[myChar - '0'];
 				} else if (myChar >= 'a' && myChar <= 'f') {
 					newColor = bl_minecraft_colors[myChar - 'a' + 10];
+				} else if (myChar == 'l') {
+					newFlags |= TEXT_BOLD;
+				} else if (myChar == 'r') {
+					newFlags = 0;
 				}
 
 				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+				if (flags & TEXT_BOLD) {
+					bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset + 1, yOffset,
+						curColor, isShadow);
+				}
 				std::string cppStringForWidth = std::string(currentTextBegin, currentLength);
 				substringOffset += bl_Font_width(font, cppStringForWidth);
 
 				curColor = newColor;
+				flags = newFlags;
 				currentTextBegin = (const char *) iteratePtr;
 				currentLength = 0;
 
@@ -351,6 +364,10 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 		}
 		if (currentLength > 0) {
 			bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+			if (flags & TEXT_BOLD) {
+				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset + 1, yOffset,
+					curColor, isShadow);
+			}
 		}
 	} else {
 		bl_Font_drawSlow_real(font, text, length, xOffset, yOffset, color, isShadow);
@@ -1567,6 +1584,9 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level15onEntityRemovedER6Entity");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_onEntityRemoved_hook, (void**) &bl_Level_onEntityRemoved_real);
+
+	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeEP6Entityffffb");
+	mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
 	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
 	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");

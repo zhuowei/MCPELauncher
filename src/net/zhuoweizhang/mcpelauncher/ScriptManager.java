@@ -1050,7 +1050,6 @@ public class ScriptManager {
 				entry = entries.nextElement();
 				Reader reader = null;
 				String name = entry.getName();
-				System.out.println(name);
 				if (!name.startsWith("script/") || !name.toLowerCase().endsWith(".js")) continue;
 				try {
 					reader = new InputStreamReader(zipFile.getInputStream(entry));
