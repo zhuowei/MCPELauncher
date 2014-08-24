@@ -14,6 +14,7 @@ import net.zhuoweizhang.mcpelauncher.Utils;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.*;
 import de.ankri.views.Switch;
@@ -277,6 +278,11 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		goToForumsPreference = findPreference("zz_go_to_forums");
 		if (goToForumsPreference != null) {
 			goToForumsPreference.setOnPreferenceClickListener(this);
+		}
+
+		Preference immersiveModePreference = findPreference("zz_immersive_mode");
+		if (immersiveModePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+			getPreferenceScreen().removePreference(immersiveModePreference);
 		}
 	}
 

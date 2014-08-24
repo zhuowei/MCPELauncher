@@ -166,6 +166,8 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="previous_command">Prev</string>
     <string name="next_command">Next</string>
     <string name="pref_zz_command_history">Enable command history on chat screen</string>
+    <string name="pref_zz_immersive_mode">Enable immersive mode</string>
+    <string name="pref_zz_immersive_mode_summary">Hide the navigation buttons during gameplay</string>
     <string name="advertising_privacy_policy">Advertising privacy policy</string>
     <string name="report_error_title">Oh nose everything broke</string>
 </resources>

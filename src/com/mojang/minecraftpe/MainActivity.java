@@ -389,6 +389,7 @@ public class MainActivity extends NativeActivity {
 		} else {
 			hoverCar.setVisible(!Utils.getPrefs(0).getBoolean("zz_hovercar_hide", false));
 		}
+		setImmersiveMode(Utils.getPrefs(0).getBoolean("zz_immersive_mode", false));
 
 	}
 
@@ -1857,6 +1858,18 @@ public class MainActivity extends NativeActivity {
 
 	private boolean isCommandHistoryEnabled() {
 		return Utils.getPrefs(0).getBoolean("zz_command_history", true);
+	}
+
+	private void setImmersiveMode(boolean set) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
+		int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
+		int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+		if (set) {
+			uiOptions |= flags;
+		} else {
+			uiOptions &= ~flags;
+		}
+		getWindow().getDecorView().setSystemUiVisibility(uiOptions);
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

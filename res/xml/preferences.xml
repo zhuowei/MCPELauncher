@@ -51,6 +51,11 @@
             android:key="zz_custom_dpi"
             android:summary="@string/pref_zz_custom_dpi_summary"
             android:title="@string/pref_zz_custom_dpi" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_immersive_mode"
+            android:title="@string/pref_zz_immersive_mode"
+            android:summary="@string/pref_zz_immersive_mode_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_other_title" >
