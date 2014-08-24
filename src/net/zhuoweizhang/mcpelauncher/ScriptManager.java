@@ -221,6 +221,8 @@ public class ScriptManager {
 					classConstantsToJSObject(ParticleType.class));
 			ScriptableObject.putProperty(scope, "EntityType",
 					classConstantsToJSObject(EntityType.class));
+			ScriptableObject.putProperty(scope, "EntityRenderType",
+					classConstantsToJSObject(EntityRenderType.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);

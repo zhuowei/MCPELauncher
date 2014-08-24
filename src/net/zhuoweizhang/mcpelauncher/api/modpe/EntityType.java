@@ -1,4 +1,4 @@
-package net.zhuoweizhang.mcpelauncher;
+package net.zhuoweizhang.mcpelauncher.api.modpe;
 
 public class EntityType {
 	public static final int CHICKEN = 10;
