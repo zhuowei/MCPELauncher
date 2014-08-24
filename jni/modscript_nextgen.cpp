@@ -1427,6 +1427,38 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	bl_getAbilities(bl_localplayer)->mayFly = val;
 }
 
+static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
+	unsigned int diff = newpc - curpc;
+	unsigned int shiftdiff = (diff >> 1);
+	unsigned int lowerHalf = shiftdiff & 0x7ff;
+	unsigned int topHalf = (shiftdiff >> 11) & 0x7ff;
+	unsigned int topInst = topHalf | 0xf000;
+	unsigned int bottomInst = lowerHalf | 0xf800;
+	buffer[0] = (uint16_t) topInst;
+	buffer[1] = (uint16_t) bottomInst;
+}
+
+void* bl_marauder_translation_function(void* input);
+static void patchUnicodeFont(void* mcpelibhandle) {
+	void* setUnicodeTexture = dlsym(mcpelibhandle, "_ZN4Font17setUnicodeTextureEi");
+	if (setUnicodeTexture == NULL) return;
+	void* loadTexture = dlsym(mcpelibhandle, "_ZN8Textures11loadTextureERKSsbb");
+	void* getTextureData = dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
+	uint16_t* setUnicodeTexture_b = (uint16_t*) ((uintptr_t) setUnicodeTexture & ~1);
+	int offset = 0x267eb0 - 0x267e74;
+	uint16_t buf[2];
+	generateBl(buf, ((uintptr_t) setUnicodeTexture) + offset + 4, (uintptr_t) loadTexture);
+	if (buf[0] != setUnicodeTexture_b[offset >> 1] || buf[1] != setUnicodeTexture_b[(offset >> 1) + 1]) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "not buf: %x %x %x %x",
+			(int) buf[0], (int) buf[1], (int) setUnicodeTexture_b[offset >> 1], (int) setUnicodeTexture_b[(offset >> 1) + 1]);
+		return;
+	}
+	generateBl(buf, ((uintptr_t) setUnicodeTexture) + offset + 4, (uintptr_t) getTextureData);
+	uint16_t* setUnicodeTexture_m = (uint16_t*) bl_marauder_translation_function((void*) setUnicodeTexture_b);
+	setUnicodeTexture_m[offset >> 1] = buf[0];
+	setUnicodeTexture_m[(offset >> 1) + 1] = buf[1];
+}
+
 void bl_forceTextureLoad(std::string const& name) {
 	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
 	bl_Textures_getTextureData(textures, name);
@@ -1595,6 +1627,7 @@ void bl_setuphooks_cppside() {
 	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
 	bl_TileSource_setGrassColor = (void (*)(TileSource*, int, TilePos&, int))
 		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
+	patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
 }
 
