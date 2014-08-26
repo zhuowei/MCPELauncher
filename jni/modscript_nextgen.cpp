@@ -240,6 +240,7 @@ static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float
 static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
 static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
 static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
+static void (*bl_TileSource_fireTileEvent_real)(TileSource* source, int x, int y, int z, int type, int data);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -649,6 +650,26 @@ static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y
 		bl_JavaVM->DetachCurrentThread();
 	}
 	if (!preventDefaultStatus) bl_Level_explode_real(level, entity, x, y, z, power, onFire);
+}
+
+static void bl_TileSource_fireTileEvent_hook(TileSource* source, int x, int y, int z, int type, int data) {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "blockEventCallback", "(IIIII)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, x, y, z, type, data);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	bl_TileSource_fireTileEvent_real(source, x, y, z, type, data);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -1356,13 +1377,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetBiome
   (JNIEnv *env, jclass clazz, jint x, jint z) {
-	if (bl_level == NULL) return NULL;
+	if (bl_level == NULL) return 0;
 	TilePos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
 	Biome* biome = bl_TileSource_getBiome(bl_level->tileSource, pos);
-	if (biome == NULL) return NULL;
+	if (biome == NULL) return 0;
 	return biome->id;
 }
 
@@ -1381,7 +1402,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetGrassColor
   (JNIEnv *env, jclass clazz, jint x, jint z) {
-	if (bl_level == NULL) return NULL;
+	if (bl_level == NULL) return 0;
 	TilePos pos;
 	pos.x = x;
 	pos.y = 64;
@@ -1627,6 +1648,10 @@ void bl_setuphooks_cppside() {
 	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
 	bl_TileSource_setGrassColor = (void (*)(TileSource*, int, TilePos&, int))
 		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
+
+	void* fireTileEvent = dlsym(mcpelibhandle, "_ZN10TileSource13fireTileEventEiiiii");
+	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
+
 	patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
 }
