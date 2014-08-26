@@ -12,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +33,8 @@ import android.util.Log;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
 import org.mozilla.javascript.annotations.JSStaticFunction;
+
+import org.json.*;
 
 import com.mojang.minecraftpe.MainActivity;
 
@@ -109,6 +112,7 @@ public class ScriptManager {
 	private static int serverPort = 0;
 	private static Map<Integer, String> entityUUIDMap = new HashMap<Integer, String>();
 	private static boolean nextTickCallsSetLevel = false;
+	private static AtlasMeta terrainMeta, itemsMeta;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -487,6 +491,7 @@ public class ScriptManager {
 		scripts.clear();
 		entityList = new NativeArray(0);
 		androidContext = cxt.getApplicationContext();
+		loadAtlasMeta();
 		// loadEnabledScripts(); Minecraft blocks wouldn't be initialized when
 		// this is called
 		// call it before the first frame renders
@@ -1064,6 +1069,35 @@ public class ScriptManager {
 		} finally {
 			if (zipFile != null) zipFile.close();
 		}
+	}
+
+	private static void verifyBlockTextures(TextureRequests requests) {
+		if (terrainMeta == null) return;
+		for (int i = 0; i < requests.names.length; i++) {
+			if (!terrainMeta.hasIcon(requests.names[i], requests.coords[i])) {
+				throw new IllegalArgumentException("The requested block texture " +
+					requests.names[i] + ":" + requests.coords[i] + " does not exist");
+			}
+		}
+	}
+
+	private static void loadAtlasMeta() {
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				try {
+					terrainMeta = loadOneAtlasMeta(main, "terrain.meta");
+					itemsMeta = loadOneAtlasMeta(main, "items.meta");
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private static AtlasMeta loadOneAtlasMeta(MainActivity activity, String name) throws JSONException {
+		byte[] bytes = activity.getFileDataBytes(name);
+		return new AtlasMeta(new JSONArray(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
@@ -2184,6 +2218,9 @@ public class ScriptManager {
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
 			}
+			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
+				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
+			}
 			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
 		}
 
@@ -2198,6 +2235,9 @@ public class ScriptManager {
 			}
 			if (id < 0 || id >= 512) {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
+				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
 			}
 			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
 		}
@@ -2423,6 +2463,7 @@ public class ScriptManager {
 				Log.i("BlockLauncher", "setting renderType to " + renderType);
 			}
 			TextureRequests finalTextures = expandTexturesArray(textures);
+			verifyBlockTextures(finalTextures);
 			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
 					materialSourceId, opaque, renderType);
 		}

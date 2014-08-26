@@ -7,6 +7,7 @@ public class AtlasMeta {
 
 	public JSONArray data;
 	public List<AtlasIcon> addedIcons = new ArrayList<AtlasIcon>();
+	private Map<String, JSONObject> nameMap = new HashMap<String, JSONObject>();
 	public boolean[] occupied;
 	public int width, height;
 	public int tileWidth;
@@ -37,6 +38,7 @@ public class AtlasMeta {
 	private void calculateOccupied() throws JSONException {
 		for (int i = 0; i < data.length(); i++) {
 			JSONObject entry = data.getJSONObject(i);
+			nameMap.put(entry.getString("name"), entry);
 			JSONArray uvs = entry.getJSONArray("uvs");
 			for (int u = 0; u < uvs.length(); u++) {
 				JSONArray uv = uvs.getJSONArray(u);
@@ -80,6 +82,18 @@ public class AtlasMeta {
 			return arr;
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public boolean hasIcon(String name, int index) {
+		try {
+			JSONObject texItem = nameMap.get(name);
+			if (texItem == null) return false;
+			JSONArray uvs = texItem.getJSONArray("uvs");
+			if (index >= uvs.length()) return false;
+			return true;
+		} catch (JSONException e) {
+			return false;
 		}
 	}
 }

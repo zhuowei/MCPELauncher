@@ -172,6 +172,7 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		currentMainActivity = new WeakReference<MainActivity>(this);
 		if (hasAlreadyInited) {
 			globalRestart = true;
 			if (lastDestroyTime != 0) {
@@ -362,8 +363,6 @@ public class MainActivity extends NativeActivity {
 		}
 
 		System.gc();
-
-		currentMainActivity = new WeakReference<MainActivity>(this);
 
 	}
 
@@ -885,12 +884,14 @@ public class MainActivity extends NativeActivity {
 	}
 	public byte[] getFileDataBytes(String name) {
 		byte[] bytes = getFileDataBytes(name, false);
+		/*
 		if (name.endsWith(".meta")) { // hack for people trying to use 0.8.1 textures on 0.9.0
 			String fileStr = new String(bytes, Charset.forName("UTF-8"));
 			if (fileStr.contains("additonal_textures")) {
 				bytes = getFileDataBytes(name, true);
 			}
 		}
+		*/
 		return bytes;
 	}
 
