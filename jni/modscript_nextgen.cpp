@@ -1272,14 +1272,18 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	return entity->riding->entityId;
+	Entity* riding = entity->riding;
+	if (riding == NULL) return -1;
+	return riding->entityId;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRider
   (JNIEnv *env, jclass clazz, jint entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	return entity->rider->entityId;
+	Entity* rider = entity->rider;
+	if (rider == NULL) return -1;
+	return rider->entityId;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin

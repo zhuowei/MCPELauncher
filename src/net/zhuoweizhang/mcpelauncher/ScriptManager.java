@@ -1096,7 +1096,7 @@ public class ScriptManager {
 	}
 
 	private static AtlasMeta loadOneAtlasMeta(MainActivity activity, String name) throws JSONException {
-		byte[] bytes = activity.getFileDataBytes(name);
+		byte[] bytes = activity.getFileDataBytes("images/" + name);
 		return new AtlasMeta(new JSONArray(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
