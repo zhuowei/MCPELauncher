@@ -242,6 +242,8 @@ static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
 static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
 static void (*bl_TileSource_fireTileEvent_real)(TileSource* source, int x, int y, int z, int type, int data);
 
+static bool* bl_Tile_solid;
+
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
@@ -686,12 +688,15 @@ JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGet
 	Tile* tile = bl_Tile_tiles[blockId];
 	if(tile == NULL) return 0;
 	
-	return bl_CustomBlock_getRenderShapeHook(tile);
+	return tile->renderType;//bl_CustomBlock_getRenderShapeHook(tile);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId, jint renderType) {
-	  bl_custom_block_renderShape[blockId] = renderType;
+	//bl_custom_block_renderShape[blockId] = renderType;
+	Tile* tile = bl_Tile_tiles[blockId];
+	if (tile == nullptr) return;
+	tile->renderType = renderType;
 }
 
 Item* bl_constructItem(int id) {
@@ -948,10 +953,9 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
 	}
-	bl_custom_block_opaque[blockId] = opaque;
+	//bl_custom_block_opaque[blockId] = opaque;
 	bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
 	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
-	bl_custom_block_renderShape[blockId] = renderShape;
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Tile* retval = (Tile*) ::operator new((std::size_t) 0x8c);
@@ -964,6 +968,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//std::string comeOut = bl_Tile_getDescriptionId(retval);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Block added: %s\n", comeOut.c_str());
 	(*bl_I18n_strings)["tile." + nameStr + ".name"] = nameStr;
+	retval->renderType = renderShape;
+	bl_Tile_solid[blockId] = opaque;
 	//add it to the global tile list
 	bl_Tile_tiles[blockId] = retval;
 	retval->category1 = 1;
@@ -1655,6 +1661,8 @@ void bl_setuphooks_cppside() {
 
 	void* fireTileEvent = dlsym(mcpelibhandle, "_ZN10TileSource13fireTileEventEiiiii");
 	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
+
+	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN4Tile5solidE");
 
 	patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

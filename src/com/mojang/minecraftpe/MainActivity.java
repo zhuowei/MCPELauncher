@@ -895,7 +895,7 @@ public class MainActivity extends NativeActivity {
 		return bytes;
 	}
 
-	private byte[] getFileDataBytes(String name, boolean forceInternal) {
+	public byte[] getFileDataBytes(String name, boolean forceInternal) {
 		System.out.println("Get file data: " + name);
 		try {
 			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);

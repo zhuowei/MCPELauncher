@@ -1096,7 +1096,7 @@ public class ScriptManager {
 	}
 
 	private static AtlasMeta loadOneAtlasMeta(MainActivity activity, String name) throws JSONException {
-		byte[] bytes = activity.getFileDataBytes("images/" + name);
+		byte[] bytes = activity.getFileDataBytes("images/" + name, true); // force internal load
 		return new AtlasMeta(new JSONArray(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
@@ -2425,10 +2425,10 @@ public class ScriptManager {
 			nativeSetItemCategory(id, category, whatever);
 		}
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void addIcon(String url, String name, int index) {
 			ScriptManager.addIcon("items", url, name, index);
-		}
+		}*/
 
 
 		@Override
@@ -2515,10 +2515,10 @@ public class ScriptManager {
 			nativeBlockSetRenderLayer(blockId, layer);
 		}
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void addIcon(String url, String name, int index) {
 			ScriptManager.addIcon("terrain", url, name, index);
-		}
+		}*/
 
 		@Override
 		public String getClassName() {

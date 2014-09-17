@@ -95,13 +95,15 @@ typedef struct {
 	char aabbfiller[28]; //8
 	TextureUVCoordinateSet texture; //36
 	unsigned char id; //68
-	char filler[39]; //69 (insert rude joke here)
+	char filler[84-69]; //69 (insert rude joke here)
+	int renderType; //84
+	char filler2[108-88]; //88
 	void* material; //108
-	int filler2; //112
+	int filler3; //112
 	float destroyTime; //116
 	float explosionResistance; //120
 	int category1; //124
-	char filler3[8]; //128
+	char filler4[8]; //128
 	cppstr descriptionId; //136
 } Tile;
 
