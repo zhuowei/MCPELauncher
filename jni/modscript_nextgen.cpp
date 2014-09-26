@@ -773,7 +773,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
 	std::string worlddirstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(worlddir, utfChars);
-	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, NULL);
+	LevelSettings levelSettings = {
+		-1,
+		-1,
+		3,
+		4,
+		0,
+		0,
+		0,
+	};
+	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, &levelSettings);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame

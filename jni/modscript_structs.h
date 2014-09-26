@@ -199,6 +199,17 @@ typedef struct {
 	bool instabuild;
 } Abilities;
 
+// from LocalServerListItemElement::serverMainPressed 25c7d4
+typedef struct {
+	int wtf1; // 0 always negative 1?
+	int wtf2; // 4 always negative 1?
+	int wtf3; // 8 always 3
+	int wtf4; // 12 always 4
+	int wtf5; // 16 always 0
+	int wtf6; // 16 always 0
+	int wtf7; // 16 always 0
+} LevelSettings;
+
 #ifdef __cplusplus
 }
 #endif

@@ -58,6 +58,7 @@ public final class PatchUtils {
 	}
 
 	public static boolean canLivePatch(File file) throws IOException {
+		/*
 		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
 		com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
 		patch.loadPatch(file);
@@ -68,6 +69,7 @@ public final class PatchUtils {
 				return false;
 			}
 		}
+		*/
 		return true;
 	}
 
