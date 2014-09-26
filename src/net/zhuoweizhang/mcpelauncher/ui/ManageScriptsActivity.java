@@ -14,11 +14,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.*;
 
 import net.zhuoweizhang.mcpelauncher.CoffeeScriptCompiler;
 import net.zhuoweizhang.mcpelauncher.MinecraftConstants;
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
+import net.zhuoweizhang.mcpelauncher.MpepInfo;
 import net.zhuoweizhang.mcpelauncher.Utils;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 import net.zhuoweizhang.mcpelauncher.ui.RefreshContentListThread.OnRefreshContentList;
@@ -830,6 +832,18 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	@Override
 	public void onRefreshComplete(final List<ContentListItem> items) {
+		for (ContentListItem item: items) {
+			try {
+				if (item.file.getName().toLowerCase().endsWith(".modpkg")) {
+					ZipFile zip = new ZipFile(item.file);
+					MpepInfo info = MpepInfo.fromZip(zip);
+					zip.close();
+					item.extraData = "by " + info.authorName;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

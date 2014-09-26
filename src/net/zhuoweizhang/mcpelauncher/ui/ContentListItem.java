@@ -12,6 +12,7 @@ public class ContentListItem {
 	public final File file;
 	public final String displayName;
 	public boolean enabled = true;
+	public String extraData = null;
 
 	public ContentListItem(File file, boolean enabled) {
 		this.file = file;
@@ -22,11 +23,13 @@ public class ContentListItem {
 	@Override
 	public String toString() {
 		// TODO: call our custom toString(Resources) withoutResources. Ideas?
-		return displayName + (enabled ? "" : " ".concat("(disabled)"));
+		return displayName + (extraData != null? " " + extraData + " ": "") +
+			(enabled ? "" : " ".concat("(disabled)"));
 	}
 
 	public String toString(Resources res) {
-		return displayName + (enabled ? "" : " ".concat(res.getString(R.string.manage_patches_disabled)));
+		return displayName + (extraData != null? " " + extraData + " ": "") +
+			(enabled ? "" : " ".concat(res.getString(R.string.manage_patches_disabled)));
 	}
 
 	public static void sort(List<ContentListItem> list) {

@@ -2,6 +2,7 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.FileReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -1051,6 +1052,16 @@ public class ScriptManager {
 		ZipFile zipFile = null;
 		try {
 			zipFile = new ZipFile(file);
+
+			MpepInfo info = null;
+			boolean scrambled = false;
+			try {
+				info = MpepInfo.fromZip(zipFile);
+				scrambled = info.scrambleCode.length() > 0;
+			} catch (JSONException json) {
+				// ignore lol
+			}
+
 			ZipEntry entry;
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
 			while(entries.hasMoreElements()) {
@@ -1059,7 +1070,15 @@ public class ScriptManager {
 				String name = entry.getName();
 				if (!name.startsWith("script/") || !name.toLowerCase().endsWith(".js")) continue;
 				try {
-					reader = new InputStreamReader(zipFile.getInputStream(entry));
+					if (scrambled) {
+						InputStream is = zipFile.getInputStream(entry);
+						byte[] scrambleBytes = new byte[(int) entry.getSize()];
+						is.read(scrambleBytes);
+						is.close();
+						reader = Scrambler.scramble(scrambleBytes, info);
+					} else {
+						reader = new InputStreamReader(zipFile.getInputStream(entry));
+					}
 					loadScript(reader, file.getName());
 				} finally {
 					if (reader != null) reader.close();

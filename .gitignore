@@ -30,3 +30,5 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+scriptscramble.c

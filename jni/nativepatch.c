@@ -25,21 +25,6 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_pokerface_PokerFace_sysconf
 	return result;
 }
 
-void *__memcpy(void *d, void *s, int n)
-{
-    int i;
-
-    for( i = 0; i < n; i++)
-        ((unsigned char *)d)[i] = ((unsigned char *)s)[i];
-
-    return d;
-}
-
-int __mprotect_no_errno_set(void * a, int n, int p)
-{
-    return mprotect(a, n, p);
-}
-
 void mcpelauncher_hook(void *orig_fcn, void* new_fcn, void **orig_fcn_ptr)
 {
 	MSHookFunction(orig_fcn, new_fcn, orig_fcn_ptr);
