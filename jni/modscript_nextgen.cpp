@@ -48,7 +48,8 @@ typedef void Font;
 // found in LevelRenderer::renderNameTags
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 3184
+// found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 3200
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 132
 // found in BuyButton::render of all things
 #define MINECRAFT_TEXTURES_OFFSET 400
