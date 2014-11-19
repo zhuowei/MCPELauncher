@@ -109,7 +109,7 @@ static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
 static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec3*);
 int (*bl_TileSource_getTile_raw)(FullTile*, TileSource*, int, int, int);
-int (*bl_TileSource_getData_raw) (FullTile*, TileSource*, int, int, int);
+int (*bl_TileSource_getData)(TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
@@ -220,12 +220,6 @@ unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval;
 	bl_TileSource_getTile_raw(&retval, source, x, y, z);
 	return retval.id;
-}
-
-unsigned char bl_TileSource_getData(TileSource* source, int x, int y, int z) {
-	FullTile retval;
-	bl_TileSource_getData_raw(&retval, source, x, y, z);
-	return retval.data;
 }
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
@@ -510,11 +504,11 @@ void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
 
 void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y) {
 	bl_HumanoidModel_constructor_real(self, scale, y);
+	self->bipedHead.transparent = 1;
 	int oldTextureOffsetX = self->bipedHead.textureOffsetX;
 	self->bipedHead.textureOffsetX = 32;
 	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
 	self->bipedHead.textureOffsetX = oldTextureOffsetX;
-	self->bipedHead.transparent = 1;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -1183,7 +1177,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to get setTileAndData: %s\n", dlerror());
 	}
 
-	bl_TileSource_getData_raw = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getDataEiii");
+	bl_TileSource_getData = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getDataEiii");
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
 	bl_Player_ride = dlsym(RTLD_DEFAULT, "_ZN6Player4rideEP6Entity");

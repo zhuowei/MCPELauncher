@@ -258,6 +258,7 @@ void* debug_dlsym(void* handle, const char* symbol);
 #endif //DLSYM_DEBUG
 
 void bl_forceTextureLoad(std::string const&);
+void bl_dumpVtable(void**, size_t);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
@@ -518,7 +519,7 @@ void bl_ClientSideNetworkHandler_handleChatPacket_hook(void* handler, void* ipad
 		bl_JavaVM->DetachCurrentThread();
 	}
 	if (!preventDefaultStatus) {
-		void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
+		void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
 		bl_Gui_displayClientMessage(mygui, packet->message);
 	}
 }
@@ -682,7 +683,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
+	void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
 	bl_Gui_displayClientMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
@@ -1188,7 +1189,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = (void*) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET);
+	void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
 	bl_Gui_showTipMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }

@@ -266,7 +266,7 @@ public class MainActivity extends NativeActivity {
 
 		Utils.setLanguageOverride();
 
-		forceFallback = Utils.getPrefs(0).getBoolean("zz_texture_pack_demo", false);
+		forceFallback = new File("/sdcard/bl_forcefallback.txt").exists() || Utils.getPrefs(0).getBoolean("zz_texture_pack_demo", false);
 
 		loadTexturePack();
 

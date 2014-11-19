@@ -119,27 +119,30 @@ typedef struct {
 	float offsetX; //0
 	float offsetY; //4
 	float offsetZ; //8
-	char filler1[44]; //12: note that 32 contains a std::vector
+	char filler0[12]; //12: note that 32 contains a std::vector
+	bool transparent; //24
+	bool wtf1; //25
+	char filler1[30]; //25
 	int textureWidth; //56
 	int textureHeight; //60
-	bool transparent; //64
-	char filler0[3]; //65
+	char filler2[4]; //65
 	int textureOffsetX;//68
 	int textureOffsetY;//72
-	char filler2[40];//76
+	bool wtf2; //76
+	char filler3[51];//77; 84 is mesh
 } ModelPart;
 
 // from HumanoidModel::render
 
 typedef struct {
 	void** vtable; //0
-	char filler[24]; //4
-	ModelPart bipedHead;//28
-	ModelPart bipedBody;//144
-	ModelPart bipedRightArm;//260
-	ModelPart bipedLeftArm;//376
-	ModelPart bipedRightLeg;//492
-	ModelPart bipedLeftLeg;//608
+	char filler[92]; //4
+	ModelPart bipedHead;//96
+	ModelPart bipedBody;//224
+	ModelPart bipedRightArm;//352
+	ModelPart bipedLeftArm;//480
+	ModelPart bipedRightLeg;//608
+	ModelPart bipedLeftLeg;//736
 } HumanoidModel;
 
 typedef struct {
