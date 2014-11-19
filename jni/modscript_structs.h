@@ -9,7 +9,10 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef unsigned int FullTile;
+typedef struct {
+	unsigned char id;
+	unsigned char data;
+} FullTile;
 typedef void TileSource;
 
 typedef struct {
@@ -28,8 +31,8 @@ typedef struct {
 	void** vtable; //0
 	char filler[4]; //4
 	bool isRemote; //8?
-	char filler2[2963];//9
-	TileSource* tileSource;//2972
+	char filler2[2967];//9
+	TileSource* tileSource;//2976 from Level::getChunkSource
 } Level;
 typedef struct Entity_t{
 //todo: 60 = tile source, 68 = level
@@ -113,14 +116,14 @@ typedef struct {
 
 // from ModelPart::setPos, ModelPart::setTexSize
 typedef struct {
-	bool transparent; //0
-	char filler0[3]; //1
-	float offsetX; //4
-	float offsetY; //8
-	float offsetZ; //12
-	char filler1[44]; //16: note that 32 contains a std::vector
-	int textureWidth; //60
-	int textureHeight; //64
+	float offsetX; //0
+	float offsetY; //4
+	float offsetZ; //8
+	char filler1[44]; //12: note that 32 contains a std::vector
+	int textureWidth; //56
+	int textureHeight; //60
+	bool transparent; //64
+	char filler0[3]; //65
 	int textureOffsetX;//68
 	int textureOffsetY;//72
 	char filler2[40];//76
@@ -209,6 +212,15 @@ typedef struct {
 	int wtf6; // 16 always 0
 	int wtf7; // 16 always 0
 } LevelSettings;
+
+typedef struct {
+	float r;
+	float g;
+	float b;
+	float a;
+} Color;
+
+typedef void MaterialPtr;
 
 #ifdef __cplusplus
 }

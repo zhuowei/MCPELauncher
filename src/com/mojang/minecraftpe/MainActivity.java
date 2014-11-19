@@ -1457,6 +1457,15 @@ public class MainActivity extends NativeActivity {
 		return retval;
 	}
 
+	// added in 0.10.0
+	public String getDeviceModel() {
+		return Build.MODEL;
+	}
+
+	public int getAndroidVersion() {
+		return Build.VERSION.SDK_INT;
+	}
+
 	private boolean useLegacyKeyboardInput() {
 		return Utils.getPrefs(0).getBoolean("zz_legacy_keyboard_input", false);
 	}

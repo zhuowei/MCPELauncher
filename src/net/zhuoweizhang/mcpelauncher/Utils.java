@@ -91,13 +91,15 @@ public class Utils {
 	}
 
 	public static Set<String> getEnabledPatches() {
-		return new HashSet<String>(Arrays.asList(getPrefs(1).getString("enabledPatches", "")
-				.split(";")));
+		String theStr = getPrefs(1).getString("enabledPatches", "");
+		if (theStr.equals("")) return new HashSet<String>();
+		return new HashSet<String>(Arrays.asList(theStr.split(";")));
 	}
 
 	public static Set<String> getEnabledScripts() {
-		return new HashSet<String>(Arrays.asList(getPrefs(1).getString("enabledScripts", "")
-				.split(";")));
+		String theStr = getPrefs(1).getString("enabledScripts", "");
+		if (theStr.equals("")) return new HashSet<String>();
+		return new HashSet<String>(Arrays.asList(theStr.split(";")));
 	}
 
 	public static boolean isSafeMode() {

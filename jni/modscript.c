@@ -30,19 +30,23 @@ typedef struct {
 	
 } MCPETimer;
 
-#define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 13
-#define GAMEMODE_VTABLE_OFFSET_ATTACK 19
-#define GAMEMODE_VTABLE_OFFSET_TICK 9
-#define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 15
+typedef struct {
+	void* ptr;
+} unique_ptr;
+
+#define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 11
+#define GAMEMODE_VTABLE_OFFSET_ATTACK 16
+#define GAMEMODE_VTABLE_OFFSET_TICK 8
+#define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 12
 // from HumanoidMobRenderer::additionalRendering
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 121
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 118
 // from MobRenderer::render
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 91
 // from Entity::save
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 64
 // from Player::getCarriedItem
 #define PLAYER_INVENTORY_OFFSET 3212
-#define MINECRAFT_VTABLE_OFFSET_UPDATE 20
+#define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 29
 // this is / 4 bytes already; found in Mob::actuallyHurt
 #define MOB_HEALTH_OFFSET 82
@@ -51,12 +55,12 @@ typedef struct {
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
-#define MINECRAFT_TIMER_OFFSET 3248
+#define MINECRAFT_TIMER_OFFSET 128
 // from Entity::setPos(Vec3 const&)
 #define ENTITY_VTABLE_OFFSET_SETPOS 4
 // from Minecraft::selectLevel
-#define MINECRAFT_LEVEL_OFFSET 3188
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 3192
+#define MINECRAFT_LEVEL_OFFSET 104
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 248
 #define GAMERENDERER_GETFOV_SIZE 0xb8
 
 #define LOG_TAG "BlockLauncher/ModScript"
@@ -91,11 +95,11 @@ void* bl_marauder_translation_function(void* input);
 
 jclass bl_scriptmanager_class;
 
-static void (*bl_GameMode_useItemOn_real)(void*, Player*, Level*, ItemInstance*, int, int, int, signed char, void*);
-static void (*bl_Minecraft_setLevel_real)(Minecraft*, Level*, cppstr*, LocalPlayer*);
+static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
+static void (*bl_Minecraft_setLevel_real)(Minecraft*, unique_ptr*, cppstr*, LocalPlayer*);
 void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
-static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile, int);
+static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_Player_ride)(Player*, Entity*);
@@ -104,8 +108,8 @@ static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
 static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec3*);
-int (*bl_TileSource_getTile)(TileSource*, int, int, int);
-int (*bl_TileSource_getData) (TileSource*, int, int, int);
+int (*bl_TileSource_getTile_raw)(FullTile*, TileSource*, int, int, int);
+int (*bl_TileSource_getData_raw) (FullTile*, TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
@@ -212,10 +216,26 @@ static void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 	setPos(entity, x, y, z);
 }
 
-void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, ItemInstance* itemStack,
-	int x, int y, int z, signed char side, void* vec3) {
+unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
+	FullTile retval;
+	bl_TileSource_getTile_raw(&retval, source, x, y, z);
+	return retval.id;
+}
+
+unsigned char bl_TileSource_getData(TileSource* source, int x, int y, int z) {
+	FullTile retval;
+	bl_TileSource_getData_raw(&retval, source, x, y, z);
+	return retval.data;
+}
+
+void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
+	TilePos* pos, signed char side, Vec3* vec3) {
 	JNIEnv *env;
-	bl_level = level;
+	int x = pos->x;
+	int y = pos->y;
+	int z = pos->z;
+	//bl_level = level;
+	Level* level = bl_level;
 	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
 	int itemId = 0;
@@ -224,6 +244,8 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 		itemId = bl_ItemInstance_getId(itemStack);
 		itemDamage = itemStack->damage;
 	}
+
+	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: tile source = %p level %p xyz %d %d %d", level->tileSource, level, x, y, z);
 
 	int blockId = bl_TileSource_getTile(level->tileSource, x, y, z);
 	int blockDamage = bl_TileSource_getData(level->tileSource, x, y, z);
@@ -249,7 +271,7 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, Level* level, It
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
-	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, player, level, itemStack, x, y, z, side, vec3);
+	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
 }
 
 void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, int x, int y, int z, signed char side) {
@@ -296,8 +318,10 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, int 
 	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, x, y, z, side);
 }
 
-void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* levelName, LocalPlayer* player) {
+void bl_Minecraft_setLevel_hook(Minecraft* minecraft, unique_ptr* levelPtr, cppstr* levelName, LocalPlayer* player) {
 	JNIEnv *env;
+
+	Level* level = levelPtr->ptr;
 
 	bl_localplayer = player;
 	bl_minecraft = minecraft;
@@ -320,16 +344,16 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, Level* level, cppstr* leve
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
 
-	bl_Minecraft_setLevel_real(minecraft, level, levelName, player);
+	bl_Minecraft_setLevel_real(minecraft, levelPtr, levelName, player);
 
 	//attach the listener
-	bl_attachLevelListener();
+	/*bl_attachLevelListener();
 	bl_clearNameTags();
 	bl_renderManager_clearRenderTypes();
 	bl_cppNewLevelInit();
 	if (level->isRemote) {
 		bl_sendIdentPacket();
-	}
+	}*/
 }
 
 void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
@@ -638,7 +662,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint id, jint damage) {
-	bl_TileSource_setTileAndData(bl_level->tileSource, x, y, z, (FullTile) (damage << 8 | id), 3); //3 = full block update
+	FullTile tile;
+	tile.id = id;
+	tile.data = damage;
+	bl_TileSource_setTileAndData(bl_level->tileSource, x, y, z, &tile, 3); //3 = full block update
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHurtTo
@@ -931,8 +958,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + MINECRAFT_TIMER_OFFSET);
-	timer->ticksPerSecond = ticksPerSecond;
+	//MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + MINECRAFT_TIMER_OFFSET);
+	//timer->ticksPerSecond = ticksPerSecond;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
@@ -1075,10 +1102,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
-	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
+	//mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	bl_hasinit_prepatch = 1;
+}
+
+void bl_dumpVtable(void** vtable, size_t size) {
+	// thanks, MrARM
+	Dl_info info;
+	for (int i = 0; i < (size / sizeof(void*)); i++) {
+		if (!dladdr(vtable[i], &info)) continue;
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "%d: %s", i, info.dli_sname);
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
@@ -1088,7 +1124,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	dlerror();
 
 	//edit the vtables of the GameMode implementations
-	bl_GameMode_useItemOn_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnEP6PlayerP5LevelP12ItemInstanceiiiaRK4Vec3");
+	bl_GameMode_useItemOn_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
 
 	int *creativeVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12CreativeMode");
 	creativeVtable[GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON] = (int) &bl_GameMode_useItemOn_hook;
@@ -1107,8 +1143,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	survivalVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (int) &bl_GameMode_initPlayer_hook;
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
-	bl_Minecraft_setLevel_real = dlsym(RTLD_DEFAULT, "_ZN9Minecraft8setLevelEP5LevelRKSsP11LocalPlayer");
-	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12NinecraftApp");
+	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV15MinecraftClient");
+	//bl_dumpVtable((void**) minecraftVtable, 0xb8);
+	bl_Minecraft_setLevel_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL];
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (int) &bl_Minecraft_setLevel_hook;
 
@@ -1133,11 +1170,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
-	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
-	mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
-	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
+	//memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
+	//mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
+	//memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
 	// start off with original FOV
-	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, sizeof(getFovOriginal));
+	//memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, sizeof(getFovOriginal));
 	bl_GameRenderer_getFov = getFov;
 
 	//get the level set block method. In future versions this might link against libminecraftpe itself
@@ -1146,7 +1183,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to get setTileAndData: %s\n", dlerror());
 	}
 
-	bl_TileSource_getData = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getDataEiii");
+	bl_TileSource_getData_raw = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getDataEiii");
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
 	bl_Player_ride = dlsym(RTLD_DEFAULT, "_ZN6Player4rideEP6Entity");
@@ -1155,7 +1192,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_add = dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
-	bl_TileSource_getTile = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getTileEiii");
+	bl_TileSource_getTile_raw = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getTileEiii");
 	bl_TileSource_getRawBrightness = dlsym(RTLD_DEFAULT, "_ZN10TileSource16getRawBrightnessEiiib");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
@@ -1164,7 +1201,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
-	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiP10TileSource");
+	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiR10TileSource");
 	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZNK5Level7getTimeEv");
@@ -1195,7 +1232,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_ItemInstance_setId = dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 	bl_ItemInstance_getId = dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	//replace the update method in Minecraft with our own
-	bl_NinecraftApp_update_real = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp6updateEv");
+	bl_NinecraftApp_update_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE];
 #if 0
 	for (int i = 0; i < 40; i++) {
 		if (minecraftVtable[i] == (int) bl_NinecraftApp_update_real) {
@@ -1210,7 +1247,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	}
 
-	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiP10TileSourceRK4Vec3PS2_");
+	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3PS2_");
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 

@@ -33,36 +33,37 @@ typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 // After the call to RakNetInstance::RakNetInstance
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3160
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
 #define BLOCK_VTABLE_SIZE 0x128
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
 #define BLOCK_VTABLE_GET_COLOR 46
 // Mob::getTexture
-#define MOB_TEXTURE_OFFSET 2956
+#define MOB_TEXTURE_OFFSET 2960
 // found in PlayerRenderer::renderName
 #define PLAYER_NAME_OFFSET 3164
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
-#define MINECRAFT_GUI_OFFSET 416
+#define MINECRAFT_GUI_OFFSET 252
 // found in LevelRenderer::renderNameTags
-#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
+#define ENTITY_RENDERER_OFFSET_RENDER_NAME 4
 #define MOB_TARGET_OFFSET 3156
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 3200
-#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 132
-// found in BuyButton::render of all things
-#define MINECRAFT_TEXTURES_OFFSET 400
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 244
+// found in ChatScreen::setTextboxText
+#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 200
+// found in StartMenuScreen::render, or search for getTextureData
+#define MINECRAFT_TEXTURES_OFFSET 228
 // found in LocalPlayer::isSneaking
-#define PLAYER_MOVEMENT_OFFSET 3388
+#define PLAYER_MOVEMENT_OFFSET 3400
 // found way, way inside GameRenderer::pick, around the call to HitResult::HitResult(Entity*)
-#define MINECRAFT_HIT_RESULT_OFFSET 2684
+#define MINECRAFT_HIT_RESULT_OFFSET 2680
 // found in TouchscreenInput::canInteract
-#define MINECRAFT_HIT_ENTITY_OFFSET 2716
+#define MINECRAFT_HIT_ENTITY_OFFSET 2712
 // found in GameMode::initPlayer
 #define PLAYER_ABILITIES_OFFSET 3168
 // found in Minecraft constructor
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 3160
+#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 #define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 
 #define AXIS_X 0
@@ -158,7 +159,7 @@ static void (*bl_Level_addListener)(Level*, LevelListener*);
 
 static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int);
 
-static void (*bl_Font_drawSlow_real)(Font*, char const*, int, float, float, int, bool);
+static void (*bl_Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
 static int (*bl_Font_width)(Font*, std::string const&);
 
@@ -230,13 +231,13 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 
 static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
-static void (*bl_Level_addParticle)(Level*, int, float, float, float, float, float, float, int);
+static void (*bl_Level_addParticle)(Level*, int, Vec3 const&, float, float, float, int);
 static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 static bool (*bl_Level_addEntity_real)(Level*, Entity*);
-static void (*bl_Level_onEntityRemoved_real)(Level*, Entity*);
+static void (*bl_Level_removeEntity_real)(Level*, Entity*);
 static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
 static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
 static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
@@ -307,9 +308,9 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
 }
 
-void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffset, float yOffset, int color, bool isShadow) {
+/*void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material) {
 	if (bl_text_parse_color_codes) {
-		char const* currentTextBegin = text; //the current coloured section
+		char const* currentTextBegin = textStr.c_str(); //the current coloured section
 		int currentLength = 0; //length in bytes of the current coloured section
 		const uint8_t* iteratePtr = (const uint8_t*) text; //where we are iterating
 		const uint8_t* endIteratePtr = (const uint8_t*) text + length; //once we reach here, stop iterating
@@ -352,13 +353,14 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 					newFlags = 0;
 				}
 
-				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+				std::string cppStringPart = std::string(currentTextBegin, currentLength);
+
+				bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
 				if (flags & TEXT_BOLD) {
-					bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset + 1, yOffset,
-						curColor, isShadow);
+					bl_Font_drawCached_real(font, cppStringPart, substringOffset + 1, yOffset, curColor, isShadow, material);
 				}
-				std::string cppStringForWidth = std::string(currentTextBegin, currentLength);
-				substringOffset += bl_Font_width(font, cppStringForWidth);
+
+				substringOffset += bl_Font_width(font, cppStringPart);
 
 				curColor = newColor;
 				flags = newFlags;
@@ -370,17 +372,16 @@ void bl_Font_drawSlow_hook(Font* font, char const* text, int length, float xOffs
 			}
 		}
 		if (currentLength > 0) {
-			bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset, yOffset, curColor, isShadow);
+				bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
 			if (flags & TEXT_BOLD) {
-				bl_Font_drawSlow_real(font, currentTextBegin, currentLength, substringOffset + 1, yOffset,
-					curColor, isShadow);
+				bl_Font_drawCached_real(font, cppStringPart, substringOffset + 1, yOffset, curColor, isShadow, material);
 			}
 		}
 	} else {
-		bl_Font_drawSlow_real(font, text, length, xOffset, yOffset, color, isShadow);
+		bl_Font_drawCached_real(font, textStr, xOffset, yOffset, color, isShadow, material);
 		return;
 	}
-}
+}*/
 
 void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int damage){
 	int index = bl_addItemCreativeInvRequestCount;
@@ -609,8 +610,11 @@ static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
 	return retval;
 }
 
-static void bl_Level_onEntityRemoved_hook(Level* level, Entity* entity) {
+static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
 	JNIEnv *env;
+
+	bl_Level_removeEntity_real(level, entity);
+
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -629,7 +633,6 @@ static void bl_Level_onEntityRemoved_hook(Level* level, Entity* entity) {
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	bl_Level_onEntityRemoved_real(level, entity);
 }
 
 static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y, float z, float power, bool onFire) {
@@ -809,7 +812,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
   (JNIEnv *env, jclass clazz, jstring host, jint port) {
-	const char* hostChars = env->GetStringUTFChars(host, NULL);
+/*	const char* hostChars = env->GetStringUTFChars(host, NULL);
 	bl_Minecraft_locateMultiplayer(bl_minecraft); //to set up the client network handler
 	int rakNetOffset = ((int) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET;
 	RakNetInstance* raknetInstance = *((RakNetInstance**) rakNetOffset);
@@ -819,6 +822,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 	void* progressScreen = operator new(92);
 	bl_ProgressScreen_ProgressScreen(progressScreen);
 	bl_Minecraft_setScreen(bl_minecraft, progressScreen);
+*/
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
@@ -959,6 +963,7 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
+	return NULL;
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
@@ -1339,7 +1344,8 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
   (JNIEnv *env, jclass clazz, jint type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
-	bl_Level_addParticle(bl_level, type, x, y, z, xVel, yVel, zVel, data);
+	Vec3 pos {x, y, z};
+	bl_Level_addParticle(bl_level, type, pos, xVel, yVel, zVel, data);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
@@ -1349,6 +1355,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
+#if 0
 	for (int i = 1; i < 0x100; i++) {
 		if (bl_Tile_tiles[i] == NULL) {
 			char name[100];
@@ -1362,6 +1369,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
 		}
 	}
+#endif
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
@@ -1513,7 +1521,7 @@ void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
-	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+	//mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
 	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
@@ -1522,8 +1530,8 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
 
-	bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
-		dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
+	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
+	//	dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
 
 	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
@@ -1538,7 +1546,7 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
 
 	int* raknetVTable = (int*) dlsym(RTLD_DEFAULT, "_ZTV14RakNetInstance");
-	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
+	//raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
 
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	bl_FoodItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
@@ -1546,8 +1554,8 @@ void bl_setuphooks_cppside() {
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 
-	void* fontDrawSlow = dlsym(RTLD_DEFAULT, "_ZN4Font8drawSlowEPKciffib");
-	mcpelauncher_hook(fontDrawSlow, (void*) &bl_Font_drawSlow_hook, (void**) &bl_Font_drawSlow_real);
+	//void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
+	//mcpelauncher_hook(fontDrawCached, (void*) &bl_Font_drawCached_hook, (void**) &bl_Font_drawCached_real);
 
 	bl_Font_width = (int (*) (Font*, std::string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
@@ -1595,10 +1603,10 @@ void bl_setuphooks_cppside() {
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	void* populateTile = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Tileii");
-	mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
+	//mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
 
 	void* populateItem = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Itemii");
-	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
+	//mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
@@ -1612,8 +1620,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
 
-	patchEntityRenderers(mcpelibhandle);
-	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameEP6Entityf");
+	//patchEntityRenderers(mcpelibhandle);
+	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameER6Entityf");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEi");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
@@ -1624,13 +1632,13 @@ void bl_setuphooks_cppside() {
 	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
 	void* handleChatPacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10ChatPacket");
 	void* handleReal;
-	mcpelauncher_hook(handleChatPacket, (void*) &bl_ClientSideNetworkHandler_handleChatPacket_hook, &handleReal);
+	//mcpelauncher_hook(handleChatPacket, (void*) &bl_ClientSideNetworkHandler_handleChatPacket_hook, &handleReal);
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
 	bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
 	bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
 	void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
-	mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
-		(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
+	//mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
+	//	(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
 	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
 	bl_CompoundTag_putString = (void (*)(void*, std::string, std::string))
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
@@ -1648,21 +1656,21 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
 	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadER11CompoundTag");
 	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
-	bl_Level_addParticle = (void (*)(Level*, int, float, float, float, float, float, float, int))
-		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeffffffi");
-	bl_Minecraft_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN9Minecraft9setScreenEP6Screen");
+	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, float, float, float, int))
+		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3fffi");
+	//bl_Minecraft_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN9Minecraft9setScreenEP6Screen");
 	// FIXME: this constructor no longer exists; use Screen::Screen with a ProgressScreen vtable
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
-	bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
+	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
 	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityEP6Entity");
-	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
-	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level15onEntityRemovedER6Entity");
-	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_onEntityRemoved_hook, (void**) &bl_Level_onEntityRemoved_real);
+	//mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
+	//mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeEP6Entityffffb");
-	mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
+	//mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
 	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
 	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
@@ -1670,11 +1678,11 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
 
 	void* fireTileEvent = dlsym(mcpelibhandle, "_ZN10TileSource13fireTileEventEiiiii");
-	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
+	//mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
 
 	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN4Tile5solidE");
 
-	patchUnicodeFont(mcpelibhandle);
+	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
 }
 
