@@ -10,6 +10,7 @@
 #include "mcpelauncher.h"
 #include "modscript.h"
 #include "dobby_public.h"
+#include "Kamcord-C-Interface.h"
 
 #define DLSYM_DEBUG
 
@@ -177,6 +178,11 @@ static int bl_hasinit_prepatch = 0;
 
 static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
 static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
+
+static int bl_isRecording = 0;
+static jclass bl_kamcord_class;
+static jmethodID bl_kamcord_beginDraw;
+static jmethodID bl_kamcord_endDraw;
 
 #ifdef DLSYM_DEBUG
 
@@ -499,10 +505,34 @@ void bl_handleFrameCallback() {
 }
 
 void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
+	JNIEnv *env;
+	int recording = bl_isRecording;
+	if (recording) {
+		//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+		int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+		if (attachStatus == JNI_EDETACHED) {
+			(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+		}
+		(*env)->CallStaticVoidMethod(env, bl_kamcord_class, bl_kamcord_beginDraw);
+		// Yes, I realize this is two JNI calls per frame. Haters gonna hate.
+		if (attachStatus == JNI_EDETACHED) {
+			(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+		}
+	}
 	bl_NinecraftApp_update_real(minecraft);
 	if (bl_frameCallbackRequested) {
 		bl_handleFrameCallback();
 		bl_frameCallbackRequested = 0;
+	}
+	if (recording) {
+		int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+		if (attachStatus == JNI_EDETACHED) {
+			(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+		}
+		(*env)->CallStaticVoidMethod(env, bl_kamcord_class, bl_kamcord_endDraw);
+		if (attachStatus == JNI_EDETACHED) {
+			(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+		}
 	}
 }
 
@@ -1085,6 +1115,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 	bl_frameCallbackRequested = 1;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetIsRecording
+  (JNIEnv *env, jclass clazz, jboolean recording) {
+	bl_isRecording = recording;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz) {
 	if (bl_hasinit_prepatch) return;
@@ -1098,11 +1133,27 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
-	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
+/*	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
 	//mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
+*/
+	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV15MinecraftClient");
+	bl_dumpVtable((void**) minecraftVtable, 0xb8);
+// FIXME remove
+
+	bl_NinecraftApp_update_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE];
+
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
+
+	jclass clz = (*env)->FindClass(env, "com/kamcord/android/Kamcord");
+
+	bl_kamcord_class = (*env)->NewGlobalRef(env, clz);
+
+	bl_kamcord_beginDraw = (*env)->GetStaticMethodID(env, bl_kamcord_class, "beginDraw", "()V");
+	bl_kamcord_endDraw = (*env)->GetStaticMethodID(env, bl_kamcord_class, "endDraw", "()V");
+
 	bl_hasinit_prepatch = 1;
 }
 

@@ -48,6 +48,8 @@ import android.widget.*;
 
 import org.mozilla.javascript.RhinoException;
 
+import com.kamcord.android.Kamcord;
+
 import net.zhuoweizhang.mcpelauncher.*;
 import static net.zhuoweizhang.mcpelauncher.Utils.isSafeMode;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
@@ -167,6 +169,8 @@ public class MainActivity extends NativeActivity {
 	private static long lastDestroyTime = 0;
 	private static final int MILLISECONDS_FOR_WORLD_SAVE = 3000; //3 seconds
 
+	private boolean hasRecorder = false;
+	private boolean isRecording = false;
 
 	/** Called when the activity is first created. */
 
@@ -332,9 +336,9 @@ public class MainActivity extends NativeActivity {
 			boolean shouldLoadScripts = false;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
-				applyBuiltinPatches();
-				if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
-					ScriptManager.init(this);
+				//applyBuiltinPatches();
+				//if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
+				//	ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
 				ScriptManager.loadEnabledScriptsNames(this);
@@ -361,6 +365,8 @@ public class MainActivity extends NativeActivity {
 				showDialog(DIALOG_CRASH_SAFE_MODE);
 			}
 		}
+
+		initKamcord();
 
 		System.gc();
 
@@ -692,21 +698,25 @@ public class MainActivity extends NativeActivity {
 
 	protected Dialog createRuntimeOptionsDialog(final boolean hasInsertText) {
 		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
-		CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
-		CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
+		final CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
+		final CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
 		CharSequence manageModPEScripts = getResources().getString(R.string.pref_zz_manage_scripts);
 		CharSequence takeScreenshot = getResources().getString(R.string.take_screenshot);
-		CharSequence[] options = null;
-		if (hasInsertText) {
-			options = new CharSequence[] { livePatch, manageModPEScripts, takeScreenshot,
-					optionMenu, insertText };
-		} else {
-			options = new CharSequence[] { livePatch, manageModPEScripts, takeScreenshot,
-					optionMenu };
+		final CharSequence startRecording = getResources().getString(R.string.hovercar_start_recording);
+		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
+		final List<CharSequence> options = new ArrayList<CharSequence>(
+			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
+		if (hasRecorder) {
+			options.add(isRecording? stopRecording: startRecording);
 		}
+		if (hasInsertText) {
+			options.add(insertText);
+		}
+		options.add(optionMenu);
 		return new AlertDialog.Builder(this).setTitle(isSafeMode()? R.string.pref_zz_safe_mode: R.string.app_name)
-				.setItems(options, new DialogInterface.OnClickListener() {
+				.setItems(options.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogI, int button) {
+						CharSequence buttonText = options.get(button);
 						if (button == 0) {
 							if (minecraftLibBuffer == null) {
 								startActivity(getOptionsActivityIntent());
@@ -731,10 +741,12 @@ public class MainActivity extends NativeActivity {
 										.setMessage(R.string.take_screenshot_requires_modpe_script)
 										.setPositiveButton(android.R.string.ok, null).show();
 							}
-						} else if (button == 3) {
+						} else if (buttonText.equals(optionMenu)) {
 							startActivity(getOptionsActivityIntent());
-						} else if (button == 4 && hasInsertText) {
+						} else if (buttonText.equals(insertText)) {
 							showDialog(DIALOG_INSERT_TEXT);
+						} else if (buttonText.equals(startRecording) || buttonText.equals(stopRecording)) {
+							toggleRecording();
 						}
 					}
 				}).create();
@@ -1883,6 +1895,32 @@ public class MainActivity extends NativeActivity {
 		getWindow().getDecorView().setSystemUiVisibility(uiOptions);
 	}
 
+	private void initKamcord() {
+		// test if we have kamcord
+		hasRecorder = true;//false;
+		try {
+			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
+			hasRecorder = true;
+		} catch (PackageManager.NameNotFoundException ex) {
+		}
+		if (hasRecorder) {
+			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
+			Kamcord.initActivity(this);
+		}
+	}
+
+	private void toggleRecording() {
+		isRecording = !isRecording;
+		ScriptManager.nativeSetIsRecording(isRecording);
+		if (isRecording) {
+			Kamcord.startRecording();
+		} else {
+			Kamcord.stopRecording();
+			Kamcord.showView();
+		}
+		removeDialog(DIALOG_RUNTIME_OPTIONS);
+		removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
+	}
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG)

@@ -146,6 +146,8 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="permlab_mcpelauncher_addon">BlockLauncher Addon</string>
     <string name="permdesc_mcpelauncher_addon">Allows the application to be loaded as an addon into BlockLauncher. This means that this app can access network, storage, and do anything Minecraft PE has the permission to do.</string>
     <string name="hovercar_insert_text_backspace">Insert backspace</string>
+    <string name="hovercar_start_recording">Start recording</string>
+    <string name="hovercar_stop_recording">Stop recording</string>
     
     <string name="textures_select">Select</string>
     <string name="textures_demo">Demo</string>

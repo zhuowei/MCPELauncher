@@ -1363,6 +1363,8 @@ public class ScriptManager {
 
 	public static native boolean nativeLevelIsRemote();
 
+	public static native void nativeSetIsRecording(boolean yep);
+
 	public static class ScriptState {
 		public Script script;
 		public Scriptable scope;
