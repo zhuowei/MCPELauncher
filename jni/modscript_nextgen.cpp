@@ -309,15 +309,15 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
 }
 
-/*void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material) {
+void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material) {
 	if (bl_text_parse_color_codes) {
 		char const* currentTextBegin = textStr.c_str(); //the current coloured section
 		int currentLength = 0; //length in bytes of the current coloured section
-		const uint8_t* iteratePtr = (const uint8_t*) text; //where we are iterating
-		const uint8_t* endIteratePtr = (const uint8_t*) text + length; //once we reach here, stop iterating
+		const uint8_t* iteratePtr = (const uint8_t*) textStr.c_str(); //where we are iterating
+		const uint8_t* endIteratePtr = (const uint8_t*) iteratePtr + textStr.length(); //once we reach here, stop iterating
 		//int lengthOfStringRemaining = length;
 		float substringOffset = xOffset; //where we draw the currently coloured section
-		int curColor = color; //the colour for the current section
+		Color curColor = color; //the colour for the current section
 		int flags = 0;
 		//Loop through the string.
 		//When we find the first colour control character:
@@ -342,7 +342,7 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 				if (bytesAdvanced < 0 || myChar < 0) break;
 				iteratePtr += bytesAdvanced;
 
-				int newColor = curColor;
+				int newColor = -1;
 				bool newFlags = flags;
 				if (myChar >= '0' && myChar <= '9') {
 					newColor = bl_minecraft_colors[myChar - '0'];
@@ -363,7 +363,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 
 				substringOffset += bl_Font_width(font, cppStringPart);
 
-				curColor = newColor;
+				if (newColor != -1) curColor = {(newColor & 0xff) / 255.0f, ((newColor >> 8) & 0xff) / 255.0f, 
+					((newColor >> 16) & 0xff) / 255.0f, 1.0f};;
 				flags = newFlags;
 				currentTextBegin = (const char *) iteratePtr;
 				currentLength = 0;
@@ -373,7 +374,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 			}
 		}
 		if (currentLength > 0) {
-				bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
+			std::string cppStringPart = std::string(currentTextBegin, currentLength);
+			bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
 			if (flags & TEXT_BOLD) {
 				bl_Font_drawCached_real(font, cppStringPart, substringOffset + 1, yOffset, curColor, isShadow, material);
 			}
@@ -382,7 +384,7 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 		bl_Font_drawCached_real(font, textStr, xOffset, yOffset, color, isShadow, material);
 		return;
 	}
-}*/
+}
 
 void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int damage){
 	int index = bl_addItemCreativeInvRequestCount;
@@ -964,7 +966,6 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
-	return NULL;
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
@@ -1522,7 +1523,7 @@ void bl_setuphooks_cppside() {
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
-	//mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
 	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
@@ -1555,8 +1556,8 @@ void bl_setuphooks_cppside() {
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 
-	//void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
-	//mcpelauncher_hook(fontDrawCached, (void*) &bl_Font_drawCached_hook, (void**) &bl_Font_drawCached_real);
+	void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
+	mcpelauncher_hook(fontDrawCached, (void*) &bl_Font_drawCached_hook, (void**) &bl_Font_drawCached_real);
 
 	bl_Font_width = (int (*) (Font*, std::string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
@@ -1604,10 +1605,10 @@ void bl_setuphooks_cppside() {
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	void* populateTile = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Tileii");
-	//mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
+	mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
 
 	void* populateItem = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Itemii");
-	//mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
+	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
 	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
@@ -1666,12 +1667,12 @@ void bl_setuphooks_cppside() {
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
 	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityEP6Entity");
-	//mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
+	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
-	//mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
+	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeEP6Entityffffb");
-	//mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
+	mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
 	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
 	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
@@ -1679,7 +1680,7 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
 
 	void* fireTileEvent = dlsym(mcpelibhandle, "_ZN10TileSource13fireTileEventEiiiii");
-	//mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
+	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
 
 	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN4Tile5solidE");
 
