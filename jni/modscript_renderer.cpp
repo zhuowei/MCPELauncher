@@ -14,8 +14,10 @@
 
 // search for HumanoidModel::HumanoidModel
 #define HUMANOIDMODEL_SIZE 868
-// search for MobRenderer::MobRenderer
-#define MOBRENDERER_SIZE 88
+// search for HumanoidMobRenderer::HumanoidMobRenderer
+#define MOBRENDERER_SIZE 92
+// ModelPart::addBox
+#define MODELPART_CUBEVECTOR_OFFSET 28
 
 
 extern "C" {
@@ -115,7 +117,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat xOffset, jfloat yOffset, jfloat zOffset,
     jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent,
     jfloat textureWidth, jfloat textureHeight) {
-	/*const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
+	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	part->textureOffsetX = textureX;
 	part->textureOffsetY = textureY;
@@ -124,28 +126,27 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	if (textureHeight > 0) part->textureHeight = textureHeight;
 	bl_ModelPart_addBox(part, xOffset, yOffset, zOffset, width, height, depth, scale);
 	bl_renderManager_invalidateModelPart(part);
-	env->ReleaseStringUTFChars(modelPartName, utfChars);*/
+	env->ReleaseStringUTFChars(modelPartName, utfChars);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelClear
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
-	/*const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
+	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
-	std::vector<Cube*>* cubeVector = (std::vector<Cube*>*) ((uintptr_t) part + 32);
+	std::vector<Cube*>* cubeVector = (std::vector<Cube*>*) ((uintptr_t) part + MODELPART_CUBEVECTOR_OFFSET);
 	cubeVector->clear();
 	bl_renderManager_invalidateModelPart(part);
-	env->ReleaseStringUTFChars(modelPartName, utfChars);*/
+	env->ReleaseStringUTFChars(modelPartName, utfChars);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelPartExists
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
-	/*jboolean exists;
+	jboolean exists;
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	exists = part != NULL;
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
-	return exists;*/
-	return false;
+	return exists;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
@@ -155,14 +156,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelSetRotationPoint
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat x, jfloat y, jfloat z) {
-	/*const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
+	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	part->offsetX = x;
 	part->offsetY = y;
 	part->offsetZ = z;
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
-	*/
 }
 
 void bl_renderManager_init(void* mcpelibhandle) {

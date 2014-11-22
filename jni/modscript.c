@@ -62,6 +62,8 @@ typedef struct {
 #define MINECRAFT_LEVEL_OFFSET 104
 #define MINECRAFT_LOCAL_PLAYER_OFFSET 248
 #define GAMERENDERER_GETFOV_SIZE 0xb8
+// from GameMode::GameMode
+#define GAMEMODE_MINECRAFT_OFFSET 4
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -414,6 +416,8 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 
 void bl_GameMode_tick_hook(void* gamemode) {
 	JNIEnv *env;
+
+	bl_minecraft = *((Minecraft**) ((uintptr_t) gamemode + GAMEMODE_MINECRAFT_OFFSET));
 
 	bl_level = *((Level**) ((uintptr_t) bl_minecraft + MINECRAFT_LEVEL_OFFSET));
 	bl_localplayer = *((Entity**) ((uintptr_t) bl_minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
@@ -1257,5 +1261,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (myerror != NULL) {
 		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Error in ModPE script init: %s\n", myerror);
 	}
+	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Size of ModelPart: %d", sizeof(ModelPart));
 
 }

@@ -122,10 +122,10 @@ typedef struct {
 	char filler0[12]; //12: note that 32 contains a std::vector
 	bool transparent; //24
 	bool wtf1; //25
-	char filler1[30]; //25
+	char filler1[30]; //26
 	int textureWidth; //56
 	int textureHeight; //60
-	char filler2[4]; //65
+	char filler2[4]; //64
 	int textureOffsetX;//68
 	int textureOffsetY;//72
 	bool wtf2; //76
@@ -163,8 +163,9 @@ typedef struct {
 typedef void EntityRenderer;
 
 typedef struct {
-	void** vtable;
-	void* model;
+	void** vtable; //0
+	char filler[48]; //4
+	void* model; // 52 (from MobRenderer::MobRenderer)
 } MobRenderer;
 
 typedef void Tag;

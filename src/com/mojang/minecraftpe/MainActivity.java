@@ -704,7 +704,7 @@ public class MainActivity extends NativeActivity {
 			options = new CharSequence[] { livePatch, manageModPEScripts, takeScreenshot,
 					optionMenu };
 		}
-		return new AlertDialog.Builder(this).setTitle(R.string.app_name)
+		return new AlertDialog.Builder(this).setTitle(isSafeMode()? R.string.pref_zz_safe_mode: R.string.app_name)
 				.setItems(options, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogI, int button) {
 						if (button == 0) {
@@ -1516,7 +1516,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void setupHoverCar() {
-		hoverCar = new HoverCar(this);
+		hoverCar = new HoverCar(this, isSafeMode());
 		hoverCar.show(getWindow().getDecorView());
 		hoverCar.setVisible(!Utils.getPrefs(0).getBoolean("zz_hovercar_hide", false));
 		hoverCar.mainButton.setOnClickListener(new View.OnClickListener() {
@@ -1610,6 +1610,7 @@ public class MainActivity extends NativeActivity {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, "Disabling all patches");
 		PatchManager.getPatchManager(this).disableAllPatches();
+		Utils.getPrefs(0).edit().putBoolean("zz_load_native_addons", false).apply();
 	}
 
 	protected void loginLaunchCallback(Uri launchUri) {

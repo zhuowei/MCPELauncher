@@ -2,6 +2,7 @@ package net.zhuoweizhang.mcpelauncher.ui;
 
 import net.zhuoweizhang.mcpelauncher.R;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,7 @@ public class HoverCar extends PopupWindow {
 
 	public ImageButton mainButton;
 
-	public HoverCar(Context con) {
+	public HoverCar(Context con, boolean safeMode) {
 		super(con);
 		LayoutInflater inf = (LayoutInflater) con
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -24,7 +25,7 @@ public class HoverCar extends PopupWindow {
 				R.dimen.hovercar_height);
 		setWidth((int) myWidth);
 		setHeight((int) myHeight);
-		setBackgroundDrawable(null);
+		setBackgroundDrawable(safeMode? new ColorDrawable(0x80ff0000) : null);
 	}
 
 	public void show(View parentView) {

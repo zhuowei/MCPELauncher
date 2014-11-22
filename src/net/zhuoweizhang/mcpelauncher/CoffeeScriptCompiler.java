@@ -92,6 +92,7 @@ public class CoffeeScriptCompiler {
 		//grab the compile function
 		//invoke it with our parameters (bare, literate if appropriate, no header)
 		//return the compiled string
+		/*
 		Context ctx = Context.enter();
 		Script compilerScript = new org.coffeescript.CoffeeScript();
 		Scriptable scope = ctx.initStandardObjects();
@@ -108,5 +109,7 @@ public class CoffeeScriptCompiler {
 		String output = (String) coffeeScriptCompile.call(ctx, scope, scope, new Object[] {input, compilerParams});
 		Context.exit();
 		return output;
+		*/
+		throw new RuntimeException("CoffeeScript compiler has been removed");
 	}
 }
