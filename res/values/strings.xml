@@ -170,6 +170,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="pref_zz_command_history">Enable command history on chat screen</string>
     <string name="pref_zz_immersive_mode">Enable immersive mode</string>
     <string name="pref_zz_immersive_mode_summary">Hide the navigation buttons during gameplay</string>
+    <string name="pref_zz_watch_recording">Watch recordings</string>
     <string name="advertising_privacy_policy">Advertising privacy policy</string>
     <string name="about_kamcord_credits">Certain video and audio capture functionality is Powered by Kamcord™ (kamcord.com), and your use of such functionality is subject to the Kamcord Terms of Use (kamcord.com/tos) and Privacy Policy (kamcord.com/privacy)</string>
     <string name="report_error_title">Oh nose everything broke</string>

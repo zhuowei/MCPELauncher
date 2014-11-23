@@ -3,8 +3,10 @@ package net.zhuoweizhang.mcpelauncher.ui;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import com.mojang.minecraftpe.MainActivity;
 
@@ -18,6 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.*;
 import de.ankri.views.Switch;
+
+import com.kamcord.android.Kamcord;
 
 public class MainMenuOptionsActivity extends PreferenceActivity implements
 		Preference.OnPreferenceClickListener, SwitchPreference.OnCheckedChangeListener {
@@ -37,6 +41,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private boolean needsRestart = false;
 	public static boolean isManagingAddons = false;
 
+	private Set<Switch> hasInflatedSwitches = new HashSet<Switch>();
+
 	private SwitchPreference patchesPreference;
 	private SwitchPreference texturepackPreference;
 	private SwitchPreference addonsPreference;
@@ -49,6 +55,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference aboutPreference;
 	private Preference paranoidPreference;
 	private Preference legacyLivePatchPreference;
+
+	private Preference recorderWatchPreference;
 
 	protected Thread ui = new Thread(new Runnable() {
 		protected WeakReference<MainMenuOptionsActivity> activity = null;
@@ -284,6 +292,15 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		if (immersiveModePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
 			getPreferenceScreen().removePreference(immersiveModePreference);
 		}
+
+		recorderWatchPreference = findPreference("zz_watch_recording");
+		if (recorderWatchPreference != null) {
+			if (!Kamcord.isEnabled()) {
+				getPreferenceScreen().removePreference(recorderWatchPreference);
+			} else {
+				recorderWatchPreference.setOnPreferenceClickListener(this);
+			}
+		}
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
@@ -317,13 +334,21 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		} else if (pref == languagePreference || pref == paranoidPreference || pref == legacyLivePatchPreference) {
 			needsRestart = true;
 			return false;
+		} else if (pref == recorderWatchPreference) {
+			Kamcord.showWatchView();
+			finish();
+			return false;
 		}
 		return false;
 	}
 
 	@Override
 	public void onCheckedChange(Switch data) {
-		needsRestart = true;
+		if (hasInflatedSwitches.contains(data)) {
+			needsRestart = true;
+		} else {
+			hasInflatedSwitches.add(data);
+		}
 		synchronized (ui) {
 			ui.notifyAll();
 		}
