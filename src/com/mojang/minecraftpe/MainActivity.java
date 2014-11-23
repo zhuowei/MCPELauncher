@@ -336,9 +336,9 @@ public class MainActivity extends NativeActivity {
 			boolean shouldLoadScripts = false;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
-				//applyBuiltinPatches();
-				//if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
-				//	ScriptManager.init(this);
+				applyBuiltinPatches();
+				if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
+					ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
 				ScriptManager.loadEnabledScriptsNames(this);
@@ -354,6 +354,7 @@ public class MainActivity extends NativeActivity {
 		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		//enableSoftMenuKey();
+		//disableTransparentSystemBar(); not needed when targetting KitKat
 
 		java.net.CookieManager cookieManager = new java.net.CookieManager();
 		java.net.CookieHandler.setDefault(cookieManager);
@@ -366,6 +367,7 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 
+		// note that Kamcord works better with targetSdkVersion=19 than with 21
 		initKamcord();
 
 		System.gc();
@@ -706,7 +708,8 @@ public class MainActivity extends NativeActivity {
 		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
-		if (hasRecorder) {
+		isRecording = Kamcord.isRecording();
+		if (hasRecorder && (isRecording || ScriptManager.hasLevel)) { // prevent starting recording on title screen
 			options.add(isRecording? stopRecording: startRecording);
 		}
 		if (hasInsertText) {
@@ -1618,6 +1621,11 @@ public class MainActivity extends NativeActivity {
 		// KitKat reused old show menu key flag for transparent navbars
 	}
 
+	private void disableTransparentSystemBar() {
+		if (Build.VERSION.SDK_INT < 21) return; // below Lollipop
+		getWindow().clearFlags(0x80000000); // FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS 
+	}
+
 	private void disableAllPatches() {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, "Disabling all patches");
@@ -1682,6 +1690,7 @@ public class MainActivity extends NativeActivity {
 				}
 			});
 		}
+		if (hasRecorder) clearRuntimeOptionsDialog();
 	}
 
 	/**
@@ -1690,6 +1699,7 @@ public class MainActivity extends NativeActivity {
 	 * ingame/show ads, etc
 	 */
 	public void leaveGameCallback() {
+		if (hasRecorder) clearRuntimeOptionsDialog();
 	}
 
 	public void scriptPrintCallback(final String message, final String scriptName) {
@@ -1897,21 +1907,23 @@ public class MainActivity extends NativeActivity {
 
 	private void initKamcord() {
 		// test if we have kamcord
-		hasRecorder = true;//false;
+		hasRecorder = false;
 		try {
 			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
-			hasRecorder = true;
+			hasRecorder = getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.recorder") != null;
 		} catch (PackageManager.NameNotFoundException ex) {
 		}
 		if (hasRecorder) {
+			Kamcord.whitelistAll();
 			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
 			Kamcord.initActivity(this);
+			hasRecorder = Kamcord.isEnabled();
 		}
 	}
 
 	private void toggleRecording() {
 		isRecording = !isRecording;
-		ScriptManager.nativeSetIsRecording(isRecording);
+		//ScriptManager.nativeSetIsRecording(isRecording);
 		if (isRecording) {
 			Kamcord.startRecording();
 		} else {
@@ -1920,6 +1932,16 @@ public class MainActivity extends NativeActivity {
 		}
 		removeDialog(DIALOG_RUNTIME_OPTIONS);
 		removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
+	}
+
+	private void clearRuntimeOptionsDialog() {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				if (BuildConfig.DEBUG) System.out.println("clearRuntimeOptionsDialog");
+				removeDialog(DIALOG_RUNTIME_OPTIONS);
+				removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
+			}
+		});
 	}
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {

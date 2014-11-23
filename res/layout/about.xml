@@ -42,6 +42,12 @@
         android:text="@string/about_librarycredits"/>
 
     <TextView
+        android:id="@+id/about_kamcordcreditstext"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_kamcord_credits"/>
+
+    <TextView
         android:id="@+id/about_copyrighttext"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

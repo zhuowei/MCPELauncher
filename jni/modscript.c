@@ -505,34 +505,10 @@ void bl_handleFrameCallback() {
 }
 
 void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
-	JNIEnv *env;
-	int recording = bl_isRecording;
-	if (recording) {
-		//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-		int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
-		if (attachStatus == JNI_EDETACHED) {
-			(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
-		}
-		(*env)->CallStaticVoidMethod(env, bl_kamcord_class, bl_kamcord_beginDraw);
-		// Yes, I realize this is two JNI calls per frame. Haters gonna hate.
-		if (attachStatus == JNI_EDETACHED) {
-			(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
-		}
-	}
 	bl_NinecraftApp_update_real(minecraft);
 	if (bl_frameCallbackRequested) {
 		bl_handleFrameCallback();
 		bl_frameCallbackRequested = 0;
-	}
-	if (recording) {
-		int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
-		if (attachStatus == JNI_EDETACHED) {
-			(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
-		}
-		(*env)->CallStaticVoidMethod(env, bl_kamcord_class, bl_kamcord_endDraw);
-		if (attachStatus == JNI_EDETACHED) {
-			(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
-		}
 	}
 }
 
@@ -1139,14 +1115,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 */
-	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV15MinecraftClient");
-	bl_dumpVtable((void**) minecraftVtable, 0xb8);
-// FIXME remove
-
-	bl_NinecraftApp_update_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE];
-
-	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
-
 	jclass clz = (*env)->FindClass(env, "com/kamcord/android/Kamcord");
 
 	bl_kamcord_class = (*env)->NewGlobalRef(env, clz);

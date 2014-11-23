@@ -114,6 +114,7 @@ public class ScriptManager {
 	private static Map<Integer, String> entityUUIDMap = new HashMap<Integer, String>();
 	private static boolean nextTickCallsSetLevel = false;
 	private static AtlasMeta terrainMeta, itemsMeta;
+	public static boolean hasLevel = false;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -283,6 +284,7 @@ public class ScriptManager {
 		allentities.clear();
 		allplayers.clear();
 		entityUUIDMap.clear();
+		ScriptManager.hasLevel = true;
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -299,12 +301,13 @@ public class ScriptManager {
 		worldName = wName;
 		worldDir = wDir;
 		callScriptMethod("selectLevelHook");
-		nextTickCallsSetLevel = true;
+		//nextTickCallsSetLevel = true;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
 		ScriptManager.isRemote = false;
 		ScriptManager.scriptingEnabled = true;
+		ScriptManager.hasLevel = false;
 		callScriptMethod("leaveGame");
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();

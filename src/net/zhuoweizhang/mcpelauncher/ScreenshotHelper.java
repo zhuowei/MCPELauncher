@@ -13,7 +13,7 @@ import java.util.Locale;
 
 import android.graphics.Bitmap;
 
-import static android.opengl.GLES11.*;
+import static android.opengl.GLES20.*;
 
 import android.os.Environment;
 
