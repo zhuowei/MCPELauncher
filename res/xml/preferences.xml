@@ -63,6 +63,12 @@
             android:defaultValue="false"
             android:key="zz_hovercar_hide"
             android:title="@string/pref_zz_hovercar_hide" />
+        <Preference
+            android:key="zz_watch_recording"
+            android:title="@string/pref_zz_watch_recording" />
+        <Preference
+            android:key="zz_reshare_last_recording"
+            android:title="@string/pref_zz_reshare_last_recording" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_show_insert_text"

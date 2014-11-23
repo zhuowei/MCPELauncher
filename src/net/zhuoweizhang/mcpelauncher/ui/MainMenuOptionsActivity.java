@@ -10,14 +10,17 @@ import java.util.Set;
 
 import com.mojang.minecraftpe.MainActivity;
 
+import net.zhuoweizhang.mcpelauncher.KamcordConstants;
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.Utils;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.*;
 import de.ankri.views.Switch;
 
@@ -57,6 +60,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference legacyLivePatchPreference;
 
 	private Preference recorderWatchPreference;
+	private Preference recorderReshareLastPreference;
 
 	protected Thread ui = new Thread(new Runnable() {
 		protected WeakReference<MainMenuOptionsActivity> activity = null;
@@ -291,14 +295,27 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		Preference immersiveModePreference = findPreference("zz_immersive_mode");
 		if (immersiveModePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
 			getPreferenceScreen().removePreference(immersiveModePreference);
+			immersiveModePreference.setEnabled(false);
 		}
+
+		boolean hasRecorder = hasRecorder() && Kamcord.isEnabled();
+		System.out.println("Has recorder: " + hasRecorder);
 
 		recorderWatchPreference = findPreference("zz_watch_recording");
 		if (recorderWatchPreference != null) {
-			if (!Kamcord.isEnabled()) {
-				getPreferenceScreen().removePreference(recorderWatchPreference);
+			if (!hasRecorder) {
+				recorderWatchPreference.setEnabled(false);
 			} else {
 				recorderWatchPreference.setOnPreferenceClickListener(this);
+			}
+		}
+
+		recorderReshareLastPreference = findPreference("zz_reshare_last_recording");
+		if (recorderReshareLastPreference != null) {
+			if (!hasRecorder) {
+				recorderReshareLastPreference.setEnabled(false);
+			} else {
+				recorderReshareLastPreference.setOnPreferenceClickListener(this);
 			}
 		}
 	}
@@ -337,6 +354,9 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		} else if (pref == recorderWatchPreference) {
 			Kamcord.showWatchView();
 			finish();
+			return false;
+		} else if (pref == recorderReshareLastPreference) {
+			reshareLast();
 			return false;
 		}
 		return false;
@@ -448,6 +468,36 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 	}
 
+	private void reshareLast() {
+		// find the last Kamcord video, if any, and call share on it
+		File file = findLastKamcordVideo();
+		if (file == null) {
+			new AlertDialog.Builder(this).setMessage(R.string.recorder_no_recording).
+				setPositiveButton(android.R.string.ok, null).
+				show();
+			return;
+		}
+		Uri theUri = Uri.fromFile(file);
+		Intent intent = new Intent(Intent.ACTION_SEND);
+		intent.setType("video/mp4");
+		intent.putExtra(Intent.EXTRA_STREAM, theUri);
+		Intent chooser = Intent.createChooser(intent, "Share video");
+		startActivity(chooser);
+	}
+
+	private File findLastKamcordVideo() {
+		File kamcordDir = new File(Environment.getExternalStorageDirectory(), "Kamcord");
+		File myDir = new File(kamcordDir, KamcordConstants.DEV_KEY + "-" + getPackageName());
+		if (!myDir.exists()) return null;
+		for (File theDir: myDir.listFiles()) {
+			if (!theDir.isDirectory()) continue;
+			if (new File(theDir, "thumbnail.jpg").exists() && new File(theDir, "video.mp4").exists()) {
+				return new File(theDir, "video.mp4");
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Forces the app to be restarted by calling System.exit(0), Android
 	 * automatically re-launches the activity behind this one when the vm exits,
@@ -495,6 +545,15 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			scriptsPreference.setEnabled(!safeMode);
 			needsRestart = true;
 		}*/
+	}
+
+	protected boolean hasRecorder() {
+		try {
+			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
+			return true;
+		} catch (Exception ex) {
+			return false;
+		}
 	}
 
 }
