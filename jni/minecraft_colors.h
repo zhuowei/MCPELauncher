@@ -15,5 +15,6 @@ int bl_minecraft_colors[] = {
 	0xFF5555, //red
 	0xFF55FF, //light purple
 	0xFFFF55, //yellow
-	0xFFFFFF  //white
+	0xFFFFFF,  //white
+	0x2d3b00 // veggie poop
 };
