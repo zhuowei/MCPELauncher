@@ -274,6 +274,8 @@ public class ScriptManager {
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
+	}
+	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
 		//ScriptManager.isRemote = isRemote;
@@ -301,7 +303,7 @@ public class ScriptManager {
 		worldName = wName;
 		worldDir = wDir;
 		callScriptMethod("selectLevelHook");
-		//nextTickCallsSetLevel = true;
+		nextTickCallsSetLevel = true;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -325,7 +327,7 @@ public class ScriptManager {
 
 	public static void tickCallback() {
 		if (nextTickCallsSetLevel) {
-			setLevelCallback(true, nativeLevelIsRemote());
+			setLevelFakeCallback(true, nativeLevelIsRemote());
 		}
 		callScriptMethod("modTick");
 		// do we have any requests for graphics reset?

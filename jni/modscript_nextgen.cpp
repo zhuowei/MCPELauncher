@@ -1357,7 +1357,6 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
-#if 0
 	for (int i = 1; i < 0x100; i++) {
 		if (bl_Tile_tiles[i] == NULL) {
 			char name[100];
@@ -1371,7 +1370,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
 		}
 	}
-#endif
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity

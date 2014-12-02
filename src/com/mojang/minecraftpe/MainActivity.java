@@ -1916,7 +1916,9 @@ public class MainActivity extends NativeActivity {
 		if (hasRecorder) {
 			Kamcord.whitelistAll();
 			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
+			Kamcord.whitelistAll();
 			Kamcord.initActivity(this);
+			Kamcord.whitelistAll();
 			hasRecorder = Kamcord.isEnabled();
 		}
 	}
