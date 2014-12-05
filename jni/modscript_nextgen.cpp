@@ -1357,6 +1357,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
+#ifdef __arm__
 	for (int i = 1; i < 0x100; i++) {
 		if (bl_Tile_tiles[i] == NULL) {
 			char name[100];
@@ -1370,6 +1371,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
 		}
 	}
+#endif
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
@@ -1518,6 +1520,8 @@ void bl_cppNewLevelInit() {
 }
 
 void bl_setuphooks_cppside() {
+	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+
 	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
 
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
@@ -1545,12 +1549,11 @@ void bl_setuphooks_cppside() {
 	bl_RakNetInstance_connect_real = (void (*) (RakNetInstance*, char const*, int))
 		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
 
-	int* raknetVTable = (int*) dlsym(RTLD_DEFAULT, "_ZTV14RakNetInstance");
+	void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
 	//raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
 
-	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	bl_FoodItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
-	bl_Item_vtable = (void**) ((int) dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
+	bl_FoodItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
+	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 
@@ -1560,7 +1563,7 @@ void bl_setuphooks_cppside() {
 	bl_Font_width = (int (*) (Font*, std::string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
 
-	bl_Tile_vtable = (void**) ((int) dlsym(RTLD_DEFAULT, "_ZTV4Tile") + 8);
+	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile") + 8);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
@@ -1569,7 +1572,7 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
-	bl_TileItem_vtable = (void**) ((int) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
+	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
 	bl_Tile_getDescriptionId = (std::string (*)(Tile*))

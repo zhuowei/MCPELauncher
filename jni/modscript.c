@@ -47,7 +47,7 @@ typedef struct {
 // from Player::getCarriedItem
 #define PLAYER_INVENTORY_OFFSET 3212
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
-#define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 29
+#define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 // this is / 4 bytes already; found in Mob::actuallyHurt
 #define MOB_HEALTH_OFFSET 82
 // this is / 4 bytes already; found in EntityRenderDispatcher::getRenderer
@@ -241,15 +241,12 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 		itemDamage = itemStack->damage;
 	}
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: tile source = %p level %p xyz %d %d %d", level->tileSource, level, x, y, z);
-
 	int blockId = bl_TileSource_getTile(level->tileSource, x, y, z);
 	int blockDamage = bl_TileSource_getData(level->tileSource, x, y, z);
 
 #ifdef EXTREME_LOGGING
 	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: JavaVM = %p\n", bl_JavaVM);
 #endif
-
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
 #ifdef EXTREME_LOGGING
@@ -292,7 +289,7 @@ void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, int 
 	if(!preventDefaultStatus) bl_SurvivalMode_startDestroyBlock_real(gamemode, player, x, y, z, side);
 }
 
-void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, int x, int y, int z, int side) {
+void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, int x, int y, int z, signed char side) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -1121,31 +1118,35 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	dlerror();
 
+	if (!mcpelibhandle) {
+		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	}
+
 	//edit the vtables of the GameMode implementations
 	bl_GameMode_useItemOn_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
 
-	int *creativeVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12CreativeMode");
-	creativeVtable[GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON] = (int) &bl_GameMode_useItemOn_hook;
-	int *survivalVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV12SurvivalMode");
-	survivalVtable[GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON] = (int) &bl_GameMode_useItemOn_hook;
+	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12CreativeMode");
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON] = (void*) &bl_GameMode_useItemOn_hook;
+	void** survivalVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12SurvivalMode");
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON] = (void*) &bl_GameMode_useItemOn_hook;
 
 	bl_GameMode_attack_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackEP6PlayerP6Entity");
-	creativeVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (int) &bl_GameMode_attack_hook;
-	survivalVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (int) &bl_GameMode_attack_hook;
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (void*) &bl_GameMode_attack_hook;
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_ATTACK] = (void*) &bl_GameMode_attack_hook;
 	bl_GameMode_tick_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode4tickEv");
-	creativeVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
-	survivalVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (int) &bl_GameMode_tick_hook;
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (void*) &bl_GameMode_tick_hook;
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_TICK] = (void*) &bl_GameMode_tick_hook;
 
 	bl_GameMode_initPlayer_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode10initPlayerEP6Player");
-	creativeVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (int) &bl_GameMode_initPlayer_hook;
-	survivalVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (int) &bl_GameMode_initPlayer_hook;
+	creativeVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (void*) &bl_GameMode_initPlayer_hook;
+	survivalVtable[GAMEMODE_VTABLE_OFFSET_INIT_PLAYER] = (void*) &bl_GameMode_initPlayer_hook;
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
-	int *minecraftVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV15MinecraftClient");
+	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 	//bl_dumpVtable((void**) minecraftVtable, 0xb8);
 	bl_Minecraft_setLevel_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL];
 
-	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (int) &bl_Minecraft_setLevel_hook;
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (void*) &bl_Minecraft_setLevel_hook;
 
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
@@ -1219,8 +1220,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Player_setArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8setArmorEiPK12ItemInstance");
 
 	//replace the getTexture method for zombie pigmen
-	int *pigZombieVtable = (int*) dlsym(RTLD_DEFAULT, "_ZTV9PigZombie");
-	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (int) bl_Mob_getTexture;
+	void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
+	pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 	bl_Minecraft_setIsCreativeMode = dlsym(RTLD_DEFAULT, "_ZN9Minecraft17setIsCreativeModeEb");
@@ -1240,10 +1241,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 #endif
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
-
-	if (!mcpelibhandle) {
-		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	}
 
 	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3PS2_");
 
