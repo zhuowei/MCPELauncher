@@ -348,6 +348,8 @@ void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffs
 					newColor = bl_minecraft_colors[myChar - '0'];
 				} else if (myChar >= 'a' && myChar <= 'f') {
 					newColor = bl_minecraft_colors[myChar - 'a' + 10];
+				} else if (myChar == 0x7caa) { // chinese character for "poo"
+					newColor = 0x2d3b00; // veggie poop green
 				} else if (myChar == 'l') {
 					newFlags |= TEXT_BOLD;
 				} else if (myChar == 'r') {
@@ -363,8 +365,8 @@ void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffs
 
 				substringOffset += bl_Font_width(font, cppStringPart);
 
-				if (newColor != -1) curColor = {(newColor & 0xff) / 255.0f, ((newColor >> 8) & 0xff) / 255.0f, 
-					((newColor >> 16) & 0xff) / 255.0f, 1.0f};;
+				if (newColor != -1) curColor = {((newColor >> 16) & 0xff) / 255.0f, ((newColor >> 8) & 0xff) / 255.0f,
+					(newColor & 0xff) / 255.0f, 1.0f};;
 				flags = newFlags;
 				currentTextBegin = (const char *) iteratePtr;
 				currentLength = 0;
