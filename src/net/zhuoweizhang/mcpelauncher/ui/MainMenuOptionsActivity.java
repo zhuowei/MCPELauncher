@@ -364,11 +364,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 
 	@Override
 	public void onCheckedChange(Switch data) {
-		if (hasInflatedSwitches.contains(data)) {
-			needsRestart = true;
-		} else {
-			hasInflatedSwitches.add(data);
-		}
+		needsRestart = true;
 		synchronized (ui) {
 			ui.notifyAll();
 		}

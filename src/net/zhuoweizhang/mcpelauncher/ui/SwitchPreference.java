@@ -33,8 +33,8 @@ public class SwitchPreference extends Preference implements
 		super.onBindView(view);
 		content = (Switch) view.findViewById(R.id.switch_widget);
 		if (content != null) {
-			content.setOnCheckedChangeListener(this);
 			content.setChecked(getPersistedBoolean(false));
+			content.setOnCheckedChangeListener(this);
 		} else {
 			System.err.println("SwitchPreference Switch is null");
 		}

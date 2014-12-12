@@ -1563,7 +1563,8 @@ public class MainActivity extends NativeActivity {
 				try {
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);
-				} catch (Exception e) {
+				} catch (Throwable e) {
+					reportError(e);
 					e.printStackTrace();
 				}
 			}
