@@ -39,6 +39,7 @@ typedef void Font;
 #define BLOCK_VTABLE_SIZE 0x128
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
 #define BLOCK_VTABLE_GET_COLOR 46
+#define BLOCK_VTABLE_GET_AABB 14
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2960
 // found in PlayerRenderer::renderName
@@ -142,6 +143,7 @@ static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
 static Tile** bl_Tile_tiles;
 static int* bl_Tile_lightEmission;
+static int* bl_Tile_lightBlock;
 
 static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
@@ -206,7 +208,7 @@ bool bl_text_parse_color_codes = true;
 void* bl_CustomBlock_vtable[BLOCK_VTABLE_SIZE];
 TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
-int bl_custom_block_renderShape[256];
+bool bl_custom_block_collisionDisabled[256];
 int* bl_custom_block_colors[256];
 uint8_t bl_custom_block_renderLayer[256];
 //end custom blocks
@@ -243,6 +245,8 @@ static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
 static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
 static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
 static void (*bl_TileSource_fireTileEvent_real)(TileSource* source, int x, int y, int z, int type, int data);
+static AABB* (*bl_Tile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
+static AABB* (*bl_ReedTile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
 
 static bool* bl_Tile_solid;
 
@@ -443,10 +447,10 @@ bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
 	int blockId = tile->id;
 	return bl_custom_block_opaque[blockId];
 }
-
-int bl_CustomBlock_getRenderShapeHook(Tile* tile) {
+AABB* bl_CustomBlock_getAABBHook(Tile* tile, TileSource* tileSource, int x, int y, int z, AABB& aabb, int int1, bool bool1, int int2) {
 	int blockId = tile->id;
-	return bl_custom_block_renderShape[blockId];
+	if (bl_custom_block_collisionDisabled[blockId]) return bl_ReedTile_getAABB(tile, tileSource, x, y, z, aabb, int1, bool1, int2);
+	return bl_Tile_getAABB(tile, tileSource, x, y, z, aabb, int1, bool1, int2);
 }
 
 int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y, int z) {
@@ -460,11 +464,6 @@ int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y
 int bl_CustomBlock_getRenderLayerHook(Tile* tile) {
 	int blockId = tile->id;
 	return bl_custom_block_renderLayer[blockId];
-}
-
-bool bl_CustomBlock_isSolidRenderHook(Tile* tile) {
-	int blockId = tile->id;
-	return bl_custom_block_renderShape[blockId] == 0;
 }
 
 void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float scale) {
@@ -945,6 +944,7 @@ void bl_initCustomBlockVtable() {
 	//set the texture getter to our overridden version
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
+	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
 }
@@ -1061,6 +1061,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	bl_Tile_lightEmission[blockId] = level;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightOpacity
+  (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+	if (blockId < 0 || blockId > 255) return;
+	bl_Tile_lightBlock[blockId] = level;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
   (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
 	if (blockId < 0 || blockId > 255) return;
@@ -1076,6 +1082,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
 	bl_custom_block_renderLayer[blockId] = (uint8_t) level;
+	Tile* tile = bl_Tile_tiles[blockId];
+	tile->renderPass = level;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv
@@ -1480,6 +1488,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	bl_getAbilities(bl_localplayer)->mayFly = val;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetCollisionEnabled
+  (JNIEnv *env, jclass clazz, jint blockId, jboolean collide) {
+	if (blockId < 0 || blockId > 255) return;
+	bl_custom_block_collisionDisabled[blockId] = !collide;
+}
+
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);
@@ -1577,6 +1591,7 @@ void bl_setuphooks_cppside() {
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
+	bl_Tile_lightBlock = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile10lightBlockE");
 	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
 		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
@@ -1686,6 +1701,10 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
 
 	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN4Tile5solidE");
+	bl_Tile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
+		dlsym(mcpelibhandle, "_ZN4Tile7getAABBEP10TileSourceiiiR4AABBibi");
+	bl_ReedTile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
+		dlsym(mcpelibhandle, "_ZN8ReedTile7getAABBEP10TileSourceiiiR4AABBibi");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

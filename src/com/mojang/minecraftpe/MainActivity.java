@@ -1436,6 +1436,10 @@ public class MainActivity extends NativeActivity {
 		}
 
 		if (commandHistory) {
+			// clear blank lines
+			for (int i = commandHistoryList.size() - 1; i >= 0; i--) {
+				if (commandHistoryList.get(i).equals("")) commandHistoryList.remove(i);
+			}
 			commandHistoryList.add(text);
 			setCommandHistoryIndex(commandHistoryList.size() - 1);
 		}

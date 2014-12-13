@@ -1231,6 +1231,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetStepSound(int blockId, int sourceBlockId);
 
 	public static native void nativeBlockSetLightLevel(int blockId, int level);
+	public static native void nativeBlockSetLightOpacity(int blockId, int level);
 
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
 
@@ -1356,6 +1357,7 @@ public class ScriptManager {
 
 	public static native boolean nativePlayerCanFly();
 	public static native void nativePlayerSetCanFly(boolean val);
+	public static native void nativeBlockSetCollisionEnabled(int id, boolean enable);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2544,6 +2546,16 @@ public class ScriptManager {
 		/*@JSStaticFunction
 		public static void addIcon(String url, String name, int index) {
 			ScriptManager.addIcon("terrain", url, name, index);
+		}*/
+
+		@JSStaticFunction
+		public static void setLightOpacity(int blockId, int lightLevel) {
+			nativeBlockSetLightOpacity(blockId, lightLevel);
+		}
+
+		/*@JSStaticFunction
+		public static void setCollisionEnabled(int blockId, boolean yep) {
+			nativeBlockSetCollisionEnabled(blockId, yep);;
 		}*/
 
 		@Override
