@@ -287,6 +287,10 @@ public class ScriptManager {
 		allplayers.clear();
 		entityUUIDMap.clear();
 		ScriptManager.hasLevel = true;
+
+		// I have no idea what to do now, so manually trigger the entity added listener for the local player
+		entityAddedCallback(nativeGetPlayerEnt());
+
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -2354,6 +2358,18 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void resetFov() {
 			nativeSetFov(0.0f, false);
+		}
+
+		@JSStaticFunction
+		public static String getMinecraftVersion() {
+			try {
+				return androidContext.getPackageManager().
+					getPackageInfo("com.mojang.minecraftpe", 0).
+					versionName;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "Unknown";
+			}
 		}
 
 		@Override

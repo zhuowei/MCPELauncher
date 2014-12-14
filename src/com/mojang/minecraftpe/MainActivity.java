@@ -1471,9 +1471,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public long getTotalMemory() {
-		long retval = Debug.getNativeHeapSize();
-		Log.i(TAG, "Get total memory: " + retval);
-		return retval;
+		//long retval = Debug.getNativeHeapSize();
+		//Log.i(TAG, "Get total memory: " + retval);
+		//return retval;
+		return 0x400000000L; // 16 GB
 	}
 
 	// added in 0.10.0
@@ -2069,9 +2070,7 @@ public class MainActivity extends NativeActivity {
 				conn.setRequestProperty("User-Agent", "MCPE/Curl");
 				conn.setUseCaches(false);
 				conn.setDoInput(true);
-				if (conn instanceof HttpsURLConnection && isRedirectingRealms()) {
-					TrustModifier.relaxHostChecking(conn);
-				}
+
 				conn.connect();
 				try {
 					response = conn.getResponseCode();

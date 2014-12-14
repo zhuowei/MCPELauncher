@@ -953,8 +953,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	//MCPETimer* timer = (MCPETimer*) (((int) bl_minecraft) + MINECRAFT_TIMER_OFFSET);
-	//timer->ticksPerSecond = ticksPerSecond;
+	MCPETimer* timer = *((MCPETimer**) (((uintptr_t) bl_minecraft) + MINECRAFT_TIMER_OFFSET));
+	timer->ticksPerSecond = ticksPerSecond;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
@@ -1143,7 +1143,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
-	//bl_dumpVtable((void**) minecraftVtable, 0xb8);
+	//void** levelVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV5Level");
+	//bl_dumpVtable((void**) levelVtable, 0x94);
 	bl_Minecraft_setLevel_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL];
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (void*) &bl_Minecraft_setLevel_hook;

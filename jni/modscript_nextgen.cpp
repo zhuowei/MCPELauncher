@@ -239,6 +239,8 @@ static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 static bool (*bl_Level_addEntity_real)(Level*, Entity*);
+static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, Entity*);
+static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*);
 static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
 static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
@@ -596,6 +598,50 @@ static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
 	JNIEnv *env;
 
 	bool retval = bl_Level_addEntity_real(level, entity);
+
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	return retval;
+}
+
+static uintptr_t bl_Level_addPlayer_hook(Level* level, Player* entity) {
+	JNIEnv *env;
+
+	uintptr_t retval = bl_Level_addPlayer_real(level, entity);
+
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	return retval;
+}
+
+static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, Entity* entity) {
+	JNIEnv *env;
+
+	bool retval = bl_MultiPlayerLevel_addEntity_real(level, entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -1686,6 +1732,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
 	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityEP6Entity");
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
+	void* mpAddEntity = dlsym(mcpelibhandle, "_ZN16MultiPlayerLevel9addEntityEP6Entity");
+	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
+	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerEP6Player");
+	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
