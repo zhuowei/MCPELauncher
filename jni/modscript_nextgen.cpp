@@ -940,6 +940,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (entity == NULL) return;
 	//bl_Mob_setSneaking(entity, doIt);
 	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
+	if (movement == nullptr) return;
 	movement[14] = doIt;
 }
 
