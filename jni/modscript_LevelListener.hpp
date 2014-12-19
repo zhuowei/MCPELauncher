@@ -3,7 +3,6 @@
 #include "modscript_shared.h"
 typedef Entity TripodCamera;
 typedef void TileEntity;
-typedef struct LevelChunk_t LevelChunk;
 typedef Entity Mob;
 
 enum ParticleType {

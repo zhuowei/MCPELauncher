@@ -250,6 +250,10 @@ static void (*bl_TileSource_fireTileEvent_real)(TileSource* source, int x, int y
 static AABB* (*bl_Tile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
 static AABB* (*bl_ReedTile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
 
+static LevelChunk* (*bl_TileSource_getChunk)(TileSource*, int, int);
+static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
+static Biome* (*bl_Biome_getBiome)(int);
+
 static bool* bl_Tile_solid;
 
 #define STONECUTTER_STATUS_DEFAULT 0
@@ -1540,6 +1544,30 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	bl_custom_block_collisionDisabled[blockId] = !collide;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetBiome
+  (JNIEnv *env, jclass clazz, jint x, jint z, jint id) {
+	if (bl_level == nullptr) return;
+	LevelChunk* chunk = bl_TileSource_getChunk(bl_level->tileSource, x >> 4, z >> 4);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chunk: %p", chunk);
+	if (chunk == nullptr) return;
+	ChunkTilePos pos;
+	pos.x = x & 0xf;
+	pos.y = 64;
+	pos.z = z & 0xf;
+	Biome* biome = bl_Biome_getBiome(id);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Biome: %p", biome);
+	if (biome == nullptr) return;
+	bl_LevelChunk_setBiome(chunk, *biome, pos);
+}
+
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBiomeIdToName
+  (JNIEnv *env, jclass clazz, jint id) {
+	Biome* biome = bl_Biome_getBiome(id);
+	if (biome == nullptr) return nullptr;
+	jstring retval = env->NewStringUTF(biome->name.c_str());
+	return retval;
+}
+
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);
@@ -1755,6 +1783,13 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Tile7getAABBEP10TileSourceiiiR4AABBibi");
 	bl_ReedTile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
 		dlsym(mcpelibhandle, "_ZN8ReedTile7getAABBEP10TileSourceiiiR4AABBibi");
+
+	bl_TileSource_getChunk = (LevelChunk* (*)(TileSource*, int, int))
+		dlsym(mcpelibhandle, "_ZN10TileSource8getChunkEii");
+	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
+		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK12ChunkTilePos");
+	bl_Biome_getBiome = (Biome* (*)(int))
+		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

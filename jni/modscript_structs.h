@@ -197,8 +197,8 @@ typedef struct {
 	void** vtable; //0
 	char filler[40]; //4
 	cppstr name; //44 from Biome::setName
-	char filler2[92-48]; //48
-	int id; //92 from Biome::Biome
+	char filler2[120-48]; //48
+	int id; //120 from Biome::Biome
 } Biome;
 
 typedef struct {
@@ -230,6 +230,14 @@ typedef void MaterialPtr;
 
 typedef struct {
 } AABB;
+
+typedef struct {
+	unsigned char x;
+	unsigned char z;
+	unsigned char y;
+} ChunkTilePos;
+
+typedef struct LevelChunk_t LevelChunk;
 
 #ifdef __cplusplus
 }

@@ -1352,6 +1352,8 @@ public class ScriptManager {
 
 	public static native int nativeLevelGetBiome(int x, int z);
 	public static native String nativeLevelGetBiomeName(int x, int z);
+	public static native String nativeBiomeIdToName(int id);
+	public static native void nativeLevelSetBiome(int x, int z, int id);
 
 	public static native int nativeLevelGetGrassColor(int x, int z);
 	public static native void nativeLevelSetGrassColor(int x, int z, int val);
@@ -1802,6 +1804,16 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static String getBiomeName(int x, int z) {
 			return nativeLevelGetBiomeName(x, z);
+		}
+
+		@JSStaticFunction
+		public static String biomeIdToName(int id) {
+			return nativeBiomeIdToName(id);
+		}
+
+		@JSStaticFunction
+		public static void setBiome(int x, int z, int id) {
+			nativeLevelSetBiome(x, z, id);
 		}
 
 		@JSStaticFunction
