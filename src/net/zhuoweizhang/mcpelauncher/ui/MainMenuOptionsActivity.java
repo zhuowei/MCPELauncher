@@ -219,6 +219,18 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		setUp();
 		if (!ui.isAlive()) ui.start();
 	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		getWindow().getDecorView().post(new Runnable() {
+			public void run() {
+				synchronized (ui) {
+					ui.notifyAll();
+				}
+			}
+		});
+	}
 	
 	@SuppressWarnings("deprecation")
 	protected void setUp() {
