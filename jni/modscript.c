@@ -1082,9 +1082,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 	bl_frameCallbackRequested = 1;
 }
 
+extern void bl_signalhandler_init();
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz) {
 	if (bl_hasinit_prepatch) return;
+	bl_signalhandler_init();
 	if (!mcpelibhandle) {
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	}
@@ -1112,13 +1115,9 @@ void bl_dumpVtable(void** vtable, size_t size) {
 	}
 }
 
-extern void bl_signalhandler_init();
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
 	if (bl_hasinit_script) return;
-
-	bl_signalhandler_init();
 
 	dlerror();
 
