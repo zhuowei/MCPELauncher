@@ -1569,6 +1569,11 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return retval;
 }
 
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeForceCrash
+  (JNIEnv *env, jclass clazz) {
+	*((int*) 0xdeadfa11) = 0xd15ea5e;
+};
+
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);

@@ -1,0 +1,3 @@
+[submodule "jni/libcorkscrew"]
+	path = jni/libcorkscrew
+	url = https://github.com/zhuowei/libcorkscrew-ndk.git

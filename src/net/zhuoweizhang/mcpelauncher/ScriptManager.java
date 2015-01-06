@@ -1378,6 +1378,8 @@ public class ScriptManager {
 
 	public static native void nativeSetIsRecording(boolean yep);
 
+	public static native void nativeForceCrash();
+
 	public static class ScriptState {
 		public Script script;
 		public Scriptable scope;
@@ -2382,6 +2384,25 @@ public class ScriptManager {
 				e.printStackTrace();
 				return "Unknown";
 			}
+		}
+
+		@JSStaticFunction
+		public static void crash() {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.runOnUiThread(new Runnable() {
+						public void run() {
+							throw new RuntimeException("Intentional crash");
+						}
+					});
+				}
+			}
+		}
+
+		@JSStaticFunction
+		public static void crashNative() {
+			nativeForceCrash();
 		}
 
 		@Override

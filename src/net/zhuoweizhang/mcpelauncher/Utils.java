@@ -125,6 +125,9 @@ public class Utils {
 			return PreferenceManager.getDefaultSharedPreferences(mContext);
 		case 1:
 			return mContext.getSharedPreferences("mcpelauncherprefs", 0);
+		case 2:
+			return mContext.getSharedPreferences("safe_mode_counter", 0);
+
 		}
 		return null;
 	}

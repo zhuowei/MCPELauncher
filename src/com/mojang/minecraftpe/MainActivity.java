@@ -172,6 +172,10 @@ public class MainActivity extends NativeActivity {
 	private boolean hasRecorder = false;
 	private boolean isRecording = false;
 
+	private boolean hasResetSafeModeCounter = false;
+
+	private final static int MAX_FAILS = 2;
+
 	/** Called when the activity is first created. */
 
 	@Override
@@ -194,16 +198,14 @@ public class MainActivity extends NativeActivity {
 			System.exit(0);
 		}
 		hasAlreadyInited = true;
-		File lockFile = new File(getFilesDir(), "running.lock");
-		if (lockFile.exists()) {
+		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
+		System.out.println("Current fails: " + safeModeCounter);
+		if (safeModeCounter == MAX_FAILS) {
 			Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", true).apply();
+			safeModeCounter = 0;
 		}
-
-		try {
-			lockFile.createNewFile();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		safeModeCounter++;
+		Utils.getPrefs(2).edit().putInt("safe_mode_counter", safeModeCounter).commit();
 
 		MinecraftVersion.context = this.getApplicationContext();
 		boolean needsToClearOverrides = false;
@@ -377,11 +379,10 @@ public class MainActivity extends NativeActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		File lockFile = new File(getFilesDir(), "running.lock");
-		try {
-			lockFile.createNewFile();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (hasResetSafeModeCounter) {
+			int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
+			safeModeCounter++;
+			Utils.getPrefs(2).edit().putInt("safe_mode_counter", safeModeCounter).commit();
 		}
 		if (hoverCar == null) {
 			getWindow().getDecorView().post(new Runnable() {
@@ -404,12 +405,8 @@ public class MainActivity extends NativeActivity {
 	protected void onPause() {
 		nativeSuspend();
 		super.onPause();
-		File lockFile = new File(getFilesDir(), "running.lock");
-		try {
-			lockFile.delete();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Utils.getPrefs(2).edit().putInt("safe_mode_counter", 0).commit();
+		hasResetSafeModeCounter = true;
 		hideKeyboardView();
 	}
 
