@@ -946,14 +946,13 @@ public class ScriptManager {
 		if (!shouldLoadSkin())
 			return;
 		// load skin for player
-		String playerName = nativeGetPlayerName(entityId); // in the real
-															// service, this
-															// would be
-															// normalized
+		String playerName = nativeGetPlayerName(entityId);
+		if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
 		String skinName = "mob/" + playerName + ".png";
 		File skinFile = getTextureOverrideFile("images/" + skinName);
 		if (skinFile == null) return;
-		String urlString = "http://s3.amazonaws.com/MinecraftSkins/" + playerName + ".png";
+		String urlString = getSkinURL(playerName);
+		System.out.println("Downloading skins for " + urlString);
 		try {
 			URL url = new URL(urlString);
 			new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
@@ -962,6 +961,17 @@ public class ScriptManager {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static String getSkinURL(String name) {
+		if (Utils.getPrefs(0).getBoolean("zz_skin_load_pc", false)) {
+			return "http://s3.amazonaws.com/MinecraftSkins/" + name + ".png";
+		}
+		return "http://blskins.herokuapp.com/blskins/" + name + ".png";
+	}
+
+	private static boolean isSkinNameNormalized() {
+		return true;
 	}
 
 	private static void playerRemovedHandler(int entityId) {
@@ -976,8 +986,8 @@ public class ScriptManager {
 	}
 
 	private static boolean shouldLoadSkin() {
-		return Utils.getPrefs(0).getString("zz_skin_download_source", "mojang_pc")
-				.equals("mojang_pc");
+		return true;//Utils.getPrefs(0).getString("zz_skin_download_source", "mojang_pc")
+			//	.equals("mojang_pc");
 	}
 
 	private static boolean isClassGenMode() {
