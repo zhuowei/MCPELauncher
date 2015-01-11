@@ -948,6 +948,7 @@ public class ScriptManager {
 		// load skin for player
 		String playerName = nativeGetPlayerName(entityId);
 		if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
+		if (playerName.length() <= 0) return;
 		String skinName = "mob/" + playerName + ".png";
 		File skinFile = getTextureOverrideFile("images/" + skinName);
 		if (skinFile == null) return;
@@ -956,7 +957,7 @@ public class ScriptManager {
 		try {
 			URL url = new URL(urlString);
 			new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
-					entityId, skinName))).start();
+					entityId, skinName), false)).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

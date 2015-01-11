@@ -8,15 +8,17 @@ public class ScriptTextureDownloader implements Runnable {
 	public File file;
 	public URL url;
 	public Runnable afterDownloadAction;
+	public boolean canUseStale;
 
 	public ScriptTextureDownloader(URL url, File file) {
-		this(url, file, null);
+		this(url, file, null, true);
 	}
 
-	public ScriptTextureDownloader(URL url, File file, Runnable afterDownloadAction) {
+	public ScriptTextureDownloader(URL url, File file, Runnable afterDownloadAction, boolean canUseStale) {
 		this.url = url;
 		this.file = file;
 		this.afterDownloadAction = afterDownloadAction;
+		this.canUseStale = canUseStale;
 	}
 
 	public void run() {
@@ -46,9 +48,11 @@ public class ScriptTextureDownloader implements Runnable {
 			conn.setRequestProperty("User-Agent", 
 				"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:24.0) Gecko/20100101 Firefox/24.0 BlockLauncher");
 			int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
-			conn.setRequestProperty("Cache-Control", "max-stale=" + maxStale);
+			if (canUseStale) {
+				conn.setRequestProperty("Cache-Control", "max-stale=" + maxStale);
+				conn.setUseCaches(true);
+			}
 			conn.setDoInput(true);
-			conn.setUseCaches(true);
 
 			conn.connect();
 			try {
