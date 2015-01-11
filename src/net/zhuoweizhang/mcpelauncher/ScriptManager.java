@@ -94,9 +94,9 @@ public class ScriptManager {
 	private static List<Runnable> runOnMainThreadList = new ArrayList<Runnable>();
 	
 	/*About get all*/
-	public static List<Integer> allentities = new ArrayList<Integer>();
+	public static List<Integer> allEntities = new ArrayList<Integer>();
 	
-	public static List<Integer> allplayers = new ArrayList<Integer>();
+	public static List<Integer> allPlayers = new ArrayList<Integer>();
 	/**/
 
 	private static NativeArray entityList;
@@ -261,8 +261,8 @@ public class ScriptManager {
 			ScriptManager.scriptingEnabled = true; // all local worlds get ModPE
 													// support
 		nativeSetGameSpeed(20.0f);
-		allentities.clear();
-		allplayers.clear();
+		allEntities.clear();
+		allPlayers.clear();
 		entityUUIDMap.clear();
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
@@ -370,8 +370,8 @@ public class ScriptManager {
 		if (nativeIsPlayer(entity)) {
 			playerRemovedHandler(entity);
 		}
-		int entityIndex = allentities.indexOf(entity);
-		if (entityIndex >= 0) allentities.remove(entityIndex);
+		int entityIndex = allEntities.indexOf(entity);
+		if (entityIndex >= 0) allEntities.remove(entityIndex);
 		callScriptMethod("entityRemovedHook", entity);
 		// entityList.remove(Integer.valueOf(entity));
 	}
@@ -381,7 +381,7 @@ public class ScriptManager {
 		if (nativeIsPlayer(entity)) {
 			playerAddedHandler(entity);
 		}
-		allentities.add(entity);
+		allEntities.add(entity);
 		callScriptMethod("entityAddedHook", entity);
 		// entityList.put(entityList.getLength(), entityList, entity);
 	}
@@ -897,7 +897,7 @@ public class ScriptManager {
 	}
 
 	private static void playerAddedHandler(int entityId) {
-		allplayers.add(entityId);
+		allPlayers.add(entityId);
 		if (!shouldLoadSkin())
 			return;
 		// load skin for player
@@ -920,8 +920,8 @@ public class ScriptManager {
 	}
 
 	private static void playerRemovedHandler(int entityId) {
-		int entityIndex = allplayers.indexOf(entityId);
-		if (entityIndex >= 0) allplayers.remove(entityIndex);
+		int entityIndex = allPlayers.indexOf(entityId);
+		if (entityIndex >= 0) allPlayers.remove(entityIndex);
 	}
 
 	public static void runOnMainThread(Runnable run) {
@@ -1935,15 +1935,9 @@ public class ScriptManager {
 			nativeEntitySetNameTag(entity, name);
 		}
 		
-		
-		// KMCPE's additions
 		@JSStaticFunction
 		public static int[] getAll() {
-			int[] entities = new int[allentities.size()];
-			for(int n=0;entities.length>n;n++){
-				entities[n]=allentities.get(n);
-			}
-			return entities;
+			return allEntities.toArray();
 		}
 
 		@JSStaticFunction
@@ -2295,23 +2289,18 @@ public class ScriptManager {
 			return serverPort;
 		}
 		
-		// KMCPE's additions
 		@JSStaticFunction
 		public static int[] getAllPlayers() {
-			int[] players = new int[allplayers.size()];
-			for(int n=0;players.length>n;n++){
-				players[n]=allplayers.get(n);
-			}
-			return players;
+			return allPlayers.toArray();
 		}
 		
 		@JSStaticFunction
 		public static String[] getAllPlayerNames() {
-			String[] players = new String[allplayers.size()];
-			for(int n=0;players.length>n;n++){
-				players[n]=nativeGetPlayerName(allplayers.get(n));
+			String[] playerNames = new String[allPlayers.size()];
+			for(int i = 0; i < allPlayers.size(); i++){
+				playerNames[i] = nativeGetPlayerName(allPlayers.get(i));
 			}
-			return players;
+			return playerNames;
 		}
 		
 		@Override
