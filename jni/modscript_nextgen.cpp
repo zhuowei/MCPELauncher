@@ -253,6 +253,7 @@ static AABB* (*bl_ReedTile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, in
 static LevelChunk* (*bl_TileSource_getChunk)(TileSource*, int, int);
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
+static void (*bl_Entity_setSize)(Entity*, float, float);
 
 static bool* bl_Tile_solid;
 
@@ -1574,6 +1575,13 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	*((int*) 0xdeadfa11) = 0xd15ea5e;
 };
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetSize
+  (JNIEnv *env, jclass clazz, jint entityId, jfloat a, jfloat b) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_Entity_setSize(entity, a, b);
+}
+
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);
@@ -1796,6 +1804,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK12ChunkTilePos");
 	bl_Biome_getBiome = (Biome* (*)(int))
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
+	bl_Entity_setSize = (void (*)(Entity*, float, float))
+		dlsym(mcpelibhandle, "_ZN6Entity7setSizeEff");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

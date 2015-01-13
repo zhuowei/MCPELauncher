@@ -945,29 +945,38 @@ public class ScriptManager {
 		allplayers.add(entityId);
 		if (!shouldLoadSkin())
 			return;
-		// load skin for player
-		String playerName = nativeGetPlayerName(entityId);
-		if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
-		if (playerName.length() <= 0) return;
-		String skinName = "mob/" + playerName + ".png";
-		File skinFile = getTextureOverrideFile("images/" + skinName);
-		if (skinFile == null) return;
-		String urlString = getSkinURL(playerName);
-		System.out.println("Downloading skins for " + urlString);
-		try {
-			URL url = new URL(urlString);
-			new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
-					entityId, skinName), false)).start();
-		} catch (Exception e) {
-			e.printStackTrace();
+		runOnMainThread(new SkinLoader(entityId));
+	}
+	private static class SkinLoader implements Runnable {
+		private int entityId;
+		public SkinLoader(int entityId) {
+			this.entityId = entityId;
 		}
-
+		public void run() {
+			// load skin for player
+			String playerName = nativeGetPlayerName(entityId);
+			//System.out.println("Got player name: " + playerName + " for " + entityId);
+			if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
+			if (playerName.length() <= 0) return;
+			String skinName = "mob/" + playerName + ".png";
+			File skinFile = getTextureOverrideFile("images/" + skinName);
+			if (skinFile == null) return;
+			String urlString = getSkinURL(playerName);
+			//System.out.println("Downloading skins for " + urlString);
+			try {
+				URL url = new URL(urlString);
+				new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
+						entityId, skinName), false)).start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private static String getSkinURL(String name) {
-		if (Utils.getPrefs(0).getBoolean("zz_skin_load_pc", false)) {
-			return "http://s3.amazonaws.com/MinecraftSkins/" + name + ".png";
-		}
+		//if (Utils.getPrefs(0).getBoolean("zz_skin_load_pc", false)) {
+		//	return "http://s3.amazonaws.com/MinecraftSkins/" + name + ".png";
+		//}
 		return "http://blskins.herokuapp.com/blskins/" + name + ".png";
 	}
 
@@ -1375,6 +1384,7 @@ public class ScriptManager {
 	public static native boolean nativePlayerCanFly();
 	public static native void nativePlayerSetCanFly(boolean val);
 	public static native void nativeBlockSetCollisionEnabled(int id, boolean enable);
+	public static native void nativeEntitySetSize(int entity, float a, float b);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1824,10 +1834,10 @@ public class ScriptManager {
 			return nativeBiomeIdToName(id);
 		}
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void setBiome(int x, int z, int id) {
 			nativeLevelSetBiome(x, z, id);
-		}
+		}*/
 
 		@JSStaticFunction
 		public static int getGrassColor(int x, int z) {
@@ -2222,6 +2232,11 @@ public class ScriptManager {
 			return getEntityUUID(entity);
 		}
 
+		@JSStaticFunction
+		public static void setCollisionSize(int entity, double a, double b) {
+			nativeEntitySetSize(entity, (float) a, (float) b);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -2397,7 +2412,7 @@ public class ScriptManager {
 			}
 		}
 
-		@JSStaticFunction
+		/*@JSStaticFunction
 		public static void crash() {
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
@@ -2414,7 +2429,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void crashNative() {
 			nativeForceCrash();
-		}
+		}*/
 
 		@Override
 		public String getClassName() {

@@ -177,8 +177,8 @@ void bl_renderManager_init(void* mcpelibhandle) {
 	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, float))
 		dlsym(mcpelibhandle, "_ZN19HumanoidMobRendererC1EP13HumanoidModelf");
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
-	//mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
-	//	(void**) &bl_EntityRenderDispatcher_getRenderer_real);
+	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
+		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
 }
 
 } //extern "C"

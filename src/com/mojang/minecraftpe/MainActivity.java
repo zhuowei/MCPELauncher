@@ -229,6 +229,8 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
+			fixMyEpicFail();
+
 			migrateToPatchManager();
 
 			SharedPreferences myprefs = Utils.getPrefs(1);
@@ -1633,7 +1635,7 @@ public class MainActivity extends NativeActivity {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, "Disabling all patches");
 		PatchManager.getPatchManager(this).disableAllPatches();
-		Utils.getPrefs(0).edit().putBoolean("zz_load_native_addons", false).apply();
+		//Utils.getPrefs(0).edit().putBoolean("zz_load_native_addons", false).apply();
 	}
 
 	protected void loginLaunchCallback(Uri launchUri) {
@@ -1947,6 +1949,24 @@ public class MainActivity extends NativeActivity {
 				removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
 			}
 		});
+	}
+
+	private void fixMyEpicFail() {
+		SharedPreferences prefs = Utils.getPrefs(1);
+		int lastVersion = prefs.getInt("last_bl_version", 0);
+		int myVersion = 0;
+		try {
+			myVersion = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+		} catch (PackageManager.NameNotFoundException e) {
+			// impossible
+		}
+		if (lastVersion < 69) {
+			// force addons back on
+			Utils.getPrefs(0).edit().putBoolean("zz_load_native_addons", true).apply();
+		}
+		if (lastVersion != myVersion) {
+			prefs.edit().putInt("last_bl_version", myVersion).apply();
+		}
 	}
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
