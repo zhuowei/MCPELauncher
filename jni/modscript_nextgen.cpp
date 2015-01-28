@@ -66,6 +66,7 @@ typedef void Font;
 // found in Minecraft constructor
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 #define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
+#define PLAYER_RENDER_TYPE 21
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -149,7 +150,8 @@ static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
 static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
 
-static void (*bl_Minecraft_leaveGame)(Minecraft*, bool saveWorld, bool thatotherboolean);
+static void (*bl_MinecraftClient_leaveGame)(Minecraft*, bool saveWorld, bool thatotherboolean);
+static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
 
 static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
 
@@ -493,7 +495,9 @@ void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float sca
 	*stance1 = *stance1 + entityHeight;
 	*stance2 = *stance2 + entityHeight;
 
-	bl_PlayerRenderer_renderName(renderer, entity, scale);
+	void* playerRenderer = bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, PLAYER_RENDER_TYPE);
+
+	bl_PlayerRenderer_renderName(playerRenderer, entity, scale);
 
 	*stance1 = backupstance1;
 	*stance2 = backupstance2;
@@ -846,7 +850,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
-	bl_Minecraft_leaveGame(bl_minecraft, saveMultiplayerWorld, true);
+	bl_Minecraft_setLeaveGame(bl_minecraft);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -1636,7 +1640,8 @@ void bl_setuphooks_cppside() {
 
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	bl_Minecraft_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
+	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
+	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
 	//	dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
@@ -1728,7 +1733,7 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
 
-	//patchEntityRenderers(mcpelibhandle);
+	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameER6Entityf");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEi");

@@ -45,6 +45,9 @@ extern void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, in
 void bl_renderManager_setRenderType(Entity* entity, int type);
 int bl_renderManager_getRenderType(Entity* entity);
 void bl_renderManager_clearRenderTypes();
+
+extern void** bl_EntityRenderDispatcher_instance;
+extern EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 

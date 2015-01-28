@@ -22,9 +22,9 @@
 
 extern "C" {
 
-static void* bl_EntityRenderDispatcher_instance;
+void** bl_EntityRenderDispatcher_instance;
 
-static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
+EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_Mesh_reset)(void*);
 
@@ -41,7 +41,7 @@ static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Enti
 ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
 	MobRenderer* renderer;
 	if (rendererId < 0x1000) {
-		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(bl_EntityRenderDispatcher_instance, rendererId);
+		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, rendererId);
 	} else {
 		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
 	}
@@ -168,7 +168,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
-	bl_EntityRenderDispatcher_instance =
+	bl_EntityRenderDispatcher_instance = (void**)
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN4Mesh5resetEv");

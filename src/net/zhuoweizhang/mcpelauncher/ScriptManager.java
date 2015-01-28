@@ -342,13 +342,13 @@ public class ScriptManager {
 		// any takers for rotating the player?
 		if (sensorEnabled)
 			updatePlayerOrientation();
+		if (requestSelectLevel != null && !requestLeaveGame) {
+			nativeSelectLevel(requestSelectLevel.dir);
+			requestSelectLevel = null;
+		}
 		if (requestLeaveGame) {
 			nativeLeaveGame(false);
 			requestLeaveGame = false;
-		}
-		if (requestSelectLevel != null) {
-			nativeSelectLevel(requestSelectLevel.dir);
-			requestSelectLevel = null;
 		}
 		if (requestJoinServer != null) {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
@@ -2317,8 +2317,7 @@ public class ScriptManager {
 		// nonstandard
 
 		@JSStaticFunction
-		public static void selectLevel(String levelDir, String levelName, String levelSeed,
-				int gamemode) {
+		public static void selectLevel(String levelDir) {
 			if (levelDir.equals(ScriptManager.worldDir)) {
 				System.err.println("Attempted to load level that is already loaded - ignore");
 				return;
@@ -2327,11 +2326,6 @@ public class ScriptManager {
 			// nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
 			requestSelectLevel.dir = levelDir;
-			if (isValidStringParameter(levelName)) {
-				requestSelectLevel.name = levelName;
-				requestSelectLevel.seed = levelSeed;
-				requestSelectLevel.gameMode = gamemode;
-			}
 		}
 
 		@JSStaticFunction
