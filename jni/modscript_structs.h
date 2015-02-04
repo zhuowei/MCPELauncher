@@ -121,7 +121,9 @@ typedef struct {
 	float offsetX; //0
 	float offsetY; //4
 	float offsetZ; //8
-	char filler0[12]; //12: note that 32 contains a std::vector
+	float rotateAngleX; // 12
+	float rotateAngleY; // 16
+	char filler0[4]; //20: note that 32 contains a std::vector
 	bool transparent; //24
 	bool wtf1; //25
 	char filler1[30]; //26
@@ -238,6 +240,8 @@ typedef struct {
 } ChunkTilePos;
 
 typedef struct LevelChunk_t LevelChunk;
+
+typedef void ModelRenderer;
 
 #ifdef __cplusplus
 }

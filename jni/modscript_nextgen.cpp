@@ -47,7 +47,7 @@ typedef void Font;
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 #define MINECRAFT_GUI_OFFSET 252
 // found in LevelRenderer::renderNameTags
-#define ENTITY_RENDERER_OFFSET_RENDER_NAME 4
+#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 244
@@ -1814,6 +1814,7 @@ void bl_setuphooks_cppside() {
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
+	bl_cape_init(mcpelibhandle);
 }
 
 } //extern

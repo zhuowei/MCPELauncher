@@ -48,6 +48,7 @@ void bl_renderManager_clearRenderTypes();
 
 extern void** bl_EntityRenderDispatcher_instance;
 extern EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
+extern void bl_cape_init(void* mcpelibhandle);
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 

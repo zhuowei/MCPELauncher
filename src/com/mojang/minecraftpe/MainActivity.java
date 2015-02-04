@@ -751,6 +751,10 @@ public class MainActivity extends NativeActivity {
 							toggleRecording();
 						}
 					}
+				}).setOnDismissListener(new DialogInterface.OnDismissListener() {
+					public void onDismiss(DialogInterface dialog) {
+						setImmersiveMode(Utils.getPrefs(0).getBoolean("zz_immersive_mode", false));
+					}
 				}).create();
 	}
 
@@ -1680,6 +1684,7 @@ public class MainActivity extends NativeActivity {
 	protected void hideKeyboardView() {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
+		setImmersiveMode(Utils.getPrefs(0).getBoolean("zz_immersive_mode", false));
 	}
 
 	/**

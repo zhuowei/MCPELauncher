@@ -502,14 +502,18 @@ void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
 		bl_frameCallbackRequested = 0;
 	}
 }
+extern void bl_cape_hook(HumanoidModel* self, float scale, float y);
 
 void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y) {
 	bl_HumanoidModel_constructor_real(self, scale, y);
+	bl_cape_hook(self, scale, y);
+/*
 	self->bipedHead.transparent = 1;
 	int oldTextureOffsetX = self->bipedHead.textureOffsetX;
 	self->bipedHead.textureOffsetX = 32;
 	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
 	self->bipedHead.textureOffsetX = oldTextureOffsetX;
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -1100,7 +1104,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
-	//mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
+	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	bl_hasinit_prepatch = 1;
