@@ -6,11 +6,7 @@
 #include "modscript_shared.h"
 #include "mcpelauncher.h"
 
-// from MobRenderer::MobRenderer(Model*, float)
-#define MOB_RENDERER_MODEL_OFFSET 52
-
 static std::map<HumanoidModel*, ModelPart*> modelPartMap;
-//static void (*bl_HumanoidMobRenderer_additionalRendering_real)(ModelRenderer* renderer, Entity* entity, float partialTicks);
 static void (*bl_HumanoidModel_render_real)(HumanoidModel* self, Entity* entity, float a, float b, float c, float d, float e, float f);
 static void (*bl_ModelPart_ModelPart)(ModelPart*, HumanoidModel*, int, int, int, int);
 static void (*bl_ModelPart_render)(ModelPart*, float);
@@ -18,6 +14,7 @@ static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string);
 static void (*bl_HumanoidMobRenderer_render_real)(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b);
 
 extern "C" {
+// hooked outside of this file: hooks HumanoidModel::HumanoidModel
 void bl_cape_hook(HumanoidModel* self, float scale, float y) {
 	ModelPart* part = new ModelPart();
 	memset(part, 0, sizeof(ModelPart));
@@ -30,14 +27,15 @@ void bl_HumanoidMobRenderer_render_hook(ModelRenderer* self, Entity* entity, Vec
 	currentRenderer = self;
 	bl_HumanoidMobRenderer_render_real(self, entity, v, a, b);
 }
-void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float a, float b, float c, float d, float e, float f) {
-	bl_HumanoidModel_render_real(self, entity, a, b, c, d, e, f);
+void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swingTime, float swingMaxAngle,
+	float armSwingTime, float headYaw, float headPitch, float partialTicks) {
+	bl_HumanoidModel_render_real(self, entity, swingTime, swingMaxAngle, armSwingTime, headYaw, headPitch, partialTicks);
 	ModelPart* part = modelPartMap[self];
 	if (!part) return;
 	part->rotateAngleY = M_PI;
-	part->rotateAngleX = -M_PI/8.0f - b;
-	bl_EntityRenderer_bindTexture(currentRenderer, "mob/creeper.png");
-	bl_ModelPart_render(part, f);
+	part->rotateAngleX = -M_PI/8.0f - swingMaxAngle;
+	bl_EntityRenderer_bindTexture(currentRenderer, "mob/cow.png");
+	bl_ModelPart_render(part, partialTicks);
 }
 
 void bl_cape_init(void* mcpelibinfo) {
