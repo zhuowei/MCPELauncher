@@ -22,7 +22,7 @@ void bl_cape_hook(HumanoidModel* self, float scale, float y) {
 	ModelPart* part = new ModelPart();
 	memset(part, 0, sizeof(ModelPart));
 	bl_ModelPart_ModelPart(part, self, 0, 0, 64, 32);
-	bl_ModelPart_addBox(part, -5.0F, 0.0F, -1.0F, 10, 16, 1, scale);
+	bl_ModelPart_addBox(part, -5.0F, 0.0F, /*-1.0F*/ -3.0F, 10, 16, 1, scale);
 	modelPartMap[self] = part;
 }
 static ModelRenderer* currentRenderer;
@@ -35,8 +35,8 @@ void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float a, 
 	ModelPart* part = modelPartMap[self];
 	if (!part) return;
 	part->rotateAngleY = M_PI;
-	part->rotateAngleX = -M_PI_4;
-	bl_EntityRenderer_bindTexture(currentRenderer, "Notch.png");
+	part->rotateAngleX = -M_PI/8.0f - b;
+	bl_EntityRenderer_bindTexture(currentRenderer, "mob/creeper.png");
 	bl_ModelPart_render(part, f);
 }
 
