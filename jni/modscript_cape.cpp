@@ -1,12 +1,14 @@
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <cmath>
 #include <cstring>
 #include <dlfcn.h>
+#include <jni.h>
 #include "modscript_shared.h"
 #include "mcpelauncher.h"
 
-static std::map<HumanoidModel*, ModelPart*> modelPartMap;
+static std::unordered_map<HumanoidModel*, ModelPart*> modelPartMap;
+static std::unordered_map<int, std::string> capesMap;
 static void (*bl_HumanoidModel_render_real)(HumanoidModel* self, Entity* entity, float a, float b, float c, float d, float e, float f);
 static void (*bl_ModelPart_ModelPart)(ModelPart*, HumanoidModel*, int, int, int, int);
 static void (*bl_ModelPart_render)(ModelPart*, float);
@@ -30,13 +32,36 @@ void bl_HumanoidMobRenderer_render_hook(ModelRenderer* self, Entity* entity, Vec
 void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swingTime, float swingMaxAngle,
 	float armSwingTime, float headYaw, float headPitch, float partialTicks) {
 	bl_HumanoidModel_render_real(self, entity, swingTime, swingMaxAngle, armSwingTime, headYaw, headPitch, partialTicks);
+
+	auto capeTextureIter = capesMap.find(entity->entityId);
+	if (capeTextureIter == capesMap.end()) return;
+
+	std::string capeTexture = capeTextureIter->second;
 	ModelPart* part = modelPartMap[self];
 	if (!part) return;
 	part->rotateAngleY = M_PI;
 	part->rotateAngleX = -M_PI/8.0f - swingMaxAngle;
-	bl_EntityRenderer_bindTexture(currentRenderer, "mob/cow.png");
+	bl_EntityRenderer_bindTexture(currentRenderer, capeTexture);
 	bl_ModelPart_render(part, partialTicks);
 }
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCape
+  (JNIEnv *env, jclass clazz, int entity, jstring value) {
+	if (value == nullptr) {
+		capesMap.erase(entity);
+		return;
+	}
+	const char * valueUTFChars = env->GetStringUTFChars(value, NULL);
+	std::string valueNameString = std::string(valueUTFChars);
+	capesMap[entity] = valueNameString;
+	env->ReleaseStringUTFChars(value, valueUTFChars);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearCapes
+  (JNIEnv *env, jclass clazz) {
+	capesMap.clear();
+}
+
 
 void bl_cape_init(void* mcpelibinfo) {
 	void* render = dlsym(mcpelibinfo, "_ZN13HumanoidModel6renderER6Entityffffff");

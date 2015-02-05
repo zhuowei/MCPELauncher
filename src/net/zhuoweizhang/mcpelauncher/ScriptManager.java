@@ -286,6 +286,7 @@ public class ScriptManager {
 		allentities.clear();
 		allplayers.clear();
 		entityUUIDMap.clear();
+		nativeClearCapes();
 		ScriptManager.hasLevel = true;
 
 		// I have no idea what to do now, so manually trigger the entity added listener for the local player
@@ -962,11 +963,21 @@ public class ScriptManager {
 			File skinFile = getTextureOverrideFile("images/" + skinName);
 			if (skinFile == null) return;
 			String urlString = getSkinURL(playerName);
+
+			String capeName = "cape/" + playerName + ".png";
+			File capeFile = getTextureOverrideFile("images/" + capeName);
+			if (capeFile == null) return;
+			String capeUrlString = getCapeURL(playerName);
+
 			//System.out.println("Downloading skins for " + urlString);
 			try {
 				URL url = new URL(urlString);
 				new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
 						entityId, skinName), false)).start();
+				URL capeUrl = new URL(capeUrlString);
+				new Thread(new ScriptTextureDownloader(capeUrl, capeFile, new AfterCapeDownloadAction(
+						entityId, capeName), false)).start();
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -978,6 +989,10 @@ public class ScriptManager {
 		//	return "http://s3.amazonaws.com/MinecraftSkins/" + name + ".png";
 		//}
 		return "http://blskins.herokuapp.com/blskins/" + name + ".png";
+	}
+
+	private static String getCapeURL(String name) {
+		return "http://blskins.herokuapp.com/blskins/capes/" + name + ".png";
 	}
 
 	private static boolean isSkinNameNormalized() {
@@ -1029,29 +1044,6 @@ public class ScriptManager {
 	}
 
 	private static void nameAndShame(String str) {
-		if (str == null || str.length() < 1 || str.charAt(0) == '/')
-			return;
-		String playerName = NativePlayerApi.getName(nativeGetPlayerEnt());
-		if (playerName == null)
-			return;
-		boolean hasShamed = true;
-		if (playerName.equalsIgnoreCase("geoffrey5787")) {
-			nativeSendChat("I steal mods and claim them as my own");
-		} else if (playerName.equalsIgnoreCase("doggerhero20011")
-				|| playerName.equalsIgnoreCase("dogger20011")) {
-			nativeSendChat("I stole from app developers, so you should steal from me!");
-		} else {
-			hasShamed = false;
-		}
-		if (hasShamed) {
-			nativePreventDefault();
-			if (MainActivity.currentMainActivity != null) {
-				MainActivity main = MainActivity.currentMainActivity.get();
-				if (main != null) {
-					main.updateTextboxText("");
-				}
-			}
-		}
 	}
 
 	private static String getEntityUUID(int entityId) {
@@ -1385,6 +1377,8 @@ public class ScriptManager {
 	public static native void nativePlayerSetCanFly(boolean val);
 	public static native void nativeBlockSetCollisionEnabled(int id, boolean enable);
 	public static native void nativeEntitySetSize(int entity, float a, float b);
+	public static native void nativeSetCape(int ent, String str);
+	public static native void nativeClearCapes();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1588,7 +1582,6 @@ public class ScriptManager {
 
 		@JSFunction
 		public int bl_spawnMob(double x, double y, double z, int typeId, String tex) {
-			print("Deprecated: use Level.spawnMob, to be removed in 1.7");
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
@@ -1598,7 +1591,6 @@ public class ScriptManager {
 
 		@JSFunction
 		public void bl_setMobSkin(int entity, String tex) {
-			print("Deprecated: use Entity.setMobSkin, to be removed in 1.7");
 			nativeSetMobSkin(entity, tex);
 		}
 
@@ -2237,6 +2229,15 @@ public class ScriptManager {
 			nativeEntitySetSize(entity, (float) a, (float) b);
 		}
 
+		@JSStaticFunction
+		public static void setCape(int entity, String location) {
+			int typeId = nativeGetEntityTypeId(entity);
+			if (!(typeId >= 32 && typeId < 64)) {
+				throw new RuntimeException("Set cape only works for humanoid mobs");
+			}
+			nativeSetCape(entity, location);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -2740,6 +2741,23 @@ public class ScriptManager {
 			if (skinFile == null || !skinFile.exists())
 				return;
 			NativeEntityApi.setMobSkin(entityId, skinPath);
+		}
+	}
+
+	private static class AfterCapeDownloadAction implements Runnable {
+		private int entityId;
+		private String skinPath;
+
+		public AfterCapeDownloadAction(int entityId, String skinPath) {
+			this.entityId = entityId;
+			this.skinPath = skinPath;
+		}
+
+		public void run() {
+			File skinFile = getTextureOverrideFile("images/" + skinPath);
+			if (skinFile == null || !skinFile.exists())
+				return;
+			NativeEntityApi.setCape(entityId, skinPath);
 		}
 	}
 
