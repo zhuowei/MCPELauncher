@@ -1814,7 +1814,6 @@ void bl_setuphooks_cppside() {
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
-	bl_cape_init(mcpelibhandle);
 }
 
 } //extern
