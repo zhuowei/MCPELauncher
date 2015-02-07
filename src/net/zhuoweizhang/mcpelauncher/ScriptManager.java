@@ -954,30 +954,29 @@ public class ScriptManager {
 			this.entityId = entityId;
 		}
 		public void run() {
-			// load skin for player
-			String playerName = nativeGetPlayerName(entityId);
-			//System.out.println("Got player name: " + playerName + " for " + entityId);
-			if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
-			if (playerName.length() <= 0) return;
-			String skinName = "mob/" + playerName + ".png";
-			File skinFile = getTextureOverrideFile("images/" + skinName);
-			if (skinFile == null) return;
-			String urlString = getSkinURL(playerName);
-
-			String capeName = "cape/" + playerName + ".png";
-			File capeFile = getTextureOverrideFile("images/" + capeName);
-			if (capeFile == null) return;
-			String capeUrlString = getCapeURL(playerName);
-
-			//System.out.println("Downloading skins for " + urlString);
 			try {
+				// load skin for player
+				String playerName = nativeGetPlayerName(entityId);
+				if (playerName == null) return;
+
+				if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
+				if (playerName.length() <= 0) return;
+				String skinName = "mob/" + playerName + ".png";
+				File skinFile = getTextureOverrideFile("images/" + skinName);
+				if (skinFile == null) return;
+				String urlString = getSkinURL(playerName);
+
+				String capeName = "cape/" + playerName + ".png";
+				File capeFile = getTextureOverrideFile("images/" + capeName);
+				if (capeFile == null) return;
+				String capeUrlString = getCapeURL(playerName);
+
 				URL url = new URL(urlString);
 				new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
 						entityId, skinName), false)).start();
 				URL capeUrl = new URL(capeUrlString);
 				new Thread(new ScriptTextureDownloader(capeUrl, capeFile, new AfterCapeDownloadAction(
 						entityId, capeName), false)).start();
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -2754,10 +2753,13 @@ public class ScriptManager {
 		}
 
 		public void run() {
-			File skinFile = getTextureOverrideFile("images/" + skinPath);
-			if (skinFile == null || !skinFile.exists())
-				return;
-			NativeEntityApi.setCape(entityId, skinPath);
+			try {
+				File skinFile = getTextureOverrideFile("images/" + skinPath);
+				if (skinFile == null || !skinFile.exists()) return;
+				NativeEntityApi.setCape(entityId, skinPath);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

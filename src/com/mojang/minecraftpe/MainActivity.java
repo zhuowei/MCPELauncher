@@ -715,7 +715,8 @@ public class MainActivity extends NativeActivity {
 			options.add(insertText);
 		}
 		options.add(optionMenu);
-		return new AlertDialog.Builder(this).setTitle(isSafeMode()? R.string.pref_zz_safe_mode: R.string.app_name)
+		AlertDialog.Builder builder =
+			new AlertDialog.Builder(this).setTitle(isSafeMode()? R.string.pref_zz_safe_mode: R.string.app_name)
 				.setItems(options.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogI, int button) {
 						CharSequence buttonText = options.get(button);
@@ -751,11 +752,15 @@ public class MainActivity extends NativeActivity {
 							toggleRecording();
 						}
 					}
-				}).setOnDismissListener(new DialogInterface.OnDismissListener() {
-					public void onDismiss(DialogInterface dialog) {
-						setImmersiveMode(Utils.getPrefs(0).getBoolean("zz_immersive_mode", false));
-					}
-				}).create();
+				});
+		if (Build.VERSION.SDK_INT >= 19) { // KitKat, introduction of immersive mode
+			builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+				public void onDismiss(DialogInterface dialog) {
+					touchImmersiveMode();
+				}
+			});
+		}
+		return builder.create();
 	}
 
 	protected Dialog createInvalidPatchesDialog() {
@@ -1684,7 +1689,7 @@ public class MainActivity extends NativeActivity {
 	protected void hideKeyboardView() {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
-		setImmersiveMode(Utils.getPrefs(0).getBoolean("zz_immersive_mode", false));
+		touchImmersiveMode();
 	}
 
 	/**
@@ -1914,6 +1919,16 @@ public class MainActivity extends NativeActivity {
 		}
 		getWindow().getDecorView().setSystemUiVisibility(uiOptions);
 	}
+
+	private void touchImmersiveMode() {
+		final boolean immersive = Utils.getPrefs(0).getBoolean("zz_immersive_mode", false);
+		if (!immersive) return;
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				setImmersiveMode(immersive);
+			}
+		});
+	};
 
 	private void initKamcord() {
 		// test if we have kamcord
