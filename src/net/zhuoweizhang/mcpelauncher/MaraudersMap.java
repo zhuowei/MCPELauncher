@@ -19,6 +19,7 @@ public final class MaraudersMap {
 		 * otherwise set to writable
 		 */
 		if (patchingInitialized) return true;
+		PokerFace.init();
 		boolean useOldCode = Utils.getPrefs(0).getBoolean("zz_legacy_live_patch", false) || 
 			ScriptManager.nativeGetArch() == ScriptManager.ARCH_I386 ||
 			new File("/sdcard/blocklauncher_marauders_map_legacy").exists();
@@ -26,7 +27,6 @@ public final class MaraudersMap {
 		boolean success = true;
 		patchingInitialized = true;
 		Scanner scan = new Scanner(new File("/proc/self/maps"));
-		PokerFace.init();
 		File patchedDir = context.getDir("patched", 0);
 		while (scan.hasNextLine()) {
 			String line = scan.nextLine();
