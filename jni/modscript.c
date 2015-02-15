@@ -420,6 +420,8 @@ void bl_GameMode_tick_hook(void* gamemode) {
 	bl_minecraft = *((Minecraft**) ((uintptr_t) gamemode + GAMEMODE_MINECRAFT_OFFSET));
 
 	bl_level = *((Level**) ((uintptr_t) bl_minecraft + MINECRAFT_LEVEL_OFFSET));
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Level: %p", bl_level);
+
 	bl_localplayer = *((Entity**) ((uintptr_t) bl_minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
 
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
@@ -1093,10 +1095,10 @@ extern void bl_signalhandler_init();
 extern void bl_cape_init(void*);
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *env, jclass clazz) {
+  (JNIEnv *env, jclass clazz, jboolean signalhandler) {
 	if (bl_hasinit_prepatch) return;
 #ifndef __i386
-	bl_signalhandler_init();
+	if (signalhandler) bl_signalhandler_init();
 #endif
 	if (!mcpelibhandle) {
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);

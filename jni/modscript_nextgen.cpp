@@ -1485,6 +1485,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_DATA:
 			return bl_TileSource_getData(bl_level->tileSource,
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+		default:
+			return -1;
 	}
 }
 
@@ -1591,7 +1593,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return retval;
 }
 
-JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeForceCrash
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeForceCrash
   (JNIEnv *env, jclass clazz) {
 	*((int*) 0xdeadfa11) = 0xd15ea5e;
 };

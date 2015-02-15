@@ -9,10 +9,22 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef __cplusplus
+struct FullTile {
+	unsigned char id;
+	unsigned char data;
+	FullTile(): id(0), data(0) {
+	}
+	FullTile(FullTile const& other): id(other.id), data(other.data) {
+	}
+};
+#else
 typedef struct {
 	unsigned char id;
 	unsigned char data;
 } FullTile;
+#endif
 typedef void TileSource;
 
 typedef struct {

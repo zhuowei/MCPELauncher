@@ -312,7 +312,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode()) {
 				initPatching();
 				if (minecraftLibBuffer != null) {
-					ScriptManager.nativePrePatch();
+					ScriptManager.nativePrePatch(!new File("/sdcard/bl_nosig").exists());
 				}
 			}
 		} catch (Exception e) {
