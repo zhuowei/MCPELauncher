@@ -54,6 +54,7 @@ import net.zhuoweizhang.mcpelauncher.*;
 import static net.zhuoweizhang.mcpelauncher.Utils.isSafeMode;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 import net.zhuoweizhang.mcpelauncher.ui.AboutAppActivity;
+import net.zhuoweizhang.mcpelauncher.ui.GetSubstrateActivity;
 import net.zhuoweizhang.mcpelauncher.ui.HoverCar;
 import net.zhuoweizhang.mcpelauncher.ui.MainMenuOptionsActivity;
 import net.zhuoweizhang.mcpelauncher.ui.ManagePatchesActivity;
@@ -198,6 +199,9 @@ public class MainActivity extends NativeActivity {
 			System.exit(0);
 		}
 		hasAlreadyInited = true;
+
+		checkForSubstrate();
+
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
 		System.out.println("Current fails: " + safeModeCounter);
 		if (safeModeCounter == MAX_FAILS) {
@@ -1988,6 +1992,37 @@ public class MainActivity extends NativeActivity {
 			prefs.edit().putInt("last_bl_version", myVersion).apply();
 		}
 	}
+
+	private void checkForSubstrate() {
+		if (!Build.CPU_ABI.equals("x86")) return; // we're not on x86
+		PackageInfo substrateInfo = null;
+		try {
+			substrateInfo = this.getPackageManager().getPackageInfo("com.saurik.substrate", 0);
+		} catch (PackageManager.NameNotFoundException e) {
+		}
+		if (substrateInfo == null) {
+			finish();
+			startActivity(new Intent(this, GetSubstrateActivity.class));
+			try {
+				Thread.sleep(100);
+				android.os.Process.killProcess(android.os.Process.myPid());
+			} catch (Throwable t) {
+			}
+			return;
+		}
+		File substrateLibFile = this.getFileStreamPath("libmcpelauncher_tinysubstrate.so");
+		if (!substrateLibFile.exists()) {
+			// copy the substrate lib file over
+			File substrateSourceLibFile = new File(substrateInfo.applicationInfo.nativeLibraryDir, "libsubstrate.so");
+			try {
+				PatchUtils.copy(substrateSourceLibFile, substrateLibFile);
+			} catch (IOException ie) {
+				throw new RuntimeException(ie);
+			}
+		}
+		System.load(substrateLibFile.getAbsolutePath());
+	}
+
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG)
