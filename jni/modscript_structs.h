@@ -150,6 +150,10 @@ typedef struct {
 	char filler0[692]; //0
 } Cube;
 
+typedef struct {
+	char filler[12]; // 0
+} MaterialPtr;
+
 // from ModelPart::setPos, ModelPart::setTexSize
 typedef struct {
 	float offsetX; //0
@@ -163,7 +167,7 @@ typedef struct {
 	char filler1[30]; //26
 	int textureWidth; //56
 	int textureHeight; //60
-	char filler2[4]; //64
+	MaterialPtr* material; //64
 	int textureOffsetX;//68
 	int textureOffsetY;//72
 	bool wtf2; //76
@@ -174,7 +178,12 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	char filler[92]; //4
+	char filler[36-4]; // 4
+	MaterialPtr materialNormal; // 36
+	MaterialPtr materialAlphaTest; // 48
+	MaterialPtr materialStatic; // 60
+	MaterialPtr materialEmissive; // 72
+	MaterialPtr materialEmissiveAlpha; // 84
 	ModelPart bipedHead;//96
 	ModelPart bipedBody;//224
 	ModelPart bipedRightArm;//352
@@ -261,8 +270,6 @@ typedef struct {
 	float b;
 	float a;
 } Color;
-
-typedef void MaterialPtr;
 
 typedef struct {
 } AABB;

@@ -512,13 +512,11 @@ extern void bl_cape_hook(HumanoidModel* self, float scale, float y);
 void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y) {
 	bl_HumanoidModel_constructor_real(self, scale, y);
 	bl_cape_hook(self, scale, y);
-/*
-	self->bipedHead.transparent = 1;
 	int oldTextureOffsetX = self->bipedHead.textureOffsetX;
 	self->bipedHead.textureOffsetX = 32;
 	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
 	self->bipedHead.textureOffsetX = oldTextureOffsetX;
-*/
+	self->bipedHead.material = &self->materialAlphaTest;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
