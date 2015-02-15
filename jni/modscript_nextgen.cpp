@@ -941,7 +941,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string newSkinString(newSkin);
-	std::string* ptrToStr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
+	std::string* ptrToStr = (std::string*) (((uintptr_t) entity) + MOB_TEXTURE_OFFSET);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	*ptrToStr = newSkinString;

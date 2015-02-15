@@ -7,6 +7,9 @@
 #include "modscript_shared.h"
 #include "mcpelauncher.h"
 
+// Mob::getTexture
+#define MOB_TEXTURE_OFFSET 2960
+
 static std::unordered_map<HumanoidModel*, ModelPart*> modelPartMap;
 static std::unordered_map<int, std::string> capesMap;
 static void (*bl_HumanoidModel_render_real)(HumanoidModel* self, Entity* entity, float a, float b, float c, float d, float e, float f);
@@ -14,6 +17,7 @@ static void (*bl_ModelPart_ModelPart)(ModelPart*, HumanoidModel*, int, int, int,
 static void (*bl_ModelPart_render)(ModelPart*, float);
 static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string);
 static void (*bl_HumanoidMobRenderer_render_real)(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b);
+static void (*bl_HumanoidMobRenderer_renderHand_real)(ModelRenderer* self, Entity* mob, float partialTicks);
 
 extern "C" {
 // hooked outside of this file: hooks HumanoidModel::HumanoidModel
@@ -25,13 +29,16 @@ void bl_cape_hook(HumanoidModel* self, float scale, float y) {
 	modelPartMap[self] = part;
 }
 static ModelRenderer* currentRenderer;
+static int renderCount = 0;
 void bl_HumanoidMobRenderer_render_hook(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b) {
 	currentRenderer = self;
+	renderCount = 0;
 	bl_HumanoidMobRenderer_render_real(self, entity, v, a, b);
 }
 void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swingTime, float swingMaxAngle,
 	float armSwingTime, float headYaw, float headPitch, float partialTicks) {
 	bl_HumanoidModel_render_real(self, entity, swingTime, swingMaxAngle, armSwingTime, headYaw, headPitch, partialTicks);
+	if (renderCount++ > 0) return;
 
 	auto capeTextureIter = capesMap.find(entity->entityId);
 	if (capeTextureIter == capesMap.end()) return;
@@ -40,9 +47,17 @@ void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swi
 	ModelPart* part = modelPartMap[self];
 	if (!part) return;
 	part->rotateAngleY = M_PI;
-	part->rotateAngleX = -M_PI/8.0f - swingMaxAngle;
+	part->rotateAngleX = -M_PI/16.0f - swingMaxAngle;
 	bl_EntityRenderer_bindTexture(currentRenderer, capeTexture);
 	bl_ModelPart_render(part, partialTicks);
+}
+
+void bl_HumanoidMobRenderer_renderHand_hook(ModelRenderer* self, Entity* mob, float partialTicks) {
+	if (mob == bl_localplayer) {
+		std::string texture = *((std::string*) (((uintptr_t) mob) + MOB_TEXTURE_OFFSET));
+		bl_EntityRenderer_bindTexture(self, texture);
+	}
+	bl_HumanoidMobRenderer_renderHand_real(self, mob, partialTicks);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCape
@@ -76,6 +91,9 @@ void bl_cape_init(void* mcpelibinfo) {
 		dlsym(mcpelibinfo, "_ZN9ModelPart6renderEf");
 	bl_EntityRenderer_bindTexture = (void (*)(ModelRenderer*, std::string))
 		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSs");
+	void* renderHand = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer10renderHandER3Mobf");
+	mcpelauncher_hook(renderHand, (void*) &bl_HumanoidMobRenderer_renderHand_hook,
+		(void**) &bl_HumanoidMobRenderer_renderHand_real);
 }
 
 } // extern "C"
