@@ -21,11 +21,23 @@ typedef struct {
 	float z;
 } Vec3;
 
+#ifdef __cplusplus
+struct TilePos {
+	int x;
+	int y;
+	int z;
+	TilePos(TilePos const& other) : x(other.x), y(other.y), z(other.z) {
+	}
+	TilePos(): x(0), y(0), z(0) {
+	}
+};
+#else
 typedef struct {
 	int x;
 	int y;
 	int z;
 } TilePos;
+#endif
 
 typedef struct {
 	void** vtable; //0
@@ -38,12 +50,12 @@ typedef struct Entity_t{
 //todo: 60 = tile source, 68 = level
 	void** vtable; //0
 	int filler3[7];//28 extra bytes. All others are shifted by 28.
-	float x; //4+28
-	float y; //8
-	float z; //12
-	char filler[8];//16
-	int entityId; //28 - 4 + 28 - argh, too hard. found in Arrow::Arrow(Mob*)
-	char filler2[28];//32
+	float x; //32
+	float y; //36
+	float z; //40
+	char filler[8];//44
+	int entityId; //52 found in Arrow::Arrow(Mob*)
+	char filler2[28];//32 + 24
 	float motionX; //52 - 4 + 28 + 8 = 84 found in Entity::rideTick()
 	float motionY; //56
 	float motionZ; //60
@@ -57,12 +69,22 @@ typedef struct Entity_t{
 	struct Entity_t* riding; //244 + 8
 } Entity;
 typedef Entity Player;
-
+#ifdef __cplusplus
+struct TextureUVCoordinateSet {
+	float bounds[6];
+	int idunno;
+	void* textureFile;
+	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
+		*this = other; // yeah I know, bad memory management habit. Deal with it
+	};
+};
+#else
 typedef struct {
 	float bounds[6];
 	int idunno;
 	void* textureFile;
 } TextureUVCoordinateSet;
+#endif
 
 typedef struct {
 	void** vtable; //0

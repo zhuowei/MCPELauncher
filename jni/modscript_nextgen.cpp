@@ -45,7 +45,7 @@ typedef void Font;
 // found in PlayerRenderer::renderName
 #define PLAYER_NAME_OFFSET 3164
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
-#define MINECRAFT_GUI_OFFSET 252
+//#define MINECRAFT_GUI_OFFSET 252
 // found in LevelRenderer::renderNameTags
 #define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
@@ -53,10 +53,17 @@ typedef void Font;
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 244
 // found in ChatScreen::setTextboxText
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 200
+
+#ifdef __i386
+#define MINECRAFT_TEXTURES_OFFSET 224
+#define PLAYER_MOVEMENT_OFFSET 0xd44
+#else
 // found in StartMenuScreen::render, or search for getTextureData
 #define MINECRAFT_TEXTURES_OFFSET 228
 // found in LocalPlayer::isSneaking
 #define PLAYER_MOVEMENT_OFFSET 3400
+#endif
+
 // found way, way inside GameRenderer::pick, around the call to HitResult::HitResult(Entity*)
 #define MINECRAFT_HIT_RESULT_OFFSET 2680
 // found in TouchscreenInput::canInteract
@@ -186,7 +193,7 @@ static void (*bl_Item_setMaxDamage)(Item*, int);
 static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
 static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
-static void (*bl_Tile_getTextureUVCoordinateSet)(TextureUVCoordinateSet*, Tile*, std::string const&, int);
+static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 	std::vector<RecipesType> const&);
@@ -256,6 +263,8 @@ static LevelChunk* (*bl_TileSource_getChunk)(TileSource*, int, int);
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
+static FullTile (*bl_TileSource_getTile_raw)(TileSource*, int, int, int);
+static void* (*bl_MinecraftClient_getGui)(Minecraft* minecraft);
 
 static bool* bl_Tile_solid;
 
@@ -533,7 +542,7 @@ void bl_ClientSideNetworkHandler_handleChatPacket_hook(void* handler, void* ipad
 		bl_JavaVM->DetachCurrentThread();
 	}
 	if (!preventDefaultStatus) {
-		void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
+		void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
 		bl_Gui_displayClientMessage(mygui, packet->message);
 	}
 }
@@ -741,7 +750,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
+	void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
 	bl_Gui_displayClientMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
@@ -1016,9 +1025,10 @@ void* bl_getMaterial(int materialType) {
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	Tile* sacrificialTile = bl_Tile_tiles[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
-		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet;
+		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(bl_Tile_getTextureUVCoordinateSet(
+			sacrificialTile, textureNames[i], textureCoords[i]));
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
-		bl_Tile_getTextureUVCoordinateSet(mySet, sacrificialTile, textureNames[i], textureCoords[i]);
+
 		output[i] = mySet;
 	}
 }
@@ -1256,7 +1266,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = *((void**) (((int) bl_minecraft) + MINECRAFT_GUI_OFFSET));
+	void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
 	bl_Gui_showTipMessage(mygui, mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
@@ -1586,6 +1596,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	bl_Entity_setSize(entity, a, b);
 }
 
+unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
+	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
+	return retval.id;
+}
+
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);
@@ -1722,7 +1737,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
-	bl_Tile_getTextureUVCoordinateSet = (void (*)(TextureUVCoordinateSet*, Tile*, std::string const&, int)) 
+	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int)) 
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
@@ -1811,6 +1826,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN6Entity7setSizeEff");
+	bl_TileSource_getTile_raw = (FullTile (*)(TileSource*, int, int, int))
+		dlsym(mcpelibhandle, "_ZN10TileSource7getTileEiii");
+	bl_MinecraftClient_getGui = (void* (*)(Minecraft*))
+		dlsym(mcpelibhandle, "_ZN15MinecraftClient6getGuiEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

@@ -274,6 +274,7 @@ public class ScriptManager {
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
+		nextTickCallsSetLevel = true;
 	}
 	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		nextTickCallsSetLevel = false;
@@ -308,7 +309,7 @@ public class ScriptManager {
 		worldName = wName;
 		worldDir = wDir;
 		callScriptMethod("selectLevelHook");
-		nextTickCallsSetLevel = true;
+		//nextTickCallsSetLevel = true;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -410,6 +411,7 @@ public class ScriptManager {
 	}
 
 	public static void entityAddedCallback(int entity) {
+		System.out.println("Entity added: " + entity + " entity type: " + NativeEntityApi.getEntityTypeId(entity));
 		// check if entity is player
 		if (NativePlayerApi.isPlayer(entity)) {
 			playerAddedHandler(entity);
@@ -957,6 +959,7 @@ public class ScriptManager {
 			try {
 				// load skin for player
 				String playerName = nativeGetPlayerName(entityId);
+				System.out.println("Player name: " + playerName + " entity ID: " + entityId);
 				if (playerName == null) return;
 
 				if (isSkinNameNormalized()) playerName = playerName.toLowerCase();
@@ -987,11 +990,11 @@ public class ScriptManager {
 		//if (Utils.getPrefs(0).getBoolean("zz_skin_load_pc", false)) {
 		//	return "http://s3.amazonaws.com/MinecraftSkins/" + name + ".png";
 		//}
-		return "http://blskins.herokuapp.com/blskins/" + name + ".png";
+		return "http://blskins.ablecuboid.com/blskins/" + name + ".png";
 	}
 
 	private static String getCapeURL(String name) {
-		return "http://blskins.herokuapp.com/blskins/capes/" + name + ".png";
+		return "http://blskins.ablecuboid.com/blskins/capes/" + name + ".png";
 	}
 
 	private static boolean isSkinNameNormalized() {

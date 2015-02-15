@@ -71,6 +71,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_remapTex
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_setTranslationFunction
   (JNIEnv *env, jclass clazz, jstring tempFilePath) {
+#ifndef __i386
 	const char * pathChars = (*env)->GetStringUTFChars(env, tempFilePath, NULL);
 	char* newChar = malloc(strlen(pathChars) + 1);
 	strcpy(newChar, pathChars);
@@ -78,4 +79,5 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_MaraudersMap_setTransl
 	MSSetAddressTranslationFunction(bl_marauder_translation_function, newChar);
 	(*env)->ReleaseStringUTFChars(env, tempFilePath, pathChars);
 	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Set translation function");
+#endif
 }
