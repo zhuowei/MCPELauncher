@@ -74,6 +74,8 @@ typedef void Font;
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 #define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 #define PLAYER_RENDER_TYPE 21
+// 0x60
+#define MOB_SPAWNER_OFFSET 96
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -136,6 +138,9 @@ typedef struct {
 	RakString* sender; //12
 	RakString* message; //16
 } MessagePacket;
+
+struct BaseMobSpawner {
+};
 
 extern "C" {
 
@@ -265,6 +270,8 @@ static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
 static FullTile (*bl_TileSource_getTile_raw)(TileSource*, int, int, int);
 static void* (*bl_MinecraftClient_getGui)(Minecraft* minecraft);
+static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
+static void (*bl_TileEntity_setChanged)(TileEntity*);
 
 static bool* bl_Tile_solid;
 
@@ -1617,6 +1624,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	item->handEquipped = handEquipped;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint entityTypeId) {
+	if (bl_level == NULL) return;
+	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
+	if (te == NULL) return;
+
+	BaseMobSpawner* spawner = *((BaseMobSpawner**) (((uintptr_t) te) + MOB_SPAWNER_OFFSET));
+	bl_BaseMobSpawner_setEntityId(spawner, entityTypeId);
+	bl_TileEntity_setChanged(te);
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -1851,6 +1869,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10TileSource7getTileEiii");
 	bl_MinecraftClient_getGui = (void* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN15MinecraftClient6getGuiEv");
+	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
+		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdEi");
+	bl_TileEntity_setChanged = (void (*)(TileEntity*))
+		dlsym(mcpelibhandle, "_ZN10TileEntity10setChangedEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

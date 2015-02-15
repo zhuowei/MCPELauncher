@@ -1385,6 +1385,7 @@ public class ScriptManager {
 	public static native void nativeSetCape(int ent, String str);
 	public static native void nativeClearCapes();
 	public static native void nativeSetHandEquipped(int id, boolean handEquipped);
+	public static native void nativeSpawnerSetEntityType(int x, int y, int z, int type);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1846,6 +1847,14 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setGrassColor(int x, int z, int color) {
 			nativeLevelSetGrassColor(x, z, color);
+		}
+
+		@JSStaticFunction
+		public static void setSpawnerEntityType(int x, int y, int z, int type) {
+			if (getTile(x, y, z) != 52) {
+				throw new RuntimeException("Block at " + x + ":" + y + ":" + z + " is not a mob spawner!");
+			}
+			nativeSpawnerSetEntityType(x, y, z, type);
 		}
 
 		@Override
