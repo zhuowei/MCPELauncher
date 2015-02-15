@@ -948,7 +948,7 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	protected InputStream getInputStreamForAsset(String name) {
+	public InputStream getInputStreamForAsset(String name) {
 		InputStream is = null;
 		try {
 			for (int i = 0; i < textureOverrides.size(); i++) {

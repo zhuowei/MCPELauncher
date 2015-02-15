@@ -171,7 +171,8 @@ typedef struct {
 	int textureOffsetX;//68
 	int textureOffsetY;//72
 	bool wtf2; //76
-	char filler3[51];//77; 84 is mesh
+	char filler3[47];//77; 84 is mesh
+	void* model; // 124
 } ModelPart;
 
 // from HumanoidModel::render

@@ -2442,6 +2442,28 @@ public class ScriptManager {
 			nativeForceCrash();
 		}*/
 
+		@JSStaticFunction
+		public static byte[] getBytesFromTexturePack(String name) {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					return main.getFileDataBytes(name);
+				}
+			}
+			return null;
+		}
+
+		@JSStaticFunction
+		public static InputStream openInputStreamFromTexturePack(String name) {
+			if (MainActivity.currentMainActivity != null) {
+				MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					return main.getInputStreamForAsset(name);
+				}
+			}
+			return null;
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";
