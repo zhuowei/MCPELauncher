@@ -1596,6 +1596,27 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	bl_Entity_setSize(entity, a, b);
 }
 
+enum {
+	BL_ARCH_ARM = 0,
+	BL_ARCH_I386
+};
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetArch
+  (JNIEnv *env, jclass clazz) {
+#ifdef __i386
+	return BL_ARCH_I386;
+#else
+	return BL_ARCH_ARM;
+#endif
+};
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetHandEquipped
+  (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
+	Item* item = bl_Item_items[id];
+	if (item == nullptr) return;
+	item->handEquipped = handEquipped;
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -1737,7 +1758,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(populateItem, (void*) &bl_CreativeInventryScreen_populateItem_hook, (void**) &bl_CreativeInventryScreen_populateItem_real);
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
-	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int)) 
+	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int))
 		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 

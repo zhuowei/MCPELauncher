@@ -20,7 +20,8 @@ public final class MaraudersMap {
 		 */
 		if (patchingInitialized) return true;
 		boolean useOldCode = Utils.getPrefs(0).getBoolean("zz_legacy_live_patch", false) || 
-			new File("/sdcard/blocklauncher_marauders_map_legacy").exists() || true;
+			ScriptManager.nativeGetArch() == ScriptManager.ARCH_I386 ||
+			new File("/sdcard/blocklauncher_marauders_map_legacy").exists();
 		System.out.println("Live patching is running in " + (useOldCode? "legacy" : "normal") + " mode");
 		boolean success = true;
 		patchingInitialized = true;

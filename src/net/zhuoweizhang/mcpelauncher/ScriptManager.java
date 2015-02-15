@@ -116,6 +116,9 @@ public class ScriptManager {
 	private static AtlasMeta terrainMeta, itemsMeta;
 	public static boolean hasLevel = false;
 
+	public static final int ARCH_ARM = 0;
+	public static final int ARCH_I386 = 1;
+
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
 			return;
@@ -274,7 +277,7 @@ public class ScriptManager {
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
-		nextTickCallsSetLevel = true;
+		if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
 	}
 	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		nextTickCallsSetLevel = false;
@@ -309,7 +312,7 @@ public class ScriptManager {
 		worldName = wName;
 		worldDir = wDir;
 		callScriptMethod("selectLevelHook");
-		//nextTickCallsSetLevel = true;
+		if (nativeGetArch() != ARCH_I386) nextTickCallsSetLevel = true;
 	}
 
 	public static void leaveGameCallback(boolean thatboolean) {
@@ -1381,6 +1384,7 @@ public class ScriptManager {
 	public static native void nativeEntitySetSize(int entity, float a, float b);
 	public static native void nativeSetCape(int ent, String str);
 	public static native void nativeClearCapes();
+	public static native void nativeSetHandEquipped(int id, boolean handEquipped);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1396,6 +1400,7 @@ public class ScriptManager {
 	public static native void nativeSetIsRecording(boolean yep);
 
 	public static native void nativeForceCrash();
+	public static native int nativeGetArch();
 
 	public static class ScriptState {
 		public Script script;
@@ -2529,6 +2534,11 @@ public class ScriptManager {
 		public static void addIcon(String url, String name, int index) {
 			ScriptManager.addIcon("items", url, name, index);
 		}*/
+
+		@JSStaticFunction
+		public static void setHandEquipped(int id, boolean yep) {
+			nativeSetHandEquipped(id, yep);
+		}
 
 
 		@Override

@@ -99,7 +99,7 @@ typedef struct {
 	cppstr* description; //36
 	char filler[20]; //40
 	int category1; //60
-	bool idunnobool1; //64
+	bool handEquipped; //64
 	bool stackedByData; //65
 } Item;
 

@@ -311,7 +311,6 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, int 
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Start destroy block: %p %p %d %d %d %d", gamemode, player, x, y, z, (int) side);
 	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, x, y, z, side);
 }
 
@@ -500,7 +499,6 @@ void bl_handleFrameCallback() {
 }
 
 void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
-	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Update: %p", minecraft);
 	bl_NinecraftApp_update_real(minecraft);
 	if (bl_frameCallbackRequested) {
 		bl_handleFrameCallback();
@@ -759,7 +757,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Add item: %p %p %d %p", bl_localplayer, invPtr, PLAYER_INVENTORY_OFFSET, instance);
 	bl_Inventory_add(invPtr, instance);
 }
 
@@ -881,7 +878,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityLoc
   (JNIEnv *env, jclass clazz, jint entityId, jint axis) {
-	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Get entity loc");
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	switch (axis) {
@@ -1099,21 +1095,23 @@ extern void bl_cape_init(void*);
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz) {
 	if (bl_hasinit_prepatch) return;
-	//bl_signalhandler_init();
+#ifndef __i386
+	bl_signalhandler_init();
+#endif
 	if (!mcpelibhandle) {
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	}
 	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;
-	//mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
+	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
 	bl_cape_init(mcpelibhandle);
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
-	//mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
+	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	bl_hasinit_prepatch = 1;
@@ -1165,24 +1163,21 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 	//void** levelVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV5Level");
-	bl_dumpVtable((void**) minecraftVtable, 0x80);
+	//bl_dumpVtable((void**) minecraftVtable, 0x80);
 	bl_Minecraft_setLevel_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL];
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (void*) &bl_Minecraft_setLevel_hook;
 
 	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	//mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
+#ifndef __i386
+	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
+#endif
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEP6Playeriiia");
 	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
 	
 	void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEP6Playeriiia");
-	//int startDestroyBlockVtableOffset = bl_findVtable(survivalVtable, startDestroyBlockSurvival);
 	mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
-	//bl_SurvivalMode_startDestroyBlock_real = survivalVtable[startDestroyBlockVtableOffset];
-	//survivalVtable[startDestroyBlockVtableOffset] = &bl_SurvivalMode_startDestroyBlock_hook;
-	//bl_CreativeMode_startDestroyBlock_real = creativeVtable[startDestroyBlockVtableOffset];
-	//creativeVtable[startDestroyBlockVtableOffset] = &bl_CreativeMode_startDestroyBlock_hook;
 
 	void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
