@@ -162,6 +162,7 @@ int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 static void (*bl_HumanoidModel_constructor_real)(HumanoidModel*, float, float);
+static void (*bl_EnderManModel_constructor_real)(HumanoidModel*);
 void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
@@ -420,7 +421,6 @@ void bl_GameMode_tick_hook(void* gamemode) {
 	bl_minecraft = *((Minecraft**) ((uintptr_t) gamemode + GAMEMODE_MINECRAFT_OFFSET));
 
 	bl_level = *((Level**) ((uintptr_t) bl_minecraft + MINECRAFT_LEVEL_OFFSET));
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Level: %p", bl_level);
 
 	bl_localplayer = *((Entity**) ((uintptr_t) bl_minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
 
@@ -509,14 +509,23 @@ void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
 }
 extern void bl_cape_hook(HumanoidModel* self, float scale, float y);
 
+static bool bl_inEnderManModelConstructor = false;
+
 void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y) {
 	bl_HumanoidModel_constructor_real(self, scale, y);
 	bl_cape_hook(self, scale, y);
+	if (bl_inEnderManModelConstructor) return;
 	int oldTextureOffsetX = self->bipedHead.textureOffsetX;
 	self->bipedHead.textureOffsetX = 32;
 	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
 	self->bipedHead.textureOffsetX = oldTextureOffsetX;
 	self->bipedHead.material = &self->materialAlphaTest;
+}
+
+void bl_EnderManModel_constructor_hook(HumanoidModel* self) {
+	bl_inEnderManModelConstructor = true;
+	bl_EnderManModel_constructor_real(self);
+	bl_inEnderManModelConstructor = false;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -1112,6 +1121,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
 	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
+	void* enderManModel_constructor = dlsym(mcpelibhandle, "_ZN13EnderManModelC1Ev");
+	mcpelauncher_hook(enderManModel_constructor, (void*) &bl_EnderManModel_constructor_hook,
+		(void**) &bl_EnderManModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	bl_hasinit_prepatch = 1;
