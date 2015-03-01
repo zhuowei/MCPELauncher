@@ -1586,6 +1586,7 @@ public class MainActivity extends NativeActivity {
 				}
 			}
 		}
+		textureOverrides.add(new AddonOverrideTexturePack(this));
 	}
 
 	protected void migrateToPatchManager() {

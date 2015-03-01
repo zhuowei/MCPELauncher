@@ -50,8 +50,8 @@ public class ScriptTextureDownloader implements Runnable {
 			int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
 			if (canUseStale) {
 				conn.setRequestProperty("Cache-Control", "max-stale=" + maxStale);
-				conn.setUseCaches(true);
 			}
+			conn.setUseCaches(true);
 			conn.setDoInput(true);
 
 			conn.connect();
