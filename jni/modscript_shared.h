@@ -4,6 +4,7 @@
 #include <jni.h>
 
 #ifdef __cplusplus
+#include <array>
 extern "C" {
 #endif
 
@@ -49,8 +50,16 @@ void bl_renderManager_clearRenderTypes();
 extern void** bl_EntityRenderDispatcher_instance;
 extern EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 extern void bl_cape_init(void* mcpelibhandle);
+extern ItemInstance* (*bl_Player_getArmor)(Player*, int);
+
+void bl_dumpVtable(void** vtable, size_t size);
+
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
+
+#ifdef __cplusplus
+extern std::array<std::string, 512> bl_armorRenders;
+#endif
 
 #ifdef __cplusplus
 }

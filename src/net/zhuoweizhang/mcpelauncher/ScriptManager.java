@@ -115,6 +115,7 @@ public class ScriptManager {
 	private static boolean nextTickCallsSetLevel = false;
 	private static AtlasMeta terrainMeta, itemsMeta;
 	public static boolean hasLevel = false;
+	public static int requestLeaveGameCounter = 0;
 
 	public static final int ARCH_ARM = 0;
 	public static final int ARCH_I386 = 1;
@@ -232,6 +233,8 @@ public class ScriptManager {
 					classConstantsToJSObject(EntityType.class));
 			ScriptableObject.putProperty(scope, "EntityRenderType",
 					classConstantsToJSObject(EntityRenderType.class));
+			ScriptableObject.putProperty(scope, "ArmorType",
+					classConstantsToJSObject(ArmorType.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -351,11 +354,25 @@ public class ScriptManager {
 			nativeSelectLevel(requestSelectLevel.dir);
 			requestSelectLevel = null;
 		}
-		if (requestLeaveGame) {
+		if (requestLeaveGame && requestLeaveGameCounter-- <= 0) {
+			//nativeScreenChooserSetScreen(3);
 			nativeLeaveGame(false);
+			//nativeScreenChooserSetScreen(1);
 			requestLeaveGame = false;
+			if (MainActivity.currentMainActivity != null) {
+				final MainActivity main = MainActivity.currentMainActivity.get();
+				if (main != null) {
+					main.runOnUiThread(new Runnable() {
+						public void run() {
+							main.dismissHiddenTextbox();
+							main.hideKeyboardView();
+							System.out.println("Closed keyboard, I hope");
+						}
+					});
+				}
+			}
 		}
-		if (requestJoinServer != null) {
+		if (requestJoinServer != null && !requestLeaveGame) {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
 			requestJoinServer = null;
 		}
@@ -1145,6 +1162,12 @@ public class ScriptManager {
 		return new AtlasMeta(new JSONArray(new String(bytes, Charset.forName("UTF-8"))));
 	}
 
+	private static void setRequestLeaveGame() {
+		nativeCloseScreen();
+		requestLeaveGame = true;
+		requestLeaveGameCounter = 10;
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native int nativeGetPlayerEnt();
@@ -1234,6 +1257,7 @@ public class ScriptManager {
 	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
 
 	public static native void nativeSetSneaking(int entityId, boolean doIt);
+	public static native boolean nativeIsSneaking(int entityId);
 
 	public static native String nativeGetPlayerName(int entityId);
 
@@ -1386,6 +1410,10 @@ public class ScriptManager {
 	public static native void nativeClearCapes();
 	public static native void nativeSetHandEquipped(int id, boolean handEquipped);
 	public static native void nativeSpawnerSetEntityType(int x, int y, int z, int type);
+	public static native void nativeDefineArmor(int id, String iconName, int iconIndex, String name,
+			String texture, int damageReduceAmount, int maxDamage, int armorType);
+	public static native void nativeScreenChooserSetScreen(int id);
+	public static native void nativeCloseScreen();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2176,6 +2204,10 @@ public class ScriptManager {
 			nativeSetSneaking(ent, doIt);
 		}
 
+		public static boolean isSneaking(int ent) {
+			return nativeIsSneaking(ent);
+		}
+
 		@JSStaticFunction
 		public static double getVelX(int ent) {
 			return nativeGetEntityVel(ent, AXIS_X);
@@ -2339,7 +2371,7 @@ public class ScriptManager {
 				System.err.println("Attempted to load level that is already loaded - ignore");
 				return;
 			}
-			requestLeaveGame = true;
+			setRequestLeaveGame();
 			// nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
 			requestSelectLevel.dir = levelDir;
@@ -2372,7 +2404,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void leaveGame() {
-			requestLeaveGame = true;
+			setRequestLeaveGame();
 		}
 
 		@JSStaticFunction
@@ -2571,6 +2603,22 @@ public class ScriptManager {
 			nativeSetHandEquipped(id, yep);
 		}
 
+		@JSStaticFunction
+		public static void defineArmor(int id, String iconName, int iconIndex, String name,
+			String texture, int damageReduceAmount, int maxDamage, int armorType) {
+			if (!(armorType >= 0 && armorType <= 3)) {
+				throw new RuntimeException("Invalid armor type: use ArmorType.helmet, ArmorType.chestplate," +
+					"ArmorType.leggings, or ArmorType.boots");
+			}
+			if (id < 0 || id >= 512) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			}
+			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
+				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconIndex + " does not exist");
+			}
+			nativeDefineArmor(id, iconName, iconIndex, name,
+				texture, damageReduceAmount, maxDamage, armorType);
+		}
 
 		@Override
 		public String getClassName() {
@@ -2683,7 +2731,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
-			requestLeaveGame = true;
+			setRequestLeaveGame();
 			requestJoinServer = new JoinServerRequest();
 			String resolvedAddress;
 			try {

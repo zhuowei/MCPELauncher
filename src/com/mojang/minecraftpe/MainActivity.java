@@ -316,7 +316,8 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode()) {
 				initPatching();
 				if (minecraftLibBuffer != null) {
-					ScriptManager.nativePrePatch(!new File("/sdcard/bl_nosig").exists());
+					boolean signalHandler = false; // todo setting
+					ScriptManager.nativePrePatch(signalHandler);
 				}
 			}
 		} catch (Exception e) {
@@ -1691,7 +1692,7 @@ public class MainActivity extends NativeActivity {
 		NerdyStuffActivity.forceRestart(this);
 	}
 
-	protected void hideKeyboardView() {
+	public void hideKeyboardView() {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 		touchImmersiveMode();

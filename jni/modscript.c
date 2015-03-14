@@ -152,7 +152,7 @@ static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_Mob_die_real)(void*, Entity*);
 static void (*bl_Minecraft_setIsCreativeMode)(Minecraft*, int);
-static ItemInstance* (*bl_Player_getArmor)(Player*, int);
+ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
 static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*, cppbool);

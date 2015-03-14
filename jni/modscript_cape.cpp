@@ -1,4 +1,5 @@
 #include <string>
+#include <array>
 #include <unordered_map>
 #include <cmath>
 #include <cstring>
@@ -6,9 +7,11 @@
 #include <jni.h>
 #include "modscript_shared.h"
 #include "mcpelauncher.h"
+#include "dobby_public.h"
 
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2960
+#define PLAYER_RENDERER_VTABLE_PREPARE_ARMOR 7
 
 static std::unordered_map<HumanoidModel*, ModelPart*> modelPartMap;
 static std::unordered_map<int, std::string> capesMap;
@@ -18,6 +21,11 @@ static void (*bl_ModelPart_render)(ModelPart*, float);
 static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string);
 static void (*bl_HumanoidMobRenderer_render_real)(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b);
 static void (*bl_HumanoidMobRenderer_renderHand_real)(ModelRenderer* self, Entity* mob, float partialTicks);
+static int (*bl_PlayerRenderer_prepareArmor_real)(PlayerRenderer* self, Entity* mob, int armorPart, float partialTicks);
+static void (*bl_MobRenderer_setArmor)(MobRenderer*, HumanoidModel*);
+static bool (*bl_ItemInstance_isArmorItem)(ItemInstance*);
+
+std::array<std::string, 512> bl_armorRenders;
 
 extern "C" {
 // hooked outside of this file: hooks HumanoidModel::HumanoidModel
@@ -60,6 +68,35 @@ void bl_HumanoidMobRenderer_renderHand_hook(ModelRenderer* self, Entity* mob, fl
 	bl_HumanoidMobRenderer_renderHand_real(self, mob, partialTicks);
 }
 
+// armour
+
+int bl_PlayerRenderer_prepareArmor_hook(PlayerRenderer* self, Entity* mob, int armorPart, float partialTicks) {
+	ItemInstance* armor = bl_Player_getArmor(mob, armorPart);
+	if (!bl_ItemInstance_isArmorItem(armor)) return -1; // no armour
+
+	ArmorItem* armorItem = (ArmorItem*) armor->item;
+	if (armorItem->renderIndex != 42) return bl_PlayerRenderer_prepareArmor_real(self, mob, armorPart, partialTicks);
+
+	std::string texture = bl_armorRenders[armorItem->itemId];
+	bl_EntityRenderer_bindTexture(self, texture);
+
+	HumanoidModel* armorModel = armorPart == 2 ? self->modelArmor : self->modelArmorChestplate;
+	armorModel->bipedHead.showModel = armorPart == 0;
+	//armorModel->bipedHeadwear.showModel = armorPart == 0;
+	armorModel->bipedBody.showModel = armorPart == 1 || armorPart == 2;
+	armorModel->bipedRightArm.showModel = armorPart == 1;
+	armorModel->bipedLeftArm.showModel = armorPart == 1;
+	armorModel->bipedRightLeg.showModel = armorPart == 2 || armorPart == 3;
+	armorModel->bipedLeftLeg.showModel = armorPart == 2 || armorPart == 3;
+	armorModel->activeMaterial = &armorModel->materialAlphaTest;
+
+	bl_MobRenderer_setArmor(self, armorModel);
+	((HumanoidModel*) self->model)->riding = (mob->riding != nullptr);
+
+	return 1; // has armour
+}
+// end
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCape
   (JNIEnv *env, jclass clazz, int entity, jstring value) {
 	if (value == nullptr) {
@@ -94,6 +131,15 @@ void bl_cape_init(void* mcpelibinfo) {
 	void* renderHand = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer10renderHandER3Mobf");
 	mcpelauncher_hook(renderHand, (void*) &bl_HumanoidMobRenderer_renderHand_hook,
 		(void**) &bl_HumanoidMobRenderer_renderHand_real);
+	void** playerRendererVtable = (void**) dobby_dlsym(mcpelibinfo, "_ZTV14PlayerRenderer");
+	bl_PlayerRenderer_prepareArmor_real = (int (*)(PlayerRenderer*, Entity*, int, float))
+		playerRendererVtable[PLAYER_RENDERER_VTABLE_PREPARE_ARMOR];
+	playerRendererVtable[PLAYER_RENDERER_VTABLE_PREPARE_ARMOR] = (void*) &bl_PlayerRenderer_prepareArmor_hook;
+	//bl_dumpVtable(playerRendererVtable, 0x40);
+	bl_MobRenderer_setArmor = (void (*)(MobRenderer*, HumanoidModel*))
+		dlsym(mcpelibinfo, "_ZN11MobRenderer8setArmorEP5Model");
+	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))
+		dlsym(mcpelibinfo, "_ZN12ItemInstance11isArmorItemEPKS_");
 }
 
 } // extern "C"

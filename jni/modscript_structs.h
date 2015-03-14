@@ -113,6 +113,7 @@ typedef struct {
 	int category1; //60
 	bool handEquipped; //64
 	bool stackedByData; //65
+	char filler1[76-66]; //66
 } Item;
 
 typedef struct {
@@ -163,7 +164,7 @@ typedef struct {
 	float rotateAngleY; // 16
 	char filler0[4]; //20: note that 32 contains a std::vector
 	bool transparent; //24
-	bool wtf1; //25
+	bool showModel; //25
 	char filler1[30]; //26
 	int textureWidth; //56
 	int textureHeight; //60
@@ -179,7 +180,10 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	char filler[36-4]; // 4
+	char filler0[12-4]; // 4
+	bool riding; // 12
+	char filler[32-13]; // 13
+	MaterialPtr* activeMaterial; // 32
 	MaterialPtr materialNormal; // 36
 	MaterialPtr materialAlphaTest; // 48
 	MaterialPtr materialStatic; // 60
@@ -284,6 +288,23 @@ typedef struct {
 typedef struct LevelChunk_t LevelChunk;
 
 typedef void ModelRenderer;
+
+typedef void ScreenChooser;
+
+#ifdef __cplusplus
+struct ArmorItem : public Item {
+	int armorType; // 76
+	int damageReduceAmount; // 80
+	int renderIndex; // 84
+	void* armorMaterial; // 88
+};
+
+struct PlayerRenderer : public MobRenderer {
+	char filler[92-56]; // 56
+	HumanoidModel* modelArmor;
+	HumanoidModel* modelArmorChestplate;
+};
+#endif
 
 #ifdef __cplusplus
 }

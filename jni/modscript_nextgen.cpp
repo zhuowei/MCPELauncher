@@ -76,6 +76,7 @@ typedef void Font;
 #define PLAYER_RENDER_TYPE 21
 // 0x60
 #define MOB_SPAWNER_OFFSET 96
+#define MINECRAFT_SCREENCHOOSER_OFFSET 176
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -248,7 +249,7 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
 static void (*bl_Level_addParticle)(Level*, int, Vec3 const&, float, float, float, int);
-static void (*bl_Minecraft_setScreen)(Minecraft*, void*);
+static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
@@ -272,6 +273,8 @@ static FullTile (*bl_TileSource_getTile_raw)(TileSource*, int, int, int);
 static void* (*bl_MinecraftClient_getGui)(Minecraft* minecraft);
 static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_TileEntity_setChanged)(TileEntity*);
+static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
+static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 
 static bool* bl_Tile_solid;
 
@@ -839,6 +842,31 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineArmor
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
+		jint damageReduceAmount, jint maxDamage, jint armorType) {
+	ArmorItem* item = new ArmorItem;
+	bl_ArmorItem_ArmorItem(item, id - 0x100, ((ArmorItem*) bl_Item_items[310])->armorMaterial, 42, armorType);
+	item->damageReduceAmount = damageReduceAmount;
+	item->maxDamage = maxDamage;
+
+	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
+	bl_armorRenders[id] = textureUTFChars;
+	env->ReleaseStringUTFChars(name, textureUTFChars);
+
+
+	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
+	std::string iconNameString = std::string(iconUTFChars);
+	bl_Item_setIcon(item, iconNameString, iconIndex);
+
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+	bl_Item_setDescriptionId(item, mystr);
+	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
+	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(iconName, iconUTFChars);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id, jint maxDamage) {
 	if (id <= 0 || id >= 512) return;
@@ -866,7 +894,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
-	bl_Minecraft_setLeaveGame(bl_minecraft);
+	//bl_Minecraft_setLeaveGame(bl_minecraft);
+	bl_MinecraftClient_leaveGame(bl_minecraft, saveMultiplayerWorld, true);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -963,6 +992,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
 	if (movement == nullptr) return;
 	movement[14] = doIt;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsSneaking
+  (JNIEnv *env, jclass clazz, jint entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return false;
+	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
+	if (movement == nullptr) return false;
+	return movement[14];
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
@@ -1637,6 +1675,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	bl_TileEntity_setChanged(te);
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
+  (JNIEnv *env, jclass clazz, jint screen) {
+	bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
+  (JNIEnv *env, jclass clazz, jint screen) {
+	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -1827,7 +1875,7 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, float, float, float, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3fffi");
-	//bl_Minecraft_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN9Minecraft9setScreenEP6Screen");
+	bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
 	// FIXME: this constructor no longer exists; use Screen::Screen with a ProgressScreen vtable
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
@@ -1875,6 +1923,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdEi");
 	bl_TileEntity_setChanged = (void (*)(TileEntity*))
 		dlsym(mcpelibhandle, "_ZN10TileEntity10setChangedEv");
+	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, int, void*, int, int))
+		dlsym(mcpelibhandle, "_ZN9ArmorItemC1EiRKNS_13ArmorMaterialEii");
+	bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
+		dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
