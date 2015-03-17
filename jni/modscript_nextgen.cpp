@@ -275,6 +275,7 @@ static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_TileEntity_setChanged)(TileEntity*);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
+static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 
 static bool* bl_Tile_solid;
 
@@ -889,7 +890,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		0,
 		0,
 	};
+
 	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, &levelSettings);
+	bl_Minecraft_hostMultiplayer(bl_minecraft, 19132);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
@@ -923,7 +926,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 	bl_RakNetInstance_connect_hook(raknetInstance, hostChars, port);
 	env->ReleaseStringUTFChars(host, hostChars);
 	// put up the progress screen (since otherwise Minecraft PE closes itself?!)
-	void* progressScreen = operator new(92);
+	void* progressScreen = operator new(224);
 	bl_ProgressScreen_ProgressScreen(progressScreen);
 	bl_Minecraft_setScreen(bl_minecraft, progressScreen);
 */
@@ -1684,6 +1687,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jint screen) {
 	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 }
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
+  (JNIEnv *env, jclass clazz) {
+	void* progress = operator new(224);
+	bl_ProgressScreen_ProgressScreen(progress);
+	bl_MinecraftClient_setScreen(bl_minecraft, progress);
+}
 
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
@@ -1876,8 +1885,7 @@ void bl_setuphooks_cppside() {
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, float, float, float, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3fffi");
 	bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
-	// FIXME: this constructor no longer exists; use Screen::Screen with a ProgressScreen vtable
-	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
+	bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
@@ -1927,6 +1935,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN9ArmorItemC1EiRKNS_13ArmorMaterialEii");
 	bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
 		dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
+	bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
+		dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

@@ -108,7 +108,7 @@ jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, unique_ptr*, cppstr*, LocalPlayer*);
-void (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
+void* (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -353,7 +353,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, unique_ptr* levelPtr, cpps
 	}*/
 }
 
-void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+void* bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
 	bl_minecraft = minecraft;
 	JNIEnv *env;
 
@@ -373,9 +373,10 @@ void bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
 
-	bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
+	void* retval = bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
 	bl_level = *((Level**) ((uintptr_t) minecraft + MINECRAFT_LEVEL_OFFSET));
 	bl_localplayer = *((Entity**) ((uintptr_t) minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
+	return retval;
 }
 
 void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int saveLevel, int thatotherboolean) {
@@ -503,8 +504,8 @@ void bl_handleFrameCallback() {
 void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
 	bl_NinecraftApp_update_real(minecraft);
 	if (bl_frameCallbackRequested) {
-		bl_handleFrameCallback();
 		bl_frameCallbackRequested = 0;
+		bl_handleFrameCallback();
 	}
 }
 extern void bl_cape_hook(HumanoidModel* self, float scale, float y);
@@ -1175,7 +1176,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
 	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 	//void** levelVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV5Level");
-	//bl_dumpVtable((void**) minecraftVtable, 0x80);
+	bl_dumpVtable((void**) minecraftVtable, 0x100);
 	bl_Minecraft_setLevel_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL];
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_SET_LEVEL] = (void*) &bl_Minecraft_setLevel_hook;

@@ -116,6 +116,8 @@ public class ScriptManager {
 	private static AtlasMeta terrainMeta, itemsMeta;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
+	public static boolean requestScreenshot = false;
+	public static boolean requestSelectLevelHasSetScreen = false;
 
 	public static final int ARCH_ARM = 0;
 	public static final int ARCH_I386 = 1;
@@ -350,10 +352,6 @@ public class ScriptManager {
 		// any takers for rotating the player?
 		if (sensorEnabled)
 			updatePlayerOrientation();
-		if (requestSelectLevel != null && !requestLeaveGame) {
-			nativeSelectLevel(requestSelectLevel.dir);
-			requestSelectLevel = null;
-		}
 		if (requestLeaveGame && requestLeaveGameCounter-- <= 0) {
 			//nativeScreenChooserSetScreen(3);
 			nativeLeaveGame(false);
@@ -371,6 +369,7 @@ public class ScriptManager {
 					});
 				}
 			}
+			nativeRequestFrameCallback();
 		}
 		if (requestJoinServer != null && !requestLeaveGame) {
 			nativeJoinServer(requestJoinServer.serverAddress, requestJoinServer.serverPort);
@@ -469,9 +468,22 @@ public class ScriptManager {
 				e.printStackTrace();
 				reportScriptError(null, e);
 			}
-			return;
 		}
-		ScreenshotHelper.takeScreenshot(screenshotFileName);
+		if (requestSelectLevel != null && !requestLeaveGame) {
+			if (!requestSelectLevelHasSetScreen) {
+				nativeShowProgressScreen();
+				requestSelectLevelHasSetScreen = true;
+				nativeRequestFrameCallback();
+			} else {
+				nativeSelectLevel(requestSelectLevel.dir);
+				requestSelectLevel = null;
+				requestSelectLevelHasSetScreen = false;
+			}
+		}
+		if (requestScreenshot) {
+			ScreenshotHelper.takeScreenshot(screenshotFileName);
+			requestScreenshot = false;
+		}
 	}
 
 	public static void handleChatPacketCallback(String str) {
@@ -785,6 +797,7 @@ public class ScriptManager {
 
 	public static void takeScreenshot(String fileName) {
 		screenshotFileName = fileName.replace("/", "").replace("\\", "");
+		requestScreenshot = true;
 		nativeRequestFrameCallback();
 	}
 
@@ -989,17 +1002,17 @@ public class ScriptManager {
 				if (skinFile == null) return;
 				String urlString = getSkinURL(playerName);
 
-				String capeName = "cape/" + playerName + ".png";
+				/*String capeName = "cape/" + playerName + ".png";
 				File capeFile = getTextureOverrideFile("images/" + capeName);
 				if (capeFile == null) return;
-				String capeUrlString = getCapeURL(playerName);
+				String capeUrlString = getCapeURL(playerName);*/
 
 				URL url = new URL(urlString);
 				new Thread(new ScriptTextureDownloader(url, skinFile, new AfterSkinDownloadAction(
 						entityId, skinName), false)).start();
-				URL capeUrl = new URL(capeUrlString);
+				/*URL capeUrl = new URL(capeUrlString);
 				new Thread(new ScriptTextureDownloader(capeUrl, capeFile, new AfterCapeDownloadAction(
-						entityId, capeName), false)).start();
+						entityId, capeName), false)).start();*/
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1414,6 +1427,7 @@ public class ScriptManager {
 			String texture, int damageReduceAmount, int maxDamage, int armorType);
 	public static native void nativeScreenChooserSetScreen(int id);
 	public static native void nativeCloseScreen();
+	public static native void nativeShowProgressScreen();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
