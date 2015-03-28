@@ -31,6 +31,8 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.text.ClipboardManager;
 import android.text.Editable;
@@ -176,6 +178,13 @@ public class MainActivity extends NativeActivity {
 	private boolean hasResetSafeModeCounter = false;
 
 	private final static int MAX_FAILS = 2;
+
+	private final Handler mainHandler = new Handler() {
+		@Override
+		public void dispatchMessage(Message msg) {
+			toggleRecording();
+		}
+	};
 
 	/** Called when the activity is first created. */
 
@@ -754,7 +763,8 @@ public class MainActivity extends NativeActivity {
 						} else if (buttonText.equals(insertText)) {
 							showDialog(DIALOG_INSERT_TEXT);
 						} else if (buttonText.equals(startRecording) || buttonText.equals(stopRecording)) {
-							toggleRecording();
+							//toggleRecording();
+							mainHandler.sendEmptyMessageDelayed(327, 1000); // 1 second delay
 						}
 					}
 				});
