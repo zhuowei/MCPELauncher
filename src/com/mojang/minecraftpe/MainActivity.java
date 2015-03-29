@@ -722,7 +722,7 @@ public class MainActivity extends NativeActivity {
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
 		isRecording = Kamcord.isRecording();
-		if (hasRecorder && (isRecording || ScriptManager.hasLevel)) { // prevent starting recording on title screen
+		if (hasRecorder) {
 			options.add(isRecording? stopRecording: startRecording);
 		}
 		if (hasInsertText) {

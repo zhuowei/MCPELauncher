@@ -168,6 +168,8 @@ void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, floa
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
 
+static void (*bl_LevelRenderer_allChanged)(void*);
+
 static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
@@ -576,6 +578,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong time) {
 	if (bl_level == NULL) return;
 	bl_Level_setTime(bl_level, time);
+	//void* levelRenderer = *((void**) (((uintptr_t) bl_minecraft) + 212));
+	//bl_LevelRenderer_allChanged(levelRenderer);
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTime
@@ -1280,6 +1284,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3PS2_");
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
+	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 

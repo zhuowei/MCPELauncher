@@ -916,7 +916,10 @@ public class ScriptManager {
 			}
 			Scriptable myScriptable = (Scriptable) myObj;
 			String texName = ((String) ScriptableObject.getProperty(myScriptable, 0));
-			int texCoord = ((Number) ScriptableObject.getProperty(myScriptable, 1)).intValue();
+			int texCoord = 0;
+			int subarrayLength = ((Number) ScriptableObject.getProperty(myScriptable, "length"))
+				.intValue();
+			if (subarrayLength > 1) texCoord = ((Number) ScriptableObject.getProperty(myScriptable, 1)).intValue();
 			endArray[i] = texCoord;
 			stringArray[i] = texName;
 		}
