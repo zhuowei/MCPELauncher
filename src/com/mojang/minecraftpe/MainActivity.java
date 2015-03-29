@@ -1946,6 +1946,14 @@ public class MainActivity extends NativeActivity {
 		});
 	};
 
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus) {
+			touchImmersiveMode();
+		}
+	}
+
 	private void initKamcord() {
 		// test if we have kamcord
 		hasRecorder = false;
