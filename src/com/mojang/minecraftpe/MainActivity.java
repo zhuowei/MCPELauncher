@@ -190,6 +190,7 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		tempSafeMode = true;
 		currentMainActivity = new WeakReference<MainActivity>(this);
 		if (hasAlreadyInited) {
 			globalRestart = true;
@@ -254,6 +255,7 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
+				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
 				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
@@ -1112,7 +1114,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean isNetworkEnabled(boolean a) {
-		System.out.println("Network?:" + a);
+		//System.out.println("Network?:" + a); 0.11 beta 1 spams this on the title screen
 		return true;
 	}
 
@@ -1619,8 +1621,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void loadTexturePack() {
-		return;
-/*		String filePath = null;
+		String filePath = null;
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			filePath = Utils.getPrefs(1).getString("texturePack", null);
@@ -1639,7 +1640,7 @@ public class MainActivity extends NativeActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, filePath + ": size is " + new File(filePath).length());
-		}*/
+		}
 	}
 
 	/**
@@ -1973,7 +1974,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void setImmersiveMode(boolean set) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
+		/*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
 		int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
 		int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 		if (set) {
@@ -1981,7 +1982,7 @@ public class MainActivity extends NativeActivity {
 		} else {
 			uiOptions &= ~flags;
 		}
-		getWindow().getDecorView().setSystemUiVisibility(uiOptions);
+		getWindow().getDecorView().setSystemUiVisibility(uiOptions);*/
 	}
 
 	private void touchImmersiveMode() {
