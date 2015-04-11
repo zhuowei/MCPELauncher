@@ -1712,15 +1712,17 @@ public class MainActivity extends NativeActivity {
 
 	// added in 0.11
 	// for selecting skins
-	public static native void nativeOnPickImageSuccess(String path);
-	public static native void nativeOnPickImageFailed();
-	public void pickImage(long a) {
+	public static native void nativeOnPickImageSuccess(long callbackAddress);
+	public static native void nativeOnPickImageCanceled();
+	public void pickImage(long callbackAddress) {
 		System.out.println("pick: " + a);
+		pickImageCallbackAddress = callbackAddress;
+
 		// fail immediately
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				Toast.makeText(MainActivity.this, "Skins not supported yet!", Toast.LENGTH_LONG).show();
-				nativeOnPickImageFailed();
+				nativeOnPickImageCanceled();
 			}
 		});
 	}
