@@ -386,7 +386,7 @@ public class MainActivity extends NativeActivity {
 		}
 
 		// note that Kamcord works better with targetSdkVersion=19 than with 21
-		initKamcord();
+		//initKamcord();
 
 		System.gc();
 
@@ -1011,8 +1011,8 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	public int[] getImageData(String name) {
-		System.out.println("Get image data: " + name);
+	public int[] getImageData(String name, boolean magic) {
+		System.out.println("Get image data: " + name + " is magic? " + magic);
 		try {
 			InputStream is = getInputStreamForAsset(name);
 			if (is == null)
@@ -1619,7 +1619,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void loadTexturePack() {
-		String filePath = null;
+		return;
+/*		String filePath = null;
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			filePath = Utils.getPrefs(1).getString("texturePack", null);
@@ -1638,7 +1639,7 @@ public class MainActivity extends NativeActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, filePath + ": size is " + new File(filePath).length());
-		}
+		}*/
 	}
 
 	/**
@@ -1706,6 +1707,53 @@ public class MainActivity extends NativeActivity {
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 		touchImmersiveMode();
+	}
+
+	// added in 0.11
+	// for selecting skins
+	public static native void nativeOnPickImageSuccess(String path);
+	public static native void nativeOnPickImageFailed();
+	public void pickImage(long a) {
+		System.out.println("pick: " + a);
+		// fail immediately
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				Toast.makeText(MainActivity.this, "Skins not supported yet!", Toast.LENGTH_LONG).show();
+				nativeOnPickImageFailed();
+			}
+		});
+	}
+
+	// for the snooper or something
+	public String getDeviceId() {
+		System.out.println("Get device ID");
+		return "not an ID";
+	}
+
+	public String createUUID() {
+		System.out.println("Create UUID");
+		return "1619761e-2bef-45ee-8a5f-2219cc9d4b31";
+	}
+
+	// more snooper stuff
+	public String getLocale() {
+		return "en_US";
+	}
+
+	public String getExternalStoragePath() {
+		return "/sdcard";
+	}
+
+	public boolean isFirstSnooperStart() {
+		return false;
+	}
+
+	public boolean hasHardwareChanged() {
+		return false;
+	}
+
+	public boolean isTablet() {
+		return true;
 	}
 
 	/**
