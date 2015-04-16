@@ -1,5 +1,7 @@
 package com.mojang.android.net;
 
+import static com.mojang.android.net.HTTPRequest.debugNet;
+
 public class HTTPResponse {
 	public static final int STATUS_FAIL = 0;
 	public static final int STATUS_SUCCESS = 1;
@@ -14,17 +16,17 @@ public class HTTPResponse {
 	}
 
 	public int getStatus() {
-		System.out.println("get status");
+		if (debugNet) System.out.println("get status");
 		return status;
 	}
 
 	public String getBody() {
-		System.out.println("get response " + body);
+		if (debugNet) System.out.println("get response " + body);
 		return body;
 	}
 
 	public int getResponseCode() {
-		System.out.println("get response code");
+		if (debugNet) System.out.println("get response code");
 		return responseCode;
 	}
 }

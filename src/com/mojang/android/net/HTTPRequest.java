@@ -6,28 +6,30 @@ import java.nio.charset.*;
 
 public class HTTPRequest {
 
+	public static boolean debugNet = net.zhuoweizhang.mcpelauncher.BuildConfig.DEBUG;
+
 	public String url, requestBody, cookieData, contentType;
 
 	public void setURL(String url) {
-		System.out.println("URL: " + url);
+		if (debugNet) System.out.println("URL: " + url);
 		this.url = url;
 	}
 	public void setRequestBody(String body) {
-		System.out.println("Body: " + body);
+		if (debugNet) System.out.println("Body: " + body);
 		this.requestBody = body;
 	}
 	public void setCookieData(String cookie) {
-		System.out.println("Cookie: " + cookie);
+		if (debugNet) System.out.println("Cookie: " + cookie);
 		this.cookieData = cookie;
 	}
 
 	public void setContentType(String contentType) {
-		System.out.println("Content type: " + contentType);
+		if (debugNet) System.out.println("Content type: " + contentType);
 		this.contentType = contentType;
 	}
 
 	public HTTPResponse send(String mode) {
-		System.out.println("Send: " + mode);
+		if (debugNet) System.out.println("Send: " + mode);
 		InputStream is = null;
 		try {
 			int status = 0;
@@ -80,6 +82,6 @@ public class HTTPRequest {
 	}
 
 	public void abort() {
-		System.out.println("Abort");
+		if (debugNet) System.out.println("Abort");
 	}
 }

@@ -261,7 +261,7 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
-				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
+				//Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
 				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
@@ -1518,7 +1518,7 @@ public class MainActivity extends NativeActivity {
 
 	// added in 0.10.0
 	public String getDeviceModel() {
-		return Build.MODEL;
+		return HardwareInformation.getDeviceModelName();
 	}
 
 	public int getAndroidVersion() {
@@ -1737,18 +1737,25 @@ public class MainActivity extends NativeActivity {
 
 	// for the snooper or something
 	public String getDeviceId() {
+		String deviceId = Utils.getPrefs(0).getString("snooperId", null);
+		if (deviceId == null) {
+			deviceId = createUUID();
+			Utils.getPrefs(0).edit().putString("snooperId", deviceId).apply();
+		}
 		System.out.println("Get device ID");
-		return "not an ID";
+		return deviceId;
 	}
 
 	public String createUUID() {
+		/* Generates a fresh UUID; used by snooper for session ID */
 		System.out.println("Create UUID");
-		return "1619761e-2bef-45ee-8a5f-2219cc9d4b31";
+		return UUID.randomUUID().toString().replace("-", "");
 	}
 
 	// more snooper stuff
 	public String getLocale() {
-		return "en_US";
+		Locale locale = getResources().getConfiguration().locale;
+		return locale.getLanguage() + "_" + locale.getCountry();
 	}
 
 	public String getExternalStoragePath() {
@@ -1756,7 +1763,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean isFirstSnooperStart() {
-		return false;
+		System.out.println("Is first snooper start");
+		return Utils.getPrefs(0).getString("snooperId", null) == null;
 	}
 
 	public boolean hasHardwareChanged() {
@@ -1764,7 +1772,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean isTablet() {
-		return true;
+		// metric: >= sw600dp
+		return getResources().getConfiguration().smallestScreenWidthDp >= 600;
 	}
 
 	// end 0.11
