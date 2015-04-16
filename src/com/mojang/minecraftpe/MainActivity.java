@@ -196,7 +196,6 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		tempSafeMode = true;
 		currentMainActivity = new WeakReference<MainActivity>(this);
 		if (hasAlreadyInited) {
 			globalRestart = true;
@@ -363,7 +362,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				applyBuiltinPatches();
-				if (Utils.getPrefs(0).getBoolean("zz_script_enable", true))
+				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true))
 					ScriptManager.init(this);
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
@@ -1600,11 +1599,17 @@ public class MainActivity extends NativeActivity {
 				continue;
 			String nativeLibName = app.metaData
 					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
+			String targetMCPEVersion = app.metaData
+					.getString("net.zhuoweizhang.mcpelauncher.api.targetmcpeversion");
 			if (nativeLibName != null
 				&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
 					PackageManager.PERMISSION_GRANTED
 				&& addonManager.isEnabled(app.packageName)) {
 				try {
+					if (!isAddonCompat(targetMCPEVersion)) {
+						throw new Exception("The addon " + app.packageName +
+							" is not compatible with this version of Minecraft PE.");
+					}
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);
 				} catch (Throwable e) {
@@ -1829,6 +1834,7 @@ public class MainActivity extends NativeActivity {
 	 * ingame/show ads, etc
 	 */
 	public void leaveGameCallback() {
+		System.out.println("Leave game");
 		if (hasRecorder) clearRuntimeOptionsDialog();
 	}
 
@@ -2140,6 +2146,12 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 		System.load(substrateLibFile.getAbsolutePath());
+	}
+
+	private boolean isAddonCompat(String version) {
+		if (version == null) return false;
+		if (version.matches("0\\.11\\.0.*")) return true;
+		return false;
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

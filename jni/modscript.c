@@ -109,7 +109,7 @@ jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, unique_ptr*, cppstr*, LocalPlayer*);
 void* (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
-static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int, int);
+static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
@@ -381,9 +381,9 @@ void* bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wNam
 	return retval;
 }
 
-void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int saveLevel, int thatotherboolean) {
+void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 	JNIEnv *env;
-	bl_Minecraft_leaveGame_real(minecraft, saveLevel, thatotherboolean);
+	bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
@@ -394,7 +394,7 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int saveLevel, int thatot
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, saveLevel);
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, thatotherboolean);
 
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
@@ -1106,6 +1106,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 extern void bl_signalhandler_init();
 extern void bl_cape_init(void*);
 
+static void setupIsModded() {
+#ifdef __arm__
+	uintptr_t isModdedAddr = ((uintptr_t) dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv")) & ~1;
+	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
+	isModdedArray[0] = 1;
+#endif
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz, jboolean signalhandler) {
 	if (bl_hasinit_prepatch) return;
@@ -1119,9 +1127,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
+	setupIsModded();
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
+/*
 	bl_cape_init(mcpelibhandle);
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
@@ -1131,6 +1141,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 		(void**) &bl_EnderManModel_constructor_real);
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
+*/
+	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
+
+	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
+	//get a callback when the level is exited
+	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
+	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 	bl_hasinit_prepatch = 1;
 }
 
@@ -1202,10 +1219,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieEP6Entity");
 	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
-
-	//get a callback when the level is exited
-	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEbb");
-	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
@@ -1285,10 +1298,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
-
-	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
-
-	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
 
 	bl_setuphooks_cppside();
 

@@ -324,7 +324,8 @@ public class ScriptManager {
 		ScriptManager.isRemote = false;
 		ScriptManager.scriptingEnabled = true;
 		ScriptManager.hasLevel = false;
-		callScriptMethod("leaveGame");
+		// we check if script has been initialized as this may be called even without ModPE turned on
+		if (scriptingInitialized) callScriptMethod("leaveGame");
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
