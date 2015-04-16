@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 import java.lang.reflect.Field;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,6 +32,7 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -178,6 +180,10 @@ public class MainActivity extends NativeActivity {
 	private boolean hasResetSafeModeCounter = false;
 
 	private final static int MAX_FAILS = 2;
+
+	private static final int REQUEST_PICK_IMAGE = 415;
+	private long pickImageCallbackAddress = 0;
+	private Intent pickImageResult;
 
 	private final Handler mainHandler = new Handler() {
 		@Override
@@ -637,6 +643,14 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode()) {
 				applyBuiltinPatches();
 			}
+		} else if (requestCode == REQUEST_PICK_IMAGE) {
+			if (resultCode == Activity.RESULT_OK) {
+				pickImageResult = intent;
+				File tempFile = copyContentStoreToTempFile(intent.getData());
+				nativeOnPickImageSuccess(pickImageCallbackAddress, tempFile.getAbsolutePath());
+			} else {
+				nativeOnPickImageCanceled(pickImageCallbackAddress);
+			}
 		}
 	}
 
@@ -1013,10 +1027,10 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	public int[] getImageData(String name, boolean magic) {
-		System.out.println("Get image data: " + name + " is magic? " + magic);
+	public int[] getImageData(String name, boolean fromAssets) {
+		System.out.println("Get image data: " + name + " from assets? " + fromAssets);
 		try {
-			InputStream is = getInputStreamForAsset(name);
+			InputStream is = fromAssets? getInputStreamForAsset(name): getRegularInputStream(name);
 			if (is == null)
 				return null;
 			Bitmap bmp = BitmapFactory.decodeStream(is);
@@ -1712,19 +1726,13 @@ public class MainActivity extends NativeActivity {
 
 	// added in 0.11
 	// for selecting skins
-	public static native void nativeOnPickImageSuccess(long callbackAddress);
-	public static native void nativeOnPickImageCanceled();
+	public static native void nativeOnPickImageSuccess(long callbackAddress, String url);
+	public static native void nativeOnPickImageCanceled(long callbackAddress);
 	public void pickImage(long callbackAddress) {
-		System.out.println("pick: " + a);
 		pickImageCallbackAddress = callbackAddress;
 
-		// fail immediately
-		this.runOnUiThread(new Runnable() {
-			public void run() {
-				Toast.makeText(MainActivity.this, "Skins not supported yet!", Toast.LENGTH_LONG).show();
-				nativeOnPickImageCanceled();
-			}
-		});
+		Intent picker = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		startActivityForResult(picker, REQUEST_PICK_IMAGE);
 	}
 
 	// for the snooper or something
@@ -1744,7 +1752,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public String getExternalStoragePath() {
-		return "/sdcard";
+		return Environment.getExternalStorageDirectory().getAbsolutePath();
 	}
 
 	public boolean isFirstSnooperStart() {
@@ -1757,6 +1765,37 @@ public class MainActivity extends NativeActivity {
 
 	public boolean isTablet() {
 		return true;
+	}
+
+	// end 0.11
+
+	private InputStream getRegularInputStream(String path) {
+		try {
+			return new BufferedInputStream(new FileInputStream(new File(path)));
+		} catch (IOException ie) {
+			ie.printStackTrace();
+			return null;
+		}
+	}
+
+	private File copyContentStoreToTempFile(Uri content) {
+		try {
+			File tempFile = new File(this.getExternalFilesDir(null), "skintemp.png");
+			tempFile.getParentFile().mkdirs();
+			InputStream is = getContentResolver().openInputStream(content);
+			OutputStream os = new FileOutputStream(tempFile);
+			byte[] buffer = new byte[0x1000];
+			int count;
+			while ((count = is.read(buffer)) != -1) {
+				os.write(buffer, 0, count);
+			}
+			is.close();
+			os.close();
+			return tempFile;
+		} catch (IOException ie) {
+			ie.printStackTrace();
+			return new File("/sdcard/totally/fake");
+		}
 	}
 
 	/**
