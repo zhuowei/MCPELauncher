@@ -60,7 +60,7 @@ public class ScriptTextureDownloader implements Runnable {
 				is = conn.getInputStream();
 			} catch (Exception e) {
 				//maybe try cache?
-				try {
+				/*try {
 
 				} catch (Exception ee) {
 					e.printStackTrace();
@@ -68,7 +68,8 @@ public class ScriptTextureDownloader implements Runnable {
 					ee.printStackTrace();
 					ScriptManager.reportScriptError(null, e);
 					return;
-				}
+				}*/
+				e.printStackTrace();
 			}
 
 			if (response >= 400 || is == null) {
