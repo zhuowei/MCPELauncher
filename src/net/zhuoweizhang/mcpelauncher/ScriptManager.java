@@ -1050,7 +1050,7 @@ public class ScriptManager {
 	}
 
 	private static boolean shouldLoadSkin() {
-		return true;//Utils.getPrefs(0).getString("zz_skin_download_source", "mojang_pc")
+		return false;//Utils.getPrefs(0).getString("zz_skin_download_source", "mojang_pc")
 			//	.equals("mojang_pc");
 	}
 

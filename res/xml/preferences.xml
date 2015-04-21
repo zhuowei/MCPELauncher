@@ -8,15 +8,6 @@
             android:defaultValue="false"
             android:key="zz_texture_pack_enable"
             android:title="@string/pref_texture_pack" />
-        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
-            android:defaultValue="false"
-            android:key="zz_skin_enable"
-            android:title="@string/pref_zz_skin_enable" />
-        <Preference android:title="@string/pref_zz_upload_skin" >
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://blskins.herokuapp.com"/>
-        </Preference>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_addons_title" >
         <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference

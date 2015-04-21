@@ -301,7 +301,7 @@ public class MainActivity extends NativeActivity {
 		loadTexturePack();
 
 		textureOverrides.clear();
-		textureOverrides.add(new SkinTextureOverride());
+
 		if (allowScriptOverrideTextures()) {
 			textureOverrides.add(new ScriptOverrideTexturePack(this));
 		}

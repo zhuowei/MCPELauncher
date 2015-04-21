@@ -109,6 +109,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 
 		protected void updateSkin() {
+			/*
 			MainMenuOptionsActivity a = activity.get();
 			final SwitchPreference p = a.skinPreference;
 			String sum = null;
@@ -124,6 +125,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 				}
 			});
 			a = null;
+			*/
 		}
 
 		protected void updatePatches() {
@@ -386,12 +388,15 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			if (!data.isChecked())
 				f = ManageTexturepacksActivity.REQUEST_DISABLE;
 			ManageTexturepacksActivity.setTexturepack(f, null);
+		}
+		/*
 		} else if (data == skinPreference.content) {
 			File f = ManageSkinsActivity.REQUEST_ENABLE;
 			if (!data.isChecked())
 				f = ManageSkinsActivity.REQUEST_DISABLE;
 			ManageSkinsActivity.setSkin(f, null);
 		}
+		*/
 	}
 
 	protected void managePatches() {
