@@ -271,6 +271,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			scriptsPreference.setOnPreferenceClickListener(this);
 			if (ScriptManager.isRemote)
 				scriptsPreference.setEnabled(false);
+			if (MainActivity.disableModPEForDev) scriptsPreference.setEnabled(false);
 		}
 
 		languagePreference = (ListPreference) findPreference("zz_language_override");

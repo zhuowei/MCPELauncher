@@ -1108,7 +1108,8 @@ extern void bl_cape_init(void*);
 
 static void setupIsModded() {
 #ifdef __arm__
-	uintptr_t isModdedAddr = ((uintptr_t) dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv")) & ~1;
+	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
+		dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv"))) & ~1;
 	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
 	isModdedArray[0] = 1;
 #endif

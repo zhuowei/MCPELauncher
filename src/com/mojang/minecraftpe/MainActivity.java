@@ -185,6 +185,8 @@ public class MainActivity extends NativeActivity {
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
 
+	public static final boolean disableModPEForDev = true;
+
 	private final Handler mainHandler = new Handler() {
 		@Override
 		public void dispatchMessage(Message msg) {
@@ -393,7 +395,7 @@ public class MainActivity extends NativeActivity {
 		}
 
 		// note that Kamcord works better with targetSdkVersion=19 than with 21
-		//initKamcord();
+		initKamcord();
 
 		System.gc();
 
@@ -736,6 +738,7 @@ public class MainActivity extends NativeActivity {
 		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
+		if (disableModPEForDev) options.remove(manageModPEScripts);
 		isRecording = Kamcord.isRecording();
 		if (hasRecorder) {
 			options.add(isRecording? stopRecording: startRecording);
