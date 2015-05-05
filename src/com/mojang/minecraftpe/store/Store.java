@@ -7,22 +7,22 @@ public class Store {
 	}
 
 	public String getStoreId() {
-		System.out.println("Get store ID");
-		return "Placeholder store ID"
+		System.out.println("Store: Get store ID");
+		return "Placeholder store ID";
 	}
 	public void queryProducts() {
-		System.out.println("Query products");
+		System.out.println("Store: Query products");
 	}
 
 	public void purchase(String product) {
-		System.out.println("Purchase " + product);
+		System.out.println("Store: Purchase " + product);
 	}
 
 	public void queryPurchases() {
-		System.out.println("Query purchases");
+		System.out.println("Store: Query purchases");
 	}
 
 	public void destructor() {
-		System.out.println("Destructor");
+		System.out.println("Store: Destructor");
 	}
 }

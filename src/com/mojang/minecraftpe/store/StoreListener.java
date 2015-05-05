@@ -1,4 +1,4 @@
 package com.mojang.minecraftpe.store;
 
-public class StoreListener {
+public interface StoreListener {
 }
