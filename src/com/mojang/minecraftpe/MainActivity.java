@@ -262,7 +262,7 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
-				//Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
+				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
 				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
@@ -2033,7 +2033,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void setImmersiveMode(boolean set) {
-		/*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
 		int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
 		int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 		if (set) {
@@ -2041,7 +2041,7 @@ public class MainActivity extends NativeActivity {
 		} else {
 			uiOptions &= ~flags;
 		}
-		getWindow().getDecorView().setSystemUiVisibility(uiOptions);*/
+		getWindow().getDecorView().setSystemUiVisibility(uiOptions);
 	}
 
 	private void touchImmersiveMode() {
