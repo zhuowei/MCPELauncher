@@ -298,6 +298,13 @@ void bl_forceTextureLoad(std::string const&);
 void bl_dumpVtable(void**, size_t);
 void bl_set_i18n(std::string const&, std::string const&);
 
+Entity* bl_getEntityWrapper(Level* level, long long entityId) {
+	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
+		return bl_removedEntity;
+	}
+	return level->getEntity(entityId, 0 /* false */);
+}
+
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());

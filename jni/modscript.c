@@ -124,7 +124,6 @@ static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
 static int (*bl_TileSource_getRawBrightness)(TileSource*, int, int, int, cppbool);
-static Entity* (*bl_Level_getEntity)(Level*, int, cppbool);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_GameRenderer_getFov)(void*, float, int);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
@@ -204,12 +203,7 @@ void* debug_dlsym(void* handle, const char* symbol) {
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
 
-Entity* bl_getEntityWrapper(Level* level, EntityUniqueID entityId) {
-	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
-		return bl_removedEntity;
-	}
-	return bl_Level_getEntity(level, entityId, 0 /* false */);
-}
+Entity* bl_getEntityWrapper(Level* level, long long entityId);
 
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
@@ -958,6 +952,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 			return instance->damage;
 		case AMOUNT:
 			return instance->count;
+		default:
+			return 0;
 	}
 }
 
@@ -1248,7 +1244,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_TileSource_getRawBrightness = dlsym(RTLD_DEFAULT, "_ZN10TileSource16getRawBrightnessEiiib");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
 	bl_Entity_setRot = dlsym(RTLD_DEFAULT, "_ZN6Entity6setRotEff");
-	bl_Level_getEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9getEntityEib");
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
@@ -1293,7 +1288,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 #endif
 
-	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = &bl_NinecraftApp_update_hook;
 
 	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3P4Vec2");
 

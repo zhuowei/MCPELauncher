@@ -1,5 +1,3 @@
-typedef long long EntityUniqueID;
-
 #ifdef __cplusplus
 #define cppstr std::string
 #else
@@ -28,6 +26,26 @@ typedef struct {
 } FullTile;
 #endif
 typedef void TileSource;
+
+#ifdef __cplusplus
+class EntityUniqueID {
+public:
+	long long id;
+	EntityUniqueID(long long id) : id(id) {
+	}
+	void operator=(long long id) {
+		this->id = id;
+	}
+
+	operator long long() const {
+		return this->id;
+	}
+};
+#else
+typedef struct {
+	long long id;
+} EntityUniqueID;
+#endif
 
 typedef struct {
 	float x;
@@ -58,13 +76,6 @@ typedef struct {
 } TilePos;
 #endif
 
-typedef struct {
-	void** vtable; //0
-	char filler[4]; //4
-	bool isRemote; //8?
-	char filler2[2967];//9
-	TileSource* tileSource;//2976 from Level::getChunkSource
-} Level;
 typedef struct Entity_t{
 //todo: 60 = tile source, 68 = level
 	void** vtable; //0
@@ -87,6 +98,25 @@ typedef struct Entity_t{
 	struct Entity_t* rider; //240 + 8
 	struct Entity_t* riding; //244 + 8
 } Entity;
+
+#ifdef __cplusplus
+#define CLASS_TYPEDEF(name) class name {public:
+#define CLASS_FOOTER(name) }
+#else
+#define CLASS_TYPEDEF(name) typedef struct {
+#define CLASS_FOOTER(name) } name
+#endif
+
+CLASS_TYPEDEF(Level)
+	void** vtable; //0
+	char filler[4]; //4
+	bool isRemote; //8?
+	char filler2[2967];//9
+	TileSource* tileSource;//2976 from Level::getChunkSource
+#ifdef __cplusplus
+	Entity* getEntity(EntityUniqueID, bool);
+#endif
+CLASS_FOOTER(Level);
 typedef Entity Player;
 #ifdef __cplusplus
 struct TextureUVCoordinateSet {
