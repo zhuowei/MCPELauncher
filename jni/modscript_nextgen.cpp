@@ -26,6 +26,8 @@
 
 #include "minecraft_colors.h"
 
+#include "mcpe/i18n.h"
+
 #define DLSYM_DEBUG
 
 typedef void RakNetInstance;
@@ -163,7 +165,7 @@ static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
 
 static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
 
-static void (*bl_MinecraftClient_leaveGame)(Minecraft*, bool saveWorld, bool thatotherboolean);
+static void (*bl_MinecraftClient_leaveGame)(Minecraft*, bool saveWorld);
 static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
 
 static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
@@ -176,9 +178,13 @@ static void (*bl_Level_addListener)(Level*, LevelListener*);
 
 static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int);
 
+#if 0
+
 static void (*bl_Font_drawCached_real)(Font*, std::string const&, float, float, Color const&, bool, MaterialPtr*);
 
 static int (*bl_Font_width)(Font*, std::string const&);
+
+#endif
 
 static void* bl_Material_dirt;
 
@@ -227,8 +233,6 @@ bool bl_custom_block_collisionDisabled[256];
 int* bl_custom_block_colors[256];
 uint8_t bl_custom_block_renderLayer[256];
 //end custom blocks
-
-std::map <std::string, std::string>* bl_I18n_strings;
 
 int bl_addItemCreativeInvRequest[256][4];
 int bl_addItemCreativeInvRequestCount = 0;
@@ -292,6 +296,7 @@ void* debug_dlsym(void* handle, const char* symbol);
 
 void bl_forceTextureLoad(std::string const&);
 void bl_dumpVtable(void**, size_t);
+void bl_set_i18n(std::string const&, std::string const&);
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
@@ -341,6 +346,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 
 	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
 }
+
+#if 0
 
 void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material) {
 	if (bl_text_parse_color_codes) {
@@ -420,6 +427,8 @@ void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffs
 		return;
 	}
 }
+
+#endif
 
 void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int damage){
 	int index = bl_addItemCreativeInvRequestCount;
@@ -817,7 +826,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
 	bl_Item_setDescriptionId(item, mystr);
-	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
+	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
@@ -838,7 +847,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
 	bl_Item_setDescriptionId(item, mystr);
-	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
+	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
@@ -863,7 +872,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 	bl_Item_setDescriptionId(item, mystr);
-	(*bl_I18n_strings)["item." + mystr + ".name"] = mystr;
+	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
@@ -898,7 +907,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
 	//bl_Minecraft_setLeaveGame(bl_minecraft);
-	bl_MinecraftClient_leaveGame(bl_minecraft, saveMultiplayerWorld, true);
+	// Is this boolean right?
+	bl_MinecraftClient_leaveGame(bl_minecraft, saveMultiplayerWorld);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -1023,9 +1033,11 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	}
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
 	std::string returnVal = descriptionId;
+	/*
 	if (!raw) {
 		returnVal = (*bl_I18n_strings)[descriptionId];
 	}
+	*/
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
 }
@@ -1100,7 +1112,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	bl_Tile_setDescriptionId(retval, nameStr);
 	//std::string comeOut = bl_Tile_getDescriptionId(retval);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Block added: %s\n", comeOut.c_str());
-	(*bl_I18n_strings)["tile." + nameStr + ".name"] = nameStr;
+	bl_set_i18n("tile." + nameStr + ".name", nameStr);
 	retval->renderType = renderShape;
 	bl_Tile_solid[blockId] = opaque;
 	//add it to the global tile list
@@ -1221,7 +1233,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	const char * keyUTFChars = env->GetStringUTFChars(key, NULL);
 	std::string keyString = std::string(keyUTFChars);
-	(*bl_I18n_strings)[keyString] = valueNameString;
+	bl_set_i18n(keyString, valueNameString);
 	env->ReleaseStringUTFChars(key, keyUTFChars);
 	env->ReleaseStringUTFChars(value, valueUTFChars);
 }
@@ -1740,6 +1752,10 @@ void bl_cppNewLevelInit() {
 	bl_entityUUIDMap.clear();
 }
 
+void bl_set_i18n(std::string const& key, std::string const& value) {
+	(I18n::getCurrentLanguage()->map)[key] = value;
+}
+
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
@@ -1753,7 +1769,7 @@ void bl_setuphooks_cppside() {
 
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEbb"); //hooked - just pull whichever version MCPE uses
+	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
 	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
@@ -1779,11 +1795,15 @@ void bl_setuphooks_cppside() {
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 
+#if 0
+
 	void* fontDrawCached = dlsym(RTLD_DEFAULT, "_ZN4Font10drawCachedERKSsffRK5ColorbP11MaterialPtr");
 	mcpelauncher_hook(fontDrawCached, (void*) &bl_Font_drawCached_hook, (void**) &bl_Font_drawCached_real);
 
 	bl_Font_width = (int (*) (Font*, std::string const&))
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
+
+#endif
 
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile") + 8);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
@@ -1820,7 +1840,6 @@ void bl_setuphooks_cppside() {
 
 	bl_initCustomBlockVtable();
 
-	bl_I18n_strings = (std::map <std::string, std::string> *) dlsym(RTLD_DEFAULT, "_ZN4I18n8_stringsE");
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");

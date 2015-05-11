@@ -1,3 +1,5 @@
+typedef long long EntityUniqueID;
+
 #ifdef __cplusplus
 #define cppstr std::string
 #else
@@ -32,6 +34,11 @@ typedef struct {
 	float y;
 	float z;
 } Vec3;
+
+typedef struct {
+	float x;
+	float y;
+} Vec2;
 
 #ifdef __cplusplus
 struct TilePos {

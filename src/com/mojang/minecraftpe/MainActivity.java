@@ -334,7 +334,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSafeMode()) {
 				initPatching();
 				if (minecraftLibBuffer != null) {
-					boolean signalHandler = false; // todo setting
+					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
 					ScriptManager.nativePrePatch(signalHandler);
 				}
 			}
@@ -360,7 +360,7 @@ public class MainActivity extends NativeActivity {
 		setFakePackage(false);
 
 		try {
-			boolean shouldLoadScripts = false;
+			boolean shouldLoadScripts = true;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				loadNativeAddons();
 				applyBuiltinPatches();
@@ -738,7 +738,6 @@ public class MainActivity extends NativeActivity {
 		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
-		if (disableModPEForDev) options.remove(manageModPEScripts);
 		isRecording = Kamcord.isRecording();
 		if (hasRecorder) {
 			options.add(isRecording? stopRecording: startRecording);

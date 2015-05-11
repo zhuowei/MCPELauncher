@@ -118,7 +118,7 @@ static void (*bl_Entity_setPos)(Entity*, float, float, float);
 static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int);
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
-static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec3*);
+static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec2*);
 int (*bl_TileSource_getData)(TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
@@ -1295,7 +1295,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = (int) &bl_NinecraftApp_update_hook;
 
-	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3PS2_");
+	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3P4Vec2");
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");

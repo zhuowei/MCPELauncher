@@ -1,6 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)  
-LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog -lminecraftpe
 LOCAL_MODULE    := mcpelauncher
 
 #corkscrew
