@@ -204,7 +204,7 @@ void* debug_dlsym(void* handle, const char* symbol) {
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
 
-Entity* bl_getEntityWrapper(Level* level, int entityId) {
+Entity* bl_getEntityWrapper(Level* level, EntityUniqueID entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
 		return bl_removedEntity;
 	}
@@ -649,7 +649,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetOnFire
-  (JNIEnv *env, jclass clazz, jint entityId, jint howLong) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint howLong) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setOnFire(entity, howLong);
@@ -694,7 +694,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	preventDefaultStatus = TRUE;
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
 	return bl_localplayer->entityId;
@@ -725,14 +725,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPosition
-  (JNIEnv *env, jclass clazz, jint entityId, jfloat x, jfloat y, jfloat z) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat x, jfloat y, jfloat z) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setPos_helper(entity, x, y, z);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
-  (JNIEnv *env, jclass clazz, jint entityId, jfloat vel, jint axis) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat vel, jint axis) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//the iOS version probably uses Entity::lerpMotion; that's too mainstream so we set velocity directly
@@ -750,7 +750,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
-  (JNIEnv *env, jclass clazz, jint riderId, jint mountId) {
+  (JNIEnv *env, jclass clazz, jlong riderId, jlong mountId) {
 	//use vtable so the rider doesn't have to be a player (useful?)
 	Entity* rider = bl_getEntityWrapper(bl_level, riderId);
 	Entity* mount = bl_getEntityWrapper(bl_level, mountId);
@@ -774,7 +774,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	bl_Inventory_add(invPtr, instance);
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
 	//TODO: spawn entities, not just mobs
 	Entity* entity;
@@ -822,7 +822,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetPositionRelative
-  (JNIEnv *env, jclass clazz, jint entityId, jfloat deltax, jfloat deltay, jfloat deltaz) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat deltax, jfloat deltay, jfloat deltaz) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//again, the iOS implement probably uses Entity::move, but too mainstream
@@ -830,28 +830,28 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetRot
-  (JNIEnv *env, jclass clazz, jint entityId, jfloat yaw, jfloat pitch) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat yaw, jfloat pitch) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setRot(entity, yaw, pitch);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0.0f;
 	return entity->pitch;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetYaw
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0.0f;
 	return entity->yaw;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCarriedItem
-  (JNIEnv *env, jclass clazz, jint entityId, jint itemId, jint itemCount, jint itemDamage) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	void* vtableEntry = entity->vtable[ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM];
@@ -881,7 +881,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOn
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobSkin
-  (JNIEnv *env, jclass clazz, jint entityId, jstring skinPath) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jstring skinPath) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//skins
@@ -891,7 +891,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityLoc
-  (JNIEnv *env, jclass clazz, jint entityId, jint axis) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint axis) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	switch (axis) {
@@ -907,14 +907,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveEntity
-(JNIEnv *env, jclass clazz, jint entityId) {
+(JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_remove(entity); //yes, I know I probably need to call through the vtable
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityTypeId
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	void* vtable = entity->vtable[ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID];
@@ -923,14 +923,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAnimalAge
-  (JNIEnv *env, jclass clazz, jint entityId, jint age) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint age) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_AgebleMob_setAge(entity, age);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAnimalAge
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	return ((int*) entity)[772];
@@ -987,21 +987,21 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	return ((int*) entity)[MOB_HEALTH_OFFSET];
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
-  (JNIEnv *env, jclass clazz, jint entityId, jint halfhearts) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	((int*) entity)[MOB_HEALTH_OFFSET] = halfhearts;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
-  (JNIEnv *env, jclass clazz, jint entityId, jint renderType) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint renderType) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_renderManager_setRenderType(entity, renderType);
@@ -1036,7 +1036,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityVel
-  (JNIEnv *env, jclass clazz, jint entityId, jint axis) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jint axis) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	switch (axis) {

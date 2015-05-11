@@ -998,7 +998,7 @@ void bl_attachLevelListener() {
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSneaking
-  (JNIEnv *env, jclass clazz, jint entityId, jboolean doIt) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jboolean doIt) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//bl_Mob_setSneaking(entity, doIt);
@@ -1008,7 +1008,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsSneaking
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return false;
 	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
@@ -1054,7 +1054,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
 	std::string* myName = (std::string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
@@ -1332,7 +1332,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetNameTag
-  (JNIEnv *env, jclass clazz, jint entityId, jstring name) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jstring name) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	const char * nameUtfChars = env->GetStringUTFChars(name, NULL);
@@ -1420,7 +1420,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetNameTag
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	if (bl_nametag_map.count(entityId) == 0) return NULL;
 	std::string mystr = bl_nametag_map[entityId];
 	jstring returnValString = env->NewStringUTF(mystr.c_str());
@@ -1428,7 +1428,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRiding
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	Entity* riding = entity->riding;
@@ -1437,7 +1437,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRider
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	Entity* rider = entity->rider;
@@ -1446,7 +1446,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
 	std::string* mystr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
@@ -1455,14 +1455,14 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	return bl_renderManager_getRenderType(entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	Entity** camera = (Entity**) (((int) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
@@ -1470,7 +1470,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
-  (JNIEnv *env, jclass clazz, jint entityId) {
+  (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
 	std::array<unsigned char, 16> uuidBytes = bl_getEntityUUID(entityId);
@@ -1652,7 +1652,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeFo
 };
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetSize
-  (JNIEnv *env, jclass clazz, jint entityId, jfloat a, jfloat b) {
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat a, jfloat b) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setSize(entity, a, b);
@@ -1696,7 +1696,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSc
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
-  (JNIEnv *env, jclass clazz, jint screen) {
+  (JNIEnv *env, jclass clazz) {
 	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
@@ -1769,7 +1769,7 @@ void bl_setuphooks_cppside() {
 
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
+	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
 	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
