@@ -10,7 +10,7 @@ public class Store {
 		System.out.println("Store: Get store ID");
 		return "Placeholder store ID";
 	}
-	public void queryProducts() {
+	public void queryProducts(String[] products) {
 		System.out.println("Store: Query products");
 	}
 

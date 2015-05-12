@@ -33,9 +33,6 @@ public:
 	long long id;
 	EntityUniqueID(long long id) : id(id) {
 	}
-	void operator=(long long id) {
-		this->id = id;
-	}
 
 	operator long long() const {
 		return this->id;

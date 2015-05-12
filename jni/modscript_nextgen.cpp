@@ -611,6 +611,8 @@ std::array<unsigned char, 16> bl_getEntityUUID(int entityId) {
 	return newuuid;
 }
 
+#if 0
+
 void bl_Entity_saveWithoutId_hook(Entity* entity, void* compoundTag) {
 	int entityId = entity->entityId;
 	std::array<unsigned char, 16> uuidBytes = bl_getEntityUUID(entityId);
@@ -638,6 +640,7 @@ int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 	}*/
 	return bl_Entity_load_real(entity, compoundTag);
 }
+#endif
 
 static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
 	JNIEnv *env;
@@ -651,7 +654,7 @@ static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
 	}
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(J)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
 
@@ -719,7 +722,7 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
 	bl_removedEntity = entity;
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(I)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(J)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
 
@@ -741,9 +744,9 @@ static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y
 	preventDefaultStatus = false;
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "explodeCallback", "(IFFFFZ)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "explodeCallback", "(JFFFFZ)V");
 
-	int id = entity != NULL? entity->entityId: -1;
+	long long id = entity != NULL? entity->entityId.id: -1LL;
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, id, x, y, z, power, onFire);
 
