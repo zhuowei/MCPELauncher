@@ -79,24 +79,29 @@ typedef struct {
 typedef struct Entity_t{
 //todo: 60 = tile source, 68 = level
 	void** vtable; //0
-	int filler3[7];//28 extra bytes. All others are shifted by 28.
-	float x; //32
-	float y; //36
-	float z; //40
-	char filler[8];//44
-	int entityId; //52 found in Arrow::Arrow(Mob*)
-	char filler2[28];//32 + 24
-	float motionX; //52 - 4 + 28 + 8 = 84 found in Entity::rideTick()
-	float motionY; //56
-	float motionZ; //60
-	float yaw; //64 - 4 + 28 + 8 = 96
-	float pitch; //68
-	float prevYaw; //72
-	float prevPitch; //76 (104 + 4 after shift)
-	char filler4[132]; //108 +4
-	int renderType; //236 + 8 = 244; found in the render dispatcher
-	struct Entity_t* rider; //240 + 8
-	struct Entity_t* riding; //244 + 8
+	int filler3[5];//4
+	float x; //24
+	float y; //28
+	float z; //32
+	char filler2[72-36]; //36
+	float motionX; //72 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //76
+	float motionZ; //80
+	float yaw; //84
+	float pitch; //88
+	float prevYaw; //92
+	float prevPitch; //96
+	char filler4[232-100]; //100
+	int renderType; //232
+	char filler5[248-236]; // 236
+	struct Entity_t* rider; //248
+	struct Entity_t* riding; //252
+	char filler6[280-256]; //256
+#ifdef __cplusplus
+	EntityUniqueID entityId; // 280
+#else
+	long long entityId; // 280
+#endif
 } Entity;
 
 #ifdef __cplusplus
@@ -111,8 +116,8 @@ CLASS_TYPEDEF(Level)
 	void** vtable; //0
 	char filler[4]; //4
 	bool isRemote; //8?
-	char filler2[2967];//9
-	TileSource* tileSource;//2976 from Level::getChunkSource
+	char filler2[2916-9];//9
+	TileSource* tileSource;//2916 from Level::getChunkSource
 #ifdef __cplusplus
 	Entity* getEntity(EntityUniqueID, bool);
 #endif
@@ -137,20 +142,15 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	int maxStackSize; //4
-	int idunno2; //8
-	int idunno; //12
-	int icon; //16
-	int itemId; //20
-	int maxDamage; //24
-	int idunno4; //28 <- actually a texture UV coordinate set
-	int idunno5; //32
-	cppstr* description; //36
-	char filler[20]; //40
-	int category1; //60
-	bool handEquipped; //64
-	bool stackedByData; //65
-	char filler1[76-66]; //66
+	unsigned char maxStackSize; //4
+	char filler0[18-5]; //5
+	short itemId; //18
+	short maxDamage; //20
+	char filler[56-22]; //22
+	int category1; //56
+	bool handEquipped; //60
+	bool stackedByData; //61
+	char filler1[72-62]; //62
 } Item;
 
 typedef struct {

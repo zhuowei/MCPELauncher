@@ -185,7 +185,7 @@ public class MainActivity extends NativeActivity {
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
 
-	public static final boolean disableModPEForDev = true;
+	public static final boolean disableModPEForDev = false;
 
 	private final Handler mainHandler = new Handler() {
 		@Override
