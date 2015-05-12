@@ -113,12 +113,10 @@ static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
-static void (*bl_Player_ride)(Player*, Entity*);
 static void (*bl_Entity_setPos)(Entity*, float, float, float);
 static void (*bl_Level_explode)(Level*, Entity*, float, float, float, float, int);
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_Level_addEntity)(Level*, Entity*);
-static Entity* (*bl_MobFactory_createMob)(int, TileSource*, Vec3*, Vec2*);
 int (*bl_TileSource_getData)(TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
@@ -133,7 +131,6 @@ static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Entity_remove)(Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, Player*, int, int, int, signed char);
-static Entity* (*bl_EntityFactory_CreateEntity)(int, TileSource*);
 static Entity* (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
 static long (*bl_Level_getTime)(Level*);
 static void (*bl_Level_setTime)(Level*, long); //yes, that's a 32-bit long. I have no clue why this was float before.
@@ -149,7 +146,6 @@ static void (*bl_FurnaceTileEntity_setItem)(void*, int, ItemInstance*);
 static ItemInstance* (*bl_FurnaceTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
-static void (*bl_Mob_die_real)(void*, Entity*);
 static void (*bl_Minecraft_setIsCreativeMode)(Minecraft*, int);
 ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
@@ -217,7 +213,7 @@ ItemInstance* bl_newItemInstance(int id, int count, int damage) {
 	return instance;
 }
 
-static void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
+void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 	void (*setPos)(Entity*, float, float, float);
 	setPos = entity->vtable[ENTITY_VTABLE_OFFSET_SETPOS];
 	setPos(entity, x, y, z);
@@ -453,32 +449,6 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, Player* player, int x, int y,
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, player, x, y, z, side);
 }
 
-void bl_Mob_die_hook(Entity* entity1, Entity* entity2) {
-	JNIEnv *env;
-	preventDefaultStatus = FALSE;
-	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
-	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
-	}
-
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "mobDieCallback", "(II)V");
-	int victimId = entity1->entityId;
-	int attackerId = -1;
-	if (entity2 != NULL) {
-		attackerId = entity2->entityId;
-	}
-
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, attackerId, victimId);
-
-	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
-	}
-
-	bl_Mob_die_real(entity1, entity2);
-}
-
 void bl_handleFrameCallback() {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -584,6 +554,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
+/*
 	ItemInstance* instance = bl_newItemInstance(id, count, damage);
 
 	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level->tileSource);
@@ -597,6 +568,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDr
 	//TODO: WTF, MrARM: why spawn an entity, use its spawn at location to make it drop another entity,
 	//and then never use the original?!
 	//(Potential memory leak?)
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSpawn
@@ -746,12 +718,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
   (JNIEnv *env, jclass clazz, jlong riderId, jlong mountId) {
 	//use vtable so the rider doesn't have to be a player (useful?)
+	/*
 	Entity* rider = bl_getEntityWrapper(bl_level, riderId);
 	Entity* mount = bl_getEntityWrapper(bl_level, mountId);
 	if (rider == NULL) return;
 	void* vtable = rider->vtable[19];
 	void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
 	fn(rider, mount);
+	*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
@@ -766,38 +740,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	bl_Inventory_add(invPtr, instance);
-}
-
-JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
-	//TODO: spawn entities, not just mobs
-	Entity* entity;
-	Vec3 pos;
-	pos.x = x;
-	pos.y = y;
-	pos.z = z;
-	if (type < 64) {
-		entity = bl_MobFactory_createMob(type, bl_level->tileSource, &pos, NULL); //the last two vec3s are pos and rot
-	} else {
-		entity = bl_EntityFactory_CreateEntity(type, bl_level->tileSource);
-	}
-
-	if (entity == NULL) {
-		//WTF?
-		return -1;
-	}
-	bl_Entity_setPos_helper(entity, x, y, z);
-	bl_Level_addEntity(bl_level, entity);
-
-	//skins
-	if (skinPath != NULL && type < 64) {
-		const char * skinUtfChars = (*env)->GetStringUTFChars(env, skinPath, NULL);
-		bl_changeEntitySkin((void*) entity, skinUtfChars);
-		(*env)->ReleaseStringUTFChars(env, skinPath, skinUtfChars);
-	}
-
-	return entity->entityId;
-	
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetNightMode
@@ -1213,10 +1155,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
-
-	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieEP6Entity");
-	mcpelauncher_hook(mobDie, &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
-
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
 	mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
@@ -1234,12 +1172,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_TileSource_getData = dlsym(RTLD_DEFAULT, "_ZN10TileSource7getDataEiii");
 
 	bl_Player_getCarriedItem = dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
-	bl_Player_ride = dlsym(RTLD_DEFAULT, "_ZN6Player4rideEP6Entity");
+	// FIXME!
 	bl_Entity_setPos = dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 	bl_Level_explode = dlsym(RTLD_DEFAULT, "_ZN5Level7explodeEP6Entityffffb");
 	bl_Inventory_add = dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
-	bl_Level_addEntity = dlsym(RTLD_DEFAULT, "_ZN5Level9addEntityEP6Entity");
 
 	bl_TileSource_getRawBrightness = dlsym(RTLD_DEFAULT, "_ZN10TileSource16getRawBrightnessEiiib");
 	bl_Level_setNightMode = dlsym(RTLD_DEFAULT, "_ZN5Level12setNightModeEb");
@@ -1248,7 +1185,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Mob_getTexture = dlsym(RTLD_DEFAULT, "_ZN3Mob10getTextureEv");
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
-	bl_EntityFactory_CreateEntity = dlsym(RTLD_DEFAULT, "_ZN13EntityFactory12CreateEntityEiR10TileSource");
 	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
 	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZNK5Level7getTimeEv");
@@ -1289,8 +1225,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 #endif
 
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_UPDATE] = &bl_NinecraftApp_update_hook;
-
-	bl_MobFactory_createMob = dobby_dlsym(mcpelibhandle, "_ZN10MobFactory9CreateMobEiR10TileSourceRK4Vec3P4Vec2");
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");

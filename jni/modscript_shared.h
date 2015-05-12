@@ -3,12 +3,12 @@
 
 #include <jni.h>
 
+#include "modscript_structs.h"
+
 #ifdef __cplusplus
 #include <array>
 extern "C" {
 #endif
-
-#include "modscript_structs.h"
 
 typedef void Minecraft;
 
@@ -60,6 +60,8 @@ void bl_dumpVtable(void** vtable, size_t size);
 #ifdef __cplusplus
 extern std::array<std::string, 512> bl_armorRenders;
 #endif
+
+void bl_Entity_setPos_helper(Entity*, float, float, float);
 
 #ifdef __cplusplus
 }

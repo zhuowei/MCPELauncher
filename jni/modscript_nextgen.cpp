@@ -27,6 +27,8 @@
 #include "minecraft_colors.h"
 
 #include "mcpe/i18n.h"
+#include "mcpe/entitydamagesource.h"
+#include "mcpe/mobfactory.h"
 
 #define DLSYM_DEBUG
 
@@ -161,7 +163,7 @@ static Tile** bl_Tile_tiles;
 static int* bl_Tile_lightEmission;
 static int* bl_Tile_lightBlock;
 
-static void (*bl_Item_setDescriptionId)(Item*, std::string const&);
+static void (*bl_Item_setNameID)(Item*, std::string const&);
 
 static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
 
@@ -190,20 +192,19 @@ static void* bl_Material_dirt;
 
 static void (*bl_Tile_Tile)(Tile*, int, void*);
 static void (*bl_TileItem_TileItem)(Item*, int);
-static void (*bl_Tile_setDescriptionId)(Tile*, const std::string&);
+static void (*bl_Tile_setNameId)(Tile*, const std::string&);
 static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
-static std::string (*bl_Tile_getDescriptionId)(Tile*);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
-static void (*bl_Item_setMaxStackSize)(Item*, int);
+static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 static void (*bl_CreativeInventryScreen_populateTile_real)(Tile*, int, int);
 static void (*bl_CreativeInventryScreen_populateItem_real)(Item*, int, int);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
-static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
+//static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
+//static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
@@ -241,7 +242,7 @@ std::map <int, std::string> bl_nametag_map;
 char bl_stonecutter_status[512];
 
 static Item** bl_Item_items;
-
+#if 0
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
 static void (*bl_CompoundTag_putLong)(void*, std::string const&, long long);
@@ -249,6 +250,7 @@ static int64_t (*bl_CompoundTag_getLong)(void*, std::string const&);
 //static Tag* (*bl_CompoundTag_get)(void*, std::string const&);
 static void (*bl_Entity_saveWithoutId_real)(Entity*, void*);
 static int (*bl_Entity_load_real)(Entity*, void*);
+#endif
 
 static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
@@ -257,8 +259,8 @@ static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static void* (*bl_Textures_getTextureData)(void*, std::string const&);
-static bool (*bl_Level_addEntity_real)(Level*, Entity*);
-static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, Entity*);
+static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
+static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*);
 static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
@@ -280,6 +282,7 @@ static void (*bl_TileEntity_setChanged)(TileEntity*);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
+static void (*bl_Mob_die_real)(Entity*, EntityDamageSource&);
 
 static bool* bl_Tile_solid;
 
@@ -512,7 +515,7 @@ int bl_CustomBlock_getRenderLayerHook(Tile* tile) {
 }
 
 void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float scale) {
-	int entityId = entity->entityId;
+	long long entityId = entity->entityId;
 	if (bl_nametag_map.count(entityId) == 0) return;
 	std::string mystr = bl_nametag_map[entityId];
 	//back up the existing data at the nametag's spot, then overwrite it with our string. 
@@ -642,10 +645,11 @@ int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 }
 #endif
 
-static bool bl_Level_addEntity_hook(Level* level, Entity* entity) {
+static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
 	JNIEnv *env;
+	Entity* entity = entityPtr.get();
 
-	bool retval = bl_Level_addEntity_real(level, entity);
+	bool retval = bl_Level_addEntity_real(level, std::move(entityPtr));
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -676,7 +680,7 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, Player* entity) {
 	}
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(J)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
 
@@ -686,10 +690,12 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, Player* entity) {
 	return retval;
 }
 
-static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, Entity* entity) {
+static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
 	JNIEnv *env;
 
-	bool retval = bl_MultiPlayerLevel_addEntity_real(level, entity);
+	Entity* entity = entityPtr.get();
+
+	bool retval = bl_MultiPlayerLevel_addEntity_real(level, std::move(entityPtr));
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -698,7 +704,7 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, Entity* entity) {
 	}
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(I)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(J)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
 
@@ -835,7 +841,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	} else {
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
-	bl_Item_setDescriptionId(item, mystr);
+	bl_Item_setNameID(item, mystr);
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
@@ -856,7 +862,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	} else {
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
-	bl_Item_setDescriptionId(item, mystr);
+	bl_Item_setNameID(item, mystr);
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
@@ -881,7 +887,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
-	bl_Item_setDescriptionId(item, mystr);
+	bl_Item_setNameID(item, mystr);
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
@@ -1028,6 +1034,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
+#if 0
 	if (itemId <= 0 || itemId >= 512) return NULL;
 	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return NULL;
@@ -1050,10 +1057,13 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	*/
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
+#endif
+	return nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
+#if 0
 	if (itemId <= 0 || itemId >= 512) return false;
 	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
@@ -1061,6 +1071,8 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (set == NULL || set->bounds == NULL) return false;
 	env->SetFloatArrayRegion(outputArray, 0, 6, set->bounds);
 	return true;
+#endif
+	return false;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
@@ -1119,9 +1131,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	retval->vtable = bl_CustomBlock_vtable;
 	retval->material = bl_getMaterial(materialType);
 	std::string nameStr = std::string(name);
-	bl_Tile_setDescriptionId(retval, nameStr);
-	//std::string comeOut = bl_Tile_getDescriptionId(retval);
-	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Block added: %s\n", comeOut.c_str());
+	bl_Tile_setNameId(retval, nameStr);
+
 	bl_set_i18n("tile." + nameStr + ".name", nameStr);
 	retval->renderType = renderShape;
 	bl_Tile_solid[blockId] = opaque;
@@ -1716,6 +1727,65 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 	bl_MinecraftClient_setScreen(bl_minecraft, progress);
 }
 
+void bl_Mob_die_hook(Entity* entity1, EntityDamageSource& damageSource) {
+	JNIEnv *env;
+	preventDefaultStatus = false;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "mobDieCallback", "(JJ)V");
+	long long victimId = entity1->entityId;
+	long long attackerId = -1;
+	if (damageSource.isEntitySource()) {
+		attackerId = static_cast<EntityDamageByEntitySource&>(damageSource).entity->entityId;
+	}
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, attackerId, victimId);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	bl_Mob_die_real(entity1, damageSource);
+}
+
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
+	//TODO: spawn entities, not just mobs
+	std::unique_ptr<Entity> entity;
+	Vec3 pos;
+	pos.x = x;
+	pos.y = y;
+	pos.z = z;
+	if (type < 64) {
+		entity = MobFactory::CreateMob(type, *bl_level->tileSource, pos, nullptr); //the last two vec3s are pos and rot
+	} else {
+		entity = EntityFactory::CreateEntity(type, *bl_level->tileSource);
+	}
+
+	if (entity == nullptr) {
+		//WTF?
+		return -1;
+	}
+	Entity* e = entity.get();
+	bl_Entity_setPos_helper(e, x, y, z);
+	bl_level->addEntity(std::move(entity));
+
+	//skins
+	if (skinPath != NULL && type < 64) {
+		const char * skinUtfChars = env->GetStringUTFChars(skinPath, NULL);
+		bl_changeEntitySkin((void*) e, skinUtfChars);
+		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
+	}
+
+	return e->entityId;
+
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -1775,7 +1845,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
-	bl_Item_setDescriptionId = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item16setDescriptionIdERKSs");
+	bl_Item_setNameID = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item9setNameIDERKSs");
 
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
@@ -1820,16 +1890,14 @@ void bl_setuphooks_cppside() {
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
 	bl_TileItem_TileItem = (void (*)(Item*, int)) dobby_dlsym(mcpelibhandle, "_ZN8TileItemC2Ei");
-	bl_Tile_setDescriptionId = (void (*)(Tile*, const std::string&))
-		dlsym(RTLD_DEFAULT, "_ZN4Tile16setDescriptionIdERKSs");
+	bl_Tile_setNameId = (void (*)(Tile*, const std::string&))
+		dlsym(RTLD_DEFAULT, "_ZN4Tile9setNameIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
 	bl_Tile_lightBlock = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile10lightBlockE");
-	bl_Tile_getDescriptionId = (std::string (*)(Tile*))
-		dlsym(RTLD_DEFAULT, "_ZNK4Tile16getDescriptionIdEv");
 
 #if 0
 #define CHECKVTABLE(actualfn) \
@@ -1854,8 +1922,8 @@ void bl_setuphooks_cppside() {
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
 
-	bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
-	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
+	//bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
+	//bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	void* populateTile = dlsym(RTLD_DEFAULT, "_ZN23CreativeInventoryScreen12populateItemEP4Tileii");
 	mcpelauncher_hook(populateTile, (void*) &bl_CreativeInventryScreen_populateTile_hook, (void**) &bl_CreativeInventryScreen_populateTile_real);
@@ -1878,7 +1946,7 @@ void bl_setuphooks_cppside() {
 	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameER6Entityf");
 	
-	bl_Item_setMaxStackSize = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEi");
+	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
 
 	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
@@ -1895,6 +1963,7 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
 	//	(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
 	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
+#if 0
 	bl_CompoundTag_putString = (void (*)(void*, std::string, std::string))
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
 	bl_CompoundTag_getString = (std::string (*)(void*, std::string))
@@ -1911,6 +1980,7 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
 	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadER11CompoundTag");
 	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
+#endif
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, float, float, float, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3fffi");
 	bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
@@ -1918,9 +1988,9 @@ void bl_setuphooks_cppside() {
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
-	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityEP6Entity");
+	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
-	void* mpAddEntity = dlsym(mcpelibhandle, "_ZN16MultiPlayerLevel9addEntityEP6Entity");
+	void* mpAddEntity = dlsym(mcpelibhandle, "_ZN16MultiPlayerLevel9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
 	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerEP6Player");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
@@ -1966,6 +2036,9 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
 	bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
 		dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");
+
+	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieER18EntityDamageSource");
+	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

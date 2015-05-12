@@ -1,4 +1,8 @@
 #ifdef __cplusplus
+#pragma once
+#include <memory>
+#endif
+#ifdef __cplusplus
 #define cppstr std::string
 #else
 typedef struct {
@@ -25,7 +29,7 @@ typedef struct {
 	unsigned char data;
 } FullTile;
 #endif
-typedef void TileSource;
+typedef struct TileSource TileSource;
 
 #ifdef __cplusplus
 class EntityUniqueID {
@@ -73,7 +77,7 @@ typedef struct {
 } TilePos;
 #endif
 
-typedef struct Entity_t{
+typedef struct Entity{
 //todo: 60 = tile source, 68 = level
 	void** vtable; //0
 	int filler3[5];//4
@@ -91,8 +95,8 @@ typedef struct Entity_t{
 	char filler4[232-100]; //100
 	int renderType; //232
 	char filler5[248-236]; // 236
-	struct Entity_t* rider; //248
-	struct Entity_t* riding; //252
+	struct Entity* rider; //248
+	struct Entity* riding; //252
 	char filler6[280-256]; //256
 #ifdef __cplusplus
 	EntityUniqueID entityId; // 280
@@ -101,24 +105,6 @@ typedef struct Entity_t{
 #endif
 } Entity;
 
-#ifdef __cplusplus
-#define CLASS_TYPEDEF(name) class name {public:
-#define CLASS_FOOTER(name) }
-#else
-#define CLASS_TYPEDEF(name) typedef struct {
-#define CLASS_FOOTER(name) } name
-#endif
-
-CLASS_TYPEDEF(Level)
-	void** vtable; //0
-	char filler[4]; //4
-	bool isRemote; //8?
-	char filler2[2916-9];//9
-	TileSource* tileSource;//2916 from Level::getChunkSource
-#ifdef __cplusplus
-	Entity* getEntity(EntityUniqueID, bool);
-#endif
-CLASS_FOOTER(Level);
 typedef Entity Player;
 #ifdef __cplusplus
 struct TextureUVCoordinateSet {
@@ -151,15 +137,15 @@ typedef struct {
 } Item;
 
 typedef struct {
-	int count; //0
-	int damage; //4
-	Item* item;//8
-	void* block; //12
-	bool wtf; //16
-	bool wtf2; //17
-	bool wtf3; //18
-	bool wtf4; //19
-} ItemInstance;
+	unsigned char count; //0
+	short damage; //2
+	Item* item;//4
+	void* block; //8
+	bool wtf; //12
+	bool wtf2; //13
+	bool wtf3; //14
+	bool wtf4; //15
+} ItemInstance; // see ServerCommandParser::give for size
 
 typedef struct {
 	void** vtable; //0
@@ -343,3 +329,23 @@ struct PlayerRenderer : public MobRenderer {
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+#define CLASS_TYPEDEF(name) class name {public:
+#define CLASS_FOOTER(name) }
+#else
+#define CLASS_TYPEDEF(name) typedef struct {
+#define CLASS_FOOTER(name) } name
+#endif
+
+CLASS_TYPEDEF(Level)
+	void** vtable; //0
+	char filler[4]; //4
+	bool isRemote; //8?
+	char filler2[2916-9];//9
+	TileSource* tileSource;//2916 from Level::getChunkSource
+#ifdef __cplusplus
+	Entity* getEntity(EntityUniqueID, bool);
+	void addEntity(std::unique_ptr<Entity>);
+#endif
+CLASS_FOOTER(Level);

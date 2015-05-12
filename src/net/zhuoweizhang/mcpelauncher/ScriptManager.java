@@ -1539,7 +1539,8 @@ public class ScriptManager {
 
 		@JSFunction
 		public void rideAnimal(Object /* Flynn */rider, Object mount) {
-			nativeRideAnimal((Long) rider, (Long) mount);
+			throw new RuntimeException("FIXME 0.11");
+			//nativeRideAnimal((Long) rider, (Long) mount);
 		}
 
 		@JSFunction
@@ -1757,7 +1758,8 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int dropItem(double x, double y, double z, double range, int id, int count,
 				int damage) {
-			return nativeDropItem((float) x, (float) y, (float) z, (float) range, id, count, damage);
+			throw new RuntimeException("FIXME 0.11");
+			//return nativeDropItem((float) x, (float) y, (float) z, (float) range, id, count, damage);
 		}
 
 		@JSStaticFunction
@@ -2117,7 +2119,8 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void rideAnimal(Object /* insert funny reference */rider, Object mount) {
-			nativeRideAnimal((Long) rider, (Long) mount);
+			throw new RuntimeException("FIXME 0.11");
+			//nativeRideAnimal((Long) rider, (Long) mount);
 		}
 
 		@JSStaticFunction
