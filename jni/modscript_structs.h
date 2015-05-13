@@ -342,8 +342,8 @@ CLASS_TYPEDEF(Level)
 	void** vtable; //0
 	char filler[4]; //4
 	bool isRemote; //8?
-	char filler2[2916-9];//9
-	TileSource* tileSource;//2916 from Level::getChunkSource
+	char filler2[2908-9];//9
+	TileSource* tileSource;//2908 from Level::getChunkSource
 #ifdef __cplusplus
 	Entity* getEntity(EntityUniqueID, bool);
 	void addEntity(std::unique_ptr<Entity>);

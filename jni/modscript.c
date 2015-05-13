@@ -43,12 +43,13 @@ typedef struct {
 // from MobRenderer::render
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 91
 // from Entity::save
-#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 64
-// from Player::getCarriedItem
+#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 72
+// from Player::getSelectedItem
 #ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 0xc88
+// FIXME 0.11
+#define PLAYER_INVENTORY_OFFSET 0x3244
 #else
-#define PLAYER_INVENTORY_OFFSET 3212
+#define PLAYER_INVENTORY_OFFSET 3244
 #endif
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
@@ -59,16 +60,17 @@ typedef struct {
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
-#define MINECRAFT_TIMER_OFFSET 128
+#define MINECRAFT_TIMER_OFFSET 136
 // from Entity::setPos(Vec3 const&)
 #define ENTITY_VTABLE_OFFSET_SETPOS 4
 // from Minecraft::selectLevel
-#define MINECRAFT_LEVEL_OFFSET 104
+#define MINECRAFT_LEVEL_OFFSET 164
 #ifdef __i386
 // 0xf4
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 244
+// FIXME 0.11
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 252
 #else
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 248
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 252 // MinecraftClient::selectLevel; look for constructor
 #endif
 #define GAMERENDERER_GETFOV_SIZE 0xb8
 // from GameMode::GameMode
@@ -108,7 +110,7 @@ jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_Minecraft_setLevel_real)(Minecraft*, unique_ptr*, cppstr*, LocalPlayer*);
-void* (*bl_Minecraft_selectLevel_real)(Minecraft*, void*, void*, void*);
+void* (*bl_Minecraft_selectLevel_real)(void*, Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -345,7 +347,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, unique_ptr* levelPtr, cpps
 	}*/
 }
 
-void* bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
 	bl_minecraft = minecraft;
 	JNIEnv *env;
 
@@ -359,13 +361,14 @@ void* bl_Minecraft_selectLevel_hook(Minecraft* minecraft, void* wDir, void* wNam
 	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "selectLevelCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
 
 	
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (*env)->NewStringUTF(env, bl_getCharArr(wName)), (*env)->NewStringUTF(env, bl_getCharArr(wDir)));
+	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, (*env)->NewStringUTF(env, bl_getCharArr(wName)),
+		(*env)->NewStringUTF(env, bl_getCharArr(wDir)));
 
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
 
-	void* retval = bl_Minecraft_selectLevel_real(minecraft, wDir, wName, levelSettings);
+	void* retval = bl_Minecraft_selectLevel_real(retval2, minecraft, wDir, wName, levelSettings);
 	bl_level = *((Level**) ((uintptr_t) minecraft + MINECRAFT_LEVEL_OFFSET));
 	bl_localplayer = *((Entity**) ((uintptr_t) minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
 	return retval;
@@ -410,8 +413,6 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 
 void bl_GameMode_tick_hook(void* gamemode) {
 	JNIEnv *env;
-
-	bl_minecraft = *((Minecraft**) ((uintptr_t) gamemode + GAMEMODE_MINECRAFT_OFFSET));
 
 	bl_level = *((Level**) ((uintptr_t) bl_minecraft + MINECRAFT_LEVEL_OFFSET));
 

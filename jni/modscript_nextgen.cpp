@@ -1847,6 +1847,7 @@ void bl_setuphooks_cppside() {
 	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
 	bl_Item_setNameID = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item9setNameIDERKSs");
 
+	// FIXME 0.11
 	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
 		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
 	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
