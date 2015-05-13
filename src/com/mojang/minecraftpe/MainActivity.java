@@ -1335,9 +1335,6 @@ public class MainActivity extends NativeActivity {
 
 	public void statsTrackEvent(String firstEvent, String secondEvent) {
 		Log.i(TAG, "Stats track: " + firstEvent + ":" + secondEvent);
-		if (firstEvent.equals("start_game")) {
-			ScriptManager.isRemote = !secondEvent.startsWith("{\"server_type\": \"Local\"");
-		}
 	}
 
 	public void statsUpdateUserData(String firstEvent, String secondEvent) {

@@ -174,7 +174,7 @@ Minecraft* bl_minecraft;
 void* bl_gamemode;
 Player* bl_localplayer;
 static int bl_hasinit_script = 0;
-int preventDefaultStatus = 0;
+bool preventDefaultStatus = false;
 static float bl_newfov = -1.0f;
 
 Entity* bl_removedEntity = NULL;
@@ -185,6 +185,8 @@ static int bl_hasinit_prepatch = 0;
 
 static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
 static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
+
+extern bool bl_onLockDown;
 
 #ifdef DLSYM_DEBUG
 
@@ -371,6 +373,7 @@ void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* w
 	void* retval = bl_Minecraft_selectLevel_real(retval2, minecraft, wDir, wName, levelSettings);
 	bl_level = *((Level**) ((uintptr_t) minecraft + MINECRAFT_LEVEL_OFFSET));
 	bl_localplayer = *((Entity**) ((uintptr_t) minecraft + MINECRAFT_LOCAL_PLAYER_OFFSET));
+	bl_onLockDown = false;
 	return retval;
 }
 

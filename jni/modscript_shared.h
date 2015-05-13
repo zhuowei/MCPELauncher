@@ -16,7 +16,7 @@ extern Minecraft* bl_minecraft;
 
 extern Level* bl_level;
 
-extern int preventDefaultStatus;
+extern bool preventDefaultStatus;
 
 extern JavaVM* bl_JavaVM;
 extern jclass bl_scriptmanager_class;

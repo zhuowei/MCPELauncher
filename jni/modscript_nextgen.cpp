@@ -300,11 +300,16 @@ void* debug_dlsym(void* handle, const char* symbol);
 void bl_forceTextureLoad(std::string const&);
 void bl_dumpVtable(void**, size_t);
 void bl_set_i18n(std::string const&, std::string const&);
+static bool isLocalAddress(JNIEnv* env, jstring addr);
+
+__attribute__((__visibility__("hidden")))
+bool bl_onLockDown = false;
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
 		return bl_removedEntity;
 	}
+	if (bl_onLockDown) return nullptr;
 	return level->getEntity(entityId, 0 /* false */);
 }
 
@@ -327,6 +332,8 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, chatMessageJString);
 
 	bl_JavaVM->DetachCurrentThread();
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s preventDefault %d\n", chatMessagePtr->c_str(),
+		(int) preventDefaultStatus);
 	if (!preventDefaultStatus) {
 		bl_ChatScreen_sendChatMessage_real(chatScreen);
 	} else {
@@ -349,6 +356,10 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "rakNetConnectCallback", "(Ljava/lang/String;I)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hostJString, port);
+
+	bl_onLockDown = !isLocalAddress(env, hostJString);
+
+	env->DeleteLocalRef(hostJString);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -1622,6 +1633,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetFlying
   (JNIEnv *env, jclass clazz, jboolean val) {
 	if (bl_localplayer == NULL) return;
+	if (bl_onLockDown) return;
 	bl_getAbilities(bl_localplayer)->flying = val;
 }
 
@@ -1634,6 +1646,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetCanFly
   (JNIEnv *env, jclass clazz, jboolean val) {
 	if (bl_localplayer == NULL) return;
+	if (bl_onLockDown) return;
 	bl_getAbilities(bl_localplayer)->mayFly = val;
 }
 
@@ -1836,6 +1849,12 @@ void bl_set_i18n(std::string const& key, std::string const& value) {
 	(I18n::getCurrentLanguage()->map)[key] = value;
 }
 
+static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "isLocalAddress", "(Ljava/lang/String;)Z");
+
+	return env->CallStaticBooleanMethod(bl_scriptmanager_class, mid, hostJString);
+}
+
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
@@ -1869,7 +1888,8 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
 
 	void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
-	//raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (int) &bl_RakNetInstance_connect_hook;
+	bl_dumpVtable(raknetVTable, 0x100);
+	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (void*) &bl_RakNetInstance_connect_hook;
 
 	bl_FoodItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;

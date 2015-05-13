@@ -340,9 +340,9 @@ struct PlayerRenderer : public MobRenderer {
 
 CLASS_TYPEDEF(Level)
 	void** vtable; //0
-	char filler[4]; //4
-	bool isRemote; //8?
-	char filler2[2908-9];//9
+	char filler[12-4]; //4
+	bool isRemote; //12 PrimedTnT::normalTick
+	char filler2[2908-13];//13
 	TileSource* tileSource;//2908 from Level::getChunkSource
 #ifdef __cplusplus
 	Entity* getEntity(EntityUniqueID, bool);

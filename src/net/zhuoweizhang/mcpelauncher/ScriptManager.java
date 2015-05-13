@@ -284,7 +284,7 @@ public class ScriptManager {
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
 	}
-	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
+	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemote) {
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
 		//ScriptManager.isRemote = isRemote;
@@ -316,6 +316,8 @@ public class ScriptManager {
 
 		worldName = wName;
 		worldDir = wDir;
+		scriptingEnabled = true;
+		isRemote = false;
 		callScriptMethod("selectLevelHook");
 		if (nativeGetArch() != ARCH_I386) nextTickCallsSetLevel = true;
 	}
@@ -455,6 +457,7 @@ public class ScriptManager {
 		Log.i("BlockLauncher", "Scripting is now " + (scriptingEnabled? "enabled" : "disabled"));
 		serverAddress = hostname;
 		serverPort = port;
+		ScriptManager.isRemote = true;
 	}
 
 	public static void frameCallback() {
