@@ -86,6 +86,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 
 		protected void updateTP() {
+			/*
 			MainMenuOptionsActivity a = activity.get();
 			final SwitchPreference p = a.texturepackPreference;
 			String sum = null;
@@ -106,6 +107,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 				}
 			});
 			a = null;
+			*/
 		}
 
 		protected void updateSkin() {
