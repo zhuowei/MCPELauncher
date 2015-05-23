@@ -56,4 +56,12 @@ public class AddonOverrideTexturePack implements TexturePack {
 	public void close() throws IOException {
 		//do nothing
 	}
+
+	public List<String> listFiles() throws IOException {
+		List<String> list = new ArrayList<String>();
+		for (Map.Entry<String, ZipFile> e: assets.entrySet()) {
+			list.add(e.getKey().substring("assets/".length()));
+		}
+		return list;
+	}
 }

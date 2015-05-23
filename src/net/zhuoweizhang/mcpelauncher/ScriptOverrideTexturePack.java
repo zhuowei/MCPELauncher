@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.*;
 import android.content.Context;
 
 public class ScriptOverrideTexturePack implements TexturePack {
@@ -23,6 +24,11 @@ public class ScriptOverrideTexturePack implements TexturePack {
 
 	public void close() throws IOException {
 		//do nothing
+	}
+
+	public List<String> listFiles() {
+		// empty list for now
+		return new ArrayList<String>();
 	}
 
 }

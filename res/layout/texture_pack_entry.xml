@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+<TextView android:id="@+id/texture_entry_name"
+    android:textSize="18sp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true"/>
+<Button android:id="@+id/texture_entry_up"
+    android:text="@string/texture_entry_up"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/texture_entry_name"
+    android:layout_alignParentLeft="true"
+    android:onClick="onTextureUpClick"/>
+<Button android:id="@+id/texture_entry_down"
+    android:text="@string/texture_entry_down"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/texture_entry_name"
+    android:layout_toRightOf="@id/texture_entry_up"
+    android:onClick="onTextureDownClick"/>
+<Button android:id="@+id/texture_entry_remove"
+    android:text="@string/texture_entry_remove"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/texture_entry_name"
+    android:layout_toRightOf="@id/texture_entry_down"
+    android:onClick="onTextureRemoveClick"/>
+</RelativeLayout>

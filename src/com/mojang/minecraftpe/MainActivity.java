@@ -65,6 +65,7 @@ import net.zhuoweizhang.mcpelauncher.ui.ManagePatchesActivity;
 import net.zhuoweizhang.mcpelauncher.ui.ManageScriptsActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
+import net.zhuoweizhang.mcpelauncher.texture.*;
 import net.zhuoweizhang.pokerface.PokerFace;
 
 @SuppressLint("SdCardPath")
@@ -298,9 +299,11 @@ public class MainActivity extends NativeActivity {
 
 		forceFallback = new File("/sdcard/bl_forcefallback.txt").exists() || Utils.getPrefs(0).getBoolean("zz_texture_pack_demo", false);
 
-		loadTexturePack();
+		//loadTexturePack();
 
 		textureOverrides.clear();
+
+		loadTexturePack();
 
 		if (allowScriptOverrideTextures()) {
 			textureOverrides.add(new ScriptOverrideTexturePack(this));
@@ -640,7 +643,7 @@ public class MainActivity extends NativeActivity {
 		if (requestCode == 1234) {
 			inputStatus = INPUT_STATUS_OK;
 			System.out.println("Settings OK");
-			loadTexturePack();
+			//loadTexturePack();
 			if (!isSafeMode()) {
 				applyBuiltinPatches();
 			}
@@ -1638,7 +1641,7 @@ public class MainActivity extends NativeActivity {
 		//do nothing
 	}
 
-	protected void loadTexturePack() {
+	protected void loadTexturePackOld() {
 		String filePath = null;
 		try {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
@@ -1658,6 +1661,19 @@ public class MainActivity extends NativeActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, filePath + ": size is " + new File(filePath).length());
+		}
+	}
+
+	protected void loadTexturePack() {
+		try {
+			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
+			texturePack = null;
+			if (loadTexturePack) {
+				textureOverrides.addAll(TexturePackLoader.loadTexturePacks(this));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e, R.string.texture_pack_unable_to_load, null);
 		}
 	}
 

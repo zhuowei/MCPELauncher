@@ -180,5 +180,9 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="get_substrate_explanation">You need to install the Substrate app to use BlockLauncher. (You do not have to set it up, and you do not need root access: you only need to install it.)</string>
     <string name="get_substrate_button">Get Substrate</string>
 
+    <string name="texture_entry_up">Up</string>
+    <string name="texture_entry_down">Down</string>
+    <string name="texture_entry_remove">Remove</string>
+
     <string name="report_error_title">Oh nose everything broke</string>
 </resources>

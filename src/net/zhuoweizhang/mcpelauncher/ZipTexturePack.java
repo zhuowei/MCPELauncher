@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.*;
 import java.util.zip.*;
 
 public class ZipTexturePack implements TexturePack {
@@ -52,5 +53,16 @@ public class ZipTexturePack implements TexturePack {
 	private static String getFilenameOnly(String location) {
 		String[] segments = location.split("/");
 		return segments[segments.length - 1];
+	}
+
+	public List<String> listFiles() throws IOException {
+		Enumeration<? extends ZipEntry> i = zipFile.entries();
+		List<String> list = new ArrayList<String>();
+		while (i.hasMoreElements()) {
+			ZipEntry entry = i.nextElement();
+			if (entry.getName().contains("__MACOSX")) continue; //A pox on ye, Mac OS X
+			list.add(entry.getName());
+		}
+		return list;
 	}
 }

@@ -1,6 +1,7 @@
 package net.zhuoweizhang.mcpelauncher;
 
 import java.io.*;
+import java.util.*;
 
 public class SkinTextureOverride implements TexturePack {
 
@@ -22,6 +23,10 @@ public class SkinTextureOverride implements TexturePack {
 
 	public void close() throws IOException {
 		//do nothing
+	}
+
+	public List<String> listFiles() throws IOException {
+		return new ArrayList<String>();
 	}
 
 }

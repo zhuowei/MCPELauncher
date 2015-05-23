@@ -416,7 +416,8 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	}
 
 	protected void manageTexturepacks() {
-		Intent intent = new Intent(this, ManageTexturepacksActivity.class);
+		//Intent intent = new Intent(this, ManageTexturepacksActivity.class);
+		Intent intent = new Intent(this, TexturePacksActivity.class);
 		startActivityForResult(intent, REQUEST_MANAGE_TEXTURES);
 	}
 
