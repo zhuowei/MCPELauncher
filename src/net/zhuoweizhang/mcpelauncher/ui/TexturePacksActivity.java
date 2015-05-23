@@ -150,9 +150,9 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 			v.setTag(position);
 			TextView text = (TextView) v.findViewById(R.id.texture_entry_name);
 			text.setText(TexturePackLoader.describeTexturePack(TexturePacksActivity.this, item));
-			Button up = (Button) v.findViewById(R.id.texture_entry_up);
+			View up = v.findViewById(R.id.texture_entry_up);
 			up.setEnabled(position != 0);
-			Button down = (Button) v.findViewById(R.id.texture_entry_down);
+			View down = v.findViewById(R.id.texture_entry_down);
 			down.setEnabled(position != this.getCount() - 1);
 			ImageView img = (ImageView) v.findViewById(R.id.texture_entry_img);
 			img.setImageDrawable(item.img != null? new BitmapDrawable(item.img) : null);
