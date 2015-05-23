@@ -6,6 +6,7 @@ public final class TexturePackDescription {
 	public String type;
 	public String path;
 	public Bitmap img = null;
+	public String description = "";
 	public TexturePackDescription(String type, String path) {
 		this.type = type;
 		this.path = path;

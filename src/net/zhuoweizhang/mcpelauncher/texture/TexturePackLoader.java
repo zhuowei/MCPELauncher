@@ -50,10 +50,28 @@ public class TexturePackLoader {
 
 	public static void loadIconForDescription(TexturePackDescription d) throws Exception {
 		TexturePack pack = loadTexturePack(d);
+		doLoadIcon(pack, d);
+		doLoadMeta(pack, d);
+	}
+	private static void doLoadIcon(TexturePack pack, TexturePackDescription d) throws Exception {
 		InputStream is = pack.getInputStream("pack.png");
 		if (is == null) return;
 		d.img = BitmapFactory.decodeStream(is);
 		is.close();
+	}
+
+	private static void doLoadMeta(TexturePack pack, TexturePackDescription d) throws Exception {
+		InputStream is = pack.getInputStream("pack.mcmeta");
+		if (is == null) return;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] a = new byte[0x1000];
+		int p;
+		while ((p = is.read(a)) != -1) {
+			bos.write(a, 0, p);
+		}
+		is.close();
+		JSONObject jsonObj = new JSONObject(new String(a, "UTF-8"));
+		d.description = jsonObj.getJSONObject("pack").getString("description");
 	}
 
 	private static TexturePack loadTexturePack(TexturePackDescription desc) throws Exception {

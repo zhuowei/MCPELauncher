@@ -18,11 +18,17 @@
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_toRightOf="@id/texture_entry_img"/>
+<TextView android:id="@+id/texture_entry_desc"
+    android:textSize="14sp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/texture_entry_name"
+    android:layout_toRightOf="@id/texture_entry_img"/>
 <Button android:id="@+id/texture_entry_up"
     android:text="@string/texture_entry_up"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/texture_entry_name"
+    android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_img"
     android:onClick="onTextureUpClick"
     android:drawableLeft="@drawable/ic_keyboard_arrow_up_white_18dp"/>
@@ -30,7 +36,7 @@
     android:text="@string/texture_entry_down"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/texture_entry_name"
+    android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_up"
     android:onClick="onTextureDownClick"
     android:drawableLeft="@drawable/ic_keyboard_arrow_down_white_18dp"/>
@@ -38,7 +44,7 @@
     android:text="@string/texture_entry_remove"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/texture_entry_name"
+    android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_down"
     android:onClick="onTextureRemoveClick"
     android:drawableLeft="@drawable/ic_delete_white_18dp"/>
