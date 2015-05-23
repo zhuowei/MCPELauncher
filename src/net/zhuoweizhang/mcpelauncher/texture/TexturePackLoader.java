@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import org.json.*;
 import android.content.*;
+import android.graphics.*;
 
 import net.zhuoweizhang.mcpelauncher.*;
 
@@ -33,6 +34,26 @@ public class TexturePackLoader {
 			packs.add(loadTexturePack(d));
 		}
 		return packs;
+	}
+
+	public static List<TexturePackDescription> loadDescriptionsWithIcons(Context context) throws JSONException {
+		List<TexturePackDescription> descs = loadDescriptions(context);
+		for (TexturePackDescription d: descs) {
+			try {
+				loadIconForDescription(d);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return descs;
+	}
+
+	public static void loadIconForDescription(TexturePackDescription d) throws Exception {
+		TexturePack pack = loadTexturePack(d);
+		InputStream is = pack.getInputStream("pack.png");
+		if (is == null) return;
+		d.img = BitmapFactory.decodeStream(is);
+		is.close();
 	}
 
 	private static TexturePack loadTexturePack(TexturePackDescription desc) throws Exception {

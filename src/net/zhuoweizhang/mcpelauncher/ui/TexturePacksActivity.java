@@ -5,6 +5,8 @@ import java.util.*;
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
+import android.graphics.*;
+import android.graphics.drawable.*;
 import android.net.*;
 import android.os.*;
 import android.view.*;
@@ -30,7 +32,7 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		try {
-			list = TexturePackLoader.loadDescriptions(this);
+			list = TexturePackLoader.loadDescriptionsWithIcons(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 			list = new ArrayList<TexturePackDescription>();
@@ -83,6 +85,13 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 	private void addTexturePack(int index, TexturePackDescription desc) {
 		for (TexturePackDescription d: list) {
 			if (d.path.equals(desc.path)) return;
+		}
+		if (desc.img == null) {
+			try {
+				TexturePackLoader.loadIconForDescription(desc);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		list.add(index, desc);
 		updateContents();
@@ -145,6 +154,8 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 			up.setEnabled(position != 0);
 			Button down = (Button) v.findViewById(R.id.texture_entry_down);
 			down.setEnabled(position != this.getCount() - 1);
+			ImageView img = (ImageView) v.findViewById(R.id.texture_entry_img);
+			img.setImageDrawable(item.img != null? new BitmapDrawable(item.img) : null);
 			return v;
 		}
 	}

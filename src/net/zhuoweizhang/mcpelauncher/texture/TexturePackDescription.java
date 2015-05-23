@@ -1,9 +1,11 @@
 package net.zhuoweizhang.mcpelauncher.texture;
 import org.json.*;
+import android.graphics.Bitmap;
 public final class TexturePackDescription {
 
 	public String type;
 	public String path;
+	public Bitmap img = null;
 	public TexturePackDescription(String type, String path) {
 		this.type = type;
 		this.path = path;
