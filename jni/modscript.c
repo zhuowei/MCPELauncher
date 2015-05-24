@@ -188,6 +188,8 @@ static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
 
 extern bool bl_onLockDown;
 
+static bool bl_untampered;
+
 #ifdef DLSYM_DEBUG
 
 void* debug_dlsym(void* handle, const char* symbol) {
@@ -350,6 +352,10 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, unique_ptr* levelPtr, cpps
 }
 
 void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+	if (!bl_untampered) {
+		*((void**)0x24) = 0;
+		return NULL;
+	}
 	bl_minecraft = minecraft;
 	JNIEnv *env;
 
@@ -1057,12 +1063,15 @@ static void setupIsModded() {
 #endif
 }
 
+#include "checktamper.h"
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *env, jclass clazz, jboolean signalhandler) {
+  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity) {
 	if (bl_hasinit_prepatch) return;
 #ifndef __i386
 	if (signalhandler) bl_signalhandler_init();
 #endif
+	checkTamper(env, activity);
 	if (!mcpelibhandle) {
 		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 	}

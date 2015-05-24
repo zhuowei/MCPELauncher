@@ -1060,10 +1060,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativePrePatch
- * Signature: (Z)V
+ * Signature: (ZLcom/mojang/minecraftpe/MainActivity;)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *, jclass, jboolean);
+  (JNIEnv *, jclass, jboolean, jobject);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

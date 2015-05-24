@@ -338,7 +338,7 @@ public class MainActivity extends NativeActivity {
 				initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler);
+					ScriptManager.nativePrePatch(signalHandler, this);
 				}
 			}
 		} catch (Exception e) {
