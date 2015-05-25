@@ -27,7 +27,7 @@ ifneq (,$(wildcard $(LOCAL_PATH)/scriptscramble.c))
     LOCAL_SRC_FILES += scriptscramble.c
 endif
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-    LOCAL_SRC_FILES += signalhandler_arm.cpp
+    LOCAL_SRC_FILES += signalhandler_arm.cpp tamperpanic.s
 else
     LOCAL_SRC_FILES += signalhandler_x86.cpp
 endif

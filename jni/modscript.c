@@ -227,6 +227,14 @@ void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 
 extern unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z);
 
+#ifndef __arm__
+static void bl_panicTamper() {
+	((int*) 0x0) = 0x0;
+}
+#else
+extern void bl_panicTamper();
+#endif
+
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
 	JNIEnv *env;
@@ -236,6 +244,12 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 	//bl_level = level;
 	Level* level = bl_level;
 	bl_localplayer = player;
+
+	if (!bl_untampered) {
+		bl_panicTamper();
+		return NULL;
+	}
+
 	preventDefaultStatus = FALSE;
 	int itemId = 0;
 	int itemDamage = 0;
@@ -353,7 +367,7 @@ void bl_Minecraft_setLevel_hook(Minecraft* minecraft, unique_ptr* levelPtr, cpps
 
 void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
 	if (!bl_untampered) {
-		*((void**)0x24) = 0;
+		bl_panicTamper();
 		return NULL;
 	}
 	bl_minecraft = minecraft;
