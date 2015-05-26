@@ -40,6 +40,7 @@ import org.json.*;
 import com.mojang.minecraftpe.MainActivity;
 
 import net.zhuoweizhang.mcpelauncher.api.modpe.*;
+import net.zhuoweizhang.mcpelauncher.texture.AtlasMeta;
 
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
 import static net.zhuoweizhang.mcpelauncher.PatchManager.blankArray;
@@ -113,7 +114,8 @@ public class ScriptManager {
 	private static int serverPort = 0;
 	private static Map<Long, String> entityUUIDMap = new HashMap<Long, String>();
 	private static boolean nextTickCallsSetLevel = false;
-	private static AtlasMeta terrainMeta, itemsMeta;
+	// initialized in MainActivity now
+	public static AtlasMeta terrainMeta, itemsMeta;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
 	public static boolean requestScreenshot = false;
@@ -1100,10 +1102,6 @@ public class ScriptManager {
 		uuid = uuidObj.toString();
 		entityUUIDMap.put(entityId, uuid);
 		return uuid;
-	}
-
-	private static void addIcon(String fileName, String url, String textureName, int textureIndex) {
-		AtlasIcon icon = new AtlasIcon(url, textureName, textureIndex);
 	}
 
 	private static boolean isPackagedScript(File file) {

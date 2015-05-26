@@ -27,12 +27,16 @@ public class AtlasProvider implements TexturePack {
 	private Rect tempRect = new Rect();
 	private Rect tempRect2 = new Rect();
 	private Paint tempPaint = new Paint();
-	public AtlasProvider(String metaName, String atlasName, String importDir, ImageLoader loader, int xscale) {
+	private String mipPrefix;
+	private int mipLevels;
+	public AtlasProvider(String metaName, String atlasName, String importDir, ImageLoader loader, int xscale, int mipLevels) {
 		this.metaName = metaName;
 		this.atlasName = atlasName;
 		this.importDir = importDir;
 		this.loader = loader;
 		this.xscale = xscale;
+		this.mipLevels = mipLevels;
+		this.mipPrefix = getMipMapPrefix(atlasName);
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
@@ -43,6 +47,18 @@ public class AtlasProvider implements TexturePack {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			loader.save(atlasImg, bos);
 			return new ByteArrayInputStream(bos.toByteArray());
+		} else if (mipLevels > 0 && fileName.startsWith(mipPrefix)) {
+			try {
+				int mipLevel = Integer.parseInt(
+					fileName.substring(fileName.lastIndexOf("_mip") + 4, fileName.lastIndexOf(".")));
+				if (!(mipLevel >= 0 && mipLevel < mipLevels)) return null;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				loader.save(getMipMap(mipLevel), bos);
+				return new ByteArrayInputStream(bos.toByteArray());
+			} catch (NumberFormatException nfe) {
+				nfe.printStackTrace();
+				return null;
+			}
 		} else {
 			return null;
 		}
@@ -167,6 +183,21 @@ public class AtlasProvider implements TexturePack {
 			new File("/sdcard", "bl_atlas_dump_" + new File(atlasName).getName() + ".png"));
 		atlasImg.compress(Bitmap.CompressFormat.PNG, 100, os);
 		os.close();
+		FileOutputStream os2 = new FileOutputStream(
+			new File("/sdcard", "bl_atlas_dump_" + new File(atlasName).getName() + "mip0.png"));
+		getMipMap(0).compress(Bitmap.CompressFormat.PNG, 100, os2);
+		os2.close();
+	}
+
+	private String getMipMapPrefix(String atlasName) {
+		int dotIndex = atlasName.lastIndexOf(".");
+		return atlasName.substring(0, dotIndex) + "_mip";
+	}
+
+	private Bitmap getMipMap(int level) {
+		int newwidth = atlasImg.getWidth() >> (level + 1);
+		int newheight = atlasImg.getHeight() >> (level + 1);
+		return Bitmap.createScaledBitmap(atlasImg, newwidth, newheight, true);
 	}
 
 	public void close() throws IOException {

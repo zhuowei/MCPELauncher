@@ -1,4 +1,4 @@
-package net.zhuoweizhang.mcpelauncher;
+package net.zhuoweizhang.mcpelauncher.texture;
 
 import java.util.*;
 import org.json.*;
