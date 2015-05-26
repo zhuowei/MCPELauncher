@@ -1164,6 +1164,7 @@ public class ScriptManager {
 	}
 
 	private static void loadAtlasMeta() {
+/*
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
@@ -1175,6 +1176,7 @@ public class ScriptManager {
 				}
 			}
 		}
+*/
 	}
 
 	private static AtlasMeta loadOneAtlasMeta(MainActivity activity, String name) throws JSONException {

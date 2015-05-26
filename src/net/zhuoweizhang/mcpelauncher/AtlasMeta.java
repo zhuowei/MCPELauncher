@@ -6,7 +6,6 @@ import org.json.*;
 public class AtlasMeta {
 
 	public JSONArray data;
-	public List<AtlasIcon> addedIcons = new ArrayList<AtlasIcon>();
 	private Map<String, JSONObject> nameMap = new HashMap<String, JSONObject>();
 	public boolean[] occupied;
 	public int width, height;
@@ -58,15 +57,26 @@ public class AtlasMeta {
 		return yCoord * (width / tileWidth) + xCoord;
 	}
 
-	public void addIcon(AtlasIcon icon) {
+	public JSONArray getOrAddIcon(String name, int index) throws JSONException {
+		JSONObject entry = nameMap.get(name);
+		if (entry == null) {
+			entry = new JSONObject().put("name", name).put("uvs", new JSONArray());
+			nameMap.put(name, entry);
+			data.put(entry);
+		}
+		JSONArray uvs = entry.getJSONArray("uvs");
+		if (!uvs.isNull(index)) return uvs.getJSONArray(index); // already added
 		// find an empty spot
 		int emptyIndex = 0;
 		for (; emptyIndex < occupied.length; emptyIndex++) {
 			if (!occupied[emptyIndex]) break;
 		}
-		if (emptyIndex >= occupied.length) throw new RuntimeException("No more space in the atlas! :(");
+		if (emptyIndex >= occupied.length) {
+			throw new RuntimeException("No more space in texture atlas; can't add " + name + "_" + index + " :(");
+		}
 		JSONArray uv = indexToUv(emptyIndex);
-		addedIcons.add(icon);
+		uvs.put(index, uv);
+		return uv;
 	}
 
 	private JSONArray indexToUv(int index) {

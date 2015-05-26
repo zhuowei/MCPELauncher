@@ -339,12 +339,15 @@ public class MainActivity extends NativeActivity {
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
 					ScriptManager.nativePrePatch(signalHandler, this);
+					loadNativeAddons();
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
+
+		initAtlasMeta();
 
 		displayMetrics = new DisplayMetrics();
 
@@ -365,7 +368,6 @@ public class MainActivity extends NativeActivity {
 		try {
 			boolean shouldLoadScripts = true;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
-				loadNativeAddons();
 				applyBuiltinPatches();
 				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true))
 					ScriptManager.init(this);
@@ -2167,6 +2169,24 @@ public class MainActivity extends NativeActivity {
 		if (version == null) return false;
 		if (version.matches("0\\.11\\.0.*")) return true;
 		return false;
+	}
+
+	private void initAtlasMeta() {
+		try {
+			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
+				"images/terrain-atlas/", new TGAImageLoader(), 1);
+			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.png",
+				"images/items-opaque/", new PNGImageLoader(), 2);
+			terrainProvider.initAtlas(this);
+			itemsProvider.initAtlas(this);
+			terrainProvider.dumpAtlas();
+			itemsProvider.dumpAtlas();
+			textureOverrides.add(0, terrainProvider);
+			textureOverrides.add(1, itemsProvider);
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
