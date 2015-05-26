@@ -2179,8 +2179,8 @@ public class MainActivity extends NativeActivity {
 				"images/items-opaque/", new PNGImageLoader(), 2);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
-			terrainProvider.dumpAtlas();
-			itemsProvider.dumpAtlas();
+			//terrainProvider.dumpAtlas();
+			//itemsProvider.dumpAtlas();
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
 		} catch (Exception e) {

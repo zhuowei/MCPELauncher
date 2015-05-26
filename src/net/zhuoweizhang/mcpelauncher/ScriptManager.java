@@ -417,7 +417,7 @@ public class ScriptManager {
 	}
 
 	// KsyMC's additions
-	public static void mobDieCallback(int attacker, int victim) {
+	public static void mobDieCallback(long attacker, long victim) {
 		callScriptMethod("deathHook", attacker == -1 ? null : attacker, victim);
 	}
 
@@ -540,7 +540,6 @@ public class ScriptManager {
 		scripts.clear();
 		entityList = new NativeArray(0);
 		androidContext = cxt.getApplicationContext();
-		loadAtlasMeta();
 		// loadEnabledScripts(); Minecraft blocks wouldn't be initialized when
 		// this is called
 		// call it before the first frame renders
@@ -1163,31 +1162,17 @@ public class ScriptManager {
 		}
 	}
 
-	private static void loadAtlasMeta() {
-/*
-		if (MainActivity.currentMainActivity != null) {
-			MainActivity main = MainActivity.currentMainActivity.get();
-			if (main != null) {
-				try {
-					terrainMeta = loadOneAtlasMeta(main, "terrain.meta");
-					itemsMeta = loadOneAtlasMeta(main, "items.meta");
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-*/
-	}
-
-	private static AtlasMeta loadOneAtlasMeta(MainActivity activity, String name) throws JSONException {
-		byte[] bytes = activity.getFileDataBytes("images/" + name);
-		return new AtlasMeta(new JSONArray(new String(bytes, Charset.forName("UTF-8"))));
-	}
-
 	private static void setRequestLeaveGame() {
 		nativeCloseScreen();
 		requestLeaveGame = true;
 		requestLeaveGameCounter = 10;
+	}
+
+	private static long getEntityId(Object entityId) {
+		if (entityId instanceof NativeJavaObject) {
+			return (Long) ((NativeJavaObject) entityId).unwrap();
+		}
+		return (Long) entityId;
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
@@ -1514,22 +1499,22 @@ public class ScriptManager {
 
 		@JSFunction
 		public void setPosition(Object ent, double x, double y, double z) {
-			nativeSetPosition((Long) ent, (float) x, (float) y, (float) z);
+			nativeSetPosition(getEntityId(ent), (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
 		public void setVelX(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_X);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_X);
 		}
 
 		@JSFunction
 		public void setVelY(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_Y);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_Y);
 		}
 
 		@JSFunction
 		public void setVelZ(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_Z);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_Z);
 		}
 
 		@JSFunction
@@ -1598,12 +1583,12 @@ public class ScriptManager {
 
 		@JSFunction
 		public void setPositionRelative(Object ent, double x, double y, double z) {
-			nativeSetPositionRelative((Long) ent, (float) x, (float) y, (float) z);
+			nativeSetPositionRelative(getEntityId(ent), (float) x, (float) y, (float) z);
 		}
 
 		@JSFunction
 		public void setRot(Object ent, double yaw, double pitch) {
-			nativeSetRot((Long) ent, (float) yaw, (float) pitch);
+			nativeSetRot(getEntityId(ent), (float) yaw, (float) pitch);
 		}
 
 		@JSFunction
@@ -1651,7 +1636,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public void bl_setMobSkin(Object entityId, String tex) {
-			nativeSetMobSkin((Long) entityId, tex);
+			nativeSetMobSkin(getEntityId(entityId), tex);
 		}
 
 	}
@@ -1832,9 +1817,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void playSoundEnt(Object ent, String sound, double volume, double pitch) {
-			float x = nativeGetEntityLoc((Long) ent, AXIS_X);
-			float y = nativeGetEntityLoc((Long) ent, AXIS_Y);
-			float z = nativeGetEntityLoc((Long) ent, AXIS_Z);
+			float x = nativeGetEntityLoc(getEntityId(ent), AXIS_X);
+			float y = nativeGetEntityLoc(getEntityId(ent), AXIS_Y);
+			float z = nativeGetEntityLoc(getEntityId(ent), AXIS_Z);
 
 			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
 		}
@@ -2022,12 +2007,12 @@ public class ScriptManager {
 		public static String getName(Object ent) {
 			if (!isPlayer(ent))
 				return "Not a player";
-			return nativeGetPlayerName((Long) ent);
+			return nativeGetPlayerName(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static boolean isPlayer(Object ent) {
-			return NativeEntityApi.getEntityTypeId((Long) ent) == EntityType.PLAYER;
+			return NativeEntityApi.getEntityTypeId(getEntityId(ent)) == EntityType.PLAYER;
 		}
 
 		@JSStaticFunction
@@ -2104,22 +2089,22 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setVelX(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_X);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_X);
 		}
 
 		@JSStaticFunction
 		public static void setVelY(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_Y);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_Y);
 		}
 
 		@JSStaticFunction
 		public static void setVelZ(Object ent, double amount) {
-			nativeSetVel((Long) ent, (float) amount, AXIS_Z);
+			nativeSetVel(getEntityId(ent), (float) amount, AXIS_Z);
 		}
 
 		@JSStaticFunction
 		public static void setRot(Object ent, double yaw, double pitch) {
-			nativeSetRot((Long) ent, (float) yaw, (float) pitch);
+			nativeSetRot(getEntityId(ent), (float) yaw, (float) pitch);
 		}
 
 		@JSStaticFunction
@@ -2130,54 +2115,54 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setPosition(Object ent, double x, double y, double z) {
-			nativeSetPosition((Long) ent, (float) x, (float) y, (float) z);
+			nativeSetPosition(getEntityId(ent), (float) x, (float) y, (float) z);
 		}
 
 		@JSStaticFunction
 		public static void setPositionRelative(Object ent, double x, double y, double z) {
-			nativeSetPositionRelative((Long) ent, (float) x, (float) y, (float) z);
+			nativeSetPositionRelative(getEntityId(ent), (float) x, (float) y, (float) z);
 		}
 
 		@JSStaticFunction
 		public static double getPitch(Object ent) {
-			return nativeGetPitch((Long) ent);
+			return nativeGetPitch(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static double getYaw(Object ent) {
-			return nativeGetYaw((Long) ent);
+			return nativeGetYaw(getEntityId(ent));
 		}
 
 		// nonstandard
 
 		@JSStaticFunction
 		public static void setFireTicks(Object ent, int howLong) {
-			nativeSetOnFire((Long) ent, howLong);
+			nativeSetOnFire(getEntityId(ent), howLong);
 		}
 
 		@JSStaticFunction
 		public static double getX(Object ent) {
-			return nativeGetEntityLoc((Long) ent, AXIS_X);
+			return nativeGetEntityLoc(getEntityId(ent), AXIS_X);
 		}
 
 		@JSStaticFunction
 		public static double getY(Object ent) {
-			return nativeGetEntityLoc((Long) ent, AXIS_Y);
+			return nativeGetEntityLoc(getEntityId(ent), AXIS_Y);
 		}
 
 		@JSStaticFunction
 		public static double getZ(Object ent) {
-			return nativeGetEntityLoc((Long) ent, AXIS_Z);
+			return nativeGetEntityLoc(getEntityId(ent), AXIS_Z);
 		}
 
 		@JSStaticFunction
 		public static void setCarriedItem(Object ent, int id, int count, int damage) {
-			nativeSetCarriedItem((Long) ent, id, count, damage);
+			nativeSetCarriedItem(getEntityId(ent), id, count, damage);
 		}
 
 		@JSStaticFunction
 		public static int getEntityTypeId(Object ent) {
-			return nativeGetEntityTypeId((Long) ent);
+			return nativeGetEntityTypeId(getEntityId(ent));
 		}
 
 		@JSStaticFunction
@@ -2191,69 +2176,69 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setAnimalAge(Object animal, int age) {
-			nativeSetAnimalAge((Long) animal, age);
+			nativeSetAnimalAge(getEntityId(animal), age);
 		}
 
 		@JSStaticFunction
 		public static int getAnimalAge(Object animal) {
-			return nativeGetAnimalAge((Long) animal);
+			return nativeGetAnimalAge(getEntityId(animal));
 		}
 
 		@JSStaticFunction
 		public static void setMobSkin(Object entity, String tex) {
-			nativeSetMobSkin((Long) entity, tex);
+			nativeSetMobSkin(getEntityId(entity), tex);
 		}
 
 		@JSStaticFunction
 		public static void remove(Object ent) {
-			nativeRemoveEntity((Long) ent);
+			nativeRemoveEntity(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static int getHealth(Object ent) {
-			return nativeGetMobHealth((Long) ent);
+			return nativeGetMobHealth(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static void setHealth(Object ent, int halfhearts) {
-			nativeSetMobHealth((Long) ent, halfhearts);
+			nativeSetMobHealth(getEntityId(ent), halfhearts);
 		}
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, int renderType) {
-			nativeSetEntityRenderType((Long) ent, renderType);
+			nativeSetEntityRenderType(getEntityId(ent), renderType);
 		}
 
 		@JSStaticFunction
 		public static void setSneaking(Object ent, boolean doIt) {
-			nativeSetSneaking((Long) ent, doIt);
+			nativeSetSneaking(getEntityId(ent), doIt);
 		}
 
 		public static boolean isSneaking(Object ent) {
-			return nativeIsSneaking((Long) ent);
+			return nativeIsSneaking(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static double getVelX(Object ent) {
-			return nativeGetEntityVel((Long) ent, AXIS_X);
+			return nativeGetEntityVel(getEntityId(ent), AXIS_X);
 		}
 
 		@JSStaticFunction
 		public static double getVelY(Object ent) {
-			return nativeGetEntityVel((Long) ent, AXIS_Y);
+			return nativeGetEntityVel(getEntityId(ent), AXIS_Y);
 		}
 
 		@JSStaticFunction
 		public static double getVelZ(Object ent) {
-			return nativeGetEntityVel((Long) ent, AXIS_Z);
+			return nativeGetEntityVel(getEntityId(ent), AXIS_Z);
 		}
 
 		@JSStaticFunction
 		public static void setNameTag(Object entity, String name) {
-			int entityType = nativeGetEntityTypeId((Long) entity);
+			int entityType = nativeGetEntityTypeId(getEntityId(entity));
 			if (entityType >= 64)
 				throw new IllegalArgumentException("setNameTag only works on mobs");
-			nativeEntitySetNameTag((Long) entity, name);
+			nativeEntitySetNameTag(getEntityId(entity), name);
 		}
 		
 		
@@ -2269,46 +2254,46 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getNameTag(Object entity) {
-			return nativeEntityGetNameTag((Long) entity);
+			return nativeEntityGetNameTag(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static int getRiding(Object entity) {
-			return nativeEntityGetRiding((Long) entity);
+			return nativeEntityGetRiding(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static int getRider(Object entity) {
-			return nativeEntityGetRider((Long) entity);
+			return nativeEntityGetRider(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static String getMobSkin(Object entity) {
-			return nativeEntityGetMobSkin((Long) entity);
+			return nativeEntityGetMobSkin(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static int getRenderType(Object entity) {
-			return nativeEntityGetRenderType((Long) entity);
+			return nativeEntityGetRenderType(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static String getUniqueId(Object entity) {
-			return getEntityUUID((Long) entity);
+			return getEntityUUID(getEntityId(entity));
 		}
 
 		@JSStaticFunction
 		public static void setCollisionSize(Object entity, double a, double b) {
-			nativeEntitySetSize((Long) entity, (float) a, (float) b);
+			nativeEntitySetSize(getEntityId(entity), (float) a, (float) b);
 		}
 
 		@JSStaticFunction
 		public static void setCape(Object entity, String location) {
-			int typeId = nativeGetEntityTypeId((Long) entity);
+			int typeId = nativeGetEntityTypeId(getEntityId(entity));
 			if (!(typeId >= 32 && typeId < 64)) {
 				throw new RuntimeException("Set cape only works for humanoid mobs");
 			}
-			nativeSetCape((Long) entity, location);
+			nativeSetCape(getEntityId(entity), location);
 		}
 
 		@Override
@@ -2455,7 +2440,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setCamera(Object entityId) {
-			nativeSetCameraEntity((Long) entityId);
+			nativeSetCameraEntity(getEntityId(entityId));
 		}
 
 		@JSStaticFunction
