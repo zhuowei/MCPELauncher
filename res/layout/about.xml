@@ -5,7 +5,11 @@
 <LinearLayout
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
     <TextView
         android:id="@+id/about_appnametext"
         android:layout_width="wrap_content"
@@ -40,6 +44,11 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/about_librarycredits"/>
+
+    <Button android:id="@+id/about_oss_license_info_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/about_oss_license_info"/>
 
     <TextView
         android:id="@+id/about_kamcordcreditstext"

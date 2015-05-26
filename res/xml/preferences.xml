@@ -79,6 +79,10 @@
             android:key="zz_legacy_live_patch"
             android:summary="@string/pref_zz_legacy_live_patch_summary"
             android:title="@string/pref_zz_legacy_live_patch" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="zz_signal_handler"
+            android:title="@string/pref_zz_signal_handler" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_support_title" >
         <Preference android:title="@string/nerdy_stuff_page" >
