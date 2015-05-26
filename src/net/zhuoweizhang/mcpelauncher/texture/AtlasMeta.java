@@ -76,6 +76,7 @@ public class AtlasMeta {
 		}
 		JSONArray uv = indexToUv(emptyIndex);
 		uvs.put(index, uv);
+		occupied[emptyIndex] = true;
 		return uv;
 	}
 

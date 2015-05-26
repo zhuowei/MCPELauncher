@@ -10,15 +10,7 @@ import net.zhuoweizhang.mcpelauncher.texture.tga.*;
 public class TGAImageLoader implements ImageLoader {
 
 	public Bitmap load(InputStream is) throws IOException {
-		TGAImage img = TGAImage.read(is);
-		Bitmap bmp = Bitmap.createBitmap(img.getWidth(), img.getHeight(), Bitmap.Config.ARGB_8888);
-		int[] outArr = new int[img.getWidth() * img.getHeight()];
-		img.getData().order(ByteOrder.LITTLE_ENDIAN);
-		IntBuffer myIntBuffer = img.getData().asIntBuffer();
-		myIntBuffer.position(0);
-		myIntBuffer.get(outArr);
-		bmp.setPixels(outArr, 0, img.getWidth(), 0, 0, img.getWidth(), img.getHeight());
-		return bmp;
+		return TGALoader.load(is, false);
 	}
 
 	public void save(Bitmap outBmp, OutputStream os) throws IOException {
