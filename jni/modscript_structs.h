@@ -168,7 +168,7 @@ typedef struct {
 } Tile;
 
 typedef struct {
-	char filler0[692]; //0
+	char filler0[668]; //0
 } Cube;
 
 typedef struct {
@@ -206,14 +206,17 @@ typedef struct {
 	MaterialPtr* activeMaterial; // 32
 	MaterialPtr materialNormal; // 36
 	MaterialPtr materialAlphaTest; // 48
-	MaterialPtr materialStatic; // 60
-	MaterialPtr materialEmissive; // 72
-	MaterialPtr materialEmissiveAlpha; // 84
-	ModelPart bipedHead;//96
-	ModelPart bipedBody;//224
-	ModelPart bipedRightArm;//352
-	ModelPart bipedLeftArm;//480
-	ModelPart bipedRightLeg;//608
+	MaterialPtr materialAlphaBlend; // 60
+	MaterialPtr materialStatic; // 72
+	MaterialPtr materialEmissive; // 84
+	MaterialPtr materialEmissiveAlpha; // 96
+	MaterialPtr materialChangeColor; // 108
+	ModelPart bipedHead;//120
+	ModelPart bipedHeadwear;//248
+	ModelPart bipedBody;//376
+	ModelPart bipedRightArm;//504
+	ModelPart bipedLeftArm;//632
+	ModelPart bipedRightLeg;//760
 	ModelPart bipedLeftLeg;//736
 } HumanoidModel;
 
@@ -236,8 +239,8 @@ typedef void EntityRenderer;
 
 typedef struct {
 	void** vtable; //0
-	char filler[48]; //4
-	void* model; // 52 (from MobRenderer::MobRenderer)
+	char filler[72-4]; //4
+	void* model; // 72 (from MobRenderer::MobRenderer)
 } MobRenderer;
 
 typedef void Tag;
