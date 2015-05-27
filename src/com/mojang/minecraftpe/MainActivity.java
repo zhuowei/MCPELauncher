@@ -299,7 +299,7 @@ public class MainActivity extends NativeActivity {
 
 		Utils.setLanguageOverride();
 
-		forceFallback = new File("/sdcard/bl_forcefallback.txt").exists() || Utils.getPrefs(0).getBoolean("zz_texture_pack_demo", false);
+		forceFallback = new File("/sdcard/bl_forcefallback.txt").exists();
 
 		//loadTexturePack();
 
@@ -373,7 +373,7 @@ public class MainActivity extends NativeActivity {
 				applyBuiltinPatches();
 				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
 					ScriptManager.init(this);
-					ScriptManager.nativeSetUseController(isForcingController());
+					if (isForcingController()) ScriptManager.nativeSetUseController(isForcingController());
 				}
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
@@ -1564,28 +1564,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean doesRequireGuiBlocksPatch() {
-		if (forceFallback)
-			return true;
-		if (texturePack != null) {
-			try {
-				InputStream instr = texturePack.getInputStream("gui/gui_blocks.png");
-				if (instr != null)
-					instr.close();
-				return instr == null;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
-			}
-		} else {
-			try {
-				InputStream instr = minecraftApkContext.getAssets().open("gui/gui_blocks.png");
-				instr.close();
-				return false;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return true;
-			}
-		}
+		return false;
 	}
 
 	protected void setupHoverCar() {
@@ -2203,7 +2182,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean isForcingController() {
-		return true; //new File("/sdcard/bl_controller.txt").exists();
+		return false; //new File("/sdcard/bl_controller.txt").exists();
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

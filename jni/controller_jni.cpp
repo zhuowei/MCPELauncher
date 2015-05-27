@@ -23,7 +23,7 @@ struct android_app {
 static int32_t (*inputHandlerReal)(struct android_app* app, AInputEvent* event);
 
 static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
+/*	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_CLASS_JOYSTICK) == AINPUT_SOURCE_CLASS_JOYSTICK) {
 			int32_t actionAndPointer = AMotionEvent_getAction(event);
@@ -36,6 +36,7 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 			}
 		}
 	}
+*/
 	return inputHandlerReal(app, event);
 }
 
@@ -47,16 +48,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_ControllerMa
 	struct android_app* app = (struct android_app*) nativeActivity->instance;
 	inputHandlerReal = app->onInputEvent;
 	app->onInputEvent = inputHandlerHook;
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_ControllerManager_feed
-  (JNIEnv *env, jclass clazz, jint axis, jint type, jfloat x, jfloat y) {
-	Controller::feed(axis, type, x, y);
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_ControllerManager_feedTrigger
-  (JNIEnv *env, jclass clazz, jint axis, jfloat value) {
-	Controller::feedTrigger(axis, value);
 }
 
 }
