@@ -1436,6 +1436,7 @@ public class ScriptManager {
 
 	public static native void nativeForceCrash();
 	public static native int nativeGetArch();
+	public static native void nativeSetUseController(boolean controller);
 
 	public static class ScriptState {
 		public Script script;

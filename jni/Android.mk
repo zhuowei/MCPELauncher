@@ -21,7 +21,7 @@ corkscrew_x86_src_files := \
 	libcorkscrew/arch-x86/ptrace-x86.c
 
 LOCAL_SRC_FILES := nativepatch.c modscript.c modscript_nextgen.cpp modscript_ScriptLevelListener.cpp utf8proc_slim.c dobby.cpp marauders_map.c \
-	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp $(corkscrew_generic_src_files)
+	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp $(corkscrew_generic_src_files)
 
 ifneq (,$(wildcard $(LOCAL_PATH)/scriptscramble.c))
     LOCAL_SRC_FILES += scriptscramble.c

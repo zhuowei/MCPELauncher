@@ -188,6 +188,8 @@ public class MainActivity extends NativeActivity {
 
 	public static final boolean disableModPEForDev = false;
 
+	private boolean controllerInit = false;
+
 	private final Handler mainHandler = new Handler() {
 		@Override
 		public void dispatchMessage(Message msg) {
@@ -369,8 +371,10 @@ public class MainActivity extends NativeActivity {
 			boolean shouldLoadScripts = true;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				applyBuiltinPatches();
-				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true))
+				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
 					ScriptManager.init(this);
+					ScriptManager.nativeSetUseController(isForcingController());
+				}
 			}
 			if (isSafeMode() || !shouldLoadScripts) {
 				ScriptManager.loadEnabledScriptsNames(this);
@@ -1246,6 +1250,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public boolean supportsNonTouchscreen() {
+		if (isForcingController()) {
+			if (!controllerInit && !isSafeMode()) {
+				net.zhuoweizhang.mcpelauncher.api.modpe.ControllerManager.init();
+				controllerInit = true;
+			}
+			return true;
+		}
 		boolean xperia = false;
 		boolean play = false;
 		String[] data = new String[3];
@@ -2189,6 +2200,10 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			reportError(e);
 		}
+	}
+
+	private boolean isForcingController() {
+		return true; //new File("/sdcard/bl_controller.txt").exists();
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

@@ -283,6 +283,8 @@ static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 static void (*bl_Mob_die_real)(Entity*, EntityDamageSource&);
+static bool bl_forceController = false;
+static bool (*bl_MinecraftClient_useController)(Minecraft*);
 
 static bool* bl_Tile_solid;
 
@@ -1799,6 +1801,16 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetUseController
+  (JNIEnv *env, jclass clazz, jboolean use) {
+	if (bl_forceController) return;
+#ifdef __arm__
+	unsigned char* ptr = (unsigned char*) (((uintptr_t) bl_MinecraftClient_useController) & ~1);
+	*ptr = use;
+#endif
+}
+	
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -2060,6 +2072,14 @@ void bl_setuphooks_cppside() {
 
 	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieER18EntityDamageSource");
 	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
+
+	bl_MinecraftClient_useController = (bool (*) (Minecraft*))
+		dlsym(mcpelibhandle, "_ZN15MinecraftClient13useControllerEv");
+
+#ifdef __arm__
+	unsigned char* useControllerPtr = (unsigned char*) (((uintptr_t) bl_MinecraftClient_useController) & ~1);
+	bl_forceController = *useControllerPtr;
+#endif
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
