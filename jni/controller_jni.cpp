@@ -24,6 +24,18 @@ static int32_t (*inputHandlerReal)(struct android_app* app, AInputEvent* event);
 
 static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
+	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_CLASS_JOYSTICK) == AINPUT_SOURCE_CLASS_JOYSTICK) {
+			int32_t actionAndPointer = AMotionEvent_getAction(event);
+			int32_t action = actionAndPointer & AMOTION_EVENT_ACTION_MASK;
+			if (action == AMOTION_EVENT_ACTION_MOVE) {
+				float x = AMotionEvent_getX(event, 0);
+				float y = AMotionEvent_getY(event, 0);
+				__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f", x, y);
+				Controller::feed(2, 1, x, y);
+			}
+		}
+	}
 	return inputHandlerReal(app, event);
 }
 
