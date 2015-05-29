@@ -116,6 +116,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 
 
 void bl_cape_init(void* mcpelibinfo) {
+/*
+	FIXME 0.11
 	void* render = dlsym(mcpelibinfo, "_ZN13HumanoidModel6renderER6Entityffffff");
 	mcpelauncher_hook(render, (void*) &bl_HumanoidModel_render_hook,
 		(void**) &bl_HumanoidModel_render_real);
@@ -140,6 +142,7 @@ void bl_cape_init(void* mcpelibinfo) {
 		dlsym(mcpelibinfo, "_ZN11MobRenderer8setArmorEP5Model");
 	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))
 		dlsym(mcpelibinfo, "_ZN12ItemInstance11isArmorItemEPKS_");
+*/
 }
 
 } // extern "C"

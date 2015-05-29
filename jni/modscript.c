@@ -39,24 +39,22 @@ typedef struct {
 #define GAMEMODE_VTABLE_OFFSET_TICK 8
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 12
 // from HumanoidMobRenderer::additionalRendering
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 118
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 138
 // from MobRenderer::render
 #define MOB_VTABLE_OFFSET_GET_TEXTURE 91
 // from Entity::save
-#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 72
+#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 77
 // from Player::getSelectedItem
 #ifdef __i386
 // FIXME 0.11
-#define PLAYER_INVENTORY_OFFSET 0x3244
+#define PLAYER_INVENTORY_OFFSET 3256
 #else
-#define PLAYER_INVENTORY_OFFSET 3244
+#define PLAYER_INVENTORY_OFFSET 3256
 #endif
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 // this is / 4 bytes already; found in Mob::actuallyHurt
 #define MOB_HEALTH_OFFSET 82
-// this is / 4 bytes already; found in EntityRenderDispatcher::getRenderer
-#define ENTITY_RENDER_TYPE_OFFSET 61
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
@@ -72,7 +70,7 @@ typedef struct {
 #else
 #define MINECRAFT_LOCAL_PLAYER_OFFSET 252 // MinecraftClient::selectLevel; look for constructor
 #endif
-#define GAMERENDERER_GETFOV_SIZE 0xb8
+#define GAMERENDERER_GETFOV_SIZE 0xbc
 // from GameMode::GameMode
 #define GAMEMODE_MINECRAFT_OFFSET 4
 
@@ -1105,9 +1103,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* enderManModel_constructor = dlsym(mcpelibhandle, "_ZN13EnderManModelC1Ev");
 	mcpelauncher_hook(enderManModel_constructor, (void*) &bl_EnderManModel_constructor_hook,
 		(void**) &bl_EnderManModel_constructor_real);
+*/
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
-*/
+
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
 	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);

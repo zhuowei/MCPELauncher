@@ -239,6 +239,8 @@ public class ScriptManager {
 					classConstantsToJSObject(EntityRenderType.class));
 			ScriptableObject.putProperty(scope, "ArmorType",
 					classConstantsToJSObject(ArmorType.class));
+			ScriptableObject.putProperty(scope, "MobEffect",
+					classConstantsToJSObject(MobEffect.class));
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -469,6 +471,7 @@ public class ScriptManager {
 				if (!new File("/sdcard/mcpelauncher_do_not_create_placeholder_blocks").exists()) {
 					nativeDefinePlaceholderBlocks();
 				}
+				MobEffect.initIds();
 				loadEnabledScripts();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1170,7 +1173,13 @@ public class ScriptManager {
 		if (entityId instanceof NativeJavaObject) {
 			return (Long) ((NativeJavaObject) entityId).unwrap();
 		}
-		return (Long) entityId;
+		if (entityId instanceof Number) {
+			return ((Number) entityId).longValue();
+		}
+		if (entityId instanceof Undefined) {
+			return 0;
+		}
+		throw new RuntimeException("Not an entity: " + entityId + " (" + entityId.getClass().toString() + ")");
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
@@ -1420,6 +1429,10 @@ public class ScriptManager {
 	public static native void nativeScreenChooserSetScreen(int id);
 	public static native void nativeCloseScreen();
 	public static native void nativeShowProgressScreen();
+	public static native void nativeMobAddEffect(long entity, int id, int duration, int amplifier,
+		boolean ambient, boolean showParticles);
+	public static native void nativeMobRemoveEffect(long entity, int id);
+	public static native void nativeMobRemoveAllEffects(long entity);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1437,6 +1450,7 @@ public class ScriptManager {
 	public static native void nativeForceCrash();
 	public static native int nativeGetArch();
 	public static native void nativeSetUseController(boolean controller);
+	public static native void nativeDumpVtable(String name, int size);
 
 	public static class ScriptState {
 		public Script script;
@@ -2295,6 +2309,47 @@ public class ScriptManager {
 			nativeSetCape(getEntityId(entity), location);
 		}
 
+		@JSStaticFunction
+		public static void addEffect(Object entity, int potionId, int duration, int amplifier, boolean isAmbient,
+			boolean showParticles) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("addEffect only works for mobs");
+			}
+			
+			if (MobEffect.effectIds.get(potionId) == null) {
+				throw new RuntimeException("Invalid MobEffect id: " + potionId);
+			}
+			nativeMobAddEffect(entityId, potionId, duration, amplifier, isAmbient, showParticles);
+		}
+
+		@JSStaticFunction
+		public static void removeEffect(Object entity, int potionId) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("removeEffect only works for mobs");
+			}
+			
+			if (MobEffect.effectIds.get(potionId) == null) {
+				throw new RuntimeException("Invalid MobEffect id: " + potionId);
+			}
+			nativeMobRemoveEffect(entityId, potionId);
+		}
+
+		@JSStaticFunction
+		public static void removeAllEffects(Object entity) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("removeAllEffects only works for mobs");
+			}
+			
+			nativeMobRemoveAllEffects(entityId);
+		}
+
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -2503,6 +2558,11 @@ public class ScriptManager {
 				}
 			}
 			return null;
+		}
+
+		@JSStaticFunction
+		public static void dumpVtable(String className, int size) {
+			nativeDumpVtable("_ZTV" + className.length() + className, size);
 		}
 
 		@Override

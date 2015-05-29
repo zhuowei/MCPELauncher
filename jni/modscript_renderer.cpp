@@ -13,9 +13,9 @@
 #include "modscript_shared.h"
 
 // search for HumanoidModel::HumanoidModel
-#define HUMANOIDMODEL_SIZE 868
+#define HUMANOIDMODEL_SIZE 1028
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 92
+#define MOBRENDERER_SIZE 112
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 28
 
@@ -28,7 +28,7 @@ EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_Mesh_reset)(void*);
 
-static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float);
+static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float, int, int);
 
 static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, HumanoidModel*, float);
 
@@ -48,6 +48,8 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 	HumanoidModel* model = (HumanoidModel*) renderer->model; //TODO: make sure that this is indeed a humanoid model
 	if (strcmp(modelPartName, "head") == 0) {
 		return &model->bipedHead;
+	} else if (strcmp(modelPartName, "headwear") == 0) {
+		return &model->bipedHeadwear;
 	} else if (strcmp(modelPartName, "body") == 0) {
 		return &model->bipedBody;
 	} else if (strcmp(modelPartName, "rightArm") == 0) {
@@ -77,7 +79,7 @@ int bl_renderManager_addRenderer(EntityRenderer* renderer) {
 
 int bl_renderManager_createHumanoidRenderer() {
 	HumanoidModel* model = (HumanoidModel*) operator new(HUMANOIDMODEL_SIZE);
-	bl_HumanoidModel_HumanoidModel(model, 0, 0);
+	bl_HumanoidModel_HumanoidModel(model, 0, 0, 64, 64);
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, 0);
 	return bl_renderManager_addRenderer((EntityRenderer*) renderer);
@@ -173,8 +175,8 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN4Mesh5resetEv");
-	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float))
-		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
+	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float, int, int))
+		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Effii");
 	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, float))
 		dlsym(mcpelibhandle, "_ZN19HumanoidMobRendererC1EP13HumanoidModelf");
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");

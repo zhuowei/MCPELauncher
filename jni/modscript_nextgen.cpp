@@ -29,6 +29,8 @@
 #include "mcpe/i18n.h"
 #include "mcpe/entitydamagesource.h"
 #include "mcpe/mobfactory.h"
+#include "mcpe/synchedentitydata.h"
+#include "mcpe/mobeffect.h"
 
 #define DLSYM_DEBUG
 
@@ -40,18 +42,18 @@ typedef void Font;
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
-#define BLOCK_VTABLE_SIZE 0x128
+#define BLOCK_VTABLE_SIZE 0x118
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
 #define BLOCK_VTABLE_GET_COLOR 46
 #define BLOCK_VTABLE_GET_AABB 14
 // Mob::getTexture
-#define MOB_TEXTURE_OFFSET 2960
+#define MOB_TEXTURE_OFFSET 2996
 // found in PlayerRenderer::renderName
 #define PLAYER_NAME_OFFSET 3164
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 // found in LevelRenderer::renderNameTags
-#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
+//#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
 #define MOB_TARGET_OFFSET 3156
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 244
@@ -73,7 +75,7 @@ typedef void Font;
 // found in TouchscreenInput::canInteract
 #define MINECRAFT_HIT_ENTITY_OFFSET 2712
 // found in GameMode::initPlayer
-#define PLAYER_ABILITIES_OFFSET 3168
+#define PLAYER_ABILITIES_OFFSET 3196
 // found in Minecraft constructor
 #define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 #define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
@@ -285,6 +287,7 @@ static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 static void (*bl_Mob_die_real)(Entity*, EntityDamageSource&);
 static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
+static std::string* (*bl_Entity_getNameTag)(Entity*);
 
 static bool* bl_Tile_solid;
 
@@ -525,35 +528,6 @@ int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y
 int bl_CustomBlock_getRenderLayerHook(Tile* tile) {
 	int blockId = tile->id;
 	return bl_custom_block_renderLayer[blockId];
-}
-
-void bl_EntityRenderer_renderName_hook(void* renderer, Entity* entity, float scale) {
-	long long entityId = entity->entityId;
-	if (bl_nametag_map.count(entityId) == 0) return;
-	std::string mystr = bl_nametag_map[entityId];
-	//back up the existing data at the nametag's spot, then overwrite it with our string. 
-	//This is awful code, but it might work.
-	void* ptrToName = (void*) (((uintptr_t) entity) + PLAYER_NAME_OFFSET);
-	char backup[sizeof(std::string)];
-	memcpy(backup, ptrToName, sizeof(std::string));
-	memcpy(ptrToName, &mystr, sizeof(std::string));
-
-	float* stance1 = (float*) ((uintptr_t) entity + 36); //y position
-	float* stance2 = (float*) ((uintptr_t) entity + 196); //y at last tick
-	float* entityHeightPtr = (float*) ((uintptr_t) entity + 180);
-	float backupstance1 = *stance1;
-	float backupstance2 = *stance2;
-	float entityHeight = *entityHeightPtr;
-	*stance1 = *stance1 + entityHeight;
-	*stance2 = *stance2 + entityHeight;
-
-	void* playerRenderer = bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, PLAYER_RENDER_TYPE);
-
-	bl_PlayerRenderer_renderName(playerRenderer, entity, scale);
-
-	*stance1 = backupstance1;
-	*stance2 = backupstance2;
-	memcpy(ptrToName, backup, sizeof(std::string));
 }
 
 void bl_clearNameTags() {
@@ -1028,21 +1002,26 @@ void bl_attachLevelListener() {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSneaking
   (JNIEnv *env, jclass clazz, jlong entityId, jboolean doIt) {
+/*	FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//bl_Mob_setSneaking(entity, doIt);
 	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
 	if (movement == nullptr) return;
 	movement[14] = doIt;
+*/
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsSneaking
   (JNIEnv *env, jclass clazz, jlong entityId) {
+/*	FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return false;
 	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
 	if (movement == nullptr) return false;
 	return movement[14];
+*/
+	return false;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
@@ -1092,7 +1071,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
-	std::string* myName = (std::string*) ((intptr_t) entity + PLAYER_NAME_OFFSET);
+	std::string* myName = bl_Entity_getNameTag(entity);
 	jstring returnValString = env->NewStringUTF(myName->c_str());
 	return returnValString;
 }
@@ -1370,35 +1349,24 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	const char * nameUtfChars = env->GetStringUTFChars(name, NULL);
-	std::string nameString = std::string(nameUtfChars);
-	bl_nametag_map[entity->entityId] = nameString;
-	env->ReleaseStringUTFChars(name, nameUtfChars);
-}
-
-/* List of all renderers that need name tag support */
-static const char* renderersToPatch[] = {
-"_ZTV11MobRenderer",
-"_ZTV11PigRenderer",
-"_ZTV12WolfRenderer",
-"_ZTV13SheepRenderer",
-"_ZTV13SlimeRenderer",
-"_ZTV14SpiderRenderer",
-"_ZTV15ChickenRenderer",
-"_ZTV15CreeperRenderer",
-"_ZTV16EnderManRenderer",
-"_ZTV16VillagerRenderer",
-"_ZTV18SilverfishRenderer",
-"_ZTV19HumanoidMobRenderer",
-"_ZTV19MushroomCowRenderer"
-};
-
-
-static void patchEntityRenderers(soinfo2* mcpelibhandle) {
-	int renderersCount = sizeof(renderersToPatch) / sizeof(const char*);
-	for (int i = 0; i < renderersCount; i++) {
-		void** entityRendererVtable = (void**) dobby_dlsym(mcpelibhandle, renderersToPatch[i]);
-		entityRendererVtable[ENTITY_RENDERER_OFFSET_RENDER_NAME] = (void*) &bl_EntityRenderer_renderName_hook;
+	SynchedEntityData* entityData = (SynchedEntityData*) (((uintptr_t) entity) + 8);
+	DataItem2<std::string>* dataItem = static_cast<DataItem2<std::string >*>(entityData->_find(2));
+	if (dataItem == nullptr) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dataItem is null");
+		env->ReleaseStringUTFChars(name, nameUtfChars);
+		return;
 	}
+	std::string* lineStr = &(dataItem->data);
+	if (lineStr == NULL || lineStr->length() == 0) {
+		//Workaround for C++ standard library's empty string optimization failing across libraries
+		//search FULLY_DYNAMIC_STRING
+		// (I no longer remember how this works)
+		std::string* mystr = new std::string(nameUtfChars);
+		*((void**) lineStr) = *((void**) mystr);
+	} else {
+		lineStr->assign(nameUtfChars);
+	}
+	env->ReleaseStringUTFChars(name, nameUtfChars);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetStonecutterItem
@@ -1497,10 +1465,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity
   (JNIEnv *env, jclass clazz, jlong entityId) {
+/* FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	Entity** camera = (Entity**) (((int) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
 	*camera = entity;
+*/
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
@@ -1809,7 +1779,54 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	*ptr = use;
 #endif
 }
-	
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDumpVtable
+  (JNIEnv *env, jclass clazz, jstring message, jint size) {
+	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
+	void* vtable = dlsym(RTLD_DEFAULT, messageUtfChars);
+	if (vtable != nullptr) {
+		bl_dumpVtable((void**) vtable, size);
+	}
+	env->ReleaseStringUTFChars(message, messageUtfChars);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_MobEffect_nativePopulate
+  (JNIEnv *env, jclass clazz, jstring message) {
+	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
+	void* effect = dlsym(RTLD_DEFAULT, messageUtfChars);
+	jint ret = -1;
+	if (effect != nullptr) {
+		ret = (*((MobEffect**) effect))->getId();
+	}
+	env->ReleaseStringUTFChars(message, messageUtfChars);
+	return ret;
+}
+
+static void (*bl_Mob_addEffect)(Entity*, MobEffectInstance&);
+static void (*bl_Mob_removeEffect)(Entity*, int);
+static void (*bl_Mob_removeAllEffects)(Entity*);
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobAddEffect
+  (JNIEnv* env, jclass clazz, jlong entityId, jint id, jint duration, jint amplifier, jboolean ambient, jboolean showParticles) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles);
+	bl_Mob_addEffect(entity, inst);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobRemoveEffect
+  (JNIEnv* env, jclass clazz, jlong entityId, jint id) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_Mob_removeEffect(entity, id);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobRemoveAllEffects
+  (JNIEnv* env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_Mob_removeAllEffects(entity);
+}
 
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
@@ -1919,6 +1936,7 @@ void bl_setuphooks_cppside() {
 #endif
 
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile") + 8);
+	bl_dumpVtable(bl_Tile_vtable, 0x100);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
@@ -1976,7 +1994,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
 
-	patchEntityRenderers(mcpelibhandle);
 	bl_PlayerRenderer_renderName = (void (*)(void*, Entity*, float)) dlsym(mcpelibhandle, "_ZN14PlayerRenderer10renderNameER6Entityf");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
@@ -2080,6 +2097,15 @@ void bl_setuphooks_cppside() {
 	unsigned char* useControllerPtr = (unsigned char*) (((uintptr_t) bl_MinecraftClient_useController) & ~1);
 	bl_forceController = *useControllerPtr;
 #endif
+
+	bl_Entity_getNameTag = (std::string* (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZN6Entity10getNameTagEv");
+	bl_Mob_addEffect = (void (*)(Entity*, MobEffectInstance&))
+		dlsym(mcpelibhandle, "_ZN3Mob9addEffectERK17MobEffectInstance");
+	bl_Mob_removeEffect = (void (*)(Entity*, int))
+		dlsym(mcpelibhandle, "_ZN3Mob12removeEffectEi");
+	bl_Mob_removeAllEffects = (void (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
