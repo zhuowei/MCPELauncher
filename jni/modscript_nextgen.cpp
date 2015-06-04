@@ -1874,7 +1874,7 @@ static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
 	return env->CallStaticBooleanMethod(bl_scriptmanager_class, mid, hostJString);
 }
 
-static bool bl_item_id_count = 512;
+static int bl_item_id_count = 512;
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemIdCount
   (JNIEnv* env, jclass clazz) {
@@ -1920,18 +1920,28 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't find the GOT");
 		return;
 	}
+	bool got_success = false;
 	for (int i = 0; i < 5000; i++) {
 		if (got[i] == originalItemsAddress) {
 			got[i] = &bl_items;
-			bl_item_id_count = 4096;
-			// SUCCESS :D
-			return;
+			got_success = true;
+			break;
 		}
 	}
-	itemsSym->st_value = oldValue;
-	itemsSym->st_size = oldSize;
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: couldn't find Item::items pointer in GOT");
-	return;
+	if (!got_success) {
+		itemsSym->st_value = oldValue;
+		itemsSym->st_size = oldSize;
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: couldn't find Item::items pointer in GOT");
+		return;
+	}
+	void* ItemInstance__setItem = dlsym(mcpelibhandle, "_ZN12ItemInstance8_setItemEi");
+	unsigned char* setItemCode = (unsigned char*)
+		bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance__setItem) & ~1));
+	if (!(setItemCode[4] == 0x00 && setItemCode[5] == 0x7f)) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
+	}
+	setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
+	bl_item_id_count = 4096;
 }
 
 void bl_setuphooks_cppside() {
