@@ -10,8 +10,8 @@
 #include "dobby_public.h"
 
 // Mob::getTexture
-#define MOB_TEXTURE_OFFSET 2960
-#define PLAYER_RENDERER_VTABLE_PREPARE_ARMOR 7
+#define MOB_TEXTURE_OFFSET 2996
+#define PLAYER_RENDERER_VTABLE_PREPARE_ARMOR 9
 
 static std::unordered_map<HumanoidModel*, ModelPart*> modelPartMap;
 static std::unordered_map<int, std::string> capesMap;
@@ -20,7 +20,6 @@ static void (*bl_ModelPart_ModelPart)(ModelPart*, HumanoidModel*, int, int, int,
 static void (*bl_ModelPart_render)(ModelPart*, float);
 static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string);
 static void (*bl_HumanoidMobRenderer_render_real)(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b);
-static void (*bl_HumanoidMobRenderer_renderHand_real)(ModelRenderer* self, Entity* mob, float partialTicks);
 static int (*bl_PlayerRenderer_prepareArmor_real)(PlayerRenderer* self, Entity* mob, int armorPart, float partialTicks);
 static void (*bl_MobRenderer_setArmor)(MobRenderer*, HumanoidModel*);
 static bool (*bl_ItemInstance_isArmorItem)(ItemInstance*);
@@ -60,14 +59,6 @@ void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swi
 	bl_ModelPart_render(part, partialTicks);
 }
 
-void bl_HumanoidMobRenderer_renderHand_hook(ModelRenderer* self, Entity* mob, float partialTicks) {
-	if (mob == bl_localplayer) {
-		std::string texture = *((std::string*) (((uintptr_t) mob) + MOB_TEXTURE_OFFSET));
-		bl_EntityRenderer_bindTexture(self, texture);
-	}
-	bl_HumanoidMobRenderer_renderHand_real(self, mob, partialTicks);
-}
-
 // armour
 
 int bl_PlayerRenderer_prepareArmor_hook(PlayerRenderer* self, Entity* mob, int armorPart, float partialTicks) {
@@ -82,7 +73,7 @@ int bl_PlayerRenderer_prepareArmor_hook(PlayerRenderer* self, Entity* mob, int a
 
 	HumanoidModel* armorModel = armorPart == 2 ? self->modelArmor : self->modelArmorChestplate;
 	armorModel->bipedHead.showModel = armorPart == 0;
-	//armorModel->bipedHeadwear.showModel = armorPart == 0;
+	armorModel->bipedHeadwear.showModel = armorPart == 0;
 	armorModel->bipedBody.showModel = armorPart == 1 || armorPart == 2;
 	armorModel->bipedRightArm.showModel = armorPart == 1;
 	armorModel->bipedLeftArm.showModel = armorPart == 1;
@@ -128,11 +119,10 @@ void bl_cape_init(void* mcpelibinfo) {
 		dlsym(mcpelibinfo, "_ZN9ModelPartC2EP5Modeliiii");
 	bl_ModelPart_render = (void (*)(ModelPart*, float))
 		dlsym(mcpelibinfo, "_ZN9ModelPart6renderEf");
+*/
 	bl_EntityRenderer_bindTexture = (void (*)(ModelRenderer*, std::string))
 		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSs");
-	void* renderHand = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer10renderHandER3Mobf");
-	mcpelauncher_hook(renderHand, (void*) &bl_HumanoidMobRenderer_renderHand_hook,
-		(void**) &bl_HumanoidMobRenderer_renderHand_real);
+
 	void** playerRendererVtable = (void**) dobby_dlsym(mcpelibinfo, "_ZTV14PlayerRenderer");
 	bl_PlayerRenderer_prepareArmor_real = (int (*)(PlayerRenderer*, Entity*, int, float))
 		playerRendererVtable[PLAYER_RENDERER_VTABLE_PREPARE_ARMOR];
@@ -142,7 +132,6 @@ void bl_cape_init(void* mcpelibinfo) {
 		dlsym(mcpelibinfo, "_ZN11MobRenderer8setArmorEP5Model");
 	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))
 		dlsym(mcpelibinfo, "_ZN12ItemInstance11isArmorItemEPKS_");
-*/
 }
 
 } // extern "C"

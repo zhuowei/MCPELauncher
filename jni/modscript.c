@@ -35,13 +35,13 @@ typedef struct {
 } unique_ptr;
 
 #define GAMEMODE_VTABLE_OFFSET_USE_ITEM_ON 11
-#define GAMEMODE_VTABLE_OFFSET_ATTACK 16
+#define GAMEMODE_VTABLE_OFFSET_ATTACK 15
 #define GAMEMODE_VTABLE_OFFSET_TICK 8
 #define GAMEMODE_VTABLE_OFFSET_INIT_PLAYER 12
 // from HumanoidMobRenderer::additionalRendering
 #define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 138
-// from MobRenderer::render
-#define MOB_VTABLE_OFFSET_GET_TEXTURE 91
+// from MobRenderer::bindMobTexture
+#define MOB_VTABLE_OFFSET_GET_TEXTURE 107
 // from Entity::save
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 77
 // from Player::getSelectedItem
@@ -54,25 +54,23 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 // this is / 4 bytes already; found in Mob::actuallyHurt
-#define MOB_HEALTH_OFFSET 82
+#define MOB_HEALTH_OFFSET 91
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
-#define MINECRAFT_TIMER_OFFSET 136
+#define MINECRAFT_TIMER_OFFSET 216
 // from Entity::setPos(Vec3 const&)
 #define ENTITY_VTABLE_OFFSET_SETPOS 4
 // from Minecraft::selectLevel
-#define MINECRAFT_LEVEL_OFFSET 164
+#define MINECRAFT_LEVEL_OFFSET 244
 #ifdef __i386
 // 0xf4
 // FIXME 0.11
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 252
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 332
 #else
-#define MINECRAFT_LOCAL_PLAYER_OFFSET 252 // MinecraftClient::selectLevel; look for constructor
+#define MINECRAFT_LOCAL_PLAYER_OFFSET 332 // MinecraftClient::selectLevel; look for constructor
 #endif
 #define GAMERENDERER_GETFOV_SIZE 0xbc
-// from GameMode::GameMode
-#define GAMEMODE_MINECRAFT_OFFSET 4
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -245,7 +243,7 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 
 	if (!bl_untampered) {
 		bl_panicTamper();
-		return NULL;
+		return;
 	}
 
 	preventDefaultStatus = FALSE;
@@ -1077,6 +1075,8 @@ static void setupIsModded() {
 
 #include "checktamper.h"
 
+void bl_prepatch_cppside(void*);
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity) {
 	if (bl_hasinit_prepatch) return;
@@ -1113,6 +1113,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+	bl_prepatch_cppside(mcpelibhandle);
 	bl_hasinit_prepatch = 1;
 }
 

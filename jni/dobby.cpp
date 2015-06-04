@@ -77,6 +77,10 @@ Elf_Sym* dlsym_handle_lookup(soinfo* si, const char* name) {
     return soinfo_elf_lookup(si, elfhash(name), name);
 }
 
+Elf_Sym* dobby_elfsym(void* si, const char* name) {
+    return soinfo_elf_lookup(reinterpret_cast<soinfo*>(si), elfhash(name), name);
+}
+
 void* dobby_dlsym(void* handle, const char* symbol) {
 
   soinfo* found = NULL;

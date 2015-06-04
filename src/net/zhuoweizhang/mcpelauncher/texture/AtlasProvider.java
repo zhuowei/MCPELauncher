@@ -187,6 +187,10 @@ public class AtlasProvider implements TexturePack {
 			new File("/sdcard", "bl_atlas_dump_" + new File(atlasName).getName() + "mip0.png"));
 		getMipMap(0).compress(Bitmap.CompressFormat.PNG, 100, os2);
 		os2.close();
+		FileOutputStream os3 = new FileOutputStream(
+			new File("/sdcard", "bl_atlas_dump_" + new File(metaName).getName()));
+		os3.write(metaObj.data.toString().getBytes("UTF-8"));
+		os3.close();
 	}
 
 	private String getMipMapPrefix(String atlasName) {

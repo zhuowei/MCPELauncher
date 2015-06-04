@@ -39,50 +39,46 @@ typedef void Font;
 
 #define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
 // After the call to RakNetInstance::RakNetInstance
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
+// FIXME 0.11
+//#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
 #define BLOCK_VTABLE_SIZE 0x118
-#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
-#define BLOCK_VTABLE_GET_COLOR 46
-#define BLOCK_VTABLE_GET_AABB 14
+#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 10
+#define BLOCK_VTABLE_GET_COLOR 47
+//#define BLOCK_VTABLE_GET_AABB 14
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2996
-// found in PlayerRenderer::renderName
-#define PLAYER_NAME_OFFSET 3164
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
-// found in LevelRenderer::renderNameTags
-//#define ENTITY_RENDERER_OFFSET_RENDER_NAME 6
-#define MOB_TARGET_OFFSET 3156
+//#define MOB_TARGET_OFFSET 3156
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 244
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 328
 // found in ChatScreen::setTextboxText
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 200
 
 #ifdef __i386
-#define MINECRAFT_TEXTURES_OFFSET 224
-#define PLAYER_MOVEMENT_OFFSET 0xd44
+// FIXME 0.11
+#define MINECRAFT_TEXTURES_OFFSET 308
 #else
 // found in StartMenuScreen::render, or search for getTextureData
-#define MINECRAFT_TEXTURES_OFFSET 228
-// found in LocalPlayer::isSneaking
-#define PLAYER_MOVEMENT_OFFSET 3400
+#define MINECRAFT_TEXTURES_OFFSET 308
 #endif
 
-// found way, way inside GameRenderer::pick, around the call to HitResult::HitResult(Entity*)
+// found way, way inside GameRenderer::updateFreeformPickDirection, around the call to HitResult::HitResult(Entity*)
+// (look for the stack allocation, then see where it's copied)
 #define MINECRAFT_HIT_RESULT_OFFSET 2680
-// found in TouchscreenInput::canInteract
+// found in TouchInputMove::interactWithEntity
 #define MINECRAFT_HIT_ENTITY_OFFSET 2712
 // found in GameMode::initPlayer
 #define PLAYER_ABILITIES_OFFSET 3196
-// found in Minecraft constructor
-#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
-#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
+// FIXME 0.11
+//#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 #define PLAYER_RENDER_TYPE 21
-// 0x60
+// MobSpawnerTileEntity constructor 0x60
 #define MOB_SPAWNER_OFFSET 96
-#define MINECRAFT_SCREENCHOOSER_OFFSET 176
+// MinecraftClient::handleBack
+#define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -197,6 +193,7 @@ static void (*bl_TileItem_TileItem)(Item*, int);
 static void (*bl_Tile_setNameId)(Tile*, const std::string&);
 static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
+static bool (*bl_Mob_isSneaking)(Entity*);
 
 static void (*bl_Item_setIcon)(Item*, std::string const&, int);
 static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
@@ -309,6 +306,8 @@ static bool isLocalAddress(JNIEnv* env, jstring addr);
 
 __attribute__((__visibility__("hidden")))
 bool bl_onLockDown = false;
+
+Item* bl_items[4096];
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
@@ -1002,26 +1001,16 @@ void bl_attachLevelListener() {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSneaking
   (JNIEnv *env, jclass clazz, jlong entityId, jboolean doIt) {
-/*	FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	//bl_Mob_setSneaking(entity, doIt);
-	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
-	if (movement == nullptr) return;
-	movement[14] = doIt;
-*/
+	bl_Mob_setSneaking(entity, doIt);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsSneaking
   (JNIEnv *env, jclass clazz, jlong entityId) {
-/*	FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return false;
-	bool* movement = *((bool**) ((uintptr_t) entity + PLAYER_MOVEMENT_OFFSET));
-	if (movement == nullptr) return false;
-	return movement[14];
-*/
-	return false;
+	return bl_Mob_isSneaking(entity);
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
@@ -1382,10 +1371,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_sendPacket(void* packet) {
+/*
 	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
 	void* vtable = ((void***) bl_raknet)[0][RAKNET_INSTANCE_VTABLE_OFFSET_SEND];
 	void (*fn)(void*, void*) = (void (*) (void*, void*)) vtable;
 	fn(bl_raknet, packet);
+*/
 }
 
 void bl_sendIdentPacket() {
@@ -1407,7 +1398,7 @@ void bl_sendIdentPacket() {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
   (JNIEnv *env, jclass clazz, jstring message) {
 	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
-	std::string* myName = (std::string*) ((intptr_t) bl_localplayer + PLAYER_NAME_OFFSET);
+	std::string* myName = bl_Entity_getNameTag(bl_localplayer);
 	MessagePacket packet;
 	bl_Packet_Packet(&packet);
 	packet.vtable = (void**) (((uintptr_t) bl_MessagePacket_vtable) + 8);
@@ -1423,9 +1414,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetNameTag
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	if (bl_nametag_map.count(entityId) == 0) return NULL;
-	std::string mystr = bl_nametag_map[entityId];
-	jstring returnValString = env->NewStringUTF(mystr.c_str());
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == nullptr) return nullptr;
+	std::string* mystr = bl_Entity_getNameTag(entity);
+	jstring returnValString = env->NewStringUTF(mystr->c_str());
 	return returnValString;
 }
 
@@ -1465,12 +1457,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity
   (JNIEnv *env, jclass clazz, jlong entityId) {
-/* FIXME 0.11
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	Entity** camera = (Entity**) (((int) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
+	Entity** camera = (Entity**) (((uintptr_t) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
 	*camera = entity;
-*/
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
@@ -1884,6 +1874,66 @@ static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
 	return env->CallStaticBooleanMethod(bl_scriptmanager_class, mid, hostJString);
 }
 
+static bool bl_item_id_count = 512;
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemIdCount
+  (JNIEnv* env, jclass clazz) {
+	return bl_item_id_count;
+}
+
+void bl_prepatch_cppside(void* mcpelibhandle_) {
+	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
+	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
+	// Edit the dlsym for Item::items
+	Elf_Sym* itemsSym = dobby_elfsym((void*) mcpelibhandle, "_ZN4Item5itemsE");
+	// since value + base = addr:
+	Elf_Addr oldValue = itemsSym->st_value;
+	itemsSym->st_value = ((uintptr_t) &bl_items) - mcpelibhandle->base;
+	Elf_Word oldSize = itemsSym->st_size;
+	itemsSym->st_size = sizeof(bl_items);
+	// now check if the address matches
+	void* newItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
+	if (newItemsAddress != &bl_items) {
+		// poor man's assert
+		// restore stuff
+		itemsSym->st_value = oldValue;
+		itemsSym->st_size = oldSize;
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: expected %p got %p original %p",
+			&bl_items, newItemsAddress, originalItemsAddress);
+		return;
+	}
+
+	// now edit the GOT
+	// for got, got_end_addr[got_entry] = addr
+	// FIND THE .GOT SECTION OR DIE TRYING
+	void** got = nullptr;
+	for (int i = 0; i < mcpelibhandle->phnum; i++) {
+		const Elf_Phdr* phdr = mcpelibhandle->phdr + i;
+		if (phdr->p_type == PT_DYNAMIC) { // .got always comes after .dynamic in every Android lib I've seen
+			got = (void**) (((uintptr_t) mcpelibhandle->base) + phdr->p_vaddr + phdr->p_memsz);
+			break;
+		}
+	}
+	if (got == nullptr) {
+		itemsSym->st_value = oldValue;
+		itemsSym->st_size = oldSize;
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't find the GOT");
+		return;
+	}
+	for (int i = 0; i < 5000; i++) {
+		if (got[i] == originalItemsAddress) {
+			got[i] = &bl_items;
+			bl_item_id_count = 4096;
+			// SUCCESS :D
+			return;
+		}
+	}
+	itemsSym->st_value = oldValue;
+	itemsSym->st_size = oldSize;
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: couldn't find Item::items pointer in GOT");
+	return;
+}
+
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
@@ -1971,7 +2021,8 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
-	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(RTLD_DEFAULT, "_ZN3Mob11setSneakingEb");
+	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
+	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZN3Mob10isSneakingEv");
 
 	//bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
 	//bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");

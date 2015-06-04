@@ -123,6 +123,7 @@ public class ScriptManager {
 
 	public static final int ARCH_ARM = 0;
 	public static final int ARCH_I386 = 1;
+	public static int ITEM_ID_COUNT = 512;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -542,6 +543,7 @@ public class ScriptManager {
 			versionCode = 0xaaaa;
 		}
 		nativeSetupHooks(versionCode);
+		ITEM_ID_COUNT = nativeGetItemIdCount();
 		scripts.clear();
 		entityList = new NativeArray(0);
 		androidContext = cxt.getApplicationContext();
@@ -976,7 +978,7 @@ public class ScriptManager {
 		PrintWriter out = new PrintWriter(new File(Environment.getExternalStorageDirectory(),
 				"/items.csv"));
 		float[] textureUVbuf = new float[6];
-		for (int i = 0; i < 512; i++) {
+		for (int i = 0; i < ITEM_ID_COUNT; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
 			if (itemName == null)
 				continue;
@@ -1451,6 +1453,7 @@ public class ScriptManager {
 	public static native int nativeGetArch();
 	public static native void nativeSetUseController(boolean controller);
 	public static native void nativeDumpVtable(String name, int size);
+	public static native int nativeGetItemIdCount();
 
 	public static class ScriptState {
 		public Script script;
@@ -2400,8 +2403,8 @@ public class ScriptManager {
 					+ " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
-			if (id < 0 || id >= 512) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			if (id < 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < ITEM_ID_COUNT");
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
 				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
@@ -2418,8 +2421,8 @@ public class ScriptManager {
 					+ " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
-			if (id < 0 || id >= 512) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			if (id < 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < " + ITEM_ID_COUNT);
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
 				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
@@ -2679,8 +2682,8 @@ public class ScriptManager {
 				throw new RuntimeException("Invalid armor type: use ArmorType.helmet, ArmorType.chestplate," +
 					"ArmorType.leggings, or ArmorType.boots");
 			}
-			if (id < 0 || id >= 512) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < 512");
+			if (id < 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < " + ITEM_ID_COUNT);
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
 				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconIndex + " does not exist");

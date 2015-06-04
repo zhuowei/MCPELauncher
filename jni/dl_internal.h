@@ -1,10 +1,11 @@
+#include <elf.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
   char name[128];
-  const void* phdr;
+  const Elf_Phdr* phdr;
   int phnum;
   unsigned entry;
   unsigned base;
