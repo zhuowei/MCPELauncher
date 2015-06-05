@@ -65,6 +65,15 @@ extern std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 
 void bl_Entity_setPos_helper(Entity*, float, float, float);
 
+#define DLSYM_DEBUG
+
+#ifdef DLSYM_DEBUG
+
+void* debug_dlsym(void* handle, const char* symbol);
+
+#define dlsym debug_dlsym
+#endif //DLSYM_DEBUG
+
 
 #ifdef __cplusplus
 }

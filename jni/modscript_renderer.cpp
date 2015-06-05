@@ -31,10 +31,11 @@ static void (*bl_Mesh_reset)(void*);
 static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float, int, int);
 
 static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, HumanoidModel*, float);
+static void (*bl_ModelPart_reset)(ModelPart*);
 
 static std::vector<EntityRenderer*> bl_entityRenderers;
 
-static std::map<int, int> bl_renderTypeMap;
+static std::map<long long, int> bl_renderTypeMap;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
 
@@ -86,7 +87,7 @@ int bl_renderManager_createHumanoidRenderer() {
 }
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
-	int entityId = entity->entityId;
+	long long entityId = entity->entityId;
 	if (bl_renderTypeMap.count(entityId) != 0) {
 		return bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
 	}
@@ -94,7 +95,7 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Ent
 }
 
 void bl_renderManager_setRenderType(Entity* entity, int renderType) {
-	int entityId = entity->entityId;
+	long long entityId = entity->entityId;
 	if (renderType >= 0x1000) {
 		bl_renderTypeMap[entityId] = renderType;
 	} else {
@@ -104,7 +105,7 @@ void bl_renderManager_setRenderType(Entity* entity, int renderType) {
 }
 
 int bl_renderManager_getRenderType(Entity* entity) {
-	int entityId = entity->entityId;
+	long long entityId = entity->entityId;
 	if (bl_renderTypeMap.count(entityId) != 0) {
 		return bl_renderTypeMap[entityId];
 	}
@@ -182,6 +183,8 @@ void bl_renderManager_init(void* mcpelibhandle) {
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
 	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
 		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
+	bl_ModelPart_reset = (void (*)(ModelPart*))
+		dlsym(mcpelibhandle, "_ZN9ModelPart5resetEv");
 }
 
 } //extern "C"

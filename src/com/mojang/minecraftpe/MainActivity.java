@@ -265,8 +265,8 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
-				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
-				if (myprefs.getString("texturePack", "").indexOf("minecraft.apk") >= 0) {
+				//Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
+				if (myprefs.getString("texture_packs", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
 			}

@@ -166,7 +166,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) && (master != null)) {
 			SharedPreferences sh = PreferenceManager
 					.getDefaultSharedPreferences(ManageScriptsActivity.this);
-			master.setChecked(sh.getBoolean("zz_script_enable", false));
+			master.setChecked(sh.getBoolean("zz_script_enable", true));
 		}
 	}
 

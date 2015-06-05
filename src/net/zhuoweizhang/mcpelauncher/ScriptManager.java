@@ -343,7 +343,7 @@ public class ScriptManager {
 		serverPort = 0;
 	}
 
-	public static void attackCallback(int attacker, int victim) {
+	public static void attackCallback(long attacker, long victim) {
 		callScriptMethod("attackHook", attacker, victim);
 	}
 

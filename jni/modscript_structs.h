@@ -217,7 +217,7 @@ typedef struct {
 	ModelPart bipedRightArm;//504
 	ModelPart bipedLeftArm;//632
 	ModelPart bipedRightLeg;//760
-	ModelPart bipedLeftLeg;//736
+	ModelPart bipedLeftLeg;//888
 } HumanoidModel;
 
 typedef struct {
@@ -322,10 +322,14 @@ struct ArmorItem : public Item {
 	void* armorMaterial; // 88
 };
 
+#ifdef __arm__
+static_assert(sizeof(ArmorItem) == 88, "armor item size");
+#endif
+
 struct PlayerRenderer : public MobRenderer {
-	char filler[92-56]; // 56
-	HumanoidModel* modelArmor;
-	HumanoidModel* modelArmorChestplate;
+	char filler[112-76]; // 76
+	HumanoidModel* modelArmor; // 112
+	HumanoidModel* modelArmorChestplate; // 116
 };
 #endif
 

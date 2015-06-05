@@ -11,6 +11,7 @@
 
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2996
+// Use IDA, NOT MobRenderer::render
 #define PLAYER_RENDERER_VTABLE_PREPARE_ARMOR 9
 
 static std::unordered_map<HumanoidModel*, ModelPart*> modelPartMap;
@@ -18,7 +19,7 @@ static std::unordered_map<int, std::string> capesMap;
 static void (*bl_HumanoidModel_render_real)(HumanoidModel* self, Entity* entity, float a, float b, float c, float d, float e, float f);
 static void (*bl_ModelPart_ModelPart)(ModelPart*, HumanoidModel*, int, int, int, int);
 static void (*bl_ModelPart_render)(ModelPart*, float);
-static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string);
+static void (*bl_EntityRenderer_bindTexture)(ModelRenderer*, std::string const&, int);
 static void (*bl_HumanoidMobRenderer_render_real)(ModelRenderer* self, Entity* entity, Vec3* v, float a, float b);
 static int (*bl_PlayerRenderer_prepareArmor_real)(PlayerRenderer* self, Entity* mob, int armorPart, float partialTicks);
 static void (*bl_MobRenderer_setArmor)(MobRenderer*, HumanoidModel*);
@@ -42,6 +43,7 @@ void bl_HumanoidMobRenderer_render_hook(ModelRenderer* self, Entity* entity, Vec
 	renderCount = 0;
 	bl_HumanoidMobRenderer_render_real(self, entity, v, a, b);
 }
+/*
 void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swingTime, float swingMaxAngle,
 	float armSwingTime, float headYaw, float headPitch, float partialTicks) {
 	bl_HumanoidModel_render_real(self, entity, swingTime, swingMaxAngle, armSwingTime, headYaw, headPitch, partialTicks);
@@ -58,6 +60,7 @@ void bl_HumanoidModel_render_hook(HumanoidModel* self, Entity* entity, float swi
 	bl_EntityRenderer_bindTexture(currentRenderer, capeTexture);
 	bl_ModelPart_render(part, partialTicks);
 }
+*/
 
 // armour
 
@@ -68,8 +71,8 @@ int bl_PlayerRenderer_prepareArmor_hook(PlayerRenderer* self, Entity* mob, int a
 	ArmorItem* armorItem = (ArmorItem*) armor->item;
 	if (armorItem->renderIndex != 42) return bl_PlayerRenderer_prepareArmor_real(self, mob, armorPart, partialTicks);
 
-	std::string texture = bl_armorRenders[armorItem->itemId];
-	bl_EntityRenderer_bindTexture(self, texture);
+	std::string const& texture = bl_armorRenders[armorItem->itemId];
+	bl_EntityRenderer_bindTexture(self, texture, 0);
 
 	HumanoidModel* armorModel = armorPart == 2 ? self->modelArmor : self->modelArmorChestplate;
 	armorModel->bipedHead.showModel = armorPart == 0;
@@ -120,8 +123,8 @@ void bl_cape_init(void* mcpelibinfo) {
 	bl_ModelPart_render = (void (*)(ModelPart*, float))
 		dlsym(mcpelibinfo, "_ZN9ModelPart6renderEf");
 */
-	bl_EntityRenderer_bindTexture = (void (*)(ModelRenderer*, std::string))
-		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSs");
+	bl_EntityRenderer_bindTexture = (void (*)(ModelRenderer*, std::string const&, int))
+		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSsi");
 
 	void** playerRendererVtable = (void**) dobby_dlsym(mcpelibinfo, "_ZTV14PlayerRenderer");
 	bl_PlayerRenderer_prepareArmor_real = (int (*)(PlayerRenderer*, Entity*, int, float))

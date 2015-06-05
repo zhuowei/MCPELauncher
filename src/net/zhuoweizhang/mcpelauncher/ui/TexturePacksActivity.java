@@ -83,6 +83,7 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 	}
 
 	private void addTexturePack(int index, TexturePackDescription desc) {
+		Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", true).apply();
 		for (TexturePackDescription d: list) {
 			if (d.path.equals(desc.path)) return;
 		}

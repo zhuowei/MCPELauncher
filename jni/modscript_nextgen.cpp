@@ -32,8 +32,6 @@
 #include "mcpe/synchedentitydata.h"
 #include "mcpe/mobeffect.h"
 
-#define DLSYM_DEBUG
-
 typedef void RakNetInstance;
 typedef void Font;
 
@@ -44,8 +42,8 @@ typedef void Font;
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
 #define BLOCK_VTABLE_SIZE 0x118
-#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 10
-#define BLOCK_VTABLE_GET_COLOR 47
+#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
+#define BLOCK_VTABLE_GET_COLOR 45
 //#define BLOCK_VTABLE_GET_AABB 14
 // Mob::getTexture
 #define MOB_TEXTURE_OFFSET 2996
@@ -725,22 +723,20 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Ent
 static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
 	JNIEnv *env;
 
-	bl_Level_removeEntity_real(level, entity);
-
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
 
-	bl_removedEntity = entity;
+	bl_removedEntity = NULL;
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(J)V");
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->entityId);
 
-	bl_removedEntity = NULL;
+	bl_Level_removeEntity_real(level, entity);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -1702,18 +1698,20 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
   (JNIEnv *env, jclass clazz, jint screen) {
-	bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
+	//bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
   (JNIEnv *env, jclass clazz) {
-	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
+	//bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
   (JNIEnv *env, jclass clazz) {
+	/* FIXME 0.11
 	void* progress = operator new(224);
 	bl_ProgressScreen_ProgressScreen(progress);
 	bl_MinecraftClient_setScreen(bl_minecraft, progress);
+	*/
 }
 
 void bl_Mob_die_hook(Entity* entity1, EntityDamageSource& damageSource) {
@@ -1930,7 +1928,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
 	// Edit the dlsym for Item::items
-	Elf_Sym* itemsSym = dobby_elfsym((void*) mcpelibhandle, "_ZN4Item5itemsE");
+	Elf_Sym* itemsSym = (Elf_Sym*) bl_marauder_translation_function(
+		(void*) dobby_elfsym((void*) mcpelibhandle, "_ZN4Item5itemsE"));
 	// since value + base = addr:
 	Elf_Addr oldValue = itemsSym->st_value;
 	itemsSym->st_value = ((uintptr_t) &bl_items) - mcpelibhandle->base;
@@ -1966,9 +1965,10 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		return;
 	}
 	bool got_success = false;
+	void** got_rw = (void**) bl_marauder_translation_function((void*) got);
 	for (int i = 0; i < 5000; i++) {
 		if (got[i] == originalItemsAddress) {
-			got[i] = &bl_items;
+			got_rw[i] = &bl_items;
 			got_success = true;
 			break;
 		}
@@ -2100,16 +2100,20 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
 	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
 	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
-	void* handleChatPacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10ChatPacket");
-	void* handleReal;
+	// FIXME 0.11
+	//void* handleChatPacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10ChatPacket");
+	//void* handleReal;
 	//mcpelauncher_hook(handleChatPacket, (void*) &bl_ClientSideNetworkHandler_handleChatPacket_hook, &handleReal);
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
-	bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
+	// FIXME 0.11
+	//bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
 	bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
-	void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
+	// FIXME 0.11
+	//void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
 	//mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,
 	//	(void**) &bl_ClientSideNetworkHandler_handleMessagePacket_real);
-	bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
+	// FIXME 0.11
+	//bl_MessagePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13MessagePacket");
 #if 0
 	bl_CompoundTag_putString = (void (*)(void*, std::string, std::string))
 		dobby_dlsym(mcpelibhandle, "_ZN11CompoundTag9putStringERKSsS1_");
@@ -2131,7 +2135,7 @@ void bl_setuphooks_cppside() {
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, Vec3 const&, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3S3_i");
 	bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
-	bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
+	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
 		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
