@@ -1546,8 +1546,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public void rideAnimal(Object /* Flynn */rider, Object mount) {
-			throw new RuntimeException("FIXME 0.11");
-			//nativeRideAnimal((Long) rider, (Long) mount);
+			nativeRideAnimal(getEntityId(rider), getEntityId(mount));
 		}
 
 		@JSFunction
@@ -2125,8 +2124,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void rideAnimal(Object /* insert funny reference */rider, Object mount) {
-			throw new RuntimeException("FIXME 0.11");
-			//nativeRideAnimal((Long) rider, (Long) mount);
+			nativeRideAnimal(getEntityId(rider), getEntityId(mount));
 		}
 
 		@JSStaticFunction
@@ -2464,6 +2462,8 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void selectLevel(String levelDir) {
+			throw new RuntimeException("FIXME 0.11");
+			/*
 			if (levelDir.equals(ScriptManager.worldDir)) {
 				System.err.println("Attempted to load level that is already loaded - ignore");
 				return;
@@ -2472,6 +2472,7 @@ public class ScriptManager {
 			// nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
 			requestSelectLevel.dir = levelDir;
+			*/
 		}
 
 		@JSStaticFunction
@@ -2833,6 +2834,8 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void joinServer(String serverAddress, int port) {
+			throw new RuntimeException("FIXME 0.11");
+			/*
 			setRequestLeaveGame();
 			requestJoinServer = new JoinServerRequest();
 			String resolvedAddress;
@@ -2844,13 +2847,17 @@ public class ScriptManager {
 			}
 			requestJoinServer.serverAddress = resolvedAddress;
 			requestJoinServer.serverPort = port;
+			*/
 		}
 
 		@JSStaticFunction
 		public static void sendChat(String message) {
+			throw new RuntimeException("FIXME 0.11");
+			/*
 			if (!isRemote)
 				return;
 			nativeSendChat(message);
+			*/
 		}
 
 		@JSStaticFunction

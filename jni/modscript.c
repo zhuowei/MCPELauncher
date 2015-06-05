@@ -71,6 +71,12 @@ typedef struct {
 #define MINECRAFT_LOCAL_PLAYER_OFFSET 332 // MinecraftClient::selectLevel; look for constructor
 #endif
 #define GAMERENDERER_GETFOV_SIZE 0xbc
+// MinecartRideable::interactWithPlayer
+#define ENTITY_VTABLE_OFFSET_START_RIDING 25
+// LegacyClientNetworkHandler::handleEntityLink
+#define ENTITY_VTABLE_OFFSET_STOP_RIDING 100
+// already /4; from Inventory::selectSlot
+#define INVENTORY_SELECTED_SLOT_OFFSET 8
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -718,15 +724,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
   (JNIEnv *env, jclass clazz, jlong riderId, jlong mountId) {
-	//use vtable so the rider doesn't have to be a player (useful?)
-	/*
 	Entity* rider = bl_getEntityWrapper(bl_level, riderId);
 	Entity* mount = bl_getEntityWrapper(bl_level, mountId);
 	if (rider == NULL) return;
-	void* vtable = rider->vtable[19];
-	void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
-	fn(rider, mount);
-	*/
+	if (mount == NULL) {
+		void* vtable = rider->vtable[ENTITY_VTABLE_OFFSET_STOP_RIDING];
+		void (*fn)(Entity*, bool) = vtable;
+		fn(rider, true);
+	} else {
+		void* vtable = rider->vtable[ENTITY_VTABLE_OFFSET_START_RIDING];
+		void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
+		fn(rider, mount);
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
@@ -922,7 +931,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (bl_localplayer == NULL) return 0;
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	if (invPtr == NULL) return 0;
-	return ((int*) invPtr)[10];
+	return ((int*) invPtr)[INVENTORY_SELECTED_SLOT_OFFSET];
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
@@ -1207,7 +1216,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN17FurnaceTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
-	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer7getItemEi");
+	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZNK16FillingContainer7getItemEi");
 	bl_Player_getArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8getArmorEi");
 	bl_Player_setArmor = dlsym(RTLD_DEFAULT, "_ZN6Player8setArmorEiPK12ItemInstance");
 
