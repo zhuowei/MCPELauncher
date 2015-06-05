@@ -572,25 +572,6 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 	return bl_Level_getTime(bl_level);
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
-/*
-	ItemInstance* instance = bl_newItemInstance(id, count, damage);
-
-	Entity* entity = bl_EntityFactory_CreateEntity(64, bl_level->tileSource);
-	if (entity == NULL) {
-		//WTF?
-		return 0;
-	}
-	bl_Entity_setPos_helper(entity, x, y, z);
-	Entity* entity2 = bl_Entity_spawnAtLocation(entity, instance, range);
-	return entity2->entityId;
-	//TODO: WTF, MrARM: why spawn an entity, use its spawn at location to make it drop another entity,
-	//and then never use the original?!
-	//(Potential memory leak?)
-*/
-}
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSpawn
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
 	if (bl_level == NULL) return;

@@ -1361,7 +1361,7 @@ public class ScriptManager {
 
 	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
 
-	public static native int nativeDropItem(float x, float y, float z, float range, int id,
+	public static native long nativeDropItem(float x, float y, float z, float range, int id,
 			int count, int damage);
 
 	// KsyMC's additions
@@ -1435,6 +1435,7 @@ public class ScriptManager {
 		boolean ambient, boolean showParticles);
 	public static native void nativeMobRemoveEffect(long entity, int id);
 	public static native void nativeMobRemoveAllEffects(long entity);
+	public static native int nativeGetItemEntityItem(long entity, int type);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1762,10 +1763,9 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static int dropItem(double x, double y, double z, double range, int id, int count,
+		public static long dropItem(double x, double y, double z, double range, int id, int count,
 				int damage) {
-			throw new RuntimeException("FIXME 0.11");
-			//return nativeDropItem((float) x, (float) y, (float) z, (float) range, id, count, damage);
+			return nativeDropItem((float) x, (float) y, (float) z, (float) range, id, count, damage);
 		}
 
 		@JSStaticFunction
@@ -2350,6 +2350,36 @@ public class ScriptManager {
 			}
 			
 			nativeMobRemoveAllEffects(entityId);
+		}
+
+		@JSStaticFunction
+		public static int getItemEntityId(Object entity) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId != EntityType.ITEM) {
+				throw new RuntimeException("getItemEntity only works on item entities: got " + typeId);
+			}
+			return nativeGetItemEntityItem(entityId, ITEMID);
+		}
+
+		@JSStaticFunction
+		public static int getItemEntityData(Object entity) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId != EntityType.ITEM) {
+				throw new RuntimeException("getItemEntity only works on item entities");
+			}
+			return nativeGetItemEntityItem(entityId, DAMAGE);
+		}
+
+		@JSStaticFunction
+		public static int getItemEntityCount(Object entity) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId != EntityType.ITEM) {
+				throw new RuntimeException("getItemEntity only works on item entities");
+			}
+			return nativeGetItemEntityItem(entityId, AMOUNT);
 		}
 
 

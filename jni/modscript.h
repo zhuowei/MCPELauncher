@@ -718,7 +718,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
  * Method:    nativeDropItem
  * Signature: (FFFFIII)I
  */
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *, jclass, jfloat, jfloat, jfloat, jfloat, jint, jint, jint);
 
 /*

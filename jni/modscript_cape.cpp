@@ -24,7 +24,7 @@ static int (*bl_PlayerRenderer_prepareArmor_real)(PlayerRenderer* self, Entity* 
 static void (*bl_MobRenderer_setArmor)(MobRenderer*, HumanoidModel*);
 static bool (*bl_ItemInstance_isArmorItem)(ItemInstance*);
 
-std::array<std::string, 512> bl_armorRenders;
+std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 
 extern "C" {
 // hooked outside of this file: hooks HumanoidModel::HumanoidModel

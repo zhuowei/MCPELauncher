@@ -8,7 +8,6 @@ static const char* checkTamperDec(const char* in, char* buf) {
 }
 
 static int checkTamperCmp(const char* in, const char* decin) {
-	char buf[80];
 	char a, b;
 	while((a = *in++) & (b = *decin++)) {
 		if (a != (b ^ 0x23)) break;

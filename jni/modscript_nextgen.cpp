@@ -80,6 +80,21 @@ typedef void Font;
 // MinecraftClient::handleBack
 #define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
+// found in Tile::initTiles; tile id 4
+const size_t kTileSize = 0x8c;
+// found before TileItem::TileItem
+const size_t kTileItemSize = 80;
+// found in Item::initItems item with id 6
+const size_t kItemSize = 72;
+// found in Item::initItems item with id 4
+const size_t kFoodItemSize = 100;
+// found in Entity::spawnAtLocation
+const size_t kItemEntitySize = 360;
+// found in Entity::spawnAtLocation
+const size_t kItemEntity_pickupDelay_offset = 344;
+// found in ItemEntity::_validateItem
+const size_t kItemEntity_itemInstance_offset = 324;
+
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
@@ -238,7 +253,7 @@ int bl_addItemCreativeInvRequest[256][4];
 int bl_addItemCreativeInvRequestCount = 0;
 
 std::map <int, std::string> bl_nametag_map;
-char bl_stonecutter_status[512];
+char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
 
 static Item** bl_Item_items;
 #if 0
@@ -285,12 +300,18 @@ static void (*bl_Mob_die_real)(Entity*, EntityDamageSource&);
 static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
+static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, float, float, float, ItemInstance&);
+static void (*bl_FoodItem_FoodItem)(Item*, int, int, bool, float);
 
 static bool* bl_Tile_solid;
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
 #define STONECUTTER_STATUS_FORCE_TRUE 2
+
+#define ITEMID 0
+#define DAMAGE 1
+#define AMOUNT 2
 
 #ifdef DLSYM_DEBUG
 
@@ -307,7 +328,8 @@ static bool isLocalAddress(JNIEnv* env, jstring addr);
 __attribute__((__visibility__("hidden")))
 bool bl_onLockDown = false;
 
-Item* bl_items[4096];
+static int bl_item_id_count = 512;
+Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->entityId == entityId) {
@@ -468,7 +490,7 @@ void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int dama
 			if (addTile == NULL) continue;
 
 			bl_CreativeInventryScreen_populateTile_real(addTile, bl_addItemCreativeInvRequest[i][1], bl_addItemCreativeInvRequest[i][2]);
-		} else if (id > 0 && id < 512) {
+		} else if (id > 0 && id < bl_item_id_count) {
 			ItemInstance* instance = bl_newItemInstance(id, 1, 0);
 			if (instance == NULL) continue;
 			Item* addItem = instance->item;
@@ -794,7 +816,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 Item* bl_constructItem(int id) {
-	Item* retval = (Item*) ::operator new((std::size_t) 76);
+	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, id - 0x100);
 	retval->category1 = 2; //tool
 	//retval->category2 = 0;
@@ -802,11 +824,8 @@ Item* bl_constructItem(int id) {
 }
 
 Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
-	Item* retval = (Item*) ::operator new((std::size_t) 88);
-	bl_Item_Item(retval, id - 0x100);
-	retval->vtable = bl_FoodItem_vtable;
-	((int*)retval)[19] = hearts;
-	((float*) retval)[20] = timetoeat; //time to eat
+	Item* retval = (Item*) ::operator new(kFoodItemSize);
+	bl_FoodItem_FoodItem(retval, id - 0x100, hearts, false, timetoeat);
 	retval->category1 = 4; //food
 	//retval->category2 = 0;
 	return retval;
@@ -881,7 +900,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id, jint maxDamage) {
-	if (id <= 0 || id >= 512) return;
+	if (id <= 0 || id >= bl_item_id_count) return;
 	Item* item = bl_Item_items[id];
 	if(item == NULL) return;
 	bl_Item_setMaxDamage(item, maxDamage);
@@ -1106,7 +1125,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
-	Tile* retval = (Tile*) ::operator new((std::size_t) 0x8c);
+	Tile* retval = (Tile*) ::operator new(kTileSize);
 	retval->vtable = bl_CustomBlock_vtable;
 	bl_Tile_Tile(retval, blockId, bl_getMaterial(materialType));
 	retval->vtable = bl_CustomBlock_vtable;
@@ -1121,7 +1140,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	bl_Tile_tiles[blockId] = retval;
 	retval->category1 = 1;
 	//now allocate the item
-	Item* tileItem = (Item*) ::operator new((std::size_t) 84);
+	Item* tileItem = (Item*) ::operator new(kTileItemSize);
 	tileItem->vtable = bl_TileItem_vtable;
 	bl_TileItem_TileItem(tileItem, blockId - 0x100);
 	tileItem->vtable = bl_TileItem_vtable;
@@ -1748,7 +1767,6 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	}
 	Entity* e = entity.get();
 	bl_Entity_setPos_helper(e, x, y, z);
-	bl_level->addEntity(std::move(entity));
 
 	//skins
 	if (skinPath != NULL && type < 64) {
@@ -1757,8 +1775,25 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
 	}
 
+	bl_level->addEntity(std::move(entity));
+
 	return e->entityId;
 
+}
+
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
+
+	ItemInstance* instance = bl_newItemInstance(id, count, damage);
+
+	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
+	bl_ItemEntity_ItemEntity(entity, *(bl_level->tileSource), x, y + range, z, *instance);
+
+	*((int*) (((uintptr_t) entity) + kItemEntity_pickupDelay_offset)) = 10; // 0.5 seconds
+
+	bl_level->addEntity(std::unique_ptr<Entity>(entity));
+
+	return entity->entityId;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetUseController
@@ -1818,6 +1853,23 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 	bl_Mob_removeAllEffects(entity);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemEntityItem
+  (JNIEnv* env, jclass clazz, jlong entityId, jint type) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + kItemEntity_itemInstance_offset);
+	switch (type) {
+		case ITEMID:
+			return bl_ItemInstance_getId(instance);
+		case DAMAGE:
+			return instance->damage;
+		case AMOUNT:
+			return instance->count;
+		default:
+			return 0;
+	}
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -1873,8 +1925,6 @@ static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
 
 	return env->CallStaticBooleanMethod(bl_scriptmanager_class, mid, hostJString);
 }
-
-static int bl_item_id_count = 512;
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemIdCount
   (JNIEnv* env, jclass clazz) {
@@ -1941,7 +1991,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
 	}
 	setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
-	bl_item_id_count = 4096;
+	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 }
 
 void bl_setuphooks_cppside() {
@@ -1980,7 +2030,6 @@ void bl_setuphooks_cppside() {
 	bl_dumpVtable(raknetVTable, 0x100);
 	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (void*) &bl_RakNetInstance_connect_hook;
 
-	bl_FoodItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8FoodItem") + 8);
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
@@ -2167,6 +2216,12 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN3Mob12removeEffectEi");
 	bl_Mob_removeAllEffects = (void (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
+
+	bl_FoodItem_FoodItem = (void (*)(Item*, int, int, bool, float))
+		dlsym(mcpelibhandle, "_ZN8FoodItemC1Eiibf");
+
+	bl_ItemEntity_ItemEntity = (void (*)(Entity*, TileSource&, float, float, float, ItemInstance&))
+		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER10TileSourcefffRK12ItemInstance");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

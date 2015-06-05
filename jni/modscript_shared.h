@@ -57,11 +57,14 @@ void bl_dumpVtable(void** vtable, size_t size);
 #define ITEM_TYPE_STANDARD 0
 #define ITEM_TYPE_FOOD 1
 
+#define BL_ITEMS_EXPANDED_COUNT 4096
+
 #ifdef __cplusplus
-extern std::array<std::string, 512> bl_armorRenders;
+extern std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 #endif
 
 void bl_Entity_setPos_helper(Entity*, float, float, float);
+
 
 #ifdef __cplusplus
 }
