@@ -171,8 +171,8 @@ static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
 static Tile** bl_Tile_tiles;
-static int* bl_Tile_lightEmission;
-static int* bl_Tile_lightBlock;
+static unsigned char* bl_Tile_lightEmission;
+static unsigned char* bl_Tile_lightBlock;
 
 static void (*bl_Item_setNameID)(Item*, std::string const&);
 
@@ -213,7 +213,7 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-//static std::string const (*bl_ItemInstance_getDescriptionId)(ItemInstance*);
+static std::string const (*bl_ItemInstance_getName)(ItemInstance*);
 //static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
@@ -1032,8 +1032,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
-#if 0
-	if (itemId <= 0 || itemId >= 512) return NULL;
+	if (itemId <= 0 || itemId >= bl_item_id_count) return nullptr;
 	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return NULL;
 	switch(itemId) {
@@ -1042,21 +1041,18 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 			//these return blank strings. Blank strings will kill libstdc++ since we are not using the same blank string.
 			return NULL;
 	}
-	std::string descriptionId = bl_ItemInstance_getDescriptionId(myStack);
+	std::string descriptionId = bl_ItemInstance_getName(myStack);
 	if (descriptionId.length() <= 0) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dead tile: %i\n", itemId);
 	}
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
 	std::string returnVal = descriptionId;
-	/*
 	if (!raw) {
-		returnVal = (*bl_I18n_strings)[descriptionId];
+		std::vector<std::string> tempList;
+		returnVal = I18n::get(descriptionId, tempList);
 	}
-	*/
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
-#endif
-	return nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
@@ -2051,8 +2047,8 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
-	bl_Tile_lightEmission = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
-	bl_Tile_lightBlock = (int*) dlsym(RTLD_DEFAULT, "_ZN4Tile10lightBlockE");
+	bl_Tile_lightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
+	bl_Tile_lightBlock = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN4Tile10lightBlockE");
 
 #if 0
 #define CHECKVTABLE(actualfn) \
@@ -2078,7 +2074,7 @@ void bl_setuphooks_cppside() {
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZN3Mob10isSneakingEv");
 
-	//bl_ItemInstance_getDescriptionId = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance16getDescriptionIdEv");
+	bl_ItemInstance_getName = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getNameEv");
 	//bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");

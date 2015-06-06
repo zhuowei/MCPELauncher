@@ -34,7 +34,6 @@ public class RendererManager {
 		@JSStaticFunction
 		public static NativeRenderer createHumanoidRenderer() {
 			int id = nativeCreateHumanoidRenderer();
-			// FIXME 0.11
 			return new NativeRenderer(id);
 		}
 		@Override

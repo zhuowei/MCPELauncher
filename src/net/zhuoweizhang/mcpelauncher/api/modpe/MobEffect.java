@@ -57,7 +57,7 @@ public class MobEffect {
 	public static int populate(String a) {
 		int id = nativePopulate("_ZN9MobEffect" + a.length() + a + "E");
 		effectIds.put(id, a);
-		System.out.println("MobEffect " + a + ": " + id);
+		//System.out.println("MobEffect " + a + ": " + id);
 		return id;
 	}
 }
