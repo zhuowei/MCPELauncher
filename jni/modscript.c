@@ -169,6 +169,8 @@ static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, int, int, 
 
 static void (*bl_LevelRenderer_allChanged)(void*);
 
+static int (*bl_FillingContainer_removeResource)(void*, ItemInstance*, bool);
+
 static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
@@ -746,10 +748,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
   (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
 	if (bl_localplayer == NULL) return;
+	bool remove = amount < 0;
+	if (remove) amount *= -1;
 	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 	//we grab the inventory instance from the player
 	void* invPtr = *((void**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
-	bl_Inventory_add(invPtr, instance);
+	if (!remove) {
+		bl_Inventory_add(invPtr, instance);
+	} else {
+		bl_FillingContainer_removeResource(invPtr, instance, 0);
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetNightMode
@@ -1245,6 +1253,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	bl_FillingContainer_replaceSlot = dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
 	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
+	bl_FillingContainer_removeResource = dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 
 	bl_setuphooks_cppside();
 
