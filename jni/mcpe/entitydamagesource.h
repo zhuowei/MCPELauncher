@@ -4,6 +4,7 @@ class EntityDamageSource {
 public:
 	int source;
 	virtual ~EntityDamageSource();
+	virtual bool isChildEntitySource();
 	virtual bool isEntitySource();
 	virtual bool isTileSource();
 	virtual std::string getDeathMessage(std::string, Entity*);
@@ -15,5 +16,5 @@ public:
 	virtual ~EntityDamageByEntitySource();
 	virtual bool isEntitySource() override;
 	virtual std::string getDeathMessage(std::string, Entity*) override;
-	virtual bool isChildEntitySource();
+	virtual bool isChildEntitySource() override;
 };

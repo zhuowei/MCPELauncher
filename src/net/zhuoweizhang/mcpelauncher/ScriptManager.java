@@ -423,7 +423,7 @@ public class ScriptManager {
 
 	// KsyMC's additions
 	public static void mobDieCallback(long attacker, long victim) {
-		callScriptMethod("deathHook", attacker == -1 ? null : attacker, victim);
+		callScriptMethod("deathHook", attacker == -1 ? -1 : attacker, victim);
 	}
 
 	// Other nonstandard callbacks
