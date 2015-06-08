@@ -1841,6 +1841,7 @@ public class MainActivity extends NativeActivity {
 	 * ingame/show ads, etc
 	 */
 	public void setLevelCallback(boolean isRemote) {
+		System.out.println("Set level callback: " + isRemote);
 		if (isRemote && ScriptManager.scripts.size() > 0) {
 			this.runOnUiThread(new Runnable() {
 				public void run() {

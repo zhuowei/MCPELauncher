@@ -463,6 +463,12 @@ public class ScriptManager {
 		serverAddress = hostname;
 		serverPort = port;
 		ScriptManager.isRemote = true;
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.setLevelCallback(!ScriptManager.scriptingEnabled);
+			}
+		}
 	}
 
 	public static void frameCallback() {
@@ -1403,7 +1409,7 @@ public class ScriptManager {
 
 	public static native void nativeDefinePlaceholderBlocks();
 
-	public static native int nativePlayerGetPointedEntity();
+	public static native long nativePlayerGetPointedEntity();
 
 	public static native int nativePlayerGetPointedBlock(int type);
 

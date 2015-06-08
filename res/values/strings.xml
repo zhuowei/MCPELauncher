@@ -133,7 +133,7 @@ For full licensing information, check the Minecraft Forums thread.\n</string>
     <string name="script_import_from_url_enter">Enter the address of the script to import</string>
     <string name="script_import_too_many">Upgrade to BlockLauncher Pro to patch more than one script at a time</string>
     <string name="script_execution_error">An error occurred in a ModPE Script</string>
-    <string name="script_disabled_in_multiplayer">Your ModPE Scripts have been disabled in multiplayer, as they may cause crashes. They will be re-enabled when you disconnect from the server.</string>
+    <string name="script_disabled_in_multiplayer">Your ModPE Scripts have been disabled in multiplayer. They will be re-enabled when you disconnect from the server.</string>
     <string name="script_minecraft_version_incompatible">ModPE scripts are not supported on your version of Minecraft PE. Some methods in scripts may not function, or may crash the launcher. Use at your own risk.</string>
     <string name="script_import_from_intent_warning">Do you want to import this script? It will get access to the same resources as your BlockLauncher instance, including potentially your passwords and other sensitive information.</string>
     <string name="script_view_source">View source</string>

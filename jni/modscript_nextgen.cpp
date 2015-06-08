@@ -1510,7 +1510,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
   (JNIEnv *env, jclass clazz) {
 	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
 	if (objectMouseOver->type != HIT_RESULT_ENTITY) return -1;
