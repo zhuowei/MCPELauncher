@@ -1093,7 +1093,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
-	bl_cape_init(mcpelibhandle);
 /*
 	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
@@ -1256,6 +1255,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_FillingContainer_removeResource = dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 
 	bl_setuphooks_cppside();
+
+	bl_cape_init(mcpelibhandle);
 
 	bl_hasinit_script = 1;
 

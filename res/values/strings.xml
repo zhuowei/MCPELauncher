@@ -186,6 +186,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
 
     <string name="about_oss_license_info">View library licenses</string>
     <string name="pref_zz_signal_handler">Write crash logs to shared storage</string>
+    <string name="minecraft_version_not_supported">This version of Minecraft PE is not supported by this version of BlockLauncher.\nYou have Minecraft PE MINECRAFT_VERSION, but BlockLauncher only supports Minecraft PE SUPPORTED_VERSION. Please update your copy of Minecraft PE.</string>
 
     <string name="report_error_title">Oh nose everything broke</string>
 </resources>

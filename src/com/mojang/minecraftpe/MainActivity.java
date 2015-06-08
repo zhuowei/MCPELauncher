@@ -65,6 +65,7 @@ import net.zhuoweizhang.mcpelauncher.ui.ManagePatchesActivity;
 import net.zhuoweizhang.mcpelauncher.ui.ManageScriptsActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
+import net.zhuoweizhang.mcpelauncher.ui.MinecraftNotSupportedActivity;
 import net.zhuoweizhang.mcpelauncher.texture.*;
 import net.zhuoweizhang.pokerface.PokerFace;
 
@@ -252,6 +253,21 @@ public class MainActivity extends NativeActivity {
 				Log.w(TAG, "OMG hipster version code found - breaking mod compat before it's cool");
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
+
+			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith("0.11") && !mcPkgInfo.versionName.startsWith("0.11.0");
+
+			if (!isSupportedVersion) {
+				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
+				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
+				intent.putExtra("supportedVersion", "0.11.1");
+				startActivity(intent);
+				finish();
+				try {
+					Thread.sleep(1000);
+					android.os.Process.killProcess(android.os.Process.myPid());
+				} catch (Throwable t) {
+				}
+			}
 
 			fixMyEpicFail();
 
@@ -2158,10 +2174,12 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		if (version.matches("0\\.11\\.0.*")) return true;
+		if (version.matches("0\\.11\\.1.*")) return true;
 		return false;
 	}
 
 	private void initAtlasMeta() {
+		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
 				"images/terrain-atlas/", new TGAImageLoader(), 1, 4);
