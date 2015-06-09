@@ -139,8 +139,7 @@ Para obtener información sobre la licencia completa, compruebe el tema en los f
     <string name="selinux_broke_everything">Desafortunadamente, BlockLauncher no puede ejecutarse en el dispositivo como un software de seguridad en su teléfono, tales como Samsung Knox o SELinux, es la prevención de parches en vivo.\n\n
 Estamos trabajando en una solución para esto, pero mientras tanto, las funciones BlockLauncher se limitan a parches.mods y carga textura packs.\n\nModPE scripts no se pueden cargar, y todos los parches.mod requieren un reinicio.</string>
 
-    <!-- yay Google translate -->
-    <string name="minecraft_version_not_supported">Esta versión de Minecraft PE no es compatible con esta versión de BlockLauncher.\nUsted tiene Minecraft PE MINECRAFT_VERSION, pero BlockLauncher solamente soporta Minecraft PE SUPPORTED_VERSION. Por favor, actualice su copia de Minecraft PE.</string>
+    <string name="minecraft_version_not_supported">Esta versión de Minecraft PE no es soportada por esta versión de BlockLauncher.\nTu tienes de momento Minecraft PE MINECRAFT_VERSION, pero esta versión de BlockLauncher solo soporta Minecraft PE SUPPORTED_VERSION. Por favor actualiza tu copia de Minecraft PE.</string>
 
     <string name="permlab_mcpelauncher_addon">BlockLauncher Complemento</string>
     <string name="permdesc_mcpelauncher_addon">Permite que la aplicación se cargue como un complemento a BlockLauncher. Esto significa que esta aplicación puede acceder a la red, el almacenamiento, y hacer cualquier cosa Minecraft PE tiene el permiso para hacerlo.</string>

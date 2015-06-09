@@ -1461,6 +1461,7 @@ public class ScriptManager {
 	public static native void nativeSetUseController(boolean controller);
 	public static native void nativeDumpVtable(String name, int size);
 	public static native int nativeGetItemIdCount();
+	public static native void nativeSetExitEnabled(boolean enabled);
 
 	public static class ScriptState {
 		public Script script;

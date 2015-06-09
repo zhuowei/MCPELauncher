@@ -77,6 +77,8 @@ typedef struct {
 #define ENTITY_VTABLE_OFFSET_STOP_RIDING 100
 // already /4; from Inventory::selectSlot
 #define INVENTORY_SELECTED_SLOT_OFFSET 8
+// Touch::StartMenuScreen::handleBackEvent + 2(!)
+#define MINECRAFT_VTABLE_OFFSET_QUIT 23
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -1071,6 +1073,21 @@ static void setupIsModded() {
 #endif
 }
 
+static bool exitEnabled = true;
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetExitEnabled
+  (JNIEnv* env, jclass clazz, jboolean p) {
+	exitEnabled = p;
+}
+
+static void (*App_quit_real)(void*);
+static void App_quit_hook(void* self) {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "app quit");
+	if (exitEnabled) {
+		App_quit_real(self);
+	}
+}
+
 #include "checktamper.h"
 
 void bl_prepatch_cppside(void*);
@@ -1089,6 +1106,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
+	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
+	App_quit_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT];
+	minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT] = &App_quit_hook;
 	setupIsModded();
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
