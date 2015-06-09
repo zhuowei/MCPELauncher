@@ -186,8 +186,8 @@ typedef struct {
 	bool transparent; //24
 	bool showModel; //25
 	char filler1[30]; //26
-	int textureWidth; //56
-	int textureHeight; //60
+	float textureWidth; //56
+	float textureHeight; //60
 	MaterialPtr* material; //64
 	int textureOffsetX;//68
 	int textureOffsetY;//72
