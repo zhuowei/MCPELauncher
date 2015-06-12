@@ -1801,6 +1801,9 @@ public class MainActivity extends NativeActivity {
 
 	public boolean isTablet() {
 		// metric: >= sw600dp
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+			return getResources().getConfiguration().screenHeightDp >= 600;
+		}
 		return getResources().getConfiguration().smallestScreenWidthDp >= 600;
 	}
 

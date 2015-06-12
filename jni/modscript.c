@@ -127,7 +127,7 @@ int (*bl_TileSource_getData)(TileSource*, int, int, int);
 static void (*bl_Level_setNightMode)(Level*, int);
 static void (*bl_Entity_setRot)(Entity*, float, float);
 static void (*bl_GameMode_tick_real)(void*);
-static int (*bl_TileSource_getRawBrightness)(TileSource*, int, int, int, cppbool);
+static int (*bl_TileSource_getRawBrightness)(unsigned char*, TileSource*, int, int, int, cppbool);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_GameRenderer_getFov)(void*, float, int);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
@@ -684,7 +684,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
-	return bl_TileSource_getRawBrightness(bl_level->tileSource, x, y, z, 1); //all observed uses of getRawBrightness pass true
+	unsigned char retval;
+	bl_TileSource_getRawBrightness(&retval, bl_level->tileSource, x, y, z, 1); //all observed uses of getRawBrightness pass true
+	return retval;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
@@ -1238,9 +1240,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
 	bl_TileSource_getTileEntity = dlsym(RTLD_DEFAULT, "_ZN10TileSource13getTileEntityEiii");
 	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
-	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7getItemEi");
+	bl_ChestTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZNK15ChestTileEntity7getItemEi");
 	bl_FurnaceTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN17FurnaceTileEntity7setItemEiP12ItemInstance");
-	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZN17FurnaceTileEntity7getItemEi");
+	bl_FurnaceTileEntity_getItem = dlsym(RTLD_DEFAULT, "_ZNK17FurnaceTileEntity7getItemEi");
 	bl_Entity_setOnFire = dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
 	bl_FillingContainer_clearSlot = dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = dlsym(RTLD_DEFAULT, "_ZNK16FillingContainer7getItemEi");

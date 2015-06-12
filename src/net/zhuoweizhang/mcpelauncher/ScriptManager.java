@@ -1812,26 +1812,22 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setChestSlot(int x, int y, int z, int slot, int id, int damage,
 				int amount) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//nativeAddItemChest(x, y, z, slot, id, damage, amount);
+			nativeAddItemChest(x, y, z, slot, id, damage, amount);
 		}
 
 		@JSStaticFunction
 		public static int getChestSlot(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemChest(x, y, z, slot);
+			return nativeGetItemChest(x, y, z, slot);
 		}
 
 		@JSStaticFunction
 		public static int getChestSlotData(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemDataChest(x, y, z, slot);
+			return nativeGetItemDataChest(x, y, z, slot);
 		}
 
 		@JSStaticFunction
 		public static int getChestSlotCount(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemCountChest(x, y, z, slot);
+			return nativeGetItemCountChest(x, y, z, slot);
 		}
 
 		// KsyMC's additions
@@ -1859,31 +1855,27 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage,
 				int amount) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
+			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
 		}
 
 		@JSStaticFunction
 		public static int getFurnaceSlot(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemFurnace(x, y, z, slot);
+			return nativeGetItemFurnace(x, y, z, slot);
 		}
 
 		@JSStaticFunction
 		public static int getFurnaceSlotData(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemDataFurnace(x, y, z, slot);
+			return nativeGetItemDataFurnace(x, y, z, slot);
 		}
 
 		@JSStaticFunction
 		public static int getFurnaceSlotCount(int x, int y, int z, int slot) {
-			throw new RuntimeException("Not supported yet on MCPE 0.11");// FIXME 0.11
-			//return nativeGetItemCountFurnace(x, y, z, slot);
+			return nativeGetItemCountFurnace(x, y, z, slot);
 		}
 
 		@JSStaticFunction
 		public static void addParticle(int type, double x, double y, double z, double xVel, double yVel, double zVel, int size) {
-			if (type < 0 || type > 15) throw new RuntimeException("Invalid particle type " + type + ": should be between 0 and 15");
+			if (type < 0 || type > 25) throw new RuntimeException("Invalid particle type " + type + ": should be between 0 and 25");
 			nativeLevelAddParticle(type, (float) x, (float) y, (float) z, (float) xVel, (float) yVel, (float) zVel, size);
 		}
 
