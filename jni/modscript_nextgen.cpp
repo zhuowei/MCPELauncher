@@ -198,7 +198,7 @@ static unsigned char* bl_Tile_lightBlock;
 
 static void (*bl_Item_setNameID)(Item*, std::string const&);
 
-static void (*bl_Minecraft_selectLevel)(Minecraft*, std::string const&, std::string const&, void*);
+static void (*bl_MinecraftClient_startLocalServer)(Minecraft*, std::string const&, std::string const&, void*);
 
 static void (*bl_MinecraftClient_leaveGame)(Minecraft*, bool saveWorld);
 static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
@@ -920,9 +920,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
-  (JNIEnv *env, jclass clazz, jstring worlddir) {
-/* FIXME 0.11
+  (JNIEnv *env, jclass clazz, jstring worlddir, jstring worldName) {
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
+	const char * nameUtfChars = env->GetStringUTFChars(worldName, NULL);
 	std::string worlddirstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(worlddir, utfChars);
 	LevelSettings levelSettings = {
@@ -935,9 +935,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		0,
 	};
 
-	bl_Minecraft_selectLevel(bl_minecraft, worlddirstr, worlddirstr, &levelSettings);
-	bl_Minecraft_hostMultiplayer(bl_minecraft, 19132);
-*/
+	bl_MinecraftClient_startLocalServer(bl_minecraft, worlddirstr, std::string(nameUtfChars), &levelSettings);
+	env->ReleaseStringUTFChars(worlddir, utfChars);
+	env->ReleaseStringUTFChars(worldName, nameUtfChars);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
@@ -1706,12 +1706,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
   (JNIEnv *env, jclass clazz, jint screen) {
-	//bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
+	bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
   (JNIEnv *env, jclass clazz) {
-	//bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
+	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
   (JNIEnv *env, jclass clazz) {
@@ -2020,10 +2020,10 @@ void bl_setuphooks_cppside() {
 	bl_Item_setNameID = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item9setNameIDERKSs");
 
 	// FIXME 0.11
-	bl_Minecraft_selectLevel = (void (*) (Minecraft*, std::string const&, std::string const&, void*)) 
-		dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
-	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool)) dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
-	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(RTLD_DEFAULT, "_ZN9Minecraft12setLeaveGameEv");
+	bl_MinecraftClient_startLocalServer = (void (*) (Minecraft*, std::string const&, std::string const&, void*))
+		dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
+	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
+	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
 	//	dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");

@@ -2,6 +2,7 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.FileReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -361,9 +362,8 @@ public class ScriptManager {
 		if (sensorEnabled)
 			updatePlayerOrientation();
 		if (requestLeaveGame && requestLeaveGameCounter-- <= 0) {
-			//nativeScreenChooserSetScreen(3);
+			nativeScreenChooserSetScreen(1);
 			nativeLeaveGame(false);
-			//nativeScreenChooserSetScreen(1);
 			requestLeaveGame = false;
 			if (MainActivity.currentMainActivity != null) {
 				final MainActivity main = MainActivity.currentMainActivity.get();
@@ -491,7 +491,7 @@ public class ScriptManager {
 				requestSelectLevelHasSetScreen = true;
 				nativeRequestFrameCallback();
 			} else {
-				nativeSelectLevel(requestSelectLevel.dir);
+				nativeSelectLevel(requestSelectLevel.dir, requestSelectLevel.name);
 				requestSelectLevel = null;
 				requestSelectLevelHasSetScreen = false;
 			}
@@ -1254,7 +1254,7 @@ public class ScriptManager {
 
 	public static native int nativeGetAnimalAge(long entityId);
 
-	public static native void nativeSelectLevel(String levelName);
+	public static native void nativeSelectLevel(String levelName, String levelRealName);
 
 	public static native void nativeLeaveGame(boolean saveMultiplayerWorld);
 
@@ -2467,20 +2467,55 @@ public class ScriptManager {
 		}
 
 		// nonstandard
+		private static String getLevelName(File worldDir) throws IOException {
+			File nameFile = new File(worldDir, "levelname.txt");
+			if (!nameFile.exists()) return null;
+			FileInputStream fis = new FileInputStream(nameFile);
+			byte[] buf = new byte[(int) nameFile.length()];
+			fis.read(buf);
+			fis.close();
+			String worldName = new String(buf, "UTF-8");
+			return worldName;
+		}
 
 		@JSStaticFunction
 		public static void selectLevel(String levelDir) {
-			throw new RuntimeException("FIXME 0.11");
-			/*
-			if (levelDir.equals(ScriptManager.worldDir)) {
+			String levelDirName = levelDir;
+			File worldsDir = new File("/sdcard/games/com.mojang/minecraftWorlds");
+			File theDir = new File(worldsDir, levelDirName);
+			if (!theDir.exists()) {
+				for (File worldDir: worldsDir.listFiles()) {
+					try {
+						String worldName = getLevelName(worldDir);
+						if (worldName != null && worldName.equals(levelDir)) {
+							levelDirName = worldDir.getName();
+							theDir = worldDir;
+							break;
+						}
+					} catch (IOException ie) {
+						ie.printStackTrace();
+					}
+				}
+			}
+			if (!theDir.exists()) {
+				throw new RuntimeException("The selected world " + levelDir + " does not exist.");
+			}
+			if (levelDirName.equals(ScriptManager.worldDir)) {
 				System.err.println("Attempted to load level that is already loaded - ignore");
 				return;
 			}
+			String levelFullName = null;
+			try {
+				levelFullName = getLevelName(theDir);
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			}
+
 			setRequestLeaveGame();
 			// nativeSelectLevel(levelDir);
 			requestSelectLevel = new SelectLevelRequest();
-			requestSelectLevel.dir = levelDir;
-			*/
+			requestSelectLevel.dir = levelDirName;
+			requestSelectLevel.name = levelFullName == null? levelDirName : levelFullName;
 		}
 
 		@JSStaticFunction
