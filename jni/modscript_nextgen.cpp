@@ -236,7 +236,7 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
 static std::string const (*bl_ItemInstance_getName)(ItemInstance*);
-//static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
+static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
@@ -1074,7 +1074,6 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
-#if 0
 	if (itemId <= 0 || itemId >= 512) return false;
 	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
@@ -1082,8 +1081,6 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (set == NULL || set->bounds == NULL) return false;
 	env->SetFloatArrayRegion(outputArray, 0, 6, set->bounds);
 	return true;
-#endif
-	return false;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
@@ -2094,7 +2091,8 @@ void bl_setuphooks_cppside() {
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZN3Mob10isSneakingEv");
 
 	bl_ItemInstance_getName = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getNameEv");
-	//bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
+	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool))
+		dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
 	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int))

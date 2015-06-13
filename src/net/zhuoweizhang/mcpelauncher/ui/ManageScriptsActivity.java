@@ -89,6 +89,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	
 	protected CompoundButton master;
 
+	protected ArrayAdapter<ContentListItem> adapter;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,6 +111,10 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		//if (!versionIsSupported()) {
 		//	showDialog(DIALOG_VERSION_INCOMPATIBLE);
 		//}
+		patches = new ArrayList<ContentListItem>();
+		adapter = new ContentListAdapter(ManageScriptsActivity.this, R.layout.patch_list_item, patches);
+		setListAdapter(adapter);
+
 	}
 	
 	@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -848,9 +854,9 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			@Override
 			public void run() {
 				ContentListItem.sort(items);
-				ManageScriptsActivity.this.patches = items;
-				ArrayAdapter<ContentListItem> adapter = new ContentListAdapter(ManageScriptsActivity.this, R.layout.patch_list_item, patches);
-				setListAdapter(adapter);
+				ManageScriptsActivity.this.patches.clear();
+				ManageScriptsActivity.this.patches.addAll(items);
+				adapter.notifyDataSetChanged();
 				List<String> allPaths = new ArrayList<String>(patches.size());
 				for (ContentListItem i: patches) {
 					String name = i.file.getName();
