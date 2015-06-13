@@ -31,6 +31,7 @@
 #include "mcpe/mobfactory.h"
 #include "mcpe/synchedentitydata.h"
 #include "mcpe/mobeffect.h"
+#include "mcpe/packetsender.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -92,6 +93,8 @@ const size_t kItemEntitySize = 360;
 const size_t kItemEntity_pickupDelay_offset = 344;
 // found in ItemEntity::_validateItem
 const size_t kItemEntity_itemInstance_offset = 324;
+// found in TextPacket::handle
+const int kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -134,6 +137,25 @@ typedef struct {
 	int filler; //48
 } ShapedRecipe; //52 bytes long
 
+class Packet {
+public:
+	Packet();
+	virtual ~Packet();
+};
+
+class TextPacket : public Packet {
+public:
+	TextPacket() {
+	}
+	char filler[13-4]; // 4
+	unsigned char type; //13
+	char filler2[16-14]; // 14
+	std::string username; // 16
+	std::string message; // 20
+	std::vector<std::string> thevector; // 24
+	char filler3[36-28]; // 28
+	virtual ~TextPacket() override;
+};
 
 typedef struct {
 	void** vtable; //0
@@ -230,7 +252,7 @@ static void** bl_ShapelessRecipe_vtable;
 static void (*bl_RakNetInstance_send)(void*, void*);
 static void** bl_SetTimePacket_vtable;
 static void (*bl_Packet_Packet)(void*);
-static void (*bl_ClientSideNetworkHandler_handleMessagePacket_real)(void*, void*, MessagePacket*);
+static void (*bl_ClientNetworkHandler_handleTextPacket_real)(void*, void*, TextPacket*);
 static void** bl_MessagePacket_vtable;
 
 bool bl_text_parse_color_codes = true;
@@ -298,6 +320,7 @@ static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, float, float, float, ItemInstance&);
 static void (*bl_FoodItem_FoodItem)(Item*, int, int, bool, float);
 static void (*bl_Item_addCreativeItem)(short, short);
+static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 
 static bool* bl_Tile_solid;
 
@@ -560,49 +583,43 @@ bool bl_CraftingFilters_isStonecutterItem_hook(ItemInstance const& myitem) {
 	return itemStatus == STONECUTTER_STATUS_FORCE_TRUE;
 }
 
-void bl_ClientSideNetworkHandler_handleChatPacket_hook(void* handler, void* ipaddress, ChatPacket* packet) {
+void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddress, TextPacket* packet) {
+	if (!(packet->type == 0 || packet->type == 1)) { // text or client message
+		// just pass it along
+		bl_ClientNetworkHandler_handleTextPacket_real(handler, ipaddress, packet);
+		return;
+	}
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
+	if (packet->type == 0) { // client message
+		jstring messageJString = env->NewStringUTF(packet->message.c_str());
+		preventDefaultStatus = false;
+		//Call back across JNI into the ScriptManager
+		jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleChatPacketCallback", "(Ljava/lang/String;)V");
 
-	jstring messageJString = env->NewStringUTF(packet->message.c_str());
-	preventDefaultStatus = false;
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleChatPacketCallback", "(Ljava/lang/String;)V");
+		env->CallStaticVoidMethod(bl_scriptmanager_class, mid, messageJString);
+	} else if (packet->type == 1) {
+		if (packet->username.length() == 0 && packet->message == "\xc2" "\xa7" "0BlockLauncher, enable scripts") {
+			bl_onLockDown = false;
+		}
+		jstring senderJString = env->NewStringUTF(packet->username.c_str());
+		jstring messageJString = env->NewStringUTF(packet->message.c_str());
+		preventDefaultStatus = false;
+		//Call back across JNI into the ScriptManager
+		jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleMessagePacketCallback",
+			"(Ljava/lang/String;Ljava/lang/String;)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, messageJString);
+		env->CallStaticVoidMethod(bl_scriptmanager_class, mid, senderJString, messageJString);
+	}
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
 	if (!preventDefaultStatus) {
-		void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
-		bl_Gui_displayClientMessage(mygui, packet->message);
-	}
-}
-
-void bl_ClientSideNetworkHandler_handleMessagePacket_hook(void* handler, void* ipaddress, MessagePacket* packet) {
-	JNIEnv *env;
-	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
-	if (attachStatus == JNI_EDETACHED) {
-		bl_JavaVM->AttachCurrentThread(&env, NULL);
-	}
-
-	jstring senderJString = env->NewStringUTF(packet->sender->text);
-	jstring messageJString = env->NewStringUTF(packet->message->text);
-	preventDefaultStatus = false;
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "handleMessagePacketCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
-
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, senderJString, messageJString);
-
-	if (attachStatus == JNI_EDETACHED) {
-		bl_JavaVM->DetachCurrentThread();
-	}
-	if (!preventDefaultStatus) {
-		bl_ClientSideNetworkHandler_handleMessagePacket_real(handler, ipaddress, packet);
+		bl_ClientNetworkHandler_handleTextPacket_real(handler, ipaddress, packet);
 	}
 }
 
@@ -1375,7 +1392,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//myitem->category2 = mystery1;
 }
 
-void bl_sendPacket(void* packet) {
+void bl_sendPacket(Packet* packet) {
+	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft);
+	sender->send(*packet);
 /*
 	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
 	void* vtable = ((void***) bl_raknet)[0][RAKNET_INSTANCE_VTABLE_OFFSET_SEND];
@@ -1404,16 +1423,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jstring message) {
 	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
 	std::string* myName = bl_Entity_getNameTag(bl_localplayer);
-	MessagePacket packet;
-	bl_Packet_Packet(&packet);
-	packet.vtable = (void**) (((uintptr_t) bl_MessagePacket_vtable) + 8);
-	packet.sender = new RakString;
-	packet.sender->text = (char*) myName->c_str();
-	packet.message = new RakString;
-	packet.message->text = (char*) messageUtfChars;
-	bl_sendPacket(&packet);
-	delete packet.sender;
-	delete packet.message;
+	TextPacket textPacket;
+	textPacket.type = 1;
+	memset(&(textPacket.filler2), 0, sizeof(textPacket.filler2));
+	textPacket.username = *myName;
+	textPacket.message = messageUtfChars;
+	bl_sendPacket(&textPacket);
 	env->ReleaseStringUTFChars(message, messageUtfChars);
 }
 
@@ -1978,10 +1993,14 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	void* ItemInstance__setItem = dlsym(mcpelibhandle, "_ZN12ItemInstance8_setItemEi");
 	unsigned char* setItemCode = (unsigned char*)
 		bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance__setItem) & ~1));
-	if (!(setItemCode[4] == 0x00 && setItemCode[5] == 0x7f)) {
+	if (setItemCode[4] == 0x00 && setItemCode[5] == 0x7f) {
+		setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
+	} else if (setItemCode[2] == 0x00 && setItemCode[3] == 0x7f) {
+		setItemCode[2] = 0x80; setItemCode[3] = 0x5f;
+	} else {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
+		return;
 	}
-	setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 }
 
@@ -2097,9 +2116,18 @@ void bl_setuphooks_cppside() {
 	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
 	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
 	// FIXME 0.11
-	//void* handleChatPacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10ChatPacket");
-	//void* handleReal;
-	//mcpelauncher_hook(handleChatPacket, (void*) &bl_ClientSideNetworkHandler_handleChatPacket_hook, &handleReal);
+	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
+	//mcpelauncher_hook(handleTextPacket, (void*) &bl_ClientNetworkHandler_handleTextPacket_hook,
+	//	(void**) &bl_ClientNetworkHandler_handleTextPacket_real);
+	void** clientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV20ClientNetworkHandler") + 2;
+	// first two entries are removed
+	bl_ClientNetworkHandler_handleTextPacket_real = (void (*)(void*, void*, TextPacket*))
+		clientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket];
+	clientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket] =
+		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
+	void** legacyClientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV26LegacyClientNetworkHandler") + 2;
+	legacyClientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket] =
+		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
 	// FIXME 0.11
 	//bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
@@ -2212,6 +2240,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER10TileSourcefffRK12ItemInstance");
 	bl_Item_addCreativeItem = (void (*)(short, short))
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
+	bl_Minecraft_getPacketSender = (PacketSender* (*)(Minecraft*))
+		dlsym(mcpelibhandle, "_ZN9Minecraft15getPacketSenderEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

@@ -507,19 +507,14 @@ public class ScriptManager {
 			return;
 		callScriptMethod("serverMessageReceiveHook", str);
 		if (BuildConfig.DEBUG) {
-			System.out.println(str);
+			System.out.println("message: " + str);
 		}
 	}
 
 	public static void handleMessagePacketCallback(String sender, String str) {
 		if (str == null || str.length() < 1)
 			return;
-		callScriptMethod("chatReceiveHook", str, sender);
-		if (BuildConfig.DEBUG) {
-			System.out.println(sender + ": " + str);
-		}
-		if (str.equals("BlockLauncher, enable scripts, please and thank you")
-				&& sender.length() == 0) {
+		if (sender.length() == 0 && str.equals("\u00a70BlockLauncher, enable scripts")) {
 			scriptingEnabled = true;
 			nativePreventDefault();
 			if (MainActivity.currentMainActivity != null) {
@@ -528,6 +523,11 @@ public class ScriptManager {
 					main.scriptPrintCallback("Scripts have been re-enabled", "");
 				}
 			}
+
+		}
+		callScriptMethod("chatReceiveHook", str, sender);
+		if (BuildConfig.DEBUG) {
+			System.out.println("chat: " + sender + ": " + str);
 		}
 	}
 
@@ -2859,12 +2859,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void sendChat(String message) {
-			throw new RuntimeException("FIXME 0.11");
-			/*
 			if (!isRemote)
 				return;
 			nativeSendChat(message);
-			*/
 		}
 
 		@JSStaticFunction
