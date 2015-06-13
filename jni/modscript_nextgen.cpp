@@ -1932,6 +1932,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return bl_item_id_count;
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidItem
+  (JNIEnv *env, jclass clazz, jint itemId) {
+	if (itemId == 0) return true;
+	if (itemId < 0 || itemId >= bl_item_id_count) return false;
+	return bl_Item_items[itemId] != nullptr;
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");

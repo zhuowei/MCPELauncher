@@ -1442,6 +1442,7 @@ public class ScriptManager {
 	public static native void nativeMobRemoveEffect(long entity, int id);
 	public static native void nativeMobRemoveAllEffects(long entity);
 	public static native int nativeGetItemEntityItem(long entity, int type);
+	public static native boolean nativeIsValidItem(int id);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2655,7 +2656,7 @@ public class ScriptManager {
 				if (end > temprowLength) end = temprowLength;
 				shape[i] = temprow.substring(begin, end);
 			}
-			nativeAddShapedRecipe(id, count, damage, shape, ingredients);
+			verifyAndAddShapedRecipe(id, count, damage, shape, ingredients);
 		}
 
 		@JSStaticFunction
@@ -2689,7 +2690,25 @@ public class ScriptManager {
 			}
 			//System.out.println(Arrays.toString(shapeArray));
 			//System.out.println(Arrays.toString(ingredientsArray));
-			nativeAddShapedRecipe(id, count, damage, shapeArray, ingredientsArray);
+			verifyAndAddShapedRecipe(id, count, damage, shapeArray, ingredientsArray);
+		}
+
+		private static void verifyAndAddShapedRecipe(int id, int count, int damage, String[] shape,
+			int[] ingredients) {
+			if (id < 0 || id >= ITEM_ID_COUNT) {
+				throw new RuntimeException("Invalid result in recipe: " + id + ": must be between 0 and " + ITEM_ID_COUNT);
+			}
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("Invalid result in recipe: " + id + " is not a valid item. " +
+					"You must create the item before you can add it to a recipe.");
+			}
+			for (int i = 0; i < ingredients.length; i += 3) {
+				if (!nativeIsValidItem(ingredients[i + 1])) {
+					throw new RuntimeException("Invalid input in recipe: " + id + " is not a valid item. " +
+						"You must create the item before you can add it to a recipe.");
+				}
+			}
+			nativeAddShapedRecipe(id, count, damage, shape, ingredients);
 		}
 
 		@JSStaticFunction
