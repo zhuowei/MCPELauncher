@@ -1936,7 +1936,7 @@ public class ScriptManager {
 		}
 		
 		
-		// KMCPE's additions
+		// Ganggroid's additions
 		@JSStaticFunction
 		public static int[] getAll() {
 			int[] entities = new int[allentities.size()];
@@ -2295,7 +2295,7 @@ public class ScriptManager {
 			return serverPort;
 		}
 		
-		// KMCPE's additions
+		// Ganggroid's additions
 		@JSStaticFunction
 		public static int[] getAllPlayers() {
 			int[] players = new int[allplayers.size()];
