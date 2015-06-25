@@ -26,11 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+
 import java.util.zip.*;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.view.KeyEvent;
 import android.util.Log;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
@@ -125,6 +129,8 @@ public class ScriptManager {
 	public static final int ARCH_ARM = 0;
 	public static final int ARCH_I386 = 1;
 	public static int ITEM_ID_COUNT = 512;
+	private static android.app.Instrumentation instrumentation;
+	private static ExecutorService instrumentationExecutor;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -1201,6 +1207,18 @@ public class ScriptManager {
 			return 0;
 		}
 		throw new RuntimeException("Not an entity: " + entityId + " (" + entityId.getClass().toString() + ")");
+	}
+
+	private static void injectKeyEvent(final int key, final int pressed) {
+		if (instrumentation == null) {
+			instrumentation = new android.app.Instrumentation();
+			instrumentationExecutor = Executors.newSingleThreadExecutor();
+		}
+		instrumentationExecutor.execute(new Runnable() {
+			public void run() {
+				instrumentation.sendKeySync(new KeyEvent(pressed != 0? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP, key));
+			}
+		});
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
