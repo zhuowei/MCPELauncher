@@ -984,6 +984,7 @@ public class ScriptManager {
 		PrintWriter out = new PrintWriter(new File(Environment.getExternalStorageDirectory(),
 				"/items.csv"));
 		float[] textureUVbuf = new float[6];
+		int[][] bonuses = {{38,0,8},{159,0,15},{171,0,15},{175,0,5},{383,10,63}};
 		for (int i = 0; i < ITEM_ID_COUNT; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
 			if (itemName == null)
@@ -992,6 +993,18 @@ public class ScriptManager {
 			String itemIcon = Arrays.toString(textureUVbuf).replace("[", "").replace("]", "")
 					.replace(",", "|");
 			out.println(i + "," + itemName + "," + itemIcon);
+		}
+		for (int[] bonus: bonuses) {
+			int id = bonus[0];
+			for (int dmg = bonus[1]; dmg <= bonus[2]; dmg++) {
+				String itemName = nativeGetItemName(id, dmg, true);
+				if (itemName == null)
+					continue;
+				boolean success = nativeGetTextureCoordinatesForItem(id, dmg, textureUVbuf);
+				String itemIcon = Arrays.toString(textureUVbuf).replace("[", "").replace("]", "")
+						.replace(",", "|");
+				out.println(id+":"+dmg + "," + itemName + "," + itemIcon);
+			}
 		}
 		out.close();
 	}

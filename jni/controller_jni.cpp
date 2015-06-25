@@ -3,6 +3,12 @@
 #include <android/native_activity.h>
 #include "mcpe/appplatform.h"
 #include "mcpe/controller.h"
+#include <dlfcn.h>
+
+#include "modscript_shared.h"
+
+static float (*bl_AMotionEvent_getAxisValue)(const AInputEvent* motion_event,
+        int32_t axis, size_t pointer_index) __NDK_FPABI__;
 
 // abridged android_app struct
 struct android_app {
@@ -22,28 +28,84 @@ struct android_app {
 
 static int32_t (*inputHandlerReal)(struct android_app* app, AInputEvent* event);
 
+static int32_t leftTriggerEmuButton = 104, rightTriggerEmuButton = 105;
+
+static int dpadState = 0;
+
+enum {
+	BL_DPAD_UP = 1,
+	BL_DPAD_DOWN = 2,
+	BL_DPAD_LEFT = 4,
+	BL_DPAD_RIGHT = 8,
+};
+
 static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
-/*	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
+	int32_t forceReturn = -1;
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
-		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_CLASS_JOYSTICK) == AINPUT_SOURCE_CLASS_JOYSTICK) {
+		int32_t source = AInputEvent_getSource(event);
+		if ((source & AINPUT_SOURCE_CLASS_JOYSTICK) == AINPUT_SOURCE_CLASS_JOYSTICK) {
 			int32_t actionAndPointer = AMotionEvent_getAction(event);
 			int32_t action = actionAndPointer & AMOTION_EVENT_ACTION_MASK;
 			if (action == AMOTION_EVENT_ACTION_MOVE) {
-				float x = AMotionEvent_getX(event, 0);
-				float y = AMotionEvent_getY(event, 0);
-				__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f", x, y);
-				Controller::feed(2, 1, x, y);
+				float x = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X, 0);
+				float y = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y, 0);
+				float z = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Z, 0);
+				float rx = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RZ, 0);
+				float dpadX = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
+				float dpadY = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
+				int newdpadState = (dpadX > 0.5f? BL_DPAD_RIGHT: (dpadX < -0.5f? BL_DPAD_LEFT: 0)) |
+					(dpadY > 0.5f? BL_DPAD_UP: (dpadY < -0.5f? BL_DPAD_DOWN: 0));
+
+				__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f %x %x", x, y,
+					dpadState, newdpadState);
+				Controller::feed(1, 1, x, -y);
+				Controller::feed(2, 1, z, -rx);
+				dpadState = newdpadState;
+				// handle dpad
+			}
+		}
+	} else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key sauce");
+		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) {
+			int32_t keyCode = AKeyEvent_getKeyCode(event);
+			int32_t action = AKeyEvent_getAction(event);
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key %d %d", keyCode, action);
+			int trigger = 0;
+			if (keyCode == leftTriggerEmuButton) {
+				trigger = 1;
+			} else if (keyCode == rightTriggerEmuButton) {
+				trigger = 2;
+			}
+			if (trigger) {
+				float val;
+				bool yep;
+				if (action == AKEY_EVENT_ACTION_DOWN) {
+					val = 1;
+					yep = true;
+				} else if (action == AKEY_EVENT_ACTION_UP) {
+					val = 0;
+					yep = true;
+				} else {
+					val = 0;
+					yep = false;
+				}
+				if (yep) Controller::feedTrigger(trigger, val);
 			}
 		}
 	}
-*/
-	return inputHandlerReal(app, event);
+	int32_t retval = inputHandlerReal(app, event);
+	if (forceReturn >= 0) return forceReturn;
+	return retval;
 }
 
 extern "C" {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_ControllerManager_init
   (JNIEnv *env, jclass clazz) {
+	bl_AMotionEvent_getAxisValue =
+		(float (*)(const AInputEvent* motion_event, int32_t axis, size_t pointer_index))
+		dlsym(RTLD_DEFAULT, "AMotionEvent_getAxisValue");
 	ANativeActivity* nativeActivity = *((ANativeActivity**) (((uintptr_t) AppPlatform::_singleton) + 112));
 	struct android_app* app = (struct android_app*) nativeActivity->instance;
 	inputHandlerReal = app->onInputEvent;

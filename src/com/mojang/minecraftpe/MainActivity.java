@@ -1184,10 +1184,11 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public int getKeyFromKeyCode(int keyCode, int metaState, int deviceId) {
-		if (BuildConfig.DEBUG)
-			Log.i(TAG, "getKey: " + keyCode + ":" + metaState + ":" + deviceId);
 		KeyCharacterMap characterMap = KeyCharacterMap.load(deviceId);
-		return characterMap.get(keyCode, metaState);
+		int retval = characterMap.get(keyCode, metaState);
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "getKey: " + keyCode + ":" + metaState + ":" + deviceId + ":" + retval);
+		return retval;
 	}
 
 	public static void saveScreenshot(String name, int firstInt, int secondInt, int[] thatArray) {
@@ -2204,7 +2205,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean isForcingController() {
-		return false; //new File("/sdcard/bl_controller.txt").exists();
+		return new File("/sdcard/bl_controller.txt").exists();
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
