@@ -29,9 +29,8 @@ struct android_app {
 
 static int32_t (*inputHandlerReal)(struct android_app* app, AInputEvent* event);
 
-static int32_t leftTriggerEmuButton = 104, rightTriggerEmuButton = 105;
-
 static int dpadState = 0;
+static bool triggerEmu = false;
 
 enum {
 	BL_DPAD_UP = 1,
@@ -69,11 +68,17 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 					checkState(newdpadState, BL_DPAD_LEFT, AKEYCODE_DPAD_LEFT);
 					checkState(newdpadState, BL_DPAD_RIGHT, AKEYCODE_DPAD_RIGHT);
 				}
+				float ltrigger = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_LTRIGGER, 0);
+				float rtrigger = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_LTRIGGER, 0);
 
 				__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f %x %x", x, y,
 					dpadState, newdpadState);
 				Controller::feed(1, 1, x, -y);
 				Controller::feed(2, 1, z, -rx);
+				if (!triggerEmu) {
+					Controller::feedTrigger(1, ltrigger);
+					Controller::feedTrigger(2, rtrigger);
+				}
 				dpadState = newdpadState;
 				// handle dpad
 			}
@@ -100,12 +105,13 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 
 
 			int trigger = 0;
-			if (keyCode == leftTriggerEmuButton) {
+			if (keyCode == AKEYCODE_BUTTON_L2) {
 				trigger = 1;
-			} else if (keyCode == rightTriggerEmuButton) {
+			} else if (keyCode == AKEYCODE_BUTTON_R2) {
 				trigger = 2;
 			}
 			if (yep && trigger) {
+				triggerEmu = true;
 				Controller::feedTrigger(trigger, val);
 			}
 			if (yep && keyCode == AKEYCODE_BUTTON_A) {
