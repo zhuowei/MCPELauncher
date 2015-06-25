@@ -15,6 +15,7 @@ import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.Utils;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -58,6 +59,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference aboutPreference;
 	private Preference paranoidPreference;
 	private Preference legacyLivePatchPreference;
+	private SwitchPreference useControllerPreference;
 
 	private Preference recorderWatchPreference;
 	private Preference recorderReshareLastPreference;
@@ -335,6 +337,14 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 				recorderReshareLastPreference.setOnPreferenceClickListener(this);
 			}
 		}
+		useControllerPreference = (SwitchPreference) findPreference("zz_use_controller");
+		if (useControllerPreference != null) {
+			if (Build.VERSION.SDK_INT < 12) {
+				getPreferenceScreen().removePreference(useControllerPreference);
+			} else {
+				useControllerPreference.setListener(this);
+			}
+		}
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
@@ -382,6 +392,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	@Override
 	public void onCheckedChange(Switch data) {
 		needsRestart = true;
+		if (useControllerPreference != null && data == useControllerPreference.content) {
+			controllerChange(data);
+			return;
+		}
 		synchronized (ui) {
 			ui.notifyAll();
 		}
@@ -400,6 +414,24 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 		*/
 	}
+
+	private void controllerChange(Switch sw) {
+		if (!sw.isChecked()) return;
+		if (Utils.hasExtrasPackage(this)) return;
+		sw.setChecked(false);
+		Utils.getPrefs(0).edit().putBoolean("zz_use_controller", false).apply();
+		new AlertDialog.Builder(this).setMessage(R.string.purchase_extras_package)
+			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialogI, int button) {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse("https://gist.github.com/zhuowei/4538923d1963524b71fc#file-getextras-md"));
+					startActivity(intent);
+				}
+			})
+			.setNegativeButton(android.R.string.cancel, null)
+			.show();
+	}
+
 
 	protected void managePatches() {
 		Intent intent = new Intent(this, ManagePatchesActivity.class);

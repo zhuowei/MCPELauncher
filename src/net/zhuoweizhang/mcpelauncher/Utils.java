@@ -132,6 +132,15 @@ public class Utils {
 		return null;
 	}
 
+	public static boolean hasExtrasPackage(Context context) {
+		try {
+			context.getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.extras", 0);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Throws an exception when you try to call methods, calling this class to
 	 * prevent NPE, without Utils initialization.

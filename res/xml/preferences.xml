@@ -30,6 +30,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_ctrl_title" >
+        <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
+            android:defaultValue="false"
+            android:key="zz_use_controller"
+            android:dependency="zz_script_enable"
+            android:title="@string/pref_zz_use_controller" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="zz_longvibration"

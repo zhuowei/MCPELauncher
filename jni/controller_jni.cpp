@@ -46,7 +46,7 @@ static void checkState(int newdpadState, int key, int akey) {
 }
 
 static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
 	int32_t forceReturn = -1;
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
 		int32_t source = AInputEvent_getSource(event);
@@ -71,8 +71,8 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 				float ltrigger = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_LTRIGGER, 0);
 				float rtrigger = bl_AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_LTRIGGER, 0);
 
-				__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f %x %x", x, y,
-					dpadState, newdpadState);
+				//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Controller %f %f %x %x", x, y,
+				//	dpadState, newdpadState);
 				Controller::feed(1, 1, x, -y);
 				Controller::feed(2, 1, z, -rx);
 				if (!triggerEmu) {
@@ -84,11 +84,11 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 			}
 		}
 	} else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
-		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key sauce");
+		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key sauce");
 		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) {
 			int32_t keyCode = AKeyEvent_getKeyCode(event);
 			int32_t action = AKeyEvent_getAction(event);
-			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key %d %d", keyCode, action);
+			//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Key %d %d", keyCode, action);
 
 			float val;
 			bool yep;

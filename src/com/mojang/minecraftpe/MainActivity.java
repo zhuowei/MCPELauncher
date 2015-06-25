@@ -2205,7 +2205,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean isForcingController() {
-		return new File("/sdcard/bl_controller.txt").exists();
+		return Build.VERSION.SDK_INT >= 12 &&
+			Utils.hasExtrasPackage(this) && Utils.getPrefs(0).getBoolean("zz_use_controller", false);
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
