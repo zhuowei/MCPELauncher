@@ -32,6 +32,7 @@
 #include "mcpe/synchedentitydata.h"
 #include "mcpe/mobeffect.h"
 #include "mcpe/packetsender.h"
+#include "mcpe/servercommandparser.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -95,6 +96,8 @@ const size_t kItemEntity_pickupDelay_offset = 344;
 const size_t kItemEntity_itemInstance_offset = 324;
 // found in TextPacket::handle
 const int kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
+// found by searching for constructor
+const size_t kMinecraft_serverCommandParser_offset = 112;
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -343,6 +346,7 @@ void bl_forceTextureLoad(std::string const&);
 void bl_dumpVtable(void**, size_t);
 void bl_set_i18n(std::string const&, std::string const&);
 static bool isLocalAddress(JNIEnv* env, jstring addr);
+void* bl_marauder_translation_function(void* input);
 
 __attribute__((__visibility__("hidden")))
 bool bl_onLockDown = false;
@@ -1801,7 +1805,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jboolean use) {
 	if (bl_forceController) return;
 #ifdef __arm__
-	unsigned char* ptr = (unsigned char*) (((uintptr_t) bl_MinecraftClient_useController) & ~1);
+	unsigned char* ptr = (unsigned char*) bl_marauder_translation_function(
+		(void*) (((uintptr_t) bl_MinecraftClient_useController) & ~1));
 	*ptr = use;
 #endif
 }
@@ -1887,7 +1892,6 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	buffer[1] = (uint16_t) bottomInst;
 }
 
-void* bl_marauder_translation_function(void* input);
 static void patchUnicodeFont(void* mcpelibhandle) {
 	void* setUnicodeTexture = dlsym(mcpelibhandle, "_ZN4Font17setUnicodeTextureEi");
 	if (setUnicodeTexture == NULL) return;
@@ -1937,6 +1941,16 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (itemId == 0) return true;
 	if (itemId < 0 || itemId >= bl_item_id_count) return false;
 	return bl_Item_items[itemId] != nullptr;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
+  (JNIEnv *env, jclass clazz, jstring text) {
+	const char * utfChars = env->GetStringUTFChars(text, NULL);
+	std::string mystr = std::string(utfChars);
+	ServerCommandParser* parser = *((ServerCommandParser**) (((uintptr_t) bl_minecraft) + kMinecraft_serverCommandParser_offset));
+	int findCount = parser->commands.count(mystr);
+	env->ReleaseStringUTFChars(text, utfChars);
+	return findCount != 0;
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

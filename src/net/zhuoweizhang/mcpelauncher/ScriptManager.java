@@ -413,7 +413,9 @@ public class ScriptManager {
 		if (str.charAt(0) != '/')
 			return;
 		callScriptMethod("procCmd", str.substring(1));
-		if (!isRemote) {
+		String[] splitted = str.substring(1).split(" ");
+		boolean validNativeCommand = splitted.length > 0 && nativeIsValidCommand(splitted[0]);
+		if (!isRemote && !validNativeCommand) {
 			nativePreventDefault();
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
@@ -1474,6 +1476,7 @@ public class ScriptManager {
 	public static native void nativeMobRemoveAllEffects(long entity);
 	public static native int nativeGetItemEntityItem(long entity, int type);
 	public static native boolean nativeIsValidItem(int id);
+	public static native boolean nativeIsValidCommand(String name);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
