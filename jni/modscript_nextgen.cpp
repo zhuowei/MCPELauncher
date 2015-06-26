@@ -324,6 +324,8 @@ static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, float, float, floa
 static void (*bl_FoodItem_FoodItem)(Item*, int, int, bool, float);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
+static bool (*bl_Zombie_isBaby)(Entity*);
+static void (*bl_Zombie_setBaby)(Entity*, bool);
 
 static bool* bl_Tile_solid;
 
@@ -1953,6 +1955,21 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return findCount != 0;
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
+  (JNIEnv *env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return false;
+	return bl_Zombie_isBaby(entity);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieSetBaby
+  (JNIEnv *env, jclass clazz, jlong entityId, jboolean yep) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	bl_Zombie_setBaby(entity, yep);
+}
+
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
@@ -2261,6 +2278,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
 	bl_Minecraft_getPacketSender = (PacketSender* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN9Minecraft15getPacketSenderEv");
+	bl_Zombie_isBaby = (bool (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZNK6Zombie6isBabyEv");
+	bl_Zombie_setBaby = (void (*)(Entity*, bool))
+		dlsym(mcpelibhandle, "_ZN6Zombie7setBabyEb");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

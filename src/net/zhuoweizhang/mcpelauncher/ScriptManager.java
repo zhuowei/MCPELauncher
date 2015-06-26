@@ -1477,6 +1477,8 @@ public class ScriptManager {
 	public static native int nativeGetItemEntityItem(long entity, int type);
 	public static native boolean nativeIsValidItem(int id);
 	public static native boolean nativeIsValidCommand(String name);
+	public static native boolean nativeZombieIsBaby(long entity);
+	public static native void nativeZombieSetBaby(long entity, boolean yep);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1677,6 +1679,7 @@ public class ScriptManager {
 				tex = "mob/pigzombie.png";
 			}
 			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
+			if (item == 0 || !nativeIsValidItem(item)) item = 283; // gold sword
 			nativeSetCarriedItem(entityId, item, 1, 0);
 			return entityId;
 		}
@@ -2213,6 +2216,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setCarriedItem(Object ent, int id, int count, int damage) {
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("The item ID " + id + " is invalid.");
+			}
 			nativeSetCarriedItem(getEntityId(ent), id, count, damage);
 		}
 
@@ -2232,11 +2238,24 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setAnimalAge(Object animal, int age) {
+			int type = getEntityTypeId(animal);
+			if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.PIG_ZOMBIE) {
+				nativeZombieSetBaby(getEntityId(animal), age < 0);
+				return;
+			} else if (type < 10 || type >= 32) {
+				throw new RuntimeException("Age can only be set for animals and zombies/skeletons/pigmen");
+			}
 			nativeSetAnimalAge(getEntityId(animal), age);
 		}
 
 		@JSStaticFunction
 		public static int getAnimalAge(Object animal) {
+			int type = getEntityTypeId(animal);
+			if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.PIG_ZOMBIE) {
+				return nativeZombieIsBaby(getEntityId(animal))? -24000: 0;
+			} else if (type < 10 || type >= 32) {
+				throw new RuntimeException("Age can only be get for animals and zombies/skeletons/pigmen");
+			}
 			return nativeGetAnimalAge(getEntityId(animal));
 		}
 
