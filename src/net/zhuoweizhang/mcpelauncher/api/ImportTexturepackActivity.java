@@ -1,7 +1,10 @@
 package net.zhuoweizhang.mcpelauncher.api;
 
+import java.util.*;
+
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.Utils;
+import net.zhuoweizhang.mcpelauncher.texture.*;
 import android.os.*;
 import android.widget.*;
 
@@ -14,7 +17,21 @@ public class ImportTexturepackActivity extends ImportActivity {
 
 	@Override
 	protected void startImport() {
-		Utils.getPrefs(1).edit().putString("texturePack", mFile.getAbsolutePath()).apply();
+		try {
+			List<TexturePackDescription> list = TexturePackLoader.loadDescriptionsWithIcons(this);
+			TexturePackDescription desc = new TexturePackDescription(TexturePackLoader.TYPE_ZIP, mFile.getAbsolutePath());
+			boolean already = false;
+			for (TexturePackDescription d: list) {
+				if (d.path.equals(desc.path)) {
+					already = true;
+					break;
+				}
+			}
+			if (!already) list.add(0, desc);
+			TexturePackLoader.saveDescriptions(this, list);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", true).apply();
 		Toast.makeText(this, R.string.texturepack_imported, Toast.LENGTH_LONG).show();
 		finish();

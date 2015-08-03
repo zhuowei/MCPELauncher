@@ -60,6 +60,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference paranoidPreference;
 	private Preference legacyLivePatchPreference;
 	private SwitchPreference useControllerPreference;
+	private SwitchPreference enableKamcordPreference;
 
 	private Preference recorderWatchPreference;
 	private Preference recorderReshareLastPreference;
@@ -345,6 +346,14 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 				useControllerPreference.setListener(this);
 			}
 		}
+		enableKamcordPreference = (SwitchPreference) findPreference("zz_enable_kamcord");
+		if (enableKamcordPreference != null) {
+			if (Build.VERSION.SDK_INT < 16) { // Android 4.1
+				getPreferenceScreen().removePreference(enableKamcordPreference);
+			} else {
+				enableKamcordPreference.setListener(this);
+			}
+		}
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
@@ -597,12 +606,16 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	}
 
 	protected boolean hasRecorder() {
+/*
 		try {
 			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
 			return true;
 		} catch (Exception ex) {
 			return false;
 		}
+	}
+*/
+		return this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro");
 	}
 
 }

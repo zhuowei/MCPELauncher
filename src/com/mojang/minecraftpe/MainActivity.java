@@ -2089,13 +2089,23 @@ public class MainActivity extends NativeActivity {
 
 	private void initKamcord() {
 		// test if we have kamcord
-		hasRecorder = false;
+		hasRecorder = this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro") &&
+			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false);
+/*
 		try {
 			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
 			hasRecorder = getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.recorder") != null;
 		} catch (PackageManager.NameNotFoundException ex) {
 		}
+*/
 		if (hasRecorder) {
+			// patch Kamcord
+			System.loadLibrary("mcpelauncher");
+			try {
+				com.kamcord.android.core.KamcordFix.install();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			Kamcord.whitelistAll();
 			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
 			Kamcord.whitelistAll();
@@ -2375,6 +2385,7 @@ public class MainActivity extends NativeActivity {
 			try {
 				Thread.sleep(MILLISECONDS_FOR_WORLD_SAVE); // to give the worlds some time to save
 			} catch (InterruptedException ie) {}
+			System.out.println("Preparing to exit");
 			if (!globalRestart) System.exit(0);
 		}
 	}

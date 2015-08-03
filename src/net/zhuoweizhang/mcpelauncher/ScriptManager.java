@@ -992,7 +992,7 @@ public class ScriptManager {
 		PrintWriter out = new PrintWriter(new File(Environment.getExternalStorageDirectory(),
 				"/items.csv"));
 		float[] textureUVbuf = new float[6];
-		int[][] bonuses = {{38,0,8},{159,0,15},{171,0,15},{175,0,5},{383,10,63}};
+		int[][] bonuses = {{1,1,6},{38,0,8},{159,0,15},{171,0,15},{175,0,5},{349,1,3},{350,1,1},{383,10,63}};
 		for (int i = 0; i < ITEM_ID_COUNT; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
 			if (itemName == null)

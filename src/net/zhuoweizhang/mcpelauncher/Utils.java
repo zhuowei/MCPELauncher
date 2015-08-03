@@ -135,7 +135,7 @@ public class Utils {
 	public static boolean hasExtrasPackage(Context context) {
 		try {
 			context.getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.extras", 0);
-			return true;
+			return context.getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.extras") != null;
 		} catch (Exception e) {
 			return false;
 		}
