@@ -254,12 +254,13 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith("0.11") && !mcPkgInfo.versionName.startsWith("0.11.0");
+			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith("0.12");
+			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.11.1");
+				intent.putExtra("supportedVersion", "0.12.1 build 8");
 				startActivity(intent);
 				finish();
 				try {
@@ -281,7 +282,7 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
-				//Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
+				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
 				if (myprefs.getString("texture_packs", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
@@ -340,7 +341,11 @@ public class MainActivity extends NativeActivity {
 			// showDialog(DIALOG_UNABLE_TO_PATCH);
 		}
 
+		//org.fmod.FMOD.assetManager = getAssets();
+
 		try {
+			System.loadLibrary("gnustl_shared");
+			System.load(mcAppInfo.nativeLibraryDir + "/libfmod.so");
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -356,7 +361,7 @@ public class MainActivity extends NativeActivity {
 				initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler, this);
+					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ true);
 					loadNativeAddons();
 				}
 			}
@@ -384,7 +389,7 @@ public class MainActivity extends NativeActivity {
 		setFakePackage(false);
 
 		try {
-			boolean shouldLoadScripts = true;
+			boolean shouldLoadScripts = false;//true;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				applyBuiltinPatches();
 				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
@@ -1058,7 +1063,7 @@ public class MainActivity extends NativeActivity {
 		try {
 			InputStream is = fromAssets? getInputStreamForAsset(name): getRegularInputStream(name);
 			if (is == null)
-				return null;
+				return getFakeImageData(name, fromAssets);
 			Bitmap bmp = BitmapFactory.decodeStream(is);
 			int[] retval = new int[(bmp.getWidth() * bmp.getHeight()) + 2];
 			retval[0] = bmp.getWidth();
@@ -1074,6 +1079,10 @@ public class MainActivity extends NativeActivity {
 		}
 		/* format: width, height, each integer a pixel */
 		/* 0 = white, full transparent */
+	}
+
+	public int[] getFakeImageData(String name, boolean fromAssets) {
+		return new int[] {1, 1, 0};
 	}
 
 	public String[] getOptionStrings() {
@@ -1810,6 +1819,16 @@ public class MainActivity extends NativeActivity {
 
 	// end 0.11
 
+	// 0.12
+	public int getKeyboardHeight() {
+		return 0;
+	}
+	// end 0.12
+
+	@Override
+	public void onBackPressed() {
+	}
+
 	private InputStream getRegularInputStream(String path) {
 		try {
 			return new BufferedInputStream(new FileInputStream(new File(path)));
@@ -2090,7 +2109,7 @@ public class MainActivity extends NativeActivity {
 	private void initKamcord() {
 		// test if we have kamcord
 		hasRecorder = this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro") &&
-			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false);
+			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false) && !isSafeMode();
 /*
 		try {
 			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
@@ -2188,8 +2207,8 @@ public class MainActivity extends NativeActivity {
 
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
-		if (version.matches("0\\.11\\.0.*")) return true;
-		if (version.matches("0\\.11\\.1.*")) return true;
+		//if (version.matches("0\\.11\\.0.*")) return true;
+		if (version.matches("0\\.12\\.1\\.b.*")) return true;
 		return false;
 	}
 

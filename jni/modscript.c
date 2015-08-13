@@ -1095,7 +1095,7 @@ static void App_quit_hook(void* self) {
 void bl_prepatch_cppside(void*);
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity) {
+  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
 	if (bl_hasinit_prepatch) return;
 #ifndef __i386
 	if (signalhandler) bl_signalhandler_init();
@@ -1108,10 +1108,25 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
+
+	setupIsModded();
+
+	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
+
+	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
+	//get a callback when the level is exited
+	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
+	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+
+	if (limitedPrepatch) {
+		bl_hasinit_prepatch = 1;
+		return;
+	}
+
 	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 	App_quit_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT];
 	minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT] = &App_quit_hook;
-	setupIsModded();
+
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
 	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
@@ -1126,12 +1141,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 
-	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
-
-	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
-	//get a callback when the level is exited
-	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
-	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 	bl_prepatch_cppside(mcpelibhandle);
 	bl_hasinit_prepatch = 1;
 }

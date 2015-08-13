@@ -1487,7 +1487,7 @@ public class ScriptManager {
 
 	public static native void nativeSetTextParseColorCodes(boolean doIt);
 
-	public static native void nativePrePatch(boolean signalhandler, MainActivity activity);
+	public static native void nativePrePatch(boolean signalhandler, MainActivity activity, boolean limited);
 
 	public static native boolean nativeLevelIsRemote();
 

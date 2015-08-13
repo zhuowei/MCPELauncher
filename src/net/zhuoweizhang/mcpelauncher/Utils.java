@@ -133,12 +133,7 @@ public class Utils {
 	}
 
 	public static boolean hasExtrasPackage(Context context) {
-		try {
-			context.getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.extras", 0);
-			return context.getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.extras") != null;
-		} catch (Exception e) {
-			return false;
-		}
+		return context.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro");
 	}
 
 	/**

@@ -45,7 +45,7 @@ static void checkState(int newdpadState, int key, int akey) {
 	}
 }
 
-static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
+/*static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "InputEvent: %p", event);
 	int32_t forceReturn = -1;
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
@@ -125,7 +125,7 @@ static int32_t inputHandlerHook(struct android_app* app, AInputEvent* event) {
 	int32_t retval = inputHandlerReal(app, event);
 	if (forceReturn >= 0) return forceReturn;
 	return retval;
-}
+}*/
 
 static void injectKeyEvent(int keycode, int down) {
 	JNIEnv* env;
@@ -150,13 +150,14 @@ extern "C" {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_ControllerManager_init
   (JNIEnv *env, jclass clazz) {
-	bl_AMotionEvent_getAxisValue =
+/*	bl_AMotionEvent_getAxisValue =
 		(float (*)(const AInputEvent* motion_event, int32_t axis, size_t pointer_index))
 		dlsym(RTLD_DEFAULT, "AMotionEvent_getAxisValue");
 	ANativeActivity* nativeActivity = *((ANativeActivity**) (((uintptr_t) AppPlatform::_singleton) + 112));
 	struct android_app* app = (struct android_app*) nativeActivity->instance;
 	inputHandlerReal = app->onInputEvent;
 	app->onInputEvent = inputHandlerHook;
+*/
 }
 
 }

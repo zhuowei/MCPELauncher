@@ -1762,10 +1762,11 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	pos.x = x;
 	pos.y = y;
 	pos.z = z;
+	Vec2 rot {0, 0};
 	if (type < 64) {
-		entity = MobFactory::CreateMob(type, *bl_level->tileSource, pos, nullptr); //the last two vec3s are pos and rot
+		entity = MobFactory::CreateMob((EntityType) type, *bl_level->tileSource, pos, rot); //the last two vec3s are pos and rot
 	} else {
-		entity = EntityFactory::CreateEntity(type, *bl_level->tileSource);
+		entity = EntityFactory::CreateEntity((EntityType)type, *bl_level->tileSource);
 	}
 
 	if (entity == nullptr) {

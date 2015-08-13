@@ -1075,6 +1075,30 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeIsValidCommand
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeZombieIsBaby
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeZombieSetBaby
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieSetBaby
+  (JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: (I)V
  */
@@ -1100,10 +1124,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativePrePatch
- * Signature: (ZLcom/mojang/minecraftpe/MainActivity;)V
+ * Signature: (ZLcom/mojang/minecraftpe/MainActivity;Z)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *, jclass, jboolean, jobject);
+  (JNIEnv *, jclass, jboolean, jobject, jboolean);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
