@@ -211,4 +211,8 @@ public class AtlasProvider implements TexturePack {
 		hasChanges = false;
 	}
 
+	public long getSize(String name) {
+		return 0;
+	}
+
 }
