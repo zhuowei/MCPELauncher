@@ -40,7 +40,6 @@ static FMOD_RESULT fmodopen(const char *name,
   void **handle,
   void *userdata
 ) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "fmodopen %s", name);
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -96,7 +95,6 @@ static FMOD_RESULT fmodseek(
 extern "C" {
 
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "in fmod hook %p %d %d %p", system, maxchannels, flags, extradriverdata);
 	FMOD_RESULT res = system->init(maxchannels, flags, extradriverdata);
 	if (res != FMOD_OK) return res;
 	system->setFileSystem(fmodopen, fmodclose, fmodread, fmodseek, nullptr, nullptr, -1);

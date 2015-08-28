@@ -1845,7 +1845,7 @@ public class MainActivity extends NativeActivity {
 		Rect r = new Rect();
 		View rootview = this.getWindow().getDecorView();
 		rootview.getWindowVisibleDisplayFrame(r);
-		return 0;
+		return displayMetrics.heightPixels - r.bottom;
 	}
 	// end 0.12
 

@@ -555,7 +555,6 @@ public class ScriptManager {
 	}
 
 	public static byte[] getSoundBytes(String name) {
-		System.out.println("Get sound bytes");
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
