@@ -53,6 +53,13 @@ public class AddonOverrideTexturePack implements TexturePack {
 		return file.getInputStream(file.getEntry(name));
 	}
 
+	public long getSize(String fileName) throws IOException {
+		String name = "assets/" + fileName;
+		ZipFile file = assets.get(name);
+		if (file == null) return -1;
+		return file.getEntry(name).getSize();
+	}
+
 	public void close() throws IOException {
 		//do nothing
 	}

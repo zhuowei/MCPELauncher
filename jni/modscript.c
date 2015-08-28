@@ -1118,14 +1118,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
-	if (limitedPrepatch) {
-		bl_hasinit_prepatch = 1;
-		return;
+	if (!limitedPrepatch) {
+		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
+		App_quit_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT];
+		minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT] = &App_quit_hook;
+		bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	}
-
-	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
-	App_quit_real = minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT];
-	minecraftVtable[MINECRAFT_VTABLE_OFFSET_QUIT] = &App_quit_hook;
 
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	//replace the native code read asset method with the old one that went through JNI
@@ -1138,8 +1136,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	mcpelauncher_hook(enderManModel_constructor, (void*) &bl_EnderManModel_constructor_hook,
 		(void**) &bl_EnderManModel_constructor_real);
 */
-
-	bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 
 	bl_prepatch_cppside(mcpelibhandle);
 	bl_hasinit_prepatch = 1;

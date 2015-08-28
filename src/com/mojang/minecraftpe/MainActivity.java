@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.media.AudioManager;
@@ -260,7 +261,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.12.1 build 8");
+				intent.putExtra("supportedVersion", "0.12.1 build 9");
 				startActivity(intent);
 				finish();
 				try {
@@ -353,6 +354,8 @@ public class MainActivity extends NativeActivity {
 					Toast.LENGTH_LONG).show();
 			finish();
 		}
+
+		org.fmod.FMOD.init(this);
 
 		libLoaded = true;
 
@@ -1007,24 +1010,30 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public InputStream getInputStreamForAsset(String name) {
+		return getInputStreamForAsset(name, null);
+	}
+
+	public InputStream getInputStreamForAsset(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			for (int i = 0; i < textureOverrides.size(); i++) {
 				try {
 					is = textureOverrides.get(i).getInputStream(name);
-					if (is != null)
+					if (is != null) {
+						if (lengthOut != null) lengthOut[0] = textureOverrides.get(i).getSize(name);
 						return is;
+					}
 				} catch (IOException e) {
 				}
 			}
 			if (texturePack == null) {
-				return getLocalInputStreamForAsset(name);
+				return getLocalInputStreamForAsset(name, lengthOut);
 			} else {
 				System.out.println("Trying to load  " + name + "from tp");
 				is = texturePack.getInputStream(name);
 				if (is == null) {
 					System.out.println("Can't load " + name + " from tp");
-					return getLocalInputStreamForAsset(name);
+					return getLocalInputStreamForAsset(name, lengthOut);
 				}
 			}
 			return is;
@@ -1035,6 +1044,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream getLocalInputStreamForAsset(String name) {
+		return getLocalInputStreamForAsset(name, null);
+	}
+
+	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			if (forceFallback) {
@@ -1050,6 +1063,9 @@ public class MainActivity extends NativeActivity {
 			if (is == null) {
 				System.out.println("Can't find it in the APK - attempting to load fallback");
 				is = getAssets().open(name);
+			}
+			if (is != null && lengthOut != null) {
+				lengthOut[0] = is.available();
 			}
 			return is;
 		} catch (Exception e) {
@@ -1405,9 +1421,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	// added in 0.8.0
+	// showKeyboard modified in 0.12.0b10
 	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
+		this.showKeyboard(mystr, maxLength, mybool, false);
+	}
+	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool, final boolean mybool2) {
 		if (BuildConfig.DEBUG)
-			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
+			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool + ":" + mybool2);
 		if (useLegacyKeyboardInput()) {
 			showKeyboardView();
 			return;
@@ -1821,6 +1841,10 @@ public class MainActivity extends NativeActivity {
 
 	// 0.12
 	public int getKeyboardHeight() {
+		if (BuildConfig.DEBUG) System.out.println("Keyboard height");
+		Rect r = new Rect();
+		View rootview = this.getWindow().getDecorView();
+		rootview.getWindowVisibleDisplayFrame(r);
 		return 0;
 	}
 	// end 0.12

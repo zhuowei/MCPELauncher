@@ -543,6 +543,28 @@ public class ScriptManager {
 		callScriptMethod("explodeHook", entity, x, y, z, power, onFire);
 	}
 
+	public static InputStream getSoundInputStream(String name, long[] lengthout) {
+		System.out.println("Get sound input stream");
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				return main.getInputStreamForAsset(name.substring("file:///android_asset/".length()), lengthout);
+			}
+		}
+		return null;
+	}
+
+	public static byte[] getSoundBytes(String name) {
+		System.out.println("Get sound bytes");
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				return main.getFileDataBytes(name.substring("file:///android_asset/".length()));
+			}
+		}
+		return null;
+	}
+
 	public static void init(android.content.Context cxt) throws IOException {
 		scriptingInitialized = true;
 		// set up hooks

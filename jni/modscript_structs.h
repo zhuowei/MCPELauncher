@@ -352,7 +352,7 @@ CLASS_TYPEDEF(Level)
 	char filler2[2908-13];//13
 	TileSource* tileSource;//2908 from Level::getChunkSource
 #ifdef __cplusplus
-	Entity* getEntity(EntityUniqueID, bool);
+	Entity* getEntity(EntityUniqueID, bool) const;
 	void addEntity(std::unique_ptr<Entity>);
 #endif
 CLASS_FOOTER(Level);

@@ -22,6 +22,13 @@ public class ScriptOverrideTexturePack implements TexturePack {
 		return new FileInputStream(file);
 	}
 
+	public long getSize(String fileName) throws IOException {
+		if (ScriptManager.androidContext == null) return -1;
+		File file = ScriptManager.getTextureOverrideFile(fileName);
+		if (!file.exists()) return -1;
+		return file.length();
+	}
+
 	public void close() throws IOException {
 		//do nothing
 	}

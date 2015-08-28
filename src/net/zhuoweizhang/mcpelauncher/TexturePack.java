@@ -11,4 +11,6 @@ public interface TexturePack extends Closeable {
 
 	public List<String> listFiles() throws IOException;
 
+	public long getSize(String fileName) throws IOException;
+
 }

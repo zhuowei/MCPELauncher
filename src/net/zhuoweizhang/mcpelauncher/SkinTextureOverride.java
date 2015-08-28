@@ -29,4 +29,8 @@ public class SkinTextureOverride implements TexturePack {
 		return new ArrayList<String>();
 	}
 
+	public long getSize(String name) throws IOException {
+		return 0;
+	}
+
 }
