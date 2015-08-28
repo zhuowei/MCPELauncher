@@ -76,6 +76,19 @@ public class AtlasProvider implements TexturePack {
 		atlasCanvas = null;
 	}
 
+	private void calcXScale(MainActivity activity, AtlasMeta metaArr) throws IOException {
+		List<String> pathsForMeta = TextureUtils.getAllFilesFilter(activity.textureOverrides, importDir);
+		int curMetaSize = (metaArr.width / metaArr.tileWidth) * (metaArr.height / metaArr.tileWidth);
+		int curRemaining = (curMetaSize - metaArr.originalUVCount);
+		int needed = pathsForMeta.size();
+		xscale = 1;
+		int cr = curRemaining;
+		while (cr < needed && xscale < 64) {
+			xscale *= 2;
+			cr = curRemaining + (curMetaSize*(xscale-1));
+		}
+	}
+
 	private void loadAtlas(MainActivity activity) throws Exception {
 		// read the meta file
 		InputStream metaIs = activity.getInputStreamForAsset(metaName);
@@ -87,6 +100,7 @@ public class AtlasProvider implements TexturePack {
 		}
 		metaIs.close();
 		JSONArray metaArr = new JSONArray(new String(bos.toByteArray(), "UTF-8"));
+		calcXScale(activity, new AtlasMeta(metaArr));
 		scaleMeta(metaArr);
 		metaObj = new AtlasMeta(metaArr);
 

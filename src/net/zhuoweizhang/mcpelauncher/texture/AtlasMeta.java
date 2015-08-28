@@ -10,6 +10,7 @@ public class AtlasMeta {
 	public boolean[] occupied;
 	public int width, height;
 	public int tileWidth;
+	public int originalUVCount = 0;
 
 	public AtlasMeta(JSONArray data) {
 		this.data = data;
@@ -43,6 +44,7 @@ public class AtlasMeta {
 				JSONArray uv = uvs.getJSONArray(u);
 				int index = uvToIndex(uv.getDouble(0), uv.getDouble(1));
 				occupied[index] = true;
+				originalUVCount++;
 			}
 		}
 	}

@@ -55,7 +55,6 @@ static FMOD_RESULT fmodopen(const char *name,
 		RamFileHandle* ramfile = RamFileHandle::alloc(thesize);
 		env->GetByteArrayRegion(soundBytes, 0, thesize, (jbyte*) ramfile->data);
 		*handle = (void*) ramfile;
-		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "fmodopen length %x", *filesize);
 	}
 	env->DeleteLocalRef(nameJString);
 	if (attachStatus == JNI_EDETACHED) {
