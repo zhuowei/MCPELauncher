@@ -1320,6 +1320,8 @@ public class ScriptManager {
 
 	public static native int nativeGetSelectedSlotId();
 
+	public static native void nativeSetSelectedSlotId(int slot);
+
 	public static native int nativeGetMobHealth(long entityId);
 
 	public static native void nativeSetMobHealth(long entityId, int halfhearts);
@@ -2029,6 +2031,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getSelectedSlotId() {
 			return nativeGetSelectedSlotId();
+		}
+		@JSStaticFunction
+		public static void setSelectedSlotId(int slot) {
+			return nativeSetSelectedSlotId(slot);
 		}
 
 		// KsyMC's additions

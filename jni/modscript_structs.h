@@ -88,24 +88,24 @@ typedef struct Entity{
 	char filler2[48-36]; //36
 	TileSource* tileSource; // 48
 	int dimension; // 52
-	char filler2_[72-56]; // 56
-	float motionX; //72 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //76
-	float motionZ; //80
-	float yaw; //84
-	float pitch; //88
-	float prevYaw; //92
-	float prevPitch; //96
-	char filler4[232-100]; //100
-	int renderType; //232
-	char filler5[248-236]; // 236
-	struct Entity* rider; //248
-	struct Entity* riding; //252
-	char filler6[280-256]; //256
+	char filler2_[76-56]; // 56
+	float motionX; //76 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //80
+	float motionZ; //84
+	float yaw; //88
+	float pitch; //92
+	float prevYaw; //96
+	float prevPitch; //100
+	char filler4[268-104]; //104
+	int renderType; //268
+	char filler5[284-272]; // 272
+	struct Entity* rider; //284
+	struct Entity* riding; //288
+	char filler6[320-292]; //292
 #ifdef __cplusplus
-	EntityUniqueID entityId; // 280
+	EntityUniqueID entityId; // 320
 #else
-	long long entityId; // 280
+	long long entityId; // 320
 #endif
 } Entity;
 

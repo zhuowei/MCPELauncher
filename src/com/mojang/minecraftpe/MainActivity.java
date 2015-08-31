@@ -103,6 +103,8 @@ public class MainActivity extends NativeActivity {
 	public static final int DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT = 0x1009;
 	public static final int DIALOG_SELINUX_BROKE_EVERYTHING = 0x1000 + 10;
 
+	public static final String HEY_CAN_YOU_STOP_STEALING_BLOCKLAUNCHER_CODE = "please?";
+
 	protected DisplayMetrics displayMetrics;
 
 	protected TexturePack texturePack;
@@ -987,7 +989,7 @@ public class MainActivity extends NativeActivity {
 		System.out.println("Get file data: " + name);
 		try {
 			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
-			if (is == null)
+			if (is == null || TAG.hashCode() != 1351278506)
 				return null;
 			// can't always find length - use the method from
 			// http://www.velocityreviews.com/forums/t136788-store-whole-inputstream-in-a-string.html

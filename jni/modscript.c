@@ -35,11 +35,9 @@ typedef struct {
 } unique_ptr;
 
 // from HumanoidMobRenderer::additionalRendering
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 138
-// from MobRenderer::bindMobTexture
-#define MOB_VTABLE_OFFSET_GET_TEXTURE 107
+#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 156
 // from Entity::save
-#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 77
+#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 85
 // from Player::getSelectedItem
 #ifdef __i386
 // FIXME 0.11
@@ -51,8 +49,6 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
-// this is / 4 bytes already; found in Mob::actuallyHurt
-#define MOB_HEALTH_OFFSET 91
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
@@ -64,8 +60,6 @@ typedef struct {
 #define ENTITY_VTABLE_OFFSET_START_RIDING 25
 // LegacyClientNetworkHandler::handleEntityLink
 #define ENTITY_VTABLE_OFFSET_STOP_RIDING 100
-// already /4; from Inventory::selectSlot
-#define INVENTORY_SELECTED_SLOT_OFFSET 8
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -161,6 +155,8 @@ static void (*bl_LevelRenderer_allChanged)(void*);
 static int (*bl_FillingContainer_removeResource)(void*, ItemInstance*, bool);
 static Level* (*bl_Minecraft_getLevel)(Minecraft*);
 static Player* (*bl_MinecraftClient_getPlayer)(Minecraft*);
+static int (*bl_Inventory_getSelectedSlot)(void*);
+static void (*bl_Inventory_selectSlot)(void*, int);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -935,21 +931,15 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (bl_localplayer == NULL) return 0;
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	if (invPtr == NULL) return 0;
-	return ((int*) invPtr)[INVENTORY_SELECTED_SLOT_OFFSET];
+	return bl_Inventory_getSelectedSlot(invPtr);
 }
 
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
-  (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return 0;
-	return ((int*) entity)[MOB_HEALTH_OFFSET];
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
-  (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return;
-	((int*) entity)[MOB_HEALTH_OFFSET] = halfhearts;
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSelectedSlotId
+  (JNIEnv *env, jclass clazz, jint newSlot) {
+	if (bl_localplayer == NULL) return 0;
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	if (invPtr == NULL) return 0;
+	bl_Inventory_selectSlot(invPtr, newSlot);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
@@ -1315,6 +1305,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_FillingContainer_removeResource = dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 	bl_Minecraft_getLevel = dlsym(mcpelibhandle, "_ZN9Minecraft8getLevelEv");
 	bl_MinecraftClient_getPlayer = dlsym(mcpelibhandle, "_ZN15MinecraftClient9getPlayerEv");
+	bl_Inventory_getSelectedSlot = dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
+	bl_Inventory_selectSlot = dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
 
 	bl_setuphooks_cppside();
 

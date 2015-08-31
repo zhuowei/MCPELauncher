@@ -33,6 +33,7 @@
 #include "mcpe/mobeffect.h"
 #include "mcpe/packetsender.h"
 #include "mcpe/servercommandparser.h"
+#include "mcpe/attribute.h"
 
 #include "fmod_hdr.h"
 
@@ -49,22 +50,20 @@ typedef void Font;
 #define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
 #define BLOCK_VTABLE_GET_COLOR 45
 //#define BLOCK_VTABLE_GET_AABB 14
-// Mob::getTexture
-#define MOB_TEXTURE_OFFSET 2996
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 //#define MOB_TARGET_OFFSET 3156
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 328
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 180
 // found in ChatScreen::setTextboxText
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 212
 
 #ifdef __i386
-// FIXME 0.11
-#define MINECRAFT_TEXTURES_OFFSET 308
+// FIXME 0.12
+#define MINECRAFT_TEXTURES_OFFSET 168
 #else
 // found in StartMenuScreen::render, or search for getTextureData
-#define MINECRAFT_TEXTURES_OFFSET 308
+#define MINECRAFT_TEXTURES_OFFSET 168
 #endif
 
 // found way, way inside GameRenderer::updateFreeformPickDirection, around the call to HitResult::HitResult(Entity*)
@@ -73,7 +72,8 @@ typedef void Font;
 // found in TouchInputMove::interactWithEntity
 #define MINECRAFT_HIT_ENTITY_OFFSET 2712
 // found in GameMode::initPlayer
-#define PLAYER_ABILITIES_OFFSET 3196
+// or look for Abilities::Abilities
+#define PLAYER_ABILITIES_OFFSET 3368
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 #define PLAYER_RENDER_TYPE 21
@@ -328,6 +328,9 @@ static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 static bool (*bl_Zombie_isBaby)(Entity*);
 static void (*bl_Zombie_setBaby)(Entity*, bool);
+static std::string* (*bl_Mob_getTexture)(Entity*);
+static int (*bl_Mob_getHealth)(Entity*);
+static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 
 static bool* bl_Tile_solid;
 
@@ -1027,7 +1030,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
 	std::string newSkinString(newSkin);
-	std::string* ptrToStr = (std::string*) (((uintptr_t) entity) + MOB_TEXTURE_OFFSET);
+	std::string* ptrToStr = (std::string*) bl_Mob_getTexture((Entity*) entity);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	*ptrToStr = newSkinString;
@@ -1469,7 +1472,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
-	std::string* mystr = (std::string*) (((int) entity) + MOB_TEXTURE_OFFSET);
+	std::string* mystr = (std::string*) bl_Mob_getTexture(entity);
 	jstring returnValString = env->NewStringUTF(mystr->c_str());
 	return returnValString;
 }
@@ -1880,6 +1883,21 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 		default:
 			return 0;
 	}
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobHealth
+  (JNIEnv *env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return 0;
+	return bl_Mob_getHealth(entity);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
+  (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	if (attrib) attrib->value = halfhearts;
 }
 
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
@@ -2304,6 +2322,12 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK6Zombie6isBabyEv");
 	bl_Zombie_setBaby = (void (*)(Entity*, bool))
 		dlsym(mcpelibhandle, "_ZN6Zombie7setBabyEb");
+	bl_Mob_getTexture = (std::string* (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZN3Mob10getTextureEv");
+	bl_Mob_getHealth = (int (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZN3Mob9getHealthEv");
+	bl_Mob_getAttribute = (AttributeInstance* (*)(Entity*, Attribute const&))
+		dlsym(mcpelibhandle, "_ZNK3Mob12getAttributeERK9Attribute");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
