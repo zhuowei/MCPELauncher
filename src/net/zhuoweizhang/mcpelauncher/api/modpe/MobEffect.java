@@ -27,35 +27,35 @@ public class MobEffect {
 	public static Map<Integer, String> effectIds = new HashMap<Integer, String>();
 
 	public static void initIds() {
-		saturation = populate("saturation");
-		absorption = populate("absorption");
-		healthBoost = populate("healthBoost");
-		wither = populate("wither");
-		poison = populate("poison");
-		weakness = populate("weakness");
-		hunger = populate("hunger");
-		nightVision = populate("nightVision");
-		blindness = populate("blindness");
-		invisibility = populate("invisibility");
-		waterBreathing = populate("waterBreathing");
-		fireResistance = populate("fireResistance");
-		damageResistance = populate("damageResistance");
-		regeneration = populate("regeneration");
-		confusion = populate("confusion");
-		jump = populate("jump");
-		harm = populate("harm");
-		heal = populate("heal");
-		damageBoost = populate("damageBoost");
-		digSlowdown = populate("digSlowdown");
-		digSpeed = populate("digSpeed");
-		movementSlowdown = populate("movementSlowdown");
-		movementSpeed = populate("movementSpeed");
+		saturation = populate("saturation", "SATURATION");
+		absorption = populate("absorption", "ABSORPTION");
+		healthBoost = populate("healthBoost", "HEALTH_BOOST");
+		wither = populate("wither", "WITHER");
+		poison = populate("poison", "POISON");
+		weakness = populate("weakness", "WEAKNESS");
+		hunger = populate("hunger", "HUNGER");
+		nightVision = populate("nightVision", "NIGHT_VISION");
+		blindness = populate("blindness", "BLINDNESS");
+		invisibility = populate("invisibility", "INVISIBILITY");
+		waterBreathing = populate("waterBreathing", "WATER_BREATHING");
+		fireResistance = populate("fireResistance", "FIRE_RESISTANCE");
+		damageResistance = populate("damageResistance", "DAMAGE_RESISTANCE");
+		regeneration = populate("regeneration", "REGENERATION");
+		confusion = populate("confusion", "CONFUSION");
+		jump = populate("jump", "JUMP");
+		harm = populate("harm", "HARM");
+		heal = populate("heal", "HEAL");
+		damageBoost = populate("damageBoost", "DAMAGE_BOOST");
+		digSlowdown = populate("digSlowdown", "DIG_SLOWDOWN");
+		digSpeed = populate("digSpeed", "DIG_SPEED");
+		movementSlowdown = populate("movementSlowdown", "MOVEMENT_SLOWDOWN");
+		movementSpeed = populate("movementSpeed", "MOVEMENT_SPEED");
 	}
 
 	public static native int nativePopulate(String a);
 
-	public static int populate(String a) {
-		int id = nativePopulate("_ZN9MobEffect" + a.length() + a + "E");
+	public static int populate(String a, String b) {
+		int id = nativePopulate("_ZN9MobEffect" + b.length() + b + "E");
 		effectIds.put(id, a);
 		//System.out.println("MobEffect " + a + ": " + id);
 		return id;

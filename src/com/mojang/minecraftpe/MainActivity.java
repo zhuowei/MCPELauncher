@@ -364,7 +364,7 @@ public class MainActivity extends NativeActivity {
 				initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ true);
+					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ false);
 					loadNativeAddons();
 				}
 			}
@@ -392,7 +392,7 @@ public class MainActivity extends NativeActivity {
 		setFakePackage(false);
 
 		try {
-			boolean shouldLoadScripts = false;//true;
+			boolean shouldLoadScripts = true;
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				applyBuiltinPatches();
 				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {

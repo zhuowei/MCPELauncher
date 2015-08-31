@@ -299,7 +299,7 @@ static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*);
-static void (*bl_Level_explode_real)(Level*, Entity*, float, float, float, float, bool);
+static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, float, float, float, float, bool);
 static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
 static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
 static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
@@ -768,7 +768,7 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
 	}
 }
 
-static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y, float z, float power, bool onFire) {
+static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, float x, float y, float z, float power, bool onFire) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -788,7 +788,7 @@ static void bl_Level_explode_hook(Level* level, Entity* entity, float x, float y
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	if (!preventDefaultStatus) bl_Level_explode_real(level, entity, x, y, z, power, onFire);
+	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, x, y, z, power, onFire);
 }
 
 static void bl_TileSource_fireTileEvent_hook(TileSource* source, int x, int y, int z, int type, int data) {
@@ -989,7 +989,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line) {
 	if (bl_level == NULL) return NULL;
-	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
+	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
 	if (te == NULL) return NULL;
 	//line offsets: 68, 72, 76, 80
 	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
@@ -1002,7 +1002,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line, jstring newText) {
 	if (bl_level == NULL) return;
-	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
+	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
 	if (te == NULL) return;
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
@@ -1334,6 +1334,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		recipeType.item = NULL;
 		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 		recipeType.itemInstance.count = 1;
+		recipeType.itemInstance.tag = NULL;
 		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3 + 1]);
 		recipeType.letter = (char) ingredients[i * 3];
 		ingredientsList.push_back(recipeType);
@@ -1553,10 +1554,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_SIDE:
 			return objectMouseOver->side;
 		case BLOCK_ID:
-			return bl_TileSource_getTile(bl_level->tileSource,
+			return bl_TileSource_getTile(bl_localplayer->tileSource,
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 		case BLOCK_DATA:
-			return bl_TileSource_getData(bl_level->tileSource,
+			return bl_TileSource_getData(bl_localplayer->tileSource,
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 		default:
 			return -1;
@@ -1570,7 +1571,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	Biome* biome = bl_TileSource_getBiome(bl_level->tileSource, pos);
+	Biome* biome = bl_TileSource_getBiome(bl_localplayer->tileSource, pos);
 	if (biome == NULL) return 0;
 	return biome->id;
 }
@@ -1582,7 +1583,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	Biome* biome = bl_TileSource_getBiome(bl_level->tileSource, pos);
+	Biome* biome = bl_TileSource_getBiome(bl_localplayer->tileSource, pos);
 	if (biome == NULL) return NULL;
 	jstring retval = env->NewStringUTF(biome->name.c_str());
 	return retval;
@@ -1595,7 +1596,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	return bl_TileSource_getGrassColor(bl_level->tileSource, pos);
+	return bl_TileSource_getGrassColor(bl_localplayer->tileSource, pos);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetGrassColor
@@ -1605,7 +1606,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	bl_TileSource_setGrassColor(bl_level->tileSource, color, pos, 3); //if you recall, 3 = full block update
+	bl_TileSource_setGrassColor(bl_localplayer->tileSource, color, pos, 3); //if you recall, 3 = full block update
 }
 
 static Abilities* bl_getAbilities(Player* player) {
@@ -1647,7 +1648,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetBiome
   (JNIEnv *env, jclass clazz, jint x, jint z, jint id) {
 	if (bl_level == nullptr) return;
-	LevelChunk* chunk = bl_TileSource_getChunk(bl_level->tileSource, x >> 4, z >> 4);
+	LevelChunk* chunk = bl_TileSource_getChunk(bl_localplayer->tileSource, x >> 4, z >> 4);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chunk: %p", chunk);
 	if (chunk == nullptr) return;
 	ChunkTilePos pos;
@@ -1704,7 +1705,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint entityTypeId) {
 	if (bl_level == NULL) return;
-	void* te = bl_TileSource_getTileEntity(bl_level->tileSource, x, y, z);
+	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
 	if (te == NULL) return;
 
 	BaseMobSpawner* spawner = *((BaseMobSpawner**) (((uintptr_t) te) + MOB_SPAWNER_OFFSET));
@@ -1766,9 +1767,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	pos.z = z;
 	Vec2 rot {0, 0};
 	if (type < 64) {
-		entity = MobFactory::CreateMob((EntityType) type, *bl_level->tileSource, pos, rot); //the last two vec3s are pos and rot
+		entity = MobFactory::CreateMob((EntityType) type, *bl_localplayer->tileSource, pos, rot); //the last two vec3s are pos and rot
 	} else {
-		entity = EntityFactory::CreateEntity((EntityType)type, *bl_level->tileSource);
+		entity = EntityFactory::CreateEntity((EntityType)type, *bl_localplayer->tileSource);
 	}
 
 	if (entity == nullptr) {
@@ -1797,7 +1798,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeD
 	ItemInstance* instance = bl_newItemInstance(id, count, damage);
 
 	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
-	bl_ItemEntity_ItemEntity(entity, *(bl_level->tileSource), x, y + range, z, *instance);
+	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->tileSource), x, y + range, z, *instance);
 
 	*((int*) (((uintptr_t) entity) + kItemEntity_pickupDelay_offset)) = 10; // 0.5 seconds
 
@@ -2226,7 +2227,7 @@ void bl_setuphooks_cppside() {
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
-	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeEP6Entityffffb");
+	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeER10TileSourceP6Entityffffb");
 	mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
 	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");

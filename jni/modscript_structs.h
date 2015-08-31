@@ -78,13 +78,17 @@ typedef struct {
 #endif
 
 typedef struct Entity{
+// this is all wrong FIXME 0.12
 //todo: 60 = tile source, 68 = level
 	void** vtable; //0
 	int filler3[5];//4
 	float x; //24
 	float y; //28
 	float z; //32
-	char filler2[72-36]; //36
+	char filler2[48-36]; //36
+	TileSource* tileSource; // 48
+	int dimension; // 52
+	char filler2_[72-56]; // 56
 	float motionX; //72 found in Entity::rideTick(); should be set to 0 there
 	float motionY; //76
 	float motionZ; //80
@@ -136,15 +140,15 @@ typedef struct {
 	char filler1[72-62]; //62
 } Item;
 
+typedef void CompoundTag;
+
 typedef struct {
 	unsigned char count; //0
 	short damage; //2
-	Item* item;//4
-	void* block; //8
-	bool wtf; //12
-	bool wtf2; //13
-	bool wtf3; //14
-	bool wtf4; //15
+	CompoundTag* tag; // 4
+	Item* item; // 8
+	void* block; //12
+	bool wtf; //16
 } ItemInstance; // see ServerCommandParser::give for size
 
 typedef struct {
