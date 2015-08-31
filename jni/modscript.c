@@ -438,8 +438,6 @@ void bl_GameMode_tick_hook(void* gamemode) {
 
 	bl_localplayer = bl_MinecraftClient_getPlayer(bl_minecraft);
 
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "tick %p %p %p", bl_minecraft, bl_level, bl_localplayer);
-
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
 	//Call back across JNI into the ScriptManager

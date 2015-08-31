@@ -57,7 +57,7 @@ typedef void Font;
 // found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
 #define MINECRAFT_CAMERA_ENTITY_OFFSET 328
 // found in ChatScreen::setTextboxText
-#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 200
+#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 212
 
 #ifdef __i386
 // FIXME 0.11
@@ -1951,12 +1951,15 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *env, jclass clazz, jstring text) {
+	return false;
+/*
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
 	ServerCommandParser* parser = *((ServerCommandParser**) (((uintptr_t) bl_minecraft) + kMinecraft_serverCommandParser_offset));
 	int findCount = parser->commands.count(mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 	return findCount != 0;
+*/
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
