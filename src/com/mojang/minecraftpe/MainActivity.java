@@ -1040,7 +1040,7 @@ public class MainActivity extends NativeActivity {
 			}
 			return is;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println(e);
 			return null;
 		}
 	}
@@ -1071,7 +1071,7 @@ public class MainActivity extends NativeActivity {
 			}
 			return is;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println(e);
 			return null;
 		}
 	}
@@ -1843,7 +1843,6 @@ public class MainActivity extends NativeActivity {
 
 	// 0.12
 	public int getKeyboardHeight() {
-		if (BuildConfig.DEBUG) System.out.println("Keyboard height");
 		Rect r = new Rect();
 		View rootview = this.getWindow().getDecorView();
 		rootview.getWindowVisibleDisplayFrame(r);

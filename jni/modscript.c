@@ -133,7 +133,7 @@ static void (*bl_FurnaceTileEntity_setItem)(void*, int, ItemInstance*);
 static ItemInstance* (*bl_FurnaceTileEntity_getItem)(void*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
-static void (*bl_Minecraft_setIsCreativeMode)(Minecraft*, int);
+static void (*bl_MinecraftClient_setGameMode)(Minecraft*, int);
 ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
 static void (*bl_Inventory_clearInventoryWithDefault)(void*);
@@ -587,8 +587,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* levelData = bl_Level_getLevelData(bl_level);
 	bl_LevelData_setGameType(levelData, type);
 	if (bl_localplayer == NULL) return;
-	bl_Minecraft_setIsCreativeMode(bl_minecraft, type == 1);
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	bl_MinecraftClient_setGameMode(bl_minecraft, type == 1);
+	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	//((char*) invPtr)[32] = type == 1;
 	//bl_Inventory_clearInventoryWithDefault(invPtr);
 	bl_Inventory_delete1_Inventory(invPtr);
@@ -1277,7 +1277,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZNK5Level7getTimeEv");
 	bl_Level_getLevelData = dlsym(RTLD_DEFAULT, "_ZN5Level12getLevelDataEv");
 	bl_LevelData_setSpawn = dlsym(RTLD_DEFAULT, "_ZN9LevelData8setSpawnERK7TilePos");
-	bl_LevelData_setGameType = dlsym(RTLD_DEFAULT, "_ZN9LevelData11setGameTypeEi");
+	bl_LevelData_setGameType = dlsym(RTLD_DEFAULT, "_ZN9LevelData11setGameTypeE8GameType");
 	bl_LevelData_getGameType = dlsym(RTLD_DEFAULT, "_ZNK9LevelData11getGameTypeEv");
 	bl_TileSource_getTileEntity = dlsym(RTLD_DEFAULT, "_ZN10TileSource13getTileEntityEiii");
 	bl_ChestTileEntity_setItem = dlsym(RTLD_DEFAULT, "_ZN15ChestTileEntity7setItemEiP12ItemInstance");
@@ -1295,7 +1295,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
-	bl_Minecraft_setIsCreativeMode = dlsym(RTLD_DEFAULT, "_ZN9Minecraft17setIsCreativeModeEb");
+	bl_MinecraftClient_setGameMode = dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
 	bl_Inventory_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryC2EP6Playerb");
 	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
