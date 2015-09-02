@@ -91,11 +91,11 @@ const size_t kItemSize = 72;
 // found in Item::initItems item with id 4
 const size_t kFoodItemSize = 100;
 // found in Entity::spawnAtLocation
-const size_t kItemEntitySize = 360;
+const size_t kItemEntitySize = 408;
 // found in Entity::spawnAtLocation
-const size_t kItemEntity_pickupDelay_offset = 344;
+const size_t kItemEntity_pickupDelay_offset = 384;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 324;
+const size_t kItemEntity_itemInstance_offset = 360;
 // found in TextPacket::handle
 const int kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
 // found by searching for constructor
@@ -1012,6 +1012,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//line offsets: 68, 72, 76, 80
 	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	/*
 	if (lineStr == NULL || lineStr->length() == 0) {
 		//Workaround for C++ standard library's empty string optimization failing across libraries
 		//search FULLY_DYNAMIC_STRING
@@ -1020,6 +1021,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	} else {
 		lineStr->assign(utfChars);
 	}
+	*/
+	lineStr->assign(utfChars);
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
 
@@ -1377,6 +1380,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 		return;
 	}
 	std::string* lineStr = &(dataItem->data);
+	/*
 	if (lineStr == NULL || lineStr->length() == 0) {
 		//Workaround for C++ standard library's empty string optimization failing across libraries
 		//search FULLY_DYNAMIC_STRING
@@ -1386,6 +1390,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	} else {
 		lineStr->assign(nameUtfChars);
 	}
+	*/
+	lineStr->assign(nameUtfChars);
 	env->ReleaseStringUTFChars(name, nameUtfChars);
 }
 
@@ -2166,7 +2172,7 @@ void bl_setuphooks_cppside() {
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
-	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZN3Mob10isSneakingEv");
+	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
 
 	bl_ItemInstance_getName = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getNameEv");
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool))
@@ -2301,7 +2307,7 @@ void bl_setuphooks_cppside() {
 #endif
 
 	bl_Entity_getNameTag = (std::string* (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZN6Entity10getNameTagEv");
+		dlsym(mcpelibhandle, "_ZNK6Entity10getNameTagEv");
 	bl_Mob_addEffect = (void (*)(Entity*, MobEffectInstance&))
 		dlsym(mcpelibhandle, "_ZN3Mob9addEffectERK17MobEffectInstance");
 	bl_Mob_removeEffect = (void (*)(Entity*, int))

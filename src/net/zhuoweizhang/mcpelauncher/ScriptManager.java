@@ -1143,18 +1143,7 @@ public class ScriptManager {
 	}
 
 	private static String getEntityUUID(long entityId) {
-		String uuid = entityUUIDMap.get(entityId);
-		if (uuid != null) return uuid;
-		long[] uuidParts = nativeEntityGetUUID(entityId);
-		if (uuidParts == null) return null;
-		long lsb = Long.reverseBytes(uuidParts[0]);
-		long msb = Long.reverseBytes(uuidParts[1]);
-		UUID uuidObj = new UUID(lsb, msb);
-		System.out.println(uuidObj);
-		if (uuidObj.version() != 4) throw new RuntimeException("Invalid entity UUID");
-		uuid = uuidObj.toString();
-		entityUUIDMap.put(entityId, uuid);
-		return uuid;
+		return Long.toString(entityId);
 	}
 
 	private static boolean isPackagedScript(File file) {
@@ -2316,6 +2305,7 @@ public class ScriptManager {
 			nativeSetSneaking(getEntityId(ent), doIt);
 		}
 
+		@JSStaticFunction
 		public static boolean isSneaking(Object ent) {
 			return nativeIsSneaking(getEntityId(ent));
 		}

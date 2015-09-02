@@ -175,7 +175,7 @@ void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_instance = (void**)
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
-		dlsym(mcpelibhandle, "_ZN4Mesh5resetEv");
+		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
 	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float, int, int))
 		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Effii");
 	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, float))

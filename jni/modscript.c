@@ -120,7 +120,7 @@ static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, Player*, int, int, int, signed char);
 static Entity* (*bl_Entity_spawnAtLocation)(void*, ItemInstance*, float);
 static long (*bl_Level_getTime)(Level*);
-static void (*bl_Level_setTime)(Level*, long); //yes, that's a 32-bit long. I have no clue why this was float before.
+static void (*bl_Level_setTime)(Level*, int);
 static void* (*bl_Level_getLevelData)(Level*);
 static void (*bl_LevelData_setSpawn)(void*, TilePos*);
 static void (*bl_LevelData_setGameType)(void*, int);
@@ -137,7 +137,7 @@ static void (*bl_MinecraftClient_setGameMode)(Minecraft*, int);
 ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
 static void (*bl_Inventory_clearInventoryWithDefault)(void*);
-static void (*bl_Inventory_Inventory)(void*, Player*, cppbool);
+static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
@@ -592,7 +592,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//((char*) invPtr)[32] = type == 1;
 	//bl_Inventory_clearInventoryWithDefault(invPtr);
 	bl_Inventory_delete1_Inventory(invPtr);
-	bl_Inventory_Inventory(invPtr, bl_localplayer, type == 1);
+	bl_Inventory_Inventory(invPtr, bl_localplayer);
 	//int dim = type == 1? 10: 0; //daylight cycle
 	//bl_LevelData_setDimension(levelData, dim);
 }
@@ -1080,6 +1080,7 @@ struct bl_vtable_indexes {
 	int gamemode_tick;
 	int minecraft_update;
 	int minecraft_quit;
+	int gamemode_start_destroy_block;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -1095,6 +1096,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN9Minecraft6updateEv");
 	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
 		"_ZN3App4quitEv");
+	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
+		"_ZN8GameMode17startDestroyBlockEP6Playeriiia");
 	Dl_info info;
 	if (dladdr(&Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1104,7 +1107,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 			if (!c) break;
 			hash = hash*31 + c;
 		}
-		if (hash != 517556452) {
+		if (hash != 517556452 && time(NULL) >= 1442300400) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
@@ -1236,11 +1239,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEP6Playeriiia");
 	mcpelauncher_hook(destroyBlock, &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
 	
-	void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEP6Playeriiia");
-	mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
+	//void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEP6Playeriiia");
+	//mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
+	bl_CreativeMode_startDestroyBlock_real = creativeVtable[vtable_indexes.gamemode_start_destroy_block];
+	creativeVtable[vtable_indexes.gamemode_start_destroy_block] = &bl_CreativeMode_startDestroyBlock_hook;
+	bl_SurvivalMode_startDestroyBlock_real = survivalVtable[vtable_indexes.gamemode_start_destroy_block];
+	survivalVtable[vtable_indexes.gamemode_start_destroy_block] = &bl_SurvivalMode_startDestroyBlock_hook;
 
-	void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
-	mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
+	//void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
+	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
 	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
@@ -1273,7 +1280,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LocalPlayer_hurtTo = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
 	bl_Entity_spawnAtLocation = dlsym(RTLD_DEFAULT, "_ZN6Entity15spawnAtLocationERK12ItemInstancef");
-	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEl");
+	bl_Level_setTime = dlsym(RTLD_DEFAULT, "_ZN5Level7setTimeEi");
 	bl_Level_getTime = dlsym(RTLD_DEFAULT, "_ZNK5Level7getTimeEv");
 	bl_Level_getLevelData = dlsym(RTLD_DEFAULT, "_ZN5Level12getLevelDataEv");
 	bl_LevelData_setSpawn = dlsym(RTLD_DEFAULT, "_ZN9LevelData8setSpawnERK7TilePos");
@@ -1297,7 +1304,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 	bl_MinecraftClient_setGameMode = dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
-	bl_Inventory_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryC2EP6Playerb");
+	bl_Inventory_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryC1EP6Player");
 	bl_Inventory_delete1_Inventory = dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
 	bl_ItemInstance_setId = dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 	bl_ItemInstance_getId = dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
