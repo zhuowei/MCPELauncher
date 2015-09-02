@@ -95,7 +95,7 @@ jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(Minecraft*, unique_ptr*);
-void* (*bl_Minecraft_selectLevel_real)(void*, Minecraft*, void*, void*, void*);
+void* (*bl_MinecraftClient_startLocalServer_real)(Minecraft*, void*, void*, void*);
 static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -236,7 +236,6 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 	int y = pos->y;
 	int z = pos->z;
 	//bl_level = level;
-	Level* level = bl_level;
 	bl_localplayer = player;
 
 	if (!bl_untampered) {
@@ -358,7 +357,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(Minecraft* minecraft, unique_p
 	}*/
 }
 
-void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+void* bl_MinecraftClient_startLocalServer_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -383,7 +382,7 @@ void* bl_Minecraft_selectLevel_hook(void* retval2, Minecraft* minecraft, void* w
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 	}
 
-	void* retval = bl_Minecraft_selectLevel_real(retval2, minecraft, wDir, wName, levelSettings);
+	void* retval = bl_MinecraftClient_startLocalServer_real(minecraft, wDir, wName, levelSettings);
 	bl_level = bl_Minecraft_getLevel(minecraft);
 	bl_localplayer = bl_MinecraftClient_getPlayer(minecraft);
 	bl_onLockDown = false;
@@ -1098,6 +1097,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN3App4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode17startDestroyBlockEP6Playeriiia");
+/*
 	Dl_info info;
 	if (dladdr(&Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1111,6 +1111,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
+*/
 }
 
 void bl_prepatch_cppside(void*);
@@ -1231,9 +1232,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
-	void* selectLevel = dlsym(RTLD_DEFAULT, "_ZN9Minecraft11selectLevelERKSsS1_RK13LevelSettings");
+	void* selectLevel = dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
 #ifndef __i386
-	mcpelauncher_hook(selectLevel, &bl_Minecraft_selectLevel_hook, (void**) &bl_Minecraft_selectLevel_real);
+	mcpelauncher_hook(selectLevel, &bl_MinecraftClient_startLocalServer_hook, (void**) &bl_MinecraftClient_startLocalServer_real);
 #endif
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockEP6Playeriiia");
