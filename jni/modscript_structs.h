@@ -78,8 +78,6 @@ typedef struct {
 #endif
 
 typedef struct Entity{
-// this is all wrong FIXME 0.12
-//todo: 60 = tile source, 68 = level
 	void** vtable; //0
 	int filler3[5];//4
 	float x; //24
@@ -130,14 +128,14 @@ typedef struct {
 typedef struct {
 	void** vtable; //0
 	unsigned char maxStackSize; //4
-	char filler0[18-5]; //5
-	short itemId; //18
-	short maxDamage; //20
-	char filler[56-22]; //22
-	int category1; //56
-	bool handEquipped; //60
-	bool stackedByData; //61
-	char filler1[72-62]; //62
+	char filler0[24-5]; //5
+	short itemId; //24
+	short maxDamage; //26
+	char filler[60-28]; //28
+	int category1; //60
+	bool handEquipped; //64
+	bool stackedByData; //65
+	char filler1[72-66]; //66
 } Item;
 
 typedef void CompoundTag;
@@ -354,7 +352,7 @@ CLASS_TYPEDEF(Level)
 	char filler[12-4]; //4
 	bool isRemote; //12 PrimedTnT::normalTick
 	char filler2[2908-13];//13
-	TileSource* tileSource;//2908 from Level::getChunkSource
+
 #ifdef __cplusplus
 	Entity* getEntity(EntityUniqueID, bool) const;
 	void addEntity(std::unique_ptr<Entity>);

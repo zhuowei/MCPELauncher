@@ -2034,7 +2034,7 @@ public class ScriptManager {
 		}
 		@JSStaticFunction
 		public static void setSelectedSlotId(int slot) {
-			return nativeSetSelectedSlotId(slot);
+			nativeSetSelectedSlotId(slot);
 		}
 
 		// KsyMC's additions

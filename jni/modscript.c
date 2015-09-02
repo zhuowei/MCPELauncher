@@ -52,14 +52,14 @@ typedef struct {
 // found in TextureAtlas::load
 #define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
 // from calls to Timer::advanceTime
-#define MINECRAFT_TIMER_OFFSET 216
+#define MINECRAFT_TIMER_OFFSET 92
 // from Entity::setPos(Vec3 const&)
-#define ENTITY_VTABLE_OFFSET_SETPOS 4
-#define GAMERENDERER_GETFOV_SIZE 0xbc
+#define ENTITY_VTABLE_OFFSET_SETPOS 6
+#define GAMERENDERER_GETFOV_SIZE 0x134
 // MinecartRideable::interactWithPlayer
-#define ENTITY_VTABLE_OFFSET_START_RIDING 25
+#define ENTITY_VTABLE_OFFSET_START_RIDING 29
 // LegacyClientNetworkHandler::handleEntityLink
-#define ENTITY_VTABLE_OFFSET_STOP_RIDING 100
+#define ENTITY_VTABLE_OFFSET_STOP_RIDING 118
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -1095,6 +1095,19 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN9Minecraft6updateEv");
 	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
 		"_ZN3App4quitEv");
+	Dl_info info;
+	if (dladdr(&Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
+		int hash = 0;
+		const char* funcname = info.dli_sname;
+		for (int i = 0; ; i++) {
+			char c = funcname[i];
+			if (!c) break;
+			hash = hash*31 + c;
+		}
+		if (hash != 517556452) {
+			vtable_indexes.minecraft_update = hash;
+		}
+	}
 }
 
 void bl_prepatch_cppside(void*);
