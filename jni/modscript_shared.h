@@ -74,6 +74,8 @@ void* debug_dlsym(void* handle, const char* symbol);
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
 
+int bl_vtableIndex(void* si, const char* vtablename, const char* name);
+
 
 #ifdef __cplusplus
 }

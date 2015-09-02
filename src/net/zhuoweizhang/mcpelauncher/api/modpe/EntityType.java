@@ -10,6 +10,9 @@ public class EntityType {
 	public static final int MUSHROOM_COW = 16;
 	public static final int SQUID = 17;
 	public static final int BAT = 19;
+	public static final int IRON_GOLEM = 20;
+	public static final int SNOW_GOLEM = 21;
+	public static final int OCELOT = 22;
 	public static final int ZOMBIE = 32;
 	public static final int CREEPER = 33;
 	public static final int SKELETON = 34;
@@ -21,9 +24,13 @@ public class EntityType {
 	public static final int CAVE_SPIDER = 40;
 	public static final int GHAST = 41;
 	public static final int LAVA_SLIME = 42;
+	public static final int BLAZE = 43;
+	public static final int ZOMBIE_VILLAGER = 44;
 	public static final int ITEM = 64;
 	public static final int PRIMED_TNT = 65;
 	public static final int FALLING_BLOCK = 66;
+	public static final int EXPERIENCE_POTION = 68;
+	public static final int EXPERIENCE_ORB = 69;
 	public static final int FISHING_HOOK = 77;
 	public static final int ARROW = 80;
 	public static final int SNOWBALL = 81;
@@ -31,6 +38,9 @@ public class EntityType {
 	public static final int PAINTING = 83;
 	public static final int MINECART = 84;
 	public static final int FIREBALL = 85;
+	public static final int THROWN_POTION = 86;
 	public static final int BOAT = 90;
+	public static final int LIGHTNING_BOLT = 93;
+	public static final int SMALL_FIREBALL = 94;
 	public static final int PLAYER = 63;
 }

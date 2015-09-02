@@ -1491,6 +1491,7 @@ public class ScriptManager {
 	public static native boolean nativeIsValidCommand(String name);
 	public static native boolean nativeZombieIsBaby(long entity);
 	public static native void nativeZombieSetBaby(long entity, boolean yep);
+	public static native int nativeBlockGetSecondPart(int x, int y, int z, int axis);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2952,6 +2953,26 @@ public class ScriptManager {
 		public static void setCollisionEnabled(int blockId, boolean yep) {
 			nativeBlockSetCollisionEnabled(blockId, yep);;
 		}*/
+
+		@JSStaticFunction
+		public static boolean isDouble(int x, int y, int z) {
+			return nativeBlockGetSecondPart(x, y, z, AXIS_Y) != -1;
+		}
+
+		@JSStaticFunction
+		public static int getSecondPartX(int x, int y, int z) {
+			return nativeBlockGetSecondPart(x, y, z, AXIS_X);
+		}
+
+		@JSStaticFunction
+		public static int getSecondPartY(int x, int y, int z) {
+			return nativeBlockGetSecondPart(x, y, z, AXIS_Y);
+		}
+
+		@JSStaticFunction
+		public static int getSecondPartZ(int x, int y, int z) {
+			return nativeBlockGetSecondPart(x, y, z, AXIS_Z);
+		}
 
 		@Override
 		public String getClassName() {

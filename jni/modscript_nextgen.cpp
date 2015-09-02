@@ -185,6 +185,17 @@ typedef struct {
 struct BaseMobSpawner {
 };
 
+struct bl_vtable_indexes_nextgen_cpp {
+	int tile_get_second_part;
+};
+
+static bl_vtable_indexes_nextgen_cpp vtable_indexes;
+
+static void populate_vtable_indexes(void* mcpelibhandle) {
+	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
+		"_ZN4Tile13getSecondPartER10TileSourceRK7TilePosRS2_");
+}
+
 extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
@@ -2000,6 +2011,34 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZo
 	bl_Zombie_setBaby(entity, yep);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetSecondPart
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint axis) {
+	int blockId = bl_TileSource_getTile(bl_localplayer->tileSource, x, y, z);
+	if (blockId == 0) return -1;
+	Tile* tile = bl_Tile_tiles[blockId];
+	if (!tile) return -1;
+	void* methodPtr = tile->vtable[vtable_indexes.tile_get_second_part];
+	bool (*getSecondPart)(Tile*, TileSource&, TilePos const&, TilePos&) =
+		(bool (*)(Tile*, TileSource&, TilePos const&, TilePos&)) methodPtr;
+	TilePos tilePos;
+	tilePos.x = x;
+	tilePos.y = y;
+	tilePos.z = z;
+	TilePos tilePosOut;
+	bool ret = getSecondPart(tile, *(bl_localplayer->tileSource), tilePos, tilePosOut);
+	if (!ret) return -1;
+	switch (axis) {
+		case AXIS_X:
+			return tilePosOut.x;
+		case AXIS_Y:
+			return tilePosOut.y;
+		case AXIS_Z:
+			return tilePosOut.z;
+		default:
+			abort();
+	}
+}
+
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 
 static bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
@@ -2041,6 +2080,7 @@ static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
+	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	bl_prepatch_fmod(mcpelibhandle);
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
@@ -2144,7 +2184,7 @@ void bl_setuphooks_cppside() {
 	bl_Tile_setNameId = (void (*)(Tile*, const std::string&))
 		dlsym(RTLD_DEFAULT, "_ZN4Tile9setNameIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
-		dlsym(RTLD_DEFAULT, "_ZN4Tile8setShapeEffffff");
+		dlsym(RTLD_DEFAULT, "_ZN4Tile14setVisualShapeEffffff");
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
 	bl_Tile_lightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
