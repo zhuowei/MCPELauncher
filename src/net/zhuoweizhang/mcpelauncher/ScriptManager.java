@@ -215,6 +215,11 @@ public class ScriptManager {
 		Context.exit();
 	}
 
+	private static Class<?>[] constantsClasses = {
+		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
+		EntityRenderType.class, ArmorType.class, MobEffect.class
+	};
+
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
 		Scriptable scope = ctx.initStandardObjects(new BlockHostObject(), false);
 		ScriptState state = new ScriptState(script, scope, sourceName);
@@ -232,23 +237,13 @@ public class ScriptManager {
 			ScriptableObject.defineClass(scope, NativeEntityApi.class);
 			ScriptableObject.defineClass(scope, NativeModPEApi.class);
 			ScriptableObject.defineClass(scope, NativeItemApi.class);
-			ScriptableObject.putProperty(scope, "ChatColor",
-					classConstantsToJSObject(ChatColor.class));
-			ScriptableObject.putProperty(scope, "ItemCategory",
-					classConstantsToJSObject(ItemCategory.class));
 			ScriptableObject.defineClass(scope, NativeBlockApi.class);
 			ScriptableObject.defineClass(scope, NativeServerApi.class);
 			RendererManager.defineClasses(scope);
-			ScriptableObject.putProperty(scope, "ParticleType",
-					classConstantsToJSObject(ParticleType.class));
-			ScriptableObject.putProperty(scope, "EntityType",
-					classConstantsToJSObject(EntityType.class));
-			ScriptableObject.putProperty(scope, "EntityRenderType",
-					classConstantsToJSObject(EntityRenderType.class));
-			ScriptableObject.putProperty(scope, "ArmorType",
-					classConstantsToJSObject(ArmorType.class));
-			ScriptableObject.putProperty(scope, "MobEffect",
-					classConstantsToJSObject(MobEffect.class));
+			for (Class<?> clazz: constantsClasses) {
+				ScriptableObject.putProperty(scope, clazz.getSimpleName(),
+						classConstantsToJSObject(clazz));
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportScriptError(state, e);
@@ -790,6 +785,9 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeItemApi.class, "Item");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
 		appendApiMethods(builder, NativeServerApi.class, "Server");
+		for (Class<?> clazz: constantsClasses) {
+			appendApiClassConstants(builder, clazz);
+		}
 		return builder.toString();
 
 	}
@@ -822,6 +820,17 @@ public class ScriptManager {
 			}
 		}
 		builder.append(");\n");
+	}
+
+	private static void appendApiClassConstants(StringBuilder builder, Class<?> clazz) {
+		String className = clazz.getSimpleName();
+		for (Field field : clazz.getFields()) {
+			int fieldModifiers = field.getModifiers();
+			if (!Modifier.isStatic(fieldModifiers) || !Modifier.isPublic(fieldModifiers))
+				continue;
+			builder.append(className).append(".").append(field.getName()).append(";\n");
+		}
+		builder.append("\n");
 	}
 
 	// end method dumping code
@@ -1926,7 +1935,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void addParticle(int type, double x, double y, double z, double xVel, double yVel, double zVel, int size) {
-			if (type < 0 || type > 25) throw new RuntimeException("Invalid particle type " + type + ": should be between 0 and 25");
+			if (!ParticleType.checkValid(type, size)) return;
 			nativeLevelAddParticle(type, (float) x, (float) y, (float) z, (float) xVel, (float) yVel, (float) zVel, size);
 		}
 
