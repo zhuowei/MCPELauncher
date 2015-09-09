@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <android/log.h>
 #include <jni.h>
+#include <time.h>
 
 #include "dl_internal.h"
 #include "mcpelauncher.h"
@@ -136,7 +137,7 @@ static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_MinecraftClient_setGameMode)(Minecraft*, int);
 ItemInstance* (*bl_Player_getArmor)(Player*, int);
 static void  (*bl_Player_setArmor)(Player*, int, ItemInstance*);
-static void (*bl_Inventory_clearInventoryWithDefault)(void*);
+//static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
@@ -180,6 +181,18 @@ extern bool bl_onLockDown;
 static bool bl_untampered;
 
 int bl_vtableIndex(void* si, const char* vtablename, const char* name);
+
+struct bl_vtable_indexes {
+	int gamemode_use_item_on;
+	int gamemode_attack;
+	int gamemode_tick;
+	int minecraft_update;
+	int minecraft_quit;
+	int gamemode_start_destroy_block;
+	int entity_get_entity_type_id;
+};
+
+static struct bl_vtable_indexes vtable_indexes; // indices? whatever
 
 #ifdef DLSYM_DEBUG
 
@@ -847,7 +860,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	void* vtable = entity->vtable[ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID];
+	void* vtable = entity->vtable[vtable_indexes.entity_get_entity_type_id];
 	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
 	return fn(entity) & 0xff;
 }
@@ -920,16 +933,16 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSelectedSlotId
   (JNIEnv *env, jclass clazz, jint newSlot) {
-	if (bl_localplayer == NULL) return 0;
+	if (bl_localplayer == NULL) return;
 	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
-	if (invPtr == NULL) return 0;
+	if (invPtr == NULL) return;
 	bl_Inventory_selectSlot(invPtr, newSlot);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
   (JNIEnv *env, jclass clazz, jlong entityId, jint renderType) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return;
+	if (entity == NULL) return true;
 	return bl_renderManager_setRenderType(entity, renderType);
 }
 
@@ -1058,17 +1071,6 @@ static void App_quit_hook(void* self) {
 
 #include "checktamper.h"
 
-struct bl_vtable_indexes {
-	int gamemode_use_item_on;
-	int gamemode_attack;
-	int gamemode_tick;
-	int minecraft_update;
-	int minecraft_quit;
-	int gamemode_start_destroy_block;
-};
-
-static struct bl_vtable_indexes vtable_indexes; // indices? whatever
-
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
@@ -1082,7 +1084,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN3App4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode17startDestroyBlockEP6Playeriiia");
-/*
+	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
+		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	Dl_info info;
 	if (dladdr(&Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1096,7 +1099,6 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
-*/
 }
 
 void bl_prepatch_cppside(void*);
@@ -1284,7 +1286,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Player_setArmor = dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer8setArmorEiPK12ItemInstance");
 
 	//replace the getTexture method for zombie pigmen
-	void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
+	//void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
