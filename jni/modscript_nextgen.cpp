@@ -65,9 +65,10 @@ typedef void Font;
 
 // found way, way inside GameRenderer::updateFreeformPickDirection, around the call to HitResult::HitResult(Entity*)
 // (look for the stack allocation, then see where it's copied)
-#define MINECRAFT_HIT_RESULT_OFFSET 2680
+// can also check interactWithEntity
+#define MINECRAFT_HIT_RESULT_OFFSET (5120 + 8)
 // found in TouchInputMove::interactWithEntity
-#define MINECRAFT_HIT_ENTITY_OFFSET 2712
+#define MINECRAFT_HIT_ENTITY_OFFSET (5152 + 8)
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
 #define PLAYER_ABILITIES_OFFSET 3368
@@ -1570,6 +1571,8 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeP
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
   (JNIEnv *env, jclass clazz, jint axis) {
 	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "hit %d %d %d %d", objectMouseOver->type,
+	//	objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 	if (objectMouseOver->type != HIT_RESULT_BLOCK) return -1;
 	switch (axis) {
 		case AXIS_X:
