@@ -113,7 +113,7 @@ static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_GameRenderer_getFov)(void*, float, int);
 static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
-static void* (*bl_Mob_getTexture)(Entity*);
+cppstr* (*bl_Mob_getTexture)(Entity*);
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Entity_remove)(Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
@@ -143,9 +143,6 @@ void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
-static void (*bl_HumanoidModel_constructor_real)(HumanoidModel*, float, float);
-static void (*bl_EnderManModel_constructor_real)(HumanoidModel*);
-void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
@@ -490,26 +487,6 @@ void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
 		bl_frameCallbackRequested = 0;
 		bl_handleFrameCallback();
 	}
-}
-extern void bl_cape_hook(HumanoidModel* self, float scale, float y);
-
-static bool bl_inEnderManModelConstructor = false;
-
-void bl_HumanoidModel_constructor_hook(HumanoidModel* self, float scale, float y) {
-	bl_HumanoidModel_constructor_real(self, scale, y);
-	bl_cape_hook(self, scale, y);
-	if (bl_inEnderManModelConstructor) return;
-	int oldTextureOffsetX = self->bipedHead.textureOffsetX;
-	self->bipedHead.textureOffsetX = 32;
-	bl_ModelPart_addBox(&self->bipedHead, -4.0F, -8.0F, -4.0F, 8, 8, 8, scale + 0.5F);
-	self->bipedHead.textureOffsetX = oldTextureOffsetX;
-	self->bipedHead.material = &self->materialAlphaTest;
-}
-
-void bl_EnderManModel_constructor_hook(HumanoidModel* self) {
-	bl_inEnderManModelConstructor = true;
-	bl_EnderManModel_constructor_real(self);
-	bl_inEnderManModelConstructor = false;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
@@ -1146,7 +1123,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 		App_quit_real = minecraftVtable[vtable_indexes.minecraft_quit];
 		minecraftVtable[vtable_indexes.minecraft_quit] = &App_quit_hook;
-		bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	}
 
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");

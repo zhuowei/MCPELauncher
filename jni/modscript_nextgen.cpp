@@ -339,7 +339,6 @@ static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 static bool (*bl_Zombie_isBaby)(Entity*);
 static void (*bl_Zombie_setBaby)(Entity*, bool);
-static std::string* (*bl_Mob_getTexture)(Entity*);
 static int (*bl_Mob_getHealth)(Entity*);
 static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 

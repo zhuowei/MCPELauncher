@@ -170,7 +170,7 @@ typedef struct {
 } Tile;
 
 typedef struct {
-	char filler0[668]; //0
+	char filler0[664]; //0
 } Cube;
 
 typedef struct {
@@ -184,43 +184,49 @@ typedef struct {
 	float offsetZ; //8
 	float rotateAngleX; // 12
 	float rotateAngleY; // 16
-	char filler0[4]; //20: note that 32 contains a std::vector
-	bool transparent; //24
-	bool showModel; //25
-	char filler1[30]; //26
-	float textureWidth; //56
-	float textureHeight; //60
-	MaterialPtr* material; //64
-	int textureOffsetX;//68
-	int textureOffsetY;//72
-	bool wtf2; //76
-	char filler3[47];//77; 84 is mesh
-	void* model; // 124
-} ModelPart;
+	char filler0[25-20]; // 20
+	bool showModel; // 25 from HumanoidMobRenderer::prepareArmor
+	char filler1[52-26]; //26
+	float textureWidth; //52
+	float textureHeight; //56
+	MaterialPtr* material; //60 from ModelPart::draw
+	int textureOffsetX; // 64
+	int textureOffsetY; // 68
+	bool neverRender; // 72
+	char filler3[152-73];//73
+	void* model; // 152
+} ModelPart; // 156 bytes
 
 // from HumanoidModel::render
 
 typedef struct {
 	void** vtable; //0
-	char filler0[12-4]; // 4
-	bool riding; // 12
-	char filler[32-13]; // 13
-	MaterialPtr* activeMaterial; // 32
-	MaterialPtr materialNormal; // 36
-	MaterialPtr materialAlphaTest; // 48
-	MaterialPtr materialAlphaBlend; // 60
-	MaterialPtr materialStatic; // 72
-	MaterialPtr materialEmissive; // 84
-	MaterialPtr materialEmissiveAlpha; // 96
-	MaterialPtr materialChangeColor; // 108
-	ModelPart bipedHead;//120
-	ModelPart bipedHeadwear;//248
-	ModelPart bipedBody;//376
-	ModelPart bipedRightArm;//504
-	ModelPart bipedLeftArm;//632
-	ModelPart bipedRightLeg;//760
-	ModelPart bipedLeftLeg;//888
+	char filler[13-4]; // 4
+	bool riding; // 13
+	char filler1[16-14]; // 14
+	MaterialPtr* activeMaterial; // 16
+	MaterialPtr materialNormal; // 20
+	MaterialPtr materialAlphaTest; // 32
+	MaterialPtr materialAlphaBlend; // 44
+	MaterialPtr materialStatic; // 56
+	MaterialPtr materialEmissive; // 68
+	MaterialPtr materialEmissiveAlpha; // 80
+	MaterialPtr materialChangeColor; // 92
+	MaterialPtr materialGlint; // 104
+	MaterialPtr materialAlphaTestGlint; // 116
+	char filler2[140-128]; // 128
+	ModelPart bipedHead;//140
+	ModelPart bipedHeadwear;//296
+	ModelPart bipedBody;//452
+	ModelPart bipedRightArm;//608
+	ModelPart bipedLeftArm;//764
+	ModelPart bipedRightLeg;//920
+	ModelPart bipedLeftLeg;//1076
 } HumanoidModel;
+
+#ifdef __cplusplus
+static_assert(sizeof(ModelPart) == 156, "ModelPart size");
+#endif
 
 typedef struct {
 	Item* item; //0
@@ -241,8 +247,8 @@ typedef void EntityRenderer;
 
 typedef struct {
 	void** vtable; //0
-	char filler[72-4]; //4
-	void* model; // 72 (from MobRenderer::MobRenderer)
+	char filler[108-4]; //4
+	void* model; // 108 (from MobRenderer::MobRenderer)
 } MobRenderer;
 
 typedef void Tag;
@@ -328,10 +334,10 @@ struct ArmorItem : public Item {
 static_assert(sizeof(ArmorItem) == 88, "armor item size");
 #endif
 
-struct PlayerRenderer : public MobRenderer {
-	char filler[112-76]; // 76
-	HumanoidModel* modelArmor; // 112
-	HumanoidModel* modelArmorChestplate; // 116
+struct HumanoidMobRenderer : public MobRenderer {
+	char filler[144-112]; // 112
+	HumanoidModel* modelArmor; // 144
+	HumanoidModel* modelArmorChestplate; // 148
 };
 #endif
 

@@ -76,6 +76,8 @@ void* debug_dlsym(void* handle, const char* symbol);
 
 int bl_vtableIndex(void* si, const char* vtablename, const char* name);
 
+extern cppstr* (*bl_Mob_getTexture)(Entity*);
+
 
 #ifdef __cplusplus
 }
