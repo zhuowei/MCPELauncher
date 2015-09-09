@@ -187,6 +187,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_vtable_size;
 	int tile_get_texture_char_int;
 	int tile_get_color;
+	int raknet_instance_connect;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -199,6 +200,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN4Tile10getTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
 		"_ZN4Tile8getColorEi");
+	vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
+		"_ZN14RakNetInstance7connectEPKci");
 }
 
 extern "C" {
@@ -1739,12 +1742,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
   (JNIEnv *env, jclass clazz, jint screen) {
-	bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
+	//bl_ScreenChooser_setScreen(*((ScreenChooser**) ((uintptr_t) bl_minecraft + MINECRAFT_SCREENCHOOSER_OFFSET)), screen);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
   (JNIEnv *env, jclass clazz) {
-	bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
+	//bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
   (JNIEnv *env, jclass clazz) {
@@ -2162,8 +2165,8 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
 
 	void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
-	bl_dumpVtable(raknetVTable, 0x100);
-	raknetVTable[RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT] = (void*) &bl_RakNetInstance_connect_hook;
+	//bl_dumpVtable(raknetVTable, 0x100);
+	raknetVTable[vtable_indexes.raknet_instance_connect] = (void*) &bl_RakNetInstance_connect_hook;
 
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
 	//I have no idea why I have to subtract 24 (or add 8).
@@ -2284,7 +2287,7 @@ void bl_setuphooks_cppside() {
 #endif
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, Vec3 const&, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3S3_i");
-	bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
+	//bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
 	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
@@ -2333,8 +2336,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN10TileEntity10setChangedEv");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, int, void*, int, int))
 		dlsym(mcpelibhandle, "_ZN9ArmorItemC1EiRKNS_13ArmorMaterialEii");
-	bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
-		dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
+	//bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
+	//	dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
 	// FIXME 0.11
 	//bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
 	//	dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");

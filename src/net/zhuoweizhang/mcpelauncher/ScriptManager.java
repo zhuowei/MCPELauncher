@@ -1252,7 +1252,7 @@ public class ScriptManager {
 
 	public static native void nativeSetVel(long entityId, float vel, int axis);
 
-	public static native void nativeExplode(float x, float y, float z, float radius);
+	public static native void nativeExplode(float x, float y, float z, float radius, boolean onfire);
 
 	public static native void nativeAddItemInventory(int id, int amount, int damage);
 
@@ -1601,8 +1601,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void explode(double x, double y, double z, double radius) {
-			nativeExplode((float) x, (float) y, (float) z, (float) radius);
+		public void explode(double x, double y, double z, double radius, boolean onfire) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire);
 		}
 
 		@JSFunction
@@ -1753,8 +1753,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void explode(double x, double y, double z, double radius) {
-			nativeExplode((float) x, (float) y, (float) z, (float) radius);
+		public static void explode(double x, double y, double z, double radius, boolean onfire) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire);
 		}
 
 		@JSStaticFunction
@@ -2308,7 +2308,13 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, int renderType) {
-			nativeSetEntityRenderType(getEntityId(ent), renderType);
+			if (renderType < 0x1000 && !EntityRenderType.isValidRenderType(renderType)) {
+				throw new RuntimeException("Render type " + renderType + " does not exist");
+			}
+			boolean ret = nativeSetEntityRenderType(getEntityId(ent), renderType);
+			if (!ret) {
+				throw new RuntimeException("Custom render type " + renderType + " does not exist");
+			}
 		}
 
 		@JSStaticFunction

@@ -263,7 +263,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.12.1 build 13");
+				intent.putExtra("supportedVersion", "0.12.1");
 				startActivity(intent);
 				finish();
 				try {
@@ -773,8 +773,8 @@ public class MainActivity extends NativeActivity {
 		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
-		isRecording = Kamcord.isRecording();
 		if (hasRecorder) {
+			isRecording = Kamcord.isRecording();
 			options.add(isRecording? stopRecording: startRecording);
 		}
 		if (hasInsertText) {
@@ -2233,7 +2233,8 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
-		if (version.matches("0\\.12\\.1\\.b.*")) return true;
+		if (version.matches("0\\.12\\.1\\.b13")) return true;
+		if (version.matches("0\\.12\\.1")) return true;
 		return false;
 	}
 

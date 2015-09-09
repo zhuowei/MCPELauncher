@@ -71,7 +71,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
  * Signature: (FFFF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
-  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jfloat);
+  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jfloat, jboolean);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

@@ -26,8 +26,11 @@ extern "C" {
 
 static void create_key() {
 	pthread_key_create(&key, detach_thread);
+}
 
-	void* pthread_create_ptr = (void*) &pthread_create;
+void bl_nativeAttachDestructor() {
+	pthread_once(&key_once_control, create_key);
+	pthread_setspecific(key, bl_JavaVM);
 }
 
 JNIEXPORT void JNICALL Java_com_kamcord_android_core_KamcordFix_nativeAttachDestructor

@@ -1,66 +1,53 @@
 package net.zhuoweizhang.mcpelauncher.api.modpe;
-/*
-1 invisible
-2 tnt
-3 player
-4 item (crashes)
-5 chicken
-6 cow
-7 mushroom cow
-8 pig
-9 sheep
-10 (crashes)
-11 villager
-12 (invisible)
-13 player
-14 skeleton
-15 spider
-16 silverfish
-17 creeper
-18 invisible
-19 enderman
-20 arrow
-21 egg
-22 egg
-23 snowball
-24 crash
-25 invisible
-26 minecart
-27 crash
-*/
 public final class EntityRenderType {
 
 	public static final int tnt = 2,
 	human = 3,
+	item = 4,
 	chicken = 5,
-	cow = 6,
-	mushroomCow = 7,
+	cow = 7,
 	pig = 8,
 	sheep = 9,
 	bat = 10,
 	wolf = 11,
 	villager = 12,
 	zombie = 14,
-	human2 = 15,
+	zombiePigman = 15,
 	lavaSlime = 16,
 	ghast = 17,
-	skeleton = 18,
-	spider = 19,
-	silverfish = 20,
-	creeper = 21,
-	slime = 22,
-	enderMan = 23,
-	fishHook = 25,
-	player = 26,
-	player2 = 27,
-	arrow = 28,
-	egg = 29,
-	snowball = 30,
-	fallingTile = 31,
-	minecart = 32,
-	boat = 33,
-	squid = 34,
-	fireball = 35;
+	blaze = 18,
+	skeleton = 19,
+	spider = 20,
+	silverfish = 21,
+	creeper = 22,
+	slime = 23,
+	enderman = 24,
+	unknown1 = 25,
+	fishHook = 26,
+	player = 27,
+	player2 = 28,
+	snowball = 29,
+	egg = 30,
+	thrownPotion = 31,
+	arrow = 32,
+	fallingTile = 33,
+	minecart = 34,
+	boat = 35,
+	squid = 36,
+	fireball = 37,
+	smallFireball = 38,
+	villagerZombie = 39,
+	experienceOrb = 40,
+	lightningBolt = 41,
+	ironGolem = 42,
+	ocelot = 43,
+	snowGolem = 44,
+	expPotion = 45;
+	private static final int[] alltypes = {2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45};
 	
 	private EntityRenderType() {}
+
+	public static boolean isValidRenderType(int type) {
+		return java.util.Arrays.binarySearch(alltypes, type) >= 0;
+	}
 }

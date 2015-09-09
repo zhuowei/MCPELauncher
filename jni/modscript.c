@@ -463,7 +463,10 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, Player* player, int x, int y,
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, player, x, y, z, side);
 }
 
+extern void bl_nativeAttachDestructor();
+
 void bl_handleFrameCallback() {
+	static bool hasAttachedShutdownHandler = false;
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
@@ -478,6 +481,10 @@ void bl_handleFrameCallback() {
 
 	if (attachStatus == JNI_EDETACHED) {
 		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+	}
+	if (!hasAttachedShutdownHandler) {
+		bl_nativeAttachDestructor();
+		hasAttachedShutdownHandler = true;
 	}
 }
 
@@ -710,8 +717,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power) {
-	bl_Level_explode(bl_level, bl_localplayer->tileSource, bl_localplayer, x, y, z, power, FALSE);
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire) {
+	bl_Level_explode(bl_level, bl_localplayer->tileSource, NULL, x, y, z, power, fire);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory

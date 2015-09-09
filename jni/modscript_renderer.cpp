@@ -58,7 +58,6 @@ static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char*
 	}
 	HumanoidModel* model = (HumanoidModel*) renderer->model; //TODO: make sure that this is indeed a humanoid model
 	*modelPtr = model;
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "getmodelpart %d %s %p %p\n", rendererId, modelPartName, renderer, model);
 	if (strcmp(modelPartName, "head") == 0) {
 		return &model->bipedHead;
 	} else if (strcmp(modelPartName, "headwear") == 0) {
@@ -82,11 +81,13 @@ static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char*
 ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
 	HumanoidModel* modelPtr = nullptr;
 	ModelPart* retval = bl_renderManager_getModelPart_impl(rendererId, modelPartName, &modelPtr);
+	/*
 	if (retval && !retval->model) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d part %s doesn't have a model\n",
 			rendererId, modelPartName);
 		retval->model = modelPtr;
 	}
+	*/
 	return retval;
 }
 
@@ -142,9 +143,8 @@ bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 		bl_renderTypeMap[entityId] = renderType;
 	} else {
 		//if (!getMCPERenderType(renderType)) return false;
-		// FIXME 0.12
 		bl_renderTypeMap.erase(entityId);
-		//entity->renderType = renderType;
+		entity->renderType = renderType;
 	}
 	return true;
 }
