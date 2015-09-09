@@ -43,7 +43,7 @@ extern Player* bl_localplayer;
 
 void bl_renderManager_init(void* libHandle);
 extern void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
-void bl_renderManager_setRenderType(Entity* entity, int type);
+bool bl_renderManager_setRenderType(Entity* entity, int type);
 int bl_renderManager_getRenderType(Entity* entity);
 void bl_renderManager_clearRenderTypes();
 

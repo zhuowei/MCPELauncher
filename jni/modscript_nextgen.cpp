@@ -46,9 +46,6 @@ typedef void Font;
 //#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 // from SignTileEntity::save(CompoundTag*)
 #define SIGN_TILE_ENTITY_LINE_OFFSET 96
-#define BLOCK_VTABLE_SIZE 0x118
-#define BLOCK_VTABLE_GET_TEXTURE_OFFSET 8
-#define BLOCK_VTABLE_GET_COLOR 45
 //#define BLOCK_VTABLE_GET_AABB 14
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
@@ -187,6 +184,9 @@ struct BaseMobSpawner {
 
 struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
+	int tile_vtable_size;
+	int tile_get_texture_char_int;
+	int tile_get_color;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -194,6 +194,11 @@ static bl_vtable_indexes_nextgen_cpp vtable_indexes;
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
 		"_ZN4Tile13getSecondPartER10TileSourceRK7TilePosRS2_");
+	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV4Tile")->st_size;
+	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
+		"_ZN4Tile10getTextureEai");
+	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
+		"_ZN4Tile8getColorEi");
 }
 
 extern "C" {
@@ -204,7 +209,6 @@ static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
 
 static void (*bl_Item_Item)(Item*, int);
 
-static void** bl_FoodItem_vtable;
 static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
@@ -274,7 +278,7 @@ static void** bl_MessagePacket_vtable;
 bool bl_text_parse_color_codes = true;
 
 //custom blocks
-void* bl_CustomBlock_vtable[BLOCK_VTABLE_SIZE];
+void** bl_CustomBlock_vtable;
 TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 bool bl_custom_block_collisionDisabled[256];
@@ -329,7 +333,7 @@ static void (*bl_TileEntity_setChanged)(TileEntity*);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
-static void (*bl_Mob_die_real)(Entity*, EntityDamageSource&);
+static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
 static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
@@ -1118,11 +1122,12 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
-	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, BLOCK_VTABLE_SIZE);
+	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
+	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, vtable_indexes.tile_vtable_size);
 
 	//set the texture getter to our overridden version
-	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_TEXTURE_OFFSET] = (void*) &bl_CustomBlock_getTextureHook;
-	bl_CustomBlock_vtable[BLOCK_VTABLE_GET_COLOR] = (void*) &bl_CustomBlock_getColorHook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
@@ -1750,7 +1755,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 	*/
 }
 
-void bl_Mob_die_hook(Entity* entity1, EntityDamageSource& damageSource) {
+void bl_Mob_die_hook(Entity* entity1, EntityDamageSource const& damageSource) {
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -1764,7 +1769,7 @@ void bl_Mob_die_hook(Entity* entity1, EntityDamageSource& damageSource) {
 	long long victimId = entity1->entityId;
 	long long attackerId = -1;
 	if (damageSource.isEntitySource()) {
-		attackerId = static_cast<EntityDamageByEntitySource&>(damageSource).entity->entityId;
+		attackerId = damageSource.getEntity()->entityId;
 	}
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, attackerId, victimId);
@@ -2334,7 +2339,7 @@ void bl_setuphooks_cppside() {
 	//bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
 	//	dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");
 
-	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieER18EntityDamageSource");
+	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieERK18EntityDamageSource");
 	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	bl_MinecraftClient_useController = (bool (*) (Minecraft*))

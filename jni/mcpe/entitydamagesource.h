@@ -4,17 +4,19 @@ class EntityDamageSource {
 public:
 	int source;
 	virtual ~EntityDamageSource();
-	virtual bool isChildEntitySource();
-	virtual bool isEntitySource();
-	virtual bool isTileSource();
-	virtual std::string getDeathMessage(std::string, Entity*);
+	virtual bool isEntitySource() const;
+	virtual Entity* getEntity() const;
+	virtual bool isChildEntitySource() const;
+	virtual Entity* getChildEntity() const;
+	virtual bool isTileSource() const;
+	virtual std::string getDeathMessage(std::string, Entity*) const;
 };
 
 class EntityDamageByEntitySource : public EntityDamageSource {
 public:
 	Entity* entity;
 	virtual ~EntityDamageByEntitySource();
-	virtual bool isEntitySource() override;
-	virtual std::string getDeathMessage(std::string, Entity*) override;
-	virtual bool isChildEntitySource() override;
+	virtual bool isEntitySource() const override;
+	virtual std::string getDeathMessage(std::string, Entity*) const override;
+	virtual bool isChildEntitySource() const override;
 };

@@ -1,4 +1,5 @@
 #include "jni.h"
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -18,6 +19,8 @@
 #define MOBRENDERER_SIZE 156
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 28
+// ModelPart destructor
+#define MODELPART_MESHBUFFER_OFFSET 80
 
 
 extern "C" {
@@ -46,7 +49,7 @@ static std::map<long long, int> bl_renderTypeMap;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
 
-ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
+static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
 	MobRenderer* renderer;
 	if (rendererId < 0x1000) {
 		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, rendererId);
@@ -54,6 +57,8 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
 	}
 	HumanoidModel* model = (HumanoidModel*) renderer->model; //TODO: make sure that this is indeed a humanoid model
+	*modelPtr = model;
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "getmodelpart %d %s %p %p\n", rendererId, modelPartName, renderer, model);
 	if (strcmp(modelPartName, "head") == 0) {
 		return &model->bipedHead;
 	} else if (strcmp(modelPartName, "headwear") == 0) {
@@ -74,8 +79,19 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 	return NULL;
 }
 
+ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartName) {
+	HumanoidModel* modelPtr = nullptr;
+	ModelPart* retval = bl_renderManager_getModelPart_impl(rendererId, modelPartName, &modelPtr);
+	if (retval && !retval->model) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d part %s doesn't have a model\n",
+			rendererId, modelPartName);
+		retval->model = modelPtr;
+	}
+	return retval;
+}
+
 void bl_renderManager_invalidateModelPart(ModelPart* part) {
-	void* meshBuffer = (void*) ((uintptr_t) part + 84);
+	void* meshBuffer = (void*) ((uintptr_t) part + MODELPART_MESHBUFFER_OFFSET);
 	bl_Mesh_reset(meshBuffer);
 }
 
@@ -88,9 +104,19 @@ int bl_renderManager_addRenderer(EntityRenderer* renderer) {
 int bl_renderManager_createHumanoidRenderer() {
 	HumanoidModel* model = (HumanoidModel*) operator new(HUMANOIDMODEL_SIZE);
 	bl_HumanoidModel_HumanoidModel(model, 0, 0, 64, 64);
+
+	HumanoidModel* model2 = (HumanoidModel*) operator new(HUMANOIDMODEL_SIZE);
+	bl_HumanoidModel_HumanoidModel(model2, 0, 0, 64, 64);
+
+	HumanoidModel* model3 = (HumanoidModel*) operator new(HUMANOIDMODEL_SIZE);
+	bl_HumanoidModel_HumanoidModel(model3, 0, 0, 64, 64);
+
+
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
-	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, nullptr, nullptr, 0);
-	return bl_renderManager_addRenderer((EntityRenderer*) renderer);
+	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, model2, model3, 0);
+
+	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
+	return retval;
 }
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
@@ -101,14 +127,26 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Ent
 	return bl_EntityRenderDispatcher_getRenderer_real(dispatcher, entity);
 }
 
-void bl_renderManager_setRenderType(Entity* entity, int renderType) {
+//static void* getMCPERenderType(int renderType) {
+//	return bl_EntityRenderDispatcher_getRenderer_EntityRenderId(*bl_EntityRenderDispatcher_instance, renderType);
+//}
+
+bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 	long long entityId = entity->entityId;
 	if (renderType >= 0x1000) {
+		if ((renderType - 0x1000) >= bl_entityRenderers.size()) {
+			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d is over size of %d",
+				renderType, bl_entityRenderers.size());
+			return false;
+		}
 		bl_renderTypeMap[entityId] = renderType;
 	} else {
+		//if (!getMCPERenderType(renderType)) return false;
+		// FIXME 0.12
 		bl_renderTypeMap.erase(entityId);
-		entity->renderType = renderType;
+		//entity->renderType = renderType;
 	}
+	return true;
 }
 
 int bl_renderManager_getRenderType(Entity* entity) {

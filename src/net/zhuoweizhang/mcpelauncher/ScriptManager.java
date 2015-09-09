@@ -1324,7 +1324,7 @@ public class ScriptManager {
 
 	public static native void nativeSetMobHealth(long entityId, int halfhearts);
 
-	public static native void nativeSetEntityRenderType(long entityId, int renderType);
+	public static native boolean nativeSetEntityRenderType(long entityId, int renderType);
 
 	public static native void nativeRequestFrameCallback();
 
@@ -2024,7 +2024,8 @@ public class ScriptManager {
 		// nonstandard
 		@JSStaticFunction
 		public static void setHealth(int value) {
-			nativeHurtTo(value);
+			//nativeHurtTo(value);
+			nativeSetMobHealth(nativeGetPlayerEnt(), value);
 		}
 
 		@JSStaticFunction

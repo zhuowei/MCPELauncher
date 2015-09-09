@@ -84,7 +84,7 @@ void bl_setuphooks_cppside();
 void bl_changeEntitySkin(void* entity, const char* newSkin);
 const char* bl_getCharArr(void* str);
 void bl_attachLevelListener();
-void bl_renderManager_setRenderType(Entity* entity, int type);
+bool bl_renderManager_setRenderType(Entity* entity, int type);
 void bl_renderManager_clearRenderTypes();
 void bl_cppNewLevelInit();
 void bl_clearNameTags();
@@ -143,6 +143,7 @@ void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(Minecraft*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
+void (*bl_ModelPart_addBox)(ModelPart*, float, float, float, int, int, int, float);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, int, int, int, signed char);
@@ -918,11 +919,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_selectSlot(invPtr, newSlot);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType
   (JNIEnv *env, jclass clazz, jlong entityId, jint renderType) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_renderManager_setRenderType(entity, renderType);
+	return bl_renderManager_setRenderType(entity, renderType);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotArmor
@@ -1123,6 +1124,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
 		App_quit_real = minecraftVtable[vtable_indexes.minecraft_quit];
 		minecraftVtable[vtable_indexes.minecraft_quit] = &App_quit_hook;
+		bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	}
 
 	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
@@ -1315,6 +1317,5 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (myerror != NULL) {
 		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Error in ModPE script init: %s\n", myerror);
 	}
-	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Size of ModelPart: %d", sizeof(ModelPart));
 
 }
