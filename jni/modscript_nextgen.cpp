@@ -45,7 +45,7 @@ typedef void Font;
 // FIXME 0.11
 //#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
 // from SignTileEntity::save(CompoundTag*)
-#define SIGN_TILE_ENTITY_LINE_OFFSET 96
+#define SIGN_TILE_ENTITY_LINE_OFFSET 92
 //#define BLOCK_VTABLE_GET_AABB 14
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
@@ -1013,7 +1013,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
 	if (te == NULL) return NULL;
 	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	std::string* lineStr = (std::string*) (((uintptr_t) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
 	if (lineStr == NULL) return NULL;
 
 	jstring signJString = env->NewStringUTF(lineStr->c_str());
@@ -1029,7 +1029,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
 	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((int) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
+	std::string* lineStr = (std::string*) (((uintptr_t) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
 	/*
 	if (lineStr == NULL || lineStr->length() == 0) {
 		//Workaround for C++ standard library's empty string optimization failing across libraries
