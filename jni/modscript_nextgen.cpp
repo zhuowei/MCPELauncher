@@ -1090,16 +1090,20 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 			//these return blank strings. Blank strings will kill libstdc++ since we are not using the same blank string.
 			return NULL;
 	}
+	Localization* bak;
+	if (raw) {
+		bak = I18n::currentLanguage;
+		I18n::currentLanguage = nullptr;
+	}
 	std::string descriptionId = bl_ItemInstance_getName(myStack);
+	if (raw) {
+		I18n::currentLanguage = bak;
+	}
 	if (descriptionId.length() <= 0) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dead tile: %i\n", itemId);
 	}
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Tile: %s\n", descriptionId.c_str());
 	std::string returnVal = descriptionId;
-	if (!raw) {
-		std::vector<std::string> tempList;
-		returnVal = I18n::get(descriptionId, tempList);
-	}
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
 }

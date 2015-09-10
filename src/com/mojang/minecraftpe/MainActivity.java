@@ -285,11 +285,19 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
+			}
+
+			int lastVersionCode = myprefs.getInt("last_version", -1);
+
+			if (lastVersionCode != minecraftVersionCode) {
+				// don't depend on prepatch
 				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
+				myprefs.edit().putInt("last_version", minecraftVersionCode).apply();
 				if (myprefs.getString("texture_packs", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
 			}
+
 
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
@@ -974,14 +982,12 @@ public class MainActivity extends NativeActivity {
 	}
 	public byte[] getFileDataBytes(String name) {
 		byte[] bytes = getFileDataBytes(name, false);
-		/*
-		if (name.endsWith(".meta")) { // hack for people trying to use 0.8.1 textures on 0.9.0
+		if (name.endsWith(".meta")) { // hack for people trying to use 0.11 textures on 0.12.1
 			String fileStr = new String(bytes, Charset.forName("UTF-8"));
-			if (fileStr.contains("additonal_textures")) {
+			if (!fileStr.contains("portal") && !fileStr.contains("rabbit_foot")) {
 				bytes = getFileDataBytes(name, true);
 			}
 		}
-		*/
 		return bytes;
 	}
 
@@ -1711,6 +1717,7 @@ public class MainActivity extends NativeActivity {
 			if (loadTexturePack) {
 				textureOverrides.addAll(TexturePackLoader.loadTexturePacks(this));
 			}
+			System.out.println(textureOverrides);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, null);
@@ -2247,8 +2254,8 @@ public class MainActivity extends NativeActivity {
 				"images/items-opaque/", new PNGImageLoader(), 2, 0);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
-			//terrainProvider.dumpAtlas();
-			//itemsProvider.dumpAtlas();
+			terrainProvider.dumpAtlas();
+			itemsProvider.dumpAtlas();
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
 			ScriptManager.terrainMeta = terrainProvider.metaObj;

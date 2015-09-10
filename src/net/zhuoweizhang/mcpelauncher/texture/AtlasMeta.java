@@ -38,6 +38,7 @@ public class AtlasMeta {
 	private void calculateOccupied() throws JSONException {
 		for (int i = 0; i < data.length(); i++) {
 			JSONObject entry = data.getJSONObject(i);
+			if (!entry.has("name")) continue; // Soartex 64x64 has corrupt terrain meta
 			nameMap.put(entry.getString("name"), entry);
 			JSONArray uvs = entry.getJSONArray("uvs");
 			for (int u = 0; u < uvs.length(); u++) {

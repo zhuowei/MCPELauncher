@@ -188,8 +188,12 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 			} catch (PackageManager.NameNotFoundException impossible) {
 			}
 			outFile = new File(getExternalFilesDir(null), "minecraft.apk");
+			outFile.delete();
+			String outPath = outFile.getAbsolutePath().replace(
+				Environment.getExternalStorageDirectory().getAbsolutePath(), "/sdcard");
+			System.out.println(outPath);
 			List<String> suResult = Shell.SU.run("cat \"" + mcpeApkLoc + "\" >\""
-					+ outFile.getAbsolutePath() + "\"");
+					+ outPath + "\"");
 			if (suResult == null) {
 				hasSu = false;
 			}

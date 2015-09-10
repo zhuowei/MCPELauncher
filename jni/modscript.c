@@ -1312,7 +1312,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 	bl_FillingContainer_removeResource = dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 	bl_Minecraft_getLevel = dlsym(mcpelibhandle, "_ZN9Minecraft8getLevelEv");
-	bl_MinecraftClient_getPlayer = dlsym(mcpelibhandle, "_ZN15MinecraftClient9getPlayerEv");
+	bl_MinecraftClient_getPlayer = dobby_dlsym(mcpelibhandle, "_ZN15MinecraftClient9getPlayerEv");
 	bl_Inventory_getSelectedSlot = dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
 	bl_Inventory_selectSlot = dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
 
