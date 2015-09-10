@@ -1,6 +1,6 @@
 package net.zhuoweizhang.mcpelauncher;
 
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Field;
 
 import android.content.Context;
@@ -134,6 +134,30 @@ public class Utils {
 
 	public static boolean hasExtrasPackage(Context context) {
 		return context.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro");
+	}
+
+	public static long parseMemInfo() throws IOException {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader("/proc/meminfo"));
+			String l;
+			while ((l = reader.readLine()) != null) {
+				if (!l.contains(":")) continue;
+				String[] parts = l.split(":");
+				String partName = parts[0].trim();
+				String[] result = parts[1].trim().split(" ");
+				if (partName.equals("MemTotal")) {
+					return Long.parseLong(result[0]) * 1024;
+				}
+			}
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException notanotherone){}
+			}
+		}
+		return 0x400000000L; // 16 GB
 	}
 
 	/**

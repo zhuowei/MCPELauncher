@@ -1578,10 +1578,14 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public long getTotalMemory() {
-		//long retval = Debug.getNativeHeapSize();
-		//Log.i(TAG, "Get total memory: " + retval);
-		//return retval;
-		return 0x400000000L; // 16 GB
+		try {
+			long retval = Utils.parseMemInfo();
+			Log.i(TAG, "Get total memory: " + retval);
+			return retval;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0x400000000L; // 16GB
+		}
 	}
 
 	// added in 0.10.0
