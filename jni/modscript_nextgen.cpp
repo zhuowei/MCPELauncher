@@ -1155,7 +1155,6 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(bl_Tile_getTextureUVCoordinateSet(
 			sacrificialTile, textureNames[i], textureCoords[i]));
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
-
 		output[i] = mySet;
 	}
 }
@@ -1171,9 +1170,9 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Tile* retval = (Tile*) ::operator new(kTileSize);
-	retval->vtable = bl_CustomBlock_vtable;
 	bl_Tile_Tile(retval, blockId, bl_getMaterial(materialType));
-	retval->vtable = bl_CustomBlock_vtable;
+	retval->vtable = bl_CustomBlock_vtable + 2;
+
 	retval->material = bl_getMaterial(materialType);
 	std::string nameStr = std::string(name);
 	bl_Tile_setNameId(retval, nameStr);
@@ -2189,7 +2188,7 @@ void bl_setuphooks_cppside() {
 
 #endif
 
-	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile") + 8);
+	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile"));
 	bl_dumpVtable(bl_Tile_vtable, 0x100);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
