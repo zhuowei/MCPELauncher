@@ -72,6 +72,15 @@ public class Utils {
 		return r;
 	}
 
+	public static String joinArray(Object[] arr, String sep) {
+		StringBuilder b = new StringBuilder();
+		for (int i = 0; i < arr.length; i++) {
+			if (i != 0) b.append(sep);
+			b.append(arr[i] == null? "null": arr[i].toString());
+		}
+		return b.toString();
+	}
+
 	public static boolean hasTooManyPatches() {
 		int maxPatchCount = getMaxPatches();
 		return maxPatchCount >= 0 && getEnabledPatches().size() >= maxPatchCount;

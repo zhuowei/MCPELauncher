@@ -275,15 +275,18 @@ public class ScriptManager {
 		}
 	}
 
+	@CallbackName(name="useItem", args={"x", "y", "z", "itemid", "blockid", "side", "itemDamage", "blockDamage"})
 	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side,
 			int itemDamage, int blockDamage) {
 		callScriptMethod("useItem", x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	}
 
+	@CallbackName(name="destroyBlock", args={"x", "y", "z", "side"})
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("destroyBlock", x, y, z, side);
 	}
 
+	@CallbackName(name="startDestroyBlock", args={"x", "y", "z", "side"})
 	public static void startDestroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("startDestroyBlock", x, y, z, side);
 	}
@@ -291,6 +294,8 @@ public class ScriptManager {
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
 	}
+
+	@CallbackName(name="newLevel")
 	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemote) {
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
@@ -317,6 +322,7 @@ public class ScriptManager {
 		}
 	}
 
+	@CallbackName(name="selectLevelHook")
 	public static void selectLevelCallback(String wName, String wDir) {
 		System.out.println("World name: " + wName);
 		System.out.println("World dir: " + wDir);
@@ -329,6 +335,7 @@ public class ScriptManager {
 		if (nativeGetArch() != ARCH_I386) nextTickCallsSetLevel = true;
 	}
 
+	@CallbackName(name="leaveGame")
 	public static void leaveGameCallback(boolean thatboolean) {
 		ScriptManager.isRemote = false;
 		ScriptManager.scriptingEnabled = true;
@@ -345,10 +352,12 @@ public class ScriptManager {
 		serverPort = 0;
 	}
 
+	@CallbackName(name="attackHook", args={"attacker", "victim"})
 	public static void attackCallback(long attacker, long victim) {
 		callScriptMethod("attackHook", attacker, victim);
 	}
 
+	@CallbackName(name="modTick")
 	public static void tickCallback() {
 		if (nextTickCallsSetLevel) {
 			setLevelFakeCallback(true, nativeLevelIsRemote());
@@ -399,6 +408,8 @@ public class ScriptManager {
 		nativeSetRot(nativeGetPlayerEnt(), newPlayerYaw, newPlayerPitch);
 	}
 
+	@CallbackName(name="chatHook", args={"str"})
+	// fixme callback 2
 	public static void chatCallback(String str) {
 		if (isRemote)
 			nameAndShame(str);
@@ -425,11 +436,13 @@ public class ScriptManager {
 	}
 
 	// KsyMC's additions
+	@CallbackName(name="deathHook", args={"attacker", "victim"})
 	public static void mobDieCallback(long attacker, long victim) {
 		callScriptMethod("deathHook", attacker == -1 ? -1 : attacker, victim);
 	}
 
 	// Other nonstandard callbacks
+	@CallbackName(name="entityRemovedHook", args={"entity"})
 	public static void entityRemovedCallback(long entity) {
 		if (NativePlayerApi.isPlayer(entity)) {
 			playerRemovedHandler(entity);
@@ -440,6 +453,7 @@ public class ScriptManager {
 		// entityList.remove(Integer.valueOf(entity));
 	}
 
+	@CallbackName(name="entityAddedHook", args={"entity"})
 	public static void entityAddedCallback(long entity) {
 		System.out.println("Entity added: " + entity + " entity type: " + NativeEntityApi.getEntityTypeId(entity));
 		// check if entity is player
@@ -505,6 +519,7 @@ public class ScriptManager {
 		}
 	}
 
+	@CallbackName(name="serverMessageReceiveHook", args={"str"})
 	public static void handleChatPacketCallback(String str) {
 		if (str == null || str.length() < 1)
 			return;
@@ -514,6 +529,7 @@ public class ScriptManager {
 		}
 	}
 
+	@CallbackName(name="chatReceiveHook", args={"str", "sender"})
 	public static void handleMessagePacketCallback(String sender, String str) {
 		if (str == null || str.length() < 1)
 			return;
@@ -534,6 +550,7 @@ public class ScriptManager {
 		}
 	}
 
+	@CallbackName(name="explodeHook", args={"entity", "x", "y", "z", "power", "onFire"})
 	public static void explodeCallback(long entity, float x, float y, float z, float power, boolean onFire) {
 		callScriptMethod("explodeHook", entity, x, y, z, power, onFire);
 	}
@@ -785,6 +802,7 @@ public class ScriptManager {
 		appendApiMethods(builder, NativeItemApi.class, "Item");
 		appendApiMethods(builder, NativeBlockApi.class, "Block");
 		appendApiMethods(builder, NativeServerApi.class, "Server");
+		appendCallbacks(builder);
 		for (Class<?> clazz: constantsClasses) {
 			appendApiClassConstants(builder, clazz);
 		}
@@ -829,6 +847,16 @@ public class ScriptManager {
 			if (!Modifier.isStatic(fieldModifiers) || !Modifier.isPublic(fieldModifiers))
 				continue;
 			builder.append(className).append(".").append(field.getName()).append(";\n");
+		}
+		builder.append("\n");
+	}
+
+	private static void appendCallbacks(StringBuilder builder) {
+		for (Method met: ScriptManager.class.getMethods()) {
+			CallbackName name = met.getAnnotation(CallbackName.class);
+			if (name == null) continue;
+			builder.append("function ").append(name.name()).append("(").
+				append(Utils.joinArray(name.args(), ", ")).append(")\n");
 		}
 		builder.append("\n");
 	}
