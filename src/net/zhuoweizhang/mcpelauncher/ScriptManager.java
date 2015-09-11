@@ -1894,7 +1894,8 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void playSound(double x, double y, double z, String sound, double volume,
 				double pitch) {
-			nativePlaySound((float) x, (float) y, (float) z, sound, (float) volume, (float) pitch);
+			nativePlaySound((float) x, (float) y, (float) z, sound,
+				volume <= 0? 1.0f: (float) volume, pitch <= 0? 1.0f: (float) pitch);
 		}
 
 		@JSStaticFunction
@@ -1903,7 +1904,8 @@ public class ScriptManager {
 			float y = nativeGetEntityLoc(getEntityId(ent), AXIS_Y);
 			float z = nativeGetEntityLoc(getEntityId(ent), AXIS_Z);
 
-			nativePlaySound(x, y, z, sound, (float) volume, (float) pitch);
+			nativePlaySound(x, y, z, sound,
+				volume <= 0? 1.0f: (float) volume, pitch <= 0? 1.0f: (float) pitch);
 		}
 
 		// Byteandahalf's additions
@@ -2785,6 +2787,14 @@ public class ScriptManager {
 		public static void addFurnaceRecipe(int inputId, int outputId, int outputDamage) {
 			// Do I need a count? If not, should I just fill it with null, or
 			// skip it completely?
+			if (!nativeIsValidItem(inputId)) {
+				throw new RuntimeException("Invalid input in furnace recipe: " + inputId + " is not a valid item. " +
+					"You must create the item before you can add it to a recipe.");
+			}
+			if (!nativeIsValidItem(outputId)) {
+				throw new RuntimeException("Invalid output in furnace recipe: " + outputId + " is not a valid item. " +
+					"You must create the item before you can add it to a recipe.");
+			}
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
