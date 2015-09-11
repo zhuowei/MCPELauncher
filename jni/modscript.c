@@ -444,6 +444,8 @@ void bl_GameMode_tick_hook(void* gamemode) {
 
 	bl_localplayer = bl_MinecraftClient_getPlayer(bl_minecraft);
 
+	bl_gamemode = gamemode;
+
 	(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
 
 	//Call back across JNI into the ScriptManager

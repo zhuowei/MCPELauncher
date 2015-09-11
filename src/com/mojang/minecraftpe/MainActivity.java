@@ -355,14 +355,15 @@ public class MainActivity extends NativeActivity {
 		//org.fmod.FMOD.assetManager = getAssets();
 
 		try {
-			System.loadLibrary("gnustl_shared");
+			System.load(mcAppInfo.nativeLibraryDir + "/libgnustl_shared.so");
 			System.load(mcAppInfo.nativeLibraryDir + "/libfmod.so");
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK",
-					Toast.LENGTH_LONG).show();
-			finish();
+			throw new RuntimeException(e);
+			//e.printStackTrace();
+			//Toast.makeText(this, "Can't load libminecraftpe.so from the original APK",
+			//		Toast.LENGTH_LONG).show();
+			//finish();
 		}
 
 		org.fmod.FMOD.init(this);
