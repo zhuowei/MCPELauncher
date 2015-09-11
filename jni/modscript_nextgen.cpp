@@ -188,6 +188,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_vtable_size;
 	int tile_get_texture_char_int;
 	int tile_get_color;
+	int tile_get_color_data;
 	int raknet_instance_connect;
 };
 
@@ -200,6 +201,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
 		"_ZN4Tile10getTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
+		"_ZN4Tile8getColorEP10TileSourceiii");
+	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
 		"_ZN4Tile8getColorEi");
 	vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 		"_ZN14RakNetInstance7connectEPKci");
@@ -591,8 +594,16 @@ AABB* bl_CustomBlock_getAABBHook(Tile* tile, TileSource* tileSource, int x, int 
 int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y, int z) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
-	if (myColours == NULL || bl_level == NULL) return 0xffffff; //I see your true colours shining through
+	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
 	int data = bl_TileSource_getData(tileSource, x, y, z);
+	return myColours[data];
+}
+
+// doesn't seem to be used but might as well hook it
+int bl_CustomBlock_getColor_data_Hook(Tile* tile, int data) {
+	int blockId = tile->id;
+	int* myColours = bl_custom_block_colors[blockId];
+	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
 	return myColours[data];
 }
 
@@ -1136,6 +1147,7 @@ void bl_initCustomBlockVtable() {
 	//set the texture getter to our overridden version
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));

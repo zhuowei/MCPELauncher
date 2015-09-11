@@ -155,9 +155,8 @@ typedef struct {
 	char aabbfiller[28]; //8
 	TextureUVCoordinateSet texture; //36
 	unsigned char id; //68
-	char filler[76-69]; //69 (insert rude joke here)
-	int renderPass; //76
-	int filler_afterRenderPass; //80
+	char filler[80-69]; //69 (insert rude joke here)
+	int renderPass; //80
 	int renderType; //84
 	char filler2[108-88]; //88
 	void* material; //108

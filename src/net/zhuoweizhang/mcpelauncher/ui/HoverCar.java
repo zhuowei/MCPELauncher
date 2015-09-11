@@ -12,9 +12,11 @@ import android.widget.PopupWindow;
 public class HoverCar extends PopupWindow {
 
 	public ImageButton mainButton;
+	private Context theContext;
 
 	public HoverCar(Context con, boolean safeMode) {
 		super(con);
+		this.theContext = con;
 		LayoutInflater inf = (LayoutInflater) con
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		setContentView(inf.inflate(R.layout.hovercar, null));
@@ -29,7 +31,8 @@ public class HoverCar extends PopupWindow {
 	}
 
 	public void show(View parentView) {
-		showAtLocation(parentView, Gravity.CENTER | Gravity.TOP, 64, 0);
+		showAtLocation(parentView, Gravity.CENTER | Gravity.TOP,
+			(int) (theContext.getResources().getDimension(R.dimen.hovercar_width)*1.5), 0);
 	}
 
 	/**

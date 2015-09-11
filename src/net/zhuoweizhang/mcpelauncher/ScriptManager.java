@@ -2970,6 +2970,8 @@ public class ScriptManager {
 			nativeBlockSetCollisionEnabled(blockId, yep);;
 		}*/
 
+		/*
+
 		@JSStaticFunction
 		public static boolean isDouble(int x, int y, int z) {
 			return nativeBlockGetSecondPart(x, y, z, AXIS_Y) != -1;
@@ -2989,6 +2991,8 @@ public class ScriptManager {
 		public static int getSecondPartZ(int x, int y, int z) {
 			return nativeBlockGetSecondPart(x, y, z, AXIS_Z);
 		}
+
+		*/
 
 		@Override
 		public String getClassName() {
