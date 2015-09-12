@@ -77,7 +77,7 @@ typedef void Font;
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 #define PLAYER_RENDER_TYPE 21
 // MobSpawnerTileEntity constructor 0x60
-#define MOB_SPAWNER_OFFSET 96
+#define MOB_SPAWNER_OFFSET 92
 // MinecraftClient::handleBack
 #define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
@@ -2381,7 +2381,7 @@ void bl_setuphooks_cppside() {
 	bl_MinecraftClient_getGui = (void* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN15MinecraftClient6getGuiEv");
 	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
-		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdEi");
+		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
 	bl_TileEntity_setChanged = (void (*)(TileEntity*))
 		dlsym(mcpelibhandle, "_ZN10TileEntity10setChangedEv");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, int, void*, int, int))
