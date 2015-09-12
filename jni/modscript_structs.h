@@ -307,6 +307,13 @@ typedef struct {
 } Color;
 
 typedef struct {
+	bool shouldBeFalse; // 0
+	float x1; // 4
+	float y1; // 8
+	float z1; // 12
+	float x2; // 16
+	float y2; // 20
+	float z2; // 24
 } AABB;
 
 typedef struct {

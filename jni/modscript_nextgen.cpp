@@ -190,6 +190,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_texture_char_int;
 	int tile_get_color;
 	int tile_get_color_data;
+	int tile_get_visual_shape;
 	int raknet_instance_connect;
 };
 
@@ -205,6 +206,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN4Tile8getColorEP10TileSourceiii");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
 		"_ZN4Tile8getColorEi");
+	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
+		"_ZN4Tile14getVisualShapeEhR4AABBb");
 	vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 		"_ZN14RakNetInstance7connectEPKci");
 }
@@ -291,7 +294,7 @@ TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 bool bl_custom_block_collisionDisabled[256];
 int* bl_custom_block_colors[256];
-uint8_t bl_custom_block_renderLayer[256];
+AABB** bl_custom_block_visualShapes[256];
 //end custom blocks
 
 int bl_addItemCreativeInvRequest[256][4];
@@ -355,6 +358,7 @@ static int (*bl_Mob_getHealth)(Entity*);
 static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 static void (*bl_Player_eat_real)(Entity*, int, float);
 static int (*bl_Entity_getDimensionId)(Entity*);
+static AABB& (*bl_Tile_getVisualShape)(Tile*, unsigned char, AABB&, bool);
 
 static bool* bl_Tile_solid;
 
@@ -610,9 +614,13 @@ int bl_CustomBlock_getColor_data_Hook(Tile* tile, int data) {
 	return myColours[data];
 }
 
-int bl_CustomBlock_getRenderLayerHook(Tile* tile) {
+AABB& bl_CustomBlock_getVisualShape_hook(Tile* tile, unsigned char data, AABB& aabb, bool someBool) {
+	if (data == 0) return bl_Tile_getVisualShape(tile, data, aabb, someBool);
 	int blockId = tile->id;
-	return bl_custom_block_renderLayer[blockId];
+	AABB** aabbs = bl_custom_block_visualShapes[blockId];
+	AABB* aabbout;
+	if (aabbs == nullptr || (aabbout = aabbs[data-1]) == nullptr) return bl_Tile_getVisualShape(tile, data, aabb, someBool);
+	return *aabbout;
 }
 
 void bl_clearNameTags() {
@@ -1170,6 +1178,7 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
@@ -1198,6 +1207,15 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
 	}
+	if (bl_custom_block_visualShapes[blockId]) {
+		AABB** a = bl_custom_block_visualShapes[blockId];
+		for (int i = 0; i < 15; i++) {
+			if (a[i]) delete[] a[i];
+		}
+		delete[] a;
+		bl_custom_block_visualShapes[blockId] = nullptr;
+	}
+
 	//bl_custom_block_opaque[blockId] = opaque;
 	bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
 	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
@@ -1267,13 +1285,29 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
-  (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6) {
+  (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6, jint damage) {
 	if (blockId < 0 || blockId > 255) return;
 	Tile* tile = bl_Tile_tiles[blockId];
 	if (tile == NULL) {
 		return;
 	}
-	bl_Tile_setShape(tile, v1, v2, v3, v4, v5, v6);
+	if (damage == 0) {
+		bl_Tile_setShape(tile, v1, v2, v3, v4, v5, v6);
+	} else {
+		AABB** aabbs = bl_custom_block_visualShapes[blockId];
+		if (!aabbs) {
+			bl_custom_block_visualShapes[blockId] = aabbs = new AABB*[15]();
+		}
+		AABB* theAABB = aabbs[damage - 1];
+		if (!theAABB) aabbs[damage - 1] = theAABB = new AABB;
+		theAABB->shouldBeFalse = false;
+		theAABB->x1 = v1;
+		theAABB->y1 = v2;
+		theAABB->z1 = v3;
+		theAABB->x2 = v4;
+		theAABB->y2 = v5;
+		theAABB->z2 = v6;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetStepSound
@@ -1306,7 +1340,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
-	bl_custom_block_renderLayer[blockId] = (uint8_t) level;
 	Tile* tile = bl_Tile_tiles[blockId];
 	tile->renderPass = level;
 }
@@ -2436,6 +2469,8 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Player_eat_real);
 	bl_Entity_getDimensionId = (int (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
+	bl_Tile_getVisualShape = (AABB& (*)(Tile*, unsigned char, AABB&, bool))
+		dlsym(mcpelibhandle, "_ZN4Tile14getVisualShapeEhR4AABBb");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

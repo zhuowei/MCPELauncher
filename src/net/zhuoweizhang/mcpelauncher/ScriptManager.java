@@ -1390,7 +1390,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetColor(int blockId, int[] colors);
 
 	public static native void nativeBlockSetShape(int blockId, float v1, float v2, float v3,
-			float v4, float v5, float v6);
+			float v4, float v5, float v6, int damage);
 
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
 
@@ -2984,9 +2984,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setShape(int blockId, double v1, double v2, double v3, double v4,
-				double v5, double v6) {
+				double v5, double v6, int damage) {
 			nativeBlockSetShape(blockId, (float) v1, (float) v2, (float) v3, (float) v4,
-					(float) v5, (float) v6);
+					(float) v5, (float) v6, damage);
 		}
 
 		/*
