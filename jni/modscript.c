@@ -156,6 +156,7 @@ static Level* (*bl_Minecraft_getLevel)(Minecraft*);
 static Player* (*bl_MinecraftClient_getPlayer)(Minecraft*);
 static int (*bl_Inventory_getSelectedSlot)(void*);
 static void (*bl_Inventory_selectSlot)(void*, int);
+static void (*bl_ItemInstance_setUserData)(ItemInstance*, unique_ptr*);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -214,12 +215,15 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId);
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
 	instance->count = count;
-	instance->tag = NULL;
+	unique_ptr tagPtr;
+	tagPtr.ptr = NULL;
+	bl_ItemInstance_setUserData(instance, &tagPtr);
 	bl_ItemInstance_setId(instance, id);
 }
 
 ItemInstance* bl_newItemInstance(int id, int count, int damage) {
 	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	instance->tag = NULL;
 	bl_setItemInstance(instance, id, count, damage);
 	return instance;
 }
@@ -803,9 +807,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
 	ItemInstance* item = fn(entity);
 	if (item == NULL) return;
-	item->count = itemCount;
-	item->damage = itemDamage;
-	bl_ItemInstance_setId(item, itemId);
+	bl_setItemInstance(item, itemId, itemCount, itemDamage);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
@@ -1317,6 +1319,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_MinecraftClient_getPlayer = dobby_dlsym(mcpelibhandle, "_ZN15MinecraftClient9getPlayerEv");
 	bl_Inventory_getSelectedSlot = dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
 	bl_Inventory_selectSlot = dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
+	bl_ItemInstance_setUserData = dlsym(mcpelibhandle,
+		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
 
 	bl_setuphooks_cppside();
 

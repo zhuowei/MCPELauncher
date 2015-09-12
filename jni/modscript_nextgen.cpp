@@ -1384,6 +1384,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
 
 	ItemInstance outStack;
+	outStack.tag = NULL;
 	bl_setItemInstance(&outStack, itemId, itemCount, itemDamage);
 	std::vector<ItemInstance> outStacks;
 	outStacks.push_back(outStack);
@@ -1409,6 +1410,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
   	ItemInstance outputStack;
+	outputStack.tag = NULL;
 	bl_setItemInstance(&outputStack, outputId, 1, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
   	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);

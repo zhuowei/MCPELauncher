@@ -2920,6 +2920,11 @@ public class ScriptManager {
 				texture, damageReduceAmount, maxDamage, armorType);
 		}
 
+		@JSStaticFunction
+		public static boolean isValidItem(int id) {
+			return nativeIsValidItem(id);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Item";
@@ -3042,6 +3047,24 @@ public class ScriptManager {
 		}
 
 		*/
+
+		@JSStaticFunction
+		public static int[] getAllBlockIds() {
+			boolean[] validIds = new boolean[0x100];
+			int theCount = 0;
+			for (int i = 0; i < 0x100; i++) {
+				if (nativeIsValidItem(i)) {
+					validIds[i] = true;
+					theCount++;
+				}
+			}
+			int[] retval = new int[theCount];
+			int b = 0;
+			for (int i = 0; i < 0x100; i++) {
+				if (validIds[i]) retval[b++] = i;
+			}
+			return retval;
+		}
 
 		@Override
 		public String getClassName() {
