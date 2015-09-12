@@ -177,6 +177,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="recorder_no_recording">There are no recordings to view.</string>
     <string name="advertising_privacy_policy">Advertising privacy policy</string>
     <string name="about_kamcord_credits">Certain video and audio capture functionality is Powered by Kamcord™ (kamcord.com), and your use of such functionality is subject to the Kamcord Terms of Use (kamcord.com/tos) and Privacy Policy (kamcord.com/privacy)</string>
+    <string name="about_fmod_credits">Audio engine : FMOD Studio by Firelight Technologies</string>
 
     <string name="get_substrate_explanation">You need to install the Substrate app to use BlockLauncher. (You do not have to set it up, and you do not need root access: you only need to install it.)</string>
     <string name="get_substrate_button">Get Substrate</string>

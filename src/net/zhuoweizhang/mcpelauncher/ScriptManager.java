@@ -217,7 +217,7 @@ public class ScriptManager {
 
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
-		EntityRenderType.class, ArmorType.class, MobEffect.class
+		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -553,6 +553,11 @@ public class ScriptManager {
 	@CallbackName(name="explodeHook", args={"entity", "x", "y", "z", "power", "onFire"})
 	public static void explodeCallback(long entity, float x, float y, float z, float power, boolean onFire) {
 		callScriptMethod("explodeHook", entity, x, y, z, power, onFire);
+	}
+
+	@CallbackName(name="eatHook", args={"hearts", "saturationRatio"})
+	public static void eatCallback(int hearts, float notHearts) {
+		callScriptMethod("eatHook", hearts, notHearts);
 	}
 
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
@@ -1529,6 +1534,7 @@ public class ScriptManager {
 	public static native boolean nativeZombieIsBaby(long entity);
 	public static native void nativeZombieSetBaby(long entity, boolean yep);
 	public static native int nativeBlockGetSecondPart(int x, int y, int z, int axis);
+	public static native int nativePlayerGetDimension();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2191,6 +2197,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setCanFly(boolean val) {
 			nativePlayerSetCanFly(val);
+		}
+
+		@JSStaticFunction
+		public static int getDimension() {
+			return nativePlayerGetDimension();
 		}
 
 		@Override

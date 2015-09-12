@@ -34,6 +34,7 @@
 #include "mcpe/packetsender.h"
 #include "mcpe/servercommandparser.h"
 #include "mcpe/attribute.h"
+#include "mcpe/simplefooddata.h"
 
 #include "fmod_hdr.h"
 
@@ -352,6 +353,8 @@ static bool (*bl_Zombie_isBaby)(Entity*);
 static void (*bl_Zombie_setBaby)(Entity*, bool);
 static int (*bl_Mob_getHealth)(Entity*);
 static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
+static void (*bl_Player_eat_real)(Entity*, int, float);
+static int (*bl_Entity_getDimensionId)(Entity*);
 
 static bool* bl_Tile_solid;
 
@@ -841,6 +844,25 @@ static void bl_TileSource_fireTileEvent_hook(TileSource* source, int x, int y, i
 	}
 
 	bl_TileSource_fireTileEvent_real(source, x, y, z, type, data);
+}
+
+static void bl_Player_eat_hook(Entity* player, int hearts, float notHearts) {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "I'm EATING %d %f", hearts, notHearts);
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "eatCallback", "(IF)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hearts);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	bl_Player_eat_real(player, hearts, notHearts);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClientMessage
@@ -2064,6 +2086,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	}
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetDimension
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return 0;
+	return bl_Entity_getDimensionId(bl_localplayer);
+}
+
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 
 static bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
@@ -2201,7 +2229,7 @@ void bl_setuphooks_cppside() {
 #endif
 
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile"));
-	bl_dumpVtable(bl_Tile_vtable, 0x100);
+	//bl_dumpVtable(bl_Tile_vtable, 0x100);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
@@ -2399,6 +2427,11 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN3Mob9getHealthEv");
 	bl_Mob_getAttribute = (AttributeInstance* (*)(Entity*, Attribute const&))
 		dlsym(mcpelibhandle, "_ZNK3Mob12getAttributeERK9Attribute");
+	void* playerEat = dlsym(mcpelibhandle, "_ZN6Player3eatEif");
+	mcpelauncher_hook((void*) playerEat, (void*) &bl_Player_eat_hook,
+		(void**) &bl_Player_eat_real);
+	bl_Entity_getDimensionId = (int (*)(Entity*))
+		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
