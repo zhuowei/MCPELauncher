@@ -229,7 +229,7 @@ static_assert(sizeof(ModelPart) == 156, "ModelPart size");
 
 typedef struct {
 	Item* item; //0
-	int wtf2; //4
+	Tile* tile; //4
 	ItemInstance itemInstance; //8
 	char letter; //28
 } RecipesType;

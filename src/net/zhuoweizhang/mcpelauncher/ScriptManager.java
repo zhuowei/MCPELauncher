@@ -313,6 +313,9 @@ public class ScriptManager {
 		// I have no idea what to do now, so manually trigger the entity added listener for the local player
 		entityAddedCallback(nativeGetPlayerEnt());
 
+		// recipes must be re-registered after every set level
+		NativeItemApi.reregisterRecipes();
+
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
@@ -2777,6 +2780,7 @@ public class ScriptManager {
 	}
 
 	private static class NativeItemApi extends ScriptableObject {
+		private static List<Object[]> activeRecipes = new ArrayList<Object[]>();
 		public NativeItemApi() {
 		}
 		
@@ -2879,7 +2883,26 @@ public class ScriptManager {
 						"You must create the item before you can add it to a recipe.");
 				}
 			}
+			for (Object[] r: activeRecipes) {
+				if (
+					((Integer) r[0]) == id &&
+					((Integer) r[1]) == count &&
+					((Integer) r[2]) == damage &&
+					Arrays.equals((String[]) r[3], shape) &&
+					Arrays.equals((int[]) r[4], ingredients)
+				) {
+					System.out.println("Recipe already exists.");
+					return;
+				}
+			}
+			activeRecipes.add(new Object[]{id, count, damage, shape, ingredients});
 			nativeAddShapedRecipe(id, count, damage, shape, ingredients);
+		}
+
+		public static void reregisterRecipes() {
+			for (Object[] r: activeRecipes) {
+				nativeAddShapedRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (String[]) r[3], (int[]) r[4]);
+			}
 		}
 
 		@JSStaticFunction

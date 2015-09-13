@@ -1426,12 +1426,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	std::vector<RecipesType> ingredientsList;
 	for (int i = 0; i < ingredientsCount; i++) {
 		RecipesType recipeType;
-		recipeType.wtf2 = 0;
-		recipeType.item = NULL;
+		int inputId = ingredients[i * 3 + 1];
+		recipeType.tile = inputId < 0x100? bl_Tile_tiles[inputId]: nullptr;
+		recipeType.item = nullptr;
 		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 		recipeType.itemInstance.count = 1;
 		recipeType.itemInstance.tag = NULL;
-		bl_ItemInstance_setId(&recipeType.itemInstance, ingredients[i * 3 + 1]);
+		bl_ItemInstance_setId(&recipeType.itemInstance, inputId);
 		recipeType.letter = (char) ingredients[i * 3];
 		ingredientsList.push_back(recipeType);
 	}
