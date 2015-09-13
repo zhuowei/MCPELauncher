@@ -1888,11 +1888,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
 	}
 
-	jlong entityId = e->entityId;
-
 	bl_level->addEntity(std::move(entity));
 
-	return entityId;
+	return e->entityId;
 
 }
 
