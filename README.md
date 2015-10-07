@@ -4,7 +4,7 @@ BlockLauncher is a custom Minecraft PE launcher that wraps around Minecraft PE a
 
 Just choose Options on the main screen, then select a texture pack. It is that easy!
 
-This program loads libminecraftpe.so from the currently installed copy of Minecraft PE, so it should be compatiable with the mod patching features of PocketTool and QuickPatch.
+This program loads libminecraftpe.so from the currently installed copy of Minecraft PE, so it should be compatible with the mod patching features of PocketTool and QuickPatch.
 
 There is a 3-PTPatch limitation on this free version.
 
