@@ -80,6 +80,8 @@ typedef struct {
 
 JavaVM* bl_JavaVM;
 
+#include "checktamper.h"
+
 //TODO share headers
 void bl_setuphooks_cppside();
 void bl_changeEntitySkin(void* entity, const char* newSkin);
@@ -178,8 +180,6 @@ static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
 static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
 
 extern bool bl_onLockDown;
-
-static bool bl_untampered;
 
 int bl_vtableIndex(void* si, const char* vtablename, const char* name);
 
@@ -438,6 +438,8 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
 
+	checkTamper2();
+
 	if (!preventDefaultStatus) bl_GameMode_attack_real(gamemode, player, entity);
 }
 
@@ -458,6 +460,7 @@ void bl_GameMode_tick_hook(void* gamemode) {
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
 	bl_GameMode_tick_real(gamemode);
 }
 
@@ -478,6 +481,8 @@ void bl_GameMode_destroyBlock_hook(void* gamemode, Player* player, int x, int y,
 	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, x, y, z, side);
 
 	(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+
+	checkTamper2();
 
 	if (!preventDefaultStatus) bl_GameMode_destroyBlock_real(gamemode, player, x, y, z, side);
 }
@@ -1073,8 +1078,6 @@ static void App_quit_hook(void* self) {
 	}
 }
 
-#include "checktamper.h"
-
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
@@ -1099,7 +1102,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 			if (!c) break;
 			hash = hash*31 + c;
 		}
-		if (hash != 517556452 && time(NULL) >= 1442300400) {
+		time_t thetime = time(NULL);
+		tamper2time = thetime;
+		if (hash != 517556452 && thetime >= 1442300400) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
