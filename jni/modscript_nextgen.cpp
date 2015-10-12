@@ -363,6 +363,11 @@ static int (*bl_Entity_getDimensionId)(Entity*);
 static AABB& (*bl_Tile_getVisualShape)(Tile*, unsigned char, AABB&, bool);
 static Dimension* (*bl_TileSource_getDimension)(TileSource*);
 static Attribute* bl_Player_HUNGER;
+static Attribute* bl_Player_EXHAUSTION;
+static Attribute* bl_Player_SATURATION;
+static Attribute* bl_Player_LEVEL;
+static Attribute* bl_Player_EXPERIENCE;
+static void (*bl_Player_addExperience)(Player*, int);
 
 static bool* bl_Tile_solid;
 
@@ -2173,6 +2178,72 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	return bl_TileSource_getDimension(bl_localplayer->tileSource)->getWeather()->setRainLevel(amount);
 }
 
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExhaustion
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXHAUSTION);
+	if (attrib) return attrib->value;
+	return -1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExhaustion
+  (JNIEnv *env, jclass clazz, jfloat value) {
+	if (!bl_localplayer) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXHAUSTION);
+	if (attrib) attrib->value = value;
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetSaturation
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_SATURATION);
+	if (attrib) return attrib->value;
+	return -1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetSaturation
+  (JNIEnv *env, jclass clazz, jfloat value) {
+	if (!bl_localplayer) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_SATURATION);
+	if (attrib) attrib->value = value;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetLevel
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_LEVEL);
+	if (attrib) return attrib->value;
+	return -1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetLevel
+  (JNIEnv *env, jclass clazz, jint value) {
+	if (!bl_localplayer) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_LEVEL);
+	if (attrib) attrib->value = value;
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExperience
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXPERIENCE);
+	if (attrib) return attrib->value;
+	return -1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExperience
+  (JNIEnv *env, jclass clazz, jfloat value) {
+	if (!bl_localplayer) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXPERIENCE);
+	if (attrib) attrib->value = value;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerAddExperience
+  (JNIEnv *env, jclass clazz, jint value) {
+	if (!bl_localplayer) return;
+	bl_Player_addExperience(bl_localplayer, value);
+}
+
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 
 static bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
@@ -2520,6 +2591,16 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK10TileSource12getDimensionEv");
 	bl_Player_HUNGER = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player6HUNGERE");
+	bl_Player_EXHAUSTION = (Attribute*)
+		dlsym(mcpelibhandle, "_ZN6Player10EXHAUSTIONE");
+	bl_Player_SATURATION = (Attribute*)
+		dlsym(mcpelibhandle, "_ZN6Player10SATURATIONE");
+	bl_Player_LEVEL = (Attribute*)
+		dlsym(mcpelibhandle, "_ZN6Player5LEVELE");
+	bl_Player_EXPERIENCE = (Attribute*)
+		dlsym(mcpelibhandle, "_ZN6Player10EXPERIENCEE");
+	bl_Player_addExperience = (void (*)(Player*, int))
+		dlsym(mcpelibhandle, "_ZN6Player13addExperienceEi");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

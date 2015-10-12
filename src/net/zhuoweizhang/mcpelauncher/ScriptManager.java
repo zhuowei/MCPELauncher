@@ -1546,6 +1546,16 @@ public class ScriptManager {
 
 	public static native float nativePlayerGetHunger(long entity);
 	public static native void nativePlayerSetHunger(long entity, float value);
+	public static native float nativePlayerGetExhaustion();
+	public static native void nativePlayerSetExhaustion(float value);
+	public static native float nativePlayerGetSaturation();
+	public static native void nativePlayerSetSaturation(float value);
+
+	public static native float nativePlayerGetExperience();
+	public static native void nativePlayerSetExperience(float value);
+	public static native int nativePlayerGetLevel();
+	public static native void nativePlayerSetLevel(int value);
+	public static native void nativePlayerAddExperience(int value);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2243,6 +2253,51 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHunger(double value) {
 			nativePlayerSetHunger(getEntity(), (float) value);
+		}
+
+		@JSStaticFunction
+		public static double getExhaustion() {
+			return nativePlayerGetExhaustion();
+		}
+
+		@JSStaticFunction
+		public static void setExhaustion(double value) {
+			nativePlayerSetExhaustion((float) value);
+		}
+
+		@JSStaticFunction
+		public static double getSaturation() {
+			return nativePlayerGetSaturation();
+		}
+
+		@JSStaticFunction
+		public static void setSaturation(double value) {
+			nativePlayerSetSaturation((float) value);
+		}
+
+		@JSStaticFunction
+		public static int getLevel() {
+			return nativePlayerGetLevel();
+		}
+
+		@JSStaticFunction
+		public static void setLevel(int value) {
+			nativePlayerSetLevel(value);
+		}
+
+		@JSStaticFunction
+		public static void addExp(int value) {
+			nativePlayerAddExperience(value);
+		}
+
+		@JSStaticFunction
+		public static double getExp() {
+			return nativePlayerGetExperience();
+		}
+
+		@JSStaticFunction
+		public static void setExp(double value) {
+			nativePlayerSetExperience((float) value);
 		}
 
 		@Override

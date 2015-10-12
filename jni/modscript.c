@@ -159,6 +159,7 @@ static Player* (*bl_MinecraftClient_getPlayer)(Minecraft*);
 static int (*bl_Inventory_getSelectedSlot)(void*);
 static void (*bl_Inventory_selectSlot)(void*, int);
 static void (*bl_ItemInstance_setUserData)(ItemInstance*, unique_ptr*);
+static int (*bl_AgableMob_getAge)(Entity*);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -885,7 +886,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	return ((int*) entity)[772];
+	return bl_AgableMob_getAge(entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
@@ -1326,6 +1327,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_selectSlot = dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
 	bl_ItemInstance_setUserData = dlsym(mcpelibhandle,
 		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
+	bl_AgableMob_getAge = dlsym(mcpelibhandle,
+		"_ZN9AgableMob6getAgeEv");
 
 	bl_setuphooks_cppside();
 
