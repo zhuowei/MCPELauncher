@@ -275,10 +275,10 @@ typedef struct {
 
 typedef struct {
 	void** vtable; //0
-	char filler[40]; //4
-	cppstr name; //44 from Biome::setName
-	char filler2[120-48]; //48
-	int id; //120 from Biome::Biome
+	char filler[56-4]; //4
+	cppstr name; //56 from Biome::setName
+	char filler2[148-60]; //60
+	int id; //148 from Biome::Biome
 } Biome;
 
 typedef struct {

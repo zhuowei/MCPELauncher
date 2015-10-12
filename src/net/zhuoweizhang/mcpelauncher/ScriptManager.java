@@ -314,7 +314,7 @@ public class ScriptManager {
 		entityAddedCallback(nativeGetPlayerEnt());
 
 		// recipes must be re-registered after every set level
-		NativeItemApi.reregisterRecipes();
+		if (!isRemote) NativeItemApi.reregisterRecipes();
 
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
@@ -1538,6 +1538,11 @@ public class ScriptManager {
 	public static native void nativeZombieSetBaby(long entity, boolean yep);
 	public static native int nativeBlockGetSecondPart(int x, int y, int z, int axis);
 	public static native int nativePlayerGetDimension();
+
+	public static native float nativeLevelGetLightningLevel();
+	public static native void nativeLevelSetLightningLevel(float a);
+	public static native float nativeLevelGetRainLevel();
+	public static native void nativeLevelSetRainLevel(float a);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
