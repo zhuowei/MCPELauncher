@@ -1544,6 +1544,9 @@ public class ScriptManager {
 	public static native float nativeLevelGetRainLevel();
 	public static native void nativeLevelSetRainLevel(float a);
 
+	public static native float nativePlayerGetHunger(long entity);
+	public static native void nativePlayerSetHunger(long entity, float value);
+
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -2021,6 +2024,26 @@ public class ScriptManager {
 			nativeSpawnerSetEntityType(x, y, z, type);
 		}
 
+		@JSStaticFunction
+		public static double getLightningLevel() {
+			return nativeLevelGetLightningLevel();
+		}
+
+		@JSStaticFunction
+		public static void setLightningLevel(double val) {
+			nativeLevelSetLightningLevel((float) val);
+		}
+
+		@JSStaticFunction
+		public static double getRainLevel() {
+			return nativeLevelGetRainLevel();
+		}
+
+		@JSStaticFunction
+		public static void setRainLevel(double val) {
+			nativeLevelSetRainLevel((float) val);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Level";
@@ -2210,6 +2233,16 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getDimension() {
 			return nativePlayerGetDimension();
+		}
+
+		@JSStaticFunction
+		public static double getHunger() {
+			return nativePlayerGetHunger(getEntity());
+		}
+
+		@JSStaticFunction
+		public static void setHunger(double value) {
+			nativePlayerSetHunger(getEntity(), (float) value);
 		}
 
 		@Override

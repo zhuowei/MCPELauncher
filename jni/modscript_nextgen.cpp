@@ -35,6 +35,8 @@
 #include "mcpe/servercommandparser.h"
 #include "mcpe/attribute.h"
 #include "mcpe/simplefooddata.h"
+#include "mcpe/weather.h"
+#include "mcpe/dimension.h"
 
 #include "fmod_hdr.h"
 
@@ -359,6 +361,8 @@ static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 static void (*bl_Player_eat_real)(Entity*, int, float);
 static int (*bl_Entity_getDimensionId)(Entity*);
 static AABB& (*bl_Tile_getVisualShape)(Tile*, unsigned char, AABB&, bool);
+static Dimension* (*bl_TileSource_getDimension)(TileSource*);
+static Attribute* bl_Player_HUNGER;
 
 static bool* bl_Tile_solid;
 
@@ -2000,6 +2004,23 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (attrib) attrib->value = halfhearts;
 }
 
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetHunger
+  (JNIEnv *env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(entity, *bl_Player_HUNGER);
+	if (attrib) return attrib->value;
+	return -1;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetHunger
+  (JNIEnv *env, jclass clazz, jlong entityId, jfloat hunger) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(entity, *bl_Player_HUNGER);
+	if (attrib) attrib->value = hunger;
+}
+
 unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
 	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
 	return retval.id;
@@ -2126,6 +2147,30 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return 0;
 	return bl_Entity_getDimensionId(bl_localplayer);
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetLightningLevel
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return 0;
+	return bl_TileSource_getDimension(bl_localplayer->tileSource)->getWeather()->getLightningLevel(0);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetLightningLevel
+  (JNIEnv *env, jclass clazz, float amount) {
+	if (!bl_localplayer) return;
+	return bl_TileSource_getDimension(bl_localplayer->tileSource)->getWeather()->setLightningLevel(amount);
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetRainLevel
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return 0;
+	return bl_TileSource_getDimension(bl_localplayer->tileSource)->getWeather()->getRainLevel(0);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetRainLevel
+  (JNIEnv *env, jclass clazz, float amount) {
+	if (!bl_localplayer) return;
+	return bl_TileSource_getDimension(bl_localplayer->tileSource)->getWeather()->setRainLevel(amount);
 }
 
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
@@ -2470,6 +2515,11 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
 	bl_Tile_getVisualShape = (AABB& (*)(Tile*, unsigned char, AABB&, bool))
 		dlsym(mcpelibhandle, "_ZN4Tile14getVisualShapeEhR4AABBb");
+
+	bl_TileSource_getDimension = (Dimension* (*)(TileSource*))
+		dlsym(mcpelibhandle, "_ZNK10TileSource12getDimensionEv");
+	bl_Player_HUNGER = (Attribute*)
+		dlsym(mcpelibhandle, "_ZN6Player6HUNGERE");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
