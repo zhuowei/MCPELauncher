@@ -99,8 +99,6 @@ const size_t kItemEntity_pickupDelay_offset = 384;
 const size_t kItemEntity_itemInstance_offset = 360;
 // found in TextPacket::handle
 const int kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
-// found by searching for constructor
-const size_t kMinecraft_serverCommandParser_offset = 112;
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -368,6 +366,8 @@ static Attribute* bl_Player_SATURATION;
 static Attribute* bl_Player_LEVEL;
 static Attribute* bl_Player_EXPERIENCE;
 static void (*bl_Player_addExperience)(Player*, int);
+static void (*bl_Item_setCategory)(Item*, int);
+static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 
 static bool* bl_Tile_solid;
 
@@ -2095,15 +2095,13 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *env, jclass clazz, jstring text) {
-	return false;
-/*
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	ServerCommandParser* parser = *((ServerCommandParser**) (((uintptr_t) bl_minecraft) + kMinecraft_serverCommandParser_offset));
+	ServerCommandParser* parser = bl_Minecraft_getCommandParser(bl_minecraft);
+	if (!parser) return false;
 	int findCount = parser->commands.count(mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 	return findCount != 0;
-*/
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
@@ -2601,6 +2599,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN6Player10EXPERIENCEE");
 	bl_Player_addExperience = (void (*)(Player*, int))
 		dlsym(mcpelibhandle, "_ZN6Player13addExperienceEi");
+	bl_Item_setCategory = (void (*)(Item*, int))
+		dlsym(mcpelibhandle, "_ZN4Item11setCategoryEi");
+	bl_Minecraft_getCommandParser = (ServerCommandParser* (*)(Minecraft*))
+		dlsym(mcpelibhandle, "_ZN9Minecraft16getCommandParserEv");
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);

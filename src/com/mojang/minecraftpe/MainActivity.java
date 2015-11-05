@@ -1603,6 +1603,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void initPatching() throws Exception {
+		System.loadLibrary("mcpelauncher_tinysubstrate");
+		System.loadLibrary("mcpelauncher");
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
 		if (!success) {
