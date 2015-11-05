@@ -94,12 +94,11 @@ void bl_clearNameTags();
 void bl_sendIdentPacket();
 void* bl_marauder_translation_function(void* input);
 
-jclass bl_scriptmanager_class;
+extern jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(Minecraft*, unique_ptr*);
 void* (*bl_MinecraftClient_startLocalServer_real)(Minecraft*, void*, void*, void*);
-static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_TileSource_setTileAndData) (TileSource*, int, int, int, FullTile*, int);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
@@ -401,27 +400,6 @@ void* bl_MinecraftClient_startLocalServer_hook(Minecraft* minecraft, void* wDir,
 	bl_localplayer = bl_MinecraftClient_getPlayer(minecraft);
 	bl_onLockDown = false;
 	return retval;
-}
-
-void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
-	JNIEnv *env;
-	bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
-
-	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
-	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
-	}
-
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
-
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, thatotherboolean);
-
-	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
-	}
-
 }
 
 void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
@@ -1109,13 +1087,6 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 	if (signalhandler) bl_signalhandler_init();
 #endif
 	checkTamper(env, activity);
-
-	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
-
-	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
-	//get a callback when the level is exited
-	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
-	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 
 	populate_vtable_indexes(mcpelibhandle);
 

@@ -278,7 +278,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			scriptsPreference.setOnPreferenceClickListener(this);
 			if (ScriptManager.isRemote)
 				scriptsPreference.setEnabled(false);
-			if (MainActivity.disableModPEForDev) scriptsPreference.setEnabled(false);
+			try {
+				if (!getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0)
+					.versionName.startsWith(MainActivity.SCRIPT_SUPPORT_VERSION)) scriptsPreference.setEnabled(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		languagePreference = (ListPreference) findPreference("zz_language_override");

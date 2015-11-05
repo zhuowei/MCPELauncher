@@ -1793,20 +1793,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	bl_Entity_setSize(entity, a, b);
 }
 
-enum {
-	BL_ARCH_ARM = 0,
-	BL_ARCH_I386
-};
-
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetArch
-  (JNIEnv *env, jclass clazz) {
-#ifdef __i386
-	return BL_ARCH_I386;
-#else
-	return BL_ARCH_ARM;
-#endif
-};
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetHandEquipped
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
 	Item* item = bl_Item_items[id];
