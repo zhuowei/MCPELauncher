@@ -75,6 +75,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/MainActivity";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.12";
+	public static final String HALF_SUPPORT_VERSION = "0.13";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -190,8 +192,6 @@ public class MainActivity extends NativeActivity {
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
 
-	public static final boolean disableModPEForDev = false;
-
 	private boolean controllerInit = false;
 
 	private final Handler mainHandler = new Handler() {
@@ -257,7 +257,8 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith("0.12");
+			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) ||
+				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
@@ -344,7 +345,8 @@ public class MainActivity extends NativeActivity {
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
 		try {
-			if (!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) {
+			if ((!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) ||
+				getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 				prePatch();
 			}
 		} catch (Exception e) {
@@ -371,12 +373,12 @@ public class MainActivity extends NativeActivity {
 		libLoaded = true;
 
 		try {
-			if (!isSafeMode()) {
+			if (!isSafeMode() || requiresPatchingInSafeMode()) {
 				initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ false);
-					loadNativeAddons();
+					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport());
+					if (!isSafeMode()) loadNativeAddons();
 				}
 			}
 		} catch (Exception e) {
@@ -403,7 +405,7 @@ public class MainActivity extends NativeActivity {
 		setFakePackage(false);
 
 		try {
-			boolean shouldLoadScripts = true;
+			boolean shouldLoadScripts = hasScriptSupport();
 			if (!isSafeMode() && minecraftLibBuffer != null) {
 				applyBuiltinPatches();
 				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
@@ -494,6 +496,10 @@ public class MainActivity extends NativeActivity {
 			hoverCar = null;
 		}
 		ScriptManager.destroy();
+		if (getMCPEVersion().startsWith("0.13")) {
+			System.exit(0);
+			return;
+		}
 		lastDestroyTime = System.currentTimeMillis();
 		Thread presidentMadagascar = new Thread(new ShutdownTask());
 		presidentMadagascar.setDaemon(true);
@@ -582,6 +588,27 @@ public class MainActivity extends NativeActivity {
 					// patch.applyPatch(libBytes);
 					PatchUtils.patch(libBuffer, patch);
 				} // TODO: load patches from assets
+			}
+			if (mcPkgInfo.versionName.startsWith("0.13")) { // FIXME 0.13
+				byte[] needle = new byte[] {
+					0x67, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x48,
+					0x65, 0x69, 0x67, 0x68, 0x74, 0x00
+				}; // getKeyboardHeight\0
+				// patched to eetKeyboardHeight
+				for (int i = 0; i < libBytes.length - needle.length; i++) {
+					boolean found = true;
+					for (int j = 0; j < needle.length; j++) {
+						if (libBytes[i + j] != needle[j]) {
+							found = false;
+							break;
+						}
+					}
+					if (found) {
+						// patch it
+						libBytes[i] = 0x65;
+						break;
+					}
+				}
 			}
 
 			OutputStream os = new FileOutputStream(newMinecraft);
@@ -805,9 +832,16 @@ public class MainActivity extends NativeActivity {
 							intent.putExtra("prePatchConfigure", false);
 							startActivity(intent);
 						} else if (button == 1) {
-							Intent intent = new Intent(MainActivity.this,
-									ManageScriptsActivity.class);
-							startActivity(intent);
+							if (hasScriptSupport()) {
+								Intent intent = new Intent(MainActivity.this,
+										ManageScriptsActivity.class);
+								startActivity(intent);
+							} else {
+								new AlertDialog.Builder(MainActivity.this)
+										.setMessage("Scripts are not supported yet in Minecraft PE "
+											+ mcPkgInfo.versionName)
+										.setPositiveButton(android.R.string.ok, null).show();
+							}
 						} else if (button == 2) {
 							boolean hasLoadedScripts = Utils.getPrefs(0).getBoolean(
 									"zz_script_enable", true)
@@ -1057,6 +1091,14 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
+		if (getMCPEVersion().startsWith("0.13")) {
+			InputStream special = getLocalInputStreamForAssetReal("13/" + name, lengthOut);
+			if (special != null) return special;
+		}
+		return getLocalInputStreamForAssetReal(name, lengthOut);
+	}
+
+	protected InputStream getLocalInputStreamForAssetReal(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			if (forceFallback) {
@@ -1604,7 +1646,11 @@ public class MainActivity extends NativeActivity {
 
 	public void initPatching() throws Exception {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
-		System.loadLibrary("mcpelauncher");
+		if (getMCPEVersion().startsWith("0.13")) {
+			System.loadLibrary("mcpelauncher_lite");
+		} else {
+			System.loadLibrary("mcpelauncher");
+		}
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
 		if (!success) {
@@ -1863,6 +1909,13 @@ public class MainActivity extends NativeActivity {
 		return displayMetrics.heightPixels - r.bottom;
 	}
 	// end 0.12
+	// 0.13
+	public float eetKeyboardHeight() {
+		Rect r = new Rect();
+		View rootview = this.getWindow().getDecorView();
+		rootview.getWindowVisibleDisplayFrame(r);
+		return displayMetrics.heightPixels - r.bottom;
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -2148,7 +2201,7 @@ public class MainActivity extends NativeActivity {
 	private void initKamcord() {
 		// test if we have kamcord
 		hasRecorder = this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro") &&
-			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false) && !isSafeMode();
+			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false) && !isSafeMode() && hasScriptSupport();
 /*
 		try {
 			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
@@ -2247,8 +2300,12 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
-		if (version.matches("0\\.12\\.1\\.b13")) return true;
-		if (version.matches("0\\.12\\.1")) return true;
+		if (mcPkgInfo.versionName.startsWith("0.12")) {
+			if (version.matches("0\\.12\\.1\\.b13")) return true;
+			if (version.matches("0\\.12\\.1")) return true;
+		} else if (mcPkgInfo.versionName.startsWith("0.13")) {
+			if (version.matches("0\\.13\\.0\\.b.*")) return true;
+		}
 		return false;
 	}
 
@@ -2276,6 +2333,16 @@ public class MainActivity extends NativeActivity {
 	private boolean isForcingController() {
 		return Build.VERSION.SDK_INT >= 12 &&
 			Utils.hasExtrasPackage(this) && Utils.getPrefs(0).getBoolean("zz_use_controller", false);
+	}
+
+	private boolean hasScriptSupport() {
+		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
+	}
+	private String getMCPEVersion() {
+		return mcPkgInfo.versionName;
+	}
+	private boolean requiresPatchingInSafeMode() {
+		return getMCPEVersion().startsWith("0.13");
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

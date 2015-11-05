@@ -175,8 +175,6 @@ Entity* bl_removedEntity = NULL;
 
 int bl_frameCallbackRequested = 0;
 
-static int bl_hasinit_prepatch = 0;
-
 static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
 static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
 
@@ -1055,15 +1053,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 extern void bl_signalhandler_init();
 extern void bl_cape_init(void*);
 
-static void setupIsModded() {
-#ifdef __arm__
-	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
-		dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv"))) & ~1;
-	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
-	isModdedArray[0] = 1;
-#endif
-}
-
 static bool exitEnabled = true;
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetExitEnabled
@@ -1105,7 +1094,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		}
 		time_t thetime = time(NULL);
 		tamper2time = thetime;
-		if (hash != 517556452 && thetime >= 1442300400) {
+		if (hash != 517556452 && thetime >= 1448859600) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
@@ -1113,22 +1102,13 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 
 void bl_prepatch_cppside(void*);
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
-	if (bl_hasinit_prepatch) return;
+void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
+	jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
+	mcpelibhandle = _mcpelibhandle;
 #ifndef __i386
 	if (signalhandler) bl_signalhandler_init();
 #endif
 	checkTamper(env, activity);
-	if (!mcpelibhandle) {
-		mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
-	}
-	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
-	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
-	void* tempPtr;
-	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
-
-	setupIsModded();
 
 	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
 
@@ -1145,21 +1125,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 		minecraftVtable[vtable_indexes.minecraft_quit] = &App_quit_hook;
 		bl_ModelPart_addBox = dlsym(mcpelibhandle, "_ZN9ModelPart6addBoxEfffiiif");
 	}
-
-	//void** appPlatformVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
-	//replace the native code read asset method with the old one that went through JNI
-	//appPlatformVtable[APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE] = NULL;
-/*
-	void* humanoidModel_constructor = dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Eff");
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking: %x", ((unsigned int) humanoidModel_constructor) - mcpelibhandle->base);
-	mcpelauncher_hook(humanoidModel_constructor, (void*) &bl_HumanoidModel_constructor_hook, (void**) &bl_HumanoidModel_constructor_real);
-	void* enderManModel_constructor = dlsym(mcpelibhandle, "_ZN13EnderManModelC1Ev");
-	mcpelauncher_hook(enderManModel_constructor, (void*) &bl_EnderManModel_constructor_hook,
-		(void**) &bl_EnderManModel_constructor_real);
-*/
-
 	bl_prepatch_cppside(mcpelibhandle);
-	bl_hasinit_prepatch = 1;
 }
 
 void bl_dumpVtable(void** vtable, size_t size) {
