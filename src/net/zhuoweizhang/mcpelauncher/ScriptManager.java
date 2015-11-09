@@ -3003,10 +3003,13 @@ public class ScriptManager {
 			nativeSetItemMaxDamage(id, maxDamage);
 		}
 
-		/* This doesn't actually work, and has never worked, but people wanted it to be re-added. I dunno why. */
 		@JSStaticFunction
-		public static void setCategory(int id, int category, int whatever) {
-			nativeSetItemCategory(id, category, whatever);
+		public static void setCategory(int id, int category) {
+			if (category < 0 || category > 4)
+				throw new RuntimeException("Invalid category " + category +
+					": should be one of ItemCategory.MATERIAL, ItemCategory.DECORATION, " + 
+					"ItemCategory.TOOL, or ItemCategory.FOOD");
+			nativeSetItemCategory(id, category, 0);
 		}
 
 		/*@JSStaticFunction

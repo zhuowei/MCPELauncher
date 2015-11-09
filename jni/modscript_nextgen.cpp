@@ -297,8 +297,7 @@ int* bl_custom_block_colors[256];
 AABB** bl_custom_block_visualShapes[256];
 //end custom blocks
 
-int bl_addItemCreativeInvRequest[256][4];
-int bl_addItemCreativeInvRequestCount = 0;
+std::vector<short*> bl_creativeItems;
 
 std::map <int, std::string> bl_nametag_map;
 char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
@@ -368,6 +367,7 @@ static Attribute* bl_Player_EXPERIENCE;
 static void (*bl_Player_addExperience)(Player*, int);
 static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
+static void (*bl_Item_initCreativeItems_real)();
 
 static bool* bl_Tile_solid;
 
@@ -544,37 +544,12 @@ void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffs
 
 #endif
 
-/*
-void bl_CreativeInventryScreen_populateTile_hook(Tile* tile, int count, int damage){
-	int index = bl_addItemCreativeInvRequestCount;
-	for(int i = index; i > 0; i--){
-		if (!bl_addItemCreativeInvRequest[i][3]) continue;
-		bl_addItemCreativeInvRequest[i][3] = 0;
-
-		int id = bl_addItemCreativeInvRequest[i][0];
-
-		if (id >= 0 && id <= 255) {
-			Tile* addTile = bl_Tile_tiles[id];
-			if (addTile == NULL) continue;
-
-			bl_CreativeInventryScreen_populateTile_real(addTile, bl_addItemCreativeInvRequest[i][1], bl_addItemCreativeInvRequest[i][2]);
-		} else if (id > 0 && id < bl_item_id_count) {
-			ItemInstance* instance = bl_newItemInstance(id, 1, 0);
-			if (instance == NULL) continue;
-			Item* addItem = instance->item;
-
-			bl_CreativeInventryScreen_populateItem_real(addItem, bl_addItemCreativeInvRequest[i][1], bl_addItemCreativeInvRequest[i][2]);
-		}
-		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Add item: %d (%d)\n", id, i);
+static void bl_Item_initCreativeItems_hook() {
+	bl_Item_initCreativeItems_real();
+	for (short*& pair: bl_creativeItems) {
+		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
-
-	bl_CreativeInventryScreen_populateTile_real(tile, count, damage);
 }
-
-void bl_CreativeInventryScreen_populateItem_hook(Item* item, int count, int damage){
-	bl_CreativeInventryScreen_populateItem_real(item, count, damage);
-}
-*/
 
 const char* bl_getCharArr(void* str){
 	std::string* mystr = static_cast<std::string*>(str);
@@ -1356,6 +1331,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv
   (JNIEnv *env, jclass clazz, jint id, jint count, jint damage) {
 	bl_Item_addCreativeItem((short) id, (short) damage);
+	short* pair = new short[2];
+	pair[0] = (short) id;
+	pair[1] = (short) damage;
+	bl_creativeItems.push_back(pair);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetI18NString
@@ -1504,8 +1483,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemCategory
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
 	Item* myitem = bl_Item_items[itemId];
-	myitem->category1 = category;
-	//myitem->category2 = mystery1;
+	bl_Item_setCategory(myitem, category);
 }
 
 void bl_sendPacket(Packet* packet) {
@@ -2589,6 +2567,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Item11setCategoryEi");
 	bl_Minecraft_getCommandParser = (ServerCommandParser* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN9Minecraft16getCommandParserEv");
+	void* initCreativeItems =
+		dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
+	mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
+		(void**) &bl_Item_initCreativeItems_real);
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
