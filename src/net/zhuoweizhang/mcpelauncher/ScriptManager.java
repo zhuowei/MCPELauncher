@@ -1359,6 +1359,7 @@ public class ScriptManager {
 	public static native int nativeGetMobHealth(long entityId);
 
 	public static native void nativeSetMobHealth(long entityId, int halfhearts);
+	public static native void nativeSetMobMaxHealth(long entityId, int halfhearts);
 
 	public static native boolean nativeSetEntityRenderType(long entityId, int renderType);
 
@@ -2435,12 +2436,21 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int getHealth(Object ent) {
+			int entityType = getEntityTypeId(ent);
+			if (!(entityType >= 10 && entityType < 64)) {
+				return 0; // not a mob
+			}
 			return nativeGetMobHealth(getEntityId(ent));
 		}
 
 		@JSStaticFunction
 		public static void setHealth(Object ent, int halfhearts) {
 			nativeSetMobHealth(getEntityId(ent), halfhearts);
+		}
+
+		@JSStaticFunction
+		public static void setMaxHealth(Object ent, int halfhearts) {
+			nativeSetMobMaxHealth(getEntityId(ent), halfhearts);
 		}
 
 		@JSStaticFunction

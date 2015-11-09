@@ -1973,6 +1973,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (attrib) attrib->value = halfhearts;
 }
 
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobMaxHealth
+  (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	if (attrib) attrib->setMaxValue(halfhearts);
+}
+
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetHunger
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
