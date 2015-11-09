@@ -21,7 +21,7 @@ corkscrew_x86_src_files := \
 	libcorkscrew/arch-x86/ptrace-x86.c
 
 LOCAL_SRC_FILES := nativepatch.c modscript.c modscript_nextgen.cpp modscript_ScriptLevelListener.cpp utf8proc_slim.c dobby.cpp marauders_map.c \
-	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp kamcord_fixer.cpp fmod_filesystem.cpp prepatch.c $(corkscrew_generic_src_files)
+	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp kamcord_fixer.cpp fmod_filesystem.cpp prepatch.cpp $(corkscrew_generic_src_files)
 
 ifneq (,$(wildcard $(LOCAL_PATH)/scriptscramble.c))
     LOCAL_SRC_FILES += scriptscramble.c
@@ -52,7 +52,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := mcpelauncher_lite
-LOCAL_SRC_FILES := nativepatch.c dobby.cpp marauders_map.c prepatch.c
+LOCAL_SRC_FILES := nativepatch.c dobby.cpp marauders_map.c fmod_filesystem.cpp prepatch.cpp
 LOCAL_LDLIBS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog -landroid -lfmod -Wl,-soname,libmcpelauncher.so
 LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 LOCAL_CFLAGS += -DMCPELAUNCHER_LITE

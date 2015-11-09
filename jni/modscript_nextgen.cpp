@@ -38,8 +38,6 @@
 #include "mcpe/weather.h"
 #include "mcpe/dimension.h"
 
-#include "fmod_hdr.h"
-
 typedef void RakNetInstance;
 typedef void Font;
 
@@ -2214,50 +2212,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	bl_Player_addExperience(bl_localplayer, value);
 }
 
-FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
-
-static bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
-	// now edit the GOT
-	// for got, got_end_addr[got_entry] = addr
-	// FIND THE .GOT SECTION OR DIE TRYING
-	void** got = nullptr;
-	for (int i = 0; i < mcpelibhandle->phnum; i++) {
-		const Elf_Phdr* phdr = mcpelibhandle->phdr + i;
-		if (phdr->p_type == PT_DYNAMIC) { // .got always comes after .dynamic in every Android lib I've seen
-			got = (void**) (((uintptr_t) mcpelibhandle->base) + phdr->p_vaddr + phdr->p_memsz);
-			break;
-		}
-	}
-	if (got == nullptr) {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find the GOT");
-		return false;
-	}
-	bool got_success = false;
-	void** got_rw = (void**) bl_marauder_translation_function((void*) got);
-	for (int i = 0; i < 5000; i++) {
-		if (got[i] == original) {
-			got_rw[i] = newptr;
-			got_success = true;
-			break;
-		}
-	}
-	if (!got_success) {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find pointer in GOT");
-		return false;
-	}
-	return true;
-}
-
-static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
-	// another got edit
-	void* originalAddress = (void*) &FMOD::System::init;
-	bl_patch_got(mcpelibhandle, originalAddress, (void*) &bl_FMOD_System_init_hook);
-}
-
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
-	bl_prepatch_fmod(mcpelibhandle);
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
 	// Edit the dlsym for Item::items
 	Elf_Sym* itemsSym = (Elf_Sym*) bl_marauder_translation_function(

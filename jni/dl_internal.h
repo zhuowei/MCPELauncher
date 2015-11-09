@@ -1,3 +1,4 @@
+#pragma once
 #include <elf.h>
 #ifdef __cplusplus
 extern "C" {

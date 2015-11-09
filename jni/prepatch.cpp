@@ -1,15 +1,18 @@
 #include <jni.h>
-#include <stdbool.h>
 #include <dlfcn.h>
 #include <android/log.h>
-#include "dobby_public.h"
-#include "mcpelauncher.h"
+#include <elf.h>
 
-extern JavaVM* bl_JavaVM;
+#include "dobby_public.h"
+#include "dl_internal.h"
+#include "mcpelauncher.h"
+#include "fmod_hdr.h"
+
+#include "modscript_shared.h"
+
+extern "C" {
 
 jclass bl_scriptmanager_class;
-
-typedef void Minecraft;
 
 void* bl_marauder_translation_function(void* input);
 
@@ -23,18 +26,18 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Leave game callback");
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = (*bl_JavaVM)->GetEnv(bl_JavaVM, (void**) &env, JNI_VERSION_1_2);
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->AttachCurrentThread(bl_JavaVM, &env, NULL);
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
 
 	//Call back across JNI into the ScriptManager
-	jmethodID mid = (*env)->GetStaticMethodID(env, bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
 
-	(*env)->CallStaticVoidMethod(env, bl_scriptmanager_class, mid, thatotherboolean);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, thatotherboolean);
 
 	if (attachStatus == JNI_EDETACHED) {
-		(*bl_JavaVM)->DetachCurrentThread(bl_JavaVM);
+		bl_JavaVM->DetachCurrentThread();
 	}
 
 }
@@ -47,6 +50,51 @@ static void setupIsModded(void* mcpelibhandle) {
 	isModdedArray[0] = 1;
 #endif
 }
+
+/* FMOD */
+
+FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
+
+bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
+	// now edit the GOT
+	// for got, got_end_addr[got_entry] = addr
+	// FIND THE .GOT SECTION OR DIE TRYING
+	void** got = nullptr;
+	for (int i = 0; i < mcpelibhandle->phnum; i++) {
+		const Elf_Phdr* phdr = mcpelibhandle->phdr + i;
+		if (phdr->p_type == PT_DYNAMIC) { // .got always comes after .dynamic in every Android lib I've seen
+			got = (void**) (((uintptr_t) mcpelibhandle->base) + phdr->p_vaddr + phdr->p_memsz);
+			break;
+		}
+	}
+	if (got == nullptr) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find the GOT");
+		return false;
+	}
+	bool got_success = false;
+	void** got_rw = (void**) bl_marauder_translation_function((void*) got);
+	for (int i = 0; i < 5000; i++) {
+		if (got[i] == original) {
+			got_rw[i] = newptr;
+			got_success = true;
+			break;
+		}
+	}
+	if (!got_success) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find pointer in GOT");
+		return false;
+	}
+	return true;
+}
+
+static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
+	// another got edit
+	void* originalAddress = (void*) &FMOD::System::init;
+	bl_patch_got(mcpelibhandle, originalAddress, (void*) &bl_FMOD_System_init_hook);
+}
+
+
+/* end FMOD */
 
 extern void bl_prepatch_cside(void* mcpelibhandle, JNIEnv *env, jclass clazz,
 	jboolean signalhandler, jobject activity, jboolean limitedPrepatch);
@@ -62,13 +110,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 	setupIsModded(mcpelibhandle);
 
-	jclass clz = (*env)->FindClass(env, "net/zhuoweizhang/mcpelauncher/ScriptManager");
+	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
 
-	bl_scriptmanager_class = (*env)->NewGlobalRef(env, clz);
+	bl_scriptmanager_class = (jclass) env->NewGlobalRef(clz);
 	//get a callback when the level is exited
 	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN9Minecraft9leaveGameEb");
 	if (!leaveGame) leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
-	mcpelauncher_hook(leaveGame, &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+	mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+
+	bl_prepatch_fmod((soinfo2*) mcpelibhandle);
 
 #ifndef MCPELAUNCHER_LITE
 	bl_prepatch_cside(mcpelibhandle, env, clazz, signalhandler, activity, limitedPrepatch);
@@ -94,3 +144,5 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv* env, jclass clazz, jboolean p) {
 }
 #endif
+
+} // extern "C"

@@ -4,6 +4,7 @@
 #include <jni.h>
 
 #include "modscript_structs.h"
+#include "dl_internal.h"
 
 #ifdef __cplusplus
 #include <array>
@@ -65,7 +66,9 @@ extern std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 
 void bl_Entity_setPos_helper(Entity*, float, float, float);
 
+#ifndef MCPELAUNCHER_LITE
 #define DLSYM_DEBUG
+#endif
 
 #ifdef DLSYM_DEBUG
 
@@ -77,6 +80,8 @@ void* debug_dlsym(void* handle, const char* symbol);
 int bl_vtableIndex(void* si, const char* vtablename, const char* name);
 
 extern cppstr* (*bl_Mob_getTexture)(Entity*);
+
+bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr);
 
 
 #ifdef __cplusplus
