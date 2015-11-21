@@ -12,8 +12,9 @@ extern "C" {
 #endif
 
 class Minecraft;
+class MinecraftClient;
 
-extern Minecraft* bl_minecraft;
+extern MinecraftClient* bl_minecraft;
 
 extern Level* bl_level;
 
@@ -32,9 +33,6 @@ extern int (*bl_ItemInstance_getId)(ItemInstance*);
 ItemInstance* bl_newItemInstance(int id, int count, int damage);
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage);
 
-extern void* (*bl_TileSource_getTileEntity)(TileSource*, int, int, int);
-extern unsigned char bl_TileSource_getTile(TileSource*, int, int, int);
-extern int (*bl_TileSource_getData) (TileSource*, int, int, int);
 Entity* bl_getEntityWrapper(Level* level, long long entityId);
 
 void bl_clearNameTags();

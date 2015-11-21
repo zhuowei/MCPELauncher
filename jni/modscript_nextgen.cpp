@@ -189,25 +189,25 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_color;
 	int tile_get_color_data;
 	int tile_get_visual_shape;
-	int raknet_instance_connect;
+	//int raknet_instance_connect;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
-	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
-		"_ZN4Tile13getSecondPartER10TileSourceRK7TilePosRS2_");
-	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV4Tile")->st_size;
-	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
-		"_ZN4Tile10getTextureEai");
-	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
-		"_ZN4Tile8getColorEP10TileSourceiii");
-	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
-		"_ZN4Tile8getColorEi");
-	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV4Tile",
-		"_ZN4Tile14getVisualShapeEhR4AABBb");
-	vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
-		"_ZN14RakNetInstance7connectEPKci");
+	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
+	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV5Block")->st_size;
+	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block10getTextureEai");
+	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block8getColorER11BlockSourceRK8BlockPos");
+	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block8getColorEi");
+	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block14getVisualShapeEhR4AABBb");
+	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
+	//	"_ZN14RakNetInstance7connectEPKci");
 }
 
 extern "C" {
@@ -221,18 +221,16 @@ static void (*bl_Item_Item)(Item*, int);
 static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
-static Tile** bl_Tile_tiles;
+static Block** bl_Block_mBlocks;
 static unsigned char* bl_Tile_lightEmission;
 static unsigned char* bl_Tile_lightBlock;
 
 static void (*bl_Item_setNameID)(Item*, std::string const&);
 
-static void (*bl_MinecraftClient_startLocalServer)(Minecraft*, std::string const&, std::string const&, void*);
+static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
-static void (*bl_MinecraftClient_leaveGame)(Minecraft*, bool saveWorld);
+static void (*bl_MinecraftClient_leaveGame)(MinecraftClient*, bool saveWorld);
 static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
-
-static void (*bl_Minecraft_connectToMCOServer)(Minecraft*, std::string const&, std::string const&, unsigned short);
 
 static void (*bl_Level_playSound)(Level*, float, float, float, std::string const&, float, float);
 
@@ -300,7 +298,7 @@ std::vector<short*> bl_creativeItems;
 std::map <int, std::string> bl_nametag_map;
 char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
 
-static Item** bl_Item_items;
+static Item** bl_Item_mItems;
 #if 0
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
@@ -323,10 +321,7 @@ static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity
 static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, float, float, float, float, bool);
-static Biome* (*bl_TileSource_getBiome)(TileSource*, TilePos&);
-static int (*bl_TileSource_getGrassColor)(TileSource*, TilePos&);
-static void (*bl_TileSource_setGrassColor)(TileSource*, int, TilePos&, int);
-static void (*bl_TileSource_fireTileEvent_real)(TileSource* source, int x, int y, int z, int type, int data);
+static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Tile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
 static AABB* (*bl_ReedTile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
 
@@ -334,8 +329,7 @@ static LevelChunk* (*bl_TileSource_getChunk)(TileSource*, int, int);
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
-static FullTile (*bl_TileSource_getTile_raw)(TileSource*, int, int, int);
-static void* (*bl_MinecraftClient_getGui)(Minecraft* minecraft);
+static void* (*bl_MinecraftClient_getGui)(MinecraftClient* minecraft);
 static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_TileEntity_setChanged)(TileEntity*);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
@@ -580,11 +574,11 @@ AABB* bl_CustomBlock_getAABBHook(Tile* tile, TileSource* tileSource, int x, int 
 	return bl_Tile_getAABB(tile, tileSource, x, y, z, aabb, int1, bool1, int2);
 }
 
-int bl_CustomBlock_getColorHook(Tile* tile, BlockSource* blockSource, int x, int y, int z) {
+int bl_CustomBlock_getColorHook(Block* tile, BlockSource& blockSource, BlockPos const& pos) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
 	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
-	int data = blockSource->getData(x, y, z);
+	int data = blockSource.getData(pos.x, pos.y, pos.z);
 	return myColours[data];
 }
 
@@ -816,7 +810,7 @@ static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* 
 	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, x, y, z, power, onFire);
 }
 
-static void bl_TileSource_fireTileEvent_hook(TileSource* source, int x, int y, int z, int type, int data) {
+static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y, int z, int type, int data) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -833,7 +827,7 @@ static void bl_TileSource_fireTileEvent_hook(TileSource* source, int x, int y, i
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	bl_TileSource_fireTileEvent_real(source, x, y, z, type, data);
+	bl_BlockSource_fireBlockEvent_real(source, x, y, z, type, data);
 }
 
 static void bl_Player_eat_hook(Entity* player, int hearts, float notHearts) {
@@ -866,7 +860,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 
 JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId) {
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if(tile == NULL) return 0;
 	
 	return tile->renderType;//bl_CustomBlock_getRenderShapeHook(tile);
@@ -875,7 +869,7 @@ JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGet
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId, jint renderType) {
 	//bl_custom_block_renderShape[blockId] = renderType;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == nullptr) return;
 	tile->renderType = renderType;
 }
@@ -942,7 +936,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
 		jint damageReduceAmount, jint maxDamage, jint armorType) {
 	ArmorItem* item = new ArmorItem;
-	bl_ArmorItem_ArmorItem(item, id - 0x100, ((ArmorItem*) bl_Item_items[310])->armorMaterial, 42, armorType);
+	bl_ArmorItem_ArmorItem(item, id - 0x100, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
 	item->damageReduceAmount = damageReduceAmount;
 	item->maxDamage = maxDamage;
 
@@ -966,7 +960,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id, jint maxDamage) {
 	if (id <= 0 || id >= bl_item_id_count) return;
-	Item* item = bl_Item_items[id];
+	Item* item = bl_Item_mItems[id];
 	if(item == NULL) return;
 	bl_Item_setMaxDamage(item, maxDamage);
 }
@@ -1169,15 +1163,15 @@ void bl_initCustomBlockVtable() {
 }
 
 void* bl_getMaterial(int materialType) {
-	Tile* baseTile = bl_Tile_tiles[materialType];
+	Tile* baseTile = bl_Block_mBlocks[materialType];
 	if (baseTile == NULL) {
-		baseTile = bl_Tile_tiles[1];
+		baseTile = bl_Block_mBlocks[1];
 	}
 	return baseTile->material;
 }
 
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
-	Tile* sacrificialTile = bl_Tile_tiles[1]; //Oh, little Cobblestone Galatti, please sing for me again!
+	Tile* sacrificialTile = bl_Block_mBlocks[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(bl_Tile_getTextureUVCoordinateSet(
 			sacrificialTile, textureNames[i], textureCoords[i]));
@@ -1217,7 +1211,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	retval->renderType = renderShape;
 	bl_Tile_solid[blockId] = opaque;
 	//add it to the global tile list
-	bl_Tile_tiles[blockId] = retval;
+	bl_Block_mBlocks[blockId] = retval;
 	retval->category1 = 1;
 	//now allocate the item
 	Item* tileItem = (Item*) ::operator new(kTileItemSize);
@@ -1248,7 +1242,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
   (JNIEnv *env, jclass clazz, jint blockId, jfloat time) {
 	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == NULL) {
 		return;
 	}
@@ -1261,7 +1255,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetExplosionResistance
   (JNIEnv *env, jclass clazz, jint blockId, jfloat resistance) {
 	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == NULL) {
 		return;
 	}
@@ -1271,7 +1265,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
   (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6, jint damage) {
 	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == NULL) {
 		return;
 	}
@@ -1324,7 +1318,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	tile->renderPass = level;
 }
 
@@ -1415,7 +1409,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	for (int i = 0; i < ingredientsCount; i++) {
 		RecipesType recipeType;
 		int inputId = ingredients[i * 3 + 1];
-		recipeType.tile = inputId < 0x100? bl_Tile_tiles[inputId]: nullptr;
+		recipeType.tile = inputId < 0x100? bl_Block_mBlocks[inputId]: nullptr;
 		recipeType.item = nullptr;
 		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 		recipeType.itemInstance.count = 1;
@@ -1482,12 +1476,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemCategory
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
-	Item* myitem = bl_Item_items[itemId];
+	Item* myitem = bl_Item_mItems[itemId];
 	bl_Item_setCategory(myitem, category);
 }
 
 void bl_sendPacket(Packet* packet) {
-	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft);
+	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft->getServer());
 	sender->send(*packet);
 /*
 	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
@@ -1607,7 +1601,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
   (JNIEnv *env, jclass clazz) {
 #ifdef __arm__
 	for (int i = 1; i < 0x100; i++) {
-		if (bl_Tile_tiles[i] == NULL) {
+		if (bl_Block_mBlocks[i] == NULL) {
 			char name[100];
 			snprintf(name, sizeof(name), "Missing block ID: %d", i);
 			std::string textureNames[16*6];
@@ -1648,7 +1642,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 			return objectMouseOver->side;
 		case BLOCK_ID:
 			return bl_localplayer->getRegion()->getBlock(
-				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z).id;
 		case BLOCK_DATA:
 			return bl_localplayer->getRegion()->getData(
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
@@ -1660,23 +1654,23 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetBiome
   (JNIEnv *env, jclass clazz, jint x, jint z) {
 	if (bl_level == NULL) return 0;
-	TilePos pos;
+	BlockPos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	Biome* biome = bl_TileSource_getBiome(bl_localplayer->tileSource, pos);
+	Biome* biome = bl_localplayer->getRegion()->getBiome(pos);
 	if (biome == NULL) return 0;
 	return biome->id;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetBiomeName
   (JNIEnv *env, jclass clazz, jint x, jint z) {
-	if (bl_level == NULL) return NULL;
-	TilePos pos;
+	if (bl_level == NULL) return 0;
+	BlockPos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	Biome* biome = bl_TileSource_getBiome(bl_localplayer->tileSource, pos);
+	Biome* biome = bl_localplayer->getRegion()->getBiome(pos);
 	if (biome == NULL) return NULL;
 	jstring retval = env->NewStringUTF(biome->name.c_str());
 	return retval;
@@ -1685,21 +1679,21 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetGrassColor
   (JNIEnv *env, jclass clazz, jint x, jint z) {
 	if (bl_level == NULL) return 0;
-	TilePos pos;
+	BlockPos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	return bl_TileSource_getGrassColor(bl_localplayer->tileSource, pos);
+	return bl_localplayer->getRegion()->getGrassColor(pos);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetGrassColor
   (JNIEnv *env, jclass clazz, jint x, jint z, jint color) {
 	if (bl_level == NULL) return;
-	TilePos pos;
+	BlockPos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
-	bl_TileSource_setGrassColor(bl_localplayer->tileSource, color, pos, 3); //if you recall, 3 = full block update
+	bl_localplayer->getRegion()->setGrassColor(color, pos, 3); //if you recall, 3 = full block update
 }
 
 static Abilities* bl_getAbilities(Player* player) {
@@ -1741,7 +1735,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetBiome
   (JNIEnv *env, jclass clazz, jint x, jint z, jint id) {
 	if (bl_level == nullptr) return;
-	LevelChunk* chunk = bl_TileSource_getChunk(bl_localplayer->tileSource, x >> 4, z >> 4);
+	LevelChunk* chunk = bl_localplayer->getRegion()->getChunk(x >> 4, z >> 4);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chunk: %p", chunk);
 	if (chunk == nullptr) return;
 	ChunkTilePos pos;
@@ -1776,7 +1770,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetHandEquipped
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
-	Item* item = bl_Item_items[id];
+	Item* item = bl_Item_mItems[id];
 	if (item == nullptr) return;
 	item->handEquipped = handEquipped;
 }
@@ -2001,11 +1995,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	if (attrib) attrib->value = hunger;
 }
 
-unsigned char bl_TileSource_getTile(TileSource* source, int x, int y, int z) {
-	FullTile retval = bl_TileSource_getTile_raw(source, x, y, z);
-	return retval.id;
-}
-
 static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int diff = newpc - curpc;
 	unsigned int shiftdiff = (diff >> 1);
@@ -2065,14 +2054,14 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
   (JNIEnv *env, jclass clazz, jint itemId) {
 	if (itemId == 0) return true;
 	if (itemId < 0 || itemId >= bl_item_id_count) return false;
-	return bl_Item_items[itemId] != nullptr;
+	return bl_Item_mItems[itemId] != nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	ServerCommandParser* parser = bl_Minecraft_getCommandParser(bl_minecraft);
+	ServerCommandParser* parser = bl_Minecraft_getCommandParser(bl_minecraft->getServer());
 	if (!parser) return false;
 	int findCount = parser->commands.count(mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
@@ -2095,9 +2084,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZo
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetSecondPart
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint axis) {
-	int blockId = bl_TileSource_getTile(bl_localplayer->tileSource, x, y, z);
+	if (!bl_localplayer) return -1;
+	int blockId = bl_localplayer->getRegion()->getBlock(x, y, z).id;
 	if (blockId == 0) return -1;
-	Tile* tile = bl_Tile_tiles[blockId];
+	Tile* tile = bl_Block_mBlocks[blockId];
 	if (!tile) return -1;
 	void* methodPtr = tile->vtable[vtable_indexes.tile_get_second_part];
 	bool (*getSecondPart)(Tile*, TileSource&, TilePos const&, TilePos&) =
@@ -2220,17 +2210,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
-	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
+	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item6mItemsE");
 	// Edit the dlsym for Item::items
 	Elf_Sym* itemsSym = (Elf_Sym*) bl_marauder_translation_function(
-		(void*) dobby_elfsym((void*) mcpelibhandle, "_ZN4Item5itemsE"));
+		(void*) dobby_elfsym((void*) mcpelibhandle, "_ZN4Item6mItemsE"));
 	// since value + base = addr:
 	Elf_Addr oldValue = itemsSym->st_value;
 	itemsSym->st_value = ((uintptr_t) &bl_items) - mcpelibhandle->base;
 	Elf_Word oldSize = itemsSym->st_size;
 	itemsSym->st_size = sizeof(bl_items);
 	// now check if the address matches
-	void* newItemsAddress = dlsym(mcpelibhandle, "_ZN4Item5itemsE");
+	void* newItemsAddress = dlsym(mcpelibhandle, "_ZN4Item6mItemsE");
 	if (newItemsAddress != &bl_items) {
 		// poor man's assert
 		// restore stuff
@@ -2274,13 +2264,11 @@ void bl_setuphooks_cppside() {
 	bl_Item_setNameID = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item9setNameIDERKSs");
 
 	// FIXME 0.11
-	bl_MinecraftClient_startLocalServer = (void (*) (Minecraft*, std::string const&, std::string const&, void*))
+	bl_MinecraftClient_startLocalServer = (void (*) (MinecraftClient*, std::string const&, std::string const&, void*))
 		dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
-	bl_MinecraftClient_leaveGame = (void (*) (Minecraft*, bool)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
+	bl_MinecraftClient_leaveGame = (void (*) (MinecraftClient*, bool))
+		dlsym(mcpelibhandle, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
 	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft12setLeaveGameEv");
-
-	//bl_Minecraft_connectToMCOServer = (void (*) (Minecraft*, std::string const&, std::string const&, unsigned short))
-	//	dlsym(RTLD_DEFAULT, "_ZN9Minecraft18connectToMCOServerERKSsS1_t");
 
 	bl_Level_playSound = (void (*) (Level*, float, float, float, std::string const&, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN5Level9playSoundEfffRKSsff");
@@ -2294,9 +2282,10 @@ void bl_setuphooks_cppside() {
 	bl_RakNetInstance_connect_real = (void (*) (RakNetInstance*, char const*, int))
 		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
 
-	void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
+	// FIXME 0.13
+	//void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
 	//bl_dumpVtable(raknetVTable, 0x100);
-	raknetVTable[vtable_indexes.raknet_instance_connect] = (void*) &bl_RakNetInstance_connect_hook;
+	//raknetVTable[vtable_indexes.raknet_instance_connect] = (void*) &bl_RakNetInstance_connect_hook;
 
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
 	//I have no idea why I have to subtract 24 (or add 8).
@@ -2312,20 +2301,20 @@ void bl_setuphooks_cppside() {
 
 #endif
 
-	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Tile"));
+	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV5Block"));
 	//bl_dumpVtable(bl_Tile_vtable, 0x100);
 	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
-	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN4TileC1EiPK8Material");
+	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN5BlockC1EiPK8Material");
 	bl_TileItem_TileItem = (void (*)(Item*, int)) dobby_dlsym(mcpelibhandle, "_ZN8TileItemC2Ei");
 	bl_Tile_setNameId = (void (*)(Tile*, const std::string&))
-		dlsym(RTLD_DEFAULT, "_ZN4Tile9setNameIdERKSs");
+		dlsym(RTLD_DEFAULT, "_ZN5Block9setNameIdERKSs");
 	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
-		dlsym(RTLD_DEFAULT, "_ZN4Tile14setVisualShapeEffffff");
+		dlsym(RTLD_DEFAULT, "_ZN5Block14setVisualShapeEffffff");
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
-	bl_Tile_tiles = (Tile**) dlsym(RTLD_DEFAULT, "_ZN4Tile5tilesE");
-	bl_Tile_lightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN4Tile13lightEmissionE");
-	bl_Tile_lightBlock = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN4Tile10lightBlockE");
+	bl_Block_mBlocks = (Block**) dlsym(RTLD_DEFAULT, "_ZN5Block7mBlocksE");
+	bl_Tile_lightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block13lightEmissionE");
+	bl_Tile_lightBlock = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block10lightBlockE");
 
 #if 0
 #define CHECKVTABLE(actualfn) \
@@ -2355,9 +2344,9 @@ void bl_setuphooks_cppside() {
 	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool))
 		dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
-	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN4Tile10getTextureEai");
+	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN5Block10getTextureEai");
 	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int))
-		dlsym(mcpelibhandle, "_ZN4Tile25getTextureUVCoordinateSetERKSsi");
+		dlsym(mcpelibhandle, "_ZN5Block25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,
@@ -2373,7 +2362,7 @@ void bl_setuphooks_cppside() {
 	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
 	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
 	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
-	bl_Item_items = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item5itemsE");
+	bl_Item_mItems = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item6mItemsE");
 	// FIXME 0.11
 	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
 	//mcpelauncher_hook(handleTextPacket, (void*) &bl_ClientNetworkHandler_handleTextPacket_hook,
@@ -2431,34 +2420,26 @@ void bl_setuphooks_cppside() {
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
-	void* explode = dlsym(mcpelibhandle, "_ZN5Level7explodeER10TileSourceP6Entityffffb");
-	mcpelauncher_hook(explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
+	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
-	bl_TileSource_getBiome = (Biome* (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource8getBiomeERK7TilePos");
-	bl_TileSource_getGrassColor = (int (*)(TileSource*, TilePos&)) dlsym(mcpelibhandle, "_ZN10TileSource13getGrassColorERK7TilePos");
-	bl_TileSource_setGrassColor = (void (*)(TileSource*, int, TilePos&, int))
-		dlsym(mcpelibhandle, "_ZN10TileSource13setGrassColorEiRK7TilePosi");
+	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
+		(void**) &bl_BlockSource_fireBlockEvent_real);
 
-	void* fireTileEvent = dlsym(mcpelibhandle, "_ZN10TileSource13fireTileEventEiiiii");
-	mcpelauncher_hook(fireTileEvent, (void*) &bl_TileSource_fireTileEvent_hook, (void**) &bl_TileSource_fireTileEvent_real);
-
-	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN4Tile5solidE");
+	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN5Block5solidE");
 	bl_Tile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
-		dlsym(mcpelibhandle, "_ZN4Tile7getAABBEP10TileSourceiiiR4AABBibi");
+		dlsym(mcpelibhandle, "_ZN5Block7getAABBEP10TileSourceiiiR4AABBibi");
 	bl_ReedTile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
 		dlsym(mcpelibhandle, "_ZN8ReedTile7getAABBEP10TileSourceiiiR4AABBibi");
 
 	bl_TileSource_getChunk = (LevelChunk* (*)(TileSource*, int, int))
 		dlsym(mcpelibhandle, "_ZN10TileSource8getChunkEii");
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
-		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK12ChunkTilePos");
+		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
 	bl_Biome_getBiome = (Biome* (*)(int))
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN6Entity7setSizeEff");
-	bl_TileSource_getTile_raw = (FullTile (*)(TileSource*, int, int, int))
-		dlsym(mcpelibhandle, "_ZN10TileSource7getTileEiii");
-	bl_MinecraftClient_getGui = (void* (*)(Minecraft*))
+	bl_MinecraftClient_getGui = (void* (*)(MinecraftClient*))
 		dlsym(mcpelibhandle, "_ZN15MinecraftClient6getGuiEv");
 	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
 		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
@@ -2519,7 +2500,7 @@ void bl_setuphooks_cppside() {
 	bl_Entity_getDimensionId = (int (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
 	bl_Tile_getVisualShape = (AABB& (*)(Tile*, unsigned char, AABB&, bool))
-		dlsym(mcpelibhandle, "_ZN4Tile14getVisualShapeEhR4AABBb");
+		dlsym(mcpelibhandle, "_ZN5Block14getVisualShapeEhR4AABBb");
 
 	bl_TileSource_getDimension = (Dimension* (*)(TileSource*))
 		dlsym(mcpelibhandle, "_ZNK10TileSource12getDimensionEv");

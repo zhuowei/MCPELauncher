@@ -145,7 +145,8 @@ typedef struct {
 	int category1; //124
 	char filler4[8]; //128
 	cppstr descriptionId; //136
-} Tile;
+} Block;
+#define Tile Block
 
 typedef struct {
 	char filler0[664]; //0
@@ -255,13 +256,14 @@ typedef struct {
 	unsigned char filler1; //36
 } HitResult;
 
-typedef struct {
+class Biome {
+public:
 	void** vtable; //0
 	char filler[56-4]; //4
 	cppstr name; //56 from Biome::setName
 	char filler2[148-60]; //60
 	int id; //148 from Biome::Biome
-} Biome;
+};
 
 typedef struct {
 	bool invulnerable; // from Desktop Edition's PlayerAbilities and also CreativeMode::initAbilities
@@ -304,7 +306,7 @@ typedef struct {
 	unsigned char y;
 } ChunkTilePos;
 
-typedef struct LevelChunk_t LevelChunk;
+class LevelChunk;
 
 typedef void ModelRenderer;
 

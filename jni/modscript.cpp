@@ -21,14 +21,14 @@ typedef bool cppbool;
 
 typedef Player LocalPlayer;
 
-typedef struct {
+class Timer {
+public:
 	float ticksPerSecond; //0
 	int elapsedTicks; //4
 	float renderPartialTicks; //8
 	float timerSpeed; //12
 	float elapsedPartialTicks; //16
-	
-} MCPETimer;
+};
 
 typedef struct {
 	void* ptr;
@@ -98,8 +98,8 @@ void* bl_marauder_translation_function(void* input);
 extern jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
-static void (*bl_MinecraftClient_onClientStartedLevel_real)(Minecraft*, std::unique_ptr<Level>);
-void* (*bl_MinecraftClient_startLocalServer_real)(Minecraft*, void*, void*, void*);
+static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
+void* (*bl_MinecraftClient_startLocalServer_real)(MinecraftClient*, void*, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_Entity_setPos)(Entity*, float, float, float);
@@ -118,14 +118,14 @@ static void (*bl_GameMode_destroyBlock_real)(void*, Player*, BlockPos, signed ch
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
-static void (*bl_MinecraftClient_setGameMode)(Minecraft*, int);
+static void (*bl_MinecraftClient_setGameMode)(MinecraftClient*, int);
 static ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
-static void (*bl_NinecraftApp_update_real)(Minecraft*);
+static void (*bl_NinecraftApp_update_real)(MinecraftClient*);
 static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
@@ -142,7 +142,7 @@ static int (*bl_AgableMob_getAge)(Entity*);
 static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
-Minecraft* bl_minecraft;
+MinecraftClient* bl_minecraft;
 void* bl_gamemode;
 Player* bl_localplayer;
 static int bl_hasinit_script = 0;
@@ -244,7 +244,7 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 		itemDamage = itemStack->damage;
 	}
 
-	int blockId = bl_localplayer->getRegion()->getBlock(x, y, z);
+	int blockId = bl_localplayer->getRegion()->getBlock(x, y, z).id;
 	int blockDamage = bl_localplayer->getRegion()->getData(x, y, z);
 
 #ifdef EXTREME_LOGGING
@@ -313,7 +313,8 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side);
 }
 
-void bl_MinecraftClient_onClientStartedLevel_hook(Minecraft* minecraft, std::unique_ptr<Level> levelPtr) {
+void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
+	std::unique_ptr<Level> levelPtr, std::unique_ptr<LocalPlayer> localPlayerPtr) {
 	JNIEnv *env;
 
 	Level* level = levelPtr.get();
@@ -338,7 +339,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(Minecraft* minecraft, std::uni
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	bl_MinecraftClient_onClientStartedLevel_real(minecraft, std::move(levelPtr));
+	bl_MinecraftClient_onClientStartedLevel_real(minecraft, std::move(levelPtr), std::move(localPlayerPtr));
 
 	//attach the listener
 	/*bl_attachLevelListener();*/
@@ -350,7 +351,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(Minecraft* minecraft, std::uni
 	}*/
 }
 
-void* bl_MinecraftClient_startLocalServer_hook(Minecraft* minecraft, void* wDir, void* wName, void* levelSettings) {
+void* bl_MinecraftClient_startLocalServer_hook(MinecraftClient* minecraft, void* wDir, void* wName, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -376,8 +377,8 @@ void* bl_MinecraftClient_startLocalServer_hook(Minecraft* minecraft, void* wDir,
 	}
 
 	void* retval = bl_MinecraftClient_startLocalServer_real(minecraft, wDir, wName, levelSettings);
-	bl_level = minecraft->getLevel();
-	bl_localplayer = ((MinecraftClient*) minecraft)->getLocalPlayer();
+	bl_level = minecraft->getServer()->getLevel();
+	bl_localplayer = minecraft->getLocalPlayer();
 	bl_onLockDown = false;
 	return retval;
 }
@@ -403,9 +404,9 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 void bl_GameMode_tick_hook(void* gamemode) {
 	JNIEnv *env;
 
-	bl_level = bl_minecraft->getLevel();
+	bl_level = bl_minecraft->getServer()->getLevel();
 
-	bl_localplayer = ((MinecraftClient*) bl_minecraft)->getLocalPlayer();
+	bl_localplayer = bl_minecraft->getLocalPlayer();
 
 	bl_gamemode = gamemode;
 
@@ -469,7 +470,7 @@ void bl_handleFrameCallback() {
 	}
 }
 
-void bl_NinecraftApp_update_hook(Minecraft* minecraft) {
+void bl_NinecraftApp_update_hook(MinecraftClient* minecraft) {
 	bl_NinecraftApp_update_real(minecraft);
 	bl_minecraft = minecraft;
 	if (bl_frameCallbackRequested) {
@@ -723,7 +724,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
-	return bl_localplayer->getRegion()->getBlock(x, y, z);
+	return bl_localplayer->getRegion()->getBlock(x, y, z).id;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetData
@@ -886,7 +887,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	MCPETimer* timer = *((MCPETimer**) (((uintptr_t) bl_minecraft) + MINECRAFT_TIMER_OFFSET));
+	Timer* timer = bl_minecraft->getServer()->getTimer();
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
@@ -1033,17 +1034,17 @@ static void App_quit_hook(void* self) {
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
+		"_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK8BlockPosaRK4Vec3");
 	vtable_indexes.gamemode_attack = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode6attackEP6PlayerP6Entity");
+		"_ZN8GameMode6attackER6PlayerR6Entity");
 	vtable_indexes.gamemode_tick = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode4tickEv");
-	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV9Minecraft",
-		"_ZN9Minecraft6updateEv");
+	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
+		"_ZN15MinecraftClient6updateEv");
 	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
 		"_ZN3App4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode17startDestroyBlockEP6Playeriiia");
+		"_ZN8GameMode17startDestroyBlockER6Player8BlockPosa");
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -1207,7 +1208,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	bl_AgebleMob_setAge = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
-	bl_MinecraftClient_setGameMode = (void (*)(Minecraft*, int)) dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
+	bl_MinecraftClient_setGameMode = (void (*)(MinecraftClient*, int))
+		dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
 	bl_Mob_getArmor = (ItemInstance* (*)(Entity*, int))
 		dlsym(mcpelibhandle, "_ZNK3Mob8getArmorE9ArmorSlot");
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
@@ -1217,7 +1219,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	//replace the update method in Minecraft with our own
-	bl_NinecraftApp_update_real = (void (*)(Minecraft*)) minecraftVtable[vtable_indexes.minecraft_update];
+	bl_NinecraftApp_update_real = (void (*)(MinecraftClient*)) minecraftVtable[vtable_indexes.minecraft_update];
 #if 0
 	for (int i = 0; i < 40; i++) {
 		if (minecraftVtable[i] == (int) bl_NinecraftApp_update_real) {

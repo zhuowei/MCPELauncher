@@ -75,8 +75,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/MainActivity";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.12";
-	public static final String HALF_SUPPORT_VERSION = "0.13";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.13";
+	public static final String HALF_SUPPORT_VERSION = "0.14";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -496,10 +496,12 @@ public class MainActivity extends NativeActivity {
 			hoverCar = null;
 		}
 		ScriptManager.destroy();
+/*
 		if (getMCPEVersion().startsWith("0.13")) {
 			System.exit(0);
 			return;
 		}
+*/
 		lastDestroyTime = System.currentTimeMillis();
 		Thread presidentMadagascar = new Thread(new ShutdownTask());
 		presidentMadagascar.setDaemon(true);
@@ -589,7 +591,7 @@ public class MainActivity extends NativeActivity {
 					PatchUtils.patch(libBuffer, patch);
 				} // TODO: load patches from assets
 			}
-			if (mcPkgInfo.versionName.startsWith("0.13")) { // FIXME 0.13
+/*			if (mcPkgInfo.versionName.startsWith("0.13")) { // FIXME 0.13
 				byte[] needle = new byte[] {
 					0x67, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x48,
 					0x65, 0x69, 0x67, 0x68, 0x74, 0x00
@@ -610,6 +612,7 @@ public class MainActivity extends NativeActivity {
 					}
 				}
 			}
+*/
 
 			OutputStream os = new FileOutputStream(newMinecraft);
 			os.write(libBytes);
@@ -1091,10 +1094,12 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
+/*
 		if (getMCPEVersion().startsWith("0.13")) {
 			InputStream special = getLocalInputStreamForAssetReal("13/" + name, lengthOut);
 			if (special != null) return special;
 		}
+*/
 		return getLocalInputStreamForAssetReal(name, lengthOut);
 	}
 
@@ -1646,11 +1651,13 @@ public class MainActivity extends NativeActivity {
 
 	public void initPatching() throws Exception {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
-		if (getMCPEVersion().startsWith("0.13")) {
+/*		if (getMCPEVersion().startsWith("0.13")) {
 			System.loadLibrary("mcpelauncher_lite");
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
+*/
+		System.loadLibrary("mcpelauncher");
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
 		if (!success) {
@@ -1901,21 +1908,14 @@ public class MainActivity extends NativeActivity {
 
 	// end 0.11
 
-	// 0.12
-	public int getKeyboardHeight() {
+	// 0.12, changed in 0.13
+	public float getKeyboardHeight() {
 		Rect r = new Rect();
 		View rootview = this.getWindow().getDecorView();
 		rootview.getWindowVisibleDisplayFrame(r);
 		return displayMetrics.heightPixels - r.bottom;
 	}
 	// end 0.12
-	// 0.13
-	public float eetKeyboardHeight() {
-		Rect r = new Rect();
-		View rootview = this.getWindow().getDecorView();
-		rootview.getWindowVisibleDisplayFrame(r);
-		return displayMetrics.heightPixels - r.bottom;
-	}
 
 	@Override
 	public void onBackPressed() {
@@ -2300,11 +2300,8 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
-		if (mcPkgInfo.versionName.startsWith("0.12")) {
-			if (version.matches("0\\.12\\.1\\.b13")) return true;
-			if (version.matches("0\\.12\\.1")) return true;
-		} else if (mcPkgInfo.versionName.startsWith("0.13")) {
-			if (version.matches("0\\.13\\.0\\.b.*")) return true;
+		if (mcPkgInfo.versionName.startsWith("0.13")) {
+			if (version.matches("0\\.13\\.*")) return true;
 		}
 		return false;
 	}
@@ -2342,7 +2339,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return getMCPEVersion().startsWith("0.13");
+		return false; //getMCPEVersion().startsWith("0.13");
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
