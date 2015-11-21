@@ -173,7 +173,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	if (transparent) part->material = &(((HumanoidModel*) part->model)->materialAlphaTest);
 	if (textureWidth > 0) part->textureWidth = textureWidth;
 	if (textureHeight > 0) part->textureHeight = textureHeight;
-	bl_ModelPart_addBox(part, xOffset, yOffset, zOffset, width, height, depth, scale);
+	part->addBox(Vec3(xOffset, yOffset, zOffset), Vec3(width, height, depth), scale);
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
 }

@@ -1474,9 +1474,9 @@ public class ScriptManager {
 	// InusualZ's additions
 	public static native void nativeExtinguishFire(int x, int y, int z, int side);
 
-	public static native int nativeGetSlotArmor(int slot, int type);
+	public static native int nativeMobGetArmor(long entityId, int slot, int type);
 
-	public static native void nativeSetArmorSlot(int slot, int id, int damage);
+	public static native void nativeMobSetArmor(long entityId, int slot, int id, int damage);
 
 	// Byteandahalf's additions
 	public static native int nativeGetBrightness(int x, int y, int z);
@@ -2155,17 +2155,17 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int getArmorSlot(int slot) {
-			return nativeGetSlotArmor(slot, ITEMID);
+			return NativeEntityApi.getArmor(getEntity(), slot);
 		}
 
 		@JSStaticFunction
 		public static int getArmorSlotDamage(int slot) {
-			return nativeGetSlotArmor(slot, DAMAGE);
+			return NativeEntityApi.getArmorDamage(getEntity(), slot);
 		}
 
 		@JSStaticFunction
 		public static void setArmorSlot(int slot, int id, int damage) {
-			nativeSetArmorSlot(slot, id, damage);
+			NativeEntityApi.setArmor(getEntity(), slot, id, damage);
 		}
 
 		@JSStaticFunction
@@ -2622,6 +2622,43 @@ public class ScriptManager {
 			return nativeGetItemEntityItem(entityId, AMOUNT);
 		}
 
+		@JSStaticFunction
+		public static int getArmor(Object entity, int slot) {
+			if (!(slot >= 0 && slot < 4)) {
+				throw new RuntimeException("slot " + slot + " is not a valid armor slot");
+			}
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("getArmor only works for mobs");
+			}
+			return nativeMobGetArmor(entityId, slot, ITEMID);
+		}
+		@JSStaticFunction
+		public static int getArmorDamage(Object entity, int slot) {
+			if (!(slot >= 0 && slot < 4)) {
+				throw new RuntimeException("slot " + slot + " is not a valid armor slot");
+			}
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("getArmorDamage only works for mobs");
+			}
+			return nativeMobGetArmor(entityId, slot, DAMAGE);
+		}
+
+		@JSStaticFunction
+		public static void setArmor(Object entity, int slot, int id, int damage) {
+			if (!(slot >= 0 && slot < 4)) {
+				throw new RuntimeException("slot " + slot + " is not a valid armor slot");
+			}
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("setArmor only works for mobs");
+			}
+			nativeMobSetArmor(entityId, slot, id, damage);
+		}
 
 		@Override
 		public String getClassName() {

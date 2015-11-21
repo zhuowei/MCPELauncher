@@ -20,7 +20,7 @@ std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 extern "C" {
 
 // armour
-
+/* FIXME 0.13
 int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* mob, int armorPart, float partialTicks) {
 	ItemInstance* armor = bl_Player_getArmor(mob, armorPart);
 	if (!bl_ItemInstance_isArmorItem(armor)) return -1; // no armour
@@ -48,6 +48,7 @@ int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* 
 	return 1; // has armour
 }
 // end
+*/
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCape
   (JNIEnv *env, jclass clazz, int entity, jstring value) {
@@ -63,9 +64,11 @@ void bl_cape_init(void* mcpelibinfo) {
 		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSsi");
 	bl_Entity_isRiding = (bool (*)(Entity*))
 		dlsym(mcpelibinfo, "_ZNK6Entity8isRidingEv");
+/* FIXME 0.13
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mobif");
 	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
 		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
+*/
 	bl_MobRenderer_setArmor = (void (*)(MobRenderer*, HumanoidModel*))
 		dlsym(mcpelibinfo, "_ZN11MobRenderer8setArmorEP5Model");
 	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))

@@ -33,29 +33,29 @@ static int (*tamper_fclose)(FILE*);
 static void checkTamper(JNIEnv* env, jobject activity) {
 	// checks our package name
 	// if not BlockLauncher, tampered
-	jclass activityClass = (*env)->GetObjectClass(env, activity);
+	jclass activityClass = env->GetObjectClass(activity);
 	char buf1[80];
 	char buf2[80];
 
 	/* BlockLauncher's shared UID is same as its package name */
 
-	int (*getuid_)() = dlsym(RTLD_DEFAULT, checkTamperDec("DFWVJG" /* getuid */ , buf1));
-	tamper_fopen = dlsym(RTLD_DEFAULT, checkTamperDec("ELSFM" /* fopen */ , buf1));
-	tamper_fclose = dlsym(RTLD_DEFAULT, checkTamperDec("E@OLPF" /* getuid */ , buf1));
+	int (*getuid_)() = (int (*)()) dlsym(RTLD_DEFAULT, checkTamperDec("DFWVJG" /* getuid */ , buf1));
+	tamper_fopen = (FILE* (*)(const char*, const char*)) dlsym(RTLD_DEFAULT, checkTamperDec("ELSFM" /* fopen */ , buf1));
+	tamper_fclose = (int (*)(FILE*)) dlsym(RTLD_DEFAULT, checkTamperDec("E@OLPF" /* getuid */ , buf1));
 	
-	jmethodID mid = (*env)->GetMethodID(env, activityClass, checkTamperDec("DFWsB@HBDFnBMBDFQ" /* getPackageManager */, buf1),
+	jmethodID mid = env->GetMethodID(activityClass, checkTamperDec("DFWsB@HBDFnBMBDFQ" /* getPackageManager */, buf1),
 		checkTamperDec("\x0b\noBMGQLJG\x0c@LMWFMW\x0cSN\x0csB@HBDFnBMBDFQ\x18" /* ()Landroid/content/pm/PackageManager; */, buf2));
-	jstring packageManager = (*env)->CallObjectMethod(env, activity, mid);
-	jclass pmClass = (*env)->GetObjectClass(env, packageManager);
-	mid = (*env)->GetMethodID(env, pmClass, checkTamperDec("DFWmBNFeLQvJG" /* getNameForUid */, buf1),
+	jstring packageManager = (jstring) env->CallObjectMethod(activity, mid);
+	jclass pmClass = (jclass) env->GetObjectClass(packageManager);
+	mid = env->GetMethodID(pmClass, checkTamperDec("DFWmBNFeLQvJG" /* getNameForUid */, buf1),
 		checkTamperDec("\x0bj\noIBUB\x0cOBMD\x0cpWQJMD\x18" /* (I)Ljava/lang/String; */, buf2));
-	jstring packageNameString = (*env)->CallObjectMethod(env, packageManager, mid, getuid_());
-	const char* packageName = (*env)->GetStringUTFChars(env, packageNameString, NULL);
+	jstring packageNameString = (jstring) env->CallObjectMethod(packageManager, mid, getuid_());
+	const char* packageName = env->GetStringUTFChars(packageNameString, NULL);
 	if ((!checkTamperCmp(packageName, "MFW\rYKVLTFJYKBMD\rN@SFOBVM@KFQ" /* net.zhuoweizhang.mcpelauncher */)) ||
 		!checkTamperCmp(packageName, "MFW\rYKVLTFJYKBMD\rN@SFOBVM@KFQ\rSQL" /* net.zhuoweizhang.mcpelauncher.pro */)) {
 		bl_untampered = true;
 	}
-	(*env)->ReleaseStringUTFChars(env, packageNameString, packageName);
+	env->ReleaseStringUTFChars(packageNameString, packageName);
 }
 
 static time_t tamper2time = 0;
@@ -83,5 +83,5 @@ static void checkTamper2() {
 		tamper_fclose(f);
 		return;
 	}
-	*((void**) &bl_JavaVM) = &checkTamper2;
+	*((void**) &bl_JavaVM) = (void*) &checkTamper2;
 }

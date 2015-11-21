@@ -20,7 +20,7 @@ corkscrew_x86_src_files := \
 	libcorkscrew/arch-x86/backtrace-x86.c \
 	libcorkscrew/arch-x86/ptrace-x86.c
 
-LOCAL_SRC_FILES := nativepatch.c modscript.c modscript_nextgen.cpp modscript_ScriptLevelListener.cpp utf8proc_slim.c dobby.cpp marauders_map.c \
+LOCAL_SRC_FILES := nativepatch.c modscript.cpp modscript_nextgen.cpp modscript_ScriptLevelListener.cpp utf8proc_slim.c dobby.cpp marauders_map.c \
 	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp kamcord_fixer.cpp fmod_filesystem.cpp prepatch.cpp $(corkscrew_generic_src_files)
 
 ifneq (,$(wildcard $(LOCAL_PATH)/scriptscramble.c))

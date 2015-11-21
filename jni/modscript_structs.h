@@ -1,7 +1,12 @@
-#ifdef __cplusplus
 #pragma once
+#ifdef __cplusplus
 #include <memory>
 #endif
+class Entity;
+typedef Entity Player;
+#include "mcpe/minecraft.h"
+#include "mcpe/blocksource.h"
+
 #ifdef __cplusplus
 #define cppstr std::string
 #else
@@ -13,23 +18,6 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifdef __cplusplus
-struct FullTile {
-	unsigned char id;
-	unsigned char data;
-	FullTile(): id(0), data(0) {
-	}
-	FullTile(FullTile const& other): id(other.id), data(other.data) {
-	}
-};
-#else
-typedef struct {
-	unsigned char id;
-	unsigned char data;
-} FullTile;
-#endif
-typedef struct TileSource TileSource;
 
 #ifdef __cplusplus
 class EntityUniqueID {
@@ -48,43 +36,32 @@ typedef struct {
 } EntityUniqueID;
 #endif
 
-typedef struct {
+struct Vec3 {
 	float x;
 	float y;
 	float z;
-} Vec3;
+	Vec3(float x_, float y_, float z_): x(x_), y(y_), z(z_) {
+	};
+	Vec3(): x(0), y(0), z(0) {
+	};
+};
 
-typedef struct {
+struct Vec2 {
 	float x;
 	float y;
-} Vec2;
-
-#ifdef __cplusplus
-struct TilePos {
-	int x;
-	int y;
-	int z;
-	TilePos(TilePos const& other) : x(other.x), y(other.y), z(other.z) {
-	}
-	TilePos(): x(0), y(0), z(0) {
-	}
+	Vec2(float x_, float y_): x(x_), y(y_) {
+	};
 };
-#else
-typedef struct {
-	int x;
-	int y;
-	int z;
-} TilePos;
-#endif
 
-typedef struct Entity{
+class Entity {
+public:
 	void** vtable; //0
 	int filler3[5];//4
 	float x; //24
 	float y; //28
 	float z; //32
 	char filler2[48-36]; //36
-	TileSource* tileSource; // 48
+	TileSource* blockSource; // 48
 	int dimension; // 52
 	char filler2_[76-56]; // 56
 	float motionX; //76 found in Entity::rideTick(); should be set to 0 there
@@ -105,9 +82,11 @@ typedef struct Entity{
 #else
 	long long entityId; // 320
 #endif
-} Entity;
 
-typedef Entity Player;
+	BlockSource* getRegion() const;
+	void setRot(Vec2 const&);
+};
+
 #ifdef __cplusplus
 struct TextureUVCoordinateSet {
 	float bounds[6];
@@ -177,7 +156,8 @@ typedef struct {
 } MaterialPtr;
 
 // from ModelPart::setPos, ModelPart::setTexSize
-typedef struct {
+class ModelPart {
+public:
 	float offsetX; //0
 	float offsetY; //4
 	float offsetZ; //8
@@ -194,7 +174,9 @@ typedef struct {
 	bool neverRender; // 72
 	char filler3[152-73];//73
 	void* model; // 152
-} ModelPart; // 156 bytes
+
+	void addBox(Vec3 const&, Vec3 const&, float);
+}; // 156 bytes
 
 // from HumanoidModel::render
 
@@ -351,22 +333,31 @@ struct HumanoidMobRenderer : public MobRenderer {
 }
 #endif
 
-#ifdef __cplusplus
-#define CLASS_TYPEDEF(name) class name {public:
-#define CLASS_FOOTER(name) }
-#else
-#define CLASS_TYPEDEF(name) typedef struct {
-#define CLASS_FOOTER(name) } name
-#endif
+enum GameType {
+};
 
-CLASS_TYPEDEF(Level)
+class LevelData {
+public:
+	void setSpawn(BlockPos const&);
+	void setGameType(GameType);
+	GameType getGameType() const;
+};
+
+class Level {
+public:
 	void** vtable; //0
 	char filler[12-4]; //4
 	bool isRemote; //12 PrimedTnT::normalTick
 	char filler2[2908-13];//13
 
-#ifdef __cplusplus
 	Entity* getEntity(EntityUniqueID, bool) const;
 	void addEntity(std::unique_ptr<Entity>);
-#endif
-CLASS_FOOTER(Level);
+	void explode(BlockSource&, Entity*, float, float, float, float, bool);
+	void setNightMode(bool);
+	void setTime(int);
+	int getTime() const;
+	LevelData* getLevelData();
+};
+
+#include "mcpe/blockentity/chestblockentity.h"
+#include "mcpe/blockentity/furnaceblockentity.h"

@@ -14,5 +14,5 @@ public:
 	static Localization* getCurrentLanguage();
 
 	static std::vector<Localization*> languages;
-	static Localization* currentLanguage;
+	static Localization* mCurrentLanguage;
 };

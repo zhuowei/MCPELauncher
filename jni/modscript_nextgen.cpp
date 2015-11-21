@@ -580,11 +580,11 @@ AABB* bl_CustomBlock_getAABBHook(Tile* tile, TileSource* tileSource, int x, int 
 	return bl_Tile_getAABB(tile, tileSource, x, y, z, aabb, int1, bool1, int2);
 }
 
-int bl_CustomBlock_getColorHook(Tile* tile, TileSource* tileSource, int x, int y, int z) {
+int bl_CustomBlock_getColorHook(Tile* tile, BlockSource* blockSource, int x, int y, int z) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
 	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
-	int data = bl_TileSource_getData(tileSource, x, y, z);
+	int data = blockSource->getData(x, y, z);
 	return myColours[data];
 }
 
@@ -1033,7 +1033,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line) {
 	if (bl_level == NULL) return NULL;
-	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
+	void* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
 	if (te == NULL) return NULL;
 	//line offsets: 68, 72, 76, 80
 	std::string* lineStr = (std::string*) (((uintptr_t) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
@@ -1046,7 +1046,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line, jstring newText) {
 	if (bl_level == NULL) return;
-	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
+	void* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
 	if (te == NULL) return;
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
@@ -1073,12 +1073,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_changeEntitySkin(void* entity, const char* newSkin) {
+/* FIXME 0.13
 	std::string newSkinString(newSkin);
 	std::string* ptrToStr = (std::string*) bl_Mob_getTexture((Entity*) entity);
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
 	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
 	*ptrToStr = newSkinString;
 	bl_forceTextureLoad(newSkinString);
+*/
 }
 
 void bl_attachLevelListener() {
@@ -1115,12 +1117,12 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	}
 	Localization* bak;
 	if (raw) {
-		bak = I18n::currentLanguage;
-		I18n::currentLanguage = nullptr;
+		bak = I18n::mCurrentLanguage;
+		I18n::mCurrentLanguage = nullptr;
 	}
 	std::string descriptionId = bl_ItemInstance_getName(myStack);
 	if (raw) {
-		I18n::currentLanguage = bak;
+		I18n::mCurrentLanguage = bak;
 	}
 	if (descriptionId.length() <= 0) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "dead tile: %i\n", itemId);
@@ -1553,11 +1555,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin
   (JNIEnv *env, jclass clazz, jlong entityId) {
+	return nullptr;
+/* FIXME 0.13
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return NULL;
 	std::string* mystr = (std::string*) bl_Mob_getTexture(entity);
 	jstring returnValString = env->NewStringUTF(mystr->c_str());
 	return returnValString;
+*/
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
@@ -1642,10 +1647,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_SIDE:
 			return objectMouseOver->side;
 		case BLOCK_ID:
-			return bl_TileSource_getTile(bl_localplayer->tileSource,
+			return bl_localplayer->getRegion()->getBlock(
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 		case BLOCK_DATA:
-			return bl_TileSource_getData(bl_localplayer->tileSource,
+			return bl_localplayer->getRegion()->getData(
 				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 		default:
 			return -1;
@@ -1779,12 +1784,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint entityTypeId) {
 	if (bl_level == NULL) return;
-	void* te = bl_TileSource_getTileEntity(bl_localplayer->tileSource, x, y, z);
+	BlockEntity* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
 	if (te == NULL) return;
 
 	BaseMobSpawner* spawner = *((BaseMobSpawner**) (((uintptr_t) te) + MOB_SPAWNER_OFFSET));
 	bl_BaseMobSpawner_setEntityId(spawner, entityTypeId);
-	bl_TileEntity_setChanged(te);
+	te->setChanged();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
@@ -2500,8 +2505,10 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK6Zombie6isBabyEv");
 	bl_Zombie_setBaby = (void (*)(Entity*, bool))
 		dlsym(mcpelibhandle, "_ZN6Zombie7setBabyEb");
+/* FIXME 0.13
 	bl_Mob_getTexture = (std::string* (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob10getTextureEv");
+*/
 	bl_Mob_getHealth = (int (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob9getHealthEv");
 	bl_Mob_getAttribute = (AttributeInstance* (*)(Entity*, Attribute const&))
