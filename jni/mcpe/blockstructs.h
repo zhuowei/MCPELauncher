@@ -27,4 +27,15 @@ struct BlockPos {
 	}
 };
 
+struct BlockID {
+	unsigned char id;
+	operator unsigned char() const {
+		return id;
+	}
+	BlockID(BlockID const& other): id(other.id) {
+	}
+	BlockID(unsigned char id_): id(id_) {
+	}
+};
+
 #define TilePos BlockPos

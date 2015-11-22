@@ -10,7 +10,7 @@ class Dimension;
 class BlockSource {
 public:
 	void		setBlockAndData(int, int, int, FullBlock, int);
-	int		getBlockID(int, int, int);
+	BlockID		getBlockID(int, int, int);
 	int		getData(int, int, int);
 	BlockBrightness	getRawBrightness(int, int, int, bool);
 	BlockEntity*	getBlockEntity(int, int, int);
@@ -22,4 +22,3 @@ public:
 	Dimension*	getDimension();
 };
 #define TileSource BlockSource
-#define tileSource blockSource

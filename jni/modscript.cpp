@@ -34,10 +34,6 @@ typedef struct {
 	void* ptr;
 } unique_ptr;
 
-// from HumanoidMobRenderer::additionalRendering
-#define ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM 156
-// from Entity::save
-#define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 85
 // from Player::getSelectedItem
 #ifdef __i386
 // FIXME 0.13
@@ -49,13 +45,7 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
-// found in TextureAtlas::load
-#define APPPLATFORM_VTABLE_OFFSET_READ_ASSET_FILE 15
-// from calls to Timer::advanceTime
-#define MINECRAFT_TIMER_OFFSET 92
-// from Entity::setPos(Vec3 const&)
-#define ENTITY_VTABLE_OFFSET_SETPOS 6
-#define GAMERENDERER_GETFOV_SIZE 0x134
+//#define GAMERENDERER_GETFOV_SIZE 0x134
 // MinecartRideable::interactWithPlayer
 #define ENTITY_VTABLE_OFFSET_START_RIDING 29
 // LegacyClientNetworkHandler::handleEntityLink
@@ -173,6 +163,7 @@ struct bl_vtable_indexes {
 	int entity_get_entity_type_id;
 	int mob_set_armor;
 	int entity_set_pos;
+	int mob_get_carried_item;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -791,7 +782,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	void* vtableEntry = entity->vtable[ENTITY_VTABLE_OFFSET_GET_CARRIED_ITEM];
+	void* vtableEntry = entity->vtable[vtable_indexes.mob_get_carried_item];
 	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
 	ItemInstance* item = fn(entity);
 	if (item == NULL) return;
@@ -1074,9 +1065,11 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob8setArmorE9ArmorSlotPK12ItemInstance");
+		"_ZN3Mob8setArmorE9ArmorSlotPK12ItemInstance") - 2;
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity6setPosERK4Vec3") - 2;
+	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
+		"_ZN3Mob14getCarriedItemEv") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;

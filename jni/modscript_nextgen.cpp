@@ -39,12 +39,8 @@
 typedef void RakNetInstance;
 typedef void Font;
 
-#define RAKNET_INSTANCE_VTABLE_OFFSET_CONNECT 5
-// After the call to RakNetInstance::RakNetInstance
 // FIXME 0.11
 //#define MINECRAFT_RAKNET_INSTANCE_OFFSET 76
-// from SignTileEntity::save(CompoundTag*)
-#define SIGN_TILE_ENTITY_LINE_OFFSET 92
 //#define BLOCK_VTABLE_GET_AABB 14
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
@@ -71,12 +67,9 @@ typedef void Font;
 #define MINECRAFT_HIT_ENTITY_OFFSET (5152 + 8)
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3368
+#define PLAYER_ABILITIES_OFFSET 3308
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
-#define PLAYER_RENDER_TYPE 21
-// MobSpawnerTileEntity constructor 0x60
-#define MOB_SPAWNER_OFFSET 92
 // MinecraftClient::handleBack
 #define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
@@ -84,8 +77,8 @@ typedef void Font;
 const size_t kTileSize = 0x8c;
 // found before TileItem::TileItem
 const size_t kTileItemSize = 80;
-// found in Item::initItems item with id 6
-const size_t kItemSize = 72;
+// found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
+const size_t kItemSize = 64;
 // found in Item::initItems item with id 4
 const size_t kFoodItemSize = 100;
 // found in Entity::spawnAtLocation
@@ -871,7 +864,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 Item* bl_constructItem(int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, id - 0x100);
-	retval->category1 = 2; //tool
 	//retval->category2 = 0;
 	return retval;
 }
@@ -879,7 +871,6 @@ Item* bl_constructItem(int id) {
 Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 	Item* retval = (Item*) ::operator new(kFoodItemSize);
 	bl_FoodItem_FoodItem(retval, id - 0x100, hearts, false, timetoeat);
-	retval->category1 = 4; //food
 	//retval->category2 = 0;
 	return retval;
 }
@@ -1027,37 +1018,24 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJo
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line) {
 	if (bl_level == NULL) return NULL;
-	void* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
+	SignBlockEntity* te = static_cast<SignBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return NULL;
-	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((uintptr_t) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
-	if (lineStr == NULL) return NULL;
 
-	jstring signJString = env->NewStringUTF(lineStr->c_str());
+	std::string const& lineStr = te->getMessage(line);
+
+	jstring signJString = env->NewStringUTF(lineStr.c_str());
 	return signJString;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint line, jstring newText) {
 	if (bl_level == NULL) return;
-	void* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
+	SignBlockEntity* te = static_cast<SignBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
-	//line offsets: 68, 72, 76, 80
-	std::string* lineStr = (std::string*) (((uintptr_t) te) + (SIGN_TILE_ENTITY_LINE_OFFSET + (line * 4)));
-	/*
-	if (lineStr == NULL || lineStr->length() == 0) {
-		//Workaround for C++ standard library's empty string optimization failing across libraries
-		//search FULLY_DYNAMIC_STRING
-		std::string* mystr = new std::string(utfChars);
-		*((void**) lineStr) = *((void**) mystr);
-	} else {
-		lineStr->assign(utfChars);
-	}
-	*/
-	lineStr->assign(utfChars);
+	te->setMessage(std::string(utfChars), line);
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
 
@@ -1777,10 +1755,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint entityTypeId) {
 	if (bl_level == NULL) return;
-	BlockEntity* te = bl_localplayer->getRegion()->getBlockEntity(x, y, z);
+	MobSpawnerBlockEntity* te = static_cast<MobSpawnerBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
 
-	BaseMobSpawner* spawner = *((BaseMobSpawner**) (((uintptr_t) te) + MOB_SPAWNER_OFFSET));
+	BaseMobSpawner* spawner = te->getSpawner();
 	bl_BaseMobSpawner_setEntityId(spawner, entityTypeId);
 	te->setChanged();
 }
@@ -2027,8 +2005,10 @@ static void patchUnicodeFont(void* mcpelibhandle) {
 }
 
 void bl_forceTextureLoad(std::string const& name) {
+/* FIXME 0.13
 	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
 	bl_Textures_getTextureData(textures, name);
+*/
 }
 
 void bl_cppNewLevelInit() {

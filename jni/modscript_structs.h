@@ -90,24 +90,25 @@ struct TextureUVCoordinateSet {
 	};
 };
 
-// NOT DONE YET
-typedef struct {
+// Updated 0.13.0
+// see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
+class Item {
+public:
 	void** vtable; //0
 	char filler0[18-4]; //4
 	short itemId; //18
-	char filler[60-20]; //20
-	int category1; //60
-	bool handEquipped; //64
-	bool stackedByData; //65
-	char filler1[72-66]; //66
-} Item;
+	char filler1[26-20]; // 20
+	bool handEquipped; // 26
+	char filler[64-27]; //20
+};
 
 class CompoundTag {
 public:
 	~CompoundTag();
 };
 
-typedef struct {
+class ItemInstance {
+public:
 	unsigned char count; //0
 	short damage; //2
 	unsigned char something; // 4
@@ -115,8 +116,9 @@ typedef struct {
 	CompoundTag* tag; // 8
 	Item* item; // 12
 	void* block; //16
-	void* wtf; //17
-} ItemInstance; // see ServerCommandParser::give for size
+}; // see ItemInstance::fromTag for size
+static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
+static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 
 typedef struct {
 	void** vtable; //0
@@ -304,14 +306,14 @@ typedef void ScreenChooser;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 76
-	int damageReduceAmount; // 80
-	int renderIndex; // 84
-	void* armorMaterial; // 88
+	int armorType; // 64
+	int damageReduceAmount; // 68
+	int renderIndex; // 72
+	void* armorMaterial; // 76
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 88, "armor item size");
+static_assert(sizeof(ArmorItem) == 80, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
@@ -354,3 +356,5 @@ public:
 
 #include "mcpe/blockentity/chestblockentity.h"
 #include "mcpe/blockentity/furnaceblockentity.h"
+#include "mcpe/blockentity/mobspawnerblockentity.h"
+#include "mcpe/blockentity/signblockentity.h"
