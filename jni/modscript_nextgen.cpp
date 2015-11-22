@@ -214,8 +214,8 @@ static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_TileItem_vtable;
 static Block** bl_Block_mBlocks;
-static unsigned char* bl_Tile_lightEmission;
-static unsigned char* bl_Tile_lightBlock;
+static unsigned char* bl_Block_mLightEmission;
+static unsigned char* bl_Block_mLightBlock;
 
 static void (*bl_Item_setNameID)(Item*, std::string const&);
 
@@ -238,12 +238,10 @@ static int (*bl_Font_width)(Font*, std::string const&);
 
 #endif
 
-static void* bl_Material_dirt;
-
 static void (*bl_Tile_Tile)(Tile*, int, void*);
 static void (*bl_TileItem_TileItem)(Item*, int);
 static void (*bl_Tile_setNameId)(Tile*, const std::string&);
-static void (*bl_Tile_setShape)(Tile*, float, float, float, float, float, float);
+static void (*bl_Block_setVisualShape)(Block*, Vec3 const&, Vec3 const&);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 static bool (*bl_Mob_isSneaking)(Entity*);
 
@@ -309,7 +307,7 @@ static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
-static void (*bl_Level_removeEntity_real)(Level*, Entity*);
+static void (*bl_Level_removeEntity_real)(Level*, Entity*, bool);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, float, float, float, float, bool);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Tile_getAABB)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int);
@@ -348,7 +346,7 @@ static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 
-static bool* bl_Tile_solid;
+static bool* bl_Block_mSolid;
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -751,7 +749,7 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Ent
 	return retval;
 }
 
-static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
+static void bl_Level_removeEntity_hook(Level* level, Entity* entity, bool arg2) {
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -767,7 +765,7 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity) {
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID());
 
-	bl_Level_removeEntity_real(level, entity);
+	bl_Level_removeEntity_real(level, entity, arg2);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -1132,8 +1130,6 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material is %x\n", bl_Material_dirt);
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "The material vtable is %x\n", *((int*) bl_Material_dirt));
 }
 
 void* bl_getMaterial(int materialType) {
@@ -1184,7 +1180,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 
 	bl_set_i18n("tile." + nameStr + ".name", nameStr);
 	retval->renderType = renderShape;
-	bl_Tile_solid[blockId] = opaque;
+	bl_Block_mSolid[blockId] = opaque;
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
 	retval->category1 = 1;
@@ -1247,7 +1243,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 		return;
 	}
 	if (damage == 0) {
-		bl_Tile_setShape(tile, v1, v2, v3, v4, v5, v6);
+		bl_Block_setVisualShape(tile, Vec3(v1, v2, v3), Vec3(v4, v5, v6));
 	} else {
 		AABB** aabbs = bl_custom_block_visualShapes[blockId];
 		if (!aabbs) {
@@ -1272,13 +1268,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightLevel
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
-	bl_Tile_lightEmission[blockId] = level;
+	bl_Block_mLightEmission[blockId] = level;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightOpacity
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
-	bl_Tile_lightBlock[blockId] = level;
+	bl_Block_mLightBlock[blockId] = level;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
@@ -2280,18 +2276,17 @@ void bl_setuphooks_cppside() {
 
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV5Block"));
 	//bl_dumpVtable(bl_Tile_vtable, 0x100);
-	bl_Material_dirt = (void*) dlsym(RTLD_DEFAULT, "_ZN8Material4dirtE");
 
 	bl_Tile_Tile = (void (*)(Tile*, int, void*)) dlsym(RTLD_DEFAULT, "_ZN5BlockC1EiPK8Material");
 	bl_TileItem_TileItem = (void (*)(Item*, int)) dobby_dlsym(mcpelibhandle, "_ZN8TileItemC2Ei");
 	bl_Tile_setNameId = (void (*)(Tile*, const std::string&))
 		dlsym(RTLD_DEFAULT, "_ZN5Block9setNameIdERKSs");
-	bl_Tile_setShape = (void (*)(Tile*, float, float, float, float, float, float))
-		dlsym(RTLD_DEFAULT, "_ZN5Block14setVisualShapeEffffff");
+	bl_Block_setVisualShape = (void (*)(Block*, Vec3 const&, Vec3 const&))
+		dlsym(RTLD_DEFAULT, "_ZN5Block14setVisualShapeERK4Vec3S2_");
 	bl_TileItem_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV8TileItem") + 8);
 	bl_Block_mBlocks = (Block**) dlsym(RTLD_DEFAULT, "_ZN5Block7mBlocksE");
-	bl_Tile_lightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block13lightEmissionE");
-	bl_Tile_lightBlock = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block10lightBlockE");
+	bl_Block_mLightEmission = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block14mLightEmissionE");
+	bl_Block_mLightBlock = (unsigned char*) dlsym(RTLD_DEFAULT, "_ZN5Block11mLightBlockE");
 
 #if 0
 #define CHECKVTABLE(actualfn) \
@@ -2336,9 +2331,6 @@ void bl_setuphooks_cppside() {
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
 
-	void* isStonecutterItem = dlsym(mcpelibhandle, "_ZN15CraftingFilters17isStonecutterItemERK12ItemInstance");
-	//mcpelauncher_hook(isStonecutterItem, (void*) &bl_CraftingFilters_isStonecutterItem_hook, 
-	//	(void**) &bl_CraftingFilters_isStonecutterItem_real);
 	bl_Item_mItems = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item6mItemsE");
 	// FIXME 0.11
 	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
@@ -2394,7 +2386,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
 	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerEP6Player");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
-	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entity");
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entityb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
@@ -2402,7 +2394,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
 		(void**) &bl_BlockSource_fireBlockEvent_real);
 
-	bl_Tile_solid = (bool*) dlsym(RTLD_DEFAULT, "_ZN5Block5solidE");
+	bl_Block_mSolid = (bool*) dlsym(RTLD_DEFAULT, "_ZN5Block6mSolidE");
 	bl_Tile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
 		dlsym(mcpelibhandle, "_ZN5Block7getAABBEP10TileSourceiiiR4AABBibi");
 	bl_ReedTile_getAABB = (AABB* (*)(Tile*, TileSource*, int, int, int, AABB&, int, bool, int))
@@ -2464,7 +2456,7 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN3Mob10getTextureEv");
 */
 	bl_Mob_getHealth = (int (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZN3Mob9getHealthEv");
+		dlsym(mcpelibhandle, "_ZNK3Mob9getHealthEv");
 	bl_Mob_getAttribute = (AttributeInstance* (*)(Entity*, Attribute const&))
 		dlsym(mcpelibhandle, "_ZNK3Mob12getAttributeERK9Attribute");
 	void* playerEat = dlsym(mcpelibhandle, "_ZN6Player3eatEif");
@@ -2488,7 +2480,7 @@ void bl_setuphooks_cppside() {
 	bl_Player_addExperience = (void (*)(Player*, int))
 		dlsym(mcpelibhandle, "_ZN6Player13addExperienceEi");
 	bl_Item_setCategory = (void (*)(Item*, int))
-		dlsym(mcpelibhandle, "_ZN4Item11setCategoryEi");
+		dlsym(mcpelibhandle, "_ZN4Item11setCategoryE20CreativeItemCategory");
 	bl_Minecraft_getCommandParser = (ServerCommandParser* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN9Minecraft16getCommandParserEv");
 	void* initCreativeItems =
