@@ -1,6 +1,7 @@
 #pragma once
 #ifdef __cplusplus
 #include <memory>
+#include <unordered_map>
 #endif
 class Entity;
 typedef Entity Player;
@@ -100,6 +101,8 @@ public:
 	char filler1[26-20]; // 20
 	bool handEquipped; // 26
 	char filler[64-27]; //20
+
+	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 };
 
 class CompoundTag {
@@ -167,9 +170,11 @@ public:
 	bool neverRender; // 72
 	char filler3[152-73];//73
 	void* model; // 152
+	char padding[4]; // 156
 
 	void addBox(Vec3 const&, Vec3 const&, float);
-}; // 156 bytes
+}; // 160 bytes
+static_assert(sizeof(ModelPart) == 160, "modelpart size wrong");
 
 // from HumanoidModel::render
 
@@ -177,30 +182,29 @@ typedef struct {
 	void** vtable; //0
 	char filler[13-4]; // 4
 	bool riding; // 13
-	char filler1[16-14]; // 14
-	MaterialPtr* activeMaterial; // 16
-	MaterialPtr materialNormal; // 20
-	MaterialPtr materialAlphaTest; // 32
-	MaterialPtr materialAlphaBlend; // 44
-	MaterialPtr materialStatic; // 56
-	MaterialPtr materialEmissive; // 68
-	MaterialPtr materialEmissiveAlpha; // 80
-	MaterialPtr materialChangeColor; // 92
-	MaterialPtr materialGlint; // 104
-	MaterialPtr materialAlphaTestGlint; // 116
-	char filler2[140-128]; // 128
-	ModelPart bipedHead;//140
-	ModelPart bipedHeadwear;//296
-	ModelPart bipedBody;//452
-	ModelPart bipedRightArm;//608
-	ModelPart bipedLeftArm;//764
-	ModelPart bipedRightLeg;//920
-	ModelPart bipedLeftLeg;//1076
+	char filler1[20-14]; // 14
+	MaterialPtr* activeMaterial; // 20
+	MaterialPtr materialNormal; // 24
+	MaterialPtr materialAlphaTest; // 36
+	MaterialPtr materialAlphaBlend; // 48
+	MaterialPtr materialStatic; // 60
+	MaterialPtr materialEmissive; // 72
+	MaterialPtr materialEmissiveAlpha; // 84
+	MaterialPtr materialChangeColor; // 96
+	MaterialPtr materialGlint; // 108
+	MaterialPtr materialAlphaTestGlint; // 120
+	char filler2[144-132]; // 132
+	ModelPart bipedHead;//144
+	ModelPart bipedHeadwear;//304
+	ModelPart bipedBody;//464
+	ModelPart bipedRightArm;//624
+	ModelPart bipedLeftArm;//784
+	ModelPart bipedRightLeg;//944
+	ModelPart bipedLeftLeg;//1104
+	char mystery2[2]; // 1264
+	char filler3[1276-1266]; // 1266
 } HumanoidModel;
-
-#ifdef __cplusplus
-static_assert(sizeof(ModelPart) == 156, "ModelPart size");
-#endif
+static_assert(sizeof(HumanoidModel) == 1276, "HumanoidModel size");
 
 typedef struct {
 	Item* item; //0

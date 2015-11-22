@@ -4,8 +4,7 @@
 
 class Localization {
 public:
-	void* filler;
-	std::map<std::string, std::string> map;
+	std::map<std::string, std::string>& _getStrings() const;
 };
 
 class I18n {

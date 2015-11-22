@@ -208,7 +208,7 @@ static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 
 static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
 
-static void (*bl_Item_Item)(Item*, int);
+static void (*bl_Item_Item)(Item*, std::string const&, short);
 
 static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
@@ -859,10 +859,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	tile->renderType = renderType;
 }
 
-Item* bl_constructItem(int id) {
+Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
-	bl_Item_Item(retval, id - 0x100);
+	bl_Item_Item(retval, name, id - 0x100);
 	//retval->category2 = 0;
+	bl_Item_mItems[id] = retval;
+	// FIXME 0.13
+	//std::string lowered = Util::toLower(name);
+	//bl_Item_mItemLookupMap[
 	return retval;
 }
 
@@ -875,29 +879,29 @@ Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
-/* FIXME 0.13
-	Item* item = bl_constructItem(id);
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+
+	Item* item = bl_constructItem(mystr, id);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
 	bl_Item_setIcon(item, iconNameString, iconIndex);
 
-	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	std::string mystr = std::string(utfChars);
 	if (maxStackSize <= 0) {
 		bl_Item_setMaxStackSize(item, 64);
 	} else {
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
-	bl_Item_setNameID(item, mystr);
+
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
-*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jint halfhearts, jstring name, jint maxStackSize) {
+	Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem(env, clazz, id, iconName, iconIndex, name, maxStackSize);
 /* FIXME 0.13
 	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
 
@@ -922,6 +926,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineArmor
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
 		jint damageReduceAmount, jint maxDamage, jint armorType) {
+	Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem(env, clazz, id, iconName, iconIndex, name, 1);
 /* FIXME 0.13
 	ArmorItem* item = new ArmorItem;
 	bl_ArmorItem_ArmorItem(item, id - 0x100, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
@@ -2012,7 +2017,7 @@ void bl_cppNewLevelInit() {
 }
 
 void bl_set_i18n(std::string const& key, std::string const& value) {
-	(I18n::getCurrentLanguage()->map)[key] = value;
+	(I18n::getCurrentLanguage()->_getStrings())[key] = value;
 }
 
 static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
@@ -2236,8 +2241,7 @@ void bl_setuphooks_cppside() {
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
-	bl_Item_Item = (void (*)(Item*, int)) dlsym(RTLD_DEFAULT, "_ZN4ItemC2Ei");
-	bl_Item_setNameID = (void (*)(Item*, std::string const&)) dlsym(RTLD_DEFAULT, "_ZN4Item9setNameIDERKSs");
+	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
 
 	// FIXME 0.11
 	bl_MinecraftClient_startLocalServer = (void (*) (MinecraftClient*, std::string const&, std::string const&, void*))

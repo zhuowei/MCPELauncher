@@ -14,9 +14,9 @@
 #include "modscript_shared.h"
 
 // search for HumanoidModel::HumanoidModel
-#define HUMANOIDMODEL_SIZE 1244
+#define HUMANOIDMODEL_SIZE 1276
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 156
+#define MOBRENDERER_SIZE 200
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 28
 // ModelPart destructor
