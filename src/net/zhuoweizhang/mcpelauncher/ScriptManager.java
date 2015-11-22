@@ -730,7 +730,12 @@ public class ScriptManager {
 				Log.i("BlockLauncher", "ModPE script " + file.toString() + " doesn't exist");
 				continue;
 			}
-			loadScript(file);
+			try {
+				loadScript(file);
+			} catch (Exception e) {
+				e.printStackTrace();
+				MainActivity.currentMainActivity.get().reportError(e);
+			}
 		}
 	}
 

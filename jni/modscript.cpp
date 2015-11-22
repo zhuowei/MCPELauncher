@@ -40,10 +40,10 @@ typedef struct {
 #define ENTITY_VTABLE_OFFSET_GET_ENTITY_TYPE_ID 85
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.11
-#define PLAYER_INVENTORY_OFFSET 3456
+// FIXME 0.13
+#define PLAYER_INVENTORY_OFFSET 3448
 #else
-#define PLAYER_INVENTORY_OFFSET 3456
+#define PLAYER_INVENTORY_OFFSET 3448
 #endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
@@ -98,6 +98,7 @@ void* bl_marauder_translation_function(void* input);
 extern jclass bl_scriptmanager_class;
 
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
+static void (*bl_SurvivalMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
 void* (*bl_MinecraftClient_startLocalServer_real)(MinecraftClient*, void*, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
@@ -136,7 +137,7 @@ static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, BlockPos, 
 static int (*bl_FillingContainer_removeResource)(void*, ItemInstance*, bool);
 static int (*bl_Inventory_getSelectedSlot)(void*);
 static void (*bl_Inventory_selectSlot)(void*, int);
-static void (*bl_ItemInstance_setUserData)(ItemInstance*, unique_ptr*);
+static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
 static int (*bl_AgableMob_getAge)(Entity*);
 
 static soinfo2* mcpelibhandle = NULL;
@@ -171,6 +172,7 @@ struct bl_vtable_indexes {
 	int gamemode_start_destroy_block;
 	int entity_get_entity_type_id;
 	int mob_set_armor;
+	int entity_set_pos;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -195,9 +197,7 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId);
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
 	instance->count = count;
-	unique_ptr tagPtr;
-	tagPtr.ptr = NULL;
-	bl_ItemInstance_setUserData(instance, &tagPtr);
+	bl_ItemInstance_setUserData(instance, std::unique_ptr<CompoundTag>(nullptr));
 	bl_ItemInstance_setId(instance, id);
 }
 
@@ -209,9 +209,9 @@ ItemInstance* bl_newItemInstance(int id, int count, int damage) {
 }
 
 void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
-	void (*setPos)(Entity*, float, float, float);
-	setPos = (void (*)(Entity*, float, float, float)) entity->vtable[ENTITY_VTABLE_OFFSET_SETPOS];
-	setPos(entity, x, y, z);
+	void (*setPos)(Entity*, Vec3 const&);
+	setPos = (void (*)(Entity*, Vec3 const&)) entity->vtable[vtable_indexes.entity_set_pos];
+	setPos(entity, Vec3(x, y, z));
 }
 
 #ifndef __arm__
@@ -244,30 +244,56 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 		itemDamage = itemStack->damage;
 	}
 
-	int blockId = bl_localplayer->getRegion()->getBlock(x, y, z).id;
+	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
 	int blockDamage = bl_localplayer->getRegion()->getData(x, y, z);
 
-#ifdef EXTREME_LOGGING
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: JavaVM = %p\n", bl_JavaVM);
-#endif
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
-
-#ifdef EXTREME_LOGGING
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: env = %p\n", env);
-#endif
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "useItemOnCallback", "(IIIIIIII)V");
-
-#ifdef EXTREME_LOGGING
-	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "use item on: mid = %i, class = %p\n", mid, bl_scriptmanager_class);
-#endif
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side, itemDamage, blockDamage);
 
 	bl_JavaVM->DetachCurrentThread();
 
 	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
+}
+
+void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
+	TilePos* pos, signed char side, Vec3* vec3) {
+	JNIEnv *env;
+	int x = pos->x;
+	int y = pos->y;
+	int z = pos->z;
+	//bl_level = level;
+	bl_localplayer = player;
+
+	if (!bl_untampered) {
+		bl_panicTamper();
+		return;
+	}
+
+	preventDefaultStatus = FALSE;
+	int itemId = 0;
+	int itemDamage = 0;
+	if (itemStack != NULL) {
+		itemId = bl_ItemInstance_getId(itemStack);
+		itemDamage = itemStack->damage;
+	}
+
+	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
+	int blockDamage = bl_localplayer->getRegion()->getData(x, y, z);
+
+	bl_JavaVM->AttachCurrentThread(&env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "useItemOnCallback", "(IIIIIIII)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side, itemDamage, blockDamage);
+
+	bl_JavaVM->DetachCurrentThread();
+
+	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
 }
 
 void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side) {
@@ -392,7 +418,7 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "attackCallback", "(JJ)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, player->entityId, entity->entityId);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, player->getUniqueID(), entity->getUniqueID());
 
 	bl_JavaVM->DetachCurrentThread();
 
@@ -628,7 +654,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerEnt
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
-	return bl_localplayer->entityId;
+	return bl_localplayer->getUniqueID();
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLevel
@@ -724,7 +750,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
-	return bl_localplayer->getRegion()->getBlock(x, y, z).id;
+	return bl_localplayer->getRegion()->getBlockID(x, y, z);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetData
@@ -1049,6 +1075,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob8setArmorE9ArmorSlotPK12ItemInstance");
+	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+		"_ZN6Entity6setPosERK4Vec3") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1125,16 +1153,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 
 	//edit the vtables of the GameMode implementations
-	bl_GameMode_useItemOn_real = (void (*)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*))
-		dlsym(RTLD_DEFAULT, "_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK7TilePosaRK4Vec3");
 
 	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12CreativeMode");
+	bl_GameMode_useItemOn_real = (void (*)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*))
+		creativeVtable[vtable_indexes.gamemode_use_item_on];
 	creativeVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
 	void** survivalVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12SurvivalMode");
-	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
+	bl_SurvivalMode_useItemOn_real = (void (*)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*))
+		survivalVtable[vtable_indexes.gamemode_use_item_on];
+	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_SurvivalMode_useItemOn_hook;
 
 	bl_GameMode_attack_real = (void (*)(void*, Player*, Entity*))
-		dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackEP6PlayerP6Entity");
+		dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackER6PlayerR6Entity");
 	creativeVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
 	survivalVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
 	bl_GameMode_tick_real = (void (*)(void*))
@@ -1193,7 +1223,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setPos = (void (*)(Entity*, float, float, float))
 		dlsym(RTLD_DEFAULT, "_ZN6Entity6setPosEfff");
 	bl_Inventory_add = (int (*)(void*, ItemInstance*))
-		dlsym(RTLD_DEFAULT, "_ZN9Inventory3addEP12ItemInstance");
+		dlsym(RTLD_DEFAULT, "_ZN9Inventory3addER12ItemInstance");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
@@ -1231,13 +1261,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	minecraftVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
 
 	bl_FillingContainer_replaceSlot = (void (*)(void*, int, ItemInstance*))
-		dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiP12ItemInstance");
+		dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiR12ItemInstance");
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 	bl_FillingContainer_removeResource = (int (*)(void*, ItemInstance*, bool))
 		dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 	bl_Inventory_getSelectedSlot = (int (*)(void*)) dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
 	bl_Inventory_selectSlot = (void (*)(void*, int)) dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
-	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, unique_ptr*)) dlsym(mcpelibhandle,
+	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
 		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
 	bl_AgableMob_getAge = (int (*)(Entity*)) dlsym(mcpelibhandle,
 		"_ZN9AgableMob6getAgeEv");

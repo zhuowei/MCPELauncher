@@ -53,41 +53,34 @@ struct Vec2 {
 	};
 };
 
+// last update: 0.13.0
 class Entity {
 public:
 	void** vtable; //0
-	int filler3[5];//4
-	float x; //24
-	float y; //28
-	float z; //32
-	char filler2[48-36]; //36
-	TileSource* blockSource; // 48
-	int dimension; // 52
-	char filler2_[76-56]; // 56
-	float motionX; //76 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //80
-	float motionZ; //84
-	float yaw; //88
-	float pitch; //92
-	float prevYaw; //96
-	float prevPitch; //100
-	char filler4[268-104]; //104
-	int renderType; //268
-	char filler5[284-272]; // 272
-	struct Entity* rider; //284
-	struct Entity* riding; //288
-	char filler6[320-292]; //292
-#ifdef __cplusplus
-	EntityUniqueID entityId; // 320
-#else
-	long long entityId; // 320
-#endif
+	int filler3;//4
+	float x; //8
+	float y; //12
+	float z; //16
+	char filler2[44-20]; // 20
+	float motionX; //44 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //48
+	float motionZ; //52
+	float yaw; //56 Entity::setRot
+	float pitch; //60
+	float prevYaw; //64
+	float prevPitch; //68
+
+	char filler4[244-104]; //72
+	int renderType; //244
+	char filler5[260-248]; // 248
+	struct Entity* rider; //260
+	struct Entity* riding; //264 from Entity::getRide
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
+	EntityUniqueID const& getUniqueID() const;
 };
 
-#ifdef __cplusplus
 struct TextureUVCoordinateSet {
 	float bounds[6];
 	int idunno;
@@ -96,36 +89,33 @@ struct TextureUVCoordinateSet {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
 };
-#else
-typedef struct {
-	float bounds[6];
-	int idunno;
-	void* textureFile;
-} TextureUVCoordinateSet;
-#endif
 
+// NOT DONE YET
 typedef struct {
 	void** vtable; //0
-	unsigned char maxStackSize; //4
-	char filler0[24-5]; //5
-	short itemId; //24
-	short maxDamage; //26
-	char filler[60-28]; //28
+	char filler0[18-4]; //4
+	short itemId; //18
+	char filler[60-20]; //20
 	int category1; //60
 	bool handEquipped; //64
 	bool stackedByData; //65
 	char filler1[72-66]; //66
 } Item;
 
-typedef void CompoundTag;
+class CompoundTag {
+public:
+	~CompoundTag();
+};
 
 typedef struct {
 	unsigned char count; //0
 	short damage; //2
-	CompoundTag* tag; // 4
-	Item* item; // 8
-	void* block; //12
-	bool wtf; //16
+	unsigned char something; // 4
+	char filler[8-5]; // 5
+	CompoundTag* tag; // 8
+	Item* item; // 12
+	void* block; //16
+	void* wtf; //17
 } ItemInstance; // see ServerCommandParser::give for size
 
 typedef struct {
@@ -359,6 +349,7 @@ public:
 	void setTime(int);
 	int getTime() const;
 	LevelData* getLevelData();
+	void playSound(Vec3 const&, std::string const&, float, float);
 };
 
 #include "mcpe/blockentity/chestblockentity.h"

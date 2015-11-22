@@ -76,7 +76,7 @@ public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/MainActivity";
 	public static final String SCRIPT_SUPPORT_VERSION = "0.13";
-	public static final String HALF_SUPPORT_VERSION = "0.14";
+	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -264,7 +264,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.12.1");
+				intent.putExtra("supportedVersion", "0.13.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -2013,11 +2013,11 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	private void reportError(final Throwable t) {
+	public void reportError(final Throwable t) {
 		reportError(t, R.string.report_error_title, null);
 	}
 
-	private void reportError(final Throwable t, final int messageId, final String extraData) {
+	public void reportError(final Throwable t, final int messageId, final String extraData) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				final StringWriter strWriter = new StringWriter();

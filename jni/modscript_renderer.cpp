@@ -121,7 +121,7 @@ int bl_renderManager_createHumanoidRenderer() {
 }
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
-	long long entityId = entity->entityId;
+	long long entityId = entity->getUniqueID();
 	if (bl_renderTypeMap.count(entityId) != 0) {
 		return bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
 	}
@@ -133,7 +133,7 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Ent
 //}
 
 bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
-	long long entityId = entity->entityId;
+	long long entityId = entity->getUniqueID();
 	if (renderType >= 0x1000) {
 		if ((renderType - 0x1000) >= bl_entityRenderers.size()) {
 			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d is over size of %d",
@@ -150,7 +150,7 @@ bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 }
 
 int bl_renderManager_getRenderType(Entity* entity) {
-	long long entityId = entity->entityId;
+	long long entityId = entity->getUniqueID();
 	if (bl_renderTypeMap.count(entityId) != 0) {
 		return bl_renderTypeMap[entityId];
 	}
