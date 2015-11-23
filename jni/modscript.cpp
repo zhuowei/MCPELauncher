@@ -192,7 +192,7 @@ void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 }
 
 ItemInstance* bl_newItemInstance(int id, int count, int damage) {
-	ItemInstance* instance = (ItemInstance*) malloc(sizeof(ItemInstance));
+	ItemInstance* instance = new ItemInstance;
 	instance->tag = NULL;
 	bl_setItemInstance(instance, id, count, damage);
 	return instance;

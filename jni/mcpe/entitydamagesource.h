@@ -8,7 +8,7 @@ public:
 	virtual Entity* getEntity() const;
 	virtual bool isChildEntitySource() const;
 	virtual Entity* getChildEntity() const;
-	virtual bool isTileSource() const;
+	virtual bool isBlockSource() const;
 	virtual std::string getDeathMessage(std::string, Entity*) const;
 };
 

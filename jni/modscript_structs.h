@@ -80,12 +80,13 @@ public:
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;
+	void setNameTag(std::string const&);
 };
 
 struct TextureUVCoordinateSet {
 	float bounds[6];
 	int idunno;
-	void* textureFile;
+	void* textureFile; // 28
 	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
@@ -125,21 +126,17 @@ static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 
 typedef struct {
 	void** vtable; //0
-	float idunnofloat1; //4
-	char aabbfiller[28]; //8
-	TextureUVCoordinateSet texture; //36
-	unsigned char id; //68
-	char filler[80-69]; //69 (insert rude joke here)
-	int renderPass; //80
-	int renderType; //84
-	char filler2[108-88]; //88
-	void* material; //108
-	int filler3; //112
-	float destroyTime; //116
-	float explosionResistance; //120
-	int category1; //124
-	char filler4[8]; //128
-	cppstr descriptionId; //136
+	unsigned char id; // 4
+	char filler0[16-5]; //5
+	TextureUVCoordinateSet texture; //16
+	char filler[56-48]; //48 (insert rude joke here)
+	int renderLayer; //56
+	int renderType; //60 Block::getBlockShape()
+	char filler2[88-64]; //64
+	void* material; //88
+	char filler3[100-92]; // 92
+	float destroyTime; //100
+	float explosionResistance; //104
 } Block;
 #define Tile Block
 
@@ -225,8 +222,9 @@ typedef void EntityRenderer;
 
 typedef struct {
 	void** vtable; //0
-	char filler[108-4]; //4
-	void* model; // 108 (from MobRenderer::MobRenderer)
+	char filler[132-4]; //4
+	void* model; // 132 (from MobRenderer::MobRenderer)
+	char filler2[180-136]; // 136
 } MobRenderer;
 
 typedef void Tag;
@@ -321,9 +319,8 @@ static_assert(sizeof(ArmorItem) == 80, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	char filler[144-112]; // 112
-	HumanoidModel* modelArmor; // 144
-	HumanoidModel* modelArmorChestplate; // 148
+	HumanoidModel* modelArmor; // 180
+	HumanoidModel* modelArmorChestplate; // 184
 };
 #endif
 

@@ -12,6 +12,7 @@
 
 #include "modscript_renderer_jni.h"
 #include "modscript_shared.h"
+#include "mcpe/mce/textureptr.h"
 
 // search for HumanoidModel::HumanoidModel
 #define HUMANOIDMODEL_SIZE 1276
@@ -40,7 +41,8 @@ static void (*bl_Mesh_reset)(void*);
 
 static void (*bl_HumanoidModel_HumanoidModel)(HumanoidModel*, float, float, int, int);
 
-static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, HumanoidModel*, HumanoidModel*, HumanoidModel*, float);
+static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, std::unique_ptr<HumanoidModel>,
+		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float);
 static void (*bl_ModelPart_reset)(ModelPart*);
 
 static std::vector<EntityRenderer*> bl_entityRenderers;
@@ -114,7 +116,10 @@ int bl_renderManager_createHumanoidRenderer() {
 
 
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
-	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, model, model2, model3, 0);
+	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
+		std::unique_ptr<HumanoidModel>(model2),
+		std::unique_ptr<HumanoidModel>(model3),
+		mce::TexturePtr(bl_minecraft->getTextures(), "mob/steve.png"), 0);
 
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	return retval;
@@ -223,8 +228,10 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
 	bl_HumanoidModel_HumanoidModel = (void (*)(HumanoidModel*, float, float, int, int))
 		dlsym(mcpelibhandle, "_ZN13HumanoidModelC1Effii");
-	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, HumanoidModel*, HumanoidModel*, HumanoidModel*, float))
-		dlsym(mcpelibhandle, "_ZN19HumanoidMobRendererC1EP13HumanoidModelS1_S1_f");
+	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, std::unique_ptr<HumanoidModel>,
+		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float))
+		dlsym(mcpelibhandle,
+			"_ZN19HumanoidMobRendererC1ESt10unique_ptrI13HumanoidModelSt14default_deleteIS1_EES4_S4_N3mce10TexturePtrEf");
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
 	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
 		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
