@@ -96,12 +96,13 @@ struct TextureUVCoordinateSet {
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 class Item {
 public:
-	void** vtable; //0
+	//void** vtable; //0
 	char filler0[18-4]; //4
 	short itemId; //18
 	char filler1[26-20]; // 20
 	bool handEquipped; // 26
 	char filler[64-27]; //20
+	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 };

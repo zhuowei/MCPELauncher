@@ -34,6 +34,8 @@
 #include "mcpe/attribute.h"
 #include "mcpe/weather.h"
 #include "mcpe/dimension.h"
+#include "mcpe/util.h"
+#include "mcpe/itemrenderer.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -344,6 +346,7 @@ static void (*bl_Player_addExperience)(Player*, int);
 static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
+static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 
 static bool* bl_Block_mSolid;
 
@@ -864,8 +867,8 @@ Item* bl_constructItem(std::string const& name, int id) {
 	//retval->category2 = 0;
 	bl_Item_mItems[id] = retval;
 	// FIXME 0.13
-	//std::string lowered = Util::toLower(name);
-	//bl_Item_mItemLookupMap[
+	std::string lowercaseStr = Util::toLower(name);
+	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(retval));
 	return retval;
 }
 
@@ -1189,6 +1192,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	Item* tileItem = (Item*) ::operator new(kBlockItemSize);
 	bl_BlockItem_BlockItem(tileItem, nameStr, blockId - 0x100);
 	bl_Item_mItems[blockId] = tileItem;
+	std::string lowercaseStr = Util::toLower(nameStr);
+	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(tileItem));
 	return retval;
 }
 
@@ -2160,6 +2165,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	bl_Player_addExperience(bl_localplayer, value);
 }
 
+mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
+	if (bl_ItemInstance_getId(const_cast<ItemInstance*>(&itemStack)) >= 0x200) { // extended item ID
+		ItemInstance temp;
+		temp.tag = NULL;
+		bl_setItemInstance(&temp, 0x100, 1, 0);
+		return bl_ItemRenderer_getGraphics_real(temp);
+	}
+	return bl_ItemRenderer_getGraphics_real(itemStack);
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2460,6 +2475,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
 	mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
 		(void**) &bl_Item_initCreativeItems_real);
+	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
+		(void**) &bl_ItemRenderer_getGraphics_real);
 
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
