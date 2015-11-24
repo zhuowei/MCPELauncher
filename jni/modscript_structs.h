@@ -83,6 +83,9 @@ public:
 	void setNameTag(std::string const&);
 };
 
+class Mob: public Entity {
+};
+
 struct TextureUVCoordinateSet {
 	float bounds[6];
 	int idunno;
@@ -354,6 +357,8 @@ public:
 	int getTime() const;
 	LevelData* getLevelData();
 	void playSound(Vec3 const&, std::string const&, float, float);
+	bool isClientSide() const;
+	HitResult const& getHitResult();
 };
 
 #include "mcpe/blockentity/chestblockentity.h"

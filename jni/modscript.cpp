@@ -81,7 +81,7 @@ void bl_attachLevelListener();
 bool bl_renderManager_setRenderType(Entity* entity, int type);
 void bl_renderManager_clearRenderTypes();
 void bl_cppNewLevelInit();
-void bl_clearNameTags();
+void bl_clearMobTextures();
 void bl_sendIdentPacket();
 void* bl_marauder_translation_function(void* input);
 
@@ -359,7 +359,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 	//attach the listener
 	/*bl_attachLevelListener();*/
-	bl_clearNameTags();
+	bl_clearMobTextures();
 	/*bl_renderManager_clearRenderTypes();
 	bl_cppNewLevelInit();
 	if (level->isRemote) {

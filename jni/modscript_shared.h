@@ -22,8 +22,8 @@ extern bool preventDefaultStatus;
 
 extern JavaVM* bl_JavaVM;
 extern jclass bl_scriptmanager_class;
-
-void bl_changeEntitySkin(void* entity, const char* newSkin);
+class Entity;
+void bl_changeEntitySkin(Entity* entity, const char* newSkin);
 extern void (*bl_Minecraft_selectLevel_real)(Minecraft*, std::string const&, std::string const&, void*);
 void bl_attachLevelListener();
 extern Entity* bl_removedEntity;

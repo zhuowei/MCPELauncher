@@ -36,6 +36,7 @@
 #include "mcpe/dimension.h"
 #include "mcpe/util.h"
 #include "mcpe/itemrenderer.h"
+#include "mcpe/mce/textureptr.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -60,12 +61,6 @@ typedef void Font;
 #define MINECRAFT_TEXTURES_OFFSET 168
 #endif
 
-// found way, way inside GameRenderer::updateFreeformPickDirection, around the call to HitResult::HitResult(Entity*)
-// (look for the stack allocation, then see where it's copied)
-// can also check interactWithEntity
-#define MINECRAFT_HIT_RESULT_OFFSET (5120 + 8)
-// found in TouchInputMove::interactWithEntity
-#define MINECRAFT_HIT_ENTITY_OFFSET (5152 + 8)
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
 #define PLAYER_ABILITIES_OFFSET 3308
@@ -90,6 +85,33 @@ const size_t kItemEntity_pickupDelay_offset = 364;
 const size_t kItemEntity_itemInstance_offset = 340;
 // found in TextPacket::handle
 const int kClientNetworkHandler_vtable_offset_handleTextPacket = 12;
+
+static const char* const listOfRenderersToPatchTextures[] = {
+"_ZTV11BatRenderer",
+"_ZTV11MobRenderer",
+"_ZTV11PigRenderer",
+"_ZTV12WolfRenderer",
+"_ZTV13BlazeRenderer",
+"_ZTV13GhastRenderer",
+"_ZTV13SheepRenderer",
+"_ZTV13SlimeRenderer",
+"_ZTV13SquidRenderer",
+"_ZTV14OcelotRenderer",
+"_ZTV14RabbitRenderer",
+"_ZTV14SpiderRenderer",
+"_ZTV15ChickenRenderer",
+"_ZTV15CreeperRenderer",
+"_ZTV16EnderManRenderer",
+"_ZTV16SkeletonRenderer",
+"_ZTV16VillagerRenderer",
+"_ZTV17IronGolemRenderer",
+"_ZTV17LavaSlimeRenderer",
+"_ZTV17SnowGolemRenderer",
+"_ZTV18SilverfishRenderer",
+"_ZTV19HumanoidMobRenderer",
+"_ZTV19MushroomCowRenderer",
+"_ZTV22VillagerZombieRenderer"
+};
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -183,6 +205,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_color_data;
 	int tile_get_visual_shape;
 	//int raknet_instance_connect;
+	int mobrenderer_get_skin_ptr;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -201,6 +224,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN5Block14getVisualShapeEhR4AABBb");
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
+	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
+		"_ZNK11MobRenderer10getSkinPtrER6Entity");
 }
 
 extern "C" {
@@ -284,7 +309,6 @@ AABB** bl_custom_block_visualShapes[256];
 
 std::vector<short*> bl_creativeItems;
 
-std::map <int, std::string> bl_nametag_map;
 char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
 
 static Item** bl_Item_mItems;
@@ -586,10 +610,6 @@ AABB& bl_CustomBlock_getVisualShape_hook(Tile* tile, unsigned char data, AABB& a
 	return *aabbout;
 }
 
-void bl_clearNameTags() {
-	bl_nametag_map.clear();
-}
-
 bool bl_CraftingFilters_isStonecutterItem_hook(ItemInstance const& myitem) {
 	int itemId = bl_ItemInstance_getId((ItemInstance*) &myitem);
 	char itemStatus = bl_stonecutter_status[itemId];
@@ -635,20 +655,6 @@ void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddres
 	if (!preventDefaultStatus) {
 		bl_ClientNetworkHandler_handleTextPacket_real(handler, ipaddress, packet);
 	}
-}
-
-std::array<unsigned char, 16> bl_getEntityUUID(int entityId) {
-	if (bl_entityUUIDMap.count(entityId) != 0) {
-		return bl_entityUUIDMap[entityId];
-	}
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Generating uuid for entity %d\n", entityId);
-	// generate a new uuid
-	std::array<unsigned char, 16> newuuid;
-	uuid_t uuidT;
-	uuid_generate_random(uuidT);
-	memcpy(newuuid.data(), uuidT, sizeof(uuidT));
-	bl_entityUUIDMap[entityId] = newuuid;
-	return newuuid;
 }
 
 #if 0
@@ -1049,15 +1055,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_text_parse_color_codes = colorText;
 }
 
-void bl_changeEntitySkin(void* entity, const char* newSkin) {
-/* FIXME 0.13
-	std::string newSkinString(newSkin);
-	std::string* ptrToStr = (std::string*) bl_Mob_getTexture((Entity*) entity);
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Str pointer: %p, %i, %s\n", ptrToStr, *((int*) ptrToStr), ptrToStr->c_str());
-	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "New string pointer: %s\n", newSkinString->c_str());
-	*ptrToStr = newSkinString;
-	bl_forceTextureLoad(newSkinString);
-*/
+std::map<long long, mce::TexturePtr> bl_mobTexturesMap;
+
+void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
+	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), newSkin);
+}
+void bl_clearMobTextures() {
+	bl_mobTexturesMap.clear();
 }
 
 void bl_attachLevelListener() {
@@ -1526,19 +1530,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	Entity** camera = (Entity**) (((uintptr_t) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET);
-	*camera = entity;
+	bl_minecraft->setCameraTargetPlayer(static_cast<Mob*>(entity));
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return NULL;
-	std::array<unsigned char, 16> uuidBytes = bl_getEntityUUID(entityId);
-	jlong* uuidLongs = (jlong*) uuidBytes.data();
-	jlongArray uuidArray = env->NewLongArray(2);
-	env->SetLongArrayRegion(uuidArray, 0, 2, uuidLongs);
-	return uuidArray;
+	return nullptr;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
@@ -1550,11 +1547,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
   (JNIEnv *env, jclass clazz) {
-	return bl_level->isRemote;
+	if (!bl_level) return false;
+	return !bl_level->isClientSide();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
+#if 0
 #ifdef __arm__
 	for (int i = 1; i < 0x100; i++) {
 		if (bl_Block_mBlocks[i] == NULL) {
@@ -1570,38 +1569,40 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		}
 	}
 #endif
+#endif
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
   (JNIEnv *env, jclass clazz) {
-	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
-	if (objectMouseOver->type != HIT_RESULT_ENTITY) return -1;
-	Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
+	HitResult const& objectMouseOver = bl_level->getHitResult();
+	if (objectMouseOver.type != HIT_RESULT_ENTITY) return -1;
+	//Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
+	Entity* hoverEntity = objectMouseOver.entity;
 	if (hoverEntity == NULL) return -1;
 	return hoverEntity->getUniqueID();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
   (JNIEnv *env, jclass clazz, jint axis) {
-	HitResult* objectMouseOver = (HitResult*) ((uintptr_t) bl_level + MINECRAFT_HIT_RESULT_OFFSET);
+	HitResult const& objectMouseOver = bl_level->getHitResult();
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "hit %d %d %d %d", objectMouseOver->type,
 	//	objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
-	if (objectMouseOver->type != HIT_RESULT_BLOCK) return -1;
+	if (objectMouseOver.type != HIT_RESULT_BLOCK) return -1;
 	switch (axis) {
 		case AXIS_X:
-			return objectMouseOver->x;
+			return objectMouseOver.x;
 		case AXIS_Y:
-			return objectMouseOver->y;
+			return objectMouseOver.y;
 		case AXIS_Z:
-			return objectMouseOver->z;
+			return objectMouseOver.z;
 		case BLOCK_SIDE:
-			return objectMouseOver->side;
+			return objectMouseOver.side;
 		case BLOCK_ID:
 			return bl_localplayer->getRegion()->getBlockID(
-				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
 		case BLOCK_DATA:
 			return bl_localplayer->getRegion()->getData(
-				objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
+				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
 		default:
 			return -1;
 	}
@@ -1812,7 +1813,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	//skins
 	if (skinPath != NULL && type < 64) {
 		const char * skinUtfChars = env->GetStringUTFChars(skinPath, NULL);
-		bl_changeEntitySkin((void*) e, skinUtfChars);
+		bl_changeEntitySkin(e, skinUtfChars);
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
 	}
 
