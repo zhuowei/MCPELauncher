@@ -2301,7 +2301,7 @@ public class MainActivity extends NativeActivity {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
 		if (mcPkgInfo.versionName.startsWith("0.13")) {
-			if (version.matches("0\\.13\\.*")) return true;
+			if (version.matches("0\\.13\\..*")) return true;
 		}
 		return false;
 	}

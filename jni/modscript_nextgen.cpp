@@ -8,6 +8,7 @@
 #include <vector>
 #include <typeinfo>
 #include <map>
+#include <unordered_map>
 #include <array>
 
 #include "utf8proc.h"
@@ -322,7 +323,7 @@ static void (*bl_Entity_saveWithoutId_real)(Entity*, void*);
 static int (*bl_Entity_load_real)(Entity*, void*);
 #endif
 
-static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
+//static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
 static void (*bl_Level_addParticle)(Level*, int, Vec3 const&, Vec3 const&, int);
 static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
@@ -371,6 +372,7 @@ static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
+static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
 
 static bool* bl_Block_mSolid;
 
@@ -1055,7 +1057,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_text_parse_color_codes = colorText;
 }
 
-std::map<long long, mce::TexturePtr> bl_mobTexturesMap;
+std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
 	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), newSkin);
@@ -1991,7 +1993,7 @@ void bl_forceTextureLoad(std::string const& name) {
 }
 
 void bl_cppNewLevelInit() {
-	bl_entityUUIDMap.clear();
+	//bl_entityUUIDMap.clear();
 }
 
 void bl_set_i18n(std::string const& key, std::string const& value) {
@@ -2174,6 +2176,14 @@ mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& item
 		return bl_ItemRenderer_getGraphics_real(temp);
 	}
 	return bl_ItemRenderer_getGraphics_real(itemStack);
+}
+
+mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Entity& ent) {
+	auto foundIter = bl_mobTexturesMap.find(ent.getUniqueID());
+	if (foundIter != bl_mobTexturesMap.end()) {
+		return foundIter->second;
+	}
+	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
@@ -2478,7 +2488,12 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Item_initCreativeItems_real);
 	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
 		(void**) &bl_ItemRenderer_getGraphics_real);
-
+	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
+		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
+	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
+		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
+		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
+	}
 	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
 }
