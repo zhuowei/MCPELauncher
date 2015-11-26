@@ -60,17 +60,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 
 
 void bl_cape_init(void* mcpelibinfo) {
+/* FIXME 0.13
 	bl_EntityRenderer_bindTexture = (void (*)(ModelRenderer*, std::string const&, int))
 		dlsym(mcpelibinfo, "_ZN14EntityRenderer11bindTextureERKSsi");
+*/
 	bl_Entity_isRiding = (bool (*)(Entity*))
 		dlsym(mcpelibinfo, "_ZNK6Entity8isRidingEv");
 /* FIXME 0.13
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mobif");
 	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
 		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
-*/
 	bl_MobRenderer_setArmor = (void (*)(MobRenderer*, HumanoidModel*))
 		dlsym(mcpelibinfo, "_ZN11MobRenderer8setArmorEP5Model");
+*/
 	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))
 		dlsym(mcpelibinfo, "_ZN12ItemInstance11isArmorItemEPKS_");
 }

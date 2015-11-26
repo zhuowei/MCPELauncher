@@ -195,7 +195,9 @@ typedef struct {
 	RakString* message; //16
 } MessagePacket;
 
-struct BaseMobSpawner {
+class BaseMobSpawner {
+public:
+	int getSpawnTypeId() const;
 };
 
 struct bl_vtable_indexes_nextgen_cpp {
@@ -329,10 +331,9 @@ static void (*bl_Level_addParticle)(Level*, int, Vec3 const&, Vec3 const&, int);
 static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
-static void* (*bl_Textures_getTextureData)(void*, std::string const&);
 static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
-static bool (*bl_Level_addPlayer_real)(Level*, Entity*);
+static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*, bool);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, float, float, float, float, bool);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
@@ -713,10 +714,8 @@ static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entity
 	return retval;
 }
 
-static uintptr_t bl_Level_addPlayer_hook(Level* level, Player* entity) {
+static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> entity) {
 	JNIEnv *env;
-
-	uintptr_t retval = bl_Level_addPlayer_real(level, entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -732,7 +731,7 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, Player* entity) {
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	return retval;
+	return bl_Level_addPlayer_real(level, std::move(entity));
 }
 
 static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
@@ -874,7 +873,6 @@ Item* bl_constructItem(std::string const& name, int id) {
 	bl_Item_Item(retval, name, id - 0x100);
 	//retval->category2 = 0;
 	bl_Item_mItems[id] = retval;
-	// FIXME 0.13
 	std::string lowercaseStr = Util::toLower(name);
 	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(retval));
 	return retval;
@@ -1511,14 +1509,15 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	return nullptr;
-/* FIXME 0.13
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return NULL;
-	std::string* mystr = (std::string*) bl_Mob_getTexture(entity);
-	jstring returnValString = env->NewStringUTF(mystr->c_str());
+	if (entity == nullptr) return nullptr;
+	const char* retval = ""; // FIXME 0.13
+	auto foundIter = bl_mobTexturesMap.find(entity->getUniqueID());
+	if (foundIter != bl_mobTexturesMap.end()) {
+		retval = foundIter->second.textureName.c_str();
+	}
+	jstring returnValString = env->NewStringUTF(retval);
 	return returnValString;
-*/
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
@@ -1731,7 +1730,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
 	Item* item = bl_Item_mItems[id];
 	if (item == nullptr) return;
-	item->handEquipped = handEquipped;
+	if (handEquipped) {
+		item->attribs |= ITEM_HAND_EQUIPPED;
+	} else {
+		item->attribs &= ~ITEM_HAND_EQUIPPED;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
@@ -1743,6 +1746,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	BaseMobSpawner* spawner = te->getSpawner();
 	bl_BaseMobSpawner_setEntityId(spawner, entityTypeId);
 	te->setChanged();
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerGetEntityType
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (bl_level == NULL) return 0;
+	MobSpawnerBlockEntity* te = static_cast<MobSpawnerBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
+	if (te == NULL) return 0;
+
+	BaseMobSpawner* spawner = te->getSpawner();
+	if (!spawner) return 0;
+	return spawner->getSpawnTypeId();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
@@ -2377,13 +2391,11 @@ void bl_setuphooks_cppside() {
 	//bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
-	bl_Textures_getTextureData = (void* (*)(void*, std::string const&))
-		dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
 	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
 	void* mpAddEntity = dlsym(mcpelibhandle, "_ZN16MultiPlayerLevel9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
-	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerEP6Player");
+	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entityb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);

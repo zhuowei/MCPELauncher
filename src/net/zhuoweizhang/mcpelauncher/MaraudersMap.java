@@ -22,7 +22,9 @@ public final class MaraudersMap {
 		PokerFace.init();
 		boolean useOldCode = Utils.getPrefs(0).getBoolean("zz_legacy_live_patch", false) || 
 			ScriptManager.nativeGetArch() == ScriptManager.ARCH_I386 ||
-			new File("/sdcard/blocklauncher_marauders_map_legacy").exists();
+			new File("/sdcard/blocklauncher_marauders_map_legacy").exists() ||
+			android.os.Build.VERSION.SDK_INT >= 23;
+			// Marshmallow - thanks BasixKor https://github.com/zhuowei/MCPELauncher/issues/284#issuecomment-154613087
 		System.out.println("Live patching is running in " + (useOldCode? "legacy" : "normal") + " mode");
 		boolean success = true;
 		patchingInitialized = true;

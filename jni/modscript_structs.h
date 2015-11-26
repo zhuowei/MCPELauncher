@@ -103,12 +103,14 @@ public:
 	char filler0[18-4]; //4
 	short itemId; //18
 	char filler1[26-20]; // 20
-	bool handEquipped; // 26
+	unsigned char attribs; // 26
 	char filler[64-27]; //20
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 };
+
+#define ITEM_HAND_EQUIPPED (1 << 1)
 
 class CompoundTag {
 public:

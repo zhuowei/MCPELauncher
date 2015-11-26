@@ -314,7 +314,11 @@ public class ScriptManager {
 		entityAddedCallback(nativeGetPlayerEnt());
 
 		// recipes must be re-registered after every set level
-		if (!isRemote) NativeItemApi.reregisterRecipes();
+		if (!isRemote) runOnMainThreadList.add(new Runnable() {
+			public void run() {
+				NativeItemApi.reregisterRecipes();
+			}
+		});
 
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
@@ -1528,6 +1532,7 @@ public class ScriptManager {
 	public static native void nativeClearCapes();
 	public static native void nativeSetHandEquipped(int id, boolean handEquipped);
 	public static native void nativeSpawnerSetEntityType(int x, int y, int z, int type);
+	public static native int nativeSpawnerGetEntityType(int x, int y, int z);
 	public static native void nativeDefineArmor(int id, String iconName, int iconIndex, String name,
 			String texture, int damageReduceAmount, int maxDamage, int armorType);
 	public static native void nativeScreenChooserSetScreen(int id);
@@ -2038,6 +2043,14 @@ public class ScriptManager {
 				throw new RuntimeException("Block at " + x + ":" + y + ":" + z + " is not a mob spawner!");
 			}
 			nativeSpawnerSetEntityType(x, y, z, type);
+		}
+
+		@JSStaticFunction
+		public static int getSpawnerEntityType(int x, int y, int z) {
+			if (getTile(x, y, z) != 52) {
+				throw new RuntimeException("Block at " + x + ":" + y + ":" + z + " is not a mob spawner!");
+			}
+			return nativeSpawnerGetEntityType(x, y, z);
 		}
 
 		@JSStaticFunction

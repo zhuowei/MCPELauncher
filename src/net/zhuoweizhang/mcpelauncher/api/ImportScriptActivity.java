@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import net.zhuoweizhang.mcpelauncher.R;
+import net.zhuoweizhang.mcpelauncher.ScriptManager;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -22,6 +23,9 @@ public class ImportScriptActivity extends ImportActivity {
 		try {
 			File to = new File(getDir(SCRIPTS_DIR, 0), mFile.getName());
 			PatchUtils.copy(mFile, to);
+			ScriptManager.androidContext = this.getApplicationContext();
+			ScriptManager.loadEnabledScriptsNames(this.getApplicationContext());
+			ScriptManager.setEnabled(to, true);
 			Toast.makeText(this, R.string.script_imported, Toast.LENGTH_LONG)
 					.show();
 			setResult(RESULT_OK);

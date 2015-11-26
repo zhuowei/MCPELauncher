@@ -9,6 +9,7 @@ public class EntityType {
 	public static final int VILLAGER = 15;
 	public static final int MUSHROOM_COW = 16;
 	public static final int SQUID = 17;
+	public static final int RABBIT = 18;
 	public static final int BAT = 19;
 	public static final int IRON_GOLEM = 20;
 	public static final int SNOW_GOLEM = 21;

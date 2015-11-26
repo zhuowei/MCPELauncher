@@ -45,7 +45,7 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
-//#define GAMERENDERER_GETFOV_SIZE 0x134
+#define GAMERENDERER_GETFOV_SIZE 0x13c
 // MinecartRideable::interactWithPlayer
 #define ENTITY_VTABLE_OFFSET_START_RIDING 29
 // LegacyClientNetworkHandler::handleEntityLink
@@ -96,9 +96,9 @@ static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_GameMode_tick_real)(void*);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
+static float (*bl_LevelRenderer_getFov)(void*, float, int);
+static float (*bl_LevelRenderer_getFov_real)(void*, float, int);
 /*
-static float (*bl_GameRenderer_getFov)(void*, float, int);
-static float (*bl_GameRenderer_getFov_real)(void*, float, int);
 static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 */
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
@@ -143,10 +143,8 @@ Entity* bl_removedEntity = NULL;
 
 int bl_frameCallbackRequested = 0;
 
-/*
 static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
 static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
-*/
 
 extern bool bl_onLockDown;
 
@@ -602,7 +600,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Entity_setOnFire(entity, howLong);
 }
 
-float bl_GameRenderer_getFov_hook(void* gameRenderer, float datFloat, int datBoolean) {
+float bl_LevelRenderer_getFov_hook(void* levelRenderer, float datFloat, int datBoolean) {
 	return bl_newfov;
 }
 
@@ -791,15 +789,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
   (JNIEnv *env, jclass clazz, jfloat newfov, jboolean override) {
 	bl_newfov = newfov;
-/*
 	if (override) {
-		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_GameRenderer_getFov) & ~1),
+		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_LevelRenderer_getFov) & ~1),
 			getFovHooked, sizeof(getFovHooked));
 	} else {
-		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_GameRenderer_getFov) & ~1),
+		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_LevelRenderer_getFov) & ~1),
 			getFovOriginal, sizeof(getFovOriginal));
 	}
-*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeOnGraphicsReset
@@ -1199,15 +1195,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
-/*
-	void* getFov = dlsym(RTLD_DEFAULT, "_ZN12GameRenderer6getFovEfb");
+	void* getFov = dlsym(RTLD_DEFAULT, "_ZN13LevelRenderer6getFovEfb");
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
-	mcpelauncher_hook(getFov, &bl_GameRenderer_getFov_hook, (void**) &bl_GameRenderer_getFov_real);
+	mcpelauncher_hook(getFov, (void*) &bl_LevelRenderer_getFov_hook, (void**) &bl_LevelRenderer_getFov_real);
 	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
 	// start off with original FOV
 	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, sizeof(getFovOriginal));
-	bl_GameRenderer_getFov = getFov;
-*/
+	bl_LevelRenderer_getFov = (float (*)(void*, float, int)) getFov;
 
 	bl_Player_getCarriedItem = (ItemInstance* (*)(Player*))
 		dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
