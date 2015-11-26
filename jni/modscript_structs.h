@@ -66,10 +66,10 @@ public:
 	float motionX; //44 found in Entity::rideTick(); should be set to 0 there
 	float motionY; //48
 	float motionZ; //52
-	float yaw; //56 Entity::setRot
-	float pitch; //60
-	float prevYaw; //64
-	float prevPitch; //68
+	float pitch; //56 Entity::setRot
+	float yaw; //60
+	float prevPitch; //64
+	float prevYaw; //68
 
 	char filler4[244-104]; //72
 	int renderType; //244
