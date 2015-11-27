@@ -130,7 +130,8 @@ public:
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 
-typedef struct {
+class Block {
+public:
 	void** vtable; //0
 	unsigned char id; // 4
 	char filler0[16-5]; //5
@@ -143,7 +144,11 @@ typedef struct {
 	char filler3[100-92]; // 92
 	float destroyTime; //100
 	float explosionResistance; //104
-} Block;
+
+	float getDestroySpeed();
+	float getFriction();
+	void setFriction(float);
+};
 #define Tile Block
 
 typedef struct {

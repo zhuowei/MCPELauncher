@@ -20,5 +20,6 @@ public:
 	LevelChunk*	getChunk(int, int);
 	void		fireBlockEvent(int, int, int, int, int);
 	Dimension*	getDimension();
+	bool		canSeeSky(int, int, int);
 };
 #define TileSource BlockSource

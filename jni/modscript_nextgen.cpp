@@ -1969,6 +1969,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (attrib) attrib->setMaxValue(halfhearts);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobMaxHealth
+  (JNIEnv *env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return -1;
+	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	if (attrib) return attrib->getMaxValue();
+	return -1;
+}
+
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetHunger
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
@@ -2216,6 +2225,33 @@ mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Ent
 		return foundIter->second;
 	}
 	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
+  (JNIEnv *env, jclass clazz, jint blockId, jint damage) {
+	Block* block = bl_Block_mBlocks[blockId];
+	if (!block) return -1;
+	return block->getDestroySpeed();
+}
+
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetFriction
+  (JNIEnv *env, jclass clazz, jint blockId) {
+	Block* block = bl_Block_mBlocks[blockId];
+	if (!block) return -1;
+	return block->getFriction();
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetFriction
+  (JNIEnv *env, jclass clazz, jint blockId, jfloat friction) {
+	Block* block = bl_Block_mBlocks[blockId];
+	if (!block) return;
+	block->setFriction(friction);
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelCanSeeSky
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (!bl_localplayer) return false;
+	return bl_localplayer->getRegion()->canSeeSky(x, y, z);
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

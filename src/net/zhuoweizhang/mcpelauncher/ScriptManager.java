@@ -1570,6 +1570,12 @@ public class ScriptManager {
 	public static native void nativePlayerSetLevel(int value);
 	public static native void nativePlayerAddExperience(int value);
 
+	public static native int nativeGetMobMaxHealth(long entity);
+	public static native float nativeBlockGetDestroyTime(int id, int data);
+	public static native float nativeBlockGetFriction(int id);
+	public static native void nativeBlockSetFriction(int id, float friction);
+	public static native boolean nativeLevelCanSeeSky(int x, int y, int z);
+
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
 
@@ -2073,6 +2079,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setRainLevel(double val) {
 			nativeLevelSetRainLevel((float) val);
+		}
+
+		@JSStaticFunction
+		public static boolean canSeeSky(int x, int y, int z) {
+			return nativeLevelCanSeeSky(x, y, z);
 		}
 
 		@Override
@@ -2696,6 +2707,11 @@ public class ScriptManager {
 			nativeMobSetArmor(entityId, slot, id, damage);
 		}
 
+		@JSStaticFunction
+		public static int getMaxHealth(Object entity) {
+			return nativeGetMobMaxHealth(getEntityId(entity));
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";
@@ -3266,6 +3282,21 @@ public class ScriptManager {
 				if (validIds[i]) retval[b++] = i;
 			}
 			return retval;
+		}
+
+		@JSStaticFunction
+		public static double getDestroyTime(int id, int damage) {
+			return nativeBlockGetDestroyTime(id, damage);
+		}
+
+		@JSStaticFunction
+		public static double getFriction(int id, int damage) {
+			return nativeBlockGetFriction(id);
+		}
+
+		@JSStaticFunction
+		public static void setFriction(int id, double friction) {
+			nativeBlockSetFriction(id, (float)friction);
 		}
 
 		@Override
