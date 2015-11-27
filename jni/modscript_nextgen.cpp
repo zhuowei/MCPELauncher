@@ -1575,6 +1575,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
   (JNIEnv *env, jclass clazz) {
+	if (!bl_level) return -1;
 	HitResult const& objectMouseOver = bl_level->getHitResult();
 	if (objectMouseOver.type != HIT_RESULT_ENTITY) return -1;
 	//Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
@@ -1585,6 +1586,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeP
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
   (JNIEnv *env, jclass clazz, jint axis) {
+	if (!bl_level) return -1;
 	HitResult const& objectMouseOver = bl_level->getHitResult();
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "hit %d %d %d %d", objectMouseOver->type,
 	//	objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
@@ -1604,6 +1606,22 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_DATA:
 			return bl_localplayer->getRegion()->getData(
 				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
+		default:
+			return -1;
+	}
+}
+
+JNIEXPORT float JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedVec
+  (JNIEnv *env, jclass clazz, jint axis) {
+	if (!bl_level) return -1;
+	HitResult const& objectMouseOver = bl_level->getHitResult();
+	switch (axis) {
+		case AXIS_X:
+			return objectMouseOver.hitVec.x;
+		case AXIS_Y:
+			return objectMouseOver.hitVec.y;
+		case AXIS_Z:
+			return objectMouseOver.hitVec.z;
 		default:
 			return -1;
 	}

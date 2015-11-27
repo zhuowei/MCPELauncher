@@ -217,7 +217,8 @@ public class ScriptManager {
 
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
-		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class
+		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class,
+		BlockFace.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -1512,6 +1513,7 @@ public class ScriptManager {
 	public static native long nativePlayerGetPointedEntity();
 
 	public static native int nativePlayerGetPointedBlock(int type);
+	public static native float nativePlayerGetPointedVec(int axis);
 
 	public static native int nativeLevelGetBiome(int x, int z);
 	public static native String nativeLevelGetBiomeName(int x, int z);
@@ -2232,6 +2234,22 @@ public class ScriptManager {
 		public static int getPointedBlockSide() {
 			return nativePlayerGetPointedBlock(0x10 + 2);
 		}
+
+		@JSStaticFunction
+		public static double getPointedVecX() {
+			return nativePlayerGetPointedVec(AXIS_X);
+		}
+
+		@JSStaticFunction
+		public static double getPointedVecY() {
+			return nativePlayerGetPointedVec(AXIS_Y);
+		}
+
+		@JSStaticFunction
+		public static double getPointedVecZ() {
+			return nativePlayerGetPointedVec(AXIS_Z);
+		}
+
 
 		/*
 		 * @JSStaticFunction public static void setInventorySlot(int slot, int
