@@ -1715,8 +1715,9 @@ public class MainActivity extends NativeActivity {
 				&& addonManager.isEnabled(app.packageName)) {
 				try {
 					if (!isAddonCompat(targetMCPEVersion)) {
-						throw new Exception("The addon " + app.packageName +
-							" is not compatible with this version of Minecraft PE.");
+						throw new Exception("The addon \"" + pm.getApplicationLabel(app).toString() +
+							"\" (" + app.packageName + ")" +
+							" is not compatible with Minecraft PE " + mcPkgInfo.versionName + ".");
 					}
 					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
 					loadedAddons.add(app.packageName);
