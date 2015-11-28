@@ -49,8 +49,8 @@ typedef void Font;
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 //#define MOB_TARGET_OFFSET 3156
-// found in both GameRenderer::moveCameraToPlayer and Minecraft::setLevel
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 180
+// found in MinecraftClient::getCameraTargetPlayer
+#define MINECRAFT_CAMERA_ENTITY_OFFSET 116
 // Updated 0.13.0
 // found in ChatScreen::setTextboxText
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 160
@@ -1596,7 +1596,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_minecraft->setCameraTargetPlayer(static_cast<Mob*>(entity));
+	*((Entity**) (((uintptr_t) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET)) = entity;
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
@@ -2393,13 +2393,9 @@ void bl_setuphooks_cppside() {
 	//bl_Level_addListener = (void (*) (Level*, LevelListener*))
 	//	dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
 
-	bl_RakNetInstance_connect_real = (void (*) (RakNetInstance*, char const*, int))
-		dlsym(RTLD_DEFAULT, "_ZN14RakNetInstance7connectEPKci");
+	void* raknet_connect = dlsym(mcpelibhandle, "_ZN14RakNetInstance7connectEPKci");
 
-	// FIXME 0.13
-	//void** raknetVTable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV14RakNetInstance");
-	//bl_dumpVtable(raknetVTable, 0x100);
-	//raknetVTable[vtable_indexes.raknet_instance_connect] = (void*) &bl_RakNetInstance_connect_hook;
+	mcpelauncher_hook(raknet_connect, (void*) &bl_RakNetInstance_connect_hook, (void**) &bl_RakNetInstance_connect_real);
 
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
 	//I have no idea why I have to subtract 24 (or add 8).
