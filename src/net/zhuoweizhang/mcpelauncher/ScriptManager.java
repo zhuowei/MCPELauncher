@@ -568,6 +568,11 @@ public class ScriptManager {
 		callScriptMethod("eatHook", hearts, notHearts);
 	}
 
+	@CallbackName(name="redstoneUpdateHook", args={"x", "y", "z", "newCurrent", "someBooleanIDontKnow", "blockId", "blockData"})
+	public static void redstoneUpdateCallback(int x, int y, int z, int newCurrent, boolean something, int blockId, int blockData) {
+		callScriptMethod("redstoneUpdateHook", x, y, z, newCurrent, something, blockId, blockData);
+	}
+
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
 		System.out.println("Get sound input stream");
 		if (MainActivity.currentMainActivity != null) {
@@ -1574,6 +1579,7 @@ public class ScriptManager {
 	public static native float nativeBlockGetDestroyTime(int id, int data);
 	public static native float nativeBlockGetFriction(int id);
 	public static native void nativeBlockSetFriction(int id, float friction);
+	public static native void nativeBlockSetRedstoneConsumer(int id, boolean yep);
 	public static native boolean nativeLevelCanSeeSky(int x, int y, int z);
 
 	// setup
@@ -3297,6 +3303,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setFriction(int id, double friction) {
 			nativeBlockSetFriction(id, (float)friction);
+		}
+
+		@JSStaticFunction
+		public static void setRedstoneConsumer(int id, boolean enabled) {
+			nativeBlockSetRedstoneConsumer(id, enabled);
 		}
 
 		@Override

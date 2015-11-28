@@ -130,6 +130,9 @@ public:
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 
+enum CreativeItemCategory {
+};
+
 class Block {
 public:
 	void** vtable; //0
@@ -148,7 +151,11 @@ public:
 	float getDestroySpeed();
 	float getFriction();
 	void setFriction(float);
+	void setSolid(bool);
+	void setCategory(CreativeItemCategory);
 };
+
+static_assert(offsetof(Block, renderLayer) == 56, "renderlayer is wrong");
 #define Tile Block
 
 typedef struct {
@@ -296,13 +303,13 @@ typedef struct {
 } Color;
 
 typedef struct {
-	bool shouldBeFalse; // 0
-	float x1; // 4
-	float y1; // 8
-	float z1; // 12
-	float x2; // 16
-	float y2; // 20
-	float z2; // 24
+	float x1; // 0
+	float y1; // 4
+	float z1; // 8
+	float x2; // 12
+	float y2; // 16
+	float z2; // 20
+	bool shouldBeFalse; // 24
 } AABB;
 
 typedef struct {

@@ -38,6 +38,7 @@
 #include "mcpe/util.h"
 #include "mcpe/itemrenderer.h"
 #include "mcpe/mce/textureptr.h"
+#include "mcpe/circuit.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -209,6 +210,10 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_visual_shape;
 	//int raknet_instance_connect;
 	int mobrenderer_get_skin_ptr;
+	int tile_on_redstone_update;
+	int tile_is_redstone_block;
+	int tile_on_loaded;
+	int tile_on_place;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -229,6 +234,14 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	//	"_ZN14RakNetInstance7connectEPKci");
 	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZNK11MobRenderer10getSkinPtrER6Entity");
+	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
+	vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZNK5Block15isRedstoneBlockEv");
+	vtable_indexes.tile_on_loaded = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block8onLoadedER11BlockSourceRK8BlockPos");
+	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZN5Block7onPlaceER11BlockSourceRK8BlockPos");
 }
 
 extern "C" {
@@ -309,6 +322,7 @@ bool bl_custom_block_collisionDisabled[256];
 int* bl_custom_block_colors[256];
 AABB** bl_custom_block_visualShapes[256];
 //end custom blocks
+unsigned char bl_custom_block_redstone[256];
 
 std::vector<short*> bl_creativeItems;
 
@@ -374,6 +388,7 @@ static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
+static void (*bl_Block_onPlace)(Block*, BlockSource&, BlockPos const&);
 
 static bool* bl_Block_mSolid;
 
@@ -403,6 +418,11 @@ bool bl_onLockDown = false;
 
 static int bl_item_id_count = 512;
 Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
+
+enum CustomBlockRedstoneType {
+	// this is a bitfield
+	REDSTONE_CONSUMER = (1 << 0),
+};
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->getUniqueID() == entityId) {
@@ -613,11 +633,46 @@ AABB& bl_CustomBlock_getVisualShape_hook(Tile* tile, unsigned char data, AABB& a
 	return *aabbout;
 }
 
-bool bl_CraftingFilters_isStonecutterItem_hook(ItemInstance const& myitem) {
-	int itemId = bl_ItemInstance_getId((ItemInstance*) &myitem);
-	char itemStatus = bl_stonecutter_status[itemId];
-	if (itemStatus == STONECUTTER_STATUS_DEFAULT) return bl_CraftingFilters_isStonecutterItem_real(myitem);
-	return itemStatus == STONECUTTER_STATUS_FORCE_TRUE;
+bool bl_CustomBlock_isRedstoneBlock_hook(Block* block) {
+	return bl_custom_block_redstone[block->id] != 0;
+}
+
+void bl_CustomBlock_onRedstoneUpdate_hook(Block* block, BlockSource& source, BlockPos const& pos, int newLevel, bool something) {
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	int blockId = source.getBlockID(pos);
+	int blockData = source.getData(pos);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "redstoneUpdateCallback", "(IIIIZII)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, pos.x, pos.y, pos.z, newLevel, something, blockId, blockData);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+}
+
+void bl_CustomBlock_onLoaded_hook(Block* block, BlockSource& source, BlockPos const& pos) {
+	if (source.getLevel()->isClientSide()) return;
+	if (bl_custom_block_redstone[block->id] & REDSTONE_CONSUMER) {
+		ConsumerComponent* component = source.getDimension()->getCircuitSystem()->create<ConsumerComponent>(
+			pos, &source, 0);
+		if (component) {
+			component->setToOne = true;
+		}
+	}
+}
+
+void bl_CustomBlock_onPlace_hook(Block* block, BlockSource& source, BlockPos const& pos) {
+	bl_Block_onPlace(block, source, pos);
+	if (bl_custom_block_redstone[block->id]) {
+		bl_CustomBlock_onLoaded_hook(block, source, pos);
+	}
 }
 
 void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddress, TextPacket* packet) {
@@ -1140,6 +1195,12 @@ void bl_initCustomBlockVtable() {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
+	bl_Block_onPlace = (void (*)(Block*, BlockSource&, BlockPos const&))
+		bl_CustomBlock_vtable[vtable_indexes.tile_on_place];
+	bl_CustomBlock_vtable[vtable_indexes.tile_on_place] = (void*) &bl_CustomBlock_onPlace_hook;
 	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
 }
 
@@ -1189,7 +1250,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 
 	bl_set_i18n("tile." + nameStr + ".name", nameStr);
 	retval->renderType = renderShape;
-	bl_Block_mSolid[blockId] = opaque;
+	retval->setSolid(opaque);
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
 	//now allocate the item
@@ -1256,7 +1317,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 			bl_custom_block_visualShapes[blockId] = aabbs = new AABB*[15]();
 		}
 		AABB* theAABB = aabbs[damage - 1];
-		if (!theAABB) aabbs[damage - 1] = theAABB = new AABB;
+		if (!theAABB) aabbs[damage - 1] = theAABB = new AABB();
 		theAABB->shouldBeFalse = false;
 		theAABB->x1 = v1;
 		theAABB->y1 = v2;
@@ -1438,6 +1499,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
 	Item* myitem = bl_Item_mItems[itemId];
 	bl_Item_setCategory(myitem, category);
+	if (itemId < 256) {
+		Block* myblock = bl_Block_mBlocks[itemId];
+		myblock->setCategory((CreativeItemCategory)category);
+	}
 }
 
 void bl_sendPacket(Packet* packet) {
@@ -1549,7 +1614,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
   (JNIEnv *env, jclass clazz) {
 	if (!bl_level) return false;
-	return !bl_level->isClientSide();
+	return bl_level->isClientSide();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
@@ -2252,6 +2317,12 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
 	if (!bl_localplayer) return false;
 	return bl_localplayer->getRegion()->canSeeSky(x, y, z);
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRedstoneConsumer
+  (JNIEnv *env, jclass clazz, jint blockId, jboolean enabled) {
+	if (enabled) bl_custom_block_redstone[blockId] |= REDSTONE_CONSUMER;
+	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

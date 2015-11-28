@@ -11,7 +11,9 @@ class BlockSource {
 public:
 	void		setBlockAndData(int, int, int, FullBlock, int);
 	BlockID		getBlockID(int, int, int);
+	BlockID		getBlockID(BlockPos const&);
 	int		getData(int, int, int);
+	int		getData(BlockPos const&);
 	BlockBrightness	getRawBrightness(int, int, int, bool);
 	BlockEntity*	getBlockEntity(int, int, int);
 	int		getGrassColor(BlockPos const&);
@@ -21,5 +23,6 @@ public:
 	void		fireBlockEvent(int, int, int, int, int);
 	Dimension*	getDimension();
 	bool		canSeeSky(int, int, int);
+	Level*		getLevel();
 };
 #define TileSource BlockSource
