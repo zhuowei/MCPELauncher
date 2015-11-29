@@ -1546,10 +1546,23 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return nullptr;
-	const char* retval = ""; // FIXME 0.13
+	const char* retval;
 	auto foundIter = bl_mobTexturesMap.find(entity->getUniqueID());
 	if (foundIter != bl_mobTexturesMap.end()) {
 		retval = foundIter->second.textureName.c_str();
+	} else {
+		// get the entity renderer and ask it for the skin
+		EntityRenderer* renderer = EntityRenderDispatcher::getInstance().getRenderer(*entity);
+		if (renderer != nullptr) {
+			void** vtable = *((void***)renderer);
+			mce::TexturePtr const& (*getSkinPtr)(EntityRenderer*, Entity*)
+				= (mce::TexturePtr const& (*)(EntityRenderer*, Entity*))
+				vtable[vtable_indexes.mobrenderer_get_skin_ptr - 2];
+			mce::TexturePtr const& texPtr = getSkinPtr(renderer, entity);
+			retval = texPtr.textureName.c_str();
+		} else {
+			retval = "";
+		}
 	}
 	jstring returnValString = env->NewStringUTF(retval);
 	return returnValString;
@@ -2039,26 +2052,6 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 	unsigned int bottomInst = lowerHalf | 0xf800;
 	buffer[0] = (uint16_t) topInst;
 	buffer[1] = (uint16_t) bottomInst;
-}
-
-static void patchUnicodeFont(void* mcpelibhandle) {
-	void* setUnicodeTexture = dlsym(mcpelibhandle, "_ZN4Font17setUnicodeTextureEi");
-	if (setUnicodeTexture == NULL) return;
-	void* loadTexture = dlsym(mcpelibhandle, "_ZN8Textures11loadTextureERKSsbb");
-	void* getTextureData = dlsym(mcpelibhandle, "_ZN8Textures14getTextureDataERKSs");
-	uint16_t* setUnicodeTexture_b = (uint16_t*) ((uintptr_t) setUnicodeTexture & ~1);
-	int offset = 0x267eb0 - 0x267e74;
-	uint16_t buf[2];
-	generateBl(buf, ((uintptr_t) setUnicodeTexture) + offset + 4, (uintptr_t) loadTexture);
-	if (buf[0] != setUnicodeTexture_b[offset >> 1] || buf[1] != setUnicodeTexture_b[(offset >> 1) + 1]) {
-		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "not buf: %x %x %x %x",
-			(int) buf[0], (int) buf[1], (int) setUnicodeTexture_b[offset >> 1], (int) setUnicodeTexture_b[(offset >> 1) + 1]);
-		return;
-	}
-	generateBl(buf, ((uintptr_t) setUnicodeTexture) + offset + 4, (uintptr_t) getTextureData);
-	uint16_t* setUnicodeTexture_m = (uint16_t*) bl_marauder_translation_function((void*) setUnicodeTexture_b);
-	setUnicodeTexture_m[offset >> 1] = buf[0];
-	setUnicodeTexture_m[(offset >> 1) + 1] = buf[1];
 }
 
 void bl_forceTextureLoad(std::string const& name) {
@@ -2610,7 +2603,6 @@ void bl_setuphooks_cppside() {
 		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
-	//patchUnicodeFont(mcpelibhandle);
 	bl_renderManager_init(mcpelibhandle);
 }
 

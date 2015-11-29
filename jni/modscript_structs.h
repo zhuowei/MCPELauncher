@@ -386,6 +386,12 @@ public:
 	HitResult const& getHitResult();
 };
 
+class EntityRenderDispatcher {
+public:
+	EntityRenderer* getRenderer(Entity&);
+	static EntityRenderDispatcher& getInstance();
+};
+
 #include "mcpe/blockentity/chestblockentity.h"
 #include "mcpe/blockentity/furnaceblockentity.h"
 #include "mcpe/blockentity/mobspawnerblockentity.h"
