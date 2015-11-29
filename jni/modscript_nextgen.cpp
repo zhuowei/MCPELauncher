@@ -13,6 +13,9 @@
 
 #include "utf8proc.h"
 
+#include "json/value.h"
+#include "json/reader.h"
+
 #include "dl_internal.h"
 #include "mcpelauncher.h"
 #include "modscript.h"
@@ -2323,6 +2326,22 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
   (JNIEnv *env, jclass clazz, jint blockId, jboolean enabled) {
 	if (enabled) bl_custom_block_redstone[blockId] |= REDSTONE_CONSUMER;
 	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
+  (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
+	Item* item = bl_Item_mItems[itemId];
+	if (!item) return false;
+	const char * utfChars = env->GetStringUTFChars(text, NULL);
+	Json::Value jsonValue;
+	Json::Reader jsonReader;
+	bool ret = false;
+	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
+		ret = true;
+		item->init(jsonValue);
+	}
+	env->ReleaseStringUTFChars(text, utfChars);
+	return ret;
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

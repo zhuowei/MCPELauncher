@@ -1581,6 +1581,7 @@ public class ScriptManager {
 	public static native void nativeBlockSetFriction(int id, float friction);
 	public static native void nativeBlockSetRedstoneConsumer(int id, boolean yep);
 	public static native boolean nativeLevelCanSeeSky(int x, int y, int z);
+	public static native boolean nativeItemSetProperties(int id, String json);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2780,19 +2781,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setFoodItem(int id, String iconName, int iconSubindex, int halfhearts,
 				String name, int maxStackSize) {
-			try {
-				Integer.parseInt(iconName);
-				throw new IllegalArgumentException("The item icon for " + name.trim()
-					+ " is not updated for 0.8.0. Please ask the script author to update");
-			} catch (NumberFormatException e) {
-			}
-			if (id < 0 || id >= ITEM_ID_COUNT) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < " + ITEM_ID_COUNT);
-			}
-			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
-				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
-			}
-			nativeDefineFoodItem(id, iconName, iconSubindex, halfhearts, name, maxStackSize);
+			setItem(id, iconName, iconSubindex, name, maxStackSize);
+			NativeItemApi.setProperties(id, "{\"use_animation\":\"eat\",\"use_duration\": 32," +
+				"\"food\":{\"nutrition\":" + halfhearts + ",\"saturation_modifier\": \"normal\"," +
+				"\"is_meat\": false}}");
 		}
 
 		// nonstandard
@@ -3147,6 +3139,23 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static boolean isValidItem(int id) {
 			return nativeIsValidItem(id);
+		}
+
+		@JSStaticFunction
+		public static void setProperties(int id, Object props) {
+			if (!isValidItem(id)) throw new RuntimeException(id + " is not a valid item");
+			String theJson;
+			if (props instanceof CharSequence || ScriptRuntime.typeof(props).equals("string")) {
+				theJson = props.toString();
+			} else if (props instanceof Scriptable) {
+				Scriptable s = (Scriptable) props;
+				theJson = NativeJSON.stringify(Context.getCurrentContext(), s.getParentScope(), s, null, "").toString();
+			} else {
+				// What is this
+				throw new RuntimeException("Invalid input to setProperties: " + props + " cannot be converted to JSON");
+			}
+			boolean ret = nativeItemSetProperties(id, theJson);
+			if (!ret) throw new RuntimeException("Failed to set properties for item " + id);
 		}
 
 		@Override

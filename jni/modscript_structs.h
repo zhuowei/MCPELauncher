@@ -95,6 +95,10 @@ struct TextureUVCoordinateSet {
 	};
 };
 
+namespace Json {
+	class Value;
+};
+
 // Updated 0.13.0
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 class Item {
@@ -108,6 +112,7 @@ public:
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
+	void init(Json::Value&);
 };
 
 #define ITEM_HAND_EQUIPPED (1 << 1)
