@@ -109,7 +109,7 @@ static void (*bl_Entity_setOnFire)(Entity*, int);
 static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_MinecraftClient_setGameMode)(MinecraftClient*, int);
-static ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
+ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);

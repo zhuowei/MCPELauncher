@@ -48,7 +48,7 @@ void bl_renderManager_clearRenderTypes();
 extern void** bl_EntityRenderDispatcher_instance;
 extern EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 extern void bl_cape_init(void* mcpelibhandle);
-extern ItemInstance* (*bl_Player_getArmor)(Player*, int);
+extern ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
 
 void bl_dumpVtable(void** vtable, size_t size);
 
@@ -58,7 +58,12 @@ void bl_dumpVtable(void** vtable, size_t size);
 #define BL_ITEMS_EXPANDED_COUNT 4096
 
 #ifdef __cplusplus
-extern std::array<std::string, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
+
+namespace mce {
+	class TexturePtr;
+};
+
+extern std::array<mce::TexturePtr*, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
 #endif
 
 void bl_Entity_setPos_helper(Entity*, float, float, float);

@@ -1339,9 +1339,6 @@ public class ScriptManager {
 	public static native void nativeDefineItem(int itemId, String iconName, int iconId,
 			String name, int maxStackSize);
 
-	public static native void nativeDefineFoodItem(int itemId, String iconName, int iconId,
-			int hearts, String name, int maxStackSize);
-
 	// nonstandard
 	public static native void nativeSetFov(float degrees, boolean override);
 

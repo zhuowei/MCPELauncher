@@ -196,14 +196,19 @@ public:
 }; // 160 bytes
 static_assert(sizeof(ModelPart) == 160, "modelpart size wrong");
 
+namespace mce {
+	class TexturePtr;
+};
+
 // from HumanoidModel::render
 
 typedef struct {
 	void** vtable; //0
 	char filler[13-4]; // 4
 	bool riding; // 13
-	char filler1[20-14]; // 14
-	MaterialPtr* activeMaterial; // 20
+	char filler1[16-14]; // 14
+	MaterialPtr* activeMaterial; // 16
+	mce::TexturePtr* activeTexture; // 20
 	MaterialPtr materialNormal; // 24
 	MaterialPtr materialAlphaTest; // 36
 	MaterialPtr materialAlphaBlend; // 48
@@ -225,6 +230,7 @@ typedef struct {
 	char filler3[1276-1266]; // 1266
 } HumanoidModel;
 static_assert(sizeof(HumanoidModel) == 1276, "HumanoidModel size");
+static_assert(offsetof(HumanoidModel, activeTexture) == 20, "active texture");
 
 typedef struct {
 	Item* item; //0

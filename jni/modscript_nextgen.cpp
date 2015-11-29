@@ -80,8 +80,6 @@ const size_t kTileSize = 0x8c;
 const size_t kBlockItemSize = 68;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = 64;
-// found in Item::initItems item with id 4
-const size_t kFoodItemSize = 100;
 // found in Entity::spawnAtLocation
 const size_t kItemEntitySize = 384;
 // found in Entity::spawnAtLocation
@@ -362,7 +360,7 @@ static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
 static void* (*bl_MinecraftClient_getGui)(MinecraftClient* minecraft);
 static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
-static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, int, void*, int, int);
+static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
@@ -370,7 +368,6 @@ static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, Vec3 const&, ItemInstance const&, int);
-static void (*bl_FoodItem_FoodItem)(Item*, int, int, bool, float);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 static bool (*bl_Zombie_isBaby)(Entity*);
@@ -926,20 +923,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	tile->renderType = renderType;
 }
 
+static void bl_registerItem(Item* item, std::string const& name) {
+	bl_Item_mItems[item->itemId] = item;
+	std::string lowercaseStr = Util::toLower(name);
+	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
+}
+
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, name, id - 0x100);
-	//retval->category2 = 0;
-	bl_Item_mItems[id] = retval;
-	std::string lowercaseStr = Util::toLower(name);
-	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(retval));
-	return retval;
-}
-
-Item* bl_constructFoodItem(int id, int hearts, float timetoeat) {
-	Item* retval = (Item*) ::operator new(kFoodItemSize);
-	bl_FoodItem_FoodItem(retval, id - 0x100, hearts, false, timetoeat);
-	//retval->category2 = 0;
+	bl_registerItem(retval, name);
 	return retval;
 }
 
@@ -965,56 +958,30 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jint halfhearts, jstring name, jint maxStackSize) {
-	Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem(env, clazz, id, iconName, iconIndex, name, maxStackSize);
-/* FIXME 0.13
-	Item* item = bl_constructFoodItem(id, halfhearts, 0.3f);
-
-	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
-	std::string iconNameString = std::string(iconUTFChars);
-	bl_Item_setIcon(item, iconNameString, iconIndex);
-
-	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	std::string mystr = std::string(utfChars);
-	if (maxStackSize <= 0) {
-		bl_Item_setMaxStackSize(item, 64);
-	} else {
-		bl_Item_setMaxStackSize(item, maxStackSize);
-	}
-	bl_Item_setNameID(item, mystr);
-	bl_set_i18n("item." + mystr + ".name", mystr);
-	env->ReleaseStringUTFChars(name, utfChars);
-	env->ReleaseStringUTFChars(iconName, iconUTFChars);
-*/
-}
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineArmor
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
 		jint damageReduceAmount, jint maxDamage, jint armorType) {
-	Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem(env, clazz, id, iconName, iconIndex, name, 1);
-/* FIXME 0.13
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+
 	ArmorItem* item = new ArmorItem;
-	bl_ArmorItem_ArmorItem(item, id - 0x100, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
+	bl_ArmorItem_ArmorItem(item, mystr, id - 0x100, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
+	bl_registerItem(item, mystr);
 	item->damageReduceAmount = damageReduceAmount;
 	bl_Item_setMaxDamage(item, maxDamage);
 
 	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
-	bl_armorRenders[id] = textureUTFChars;
+	if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
+	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), textureUTFChars);
 	env->ReleaseStringUTFChars(name, textureUTFChars);
-
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
 	bl_Item_setIcon(item, iconNameString, iconIndex);
 
-	const char * utfChars = env->GetStringUTFChars(name, NULL);
-	std::string mystr = std::string(utfChars);
-	bl_Item_setNameID(item, mystr);
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
-*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
@@ -2561,8 +2528,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK15MinecraftClient6getGuiEv");
 	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
 		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
-	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, int, void*, int, int))
-		dlsym(mcpelibhandle, "_ZN9ArmorItemC1EiRKNS_13ArmorMaterialEii");
+	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
+		dlsym(mcpelibhandle, "_ZN9ArmorItemC1ERKSsiRKNS_13ArmorMaterialEi9ArmorSlot");
 	//bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
 	//	dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
 	// FIXME 0.11
@@ -2588,9 +2555,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN3Mob12removeEffectEi");
 	bl_Mob_removeAllEffects = (void (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
-
-	bl_FoodItem_FoodItem = (void (*)(Item*, int, int, bool, float))
-		dlsym(mcpelibhandle, "_ZN8FoodItemC1Eiibf");
 
 	bl_ItemEntity_ItemEntity = (void (*)(Entity*, BlockSource&, Vec3 const&, ItemInstance const&, int))
 		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER11BlockSourceRK4Vec3RK12ItemInstancei");
