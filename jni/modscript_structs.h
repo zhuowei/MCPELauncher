@@ -231,6 +231,7 @@ typedef struct {
 } HumanoidModel;
 static_assert(sizeof(HumanoidModel) == 1276, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 20, "active texture");
+static_assert(offsetof(HumanoidModel, materialAlphaTest) == 36, "active texture");
 
 typedef struct {
 	Item* item; //0

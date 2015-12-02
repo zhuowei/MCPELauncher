@@ -215,6 +215,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_is_redstone_block;
 	int tile_on_loaded;
 	int tile_on_place;
+	int mob_set_sneaking;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -243,6 +244,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN5Block8onLoadedER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZN5Block7onPlaceER11BlockSourceRK8BlockPos");
+	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
+		"_ZN3Mob11setSneakingEb") - 2;
 }
 
 extern "C" {
@@ -1096,7 +1099,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jboolean doIt) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_Mob_setSneaking(entity, doIt);
+	void (*setSneaking)(Entity*, bool) = (void (*)(Entity*, bool)) entity->vtable[vtable_indexes.mob_set_sneaking];
+	setSneaking(entity, doIt);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsSneaking
@@ -1334,6 +1338,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv
   (JNIEnv *env, jclass clazz, jint id, jint count, jint damage) {
+	for (short* item: bl_creativeItems) {
+		if (item[0] == id && item[1] == damage) {
+			// already added to the creative inventory; ignore.
+			return;
+		}
+	}
 	bl_Item_addCreativeItem((short) id, (short) damage);
 	short* pair = new short[2];
 	pair[0] = (short) id;

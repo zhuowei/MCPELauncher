@@ -171,11 +171,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
     jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent,
     jfloat textureWidth, jfloat textureHeight) {
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
-	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
+	HumanoidModel* model = nullptr;
+	ModelPart* part = bl_renderManager_getModelPart_impl(rendererId, utfChars, &model);
 	part->textureOffsetX = textureX;
 	part->textureOffsetY = textureY;
 	//part->transparent = transparent;
-	if (transparent) part->material = &(((HumanoidModel*) part->model)->materialAlphaTest);
+	if (transparent) part->material = &(model->materialAlphaTest);
 	if (textureWidth > 0) part->textureWidth = textureWidth;
 	if (textureHeight > 0) part->textureHeight = textureHeight;
 	part->addBox(Vec3(xOffset, yOffset, zOffset), Vec3(width, height, depth), scale);

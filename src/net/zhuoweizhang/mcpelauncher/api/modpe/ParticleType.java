@@ -33,10 +33,12 @@ public final class ParticleType {
 	public static final int angryVillager = 30;
 	public static final int happyVillager = 31;
 	public static final int enchantmenttable = 32;
+	//public static final int something = 33;
+	public static final int note = 34;
 	private ParticleType() {}
 	public static boolean checkValid(int type, int data) {
-		if (type < 0 || type >= 33) {
-			throw new RuntimeException("Invalid particle type: must be between 1 and 33");
+		if (type < 0 || type > 34) {
+			throw new RuntimeException("Invalid particle type: must be between 1 and 34");
 		}
 		if (type == itemBreak && data < 0x100) {
 			throw new RuntimeException("Breaking item particle requires argument of id<<16|data");
