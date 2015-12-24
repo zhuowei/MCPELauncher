@@ -218,29 +218,22 @@ typedef struct {
 	MaterialPtr materialChangeColor; // 96
 	MaterialPtr materialGlint; // 108
 	MaterialPtr materialAlphaTestGlint; // 120
-#ifdef __i386
 	char filler2[156-132]; // 132
-#else
-	char filler2[144-132]; // 132
-#endif
-	ModelPart bipedHead;//144 / 156 x86
-	ModelPart bipedHeadwear;//304
-	ModelPart bipedBody;//464
-	ModelPart bipedRightArm;//624
-	ModelPart bipedLeftArm;//784
-	ModelPart bipedRightLeg;//944
-	ModelPart bipedLeftLeg;//1104
-	char mystery2[2]; // 1264
-	char filler3[1276-1266]; // 1266
+	ModelPart bipedHead;//156
+	ModelPart bipedHeadwear;//316
+	ModelPart bipedBody;//476
+	ModelPart bipedRightArm;//636
+	ModelPart bipedLeftArm;//796
+	ModelPart bipedRightLeg;//956
+	ModelPart bipedLeftLeg;//1116
+	char mystery2[2]; // 1276
+	char filler3[1276-1266]; // 1278
 } HumanoidModel;
-#ifdef __arm__
-static_assert(sizeof(HumanoidModel) == 1276, "HumanoidModel size");
+
+static_assert(sizeof(HumanoidModel) == 1288, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 20, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 36, "active texture");
-#endif
-#ifdef __i386
-static_assert(offsetof(HumanoidModel, bipedHead) == 156, "x86 HumanoidModel bipedHead");
-#endif
+static_assert(offsetof(HumanoidModel, bipedHead) == 156, "HumanoidModel bipedHead");
 
 typedef struct {
 	Item* item; //0
