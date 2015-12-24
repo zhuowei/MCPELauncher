@@ -922,6 +922,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 static void bl_registerItem(Item* item, std::string const& name) {
+	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
 	std::string lowercaseStr = Util::toLower(name);
 	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
@@ -1222,12 +1223,13 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	retval->setSolid(opaque);
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
+	// set default category
+	retval->setCategory((CreativeItemCategory) 2 /* Decoration */);
 	//now allocate the item
 	Item* tileItem = (Item*) ::operator new(kBlockItemSize);
 	bl_BlockItem_BlockItem(tileItem, nameStr, blockId - 0x100);
-	bl_Item_mItems[blockId] = tileItem;
-	std::string lowercaseStr = Util::toLower(nameStr);
-	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(tileItem));
+	bl_registerItem(tileItem, nameStr);
+	bl_Item_setCategory(tileItem, 2 /* Decoration */);
 	return retval;
 }
 
