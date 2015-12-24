@@ -49,10 +49,6 @@ typedef struct {
 #else
 #define GAMERENDERER_GETFOV_SIZE 0x13c
 #endif
-// MinecartRideable::interactWithPlayer
-#define ENTITY_VTABLE_OFFSET_START_RIDING 29
-// LegacyClientNetworkHandler::handleEntityLink
-#define ENTITY_VTABLE_OFFSET_STOP_RIDING 118
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -164,6 +160,8 @@ struct bl_vtable_indexes {
 	int mob_set_armor;
 	int entity_set_pos;
 	int mob_get_carried_item;
+	int entity_start_riding;
+	int entity_stop_riding;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -714,11 +712,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 	Entity* mount = bl_getEntityWrapper(bl_level, mountId);
 	if (rider == NULL) return;
 	if (mount == NULL) {
-		void* vtable = rider->vtable[ENTITY_VTABLE_OFFSET_STOP_RIDING];
+		void* vtable = rider->vtable[vtable_indexes.entity_stop_riding];
 		void (*fn)(Entity*, bool) = (void (*)(Entity*, bool)) vtable;
 		fn(rider, true);
 	} else {
-		void* vtable = rider->vtable[ENTITY_VTABLE_OFFSET_START_RIDING];
+		void* vtable = rider->vtable[vtable_indexes.entity_start_riding];
 		void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
 		fn(rider, mount);
 	}
@@ -1079,6 +1077,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN6Entity6setPosERK4Vec3") - 2;
 	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob14getCarriedItemEv") - 2;
+	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+		"_ZN6Entity11startRidingERS_") - 2;
+	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+		"_ZN6Entity10stopRidingEb") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;

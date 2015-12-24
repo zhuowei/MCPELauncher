@@ -168,7 +168,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="previous_command">Prev</string>
     <string name="next_command">Next</string>
     <string name="pref_zz_command_history">Enable command history on chat screen</string>
-    <string name="pref_zz_immersive_mode">Enable immersive mode</string>
+    <string name="pref_zz_immersive_mode">Fullscreen mode</string>
     <string name="pref_zz_immersive_mode_summary">Hide the navigation buttons during gameplay</string>
     <string name="pref_zz_watch_recording">Watch recordings</string>
     <string name="pref_zz_reshare_last_recording">Reshare last recording</string>
