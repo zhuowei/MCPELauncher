@@ -58,14 +58,6 @@ typedef void Font;
 // found in ChatScreen::setTextboxText
 #define CHATSCREEN_TEXTBOX_TEXT_OFFSET 160
 
-#ifdef __i386
-// FIXME 0.12
-#define MINECRAFT_TEXTURES_OFFSET 168
-#else
-// found in StartMenuScreen::render, or search for getTextureData
-#define MINECRAFT_TEXTURES_OFFSET 168
-#endif
-
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
 #define PLAYER_ABILITIES_OFFSET 3308
@@ -662,6 +654,8 @@ void bl_CustomBlock_onRedstoneUpdate_hook(Block* block, BlockSource& source, Blo
 
 void bl_CustomBlock_onLoaded_hook(Block* block, BlockSource& source, BlockPos const& pos) {
 	if (source.getLevel()->isClientSide()) return;
+#ifndef __i386
+	// FIXME i386: Redstone not supported on Intel Atom devices yet
 	if (bl_custom_block_redstone[block->id] & REDSTONE_CONSUMER) {
 		ConsumerComponent* component = source.getDimension()->getCircuitSystem()->create<ConsumerComponent>(
 			pos, &source, 0);
@@ -669,6 +663,7 @@ void bl_CustomBlock_onLoaded_hook(Block* block, BlockSource& source, BlockPos co
 			component->setToOne = true;
 		}
 	}
+#endif
 }
 
 void bl_CustomBlock_onPlace_hook(Block* block, BlockSource& source, BlockPos const& pos) {
@@ -2065,10 +2060,6 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 }
 
 void bl_forceTextureLoad(std::string const& name) {
-/* FIXME 0.13
-	void* textures = *((void**) ((uintptr_t) bl_minecraft + MINECRAFT_TEXTURES_OFFSET));
-	bl_Textures_getTextureData(textures, name);
-*/
 }
 
 void bl_cppNewLevelInit() {
@@ -2348,6 +2339,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	void* ItemInstance__setItem = dlsym(mcpelibhandle, "_ZN12ItemInstance8_setItemEi");
 	unsigned char* setItemCode = (unsigned char*)
 		bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance__setItem) & ~1));
+#ifdef __arm__
 	if (setItemCode[4] == 0x00 && setItemCode[5] == 0x7f) {
 		setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
 	} else if (setItemCode[2] == 0x00 && setItemCode[3] == 0x7f) {
@@ -2356,6 +2348,15 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
 		return;
 	}
+#endif
+#ifdef __i386
+	if (setItemCode[22] == 0xff && setItemCode[23] == 0x01) {
+		setItemCode[22] = (BL_ITEMS_EXPANDED_COUNT & 0xff); setItemCode[23] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+	} else {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
+		return;
+	}
+#endif
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 }
 

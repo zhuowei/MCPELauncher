@@ -36,8 +36,7 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.13
-#define PLAYER_INVENTORY_OFFSET 3448
+#define PLAYER_INVENTORY_OFFSET 3436
 #else
 #define PLAYER_INVENTORY_OFFSET 3448
 #endif
@@ -45,7 +44,11 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
+#ifdef __i386
+#define GAMERENDERER_GETFOV_SIZE 0x1d3
+#else
 #define GAMERENDERER_GETFOV_SIZE 0x13c
+#endif
 // MinecartRideable::interactWithPlayer
 #define ENTITY_VTABLE_OFFSET_START_RIDING 29
 // LegacyClientNetworkHandler::handleEntityLink
@@ -166,6 +169,7 @@ struct bl_vtable_indexes {
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
 
 #ifdef DLSYM_DEBUG
+#ifndef __i386
 
 void* debug_dlsym(void* handle, const char* symbol) {
 	dlerror();
@@ -176,6 +180,16 @@ void* debug_dlsym(void* handle, const char* symbol) {
 	}
 	return retval;
 }
+#else
+void* debug_dlsym(void* handle, const char* symbol) {
+	if (handle == RTLD_DEFAULT) handle = mcpelibhandle;
+	if (handle == nullptr) {
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Lib handle is null!");
+		abort();
+	}
+	return dobby_dlsym((soinfo2*)handle, symbol);
+}
+#endif
 
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
@@ -204,7 +218,7 @@ void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 
 #ifndef __arm__
 static void bl_panicTamper() {
-	((int*) 0x0) = 0x0;
+	*((int*) 0x0) = 0x0;
 }
 #else
 extern void bl_panicTamper();
@@ -1080,6 +1094,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 			vtable_indexes.minecraft_update = hash;
 		}
 	}
+}
+
+void bl_setmcpelibhandle(void* _mcpelibhandle) {
+	mcpelibhandle = (soinfo2*) _mcpelibhandle;
 }
 
 void bl_prepatch_cppside(void*);

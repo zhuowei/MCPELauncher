@@ -49,6 +49,13 @@ static void setupIsModded(void* mcpelibhandle) {
 	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
 	isModdedArray[0] = 1;
 #endif
+#ifdef __i386
+	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
+		dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv")));
+	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
+	isModdedArray[0] = 0xb0;
+	isModdedArray[1] = 0x01;
+#endif
 }
 
 /* FMOD */
@@ -99,10 +106,13 @@ static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
 extern void bl_prepatch_cside(void* mcpelibhandle, JNIEnv *env, jclass clazz,
 	jboolean signalhandler, jobject activity, jboolean limitedPrepatch);
 
+void bl_setmcpelibhandle(void* _mcpelibhandle);
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
 	if (bl_hasinit_prepatch) return;
 	void* mcpelibhandle = dlopen("libminecraftpe.so", RTLD_LAZY);
+	bl_setmcpelibhandle(mcpelibhandle);
 	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;

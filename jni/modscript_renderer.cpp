@@ -15,7 +15,11 @@
 #include "mcpe/mce/textureptr.h"
 
 // search for HumanoidModel::HumanoidModel
+#ifdef __i386
+#define HUMANOIDMODEL_SIZE 1288
+#else
 #define HUMANOIDMODEL_SIZE 1276
+#endif
 // search for HumanoidMobRenderer::HumanoidMobRenderer
 #define MOBRENDERER_SIZE 200
 // ModelPart::addBox
