@@ -170,6 +170,38 @@ public class Utils {
 	}
 
 	/**
+	 * Gets the architecture of an ELF library.
+	 */
+	public static int getElfArch(File file) throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		byte[] header = new byte[2];
+		fis.skip(18);
+		fis.read(header, 0, 2);
+		int arch = header[0] | (header[1] << 8);
+		fis.close();
+		if (arch == 0x28) {
+			return ScriptManager.ARCH_ARM;
+		} else if (arch == 0x3) {
+			return ScriptManager.ARCH_I386;
+		} else {
+			// I have no clue
+			System.err.println(file + " has unknown architecture 0x" + Integer.toString(arch, 16));
+			return ScriptManager.ARCH_ARM;
+		}
+	}
+
+	public static String getArchName(int arch) {
+		switch (arch) {
+			case ScriptManager.ARCH_ARM:
+				return "ARM";
+			case ScriptManager.ARCH_I386:
+				return "Intel";
+			default:
+				return "Unknown";
+		}
+	}
+
+	/**
 	 * Throws an exception when you try to call methods, calling this class to
 	 * prevent NPE, without Utils initialization.
 	 */

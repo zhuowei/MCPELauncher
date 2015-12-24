@@ -200,6 +200,7 @@ public class MainActivity extends NativeActivity {
 			toggleRecording();
 		}
 	};
+	private int mcpeArch = ScriptManager.ARCH_ARM;
 
 	/** Called when the activity is first created. */
 
@@ -311,6 +312,8 @@ public class MainActivity extends NativeActivity {
 			}
 			return;
 		}
+
+		checkArch();
 
 		try {
 			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
@@ -1702,6 +1705,7 @@ public class MainActivity extends NativeActivity {
 		PackageManager pm = getPackageManager();
 		AddonManager addonManager = AddonManager.getAddonManager(this);
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+		StringBuilder archFail = new StringBuilder();
 		for (ApplicationInfo app : apps) {
 			if (app.metaData == null)
 				continue;
@@ -1719,13 +1723,24 @@ public class MainActivity extends NativeActivity {
 							"\" (" + app.packageName + ")" +
 							" is not compatible with Minecraft PE " + mcPkgInfo.versionName + ".");
 					}
-					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
-					loadedAddons.add(app.packageName);
+					if (checkAddonArch(new File(app.nativeLibraryDir + "/lib" + nativeLibName + ".so"))) {
+						System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
+						loadedAddons.add(app.packageName);
+					} else {
+						archFail.append("\"").append(pm.getApplicationLabel(app).toString()).
+							append("\" (").append(app.packageName).append(") ");
+					}
 				} catch (Throwable e) {
 					reportError(e);
 					e.printStackTrace();
 				}
 			}
+		}
+		if (archFail.length() != 0) {
+			reportError(new Exception(
+				this.getResources().getString(R.string.addons_wrong_arch).toString()
+				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
+			));
 		}
 		textureOverrides.add(new AddonOverrideTexturePack(this));
 	}
@@ -2298,11 +2313,44 @@ public class MainActivity extends NativeActivity {
 		System.load(substrateLibFile.getAbsolutePath());
 	}
 
+	private void checkArch() {
+		try {
+			File mcpeLib = new File(MC_NATIVE_LIBRARY_LOCATION);
+			mcpeArch = Utils.getElfArch(mcpeLib);
+			File ownLib = new File(this.getApplicationInfo().nativeLibraryDir + "/libmcpelauncher.so");
+			int myArch = Utils.getElfArch(ownLib);
+			if (mcpeArch != myArch) {
+				Intent intent = new Intent(this, NoMinecraftActivity.class);
+				String message = this.getResources().getString(R.string.minecraft_wrong_arch).toString().
+					replaceAll("ARCH", Utils.getArchName(myArch));
+				intent.putExtra("message", message);
+				startActivity(intent);
+				finish();
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				System.exit(0);
+			}
+		} catch (IOException e) {
+		}
+	}
+
+	private boolean checkAddonArch(File file) {
+		try {
+			int addonArch = Utils.getElfArch(file);
+			return addonArch == mcpeArch;
+		} catch (IOException e) {
+			return true;
+		}
+	}
+
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
 		if (mcPkgInfo.versionName.startsWith("0.13")) {
-			if (version.matches("0\\.13\\..*")) return true;
+			if (version.matches("0\\.13\\..*") && !version.equals("0.13.0")) return true;
 		}
 		return false;
 	}
