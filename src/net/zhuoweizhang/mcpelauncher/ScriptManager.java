@@ -573,6 +573,18 @@ public class ScriptManager {
 		callScriptMethod("redstoneUpdateHook", x, y, z, newCurrent, something, blockId, blockData);
 	}
 
+	@CallbackName(name="projectileHitBlockHook", args={"projectile", "blockX", "blockY", "blockZ", "side"})
+	public static void throwableHitCallback(long projectile, int type, int side,
+		int x, int y, int z, float hX, float hY, float hZ, long targetEntity) {
+		if (type == 0) {
+			callScriptMethod("projectileHitBlockHook", projectile, x, y, z, side);
+		} else if (type == 1) {
+			callScriptMethod("projectileHitEntityHook", projectile, targetEntity);
+		}
+	}
+	@CallbackName(name="projectileHitEntityHook", args={"projectile", "targetEntity"})
+	public static void dummyThrowableHitEntityCallback() {};
+
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
 		System.out.println("Get sound input stream");
 		if (MainActivity.currentMainActivity != null) {

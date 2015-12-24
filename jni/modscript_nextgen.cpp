@@ -2305,6 +2305,30 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return ret;
 }
 
+static void* (*bl_Throwable_throwableHit_real)(Entity* entity, HitResult const& hitResult, int param1, int param2);
+
+void* bl_Throwable_throwableHit_hook(Entity* entity, HitResult const& hitResult, int param1, int param2) {
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "throwableHitCallback", "(JIIIIIFFFJ)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID(),
+		hitResult.type, hitResult.side, hitResult.x, hitResult.y, hitResult.z,
+		hitResult.hitVec.x, hitResult.hitVec.y, hitResult.hitVec.z,
+		hitResult.entity);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	return bl_Throwable_throwableHit_real(entity, hitResult, param1, param2);
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2610,6 +2634,9 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_ItemRenderer_getGraphics_real);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
+	void* throwableHit = dlsym(mcpelibhandle, "_ZN9Throwable12throwableHitERK9HitResultii");
+	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
+		(void**) &bl_Throwable_throwableHit_real);
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
