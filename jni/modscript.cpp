@@ -1195,10 +1195,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
 	void* selectLevel = dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
-#ifndef __i386
 	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftClient_startLocalServer_hook,
 		(void**) &bl_MinecraftClient_startLocalServer_real);
-#endif
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockER6Player8BlockPosa");
 	mcpelauncher_hook(destroyBlock, (void*) &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);

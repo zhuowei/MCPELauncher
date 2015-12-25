@@ -293,7 +293,7 @@ public class ScriptManager {
 	}
 
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
-		if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
+		//if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
 	}
 
 	@CallbackName(name="newLevel")
@@ -340,7 +340,7 @@ public class ScriptManager {
 		scriptingEnabled = true;
 		isRemote = false;
 		callScriptMethod("selectLevelHook");
-		if (nativeGetArch() != ARCH_I386) nextTickCallsSetLevel = true;
+		nextTickCallsSetLevel = true;
 	}
 
 	@CallbackName(name="leaveGame")
