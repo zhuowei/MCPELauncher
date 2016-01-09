@@ -5,6 +5,7 @@
 class Localization {
 public:
 	std::map<std::string, std::string>& _getStrings() const;
+	std::string getFullLanguageCode() const;
 };
 
 class I18n {

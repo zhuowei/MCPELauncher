@@ -218,7 +218,7 @@ public class ScriptManager {
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
 		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class,
-		BlockFace.class
+		BlockFace.class, UseAnimation.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -1085,7 +1085,7 @@ public class ScriptManager {
 		PrintWriter out = new PrintWriter(new File(Environment.getExternalStorageDirectory(),
 				"/items.csv"));
 		float[] textureUVbuf = new float[6];
-		int[][] bonuses = {{1,1,6},{38,0,8},{159,0,15},{171,0,15},{175,0,5},{349,1,3},{350,1,1},{383,10,63}};
+		int[][] bonuses = {{1,1,6},{12,1,1},{38,0,8},{159,0,15},{171,0,15},{175,0,5},{349,1,3},{350,1,1},{383,10,63}};
 		for (int i = 0; i < ITEM_ID_COUNT; i++) {
 			String itemName = nativeGetItemName(i, 0, true);
 			if (itemName == null)
@@ -1591,6 +1591,10 @@ public class ScriptManager {
 	public static native void nativeBlockSetRedstoneConsumer(int id, boolean yep);
 	public static native boolean nativeLevelCanSeeSky(int x, int y, int z);
 	public static native boolean nativeItemSetProperties(int id, String json);
+	public static native String nativeGetI18NString(String key);
+	public static native String nativeGetLanguageName();
+	public static native int nativeItemGetUseAnimation(int id);
+	public static native void nativeItemSetUseAnimation(int id, int anim);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2972,6 +2976,16 @@ public class ScriptManager {
 			nativeDumpVtable("_ZTV" + className.length() + className, size);
 		}
 
+		@JSStaticFunction
+		public static String getI18n(String key) {
+			return nativeGetI18NString(key);
+		}
+
+		@JSStaticFunction
+		public static String getLanguage() {
+			return nativeGetLanguageName();
+		}
+
 		@Override
 		public String getClassName() {
 			return "ModPE";
@@ -3165,6 +3179,16 @@ public class ScriptManager {
 			}
 			boolean ret = nativeItemSetProperties(id, theJson);
 			if (!ret) throw new RuntimeException("Failed to set properties for item " + id);
+		}
+
+		@JSStaticFunction
+		public static int getUseAnimation(int id) {
+			return nativeItemGetUseAnimation(id);
+		}
+
+		@JSStaticFunction
+		public static void setUseAnimation(int id, int animation) {
+			nativeItemSetUseAnimation(id, animation);
 		}
 
 		@Override

@@ -101,6 +101,7 @@ namespace Json {
 
 // Updated 0.13.0
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
+// for useAnimation see setUseAnimation
 class Item {
 public:
 	//void** vtable; //0
@@ -108,7 +109,9 @@ public:
 	short itemId; //18
 	char filler1[26-20]; // 20
 	unsigned char attribs; // 26
-	char filler[64-27]; //20
+	char filler[32-27]; //27
+	unsigned char useAnimation; // 32
+	char filler3[64-33]; // 33
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;

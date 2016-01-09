@@ -2331,6 +2331,39 @@ void* bl_Throwable_throwableHit_hook(Entity* entity, HitResult const& hitResult,
 	return bl_Throwable_throwableHit_real(entity, hitResult, param1, param2);
 }
 
+JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18NString
+  (JNIEnv *env, jclass clazz, jstring text) {
+	const char * utfChars = env->GetStringUTFChars(text, NULL);
+	std::string const& returnVal = (I18n::getCurrentLanguage()->_getStrings())[utfChars];
+	env->ReleaseStringUTFChars(text, utfChars);
+
+	jstring returnValString = env->NewStringUTF(returnVal.c_str());
+	return returnValString;
+}
+
+JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLanguageName
+  (JNIEnv *env, jclass clazz) {
+	std::string returnVal = I18n::getCurrentLanguage()->getFullLanguageCode();
+	jstring returnValString = env->NewStringUTF(returnVal.c_str());
+	return returnValString;
+}
+
+JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetUseAnimation
+  (JNIEnv *env, jclass clazz, jint id) {
+	if (id < 0 || id >= bl_item_id_count) return -1;
+	Item* item = bl_Item_mItems[id];
+	if (!item) return -1;
+	return item->useAnimation;
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUseAnimation
+  (JNIEnv *env, jclass clazz, jint id, jint animation) {
+	if (id < 0 || id >= bl_item_id_count) return;
+	Item* item = bl_Item_mItems[id];
+	if (!item) return;
+	item->useAnimation = animation;
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
