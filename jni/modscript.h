@@ -203,14 +203,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeDefineFoodItem
- * Signature: (ILjava/lang/String;IILjava/lang/String;I)V
- */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineFoodItem
-  (JNIEnv *, jclass, jint, jstring, jint, jint, jstring, jint);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetFov
  * Signature: (FZ)V
  */
@@ -339,6 +331,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSetMobMaxHealth
+ * Signature: (JI)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobMaxHealth
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetEntityRenderType
  * Signature: (JI)Z
  */
@@ -412,10 +412,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineBlock
- * Signature: (ILjava/lang/String;[Ljava/lang/String;[IIZI)V
+ * Signature: (ILjava/lang/String;[Ljava/lang/String;[IIZII)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
-  (JNIEnv *, jclass, jint, jstring, jobjectArray, jintArray, jint, jboolean, jint);
+  (JNIEnv *, jclass, jint, jstring, jobjectArray, jintArray, jint, jboolean, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -771,19 +771,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeGetSlotArmor
- * Signature: (II)I
+ * Method:    nativeMobGetArmor
+ * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotArmor
-  (JNIEnv *, jclass, jint, jint);
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobGetArmor
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeSetArmorSlot
- * Signature: (III)V
+ * Method:    nativeMobSetArmor
+ * Signature: (JIII)V
  */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetArmorSlot
-  (JNIEnv *, jclass, jint, jint, jint);
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmor
+  (JNIEnv *, jclass, jlong, jint, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -879,6 +879,14 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeP
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetPointedVec
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedVec
   (JNIEnv *, jclass, jint);
 
 /*
@@ -1011,6 +1019,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeSpawnerGetEntityType
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerGetEntityType
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefineArmor
  * Signature: (ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;III)V
  */
@@ -1120,6 +1136,214 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
  */
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetDimension
   (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelGetLightningLevel
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetLightningLevel
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelSetLightningLevel
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetLightningLevel
+  (JNIEnv *, jclass, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelGetRainLevel
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetRainLevel
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelSetRainLevel
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetRainLevel
+  (JNIEnv *, jclass, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetHunger
+ * Signature: (J)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetHunger
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetHunger
+ * Signature: (JF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetHunger
+  (JNIEnv *, jclass, jlong, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetExhaustion
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExhaustion
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetExhaustion
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExhaustion
+  (JNIEnv *, jclass, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetSaturation
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetSaturation
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetSaturation
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetSaturation
+  (JNIEnv *, jclass, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetExperience
+ * Signature: ()F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExperience
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetExperience
+ * Signature: (F)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExperience
+  (JNIEnv *, jclass, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetLevel
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetLevel
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetLevel
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetLevel
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerAddExperience
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerAddExperience
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetMobMaxHealth
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetMobMaxHealth
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockGetDestroyTime
+ * Signature: (II)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockGetFriction
+ * Signature: (I)F
+ */
+JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetFriction
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetFriction
+ * Signature: (IF)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetFriction
+  (JNIEnv *, jclass, jint, jfloat);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockSetRedstoneConsumer
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRedstoneConsumer
+  (JNIEnv *, jclass, jint, jboolean);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeLevelCanSeeSky
+ * Signature: (III)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelCanSeeSky
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeItemSetProperties
+ * Signature: (ILjava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetI18NString
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18NString
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetLanguageName
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLanguageName
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeItemGetUseAnimation
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetUseAnimation
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeItemSetUseAnimation
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUseAnimation
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager

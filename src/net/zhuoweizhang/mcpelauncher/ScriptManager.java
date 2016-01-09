@@ -1404,7 +1404,8 @@ public class ScriptManager {
 			float[] output);
 
 	public static native void nativeDefineBlock(int blockId, String name, String[] textureNames,
-			int[] textureCoords, int materialSourceId, boolean opaque, int renderType);
+			int[] textureCoords, int materialSourceId, boolean opaque, int renderType,
+			int customBlockType);
 
 	public static native void nativeBlockSetDestroyTime(int blockId, float amount);
 
@@ -3204,6 +3205,19 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineBlock(int blockId, String name, Object textures,
 				Object materialSourceIdSrc, Object opaqueSrc, Object renderTypeSrc) {
+			defineBlockImpl(blockId, name, textures, materialSourceIdSrc, opaqueSrc, renderTypeSrc, 0);
+		}
+
+		@JSStaticFunction
+		public static int defineLiquidBlock(int blockId, String name, Object textures,
+				Object materialSourceIdSrc) {
+			defineBlockImpl(blockId, name, textures, materialSourceIdSrc, 8, 8, 1 /* flowing */);
+			defineBlockImpl(blockId + 1, "Still " + name , textures, materialSourceIdSrc, 8, 8, 2 /* still */);
+			return blockId + 1;
+		}
+
+		private static void defineBlockImpl(int blockId, String name, Object textures,
+				Object materialSourceIdSrc, Object opaqueSrc, Object renderTypeSrc, int customBlockType) {
 			if (blockId < 0 || blockId >= 256) {
 				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
 			}
@@ -3225,7 +3239,7 @@ public class ScriptManager {
 			TextureRequests finalTextures = expandTexturesArray(textures);
 			verifyBlockTextures(finalTextures);
 			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
-					materialSourceId, opaque, renderType);
+					materialSourceId, opaque, renderType, customBlockType);
 		}
 
 		@JSStaticFunction

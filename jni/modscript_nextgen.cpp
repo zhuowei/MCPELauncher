@@ -68,6 +68,8 @@ typedef void Font;
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = 0x8c;
+const size_t kLiquidBlockDynamicSize = 248;
+const size_t kLiquidBlockStaticSize = 228;
 // found in registerBlock
 const size_t kBlockItemSize = 68;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
@@ -312,6 +314,8 @@ bool bl_text_parse_color_codes = true;
 
 //custom blocks
 void** bl_CustomBlock_vtable;
+void** bl_CustomLiquidBlockStatic_vtable;
+void** bl_CustomLiquidBlockDynamic_vtable;
 TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 bool bl_custom_block_collisionDisabled[256];
@@ -386,6 +390,12 @@ static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* ren
 static void (*bl_Block_onPlace)(Block*, BlockSource&, BlockPos const&);
 
 static bool* bl_Block_mSolid;
+static void** bl_LiquidBlockStatic_vtable;
+static void** bl_LiquidBlockDynamic_vtable;
+static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
+	(Block*, std::string const&, int, BlockID, void*, std::string const&, std::string const&);
+static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
+	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1155,6 +1165,15 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return returnValString;
 }
 
+static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
@@ -1162,16 +1181,19 @@ void bl_initCustomBlockVtable() {
 
 	//set the texture getter to our overridden version
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
 	bl_Block_onPlace = (void (*)(Block*, BlockSource&, BlockPos const&))
 		bl_CustomBlock_vtable[vtable_indexes.tile_on_place];
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_place] = (void*) &bl_CustomBlock_onPlace_hook;
-	//bl_CustomBlock_vtable[BLOCK_VTABLE_GET_AABB] = (void*) &bl_CustomBlock_getAABBHook;
+	bl_setBlockVtable(bl_CustomBlock_vtable);
+
+	bl_CustomLiquidBlockStatic_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
+	memcpy(bl_CustomLiquidBlockStatic_vtable, bl_LiquidBlockStatic_vtable, vtable_indexes.tile_vtable_size);
+	bl_setBlockVtable(bl_CustomLiquidBlockStatic_vtable);
+
+	bl_CustomLiquidBlockDynamic_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
+	memcpy(bl_CustomLiquidBlockDynamic_vtable, bl_LiquidBlockDynamic_vtable, vtable_indexes.tile_vtable_size);
+	bl_setBlockVtable(bl_CustomLiquidBlockDynamic_vtable);
+
 }
 
 void* bl_getMaterial(int materialType) {
@@ -1192,7 +1214,7 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 	}
 }
 
-Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name) {
+Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
@@ -1207,20 +1229,37 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	}
 
 	//bl_custom_block_opaque[blockId] = opaque;
-	bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
-	bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
+	if (customBlockType == 0 /* standard */) {
+		bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
+		bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
+	} else {
+		bl_custom_block_textures[blockId] = nullptr;
+	}
 
 	std::string nameStr = std::string(name);
 
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
-	Block* retval = (Block*) ::operator new(kTileSize);
-	bl_Block_Block(retval, nameStr, blockId, bl_getMaterial(materialType));
-	retval->vtable = bl_CustomBlock_vtable + 2;
+	Block* retval;
+	if (customBlockType == 0) {
+		retval = (Block*) ::operator new(kTileSize);
+		bl_Block_Block(retval, nameStr, blockId, bl_getMaterial(materialType));
+		retval->vtable = bl_CustomBlock_vtable + 2;
+		retval->renderType = renderShape;
+		retval->setSolid(opaque);
+	} else if (customBlockType == 1 /* liquid */ ) {
+		retval = (Block*) ::operator new(kLiquidBlockDynamicSize);
+		bl_LiquidBlockDynamic_LiquidBlockDynamic(retval, nameStr, blockId, bl_getMaterial(materialType),
+			textureNames[0], textureNames[1]);
+		retval->vtable = bl_CustomLiquidBlockDynamic_vtable + 2;
+	} else if (customBlockType == 2 /* still liquid */ ) {
+		retval = (Block*) ::operator new(kLiquidBlockStaticSize);
+		bl_LiquidBlockStatic_LiquidBlockStatic(retval, nameStr, blockId, blockId - 1, bl_getMaterial(materialType),
+			textureNames[0], textureNames[1]);
+		retval->vtable = bl_CustomLiquidBlockStatic_vtable + 2;
+	}
 
 	bl_set_i18n("tile." + nameStr + ".name", nameStr);
-	retval->renderType = renderShape;
-	retval->setSolid(opaque);
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
 	// set default category
@@ -1235,7 +1274,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineBlock
   (JNIEnv *env, jclass clazz, jint blockId, jstring name, jobjectArray textureNames, 
-		jintArray textureCoords, jint materialBlockId, jboolean opaque, jint renderType) {
+		jintArray textureCoords, jint materialBlockId, jboolean opaque, jint renderType, jint customBlockType) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	int myIntArray[16*6];
 	env->GetIntArrayRegion(textureCoords, 0, 16*6, myIntArray);
@@ -1246,7 +1285,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		myStringArray[i] = myStringChars;
 		env->ReleaseStringUTFChars(myString, myStringChars);
 	}
-	Tile* tile = bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars);
+	Tile* tile = bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
@@ -2285,7 +2324,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return bl_localplayer->getRegion()->canSeeSky(x, y, z);
 }
 
-JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRedstoneConsumer
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRedstoneConsumer
   (JNIEnv *env, jclass clazz, jint blockId, jboolean enabled) {
 	if (enabled) bl_custom_block_redstone[blockId] |= REDSTONE_CONSUMER;
 	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
@@ -2488,6 +2527,15 @@ void bl_setuphooks_cppside() {
 	}
 #endif
 
+	bl_LiquidBlockStatic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV17LiquidBlockStatic");
+	bl_LiquidBlockDynamic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV18LiquidBlockDynamic");
+	bl_LiquidBlockStatic_LiquidBlockStatic = (void (*)(Block*, std::string const&, int, BlockID, void*,
+		std::string const&, std::string const&))
+		dlsym(mcpelibhandle, "_ZN17LiquidBlockStaticC1ERKSsi7BlockIDRK8MaterialS1_S1_");
+	bl_LiquidBlockDynamic_LiquidBlockDynamic = (void (*)(Block*, std::string const&, int, void*,
+		std::string const&, std::string const&))
+		dlsym(mcpelibhandle, "_ZN18LiquidBlockDynamicC1ERKSsiRK8MaterialS1_S1_");
+
 	bl_initCustomBlockVtable();
 
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
@@ -2676,6 +2724,7 @@ void bl_setuphooks_cppside() {
 		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
+
 	bl_renderManager_init(mcpelibhandle);
 }
 

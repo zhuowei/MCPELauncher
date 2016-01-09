@@ -535,6 +535,14 @@ public class MainActivity extends NativeActivity {
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
 		boolean forcePrePatch = Utils.getPrefs(1).getBoolean("force_prepatch", true);
+		if (!hasPrePatched && Utils.getEnabledPatches().size() == 0) {
+			// no patches needed
+			hasPrePatched = true;
+			if (newMinecraft.exists()) newMinecraft.delete();
+			if (forcePrePatch) Utils.getPrefs(1).edit().putBoolean("force_prepatch", false)
+					.putInt("prepatch_version", mcPkgInfo.versionCode).apply();
+			return;
+		}
 		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
 
 			System.out.println("Forcing new prepatch");
