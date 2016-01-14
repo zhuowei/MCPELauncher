@@ -7,6 +7,7 @@ class Entity;
 typedef Entity Player;
 #include "mcpe/minecraft.h"
 #include "mcpe/blocksource.h"
+#include "mcpe/enchant.h"
 
 #ifdef __cplusplus
 #define cppstr std::string
@@ -134,6 +135,11 @@ public:
 	CompoundTag* tag; // 8
 	Item* item; // 12
 	void* block; //16
+
+	ItemEnchants getEnchantsFromUserData() const;
+	bool hasCustomHoverName() const;
+	std::string getCustomName() const;
+	void setCustomName(std::string const&);
 }; // see ItemInstance::fromTag for size
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");

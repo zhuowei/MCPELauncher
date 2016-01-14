@@ -42,6 +42,8 @@
 #include "mcpe/itemrenderer.h"
 #include "mcpe/mce/textureptr.h"
 #include "mcpe/circuit.h"
+#include "mcpe/enchant.h"
+#include "mcpe/inventory.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -65,6 +67,13 @@ typedef void Font;
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
 #define MINECRAFT_SCREENCHOOSER_OFFSET 252
+
+// from Player::getSelectedItem
+#ifdef __i386
+#define PLAYER_INVENTORY_OFFSET 3436
+#else
+#define PLAYER_INVENTORY_OFFSET 3448
+#endif
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = 0x8c;
@@ -428,6 +437,13 @@ enum CustomBlockRedstoneType {
 	// this is a bitfield
 	REDSTONE_CONSUMER = (1 << 0),
 };
+
+static void dumpEnchantNames() {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "enchant dump: %d", Enchant::mEnchants.size());
+	for (Enchant* enchant: Enchant::mEnchants) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "enchant %d %s", enchant->id, enchant->description.c_str());
+	}
+}
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->getUniqueID() == entityId) {
@@ -2401,6 +2417,52 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 	Item* item = bl_Item_mItems[id];
 	if (!item) return;
 	item->useAnimation = animation;
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
+  (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
+	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	ItemInstance* itemInstance = inventory->getItem(slot);
+	if (itemInstance == nullptr) return;
+	EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
+}
+
+JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
+  (JNIEnv *env, jclass clazz, jint slot) {
+	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	ItemInstance* itemInstance = inventory->getItem(slot);
+	if (itemInstance == nullptr) return nullptr;
+	std::vector<EnchantmentInstance> enchantments = itemInstance->getEnchantsFromUserData().getAllEnchants();
+	int arrLen = enchantments.size() * 2;
+	int tempArr[arrLen];
+	int i = 0;
+	for (EnchantmentInstance& e: enchantments) {
+		tempArr[i++] = e.type;
+		tempArr[i++] = e.level;
+	}
+	jintArray returnVal = env->NewIntArray(arrLen);
+	env->SetIntArrayRegion(returnVal, 0, arrLen, tempArr);
+	return returnVal;
+}
+
+JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetItemCustomName
+  (JNIEnv *env, jclass clazz, jint slot) {
+	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	ItemInstance* itemInstance = inventory->getItem(slot);
+	if (itemInstance == nullptr) return nullptr;
+	if (!itemInstance->hasCustomHoverName()) return nullptr;
+	const char* name = itemInstance->getCustomName().c_str();
+	return env->NewStringUTF(name);
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetItemCustomName
+  (JNIEnv *env, jclass clazz, jint slot, jstring name) {
+	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	ItemInstance* itemInstance = inventory->getItem(slot);
+	if (itemInstance == nullptr) return;
+	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
+	itemInstance->setCustomName(std::string(nameUtf));
+	env->ReleaseStringUTFChars(name, nameUtf);
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

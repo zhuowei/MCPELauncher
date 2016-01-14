@@ -1347,6 +1347,38 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIt
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerEnchant
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
+  (JNIEnv *, jclass, jint, jint, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetEnchantments
+ * Signature: (I)[I
+ */
+JNIEXPORT jintArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetItemCustomName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetItemCustomName
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerSetItemCustomName
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetItemCustomName
+  (JNIEnv *, jclass, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: (I)V
  */
@@ -1718,6 +1750,17 @@ extern "C" {
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntityApi_SLOT_CONVERT_ACCESSOR_TO_DATA 5L
 #undef net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntityApi_INITIAL_SLOT_SIZE
 #define net_zhuoweizhang_mcpelauncher_ScriptManager_NativeEntityApi_INITIAL_SLOT_SIZE 4L
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_EnchantmentInstance */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_EnchantmentInstance
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_EnchantmentInstance
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif

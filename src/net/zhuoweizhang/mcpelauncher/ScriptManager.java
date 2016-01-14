@@ -218,7 +218,7 @@ public class ScriptManager {
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
 		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class,
-		BlockFace.class, UseAnimation.class
+		BlockFace.class, UseAnimation.class, Enchantment.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -1597,6 +1597,10 @@ public class ScriptManager {
 	public static native String nativeGetLanguageName();
 	public static native int nativeItemGetUseAnimation(int id);
 	public static native void nativeItemSetUseAnimation(int id, int anim);
+	public static native void nativePlayerEnchant(int slot, int enchantment, int level);
+	public static native int[] nativePlayerGetEnchantments(int slot);
+	public static native String nativePlayerGetItemCustomName(int slot);
+	public static native void nativePlayerSetItemCustomName(int slot, String name);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2283,12 +2287,10 @@ public class ScriptManager {
 			return nativePlayerGetPointedVec(AXIS_Z);
 		}
 
-
-		/*
-		 * @JSStaticFunction public static void setInventorySlot(int slot, int
-		 * itemId, int count, int damage) { nativeSetInventorySlot(slot, itemId,
-		 * count, damage); }
-		 */
+		@JSStaticFunction
+		public static void setInventorySlot(int slot, int itemId, int count, int damage) {
+			nativeSetInventorySlot(slot, itemId, count, damage);
+		}
 
 		@JSStaticFunction
 		public static boolean isFlying() {
@@ -2370,9 +2372,51 @@ public class ScriptManager {
 			nativePlayerSetExperience((float) value);
 		}
 
+		@JSStaticFunction
+		public static void enchant(int slot, int enchantment, int level) {
+			if (enchantment < Enchantment.PROTECTION || enchantment > Enchantment.LURE) {
+				throw new RuntimeException("Invalid enchantment: " + enchantment);
+			}
+			nativePlayerEnchant(slot, enchantment, level);
+		}
+
+		@JSStaticFunction
+		public static EnchantmentInstance[] getEnchantments(int slot) {
+			int[] ret = nativePlayerGetEnchantments(slot);
+			if (ret == null) return null;
+			EnchantmentInstance[] en = new EnchantmentInstance[ret.length / 2];
+			for (int i = 0; i < en.length; i++) {
+				en[i] = new EnchantmentInstance(ret[i*2], ret[i*2 + 1]);
+			}
+			return en;
+		}
+
+		@JSStaticFunction
+		public static String getItemCustomName(int slot) {
+			return nativePlayerGetItemCustomName(slot);
+		}
+
+		@JSStaticFunction
+		public static void setItemCustomName(int slot, String name) {
+			nativePlayerSetItemCustomName(slot, name);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Player";
+		}
+	}
+
+	private static class EnchantmentInstance {
+		public final int type;
+		public final int level;
+		public EnchantmentInstance(int type, int level) {
+			this.type = type;
+			this.level = level;
+		}
+		@Override
+		public String toString() {
+			return "EnchantmentInstance[type=" + type + ",level=" + level + "]";
 		}
 	}
 

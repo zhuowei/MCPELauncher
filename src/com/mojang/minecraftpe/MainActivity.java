@@ -1937,6 +1937,7 @@ public class MainActivity extends NativeActivity {
 		Rect r = new Rect();
 		View rootview = this.getWindow().getDecorView();
 		rootview.getWindowVisibleDisplayFrame(r);
+		if (r.bottom == 0) return 0; // if the keyboard height goes fullscreen, ignore
 		return displayMetrics.heightPixels - r.bottom;
 	}
 	// end 0.12

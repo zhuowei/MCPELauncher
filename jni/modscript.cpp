@@ -18,6 +18,7 @@
 typedef bool cppbool;
 
 #include "modscript_structs.h"
+#include "mcpe/inventory.h"
 
 typedef Player LocalPlayer;
 
@@ -902,11 +903,19 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO Merge this into a macro
+	Inventory* invPtr = *((Inventory**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO Merge this into a macro
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
 	if (itemStack == NULL) return;
-	bl_FillingContainer_replaceSlot(invPtr, slot, itemStack);
-	free(itemStack);
+	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
+	if (slot < linkedSlotsCount) {
+		int oldslot = slot;
+		slot = invPtr->getLinkedSlot(slot);
+		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "slot old %d new %d slot %d", oldslot, slot, linkedSlotsCount);
+	}
+	if (slot >= 0) {
+		bl_FillingContainer_replaceSlot(invPtr, slot, itemStack);
+	}
+	delete itemStack;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
