@@ -986,6 +986,7 @@ public class ScriptManager {
 	public static void setupContext(Context ctx) {
 		ctx.setOptimizationLevel(-1); // No dynamic translation; we interpret
 										// and/or precompile
+		ctx.setLanguageVersion(Context.VERSION_ES6);
 		/*
 		 * if (android.preference.PreferenceManager.getDefaultSharedPreferences(
 		 * androidContext).getBoolean("zz_script_paranoid_mode", false)) {
