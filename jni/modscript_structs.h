@@ -117,6 +117,9 @@ public:
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 	void init(Json::Value&);
+	void setStackedByData(bool);
+	bool isStackedByData() const;
+	void setMaxDamage(int);
 };
 
 #define ITEM_HAND_EQUIPPED (1 << 1)

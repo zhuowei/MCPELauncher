@@ -1597,6 +1597,7 @@ public class ScriptManager {
 	public static native String nativeGetLanguageName();
 	public static native int nativeItemGetUseAnimation(int id);
 	public static native void nativeItemSetUseAnimation(int id, int anim);
+	public static native void nativeItemSetStackedByData(int id, boolean yep);
 	public static native void nativePlayerEnchant(int slot, int enchantment, int level);
 	public static native int[] nativePlayerGetEnchantments(int slot);
 	public static native String nativePlayerGetItemCustomName(int slot);
@@ -3235,6 +3236,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setUseAnimation(int id, int animation) {
 			nativeItemSetUseAnimation(id, animation);
+		}
+
+		@JSStaticFunction
+		public static void setStackedByData(int id, boolean stacked) {
+			nativeItemSetStackedByData(id, stacked);
 		}
 
 		@Override

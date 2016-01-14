@@ -219,6 +219,8 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_on_loaded;
 	int tile_on_place;
 	int mob_set_sneaking;
+	int blockitem_vtable_size;
+	int blockitem_get_level_data_for_aux_value;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -249,6 +251,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN5Block7onPlaceER11BlockSourceRK8BlockPos");
 	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob11setSneakingEb") - 2;
+	vtable_indexes.blockitem_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV9BlockItem")->st_size;
+	vtable_indexes.blockitem_get_level_data_for_aux_value = bl_vtableIndex(mcpelibhandle, "_ZTV9BlockItem",
+		"_ZNK4Item23getLevelDataForAuxValueEi");
 }
 
 extern "C" {
@@ -262,6 +267,7 @@ static void (*bl_Item_Item)(Item*, std::string const&, short);
 static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
 static void** bl_BlockItem_vtable;
+static void** bl_CustomBlockItem_vtable;
 static Block** bl_Block_mBlocks;
 static unsigned char* bl_Block_mLightEmission;
 static unsigned char* bl_Block_mLightBlock;
@@ -957,6 +963,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, name, id - 0x100);
+	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
 	return retval;
 }
@@ -1190,6 +1197,11 @@ static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
 }
 
+int bl_CustomBlockItem_getLevelDataForAuxValue_hook(Item* item, int value) {
+	if (item->isStackedByData()) return value;
+	return 0;
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
@@ -1209,6 +1221,11 @@ void bl_initCustomBlockVtable() {
 	bl_CustomLiquidBlockDynamic_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
 	memcpy(bl_CustomLiquidBlockDynamic_vtable, bl_LiquidBlockDynamic_vtable, vtable_indexes.tile_vtable_size);
 	bl_setBlockVtable(bl_CustomLiquidBlockDynamic_vtable);
+
+	bl_CustomBlockItem_vtable = (void**) ::operator new(vtable_indexes.blockitem_vtable_size);
+	memcpy(bl_CustomBlockItem_vtable, bl_BlockItem_vtable, vtable_indexes.blockitem_vtable_size);
+	bl_CustomBlockItem_vtable[vtable_indexes.blockitem_get_level_data_for_aux_value] =
+		(void*) &bl_CustomBlockItem_getLevelDataForAuxValue_hook;
 
 }
 
@@ -1283,6 +1300,9 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//now allocate the item
 	Item* tileItem = (Item*) ::operator new(kBlockItemSize);
 	bl_BlockItem_BlockItem(tileItem, nameStr, blockId - 0x100);
+	*((void***)tileItem) = bl_CustomBlockItem_vtable + 2;
+	tileItem->setMaxDamage(0);
+	tileItem->setStackedByData(true);
 	bl_registerItem(tileItem, nameStr);
 	bl_Item_setCategory(tileItem, 2 /* Decoration */);
 	return retval;
@@ -2465,6 +2485,14 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetI
 	env->ReleaseStringUTFChars(name, nameUtf);
 }
 
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetStackedByData
+  (JNIEnv *env, jclass clazz, jint id, jboolean stacked) {
+	if (id < 0 || id >= bl_item_id_count) return;
+	Item* item = bl_Item_mItems[id];
+	if (!item) return;
+	item->setStackedByData(stacked);
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2599,6 +2627,7 @@ void bl_setuphooks_cppside() {
 	bl_LiquidBlockDynamic_LiquidBlockDynamic = (void (*)(Block*, std::string const&, int, void*,
 		std::string const&, std::string const&))
 		dlsym(mcpelibhandle, "_ZN18LiquidBlockDynamicC1ERKSsiRK8MaterialS1_S1_");
+	bl_BlockItem_vtable = (void**) dlsym(mcpelibhandle, "_ZTV9BlockItem");
 
 	bl_initCustomBlockVtable();
 
