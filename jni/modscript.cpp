@@ -1128,6 +1128,13 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 		App_quit_real = (void (*)(void*)) minecraftVtable[vtable_indexes.minecraft_quit];
 		minecraftVtable[vtable_indexes.minecraft_quit] = (void*) &App_quit_hook;
 	}
+	// needed for extended items' texture hook
+	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
+	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
+		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
+	bl_ItemInstance_setId = (void (*)(ItemInstance*, int))
+		dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
+
 	bl_prepatch_cppside(mcpelibhandle);
 }
 
@@ -1255,9 +1262,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
 	bl_Inventory_Inventory = (void (*)(void*, Player*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryC1EP6Player");
 	bl_Inventory_delete1_Inventory = (void (*)(void*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
-	bl_ItemInstance_setId = (void (*)(ItemInstance*, int))
-		dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
-	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	//replace the update method in Minecraft with our own
 	bl_NinecraftApp_update_real = (void (*)(MinecraftClient*)) minecraftVtable[vtable_indexes.minecraft_update];
 #if 0
@@ -1277,8 +1281,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
 	bl_Inventory_getSelectedSlot = (int (*)(void*)) dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
 	bl_Inventory_selectSlot = (void (*)(void*, int)) dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
-	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
-		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
 	bl_AgableMob_getAge = (int (*)(Entity*)) dlsym(mcpelibhandle,
 		"_ZN9AgableMob6getAgeEv");
 

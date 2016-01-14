@@ -2518,6 +2518,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	}
 #endif
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
+	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
+		(void**) &bl_ItemRenderer_getGraphics_real);
 }
 
 void bl_setuphooks_cppside() {
@@ -2775,8 +2777,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
 	mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
 		(void**) &bl_Item_initCreativeItems_real);
-	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
-		(void**) &bl_ItemRenderer_getGraphics_real);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN9Throwable12throwableHitERK9HitResultii");
