@@ -1708,7 +1708,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void loadNativeAddons() {
-		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", false))
+		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", true))
 			return;
 		PackageManager pm = getPackageManager();
 		AddonManager addonManager = AddonManager.getAddonManager(this);

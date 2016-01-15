@@ -15,11 +15,14 @@ public class TGAImageLoader implements ImageLoader {
 
 	public void save(Bitmap outBmp, OutputStream os) throws IOException {
 		ByteBuffer data = ByteBuffer.allocate(outBmp.getWidth() * outBmp.getHeight() * 4);
-		outBmp.copyPixelsToBuffer(data);
+		int[] tempArr = new int[outBmp.getWidth() * outBmp.getHeight()];
+		outBmp.getPixels(tempArr, 0, outBmp.getWidth(), 0, 0, outBmp.getWidth(), outBmp.getHeight());
+		data.order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(tempArr);
+		tempArr = null;
 		invertBuffer(data, outBmp.getWidth(), outBmp.getHeight());
-		//RGB -> BGR
-		byte[] dataBytes = data.array();
-		TGAImage.swapBGR(dataBytes, outBmp.getWidth() * 4, outBmp.getHeight(), 4);
+		// we used to need to convert RGB -> BGR
+		// byte[] dataBytes = data.array();
+		// TGAImage.swapBGR(dataBytes, outBmp.getWidth() * 4, outBmp.getHeight(), 4);
 		TGAImage tgaImage = TGAImage.createFromData(outBmp.getWidth(), outBmp.getHeight(),
 			true, false, data);
 		tgaImage.write(Channels.newChannel(os));

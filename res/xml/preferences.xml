@@ -20,7 +20,7 @@
             android:key="zz_manage_patches"
             android:title="@string/manage_patches" />
         <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="zz_load_native_addons"
             android:title="@string/manage_addons" />
         <net.zhuoweizhang.mcpelauncher.ui.SwitchPreference
