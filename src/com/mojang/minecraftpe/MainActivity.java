@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 import java.lang.reflect.Field;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
@@ -74,7 +75,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 @SuppressWarnings("deprecation")
 public class MainActivity extends NativeActivity {
 
-	public static final String TAG = "BlockLauncher/MainActivity";
+	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "0.13";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
@@ -1044,7 +1045,7 @@ public class MainActivity extends NativeActivity {
 		System.out.println("Get file data: " + name);
 		try {
 			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
-			if (is == null || TAG.hashCode() != 1351278506)
+			if (is == null || TAG.hashCode() != -1771687045)
 				return null;
 			// can't always find length - use the method from
 			// http://www.velocityreviews.com/forums/t136788-store-whole-inputstream-in-a-string.html
@@ -1925,7 +1926,7 @@ public class MainActivity extends NativeActivity {
 	public boolean isTablet() {
 		// metric: >= sw600dp
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-			return getResources().getConfiguration().screenHeightDp >= 600;
+			return false; //getResources().getConfiguration().screenHeightDp >= 600;
 		}
 		return getResources().getConfiguration().smallestScreenWidthDp >= 600;
 	}
@@ -2193,6 +2194,7 @@ public class MainActivity extends NativeActivity {
 		return Utils.getPrefs(0).getBoolean("zz_command_history", true);
 	}
 
+	@TargetApi(Build.VERSION_CODES.KITKAT)
 	private void setImmersiveMode(boolean set) {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
 		int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
