@@ -68,6 +68,7 @@ import net.zhuoweizhang.mcpelauncher.ui.ManageScriptsActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
 import net.zhuoweizhang.mcpelauncher.ui.MinecraftNotSupportedActivity;
+import net.zhuoweizhang.mcpelauncher.ui.TexturePacksActivity;
 import net.zhuoweizhang.mcpelauncher.texture.*;
 import net.zhuoweizhang.pokerface.PokerFace;
 
@@ -190,6 +191,7 @@ public class MainActivity extends NativeActivity {
 	private final static int MAX_FAILS = 2;
 
 	private static final int REQUEST_PICK_IMAGE = 415;
+	private static final int REQUEST_MANAGE_TEXTURES = 416;
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
 
@@ -740,6 +742,11 @@ public class MainActivity extends NativeActivity {
 			} else {
 				nativeOnPickImageCanceled(pickImageCallbackAddress);
 			}
+		} else if (requestCode == REQUEST_MANAGE_TEXTURES) {
+			if (resultCode == RESULT_OK) {
+				finish();
+				NerdyStuffActivity.forceRestart(this);
+			}
 		}
 	}
 
@@ -817,7 +824,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected Dialog createRuntimeOptionsDialog(final boolean hasInsertText) {
-		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
+		CharSequence livePatch = getResources().getString(R.string.pref_texture_pack);
 		final CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
 		final CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
 		CharSequence manageModPEScripts = getResources().getString(R.string.pref_zz_manage_scripts);
@@ -840,14 +847,8 @@ public class MainActivity extends NativeActivity {
 					public void onClick(DialogInterface dialogI, int button) {
 						CharSequence buttonText = options.get(button);
 						if (button == 0) {
-							if (minecraftLibBuffer == null) {
-								startActivity(getOptionsActivityIntent());
-								return;
-							}
-							Intent intent = new Intent(MainActivity.this,
-									ManagePatchesActivity.class);
-							intent.putExtra("prePatchConfigure", false);
-							startActivity(intent);
+							Intent intent = new Intent(MainActivity.this, TexturePacksActivity.class);
+							startActivityForResult(intent, REQUEST_MANAGE_TEXTURES);
 						} else if (button == 1) {
 							if (hasScriptSupport()) {
 								Intent intent = new Intent(MainActivity.this,
