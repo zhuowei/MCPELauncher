@@ -39,13 +39,24 @@ public class AtlasMeta {
 		for (int i = 0; i < data.length(); i++) {
 			JSONObject entry = data.getJSONObject(i);
 			if (!entry.has("name")) continue; // Soartex 64x64 has corrupt terrain meta
-			nameMap.put(entry.getString("name"), entry);
+			String name = entry.getString("name");
+			nameMap.put(name, entry);
 			JSONArray uvs = entry.getJSONArray("uvs");
 			for (int u = 0; u < uvs.length(); u++) {
 				JSONArray uv = uvs.getJSONArray(u);
 				int index = uvToIndex(uv.getDouble(0), uv.getDouble(1));
 				occupied[index] = true;
 				originalUVCount++;
+			}
+			if (name.equals("flowing_water") || name.equals("flowing_lava")) {
+				// these are a grid of 4 textures; only the top left one is in the .meta
+				JSONArray uv = uvs.getJSONArray(0);
+				int index = uvToIndex(uv.getDouble(0), uv.getDouble(1));
+				int row = (width / tileWidth);
+				occupied[index + 1] = true; // right
+				occupied[index + row] = true; // bottom
+				occupied[index + row + 1] = true; // bottomright
+				originalUVCount += 3;
 			}
 		}
 	}

@@ -2365,6 +2365,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
+		final boolean dumpAtlas = false;
 		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
@@ -2373,8 +2374,10 @@ public class MainActivity extends NativeActivity {
 				"images/items-opaque/", new PNGImageLoader(), 2, 0);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
-			//terrainProvider.dumpAtlas();
-			//itemsProvider.dumpAtlas();
+			if (dumpAtlas) {
+				terrainProvider.dumpAtlas();
+				itemsProvider.dumpAtlas();
+			}
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
 			ScriptManager.terrainMeta = terrainProvider.metaObj;
