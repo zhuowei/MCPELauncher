@@ -201,6 +201,13 @@ public class Utils {
 		}
 	}
 
+	public static void setupTheme(Context context, boolean fullscreen) {
+		boolean darkTheme = getPrefs(0).getBoolean("zz_theme_dark", false);
+		if (darkTheme) {
+			context.setTheme(fullscreen? R.style.FullscreenDarkTheme: R.style.BlockLauncherDarkTheme);
+		}
+	}
+
 	/**
 	 * Throws an exception when you try to call methods, calling this class to
 	 * prevent NPE, without Utils initialization.

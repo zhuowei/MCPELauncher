@@ -408,6 +408,8 @@ public class MainActivity extends NativeActivity {
 
 		setFakePackage(false);
 
+		Utils.setupTheme(this, true);
+
 		try {
 			boolean shouldLoadScripts = hasScriptSupport();
 			if (!isSafeMode() && minecraftLibBuffer != null) {

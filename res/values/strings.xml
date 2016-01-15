@@ -193,6 +193,7 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="purchase_extras_package">You need to purchase the BlockLauncher Extras package to use this feature.</string>
     <string name="minecraft_wrong_arch">Unfortunately the version of Minecraft PE on this device is not compatibile with BlockLauncher. Please install Minecraft PE for ARCH processors.</string>
     <string name="addons_wrong_arch">The addons ADDONS cannot be loaded as they do not support ARCH processors.</string>
+    <string name="pref_zz_theme_dark">Use dark theme</string>
 
     <string name="report_error_title">Oh nose everything broke</string>
 </resources>

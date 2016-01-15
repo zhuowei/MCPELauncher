@@ -33,7 +33,7 @@
 
     <de.ankri.views.Switch
         android:id="@+id/switch_widget"
-        style="@style/switch_dark"
+        style="?attr/switchStyle"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:clickable="true"

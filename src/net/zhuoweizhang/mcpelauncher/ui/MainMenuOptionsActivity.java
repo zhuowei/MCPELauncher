@@ -61,6 +61,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference legacyLivePatchPreference;
 	private SwitchPreference useControllerPreference;
 	private SwitchPreference enableKamcordPreference;
+	private SwitchPreference themeDarkPreference;
 
 	private Preference recorderWatchPreference;
 	private Preference recorderReshareLastPreference;
@@ -358,6 +359,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			} else {
 				enableKamcordPreference.setListener(this);
 			}
+		}
+		themeDarkPreference = (SwitchPreference) findPreference("zz_theme_dark");
+		if (themeDarkPreference != null) {
+			themeDarkPreference.setListener(this);
 		}
 	}
 
