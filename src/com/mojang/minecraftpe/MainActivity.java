@@ -2408,6 +2408,16 @@ public class MainActivity extends NativeActivity {
 		return false; //getMCPEVersion().startsWith("0.13");
 	}
 
+	public void reportReimported(final String scripts) {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				Toast.makeText(MainActivity.this, MainActivity.this.getResources().
+					getString(R.string.manage_scripts_reimported_toast) + " " + scripts,
+					Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
 			if (BuildConfig.DEBUG)

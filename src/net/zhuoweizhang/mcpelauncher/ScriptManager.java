@@ -46,6 +46,7 @@ import com.mojang.minecraftpe.MainActivity;
 
 import net.zhuoweizhang.mcpelauncher.api.modpe.*;
 import net.zhuoweizhang.mcpelauncher.texture.AtlasMeta;
+import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
 import static net.zhuoweizhang.mcpelauncher.PatchManager.blankArray;
@@ -745,6 +746,8 @@ public class ScriptManager {
 
 	protected static void loadEnabledScripts() throws IOException {
 		loadEnabledScriptsNames(androidContext);
+		final boolean reimportEnabled = Utils.getPrefs(0).getBoolean("zz_reimport_scripts", false);
+		final StringBuilder reimportedString = new StringBuilder();
 		for (String name : enabledScripts) {
 			// load all scripts into the script interpreter
 			File file = getScriptFile(name);
@@ -753,11 +756,17 @@ public class ScriptManager {
 				continue;
 			}
 			try {
+				if (reimportEnabled) {
+					if (reimportIfPossible(file)) reimportedString.append(file.getName()).append(' ');
+				}
 				loadScript(file);
 			} catch (Exception e) {
 				e.printStackTrace();
 				MainActivity.currentMainActivity.get().reportError(e);
 			}
+		}
+		if (reimportedString.length() != 0) {
+			MainActivity.currentMainActivity.get().reportReimported(reimportedString.toString());
 		}
 	}
 
@@ -772,6 +781,44 @@ public class ScriptManager {
 	public static File getScriptFile(String scriptId) {
 		File scriptsFolder = androidContext.getDir(SCRIPTS_DIR, 0);
 		return new File(scriptsFolder, scriptId);
+	}
+
+	public static void setOriginalLocation(File source, File target) throws IOException {
+		SharedPreferences sharedPrefs = Utils.getPrefs(1);
+		SharedPreferences.Editor edit = sharedPrefs.edit();
+		JSONObject originalLocations = getOriginalLocations();
+		try {
+			originalLocations.put(target.getName(), source.getAbsolutePath());
+		} catch (JSONException jsonException) {
+			throw new RuntimeException("Setting original location failed", jsonException);
+		}
+		edit.putString("scriptOriginalLocations", originalLocations.toString());
+		edit.apply();
+	}
+
+	public static JSONObject getOriginalLocations() {
+		try {
+			SharedPreferences sharedPrefs = Utils.getPrefs(1);
+			return new JSONObject(sharedPrefs.getString("scriptOriginalLocations", "{}"));
+		} catch (JSONException ex) {
+			return new JSONObject();
+		}
+	}
+
+	public static File getOriginalFile(File curFile) {
+		String originalLoc = getOriginalLocations().optString(curFile.getName(), null);
+		if (originalLoc == null) return null;
+		File originalFile = new File(originalLoc);
+		if (!originalFile.exists()) return null;
+		return originalFile;
+	}
+
+	public static boolean reimportIfPossible(File curFile) throws IOException {
+		File originalFile = getOriginalFile(curFile);
+		if (originalFile == null) return false;
+		if (originalFile.lastModified() <= curFile.lastModified()) return false;
+		PatchUtils.copy(originalFile, curFile);
+		return true;
 	}
 
 	// end script manager controls

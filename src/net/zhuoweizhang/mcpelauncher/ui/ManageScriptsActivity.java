@@ -219,6 +219,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						} else {
 							to = new File(getDir(SCRIPTS_DIR, 0), file.getName());
 							PatchUtils.copy(file, to);
+							ScriptManager.setOriginalLocation(file, to);
 						}
 						ScriptManager.setEnabled(to, false);
 						int maxPatchCount = getMaxPatchCount();

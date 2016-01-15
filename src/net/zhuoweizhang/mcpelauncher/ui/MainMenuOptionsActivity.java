@@ -65,6 +65,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 
 	private Preference recorderWatchPreference;
 	private Preference recorderReshareLastPreference;
+	private SwitchPreference reimportScriptsPreference;
 
 	protected Thread ui = new Thread(new Runnable() {
 		protected WeakReference<MainMenuOptionsActivity> activity = null;
@@ -364,6 +365,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		if (themeDarkPreference != null) {
 			themeDarkPreference.setListener(this);
 		}
+		reimportScriptsPreference = (SwitchPreference) findPreference("zz_reimport_scripts");
+		if (reimportScriptsPreference != null) {
+			reimportScriptsPreference.setListener(this);
+		}
 	}
 
 	public boolean onPreferenceClick(Preference pref) {
@@ -413,6 +418,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		needsRestart = true;
 		if (useControllerPreference != null && data == useControllerPreference.content) {
 			controllerChange(data);
+			return;
+		} else if (reimportScriptsPreference != null && data == reimportScriptsPreference.content) {
+			if (data.isChecked()) {
+				new AlertDialog.Builder(this).setMessage(R.string.manage_scripts_reimport_enable_dialog).
+					setPositiveButton(android.R.string.ok, null).show();
+			}
 			return;
 		}
 		synchronized (ui) {

@@ -25,6 +25,7 @@ public class ImportScriptActivity extends ImportActivity {
 			PatchUtils.copy(mFile, to);
 			ScriptManager.androidContext = this.getApplicationContext();
 			ScriptManager.loadEnabledScriptsNames(this.getApplicationContext());
+			ScriptManager.setOriginalLocation(mFile, to);
 			ScriptManager.setEnabled(to, true);
 			Toast.makeText(this, R.string.script_imported, Toast.LENGTH_LONG)
 					.show();
