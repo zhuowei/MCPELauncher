@@ -14,7 +14,7 @@ public:
 
 class EnchantUtils {
 public:
-	static void applyEnchant(ItemInstance&, int, int);
+	static bool applyEnchant(ItemInstance&, int, int);
 };
 
 class EnchantmentInstance {

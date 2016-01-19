@@ -1645,7 +1645,7 @@ public class ScriptManager {
 	public static native int nativeItemGetUseAnimation(int id);
 	public static native void nativeItemSetUseAnimation(int id, int anim);
 	public static native void nativeItemSetStackedByData(int id, boolean yep);
-	public static native void nativePlayerEnchant(int slot, int enchantment, int level);
+	public static native boolean nativePlayerEnchant(int slot, int enchantment, int level);
 	public static native int[] nativePlayerGetEnchantments(int slot);
 	public static native String nativePlayerGetItemCustomName(int slot);
 	public static native void nativePlayerSetItemCustomName(int slot, String name);
@@ -1669,6 +1669,7 @@ public class ScriptManager {
 	public static native void nativeDumpVtable(String name, int size);
 	public static native int nativeGetItemIdCount();
 	public static native void nativeSetExitEnabled(boolean enabled);
+	public static native void nativeRecipeSetAnyAuxValue(int id, boolean anyAux);
 
 	public static class ScriptState {
 		public Script script;
@@ -2421,11 +2422,11 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void enchant(int slot, int enchantment, int level) {
+		public static boolean enchant(int slot, int enchantment, int level) {
 			if (enchantment < Enchantment.PROTECTION || enchantment > Enchantment.LURE) {
 				throw new RuntimeException("Invalid enchantment: " + enchantment);
 			}
-			nativePlayerEnchant(slot, enchantment, level);
+			return nativePlayerEnchant(slot, enchantment, level);
 		}
 
 		@JSStaticFunction
@@ -3288,6 +3289,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setStackedByData(int id, boolean stacked) {
 			nativeItemSetStackedByData(id, stacked);
+		}
+
+		@JSStaticFunction
+		public static void setRecipeIgnoreData(int id, boolean ignore) {
+			nativeRecipeSetAnyAuxValue(id, ignore);
 		}
 
 		@Override

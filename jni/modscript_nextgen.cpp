@@ -136,14 +136,17 @@ typedef struct {
 	//}
 } ItemPack;
 
-typedef struct {
+class Recipe {
+public:
 	void** vtable; //4
 	ItemPack itemPack; //4
-} Recipe;
+	static bool isAnyAuxValue(int);
+};
 
-typedef struct {
+class Recipes {
+public:
 	std::vector<Recipe*> recipes;
-} Recipes;
+};
 
 typedef struct {
 	void** vtable;//0
@@ -411,6 +414,7 @@ static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 	(Block*, std::string const&, int, BlockID, void*, std::string const&, std::string const&);
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
+static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -438,6 +442,7 @@ bool bl_onLockDown = false;
 
 static int bl_item_id_count = 512;
 Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
+unsigned char bl_anyAuxValue[BL_ITEMS_EXPANDED_COUNT];
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -1502,12 +1507,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		RecipesType recipeType;
 		int inputId = ingredients[i * 3 + 1];
 		recipeType.tile = inputId < 0x100? bl_Block_mBlocks[inputId]: nullptr;
-		recipeType.item = nullptr;
+		recipeType.item = bl_Item_mItems[inputId];//nullptr;
 		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 		recipeType.itemInstance.count = 1;
 		recipeType.itemInstance.tag = NULL;
 		bl_ItemInstance_setId(&recipeType.itemInstance, inputId);
 		recipeType.letter = (char) ingredients[i * 3];
+		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Recipes: out %d %d %d in %c %d %d",
+		//	itemId, itemCount, itemDamage, recipeType.letter, inputId,
+		//	(int)recipeType.itemInstance.damage);
 		ingredientsList.push_back(recipeType);
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
@@ -2439,12 +2447,12 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 	item->useAnimation = animation;
 }
 
-JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
+JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
   (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
 	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
 	ItemInstance* itemInstance = inventory->getItem(slot);
-	if (itemInstance == nullptr) return;
-	EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
+	if (itemInstance == nullptr) return false;
+	return EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
 }
 
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
@@ -2491,6 +2499,20 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetSta
 	Item* item = bl_Item_mItems[id];
 	if (!item) return;
 	item->setStackedByData(stacked);
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRecipeSetAnyAuxValue
+  (JNIEnv *env, jclass clazz, jint id, jboolean anyAux) {
+	if (id < 0 || id >= bl_item_id_count) return;
+	bl_anyAuxValue[id] = anyAux? 2: 1;
+}
+
+bool bl_Recipe_isAnyAuxValue_hook(int id) {
+	auto b = bl_anyAuxValue[id];
+	if (b == 0) {
+		return bl_Recipe_isAnyAuxValue_real(id);
+	}
+	return b == 2;
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
@@ -2811,6 +2833,9 @@ void bl_setuphooks_cppside() {
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN9Throwable12throwableHitERK9HitResultii");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
+	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
+		(void**) &bl_Recipe_isAnyAuxValue_real);
+
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
