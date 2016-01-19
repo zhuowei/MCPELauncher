@@ -219,7 +219,7 @@ public class ScriptManager {
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
 		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class,
-		BlockFace.class, UseAnimation.class, Enchantment.class
+		BlockFace.class, UseAnimation.class, Enchantment.class, EnchantType.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -1649,6 +1649,7 @@ public class ScriptManager {
 	public static native int[] nativePlayerGetEnchantments(int slot);
 	public static native String nativePlayerGetItemCustomName(int slot);
 	public static native void nativePlayerSetItemCustomName(int slot, String name);
+	public static native void nativeSetAllowEnchantments(int id, int flag, int value);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3291,9 +3292,16 @@ public class ScriptManager {
 			nativeItemSetStackedByData(id, stacked);
 		}
 
+		/*
 		@JSStaticFunction
 		public static void setRecipeIgnoreData(int id, boolean ignore) {
 			nativeRecipeSetAnyAuxValue(id, ignore);
+		}
+		*/
+
+		@JSStaticFunction
+		public static void setEnchantType(int id, int flag, int value) {
+			nativeSetAllowEnchantments(id, flag, value);
 		}
 
 		@Override

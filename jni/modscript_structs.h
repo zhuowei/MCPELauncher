@@ -72,7 +72,7 @@ public:
 	float prevPitch; //64
 	float prevYaw; //68
 
-	char filler4[244-104]; //72
+	char filler4[244-72]; //72
 	int renderType; //244
 	char filler5[260-248]; // 248
 	struct Entity* rider; //260
@@ -83,6 +83,7 @@ public:
 	EntityUniqueID const& getUniqueID() const;
 	void setNameTag(std::string const&);
 };
+static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 
 class Mob: public Entity {
 };

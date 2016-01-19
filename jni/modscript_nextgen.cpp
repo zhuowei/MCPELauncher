@@ -224,6 +224,9 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int mob_set_sneaking;
 	int blockitem_vtable_size;
 	int blockitem_get_level_data_for_aux_value;
+	int item_vtable_size;
+	int item_get_enchant_slot;
+	int item_get_enchant_value;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -257,6 +260,11 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.blockitem_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV9BlockItem")->st_size;
 	vtable_indexes.blockitem_get_level_data_for_aux_value = bl_vtableIndex(mcpelibhandle, "_ZTV9BlockItem",
 		"_ZNK4Item23getLevelDataForAuxValueEi");
+	vtable_indexes.item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV4Item")->st_size;
+	vtable_indexes.item_get_enchant_slot = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
+		"_ZNK4Item14getEnchantSlotEv");
+	vtable_indexes.item_get_enchant_value = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
+		"_ZNK4Item15getEnchantValueEv");
 }
 
 extern "C" {
@@ -443,6 +451,9 @@ bool bl_onLockDown = false;
 static int bl_item_id_count = 512;
 Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
 unsigned char bl_anyAuxValue[BL_ITEMS_EXPANDED_COUNT];
+void** bl_CustomItem_vtable;
+unsigned short bl_customItem_allowEnchantments[BL_ITEMS_EXPANDED_COUNT];
+int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -968,6 +979,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, name, id - 0x100);
+	*((void***)retval) = bl_CustomItem_vtable + 2;
 	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
 	return retval;
@@ -1207,6 +1219,18 @@ int bl_CustomBlockItem_getLevelDataForAuxValue_hook(Item* item, int value) {
 	return 0;
 }
 
+unsigned short bl_CustomItem_getEnchantSlot_hook(Item* item) {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Get enchant slot %d %d", item->itemId,
+		bl_customItem_allowEnchantments[item->itemId]);
+	return bl_customItem_allowEnchantments[item->itemId];
+}
+
+int bl_CustomItem_getEnchantValue_hook(Item* item) {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Get enchant value %d %d", item->itemId,
+		bl_customItem_enchantValue[item->itemId]);
+	return bl_customItem_enchantValue[item->itemId];
+}
+
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
@@ -1231,7 +1255,17 @@ void bl_initCustomBlockVtable() {
 	memcpy(bl_CustomBlockItem_vtable, bl_BlockItem_vtable, vtable_indexes.blockitem_vtable_size);
 	bl_CustomBlockItem_vtable[vtable_indexes.blockitem_get_level_data_for_aux_value] =
 		(void*) &bl_CustomBlockItem_getLevelDataForAuxValue_hook;
+	bl_CustomBlockItem_vtable[vtable_indexes.item_get_enchant_slot] =
+		(void*) &bl_CustomItem_getEnchantSlot_hook;
+	bl_CustomBlockItem_vtable[vtable_indexes.item_get_enchant_value] =
+		(void*) &bl_CustomItem_getEnchantValue_hook;
 
+	bl_CustomItem_vtable = (void**) ::operator new(vtable_indexes.item_vtable_size);
+	memcpy(bl_CustomItem_vtable, bl_Item_vtable, vtable_indexes.item_vtable_size);
+	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_slot] =
+		(void*) &bl_CustomItem_getEnchantSlot_hook;
+	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_value] =
+		(void*) &bl_CustomItem_getEnchantValue_hook;
 }
 
 void* bl_getMaterial(int materialType) {
@@ -2515,6 +2549,13 @@ bool bl_Recipe_isAnyAuxValue_hook(int id) {
 	return b == 2;
 }
 
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAllowEnchantments
+  (JNIEnv* env, jclass clazz, jint id, jint mask, jint value) {
+	if (id < 0 || id >= bl_item_id_count) return;
+	bl_customItem_allowEnchantments[id] = mask;
+	bl_customItem_enchantValue[id] = value;
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2599,7 +2640,7 @@ void bl_setuphooks_cppside() {
 
 	mcpelauncher_hook(raknet_connect, (void*) &bl_RakNetInstance_connect_hook, (void**) &bl_RakNetInstance_connect_real);
 
-	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item")) + 8;
+	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item"));
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 
