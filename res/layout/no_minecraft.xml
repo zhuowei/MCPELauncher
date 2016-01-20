@@ -14,5 +14,11 @@
     android:text="@string/no_minecraft_installed"
     android:textSize="18sp"
     />
+<Button android:id="@+id/no_minecraft_learn_more"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/no_minecraft_learn_more"
+    android:onClick="learnMoreClicked"
+    android:visibility="gone"/>
 </LinearLayout>
 

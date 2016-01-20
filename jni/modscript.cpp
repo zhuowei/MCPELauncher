@@ -106,7 +106,6 @@ static void (*bl_Entity_remove)(Entity*);
 static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, Player*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
-static int (*bl_FillingContainer_clearSlot)(void*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 static void (*bl_MinecraftClient_setGameMode)(MinecraftClient*, int);
 ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
@@ -876,8 +875,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
-	bl_FillingContainer_clearSlot(invPtr, slot);
+	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	invPtr->clearSlot(slot);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSlotInventory
@@ -908,7 +907,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (itemStack == NULL) return;
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
 	if (slot < linkedSlotsCount) {
-		int oldslot = slot;
+		//int oldslot = slot;
 		slot = invPtr->getLinkedSlot(slot);
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "slot old %d new %d slot %d", oldslot, slot, linkedSlotsCount);
 	}
@@ -1247,7 +1246,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LocalPlayer_hurtTo = (void (*)(Player*, int)) dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = (void (*)(Entity*)) dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
 	bl_Entity_setOnFire = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
-	bl_FillingContainer_clearSlot = (int (*)(void*, int)) dlsym(RTLD_DEFAULT, "_ZN16FillingContainer9clearSlotEi");
 	bl_FillingContainer_getItem = (ItemInstance* (*)(void*, int)) dlsym(RTLD_DEFAULT, "_ZNK16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen

@@ -2338,6 +2338,7 @@ public class MainActivity extends NativeActivity {
 				String message = this.getResources().getString(R.string.minecraft_wrong_arch).toString().
 					replaceAll("ARCH", Utils.getArchName(myArch));
 				intent.putExtra("message", message);
+				intent.putExtra("learnmore_uri", "https://github.com/zhuowei/MCPELauncher/issues/495");
 				startActivity(intent);
 				finish();
 				try {

@@ -403,6 +403,7 @@ public:
 	void playSound(Vec3 const&, std::string const&, float, float);
 	bool isClientSide() const;
 	HitResult const& getHitResult();
+	int getDifficulty() const;
 };
 
 class EntityRenderDispatcher {

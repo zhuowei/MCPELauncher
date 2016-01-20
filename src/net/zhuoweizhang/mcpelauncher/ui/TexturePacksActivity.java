@@ -134,6 +134,23 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 		updateContents();
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(getResources().getString(R.string.textures_clear_script_texture_overrides));
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+		if (item.getTitle().equals(getResources().getString(R.string.textures_clear_script_texture_overrides))) {
+			ScriptManager.clearTextureOverrides();
+			Toast.makeText(this, R.string.textures_clear_script_texture_overrides,
+					Toast.LENGTH_SHORT).show();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
 	private class TexturesAdapter extends ArrayAdapter<TexturePackDescription> {
 		private LayoutInflater inflater;
 

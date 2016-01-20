@@ -2558,6 +2558,12 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAllowEn
 	bl_customItem_enchantValue[id] = value;
 }
 
+JNIEXPORT int Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetDifficulty
+  (JNIEnv* env, jclass clazz) {
+	if (bl_level == nullptr) return 0;
+	return bl_level->getDifficulty();
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;

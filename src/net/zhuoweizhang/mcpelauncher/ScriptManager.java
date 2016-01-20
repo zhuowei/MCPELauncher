@@ -1650,6 +1650,7 @@ public class ScriptManager {
 	public static native String nativePlayerGetItemCustomName(int slot);
 	public static native void nativePlayerSetItemCustomName(int slot, String name);
 	public static native void nativeSetAllowEnchantments(int id, int flag, int value);
+	public static native int nativeLevelGetDifficulty();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2160,6 +2161,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static boolean canSeeSky(int x, int y, int z) {
 			return nativeLevelCanSeeSky(x, y, z);
+		}
+
+		@JSStaticFunction
+		public static int getDifficulty() {
+			return nativeLevelGetDifficulty();
 		}
 
 		@Override
@@ -3095,6 +3101,9 @@ public class ScriptManager {
 		
 		@JSStaticFunction
 		public static String getName(int id, int damage, boolean raw) {
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("getName called with invalid item ID: " + id);
+			}
 			return nativeGetItemName(id, damage, raw);
 		}
 
