@@ -4,7 +4,7 @@
 #include <unordered_map>
 #endif
 class Entity;
-typedef Entity Player;
+class Player;
 #include "mcpe/minecraft.h"
 #include "mcpe/blocksource.h"
 #include "mcpe/enchant.h"
@@ -86,6 +86,9 @@ public:
 static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 
 class Mob: public Entity {
+};
+
+class Player: public Mob {
 };
 
 struct TextureUVCoordinateSet {

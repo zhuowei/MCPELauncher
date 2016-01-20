@@ -816,6 +816,8 @@ static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entity
 }
 
 static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> entity) {
+	jlong entityId = entity->getUniqueID();
+	uintptr_t retval = bl_Level_addPlayer_real(level, std::move(entity));
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -827,12 +829,12 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> e
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityAddedCallback", "(J)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID());
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entityId);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	return bl_Level_addPlayer_real(level, std::move(entity));
+	return retval;
 }
 
 static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
