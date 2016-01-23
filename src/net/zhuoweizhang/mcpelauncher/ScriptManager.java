@@ -1688,6 +1688,7 @@ public class ScriptManager {
 	public static native void nativePlayerSetItemCustomName(int slot, String name);
 	public static native void nativeSetAllowEnchantments(int id, int flag, int value);
 	public static native int nativeLevelGetDifficulty();
+	public static native void nativeLevelSetDifficulty(int difficulty);
 	public static native void nativeArmorAddQueuedTextures();
 
 	// setup
@@ -2204,6 +2205,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getDifficulty() {
 			return nativeLevelGetDifficulty();
+		}
+
+		@JSStaticFunction
+		public static void setDifficulty(int difficulty) {
+			nativeLevelSetDifficulty(difficulty);
 		}
 
 		@Override

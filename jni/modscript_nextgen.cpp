@@ -227,6 +227,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_vtable_size;
 	int item_get_enchant_slot;
 	int item_get_enchant_value;
+	int level_set_difficulty;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -265,6 +266,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item14getEnchantSlotEv");
 	vtable_indexes.item_get_enchant_value = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item15getEnchantValueEv");
+	vtable_indexes.level_set_difficulty = bl_vtableIndex(mcpelibhandle, "_ZTV5Level",
+		"_ZN5Level13setDifficultyE10Difficulty");
 }
 
 extern "C" {
@@ -282,8 +285,6 @@ static void** bl_CustomBlockItem_vtable;
 static Block** bl_Block_mBlocks;
 static unsigned char* bl_Block_mLightEmission;
 static unsigned char* bl_Block_mLightBlock;
-
-static void (*bl_Item_setNameID)(Item*, std::string const&);
 
 static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
@@ -306,7 +307,6 @@ static int (*bl_Font_width)(Font*, std::string const&);
 
 static void (*bl_Block_Block)(Block*, std::string const&, int, void*);
 static void (*bl_BlockItem_BlockItem)(Item*, std::string const&, short);
-static void (*bl_Tile_setNameId)(Tile*, const std::string&);
 static void (*bl_Block_setVisualShape)(Block*, Vec3 const&, Vec3 const&);
 static void (*bl_Mob_setSneaking)(Entity*, bool);
 static bool (*bl_Mob_isSneaking)(Entity*);
@@ -326,7 +326,6 @@ static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> co
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 static void (*bl_Gui_showTipMessage)(void*, std::string const&);
-static bool (*bl_CraftingFilters_isStonecutterItem_real)(ItemInstance const&);
 
 static void** bl_ShapelessRecipe_vtable;
 
@@ -2562,6 +2561,13 @@ JNIEXPORT int Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetDif
   (JNIEnv* env, jclass clazz) {
 	if (bl_level == nullptr) return 0;
 	return bl_level->getDifficulty();
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDifficulty
+  (JNIEnv* env, jclass clazz, int difficulty) {
+	if (bl_level == nullptr) return;
+	void (*setDifficulty)(Level*, int) = (void (*)(Level*, int)) bl_level->vtable[vtable_indexes.level_set_difficulty - 2];
+	setDifficulty(bl_level, difficulty);
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
