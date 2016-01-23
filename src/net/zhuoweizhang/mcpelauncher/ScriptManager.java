@@ -508,6 +508,7 @@ public class ScriptManager {
 				}
 				MobEffect.initIds();
 				loadEnabledScripts();
+				nativeArmorAddQueuedTextures();
 			} catch (Exception e) {
 				e.printStackTrace();
 				reportScriptError(null, e);
@@ -1687,6 +1688,7 @@ public class ScriptManager {
 	public static native void nativePlayerSetItemCustomName(int slot, String name);
 	public static native void nativeSetAllowEnchantments(int id, int flag, int value);
 	public static native int nativeLevelGetDifficulty();
+	public static native void nativeArmorAddQueuedTextures();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);

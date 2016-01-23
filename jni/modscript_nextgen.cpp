@@ -448,7 +448,7 @@ void* bl_marauder_translation_function(void* input);
 __attribute__((__visibility__("hidden")))
 bool bl_onLockDown = false;
 
-static int bl_item_id_count = 512;
+int bl_item_id_count = 512;
 Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
 unsigned char bl_anyAuxValue[BL_ITEMS_EXPANDED_COUNT];
 void** bl_CustomItem_vtable;
