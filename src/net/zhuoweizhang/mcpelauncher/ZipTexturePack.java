@@ -65,4 +65,8 @@ public class ZipTexturePack implements TexturePack {
 		}
 		return list;
 	}
+
+	public String getZipName() {
+		return file.getName();
+	}
 }

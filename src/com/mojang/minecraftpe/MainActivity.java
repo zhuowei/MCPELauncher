@@ -392,6 +392,28 @@ public class MainActivity extends NativeActivity {
 			reportError(e);
 		}
 
+		try {
+			boolean shouldLoadScripts = hasScriptSupport();
+			if (!isSafeMode() && minecraftLibBuffer != null) {
+				applyBuiltinPatches();
+				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
+					ScriptManager.init(this);
+					textureOverrides.add(ScriptManager.modPkgTexturePack);
+				}
+			}
+			if (isSafeMode() || !shouldLoadScripts) {
+				ScriptManager.loadEnabledScriptsNames(this);
+				// in safe mode, script names, but not the actual scripts,
+				// should be loaded
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+
+		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
+
 		initAtlasMeta();
 
 		displayMetrics = new DisplayMetrics();
@@ -411,28 +433,6 @@ public class MainActivity extends NativeActivity {
 		setFakePackage(false);
 
 		Utils.setupTheme(this, true);
-
-		try {
-			boolean shouldLoadScripts = hasScriptSupport();
-			if (!isSafeMode() && minecraftLibBuffer != null) {
-				applyBuiltinPatches();
-				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
-					ScriptManager.init(this);
-					if (isForcingController()) ScriptManager.nativeSetUseController(isForcingController());
-				}
-			}
-			if (isSafeMode() || !shouldLoadScripts) {
-				ScriptManager.loadEnabledScriptsNames(this);
-				// in safe mode, script names, but not the actual scripts,
-				// should be loaded
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			reportError(e);
-		}
-
-		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		//enableSoftMenuKey();
 		//disableTransparentSystemBar(); not needed when targetting KitKat

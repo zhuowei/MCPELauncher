@@ -46,6 +46,7 @@ import com.mojang.minecraftpe.MainActivity;
 
 import net.zhuoweizhang.mcpelauncher.api.modpe.*;
 import net.zhuoweizhang.mcpelauncher.texture.AtlasMeta;
+import net.zhuoweizhang.mcpelauncher.texture.ModPkgTexturePack;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
@@ -132,6 +133,7 @@ public class ScriptManager {
 	public static int ITEM_ID_COUNT = 512;
 	private static android.app.Instrumentation instrumentation;
 	private static ExecutorService instrumentationExecutor;
+	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -186,7 +188,7 @@ public class ScriptManager {
 		}
 	}
 
-	public static void loadScript(File file) throws IOException {
+	public static void loadScript(File file, boolean firstLoad) throws IOException {
 		if (isClassGenMode()) {
 			if (!scriptingInitialized)
 				return;
@@ -196,7 +198,7 @@ public class ScriptManager {
 			return;
 		}
 		if (isPackagedScript(file)) {
-			loadPackagedScript(file);
+			loadPackagedScript(file, firstLoad);
 			return;
 		}
 		Reader in = null;
@@ -630,6 +632,7 @@ public class ScriptManager {
 		// call it before the first frame renders
 		requestReloadAllScripts = true;
 		nativeRequestFrameCallback();
+		prepareEnabledScripts();
 	}
 
 	public static void destroy() {
@@ -654,11 +657,18 @@ public class ScriptManager {
 				break;
 			}
 		}
+		if (isPackagedScript(scriptId)) {
+			try {
+				modPkgTexturePack.removePackage(scriptId);
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			}
+		}
 	}
 
 	public static void reloadScript(File file) throws IOException {
 		removeScript(file.getName());
-		loadScript(file);
+		loadScript(file, false);
 	}
 
 	public static void reportScriptError(ScriptState state, Throwable t) {
@@ -745,6 +755,23 @@ public class ScriptManager {
 	}
 
 	protected static void loadEnabledScripts() throws IOException {
+		for (String name : enabledScripts) {
+			// load all scripts into the script interpreter
+			File file = getScriptFile(name);
+			if (!file.exists() || !file.isFile()) {
+				Log.i("BlockLauncher", "ModPE script " + file.toString() + " doesn't exist");
+				continue;
+			}
+			try {
+				loadScript(file, true);
+			} catch (Exception e) {
+				e.printStackTrace();
+				MainActivity.currentMainActivity.get().reportError(e);
+			}
+		}
+	}
+
+	protected static void prepareEnabledScripts() throws IOException {
 		loadEnabledScriptsNames(androidContext);
 		final boolean reimportEnabled = Utils.getPrefs(0).getBoolean("zz_reimport_scripts", false);
 		final StringBuilder reimportedString = new StringBuilder();
@@ -759,7 +786,7 @@ public class ScriptManager {
 				if (reimportEnabled) {
 					if (reimportIfPossible(file)) reimportedString.append(file.getName()).append(' ');
 				}
-				loadScript(file);
+				prepareScript(file);
 			} catch (Exception e) {
 				e.printStackTrace();
 				MainActivity.currentMainActivity.get().reportError(e);
@@ -768,6 +795,11 @@ public class ScriptManager {
 		if (reimportedString.length() != 0) {
 			MainActivity.currentMainActivity.get().reportReimported(reimportedString.toString());
 		}
+	}
+
+	private static void prepareScript(File file) throws Exception {
+		if (!isPackagedScript(file)) return;
+		modPkgTexturePack.addPackage(file);
 	}
 
 	protected static void saveEnabledScripts() {
@@ -1267,10 +1299,13 @@ public class ScriptManager {
 	}
 
 	private static boolean isPackagedScript(File file) {
-		return file.getName().toLowerCase().endsWith(".modpkg");
+		return isPackagedScript(file.getName());
+	}
+	private static boolean isPackagedScript(String str) {
+		return str.toLowerCase().endsWith(".modpkg");
 	}
 
-	private static void loadPackagedScript(File file) throws IOException {
+	private static void loadPackagedScript(File file, boolean firstLoad) throws IOException {
 		ZipFile zipFile = null;
 		try {
 			zipFile = new ZipFile(file);
@@ -1279,7 +1314,7 @@ public class ScriptManager {
 			boolean scrambled = false;
 			try {
 				info = MpepInfo.fromZip(zipFile);
-				scrambled = info.scrambleCode.length() > 0;
+				scrambled = info != null && info.scrambleCode.length() > 0;
 			} catch (JSONException json) {
 				// ignore lol
 			}
@@ -1310,6 +1345,7 @@ public class ScriptManager {
 		} finally {
 			if (zipFile != null) zipFile.close();
 		}
+		if (!firstLoad) modPkgTexturePack.addPackage(file);
 	}
 
 	private static void verifyBlockTextures(TextureRequests requests) {
