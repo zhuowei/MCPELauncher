@@ -2440,7 +2440,7 @@ void* bl_Throwable_throwableHit_hook(Entity* entity, HitResult const& hitResult,
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID(),
 		hitResult.type, hitResult.side, hitResult.x, hitResult.y, hitResult.z,
 		hitResult.hitVec.x, hitResult.hitVec.y, hitResult.hitVec.z,
-		hitResult.entity);
+		hitResult.type == HIT_RESULT_ENTITY? (jlong)hitResult.entity->getUniqueID(): (jlong)0);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
