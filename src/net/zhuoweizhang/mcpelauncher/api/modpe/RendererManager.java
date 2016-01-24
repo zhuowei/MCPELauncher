@@ -63,6 +63,10 @@ public class RendererManager {
 			return new NativeModel(this.rendererId); //TODO: secondary models - e.g. armour
 		}
 		public void setName(String name) {
+			if (name.indexOf(".") == -1) {
+				throw new RuntimeException("Renderer name must be in format of author.modname.name;" +
+					" for example, coolmcpemodder.sz.SwagYolo");
+			}
 			this.name = name;
 			NativeRendererApi.register(name, this);
 		}

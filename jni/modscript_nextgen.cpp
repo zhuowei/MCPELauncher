@@ -1704,8 +1704,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return false;
 	auto foundIter = bl_mobTexturesMap.find(entity->getUniqueID());
-	if (foundIter == bl_mobTexturesMap.end()) return false;
-	return foundIter->second.textureName != std::string(bl_getOriginalSkin(entity));
+	return foundIter != bl_mobTexturesMap.end();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
@@ -2035,7 +2034,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	//skins
 	if (skinPath != NULL && type < 64) {
 		const char * skinUtfChars = env->GetStringUTFChars(skinPath, NULL);
-		bl_changeEntitySkin(e, skinUtfChars);
+		if (strcmp(bl_getOriginalSkin(e), skinUtfChars) != 0) {
+			bl_changeEntitySkin(e, skinUtfChars);
+		}
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
 	}
 

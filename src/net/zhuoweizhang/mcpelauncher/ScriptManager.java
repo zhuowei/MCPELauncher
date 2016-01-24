@@ -2735,6 +2735,7 @@ public class ScriptManager {
 		public static void setRenderType(Object ent, Object renderType) {
 			if (renderType instanceof Number) {
 				setRenderTypeImpl(ent, ((Number)renderType).intValue());
+				return;
 			}
 			String theName = renderType.toString();
 			setRenderTypeImpl(ent, RendererManager.NativeRendererApi.get(theName).getRenderType());
