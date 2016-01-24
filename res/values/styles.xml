@@ -34,7 +34,7 @@
         
     </style>
     <style name="ButtonBar.Button" parent="@android:style/Widget.Button">
-        
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
     
 </resources>

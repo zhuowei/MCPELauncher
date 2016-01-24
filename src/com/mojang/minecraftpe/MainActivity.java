@@ -1725,8 +1725,7 @@ public class MainActivity extends NativeActivity {
 					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
 			String targetMCPEVersion = app.metaData
 					.getString("net.zhuoweizhang.mcpelauncher.api.targetmcpeversion");
-			if (nativeLibName != null
-				&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
+			if (pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
 					PackageManager.PERMISSION_GRANTED
 				&& addonManager.isEnabled(app.packageName)) {
 				try {
@@ -1735,12 +1734,17 @@ public class MainActivity extends NativeActivity {
 							"\" (" + app.packageName + ")" +
 							" is not compatible with Minecraft PE " + mcPkgInfo.versionName + ".");
 					}
-					if (checkAddonArch(new File(app.nativeLibraryDir + "/lib" + nativeLibName + ".so"))) {
-						System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
-						loadedAddons.add(app.packageName);
+					if (nativeLibName != null) {
+						if (checkAddonArch(new File(app.nativeLibraryDir + "/lib" + nativeLibName + ".so"))) {
+							System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
+							loadedAddons.add(app.packageName);
+						} else {
+							archFail.append("\"").append(pm.getApplicationLabel(app).toString()).
+								append("\" (").append(app.packageName).append(") ");
+						}
 					} else {
-						archFail.append("\"").append(pm.getApplicationLabel(app).toString()).
-							append("\" (").append(app.packageName).append(") ");
+						// no native code; just texture pack
+						loadedAddons.add(app.packageName);
 					}
 				} catch (Throwable e) {
 					reportError(e);

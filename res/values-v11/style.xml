@@ -5,7 +5,7 @@
         
     </style>
     <style name="ButtonBar.Button" parent="@android:style/Widget.Holo.Button.Borderless">
-        
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
     
 </resources>

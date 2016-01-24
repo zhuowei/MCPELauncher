@@ -41,6 +41,10 @@ public class RendererManager {
 			return renderersById.get(id);
 		}
 
+		public static NativeRenderer getByName(String name) {
+			return renderersByName.get(name);
+		}
+
 		@JSStaticFunction
 		public static NativeRenderer createHumanoidRenderer() {
 			int id = nativeCreateHumanoidRenderer();

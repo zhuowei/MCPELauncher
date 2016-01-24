@@ -514,7 +514,7 @@ public class ScriptManager {
 		allentities.add(entity);
 		String renderType = NativeEntityApi.getExtraData(entity, ENTITY_KEY_RENDERTYPE);
 		if (renderType != null) {
-			RendererManager.NativeRenderer renderer = RendererManager.NativeRendererApi.get(renderType);
+			RendererManager.NativeRenderer renderer = RendererManager.NativeRendererApi.getByName(renderType);
 			if (renderer != null) NativeEntityApi.setRenderTypeImpl(entity, renderer.getRenderType());
 		}
 		String customSkin = NativeEntityApi.getExtraData(entity, ENTITY_KEY_SKIN);
@@ -2748,8 +2748,7 @@ public class ScriptManager {
 				theRenderer = (RendererManager.NativeRenderer) renderType;
 			} else {
 				String theName = renderType.toString();
-				theRenderer = RendererManager.NativeRendererApi.get(theName);
-				System.out.println("The name: " + theName + " got: " + theRenderer);
+				theRenderer = RendererManager.NativeRendererApi.getByName(theName);
 			}
 			if (!alreadySet) setRenderTypeImpl(ent, theRenderer.getRenderType());
 			setExtraData(ent, ENTITY_KEY_RENDERTYPE, theRenderer.getName());
