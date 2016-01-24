@@ -2733,13 +2733,26 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, Object renderType) {
-			if (renderType instanceof Number) {
-				setRenderTypeImpl(ent, ((Number)renderType).intValue());
-				return;
+			RendererManager.NativeRenderer theRenderer = null;
+			if (renderType instanceof NativeJavaObject) {
+				renderType = ((NativeJavaObject)renderType).unwrap();
 			}
-			String theName = renderType.toString();
-			setRenderTypeImpl(ent, RendererManager.NativeRendererApi.get(theName).getRenderType());
-			setExtraData(ent, ENTITY_KEY_RENDERTYPE, theName);
+			boolean alreadySet = false;
+			if (renderType instanceof Number) {
+				int rendererId = ((Number)renderType).intValue();
+				setRenderTypeImpl(ent, rendererId);
+				alreadySet = true;
+				theRenderer = RendererManager.NativeRendererApi.getById(rendererId);
+				if (theRenderer == null) return; // not a named/persistent renderer
+			} else if (renderType instanceof RendererManager.NativeRenderer) {
+				theRenderer = (RendererManager.NativeRenderer) renderType;
+			} else {
+				String theName = renderType.toString();
+				theRenderer = RendererManager.NativeRendererApi.get(theName);
+				System.out.println("The name: " + theName + " got: " + theRenderer);
+			}
+			if (!alreadySet) setRenderTypeImpl(ent, theRenderer.getRenderType());
+			setExtraData(ent, ENTITY_KEY_RENDERTYPE, theRenderer.getName());
 		}
 
 		public static void setRenderTypeImpl(Object ent, int renderType) {

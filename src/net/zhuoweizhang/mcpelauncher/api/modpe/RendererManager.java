@@ -24,6 +24,7 @@ public class RendererManager {
 
 	public static class NativeRendererApi extends ScriptableObject {
 		public static Map<String, NativeRenderer> renderersByName = new HashMap<String, NativeRenderer>();
+		public static Map<Integer, NativeRenderer> renderersById = new HashMap<Integer, NativeRenderer>();
 		public NativeRendererApi() {
 		}
 		@JSStaticFunction
@@ -35,6 +36,11 @@ public class RendererManager {
 			}
 			return renderersByName.get(name);
 		}
+
+		public static NativeRenderer getById(int id) {
+			return renderersById.get(id);
+		}
+
 		@JSStaticFunction
 		public static NativeRenderer createHumanoidRenderer() {
 			int id = nativeCreateHumanoidRenderer();
@@ -43,6 +49,7 @@ public class RendererManager {
 
 		public static void register(String name, NativeRenderer renderer) {
 			renderersByName.put(name, renderer);
+			renderersById.put(renderer.getRenderType(), renderer);
 		}
 		@Override
 		public String getClassName() {
