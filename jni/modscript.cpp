@@ -19,6 +19,7 @@ typedef bool cppbool;
 
 #include "modscript_structs.h"
 #include "mcpe/inventory.h"
+#include "mcpe/gamemode.h"
 
 typedef Player LocalPlayer;
 
@@ -602,7 +603,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	if(bl_gamemode == NULL) return;
 
-	bl_GameMode_destroyBlock_real(bl_gamemode, bl_localplayer, BlockPos(x, y, z), 2);
+	//bl_GameMode_destroyBlock_real(bl_gamemode, bl_localplayer, BlockPos(x, y, z), 2);
+	((GameMode*)bl_gamemode)->_destroyBlockInternal(*bl_localplayer, BlockPos(x, y, z), 2);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetOnFire
