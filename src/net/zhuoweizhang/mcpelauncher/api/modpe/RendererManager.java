@@ -1,5 +1,8 @@
 package net.zhuoweizhang.mcpelauncher.api.modpe;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.*;
 
@@ -19,7 +22,8 @@ public class RendererManager {
 		ScriptableObject.defineClass(scope, NativeModelPart.class);*/
 	}
 
-	private static class NativeRendererApi extends ScriptableObject {
+	public static class NativeRendererApi extends ScriptableObject {
+		public static Map<String, NativeRenderer> renderersByName = new HashMap<String, NativeRenderer>();
 		public NativeRendererApi() {
 		}
 		@JSStaticFunction
@@ -29,12 +33,16 @@ public class RendererManager {
 				return new NativeRenderer(id);
 			} catch (NumberFormatException e) {
 			}
-			return null; //TODO: named renderers
+			return renderersByName.get(name);
 		}
 		@JSStaticFunction
 		public static NativeRenderer createHumanoidRenderer() {
 			int id = nativeCreateHumanoidRenderer();
 			return new NativeRenderer(id);
+		}
+
+		public static void register(String name, NativeRenderer renderer) {
+			renderersByName.put(name, renderer);
 		}
 		@Override
 		public String getClassName() {
@@ -44,6 +52,7 @@ public class RendererManager {
 
 	public static class NativeRenderer {
 		private final int rendererId;
+		private String name = null;
 		public NativeRenderer(int id) {
 			this.rendererId = id;
 		}
@@ -52,6 +61,13 @@ public class RendererManager {
 		}
 		public NativeModel getModel() {
 			return new NativeModel(this.rendererId); //TODO: secondary models - e.g. armour
+		}
+		public void setName(String name) {
+			this.name = name;
+			NativeRendererApi.register(name, this);
+		}
+		public String getName() {
+			return name;
 		}
 	}
 	public static class NativeModel {

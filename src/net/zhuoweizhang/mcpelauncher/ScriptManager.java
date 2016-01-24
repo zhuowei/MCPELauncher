@@ -134,6 +134,11 @@ public class ScriptManager {
 	private static android.app.Instrumentation instrumentation;
 	private static ExecutorService instrumentationExecutor;
 	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack();
+	private static WorldData worldData = null;
+	private static int worldDataSaveCounter = 1;
+
+	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
+	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -342,6 +347,23 @@ public class ScriptManager {
 		worldDir = wDir;
 		scriptingEnabled = true;
 		isRemote = false;
+
+		if (worldData != null) {
+			try {
+				worldData.save();
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			}
+			worldData = null;
+		}
+		try {
+			File worldsDir = new File("/sdcard/games/com.mojang/minecraftWorlds");
+			File theDir = new File(worldsDir, worldDir);
+			worldData = new WorldData(theDir);
+		} catch (IOException ie) {
+			ie.printStackTrace();
+		}
+
 		callScriptMethod("selectLevelHook");
 		nextTickCallsSetLevel = true;
 	}
@@ -358,6 +380,15 @@ public class ScriptManager {
 			if (main != null) {
 				main.leaveGameCallback();
 			}
+		}
+		if (BuildConfig.DEBUG) System.out.println("world data: Leaving the game");
+		if (worldData != null) {
+			try {
+				worldData.save();
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			}
+			worldData = null;
 		}
 		serverAddress = null;
 		serverPort = 0;
@@ -412,6 +443,14 @@ public class ScriptManager {
 				runOnMainThreadList.clear();
 			}
 		}
+		if (worldData != null && --worldDataSaveCounter <= 0) {
+			try {
+				worldData.save();
+			} catch (IOException ie) {
+				ie.printStackTrace();
+			}
+			worldDataSaveCounter = 20*10; // every 10 seconds
+		}
 		// runDownloadCallbacks();
 	}
 
@@ -450,6 +489,7 @@ public class ScriptManager {
 	@CallbackName(name="deathHook", args={"attacker", "victim"})
 	public static void mobDieCallback(long attacker, long victim) {
 		callScriptMethod("deathHook", attacker == -1 ? -1 : attacker, victim);
+		if (worldData != null) worldData.clearEntityData(victim);
 	}
 
 	// Other nonstandard callbacks
@@ -472,6 +512,15 @@ public class ScriptManager {
 			playerAddedHandler(entity);
 		}
 		allentities.add(entity);
+		String renderType = NativeEntityApi.getExtraData(entity, ENTITY_KEY_RENDERTYPE);
+		if (renderType != null) {
+			RendererManager.NativeRenderer renderer = RendererManager.NativeRendererApi.get(renderType);
+			if (renderer != null) NativeEntityApi.setRenderTypeImpl(entity, renderer.getRenderType());
+		}
+		String customSkin = NativeEntityApi.getExtraData(entity, ENTITY_KEY_SKIN);
+		if (customSkin != null) {
+			NativeEntityApi.setMobSkinImpl(entity, customSkin, false);
+		}
 		callScriptMethod("entityAddedHook", entity);
 		// entityList.put(entityList.getLength(), entityList, entity);
 	}
@@ -1390,6 +1439,14 @@ public class ScriptManager {
 		});
 	}
 
+	private static long spawnEntityImpl(float x, float y, float z, int entityType, String skinPath) {
+		long retval = nativeSpawnEntity(x, y, z, entityType, skinPath);
+		if (nativeEntityHasCustomSkin(retval)) {
+			NativeEntityApi.setExtraData(retval, ENTITY_KEY_SKIN, skinPath);
+		}
+		return retval;
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native long nativeGetPlayerEnt();
@@ -1690,6 +1747,7 @@ public class ScriptManager {
 	public static native int nativeLevelGetDifficulty();
 	public static native void nativeLevelSetDifficulty(int difficulty);
 	public static native void nativeArmorAddQueuedTextures();
+	public static native boolean nativeEntityHasCustomSkin(long entity);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1810,7 +1868,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 10, tex);
 			return entityId;
 		}
 
@@ -1819,7 +1877,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 11, tex);
 			return entityId;
 		}
 
@@ -1890,7 +1948,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = "mob/pigzombie.png";
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 36, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 36, tex);
 			if (item == 0 || !nativeIsValidItem(item)) item = 283; // gold sword
 			nativeSetCarriedItem(entityId, item, 1, 0);
 			return entityId;
@@ -1903,13 +1961,13 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, typeId, tex);
 			return entityId;
 		}
 
 		@JSFunction
 		public void bl_setMobSkin(Object entityId, String tex) {
-			nativeSetMobSkin(getEntityId(entityId), tex);
+			NativeEntityApi.setMobSkin(getEntityId(entityId), tex);
 		}
 
 	}
@@ -1963,7 +2021,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = "mob/chicken.png";
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 10, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 10, tex);
 			return entityId;
 		}
 
@@ -1972,7 +2030,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = "mob/cow.png";
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, 11, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 11, tex);
 			return entityId;
 		}
 
@@ -1983,7 +2041,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, typeId, tex);
 			return entityId;
 		}
 
@@ -2610,7 +2668,7 @@ public class ScriptManager {
 			if (invalidTexName(tex)) {
 				tex = null;
 			}
-			long entityId = nativeSpawnEntity((float) x, (float) y, (float) z, typeId, tex);
+			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, typeId, tex);
 			return entityId;
 		}
 
@@ -2639,7 +2697,14 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setMobSkin(Object entity, String tex) {
-			nativeSetMobSkin(getEntityId(entity), tex);
+			setMobSkinImpl(entity, tex, true);
+		}
+
+		public static void setMobSkinImpl(Object entity, String text, boolean persist) {
+			nativeSetMobSkin(getEntityId(entity), text);
+			if (persist) {
+				setExtraData(entity, ENTITY_KEY_SKIN, text);
+			}
 		}
 
 		@JSStaticFunction
@@ -2667,7 +2732,16 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void setRenderType(Object ent, int renderType) {
+		public static void setRenderType(Object ent, Object renderType) {
+			if (renderType instanceof Number) {
+				setRenderTypeImpl(ent, ((Number)renderType).intValue());
+			}
+			String theName = renderType.toString();
+			setRenderTypeImpl(ent, RendererManager.NativeRendererApi.get(theName).getRenderType());
+			setExtraData(ent, ENTITY_KEY_RENDERTYPE, theName);
+		}
+
+		public static void setRenderTypeImpl(Object ent, int renderType) {
 			if (renderType < 0x1000 && !EntityRenderType.isValidRenderType(renderType)) {
 				throw new RuntimeException("Render type " + renderType + " does not exist");
 			}
@@ -2876,6 +2950,19 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getMaxHealth(Object entity) {
 			return nativeGetMobMaxHealth(getEntityId(entity));
+		}
+
+		@JSStaticFunction
+		public static String getExtraData(Object entity, String key) {
+			if (worldData == null) return null;
+			return worldData.getEntityData(getEntityId(entity), key);
+		}
+
+		@JSStaticFunction
+		public static boolean setExtraData(Object entity, String key, String value) {
+			if (worldData == null) return false;
+			worldData.setEntityData(getEntityId(entity), key, value);
+			return true;
 		}
 
 		@Override

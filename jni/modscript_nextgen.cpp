@@ -1667,6 +1667,23 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	return rider->getUniqueID();
 }
 
+static const char* bl_getOriginalSkin(Entity* entity) {
+	const char* retval;
+	// get the entity renderer and ask it for the skin
+	EntityRenderer* renderer = EntityRenderDispatcher::getInstance().getRenderer(*entity);
+	if (renderer != nullptr) {
+		void** vtable = *((void***)renderer);
+		mce::TexturePtr const& (*getSkinPtr)(EntityRenderer*, Entity*)
+			= (mce::TexturePtr const& (*)(EntityRenderer*, Entity*))
+			vtable[vtable_indexes.mobrenderer_get_skin_ptr - 2];
+		mce::TexturePtr const& texPtr = getSkinPtr(renderer, entity);
+		retval = texPtr.textureName.c_str();
+	} else {
+		retval = "";
+	}
+	return retval;
+}
+
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
@@ -1676,21 +1693,19 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	if (foundIter != bl_mobTexturesMap.end()) {
 		retval = foundIter->second.textureName.c_str();
 	} else {
-		// get the entity renderer and ask it for the skin
-		EntityRenderer* renderer = EntityRenderDispatcher::getInstance().getRenderer(*entity);
-		if (renderer != nullptr) {
-			void** vtable = *((void***)renderer);
-			mce::TexturePtr const& (*getSkinPtr)(EntityRenderer*, Entity*)
-				= (mce::TexturePtr const& (*)(EntityRenderer*, Entity*))
-				vtable[vtable_indexes.mobrenderer_get_skin_ptr - 2];
-			mce::TexturePtr const& texPtr = getSkinPtr(renderer, entity);
-			retval = texPtr.textureName.c_str();
-		} else {
-			retval = "";
-		}
+		retval = bl_getOriginalSkin(entity);
 	}
 	jstring returnValString = env->NewStringUTF(retval);
 	return returnValString;
+}
+
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityHasCustomSkin
+  (JNIEnv *env, jclass clazz, jlong entityId) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == nullptr) return false;
+	auto foundIter = bl_mobTexturesMap.find(entity->getUniqueID());
+	if (foundIter == bl_mobTexturesMap.end()) return false;
+	return foundIter->second.textureName != std::string(bl_getOriginalSkin(entity));
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
