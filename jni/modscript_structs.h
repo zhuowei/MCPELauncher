@@ -147,6 +147,7 @@ public:
 	bool hasCustomHoverName() const;
 	std::string getCustomName() const;
 	void setCustomName(std::string const&);
+	void init(int, int, int);
 }; // see ItemInstance::fromTag for size
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");

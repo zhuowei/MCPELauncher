@@ -1541,16 +1541,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	for (int i = 0; i < ingredientsCount; i++) {
 		RecipesType recipeType;
 		int inputId = ingredients[i * 3 + 1];
-		recipeType.tile = inputId < 0x100? bl_Block_mBlocks[inputId]: nullptr;
-		recipeType.item = bl_Item_mItems[inputId];//nullptr;
+		recipeType.tile = nullptr; //inputId < 0x100? bl_Block_mBlocks[inputId]: nullptr;
+		recipeType.item = nullptr; //bl_Item_mItems[inputId];//nullptr;
 		recipeType.itemInstance.damage = ingredients[i * 3 + 2];
 		recipeType.itemInstance.count = 1;
 		recipeType.itemInstance.tag = NULL;
 		bl_ItemInstance_setId(&recipeType.itemInstance, inputId);
 		recipeType.letter = (char) ingredients[i * 3];
-		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Recipes: out %d %d %d in %c %d %d",
-		//	itemId, itemCount, itemDamage, recipeType.letter, inputId,
-		//	(int)recipeType.itemInstance.damage);
 		ingredientsList.push_back(recipeType);
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
