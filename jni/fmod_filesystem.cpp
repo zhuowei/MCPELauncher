@@ -55,6 +55,7 @@ static FMOD_RESULT fmodopen(const char *name,
 		RamFileHandle* ramfile = RamFileHandle::alloc(thesize);
 		env->GetByteArrayRegion(soundBytes, 0, thesize, (jbyte*) ramfile->data);
 		*handle = (void*) ramfile;
+		env->DeleteLocalRef(soundBytes);
 	}
 	env->DeleteLocalRef(nameJString);
 	if (attachStatus == JNI_EDETACHED) {

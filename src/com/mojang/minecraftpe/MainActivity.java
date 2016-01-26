@@ -78,7 +78,7 @@ public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "0.13";
-	public static final String HALF_SUPPORT_VERSION = "~~~~";
+	public static final String HALF_SUPPORT_VERSION = "0.14";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -504,12 +504,12 @@ public class MainActivity extends NativeActivity {
 			hoverCar = null;
 		}
 		ScriptManager.destroy();
-/*
-		if (getMCPEVersion().startsWith("0.13")) {
+
+		if (getMCPEVersion().startsWith("0.14")) {
 			System.exit(0);
 			return;
 		}
-*/
+
 		lastDestroyTime = System.currentTimeMillis();
 		Thread presidentMadagascar = new Thread(new ShutdownTask());
 		presidentMadagascar.setDaemon(true);
@@ -1108,32 +1108,33 @@ public class MainActivity extends NativeActivity {
 		return getLocalInputStreamForAsset(name, null);
 	}
 
-	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
-/*
-		if (getMCPEVersion().startsWith("0.13")) {
-			InputStream special = getLocalInputStreamForAssetReal("13/" + name, lengthOut);
-			if (special != null) return special;
+	protected InputStream openFallbackAsset(String name) throws IOException {
+		if (getMCPEVersion().startsWith("0.14")) {
+			try {
+				return getAssets().open("14/" + name);
+			} catch (IOException ie) {
+				System.err.println(ie);
+			}
 		}
-*/
-		return getLocalInputStreamForAssetReal(name, lengthOut);
+		return getAssets().open(name);
 	}
 
-	protected InputStream getLocalInputStreamForAssetReal(String name, long[] lengthOut) {
+	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			if (forceFallback) {
-				return getAssets().open(name);
+				return openFallbackAsset(name);
 			}
 			try {
 				is = minecraftApkContext.getAssets().open(name);
 			} catch (Exception e) {
 				// e.printStackTrace();
 				System.out.println("Attempting to load fallback");
-				is = getAssets().open(name);
+				is = openFallbackAsset(name);
 			}
 			if (is == null) {
 				System.out.println("Can't find it in the APK - attempting to load fallback");
-				is = getAssets().open(name);
+				is = openFallbackAsset(name);
 			}
 			if (is != null && lengthOut != null) {
 				lengthOut[0] = is.available();
@@ -1666,13 +1667,12 @@ public class MainActivity extends NativeActivity {
 
 	public void initPatching() throws Exception {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
-/*		if (getMCPEVersion().startsWith("0.13")) {
+		if (getMCPEVersion().startsWith("0.14")) {
 			System.loadLibrary("mcpelauncher_lite");
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
-*/
-		System.loadLibrary("mcpelauncher");
+
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
 		if (!success) {
@@ -1949,6 +1949,16 @@ public class MainActivity extends NativeActivity {
 		return displayMetrics.heightPixels - r.bottom;
 	}
 	// end 0.12
+
+	// 0.14
+	public void launchUri(String theUri) {
+		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(theUri));
+		try {
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -2370,13 +2380,15 @@ public class MainActivity extends NativeActivity {
 		//if (version.matches("0\\.11\\.0.*")) return true;
 		if (mcPkgInfo.versionName.startsWith("0.13")) {
 			if (version.matches("0\\.13\\..*") && !version.equals("0.13.0")) return true;
+		} else if (mcPkgInfo.versionName.startsWith("0.14")) {
+			if (version.startsWith("0.14.0")) return true;
 		}
 		return false;
 	}
 
 	private void initAtlasMeta() {
 		final boolean dumpAtlas = false;
-		if (isSafeMode()) return;
+		if (isSafeMode() || getMCPEVersion().startsWith("0.14")) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
 				"images/terrain-atlas/", new TGAImageLoader(), 1, 4);
@@ -2410,7 +2422,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return false; //getMCPEVersion().startsWith("0.13");
+		return getMCPEVersion().startsWith("0.14");
 	}
 
 	public void reportReimported(final String scripts) {

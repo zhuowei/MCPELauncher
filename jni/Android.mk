@@ -49,7 +49,7 @@ LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 
 include $(BUILD_SHARED_LIBRARY)
 
-ifeq ("x","y")
+ifeq ("x","x")
 
 include $(CLEAR_VARS)
 

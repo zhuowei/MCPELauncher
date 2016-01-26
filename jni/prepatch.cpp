@@ -112,7 +112,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
   (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
 	if (bl_hasinit_prepatch) return;
 	void* mcpelibhandle = dlopen("libminecraftpe.so", RTLD_LAZY);
+#ifndef MCPELAUNCHER_LITE
 	bl_setmcpelibhandle(mcpelibhandle);
+#endif
 	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
 	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
 	void* tempPtr;

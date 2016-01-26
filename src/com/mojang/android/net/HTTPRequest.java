@@ -3,6 +3,12 @@ package com.mojang.android.net;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.*;
+import java.util.*;
+
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
+import android.text.TextUtils;
 
 public class HTTPRequest {
 
@@ -67,10 +73,10 @@ public class HTTPRequest {
 				realos.write(buffer, 0, count);
 			}
 			String returnString = new String(realos.toByteArray(), "UTF-8");
-			return new HTTPResponse(HTTPResponse.STATUS_SUCCESS, status, returnString);
+			return new HTTPResponse(HTTPResponse.STATUS_SUCCESS, status, returnString, toApacheHeaders(conn));
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new HTTPResponse(HTTPResponse.STATUS_FAIL, 0, null);
+			return new HTTPResponse(HTTPResponse.STATUS_FAIL, 0, null, new Header[0]);
 		} finally {
 			if (is != null) {
 				try {
@@ -83,5 +89,17 @@ public class HTTPRequest {
 
 	public void abort() {
 		if (debugNet) System.out.println("Abort");
+	}
+
+	private static Header[] toApacheHeaders(HttpURLConnection conn) {
+		Map<String, List<String>> headers = conn.getHeaderFields();
+		int headerSize = headers.containsKey(null)? headers.size() - 1: headers.size();
+		Header[] headersOut = new Header[headerSize];
+		int headerIndex = 0;
+		for (Map.Entry<String, List<String>> entry: headers.entrySet()) {
+			if (entry.getKey() == null) continue;
+			headersOut[headerIndex++] = new BasicHeader(entry.getKey(), TextUtils.join(",", entry.getValue()));
+		}
+		return headersOut;
 	}
 }
