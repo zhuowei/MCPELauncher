@@ -737,9 +737,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (remove) amount *= -1;
 	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	if (!remove) {
-		bl_Inventory_add(invPtr, instance);
+		invPtr->add(*instance, true);
 	} else {
 		bl_FillingContainer_removeResource(invPtr, instance, 0);
 	}

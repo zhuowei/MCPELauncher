@@ -237,9 +237,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZN5Block10getTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block8getColorER11BlockSourceRK8BlockPos");
+		"_ZNK5Block8getColorER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block8getColorEi");
+		"_ZNK5Block8getColorEi");
 	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZN5Block14getVisualShapeEhR4AABBb");
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
@@ -329,7 +329,7 @@ static void** bl_ShapelessRecipe_vtable;
 
 static void (*bl_RakNetInstance_send)(void*, void*);
 static void** bl_SetTimePacket_vtable;
-static void (*bl_Packet_Packet)(void*);
+//static void (*bl_Packet_Packet)(void*);
 static void (*bl_ClientNetworkHandler_handleTextPacket_real)(void*, void*, TextPacket*);
 static void** bl_MessagePacket_vtable;
 
@@ -2758,7 +2758,7 @@ void bl_setuphooks_cppside() {
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
 	// FIXME 0.11
 	//bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
-	bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
+	//bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
 	// FIXME 0.11
 	//void* handleMessagePacket = dlsym(mcpelibhandle, "_ZN24ClientSideNetworkHandler6handleERKN6RakNet10RakNetGUIDEP13MessagePacket");
 	//mcpelauncher_hook(handleMessagePacket, (void*) &bl_ClientSideNetworkHandler_handleMessagePacket_hook,

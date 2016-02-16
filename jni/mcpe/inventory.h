@@ -13,4 +13,5 @@ class Inventory : public FillingContainer {
 public:
 	int getLinkedSlotForItem(int slot);
 	void clearSlot(int slot);
+	void add(ItemInstance&, bool);
 };
