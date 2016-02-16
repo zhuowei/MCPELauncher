@@ -55,7 +55,7 @@ struct Vec2 {
 	};
 };
 
-// last update: 0.13.0
+// last update: 0.14.0b7
 class Entity {
 public:
 	void** vtable; //0
@@ -92,19 +92,21 @@ class Player: public Mob {
 };
 
 struct TextureUVCoordinateSet {
-	float bounds[6];
-	int idunno;
-	void* textureFile; // 28
+	float bounds[4];
+	unsigned short size[2]; // 16
+	void* filler; // 20
+	void* textureFile; // 24
 	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
 };
+static_assert(offsetof(TextureUVCoordinateSet, textureFile) == 24, "textureFile offset wrong");
 
 namespace Json {
 	class Value;
 };
 
-// Updated 0.13.0
+// Updated 0.14.0b7
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 // for useAnimation see setUseAnimation
 class Item {
@@ -116,7 +118,7 @@ public:
 	unsigned char attribs; // 26
 	char filler[32-27]; //27
 	unsigned char useAnimation; // 32
-	char filler3[64-33]; // 33
+	char filler3[68-33]; // 33
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -161,23 +163,24 @@ public:
 	unsigned char id; // 4
 	char filler0[16-5]; //5
 	TextureUVCoordinateSet texture; //16
-	char filler[56-48]; //48 (insert rude joke here)
-	int renderLayer; //56
-	int renderType; //60 Block::getBlockShape()
-	char filler2[88-64]; //64
-	void* material; //88
-	char filler3[100-92]; // 92
-	float destroyTime; //100
-	float explosionResistance; //104
+	char filler[52-44]; //48 (insert rude joke here)
+	int renderLayer; //52
+	int renderType; //56 Block::getBlockShape()
+	char filler2[84-60]; //60
+	void* material; //84
+	char filler3[112-88]; // 88
+	float destroyTime; //112
+	float explosionResistance; //116
 
 	float getDestroySpeed();
 	float getFriction();
 	void setFriction(float);
 	void setSolid(bool);
 	void setCategory(CreativeItemCategory);
+	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);
 };
 
-static_assert(offsetof(Block, renderLayer) == 56, "renderlayer is wrong");
+static_assert(offsetof(Block, renderLayer) == 52, "renderlayer is wrong");
 #define Tile Block
 
 typedef struct {
@@ -219,7 +222,8 @@ namespace mce {
 
 // from HumanoidModel::render
 
-typedef struct {
+class HumanoidModel {
+public:
 	void** vtable; //0
 	char filler[13-4]; // 4
 	bool riding; // 13
@@ -235,22 +239,23 @@ typedef struct {
 	MaterialPtr materialChangeColor; // 96
 	MaterialPtr materialGlint; // 108
 	MaterialPtr materialAlphaTestGlint; // 120
-	char filler2[156-132]; // 132
-	ModelPart bipedHead;//156
-	ModelPart bipedHeadwear;//316
-	ModelPart bipedBody;//476
-	ModelPart bipedRightArm;//636
-	ModelPart bipedLeftArm;//796
-	ModelPart bipedRightLeg;//956
-	ModelPart bipedLeftLeg;//1116
-	char mystery2[2]; // 1276
-	char filler3[1276-1266]; // 1278
-} HumanoidModel;
+	char filler2[180-132]; // 132
+	ModelPart bipedHead;//180
+	ModelPart bipedHeadwear;//340
+	ModelPart bipedBody;//500
+	ModelPart bipedRightArm;//660
+	ModelPart bipedLeftArm;//820
+	ModelPart bipedRightLeg;//980
+	ModelPart bipedLeftLeg;//1140
+	char mystery2[2]; // 1300
+	char filler3[1312-1302]; // 1302
+	HumanoidModel(float, float, int, int);
+};
 
-static_assert(sizeof(HumanoidModel) == 1288, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 1312, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 20, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 36, "active texture");
-static_assert(offsetof(HumanoidModel, bipedHead) == 156, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedHead) == 180, "HumanoidModel bipedHead");
 
 typedef struct {
 	Item* item; //0
@@ -322,8 +327,11 @@ typedef struct {
 	int wtf3; // 8 always 3
 	int wtf4; // 12 always 4
 	int wtf5; // 16 always 0
-	int wtf6; // 16 always 0
-	int wtf7; // 16 always 0
+	int wtf6; // 20 always 0
+	int wtf7; // 24 always 0
+	int wtf8; // 28
+	int wtf9; // 32
+	int wtf10; // 36
 } LevelSettings;
 
 typedef struct {
@@ -357,19 +365,20 @@ typedef void ScreenChooser;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 64
-	int damageReduceAmount; // 68
-	int renderIndex; // 72
-	void* armorMaterial; // 76
+	int armorType; // 68
+	int damageReduceAmount; // 72
+	int renderIndex; // 76
+	void* armorMaterial; // 80
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 80, "armor item size");
+static_assert(sizeof(ArmorItem) == 84, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	HumanoidModel* modelArmor; // 180
-	HumanoidModel* modelArmorChestplate; // 184
+	int something; // 180
+	HumanoidModel* modelArmor; // 184
+	HumanoidModel* modelArmorChestplate; // 188
 };
 #endif
 
@@ -396,7 +405,7 @@ public:
 
 	Entity* getEntity(EntityUniqueID, bool) const;
 	void addEntity(std::unique_ptr<Entity>);
-	void explode(BlockSource&, Entity*, float, float, float, float, bool);
+	void explode(BlockSource&, Entity*, Vec3 const&, float, bool);
 	void setNightMode(bool);
 	void setTime(int);
 	int getTime() const;

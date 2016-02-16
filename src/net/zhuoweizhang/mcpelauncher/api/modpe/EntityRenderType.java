@@ -1,7 +1,7 @@
 package net.zhuoweizhang.mcpelauncher.api.modpe;
 public final class EntityRenderType {
-
-	public static final int tnt = 2,
+	public static final int
+	tnt = 2,
 	human = 3,
 	item = 4,
 	chicken = 5,
@@ -23,14 +23,14 @@ public final class EntityRenderType {
 	creeper = 22,
 	slime = 23,
 	enderman = 24,
-	unknown1 = 25,
+	arrow = 25,
 	fishHook = 26,
 	player = 27,
-	player2 = 28,
-	snowball = 29,
-	egg = 30,
+	snowball = 28,
+	egg = 29,
+	unknownItem = 30,
 	thrownPotion = 31,
-	arrow = 32,
+	painting = 32,
 	fallingTile = 33,
 	minecart = 34,
 	boat = 35,
@@ -43,11 +43,12 @@ public final class EntityRenderType {
 	ironGolem = 42,
 	ocelot = 43,
 	snowGolem = 44,
-	expPotion = 45;
-
-	public static final int[] alltypes =
-	{2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45};
-	
+	expPotion = 45,
+	rabbit = 46,
+	witch = 47,
+	camera = 48,
+	map = 50;
+	private static final int[] alltypes = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50};
 	private EntityRenderType() {}
 
 	public static boolean isValidRenderType(int type) {

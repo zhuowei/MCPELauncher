@@ -77,8 +77,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.13";
-	public static final String HALF_SUPPORT_VERSION = "0.14";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.14";
+	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -505,15 +505,7 @@ public class MainActivity extends NativeActivity {
 		}
 		ScriptManager.destroy();
 
-		if (getMCPEVersion().startsWith("0.14")) {
-			System.exit(0);
-			return;
-		}
-
-		lastDestroyTime = System.currentTimeMillis();
-		Thread presidentMadagascar = new Thread(new ShutdownTask());
-		presidentMadagascar.setDaemon(true);
-		presidentMadagascar.start();
+		System.exit(0);
 	}
 
 	public void onStop() {
@@ -1109,6 +1101,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
+		/*
 		if (getMCPEVersion().startsWith("0.14")) {
 			try {
 				return getAssets().open("14/" + name);
@@ -1116,6 +1109,7 @@ public class MainActivity extends NativeActivity {
 				System.err.println(ie);
 			}
 		}
+		*/
 		return getAssets().open(name);
 	}
 
@@ -1667,7 +1661,7 @@ public class MainActivity extends NativeActivity {
 
 	public void initPatching() throws Exception {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
-		if (getMCPEVersion().startsWith("0.14")) {
+		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 			System.loadLibrary("mcpelauncher_lite");
 		} else {
 			System.loadLibrary("mcpelauncher");
@@ -2378,9 +2372,7 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
-		if (mcPkgInfo.versionName.startsWith("0.13")) {
-			if (version.matches("0\\.13\\..*") && !version.equals("0.13.0")) return true;
-		} else if (mcPkgInfo.versionName.startsWith("0.14")) {
+		if (mcPkgInfo.versionName.startsWith("0.14")) {
 			if (version.startsWith("0.14.0")) return true;
 		}
 		return false;
@@ -2422,7 +2414,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return getMCPEVersion().startsWith("0.14");
+		return false; //getMCPEVersion().startsWith("0.14");
 	}
 
 	public void reportReimported(final String scripts) {

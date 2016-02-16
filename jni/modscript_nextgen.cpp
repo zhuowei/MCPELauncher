@@ -54,11 +54,9 @@ typedef void Font;
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 //#define MOB_TARGET_OFFSET 3156
-// found in MinecraftClient::getCameraTargetPlayer
-#define MINECRAFT_CAMERA_ENTITY_OFFSET 116
 // Updated 0.13.0
 // found in ChatScreen::setTextboxText
-#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 160
+#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 136
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
@@ -66,31 +64,33 @@ typedef void Font;
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
-#define MINECRAFT_SCREENCHOOSER_OFFSET 252
+// FIXME 0.14
+//#define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
 // from Player::getSelectedItem
 #ifdef __i386
+// FIXME 0.14
 #define PLAYER_INVENTORY_OFFSET 3436
 #else
-#define PLAYER_INVENTORY_OFFSET 3448
+#define PLAYER_INVENTORY_OFFSET 3480
 #endif
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
-const size_t kTileSize = 0x8c;
-const size_t kLiquidBlockDynamicSize = 248;
-const size_t kLiquidBlockStaticSize = 228;
+const size_t kTileSize = 0x98;
+const size_t kLiquidBlockDynamicSize = 252;
+const size_t kLiquidBlockStaticSize = 232;
 // found in registerBlock
-const size_t kBlockItemSize = 68;
+const size_t kBlockItemSize = 72;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 64;
+const size_t kItemSize = 68;
 // found in Entity::spawnAtLocation
-const size_t kItemEntitySize = 384;
+const size_t kItemEntitySize = 400;
 // found in Entity::spawnAtLocation
-const size_t kItemEntity_pickupDelay_offset = 364;
+const size_t kItemEntity_pickupDelay_offset = 376;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 340;
+const size_t kItemEntity_itemInstance_offset = 352;
 // found in TextPacket::handle
-const int kClientNetworkHandler_vtable_offset_handleTextPacket = 12;
+const int kClientNetworkHandler_vtable_offset_handleTextPacket = 11;
 
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
@@ -102,6 +102,7 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV13SheepRenderer",
 "_ZTV13SlimeRenderer",
 "_ZTV13SquidRenderer",
+"_ZTV13WitchRenderer",
 "_ZTV14OcelotRenderer",
 "_ZTV14RabbitRenderer",
 "_ZTV14SpiderRenderer",
@@ -165,14 +166,11 @@ typedef struct {
 
 class Packet {
 public:
-	Packet();
 	virtual ~Packet();
 };
 
 class TextPacket : public Packet {
 public:
-	TextPacket() {
-	}
 	char filler[13-4]; // 4
 	unsigned char type; //13
 	char filler2[16-14]; // 14
@@ -374,7 +372,7 @@ static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*, bool);
-static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, float, float, float, float, bool);
+static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Block_getAABB)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
 static AABB* (*bl_ReedBlock_getAABB)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
@@ -883,7 +881,7 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity, bool arg2) 
 	}
 }
 
-static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, float x, float y, float z, float power, bool onFire) {
+static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -898,12 +896,12 @@ static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* 
 
 	long long id = entity != NULL? entity->getUniqueID().id: -1LL;
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, id, x, y, z, power, onFire);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, id, p.x, p.y, p.z, power, onFire);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, x, y, z, power, onFire);
+	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, p, power, onFire);
 }
 
 static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y, int z, int type, int data) {
@@ -1193,7 +1191,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
 	TextureUVCoordinateSet* set = bl_ItemInstance_getIcon(myStack, 0, true);
 	if (set == NULL || set->bounds == NULL) return false;
-	env->SetFloatArrayRegion(outputArray, 0, 6, set->bounds);
+	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
 	return true;
 }
 
@@ -1280,8 +1278,8 @@ void* bl_getMaterial(int materialType) {
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	Tile* sacrificialTile = bl_Block_mBlocks[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
-		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(bl_Tile_getTextureUVCoordinateSet(
-			sacrificialTile, textureNames[i], textureCoords[i]));
+		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(Block::getTextureUVCoordinateSet(
+			textureNames[i], textureCoords[i]));
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
 		output[i] = mySet;
 	}
@@ -1715,7 +1713,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	*((Entity**) (((uintptr_t) bl_minecraft) + MINECRAFT_CAMERA_ENTITY_OFFSET)) = entity;
+	bl_minecraft->setCameraTargetEntity(entity);
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
@@ -2731,8 +2729,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN5Block10getTextureEai");
-	bl_Tile_getTextureUVCoordinateSet = (TextureUVCoordinateSet (*)(Tile*, std::string const&, int))
-		dlsym(mcpelibhandle, "_ZN5Block25getTextureUVCoordinateSetERKSsi");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,

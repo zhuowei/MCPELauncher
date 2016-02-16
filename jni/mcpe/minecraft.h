@@ -14,5 +14,5 @@ public:
 	Minecraft* getServer();
 	Player* getLocalPlayer();
 	TextureGroup& getTextures() const;
-	void setCameraTargetPlayer(Mob*);
+	void setCameraTargetEntity(Entity*);
 };

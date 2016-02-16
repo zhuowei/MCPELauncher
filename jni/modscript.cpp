@@ -38,9 +38,10 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
+// FIXME 0.14
 #define PLAYER_INVENTORY_OFFSET 3436
 #else
-#define PLAYER_INVENTORY_OFFSET 3448
+#define PLAYER_INVENTORY_OFFSET 3480
 #endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
@@ -726,7 +727,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire) {
-	bl_level->explode(*bl_localplayer->getRegion(), NULL, x, y, z, power, fire);
+	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
