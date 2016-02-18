@@ -2901,7 +2901,7 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Recipe_isAnyAuxValue_real);
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
-		void** vtable = (void**) dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
+		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
 

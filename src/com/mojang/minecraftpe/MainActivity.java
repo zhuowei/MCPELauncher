@@ -2379,13 +2379,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-		final boolean dumpAtlas = false;
-		if (isSafeMode() || getMCPEVersion().startsWith("0.14")) return;
+		final boolean dumpAtlas = BuildConfig.DEBUG;
+		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
 				"images/terrain-atlas/", new TGAImageLoader(), 1, 4);
-			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.png",
-				"images/items-opaque/", new PNGImageLoader(), 2, 0);
+			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.tga",
+				"images/items-opaque/", new TGAImageLoader(), 2, 0);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
 			if (dumpAtlas) {

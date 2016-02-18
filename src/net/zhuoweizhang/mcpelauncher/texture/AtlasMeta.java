@@ -27,7 +27,7 @@ public class AtlasMeta {
 		JSONArray firstUv = uvs.getJSONArray(0);
 		width = firstUv.getInt(4);
 		height = firstUv.getInt(5);
-		tileWidth = (int) (((firstUv.getDouble(2) - firstUv.getDouble(0)) * width) + 0.5);
+		tileWidth = (int) (firstUv.getDouble(2) - firstUv.getDouble(0) + 0.5);
 		if (!isPowerOfTwo(tileWidth)) {
 			throw new RuntimeException("Non power of two value in icon width: " + tileWidth);
 		}
@@ -66,8 +66,8 @@ public class AtlasMeta {
 	}
 
 	private int uvToIndex(double x, double y) {
-		int xCoord = (int) (((x * width) / tileWidth) + 0.5);
-		int yCoord = (int) (((y * height) / tileWidth) + 0.5);
+		int xCoord = (int) ((x / tileWidth) + 0.5);
+		int yCoord = (int) ((y / tileWidth) + 0.5);
 		return yCoord * (width / tileWidth) + xCoord;
 	}
 
@@ -97,10 +97,10 @@ public class AtlasMeta {
 	private JSONArray indexToUv(int index) {
 		int xCoord = index % (width / tileWidth);
 		int yCoord = index / (width / tileWidth);
-		double x1 = ((xCoord * tileWidth) / (double) width);
-		double x2 = (((xCoord + 1) * tileWidth) / (double) width);
-		double y1 = ((yCoord * tileWidth) / (double) height);
-		double y2 = (((yCoord + 1) * tileWidth) / (double) height);
+		double x1 = xCoord * tileWidth;
+		double x2 = (xCoord + 1) * tileWidth;
+		double y1 = yCoord * tileWidth;
+		double y2 = (yCoord + 1) * tileWidth;
 		try {
 			JSONArray arr = new JSONArray().
 				put(x1).put(y1).put(x2).put(y2).put(width).put(height);

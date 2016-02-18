@@ -133,7 +133,7 @@ public class AtlasProvider implements TexturePack {
 			JSONArray uv = metaObj.getOrAddIcon((String) nameParts[0], (Integer) nameParts[1]);
 			Bitmap bmp = readBitmap(activity, filePath);
 			if (bmp == null) continue;
-			placeIntoAtlas(bmp, uv);
+			placeIntoAtlas(bmp, uv, metaObj);
 		}
 		return true;
 	}
@@ -161,15 +161,15 @@ public class AtlasProvider implements TexturePack {
 		return bmp;
 	}
 
-	private void placeIntoAtlas(Bitmap bmp, JSONArray uv) throws JSONException {
+	private void placeIntoAtlas(Bitmap bmp, JSONArray uv, AtlasMeta metaObj) throws JSONException {
 		tempRect2.left = tempRect2.top = 0;
 		tempRect2.right = tempRect2.bottom = bmp.getWidth();
 		int atlaswidth = atlasImg.getWidth();
 		int atlasheight = atlasImg.getHeight();
-		tempRect.left = (int) ((uv.getDouble(0) * atlaswidth) + 0.5);
-		tempRect.right = (int) ((uv.getDouble(2) * atlaswidth) + 0.5);
-		tempRect.top = (int) ((uv.getDouble(1) * atlasheight) + 0.5);
-		tempRect.bottom = (int) ((uv.getDouble(3) * atlasheight) + 0.5);
+		tempRect.left = (int) ((uv.getDouble(0) * atlaswidth / metaObj.width) + 0.5);
+		tempRect.right = (int) ((uv.getDouble(2) * atlaswidth / metaObj.width) + 0.5);
+		tempRect.top = (int) ((uv.getDouble(1) * atlasheight / metaObj.height) + 0.5);
+		tempRect.bottom = (int) ((uv.getDouble(3) * atlasheight / metaObj.height) + 0.5);
 		atlasCanvas.drawBitmap(bmp, tempRect2, tempRect, tempPaint);
 	}
 

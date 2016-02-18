@@ -95,7 +95,6 @@ static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, st
 void* (*bl_MinecraftClient_startLocalServer_real)(MinecraftClient*, void*, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
-static int (*bl_Inventory_add)(void*, ItemInstance*);
 static void (*bl_GameMode_tick_real)(void*);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_LevelRenderer_getFov)(void*, float, int);
@@ -1241,8 +1240,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	bl_Player_getCarriedItem = (ItemInstance* (*)(Player*))
 		dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
-	bl_Inventory_add = (int (*)(void*, ItemInstance*))
-		dlsym(RTLD_DEFAULT, "_ZN9Inventory3addER12ItemInstance");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
