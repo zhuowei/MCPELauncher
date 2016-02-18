@@ -268,7 +268,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.13.0");
+				intent.putExtra("supportedVersion", "0.14.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -435,7 +435,7 @@ public class MainActivity extends NativeActivity {
 		Utils.setupTheme(this, true);
 
 		//enableSoftMenuKey();
-		//disableTransparentSystemBar(); not needed when targetting KitKat
+		disableTransparentSystemBar();
 
 		java.net.CookieManager cookieManager = new java.net.CookieManager();
 		java.net.CookieHandler.setDefault(cookieManager);
@@ -599,28 +599,6 @@ public class MainActivity extends NativeActivity {
 					PatchUtils.patch(libBuffer, patch);
 				} // TODO: load patches from assets
 			}
-/*			if (mcPkgInfo.versionName.startsWith("0.13")) { // FIXME 0.13
-				byte[] needle = new byte[] {
-					0x67, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x48,
-					0x65, 0x69, 0x67, 0x68, 0x74, 0x00
-				}; // getKeyboardHeight\0
-				// patched to eetKeyboardHeight
-				for (int i = 0; i < libBytes.length - needle.length; i++) {
-					boolean found = true;
-					for (int j = 0; j < needle.length; j++) {
-						if (libBytes[i + j] != needle[j]) {
-							found = false;
-							break;
-						}
-					}
-					if (found) {
-						// patch it
-						libBytes[i] = 0x65;
-						break;
-					}
-				}
-			}
-*/
 
 			OutputStream os = new FileOutputStream(newMinecraft);
 			os.write(libBytes);
