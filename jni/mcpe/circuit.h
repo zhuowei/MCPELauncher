@@ -5,8 +5,10 @@ class BlockSource;
 
 class ConsumerComponent {
 public:
-	char filler[25];
+	char filler[40];
 	bool setToOne;
+
+	ConsumerComponent();
 };
 
 class CircuitSystem {

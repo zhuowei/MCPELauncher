@@ -38,8 +38,7 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.14
-#define PLAYER_INVENTORY_OFFSET 3436
+#define PLAYER_INVENTORY_OFFSET 3468
 #else
 #define PLAYER_INVENTORY_OFFSET 3480
 #endif

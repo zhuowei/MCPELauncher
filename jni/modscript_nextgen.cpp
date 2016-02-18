@@ -70,7 +70,7 @@ typedef void Font;
 // from Player::getSelectedItem
 #ifdef __i386
 // FIXME 0.14
-#define PLAYER_INVENTORY_OFFSET 3436
+#define PLAYER_INVENTORY_OFFSET 3468
 #else
 #define PLAYER_INVENTORY_OFFSET 3480
 #endif
@@ -420,6 +420,7 @@ static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
+static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -699,16 +700,9 @@ void bl_CustomBlock_onRedstoneUpdate_hook(Block* block, BlockSource& source, Blo
 
 void bl_CustomBlock_onLoaded_hook(Block* block, BlockSource& source, BlockPos const& pos) {
 	if (source.getLevel()->isClientSide()) return;
-#ifndef __i386
-	// FIXME i386: Redstone not supported on Intel Atom devices yet
 	if (bl_custom_block_redstone[block->id] & REDSTONE_CONSUMER) {
-		ConsumerComponent* component = source.getDimension()->getCircuitSystem()->create<ConsumerComponent>(
-			pos, &source, 0);
-		if (component) {
-			component->setToOne = true;
-		}
+		bl_TntBlock_onLoaded(block, source, pos);
 	}
-#endif
 }
 
 void bl_CustomBlock_onPlace_hook(Block* block, BlockSource& source, BlockPos const& pos) {
@@ -2899,6 +2893,8 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Throwable_throwableHit_real);
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
 		(void**) &bl_Recipe_isAnyAuxValue_real);
+	bl_TntBlock_onLoaded = (void (*)(Block*, BlockSource&, BlockPos const&))
+		dlsym(mcpelibhandle, "_ZN8TntBlock8onLoadedER11BlockSourceRK8BlockPos");
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);

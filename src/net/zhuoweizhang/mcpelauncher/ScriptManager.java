@@ -2758,6 +2758,9 @@ public class ScriptManager {
 			if (renderType < 0x1000 && !EntityRenderType.isValidRenderType(renderType)) {
 				throw new RuntimeException("Render type " + renderType + " does not exist");
 			}
+			if (renderType == EntityRenderType.villager && getEntityTypeId(ent) != EntityType.VILLAGER) {
+				throw new RuntimeException("Villager render type can only be used on villagers");
+			}
 			boolean ret = nativeSetEntityRenderType(getEntityId(ent), renderType);
 			if (!ret) {
 				throw new RuntimeException("Custom render type " + renderType + " does not exist");
