@@ -103,7 +103,7 @@ public class ScriptManager {
 	// public static Queue<Runnable> mainThreadRunnableQueue = new
 	// ArrayDeque<Runnable>();
 
-	private static ModernWrapFactory modernWrapFactory = new ModernWrapFactory();
+	private static final ModernWrapFactory modernWrapFactory = new ModernWrapFactory();
 
 	private static boolean requestReloadAllScripts = false;
 
@@ -333,6 +333,7 @@ public class ScriptManager {
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
+				if (!scriptingEnabled) modernWrapFactory.closePopups(main);
 				main.setLevelCallback(!ScriptManager.scriptingEnabled);
 			}
 		}
@@ -543,6 +544,7 @@ public class ScriptManager {
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {
+				if (!scriptingEnabled) modernWrapFactory.closePopups(main);
 				main.setLevelCallback(!ScriptManager.scriptingEnabled);
 			}
 		}
@@ -680,6 +682,8 @@ public class ScriptManager {
 		// loadEnabledScripts(); Minecraft blocks wouldn't be initialized when
 		// this is called
 		// call it before the first frame renders
+
+		ContextFactory.initGlobal(new BlockContextFactory());
 		requestReloadAllScripts = true;
 		nativeRequestFrameCallback();
 		prepareEnabledScripts();
@@ -1445,6 +1449,14 @@ public class ScriptManager {
 			NativeEntityApi.setExtraData(retval, ENTITY_KEY_SKIN, skinPath);
 		}
 		return retval;
+	}
+
+	protected static ModernWrapFactory getWrapFactory() {
+		return modernWrapFactory;
+	}
+
+	protected static boolean isScriptingEnabled() {
+		return scriptingEnabled;
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
