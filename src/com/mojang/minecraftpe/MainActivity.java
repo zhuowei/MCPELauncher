@@ -384,6 +384,9 @@ public class MainActivity extends NativeActivity {
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
 					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport());
+					if (Utils.getPrefs(0).getBoolean("zz_desktop_gui", false)) {
+						ScriptManager.nativeModPESetDesktopGui(true);
+					}
 					if (!isSafeMode()) loadNativeAddons();
 				}
 			}
@@ -1779,9 +1782,20 @@ public class MainActivity extends NativeActivity {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			texturePack = null;
 			if (loadTexturePack) {
-				textureOverrides.addAll(TexturePackLoader.loadTexturePacks(this));
+				List<String> incompatible = new ArrayList<String>();
+				List<TexturePack> packs = TexturePackLoader.loadTexturePacks(this, incompatible,
+					getFileDataBytes("images/terrain.meta", true),
+					getFileDataBytes("images/items.meta", true));
+				if (incompatible.size() != 0) {
+					new AlertDialog.Builder(this)
+						.setMessage("Some of your texture packs are not compatible with Minecraft PE " +
+							getMCPEVersion() + ". Please update " + Utils.join(incompatible, ", ") + ".")
+						.setPositiveButton(android.R.string.ok, null)
+						.show();
+				}
+				textureOverrides.addAll(packs);
 			}
-			System.out.println(textureOverrides);
+			//System.out.println(textureOverrides);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, null);

@@ -2575,6 +2575,25 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDi
 	setDifficulty(bl_level, difficulty);
 }
 
+static void* bl_AppPlatform_getScreenType;
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
+  (JNIEnv* env, jclass clazz, jboolean desktop) {
+#ifdef __arm__
+	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
+		bl_AppPlatform_getScreenType)) & ~1;
+	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
+	isModdedArray[0] = desktop? 0: 1;
+#endif
+#ifdef __i386
+	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
+		bl_AppPlatform_getScreenType));
+	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
+	isModdedArray[1] = desktop? 0: 1;
+#endif
+
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2630,6 +2649,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
 		(void**) &bl_ItemRenderer_getGraphics_real);
+	bl_AppPlatform_getScreenType = dobby_dlsym(mcpelibhandle, "_ZNK19AppPlatform_android13getScreenTypeEv");
 }
 
 void bl_setuphooks_cppside() {

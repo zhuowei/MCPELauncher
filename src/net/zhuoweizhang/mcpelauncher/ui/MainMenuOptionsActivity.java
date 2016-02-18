@@ -66,6 +66,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	private Preference recorderWatchPreference;
 	private Preference recorderReshareLastPreference;
 	private SwitchPreference reimportScriptsPreference;
+	private SwitchPreference desktopGuiPreference;
 
 	protected Thread ui = new Thread(new Runnable() {
 		protected WeakReference<MainMenuOptionsActivity> activity = null;
@@ -368,6 +369,10 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		reimportScriptsPreference = (SwitchPreference) findPreference("zz_reimport_scripts");
 		if (reimportScriptsPreference != null) {
 			reimportScriptsPreference.setListener(this);
+		}
+		desktopGuiPreference = (SwitchPreference) findPreference("zz_desktop_gui");
+		if (desktopGuiPreference != null) {
+			desktopGuiPreference.setListener(this);
 		}
 	}
 

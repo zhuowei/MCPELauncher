@@ -1801,6 +1801,7 @@ public class ScriptManager {
 	public static native int nativeGetItemIdCount();
 	public static native void nativeSetExitEnabled(boolean enabled);
 	public static native void nativeRecipeSetAnyAuxValue(int id, boolean anyAux);
+	public static native void nativeModPESetDesktopGui(boolean desktop);
 
 	public static class ScriptState {
 		public Script script;

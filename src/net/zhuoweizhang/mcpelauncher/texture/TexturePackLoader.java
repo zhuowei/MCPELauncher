@@ -27,11 +27,39 @@ public class TexturePackLoader {
 		return descs;
 	}
 
-	public static List<TexturePack> loadTexturePacks(Context context) throws Exception {
+	public static Set<String> metaToSet(byte[] meta) throws Exception {
+		JSONArray metaJson = new JSONArray(new String(meta, "UTF-8"));
+		int len = metaJson.length();
+		Set<String> mySet = new HashSet<String>();
+		for (int i = 0; i < len; i++) {
+			mySet.add(metaJson.getJSONObject(i).getString("name"));
+		}
+		return mySet;
+	}
+
+	public static List<String> metaToList(byte[] meta) throws Exception {
+		JSONArray metaJson = new JSONArray(new String(meta, "UTF-8"));
+		int len = metaJson.length();
+		List<String> list = new ArrayList<String>(len);
+		for (int i = 0; i < len; i++) {
+			list.add(metaJson.getJSONObject(i).getString("name"));
+		}
+		return list;
+	}
+
+	public static List<TexturePack> loadTexturePacks(Context context, List<String> incompatibles,
+		byte[] terrainMeta, byte[] itemsMeta) throws Exception {
+		List<String> terrainList = metaToList(terrainMeta);
+		List<String> itemsList = metaToList(itemsMeta);
 		List<TexturePackDescription> descs = loadDescriptions(context);
 		List<TexturePack> packs = new ArrayList<TexturePack>(descs.size());
 		for (TexturePackDescription d: descs) {
-			packs.add(loadTexturePack(d));
+			TexturePack pack = loadTexturePack(d);
+			if (!isCompatible(pack, terrainList, itemsList)) {
+				incompatibles.add(describeTexturePack(context, d));
+				continue;
+			}
+			packs.add(pack);
 		}
 		return packs;
 	}
@@ -97,5 +125,24 @@ public class TexturePackLoader {
 		}
 		context.getSharedPreferences("mcpelauncherprefs", 0).edit().putString("texture_packs", arr.toString()).
 			commit();
+	}
+
+	public static boolean isCompatible(TexturePack pack, List<String> terrainMeta, List<String> itemsMeta) throws Exception {
+		return isCompatibleArray(pack, "assets/images/terrain.meta", terrainMeta)
+			&& isCompatibleArray(pack, "assets/images/items.meta", itemsMeta);
+	}
+	private static boolean isCompatibleArray(TexturePack pack, String name, List<String> realMeta) throws Exception {
+		InputStream myMetaIs = pack.getInputStream(name);
+		if (myMetaIs == null) return true;
+		byte[] myMetaBuffer = new byte[(int)pack.getSize(name)];
+		myMetaIs.read(myMetaBuffer);
+		myMetaIs.close();
+		Set<String> mySet = metaToSet(myMetaBuffer);
+		for (String s: realMeta) {
+			if (!mySet.contains(s)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
