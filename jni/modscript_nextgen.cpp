@@ -469,7 +469,7 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	if (bl_removedEntity != NULL && bl_removedEntity->getUniqueID() == entityId) {
 		return bl_removedEntity;
 	}
-	if (bl_onLockDown) return nullptr;
+	if (bl_onLockDown || level == nullptr) return nullptr;
 	return level->getEntity(entityId, 0 /* false */);
 }
 

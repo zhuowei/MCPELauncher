@@ -1459,6 +1459,26 @@ public class ScriptManager {
 		return scriptingEnabled;
 	}
 
+	private static String getPlayerNameFromConfs() {
+		try {
+			File f = new File(Environment.getExternalStorageDirectory(), "games/com.mojang/minecraftpe/options.txt");
+			if (!f.exists()) return "Steve";
+			byte[] fileBytes = new byte[(int)f.length()];
+			FileInputStream fis = new FileInputStream(f);
+			fis.read(fileBytes);
+			fis.close();
+			String[] strs = new String(fileBytes, "UTF-8").split("\n");
+			for (String s: strs) {
+				if (s.startsWith("mp_username:")) {
+					return s.substring("mp_username:".length());
+				}
+			}
+		} catch (Exception ie) {
+			ie.printStackTrace();
+		}
+		return "Steve"; // I DUNNO
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native long nativeGetPlayerEnt();
@@ -2397,8 +2417,12 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getName(Object ent) {
-			if (!isPlayer(ent))
+			if (!isPlayer(ent)) {
+				if (ent == null || getEntityId(ent) == getEntity()) {
+					return getPlayerNameFromConfs();
+				}
 				return "Not a player";
+			}
 			return nativeGetPlayerName(getEntityId(ent));
 		}
 

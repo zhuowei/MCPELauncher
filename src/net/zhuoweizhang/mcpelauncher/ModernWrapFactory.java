@@ -31,7 +31,6 @@ public class ModernWrapFactory extends WrapFactory {
 
 	@Override
 	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object javaObject, Class<?> staticType) {
-		Log.i(TAG, "Wrapping " + javaObject);
 		if (javaObject instanceof PopupWindow) {
 			synchronized(popups) {
 				popups.add(new WeakReference<PopupWindow>((PopupWindow) javaObject));
@@ -41,11 +40,9 @@ public class ModernWrapFactory extends WrapFactory {
 	}
 
 	protected void closePopups(Activity activity) {
-		System.out.println("close popups");
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
 				synchronized(popups) {
-					System.out.println("close popups start");
 					for (WeakReference<PopupWindow> ref: popups) {
 						PopupWindow window = ref.get();
 						if (window == null) continue;
