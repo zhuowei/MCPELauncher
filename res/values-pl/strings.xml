@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Do not translate the app name, as I prefer the name to be consistent. Just remove the app_name line in the translations. -->
-    <string name="app_name">BlockLauncher</string>
     <string name="pref_ctrl_touchscreen">Użyj dotyku</string>
     <string name="pref_ctrl_touchscreen_summary">Jeżeli nie używasz Xperia Play, wybierz to</string>
     <string name="pref_mp_username">Nazwa gracza MultiPlayer</string>
