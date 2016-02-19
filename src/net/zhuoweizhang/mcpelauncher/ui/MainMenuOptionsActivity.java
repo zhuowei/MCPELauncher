@@ -25,8 +25,6 @@ import android.os.Environment;
 import android.preference.*;
 import de.ankri.views.Switch;
 
-import com.kamcord.android.Kamcord;
-
 public class MainMenuOptionsActivity extends PreferenceActivity implements
 		Preference.OnPreferenceClickListener, SwitchPreference.OnCheckedChangeListener {
 
@@ -326,7 +324,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			immersiveModePreference.setEnabled(false);
 		}
 
-		boolean hasRecorder = hasRecorder() && Kamcord.isEnabled();
+		boolean hasRecorder = hasRecorder();// && Kamcord.isEnabled();
 		System.out.println("Has recorder: " + hasRecorder);
 
 		recorderWatchPreference = findPreference("zz_watch_recording");
@@ -408,7 +406,12 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 			needsRestart = true;
 			return false;
 		} else if (pref == recorderWatchPreference) {
-			Kamcord.showWatchView();
+			try {
+				Class.forName("com.kamcord.android.Kamcord").getDeclaredMethod("showWatchView", (Class[]) null).
+					invoke(null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			finish();
 			return false;
 		} else if (pref == recorderReshareLastPreference) {

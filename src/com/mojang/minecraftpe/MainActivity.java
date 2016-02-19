@@ -54,8 +54,6 @@ import android.widget.*;
 
 import org.mozilla.javascript.RhinoException;
 
-import com.kamcord.android.Kamcord;
-
 import net.zhuoweizhang.mcpelauncher.*;
 import static net.zhuoweizhang.mcpelauncher.Utils.isSafeMode;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
@@ -807,7 +805,7 @@ public class MainActivity extends NativeActivity {
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
 		if (hasRecorder) {
-			isRecording = Kamcord.isRecording();
+			isRecording = isKamcordRecording();
 			options.add(isRecording? stopRecording: startRecording);
 		}
 		if (hasInsertText) {
@@ -2228,45 +2226,13 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	private void initKamcord() {
-		// test if we have kamcord
-		hasRecorder = this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro") &&
-			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false) && !isSafeMode() && hasScriptSupport();
-/*
-		try {
-			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
-			hasRecorder = getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.recorder") != null;
-		} catch (PackageManager.NameNotFoundException ex) {
-		}
-*/
-		if (hasRecorder) {
-			// patch Kamcord
-			System.loadLibrary("mcpelauncher");
-			try {
-				com.kamcord.android.core.KamcordFix.install();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			Kamcord.whitelistAll();
-			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
-			Kamcord.whitelistAll();
-			Kamcord.initActivity(this);
-			Kamcord.whitelistAll();
-			hasRecorder = Kamcord.isEnabled();
-		}
+	protected void initKamcord() {
 	}
 
-	private void toggleRecording() {
-		isRecording = !isRecording;
-		//ScriptManager.nativeSetIsRecording(isRecording);
-		if (isRecording) {
-			Kamcord.startRecording();
-		} else {
-			Kamcord.stopRecording();
-			Kamcord.showView();
-		}
-		removeDialog(DIALOG_RUNTIME_OPTIONS);
-		removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
+	protected void toggleRecording() {
+	}
+	protected boolean isKamcordRecording() {
+		return false;
 	}
 
 	private void clearRuntimeOptionsDialog() {
