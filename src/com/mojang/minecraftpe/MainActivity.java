@@ -181,8 +181,8 @@ public class MainActivity extends NativeActivity {
 	private static long lastDestroyTime = 0;
 	private static final int MILLISECONDS_FOR_WORLD_SAVE = 3000; //3 seconds
 
-	private boolean hasRecorder = false;
-	private boolean isRecording = false;
+	protected boolean hasRecorder = false;
+	protected boolean isRecording = false;
 
 	private boolean hasResetSafeModeCounter = false;
 
@@ -2365,7 +2365,7 @@ public class MainActivity extends NativeActivity {
 			Utils.hasExtrasPackage(this) && Utils.getPrefs(0).getBoolean("zz_use_controller", false);
 	}
 
-	private boolean hasScriptSupport() {
+	protected boolean hasScriptSupport() {
 		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	private String getMCPEVersion() {

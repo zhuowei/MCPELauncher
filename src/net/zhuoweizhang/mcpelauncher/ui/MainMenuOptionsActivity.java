@@ -354,7 +354,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 		}
 		enableKamcordPreference = (SwitchPreference) findPreference("zz_enable_kamcord");
 		if (enableKamcordPreference != null) {
-			if (Build.VERSION.SDK_INT < 16) { // Android 4.1
+			if (Build.VERSION.SDK_INT < 16 || Build.VERSION.SDK_INT >= 23) { // Android 4.1, 6.0
 				getPreferenceScreen().removePreference(enableKamcordPreference);
 			} else {
 				enableKamcordPreference.setListener(this);
