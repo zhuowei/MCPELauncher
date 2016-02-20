@@ -1185,7 +1185,9 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
 	TextureUVCoordinateSet* set = bl_ItemInstance_getIcon(myStack, 0, true);
 	if (set == NULL || set->bounds == NULL) return false;
+	float lasttwo[] = {set->size[0], set->size[1]};
 	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
+	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
 	return true;
 }
 
@@ -2186,9 +2188,10 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 
 void bl_forceTextureLoad(std::string const& name) {
 }
-
+void bl_reload_armor_textures();
 void bl_cppNewLevelInit() {
 	//bl_entityUUIDMap.clear();
+	bl_reload_armor_textures();
 }
 
 void bl_set_i18n(std::string const& key, std::string const& value) {

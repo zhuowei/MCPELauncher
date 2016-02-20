@@ -9,6 +9,8 @@
 #include "mcpelauncher.h"
 #include "dobby_public.h"
 #include "mcpe/mce/textureptr.h"
+#include <android/log.h>
+#include <vector>
 
 // HumanoidMobRenderer::prepareArmor
 
@@ -20,6 +22,8 @@ bool bl_setArmorTexture(int, std::string const&);
 bool bl_setArmorTexture(int, mce::TexturePtr*);
 
 static std::vector<std::pair<int, std::string>> bl_queuedArmorTextures;
+
+static bool needsReload = true;
 
 bool bl_setArmorTexture(int id, std::string const& filename) {
 	if (!bl_minecraft) {
@@ -39,6 +43,18 @@ bool bl_setArmorTexture(int id, mce::TexturePtr* texturePtr) {
 
 extern "C" {
 
+static void bl_reload_armor_textures_real() {
+	auto& textures = bl_minecraft->getTextures();
+	for (auto t: bl_armorRenders) {
+		if (!t) continue;
+		textures.loadTexture(t->textureName, true, false, false, false);
+	}
+}
+
+void bl_reload_armor_textures() {
+	needsReload = true;
+}
+
 // armour
 int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* mob, int armorPart, float partialTicks) {
 	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, mob, armorPart, partialTicks);
@@ -49,6 +65,11 @@ int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* 
 	if (armorItem->renderIndex != 42) return retval;
 
 	HumanoidModel* armorModel = armorItem->armorType == 2? self->modelArmorChestplate: self->modelArmor;
+
+	if (needsReload) {
+		needsReload = false;
+		bl_reload_armor_textures_real();
+	}
 
 	armorModel->activeTexture = bl_armorRenders[armorItem->itemId];
 
@@ -72,7 +93,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAr
 	}
 	bl_queuedArmorTextures.clear();
 }
-
 
 void bl_cape_init(void* mcpelibinfo) {
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mob9ArmorSlotf");

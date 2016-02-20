@@ -11,6 +11,7 @@ import java.util.zip.*;
 public class ZipTexturePack implements TexturePack {
 
 	private HashMap<String, ZipEntry> entries = new HashMap<String, ZipEntry>();
+	private HashMap<String, ZipEntry> fullNameEntries = new HashMap<String, ZipEntry>();
 	private ZipFile zipFile;
 	private File file;
 
@@ -25,6 +26,7 @@ public class ZipTexturePack implements TexturePack {
 		while (i.hasMoreElements()) {
 			ZipEntry entry = i.nextElement();
 			if (entry.getName().contains("__MACOSX")) continue; //A pox on ye, Mac OS X
+			fullNameEntries.put(entry.getName(), entry);
 			entries.put(getFilenameOnly(entry.getName()), entry);
 		}
 	}
@@ -42,6 +44,10 @@ public class ZipTexturePack implements TexturePack {
 	}
 
 	private ZipEntry getEntry(String fileName) {
+		ZipEntry entry = fullNameEntries.get(fileName);
+		if (entry != null) return entry;
+		entry = fullNameEntries.get("assets/" + fileName);
+		if (entry != null) return entry;
 		String name = getFilenameOnly(fileName);
 		return entries.get(name);
 	}
