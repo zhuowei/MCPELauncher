@@ -549,6 +549,34 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	return instance->count;
 }
 
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemNameChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+	if (bl_level == NULL) return nullptr;
+
+	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
+	if (te == NULL) return nullptr;
+	ItemInstance* instance = te->getItem(slot);
+	if (instance == NULL) return nullptr;
+	if (!instance->hasCustomHoverName()) return nullptr;
+	const char* name = instance->getCustomName().c_str();
+	return env->NewStringUTF(name);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemNameChest
+  (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jstring name) {
+	if (bl_level == NULL) return;
+
+	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
+	if (te == NULL) return;
+	ItemInstance* instance = te->getItem(slot);
+	if (instance == NULL) return;
+	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
+	instance->setCustomName(std::string(nameUtf));
+	env->ReleaseStringUTFChars(name, nameUtf);
+	te->setItem(slot, instance);
+}
+
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTime
   (JNIEnv *env, jclass clazz, jlong time) {
 	if (bl_level == NULL) return;

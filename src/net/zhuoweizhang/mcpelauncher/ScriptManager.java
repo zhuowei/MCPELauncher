@@ -1669,6 +1669,8 @@ public class ScriptManager {
 	public static native int nativeGetItemDataChest(int x, int y, int z, int slot);
 
 	public static native int nativeGetItemCountChest(int x, int y, int z, int slot);
+	public static native String nativeGetItemNameChest(int x, int y, int z, int slot);
+	public static native void nativeSetItemNameChest(int x, int y, int z, int slot, String name);
 
 	public static native long nativeDropItem(float x, float y, float z, float range, int id,
 			int count, int damage);
@@ -2170,6 +2172,11 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
+		public static void setChestSlotCustomName(int x, int y, int z, int slot, String name) {
+			nativeSetItemNameChest(x, y, z, slot, name);
+		}
+
+		@JSStaticFunction
 		public static int getChestSlot(int x, int y, int z, int slot) {
 			return nativeGetItemChest(x, y, z, slot);
 		}
@@ -2182,6 +2189,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getChestSlotCount(int x, int y, int z, int slot) {
 			return nativeGetItemCountChest(x, y, z, slot);
+		}
+
+		@JSStaticFunction
+		public static String getChestSlotCustomName(int x, int y, int z, int slot) {
+			return nativeGetItemNameChest(x, y, z, slot);
 		}
 
 		// KsyMC's additions
