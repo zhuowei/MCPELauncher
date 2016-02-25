@@ -771,6 +771,15 @@ public class ScriptManager {
 		saveEnabledScripts();
 	}
 
+	private static void setEnabledWithoutLoad(String name, boolean state) throws IOException {
+		if (state) {
+			enabledScripts.add(name);
+		} else {
+			enabledScripts.remove(name);
+		}
+		saveEnabledScripts();
+	}
+
 	public static void setEnabled(File[] files, boolean state) throws IOException {
 		for (File file : files) {
 			String name = file.getAbsolutePath();
@@ -789,6 +798,10 @@ public class ScriptManager {
 
 	public static void setEnabled(File file, boolean state) throws IOException {
 		setEnabled(file.getName(), state);
+	}
+
+	public static void setEnabledWithoutLoad(File file, boolean state) throws IOException {
+		setEnabledWithoutLoad(file.getName(), state);
 	}
 
 	private static boolean isEnabled(String name) {
@@ -1406,7 +1419,7 @@ public class ScriptManager {
 		if (terrainMeta == null) return;
 		for (int i = 0; i < requests.names.length; i++) {
 			if (!terrainMeta.hasIcon(requests.names[i], requests.coords[i])) {
-				throw new IllegalArgumentException("The requested block texture " +
+				throw new MissingTextureException("The requested block texture " +
 					requests.names[i] + ":" + requests.coords[i] + " does not exist");
 			}
 		}
@@ -3072,7 +3085,7 @@ public class ScriptManager {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < ITEM_ID_COUNT");
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
-				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
+				throw new MissingTextureException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
 			}
 			nativeDefineItem(id, iconName, iconSubindex, name, maxStackSize);
 		}
@@ -3442,7 +3455,7 @@ public class ScriptManager {
 				throw new IllegalArgumentException("Item IDs must be >= 0 and < " + ITEM_ID_COUNT);
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
-				throw new IllegalArgumentException("The item icon " + iconName + ":" + iconIndex + " does not exist");
+				throw new MissingTextureException("The item icon " + iconName + ":" + iconIndex + " does not exist");
 			}
 			nativeDefineArmor(id, iconName, iconIndex, name,
 				texture, damageReduceAmount, maxDamage, armorType);

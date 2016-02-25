@@ -190,6 +190,8 @@ public class MainActivity extends NativeActivity {
 
 	private static final int REQUEST_PICK_IMAGE = 415;
 	private static final int REQUEST_MANAGE_TEXTURES = 416;
+	private static final int REQUEST_MANAGE_SCRIPTS = 417;
+
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
 
@@ -713,7 +715,7 @@ public class MainActivity extends NativeActivity {
 			} else {
 				nativeOnPickImageCanceled(pickImageCallbackAddress);
 			}
-		} else if (requestCode == REQUEST_MANAGE_TEXTURES) {
+		} else if (requestCode == REQUEST_MANAGE_TEXTURES || requestCode == REQUEST_MANAGE_SCRIPTS) {
 			if (resultCode == RESULT_OK) {
 				finish();
 				NerdyStuffActivity.forceRestart(this);
@@ -824,7 +826,7 @@ public class MainActivity extends NativeActivity {
 							if (hasScriptSupport()) {
 								Intent intent = new Intent(MainActivity.this,
 										ManageScriptsActivity.class);
-								startActivity(intent);
+								startActivityForResult(intent, REQUEST_MANAGE_SCRIPTS);
 							} else {
 								new AlertDialog.Builder(MainActivity.this)
 										.setMessage("Scripts are not supported yet in Minecraft PE "

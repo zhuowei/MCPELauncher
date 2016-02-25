@@ -20,6 +20,7 @@ import net.zhuoweizhang.mcpelauncher.CoffeeScriptCompiler;
 import net.zhuoweizhang.mcpelauncher.MinecraftConstants;
 import net.zhuoweizhang.mcpelauncher.R;
 import net.zhuoweizhang.mcpelauncher.ScriptManager;
+import net.zhuoweizhang.mcpelauncher.MissingTextureException;
 import net.zhuoweizhang.mcpelauncher.MpepInfo;
 import net.zhuoweizhang.mcpelauncher.Utils;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
@@ -201,7 +202,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 	}
 
 	protected void setPatchListModified() {
-		setResult(RESULT_OK);
+		//setResult(RESULT_OK);
 	}
 
 	@Override
@@ -211,8 +212,8 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				if (resultCode == RESULT_OK) {  
 					final Uri uri = data.getData();
 					File file = FileUtils.getFile(uri);
+					File to = null;
 					try {
-						File to;
 						if (CoffeeScriptCompiler.isCoffeeScript(file)) {
 							to = new File(getDir(SCRIPTS_DIR, 0), CoffeeScriptCompiler.outputName(file.getName()));
 							CoffeeScriptCompiler.compileFile(file, to);
@@ -233,12 +234,34 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 						findScripts();
 					} catch (Exception e) {
 						e.printStackTrace();
-						reportError(e);
-						Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG).show();
+						if (!checkModPkgTextureError(e, to)) {
+							reportError(e);
+							Toast.makeText(this, R.string.manage_patches_import_error, Toast.LENGTH_LONG).show();
+						}
 					}
 				}
 				break;
 		}
+	}
+
+	private boolean checkModPkgTextureError(Exception e, File to) {
+		Throwable unwrapped = e;
+		if (e instanceof org.mozilla.javascript.WrappedException) {
+			unwrapped = ((org.mozilla.javascript.WrappedException)e).getWrappedException();
+		}
+		boolean isModpkg = to != null && to.getName().toLowerCase().endsWith(".modpkg");
+		if (isModpkg && unwrapped instanceof MissingTextureException) {
+			try {
+				ScriptManager.setEnabledWithoutLoad(to, true);
+				afterPatchToggle(new ContentListItem(to, true));
+				setResult(RESULT_OK);
+			} catch (Exception ee) {
+				ee.printStackTrace();
+				reportError(ee);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private void findScripts() {
@@ -316,7 +339,9 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			ScriptManager.setEnabled(patch.file, !patch.enabled);
 		} catch (Exception e) {
 			e.printStackTrace();
-			reportScriptLoadError(e);
+			if (!checkModPkgTextureError(e, patch.file)) {
+				reportScriptLoadError(e);
+			}
 		}
 		patch.enabled = !patch.enabled;
 		afterPatchToggle(patch);
@@ -845,7 +870,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 					ZipFile zip = new ZipFile(item.file);
 					MpepInfo info = MpepInfo.fromZip(zip);
 					zip.close();
-					item.extraData = "by " + info.authorName;
+					if (info != null) item.extraData = "by " + info.authorName;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

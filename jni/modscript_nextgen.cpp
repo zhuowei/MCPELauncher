@@ -2045,6 +2045,8 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeD
 	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
 	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), *instance, 10 /* pickup delay */);
 
+	*((int*)((uintptr_t)entity + kItemEntity_pickupDelay_offset)) = 10;
+
 	bl_level->addEntity(std::unique_ptr<Entity>(entity));
 	//delete instance;
 
