@@ -300,6 +300,23 @@ public class ScriptManager {
 		callScriptMethod("startDestroyBlock", x, y, z, side);
 	}
 
+	private static float lastDestroyProgress = -1f;
+	private static int lastDestroyX = 0, lastDestroyY = -1, lastDestroyZ = 0, lastDestroySide = -1;
+
+	@CallbackName(name="continueDestroyBlock", args={"x", "y", "z", "side", "progress"})
+	public static void continueDestroyBlockCallback(int x, int y, int z, int side, float progress) {
+		boolean samePlace = x == lastDestroyX && y == lastDestroyY && z == lastDestroyZ && side == lastDestroySide;
+		if (progress == 0 && (progress != lastDestroyProgress || !samePlace)) {
+			callScriptMethod("startDestroyBlock", x, y, z, side);
+		}
+		lastDestroyProgress = progress;
+		lastDestroyX = x;
+		lastDestroyY = y;
+		lastDestroyZ = z;
+		lastDestroySide = side;
+		callScriptMethod("continueDestroyBlock", x, y, z, side, progress);
+	}
+
 	public static void setLevelCallback(boolean hasLevel, boolean isRemoteAAAAAA) {
 		//if (nativeGetArch() == ARCH_I386) nextTickCallsSetLevel = true;
 	}

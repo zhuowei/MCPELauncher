@@ -52,6 +52,8 @@ typedef struct {
 #define GAMERENDERER_GETFOV_SIZE 0x13c
 #endif
 
+const unsigned int kGameMode_progress_offset = 36;
+
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -119,6 +121,7 @@ static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
+static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, signed char);
 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
@@ -163,6 +166,7 @@ struct bl_vtable_indexes {
 	int entity_start_riding;
 	int entity_stop_riding;
 	int entity_can_add_rider;
+	int gamemode_continue_destroy_block;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -339,6 +343,29 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 	}
 	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side);
 }
+
+void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, BlockPos blockPos, signed char side) {
+	JNIEnv *env;
+	preventDefaultStatus = FALSE;
+
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "continueDestroyBlockCallback", "(IIIIF)V");
+	float progress = *((float*) ((uintptr_t)gamemode + kGameMode_progress_offset));
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, blockPos.x, blockPos.y, blockPos.z, side, progress);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+
+	if(!preventDefaultStatus) return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side);
+}
+
 
 void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 	std::unique_ptr<Level> levelPtr, std::unique_ptr<LocalPlayer> localPlayerPtr) {
@@ -1138,6 +1165,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN6Entity10stopRidingEb") - 2;
 	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZNK6Entity11canAddRiderERS_") - 2;
+	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
+		"_ZN8GameMode20continueDestroyBlockER6Player8BlockPosa");
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1273,6 +1302,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_SurvivalMode_startDestroyBlock_real = (void (*)(void*, Player*, BlockPos, signed char))
 		survivalVtable[vtable_indexes.gamemode_start_destroy_block];
 	survivalVtable[vtable_indexes.gamemode_start_destroy_block] = (void*) &bl_SurvivalMode_startDestroyBlock_hook;
+
+	bl_GameMode_continueDestroyBlock_real = (void* (*)(void*, Player&, BlockPos, signed char))
+		creativeVtable[vtable_indexes.gamemode_continue_destroy_block];
+	creativeVtable[vtable_indexes.gamemode_continue_destroy_block] = (void*) &bl_GameMode_continueDestroyBlock_hook;
+	survivalVtable[vtable_indexes.gamemode_continue_destroy_block] = (void*) &bl_GameMode_continueDestroyBlock_hook;
 
 	//void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
