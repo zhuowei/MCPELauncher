@@ -162,6 +162,7 @@ struct bl_vtable_indexes {
 	int mob_get_carried_item;
 	int entity_start_riding;
 	int entity_stop_riding;
+	int entity_can_add_rider;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -707,6 +708,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 }
 
+static bool alwaysReturnTrue(Entity* a, Entity* b) {
+	return true;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRideAnimal
   (JNIEnv *env, jclass clazz, jlong riderId, jlong mountId) {
 	Entity* rider = bl_getEntityWrapper(bl_level, riderId);
@@ -717,9 +722,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 		void (*fn)(Entity*, bool) = (void (*)(Entity*, bool)) vtable;
 		fn(rider, true);
 	} else {
+		// horrible kludge: we hook and unhook canAddRider
+		void* oldCanAddRider = nullptr;
+		{
+			void* vtable = mount->vtable[vtable_indexes.entity_can_add_rider];
+			bool (*fn)(Entity*, Entity*) = (bool (*) (Entity*, Entity*)) vtable;
+			if (!fn(mount, rider)) {
+				oldCanAddRider = vtable;
+				mount->vtable[vtable_indexes.entity_can_add_rider] = (void*) &alwaysReturnTrue;
+			}
+		}
 		void* vtable = rider->vtable[vtable_indexes.entity_start_riding];
 		void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
 		fn(rider, mount);
+		if (oldCanAddRider) {
+			mount->vtable[vtable_indexes.entity_can_add_rider] = oldCanAddRider;
+		}
 	}
 }
 
@@ -1090,6 +1108,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN6Entity11startRidingERS_") - 2;
 	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity10stopRidingEb") - 2;
+	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+		"_ZNK6Entity11canAddRiderERS_") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
