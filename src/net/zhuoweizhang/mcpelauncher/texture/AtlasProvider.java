@@ -46,11 +46,13 @@ public class AtlasProvider implements TexturePack {
 		} else if (fileName.equals(atlasName)) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			loader.save(atlasImg, bos);
+			/*
 			if (BuildConfig.DEBUG && fileName.contains("terrain")) {
 				FileOutputStream fos = new FileOutputStream(new File("/sdcard/terrain.tga"));
 				fos.write(bos.toByteArray());
 				fos.close();
 			}
+			*/
 			return new ByteArrayInputStream(bos.toByteArray());
 		} else if (mipLevels > 0 && fileName.startsWith(mipPrefix)) {
 			try {

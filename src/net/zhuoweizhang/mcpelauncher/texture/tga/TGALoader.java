@@ -36,6 +36,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 
 import android.graphics.Bitmap;
 
@@ -194,11 +196,18 @@ public final class TGALoader {
             // Faster than doing a 16-or-24-or-32 check on each individual pixel,
             // just make a seperate loop for each.
             if (pixelDepth == 32) {
+                ByteBuffer buf = ByteBuffer.allocate(width * 4).order(ByteOrder.LITTLE_ENDIAN);
+                IntBuffer intb = buf.asIntBuffer();
+                byte[] bufBytes = buf.array();
                 for (int i = 0; i <= (height - 1); i++) {
                     if (!flip) {
                         rawDataIndex = (height - 1 - i) * width * dl;
                     }
-
+                    dis.read(bufBytes, 0, bufBytes.length);
+                    intb.position(0);
+                    intb.get(rawData, rawDataIndex, width);
+                    rawDataIndex += width;
+/*
                     for (int j = 0; j < width; j++) {
                         blue = dis.readByte();
                         green = dis.readByte();
@@ -206,6 +215,7 @@ public final class TGALoader {
                         alpha = dis.readByte();
                         rawData[rawDataIndex++] = (alpha & 0xff) << 24 | (red & 0xff) << 16 | (green & 0xff) << 8 | (blue & 0xff);
                     }
+*/
                 }
                 format = RGBA8;
             } else {
