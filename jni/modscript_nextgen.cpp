@@ -44,6 +44,7 @@
 #include "mcpe/circuit.h"
 #include "mcpe/enchant.h"
 #include "mcpe/inventory.h"
+#include "mcpe/options.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -226,6 +227,9 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_get_enchant_slot;
 	int item_get_enchant_value;
 	int level_set_difficulty;
+	int appplatform_get_screen_type;
+	int appplatform_get_edition;
+	int appplatform_use_centered_gui;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -266,6 +270,13 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item15getEnchantValueEv");
 	vtable_indexes.level_set_difficulty = bl_vtableIndex(mcpelibhandle, "_ZTV5Level",
 		"_ZN5Level13setDifficultyE10Difficulty");
+	vtable_indexes.appplatform_get_screen_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK19AppPlatform_android13getScreenTypeEv");
+	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK11AppPlatform10getEditionEv");
+	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK11AppPlatform14useCenteredGUIEv");
+
 }
 
 extern "C" {
@@ -1272,7 +1283,6 @@ void* bl_getMaterial(int materialType) {
 }
 
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
-	Tile* sacrificialTile = bl_Block_mBlocks[1]; //Oh, little Cobblestone Galatti, please sing for me again!
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(Block::getTextureUVCoordinateSet(
 			textureNames[i], textureCoords[i]));
@@ -2584,23 +2594,30 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDi
 	setDifficulty(bl_level, difficulty);
 }
 
-static void* bl_AppPlatform_getScreenType;
+static void** bl_AppPlatform_vtable;
+static void* bl_AppPlatform_getScreenType_real;
+static void* bl_AppPlatform_getEdition_real;
+static void* bl_AppPlatform_useCenteredGui_real;
+static int bl_AppPlatform_getScreenType_hook(void* appPlatform) {
+	return 0;
+}
+
+static bool bl_AppPlatform_useCenteredGui_hook(void* appPlatform) {
+	return true;
+}
+
+static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
+	return "win10";
+}
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv* env, jclass clazz, jboolean desktop) {
-#ifdef __arm__
-	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
-		bl_AppPlatform_getScreenType)) & ~1;
-	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
-	isModdedArray[0] = desktop? 0: 1;
-#endif
-#ifdef __i386
-	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
-		bl_AppPlatform_getScreenType));
-	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
-	isModdedArray[1] = desktop? 0: 1;
-#endif
-
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type] = desktop?
+		(void*) &bl_AppPlatform_getScreenType_hook: bl_AppPlatform_getScreenType_real;
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition] = desktop?
+		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
+		(void*) &bl_AppPlatform_useCenteredGui_hook: bl_AppPlatform_useCenteredGui_real;
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetImmobile
@@ -2611,6 +2628,19 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetI
 	DataItem* synchedData = entity->getEntityData()->_get(0xf);
 	if (synchedData == nullptr) return;
 	synchedData->thevalue = (char) immobile;
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetRenderDebug
+  (JNIEnv* env, jclass clazz, jboolean debug) {
+/*
+	Options* options = bl_minecraft->getOptions();
+	if (options == nullptr) return;
+	options->setDevRenderGoalState(debug);
+	options->setDevRenderBoundingBoxes(debug);
+	options->setDevRenderPaths(debug);
+	options->setRenderDebug(debug);
+*/
+	ScreenView::setDebugRendering(debug);
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
@@ -2668,7 +2698,11 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
 		(void**) &bl_ItemRenderer_getGraphics_real);
-	bl_AppPlatform_getScreenType = dobby_dlsym(mcpelibhandle, "_ZNK19AppPlatform_android13getScreenTypeEv");
+
+	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
+	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];
+	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
+	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 }
 
 void bl_setuphooks_cppside() {

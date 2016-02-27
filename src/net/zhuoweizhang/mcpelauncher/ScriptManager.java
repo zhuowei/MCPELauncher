@@ -1825,6 +1825,7 @@ public class ScriptManager {
 	public static native void nativeArmorAddQueuedTextures();
 	public static native boolean nativeEntityHasCustomSkin(long entity);
 	public static native void nativeEntitySetImmobile(long id, boolean immobile);
+	public static native void nativeModPESetRenderDebug(boolean debug);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3332,6 +3333,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static String getLanguage() {
 			return nativeGetLanguageName();
+		}
+
+		@JSStaticFunction
+		public static void setUiRenderDebug(boolean render) {
+			nativeModPESetRenderDebug(render);
 		}
 
 		@Override

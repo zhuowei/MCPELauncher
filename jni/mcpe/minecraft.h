@@ -3,6 +3,7 @@ class Level;
 class Timer;
 class TextureGroup;
 class Mob;
+class Options;
 class Minecraft {
 public:
 	Level* getLevel();
@@ -15,4 +16,5 @@ public:
 	Player* getLocalPlayer();
 	TextureGroup& getTextures() const;
 	void setCameraTargetEntity(Entity*);
+	Options* getOptions();
 };
