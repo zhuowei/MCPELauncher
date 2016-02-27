@@ -35,6 +35,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.view.KeyEvent;
+import android.widget.PopupWindow;
 import android.util.Log;
 import org.mozilla.javascript.*;
 import org.mozilla.javascript.annotations.JSFunction;
@@ -701,6 +702,7 @@ public class ScriptManager {
 		// call it before the first frame renders
 
 		ContextFactory.initGlobal(new BlockContextFactory());
+		NativeJavaMethod.blockLauncherMethodWatcher = new MyMethodWatcher();
 		requestReloadAllScripts = true;
 		nativeRequestFrameCallback();
 		prepareEnabledScripts();
@@ -1509,6 +1511,16 @@ public class ScriptManager {
 		return "Steve"; // I DUNNO
 	}
 
+	private static final class MyMethodWatcher implements NativeJavaMethod.MethodWatcher {
+		private boolean testName(String name) {
+			return name.equals("showAsDropDown") || name.equals("showAtLocation");
+		}
+		public boolean canCall(Method method, Object javaObject) {
+			if (ScriptManager.scriptingEnabled) return true;
+			return !(javaObject instanceof PopupWindow && testName(method.getName()));
+		}
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native long nativeGetPlayerEnt();
@@ -2149,6 +2161,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setGameMode(int type) {
+			if (!scriptingEnabled) return;
 			nativeSetGameType(type);
 		}
 
@@ -2174,6 +2187,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void destroyBlock(int x, int y, int z, boolean shouldDrop) {
+			if (!scriptingEnabled) return;
 			int itmId = getTile(x, y, z);
 			int itmDmg = getData(x, y, z);
 
@@ -3591,6 +3605,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setDestroyTime(int blockId, double time) {
+			if (!scriptingEnabled) return;
 			nativeBlockSetDestroyTime(blockId, (float) time);
 		}
 

@@ -809,6 +809,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
 	//we grab the inventory instance from the player
 	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	if (invPtr == nullptr) return;
 	if (!remove) {
 		invPtr->add(*instance, true);
 	} else {

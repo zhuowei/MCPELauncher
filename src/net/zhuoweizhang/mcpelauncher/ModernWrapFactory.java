@@ -32,8 +32,18 @@ public class ModernWrapFactory extends WrapFactory {
 	@Override
 	public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object javaObject, Class<?> staticType) {
 		if (javaObject instanceof PopupWindow) {
+			if (!ScriptManager.isScriptingEnabled()) {
+				((PopupWindow)javaObject).dismiss();
+			}
 			synchronized(popups) {
 				popups.add(new WeakReference<PopupWindow>((PopupWindow) javaObject));
+			}
+		}
+		if (javaObject instanceof Thread) {
+			Thread t = (Thread) javaObject;
+			Thread.UncaughtExceptionHandler exHandler = t.getUncaughtExceptionHandler();
+			if (exHandler == null || exHandler instanceof ThreadGroup) {
+				t.setUncaughtExceptionHandler(myExceptionHandler);
 			}
 		}
 		return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
@@ -48,9 +58,17 @@ public class ModernWrapFactory extends WrapFactory {
 						if (window == null) continue;
 						window.dismiss();
 					}
-					popups.clear();
+					//popups.clear();
 				}
 			}
 		});
+	}
+
+	private static MyExceptionHandler myExceptionHandler = new MyExceptionHandler();
+
+	private static class MyExceptionHandler implements Thread.UncaughtExceptionHandler {
+		public void uncaughtException(Thread thread, Throwable t) {
+			ScriptManager.reportScriptError(null, t);
+		}
 	}
 }
