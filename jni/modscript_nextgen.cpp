@@ -2658,9 +2658,13 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 	if (bl_level == nullptr) return;
 	Mob* entity = static_cast<Mob*>(bl_getEntityWrapper(bl_level, entityId));
 	if (entity == nullptr) return;
-	Mob* target = static_cast<Mob*>(bl_getEntityWrapper(bl_level, targetId));
-	if (target == nullptr) return;
-	entity->setTarget(target);
+	if (targetId == -1) {
+		entity->setTarget(nullptr);
+	} else {
+		Mob* target = static_cast<Mob*>(bl_getEntityWrapper(bl_level, targetId));
+		if (target == nullptr) return;
+		entity->setTarget(target);
+	}
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

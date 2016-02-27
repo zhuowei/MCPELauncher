@@ -227,7 +227,8 @@ public class ScriptManager {
 	private static Class<?>[] constantsClasses = {
 		ChatColor.class, ItemCategory.class, ParticleType.class, EntityType.class,
 		EntityRenderType.class, ArmorType.class, MobEffect.class, DimensionId.class,
-		BlockFace.class, UseAnimation.class, Enchantment.class, EnchantType.class
+		BlockFace.class, UseAnimation.class, Enchantment.class, EnchantType.class,
+		BlockRenderLayer.class
 	};
 
 	public static void initJustLoadedScript(Context ctx, Script script, String sourceName) {
@@ -853,6 +854,35 @@ public class ScriptManager {
 			} catch (Exception e) {
 				e.printStackTrace();
 				MainActivity.currentMainActivity.get().reportError(e);
+			}
+		}
+		loadAddonScripts();
+	}
+
+	protected static void loadAddonScripts() {
+		MainActivity mainActivity = MainActivity.currentMainActivity.get();
+		if (mainActivity == null || mainActivity.addonOverrideTexturePackInstance == null) return; // what
+		Map<String, ZipFile> addonFiles = mainActivity.addonOverrideTexturePackInstance.getZipsByPackage();
+		for (Map.Entry<String, ZipFile> s: addonFiles.entrySet()) {
+			Reader theReader = null;
+			try {
+				ZipFile zipFile = s.getValue();
+				ZipEntry entry = zipFile.getEntry("assets/script/main.js");
+				if (entry == null) continue;
+				InputStream is = zipFile.getInputStream(entry);
+				theReader = new InputStreamReader(is);
+				loadScript(theReader, "Addon " + s.getKey() + ":main.js");
+			} catch (Exception e) {
+				e.printStackTrace();
+				mainActivity.reportError(e);
+			} finally {
+				if (theReader != null) {
+					try {
+						theReader.close();
+					} catch (IOException ie) {
+						ie.printStackTrace();
+					}
+				}
 			}
 		}
 	}
@@ -3100,10 +3130,12 @@ public class ScriptManager {
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("setTarget only works on mob entities");
 			}
-			long targetId = getEntityId(target);
-			int targetTypeId = nativeGetEntityTypeId(targetId);
-			if (!(targetTypeId > 0 && targetTypeId < 64)) {
-				throw new RuntimeException("setTarget only works on mob targets");
+			long targetId = target == null? -1: getEntityId(target);
+			if (targetId != -1) {
+				int targetTypeId = nativeGetEntityTypeId(targetId);
+				if (!(targetTypeId > 0 && targetTypeId < 64)) {
+					throw new RuntimeException("setTarget only works on mob targets");
+				}
 			}
 			nativeEntitySetTarget(entityId, targetId);
 		}

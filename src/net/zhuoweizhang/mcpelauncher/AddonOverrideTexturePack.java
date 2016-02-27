@@ -13,8 +13,9 @@ import com.mojang.minecraftpe.MainActivity;
 
 public class AddonOverrideTexturePack implements TexturePack {
 
-	private MainActivity activity;
-	private Map<String, ZipFile> assets = new HashMap<String, ZipFile>();
+	private final MainActivity activity;
+	private final Map<String, ZipFile> assets = new HashMap<String, ZipFile>();
+	private final Map<String, ZipFile> zipsByPackage = new HashMap<String, ZipFile>();
 
 	public AddonOverrideTexturePack(MainActivity activity) {
 		this.activity = activity;
@@ -26,14 +27,18 @@ public class AddonOverrideTexturePack implements TexturePack {
 			System.out.println("Addon textures: " + packageName);
 			try {
 				addPackage(new File(activity.getPackageManager().getPackageInfo(packageName, 0).
-					applicationInfo.publicSourceDir));
+					applicationInfo.publicSourceDir), packageName);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void addPackage(File myZip) throws IOException {
+	public Map<String, ZipFile> getZipsByPackage() {
+		return zipsByPackage;
+	}
+
+	public void addPackage(File myZip, String packageName) throws IOException {
 		ZipFile zipFile = new ZipFile(myZip);
 		Enumeration<? extends ZipEntry> i = zipFile.entries();
 		while (i.hasMoreElements()) {
@@ -44,6 +49,7 @@ public class AddonOverrideTexturePack implements TexturePack {
 			if (name.charAt(name.length() - 1) == '/') continue;
 			assets.put(name, zipFile);
 		}
+		zipsByPackage.put(packageName, zipFile);
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {

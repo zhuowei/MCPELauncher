@@ -131,7 +131,7 @@ public class ManageAddonsActivity extends ListActivity {
 			if (app.metaData == null)
 				continue;
 			String nativeLibName = app.metaData
-					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
+					.getString("net.zhuoweizhang.mcpelauncher.api.targetmcpeversion");
 			if (nativeLibName != null) {
 				boolean enabled = manager.isEnabled(app.packageName);
 				AddonListItem itm = new AddonListItem(app, enabled);

@@ -204,6 +204,7 @@ public class MainActivity extends NativeActivity {
 		}
 	};
 	private int mcpeArch = ScriptManager.ARCH_ARM;
+	public AddonOverrideTexturePack addonOverrideTexturePackInstance = null;
 
 	/** Called when the activity is first created. */
 
@@ -1733,7 +1734,8 @@ public class MainActivity extends NativeActivity {
 				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
 			));
 		}
-		textureOverrides.add(new AddonOverrideTexturePack(this));
+		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this);
+		textureOverrides.add(addonOverrideTexturePackInstance);
 	}
 
 	protected void migrateToPatchManager() {
