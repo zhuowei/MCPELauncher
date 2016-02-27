@@ -405,6 +405,7 @@ public:
 
 	Entity* getEntity(EntityUniqueID, bool) const;
 	void addEntity(std::unique_ptr<Entity>);
+	void addGlobalEntity(std::unique_ptr<Entity>);
 	void explode(BlockSource&, Entity*, Vec3 const&, float, bool);
 	void setNightMode(bool);
 	void setTime(int);

@@ -2031,7 +2031,11 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
 	}
 
-	bl_level->addEntity(std::move(entity));
+	if (type != 93) {
+		bl_level->addEntity(std::move(entity));
+	} else { // lightning
+		bl_level->addGlobalEntity(std::move(entity));
+	}
 
 	return e->getUniqueID();
 
