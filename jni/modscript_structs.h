@@ -8,6 +8,7 @@ class Player;
 #include "mcpe/minecraft.h"
 #include "mcpe/blocksource.h"
 #include "mcpe/enchant.h"
+#include "mcpe/synchedentitydata.h"
 
 #ifdef __cplusplus
 #define cppstr std::string
@@ -82,6 +83,7 @@ public:
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;
 	void setNameTag(std::string const&);
+	SynchedEntityData* getEntityData();
 };
 static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 

@@ -90,7 +90,7 @@ const size_t kItemEntity_pickupDelay_offset = 376;
 // found in ItemEntity::_validateItem
 const size_t kItemEntity_itemInstance_offset = 352;
 // found in TextPacket::handle
-const int kClientNetworkHandler_vtable_offset_handleTextPacket = 11;
+const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 11;
 
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
@@ -1185,7 +1185,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
 	TextureUVCoordinateSet* set = bl_ItemInstance_getIcon(myStack, 0, true);
 	if (set == NULL || set->bounds == NULL) return false;
-	float lasttwo[] = {set->size[0], set->size[1]};
+	float lasttwo[] = {(float) set->size[0], (float) set->size[1]};
 	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
 	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
 	return true;
@@ -2601,6 +2601,16 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDe
 	isModdedArray[1] = desktop? 0: 1;
 #endif
 
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetImmobile
+  (JNIEnv* env, jclass clazz, jlong entityId, jboolean immobile) {
+	if (bl_level == nullptr) return;
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == nullptr) return;
+	DataItem* synchedData = entity->getEntityData()->_get(0xf);
+	if (synchedData == nullptr) return;
+	synchedData->thevalue = (char) immobile;
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

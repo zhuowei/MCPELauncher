@@ -1824,6 +1824,7 @@ public class ScriptManager {
 	public static native void nativeLevelSetDifficulty(int difficulty);
 	public static native void nativeArmorAddQueuedTextures();
 	public static native boolean nativeEntityHasCustomSkin(long entity);
+	public static native void nativeEntitySetImmobile(long id, boolean immobile);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3072,6 +3073,11 @@ public class ScriptManager {
 			if (worldData == null) return false;
 			worldData.setEntityData(getEntityId(entity), key, value);
 			return true;
+		}
+
+		@JSStaticFunction
+		public static void setImmobile(Object entity, boolean immobile) {
+			nativeEntitySetImmobile(getEntityId(entity), immobile);
 		}
 
 		@Override

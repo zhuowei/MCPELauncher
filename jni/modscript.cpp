@@ -364,6 +364,7 @@ void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, Bloc
 	}
 
 	if(!preventDefaultStatus) return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side);
+	return nullptr;
 }
 
 
