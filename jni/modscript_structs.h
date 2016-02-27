@@ -88,6 +88,9 @@ public:
 static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 
 class Mob: public Entity {
+public:
+	Mob* getTarget();
+	void setTarget(Mob*);
 };
 
 class Player: public Mob {

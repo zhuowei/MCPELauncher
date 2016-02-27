@@ -1826,6 +1826,8 @@ public class ScriptManager {
 	public static native boolean nativeEntityHasCustomSkin(long entity);
 	public static native void nativeEntitySetImmobile(long id, boolean immobile);
 	public static native void nativeModPESetRenderDebug(boolean debug);
+	public static native long nativeEntityGetTarget(long id);
+	public static native void nativeEntitySetTarget(long id, long target);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3079,6 +3081,31 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setImmobile(Object entity, boolean immobile) {
 			nativeEntitySetImmobile(getEntityId(entity), immobile);
+		}
+
+		@JSStaticFunction
+		public static long getTarget(Object entity) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("getTarget only works on mobs");
+			}
+			return nativeEntityGetTarget(entityId);
+		}
+
+		@JSStaticFunction
+		public static void setTarget(Object entity, Object target) {
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("setTarget only works on mob entities");
+			}
+			long targetId = getEntityId(target);
+			int targetTypeId = nativeGetEntityTypeId(targetId);
+			if (!(targetTypeId > 0 && targetTypeId < 64)) {
+				throw new RuntimeException("setTarget only works on mob targets");
+			}
+			nativeEntitySetTarget(entityId, targetId);
 		}
 
 		@Override

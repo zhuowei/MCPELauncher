@@ -2643,6 +2643,26 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetRe
 	ScreenView::setDebugRendering(debug);
 }
 
+JNIEXPORT jlong Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetTarget
+  (JNIEnv* env, jclass clazz, jlong entityId) {
+	if (bl_level == nullptr) return -1;
+	Mob* entity = static_cast<Mob*>(bl_getEntityWrapper(bl_level, entityId));
+	if (entity == nullptr) return -1;
+	Mob* target = entity->getTarget();
+	if (target == nullptr) return -1;
+	return target->getUniqueID().id;
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetTarget
+  (JNIEnv* env, jclass clazz, jlong entityId, jlong targetId) {
+	if (bl_level == nullptr) return;
+	Mob* entity = static_cast<Mob*>(bl_getEntityWrapper(bl_level, entityId));
+	if (entity == nullptr) return;
+	Mob* target = static_cast<Mob*>(bl_getEntityWrapper(bl_level, targetId));
+	if (target == nullptr) return;
+	entity->setTarget(target);
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
