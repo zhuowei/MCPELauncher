@@ -977,7 +977,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
 	std::string lowercaseStr = Util::toLower(name);
-	Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
+	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
 
 Item* bl_constructItem(std::string const& name, int id) {
