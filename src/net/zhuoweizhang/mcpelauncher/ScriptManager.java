@@ -856,7 +856,7 @@ public class ScriptManager {
 				MainActivity.currentMainActivity.get().reportError(e);
 			}
 		}
-		loadAddonScripts();
+		//loadAddonScripts();
 	}
 
 	protected static void loadAddonScripts() {
