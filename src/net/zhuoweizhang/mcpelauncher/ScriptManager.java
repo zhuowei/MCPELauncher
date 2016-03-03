@@ -1877,6 +1877,8 @@ public class ScriptManager {
 	public static native long nativeEntityGetTarget(long id);
 	public static native void nativeEntitySetTarget(long id, long target);
 	public static native int nativePlayerGetScore();
+	public static native String nativeMobGetArmorCustomName(long entity, int slot);
+	public static native void nativeMobSetArmorCustomName(long entity, int slot, String name);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3115,6 +3117,32 @@ public class ScriptManager {
 				throw new RuntimeException("setArmor only works for mobs");
 			}
 			nativeMobSetArmor(entityId, slot, id, damage);
+		}
+
+		@JSStaticFunction
+		public static String getArmorCustomName(Object entity, int slot) {
+			if (!(slot >= 0 && slot < 4)) {
+				throw new RuntimeException("slot " + slot + " is not a valid armor slot");
+			}
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("setArmor only works for mobs");
+			}
+			return nativeMobGetArmorCustomName(entityId, slot);
+		}
+
+		@JSStaticFunction
+		public static void setArmorCustomName(Object entity, int slot, String name) {
+			if (!(slot >= 0 && slot < 4)) {
+				throw new RuntimeException("slot " + slot + " is not a valid armor slot");
+			}
+			long entityId = getEntityId(entity);
+			int typeId = nativeGetEntityTypeId(entityId);
+			if (!(typeId > 0 && typeId < 64)) {
+				throw new RuntimeException("setArmor only works for mobs");
+			}
+			nativeMobSetArmorCustomName(entityId, slot, name);
 		}
 
 		@JSStaticFunction

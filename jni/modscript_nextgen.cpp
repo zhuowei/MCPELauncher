@@ -2580,6 +2580,30 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetI
 	env->ReleaseStringUTFChars(name, nameUtf);
 }
 
+JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobGetArmorCustomName
+  (JNIEnv *env, jclass clazz, jlong entityId, jint slot) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return nullptr;
+	//Geting the item
+	ItemInstance* itemInstance = bl_Mob_getArmor(entity, slot);
+	if (itemInstance == nullptr) return nullptr;
+	if (!itemInstance->hasCustomHoverName()) return nullptr;
+	const char* name = itemInstance->getCustomName().c_str();
+	return env->NewStringUTF(name);
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmorCustomName
+  (JNIEnv *env, jclass clazz, jlong entityId, jint slot, jstring name) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return;
+	//Geting the item
+	ItemInstance* itemInstance = bl_Mob_getArmor(entity, slot);
+	if (itemInstance == nullptr) return;
+	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
+	itemInstance->setCustomName(std::string(nameUtf));
+	env->ReleaseStringUTFChars(name, nameUtf);
+}
+
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetStackedByData
   (JNIEnv *env, jclass clazz, jint id, jboolean stacked) {
 	if (id < 0 || id >= bl_item_id_count) return;
