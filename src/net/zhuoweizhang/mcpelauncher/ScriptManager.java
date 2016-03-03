@@ -3853,8 +3853,6 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void sendChat(String message) {
-			if (!isRemote)
-				return;
 			nativeSendChat(message);
 		}
 

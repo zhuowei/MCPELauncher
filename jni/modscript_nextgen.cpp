@@ -172,13 +172,16 @@ public:
 
 class TextPacket : public Packet {
 public:
-	char filler[13-4]; // 4
+	char filler[8-4]; // 4
+	int shouldBeOne; // 8
+	unsigned char shouldBeZero; // 12
 	unsigned char type; //13
 	char filler2[16-14]; // 14
 	std::string username; // 16
 	std::string message; // 20
-	std::vector<std::string> thevector; // 24
-	char filler3[36-28]; // 28
+	//std::vector<std::string> thevector; // 24
+	//char filler3[36-28]; // 28
+	char filler3[36-24]; // 24
 	virtual ~TextPacket() override;
 };
 
@@ -1635,6 +1638,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	TextPacket textPacket;
 	textPacket.type = 1;
 	memset(&(textPacket.filler2), 0, sizeof(textPacket.filler2));
+	memset(&(textPacket.filler3), 0, sizeof(textPacket.filler3));
+	textPacket.shouldBeZero = 0;
+	textPacket.shouldBeOne = 1;
 	textPacket.username = *myName;
 	textPacket.message = messageUtfChars;
 	bl_sendPacket(&textPacket);
