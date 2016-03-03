@@ -94,6 +94,8 @@ public:
 };
 
 class Player: public Mob {
+public:
+	int getScore();
 };
 
 struct TextureUVCoordinateSet {

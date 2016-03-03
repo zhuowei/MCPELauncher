@@ -5,7 +5,7 @@ public final class BlockRenderLayer {
 	opaque = 0,
 	opaque_seasons = 1,
 	doubleside = 2,
-	alpha = 3,
+	alpha = 0x1003, // real value is 3
 	alpha_single_side = 4,
 	alpha_seasons = 5,
 	blend = 6,

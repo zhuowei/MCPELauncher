@@ -1664,6 +1664,8 @@ public class ScriptManager {
 
 	public static native boolean nativeGetTextureCoordinatesForItem(int itemId, int itemDamage,
 			float[] output);
+	public static native boolean nativeGetTextureCoordinatesForBlock(int itemId, int itemDamage, int side,
+			float[] output);
 
 	public static native void nativeDefineBlock(int blockId, String name, String[] textureNames,
 			int[] textureCoords, int materialSourceId, boolean opaque, int renderType,
@@ -1874,6 +1876,7 @@ public class ScriptManager {
 	public static native void nativeModPESetRenderDebug(boolean debug);
 	public static native long nativeEntityGetTarget(long id);
 	public static native void nativeEntitySetTarget(long id, long target);
+	public static native int nativePlayerGetScore();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2700,6 +2703,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setItemCustomName(int slot, String name) {
 			nativePlayerSetItemCustomName(slot, name);
+		}
+
+		@JSStaticFunction
+		public static int getScore() {
+			return nativePlayerGetScore();
 		}
 
 		@Override
@@ -3648,6 +3656,17 @@ public class ScriptManager {
 			nativeSetAllowEnchantments(id, flag, value);
 		}
 
+		@JSStaticFunction
+		public static int[] getTextureCoords(int id, int damage) {
+			float[] retval = new float[6];
+			boolean success = nativeGetTextureCoordinatesForItem(id, damage, retval);
+			if (!success) throw new RuntimeException("Can't get texture for item " + id + ":" + damage);
+			int[] newretval = new int[] {(int) (retval[0] * retval[4] + 0.5), (int) (retval[1] * retval[5] + 0.5),
+				(int) (retval[2] * retval[4] + 0.5), (int) (retval[3] * retval[5] + 0.5),
+				(int) (retval[4] + 0.5), (int) (retval[5] + 0.5)};
+			return newretval;
+		}
+
 		@Override
 		public String getClassName() {
 			return "Item";
@@ -3743,6 +3762,12 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderLayer(int blockId, int layer) {
+			// workaround for hardcoded 3 value
+			if (layer == 3) {
+				layer = BlockRenderLayer.alpha_single_side;
+			} else if (layer == BlockRenderLayer.alpha) {
+				layer = 3;
+			}
 			nativeBlockSetRenderLayer(blockId, layer);
 		}
 
@@ -3821,6 +3846,17 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setRedstoneConsumer(int id, boolean enabled) {
 			nativeBlockSetRedstoneConsumer(id, enabled);
+		}
+
+		@JSStaticFunction
+		public static int[] getTextureCoords(int id, int damage, int side) {
+			float[] retval = new float[6];
+			boolean success = nativeGetTextureCoordinatesForBlock(id, damage, side, retval);
+			if (!success) throw new RuntimeException("Can't get texture for block " + id + ":" + damage);
+			int[] newretval = new int[] {(int) (retval[0] * retval[4] + 0.5), (int) (retval[1] * retval[5] + 0.5),
+				(int) (retval[2] * retval[4] + 0.5), (int) (retval[3] * retval[5] + 0.5),
+				(int) (retval[4] + 0.5), (int) (retval[5] + 0.5)};
+			return newretval;
 		}
 
 		@Override

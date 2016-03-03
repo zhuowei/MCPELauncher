@@ -1205,6 +1205,22 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return true;
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForBlock
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jint side, jfloatArray outputArray) {
+	if (itemId <= 0 || itemId >= 256) return false;
+	Block* block = bl_Block_mBlocks[itemId];
+	if (!block) return false;
+	TextureUVCoordinateSet* (*gettex)(Block*, signed char, int) =
+		(TextureUVCoordinateSet* (*)(Block*, signed char, int))
+		block->vtable[vtable_indexes.tile_get_texture_char_int - 2];
+	TextureUVCoordinateSet* set = gettex(block, itemDamage, side);
+	if (set == NULL || set->bounds == NULL) return false;
+	float lasttwo[] = {(float) set->size[0], (float) set->size[1]};
+	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
+	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
+	return true;
+}
+
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
@@ -2386,6 +2402,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
   (JNIEnv *env, jclass clazz, jint value) {
 	if (!bl_localplayer) return;
 	bl_Player_addExperience(bl_localplayer, value);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetScore
+  (JNIEnv *env, jclass clazz) {
+	if (!bl_localplayer) return 0;
+	return bl_localplayer->getScore();
 }
 
 mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
