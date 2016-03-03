@@ -140,6 +140,7 @@ public class ScriptManager {
 
 	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
+	private static final String ENTITY_KEY_IMMOBILE = "zhuowei.bl.im";
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -527,20 +528,26 @@ public class ScriptManager {
 	@CallbackName(name="entityAddedHook", args={"entity"})
 	public static void entityAddedCallback(long entity) {
 		System.out.println("Entity added: " + entity + " entity type: " + NativeEntityApi.getEntityTypeId(entity));
+		String renderType = NativeEntityApi.getExtraData(entity, ENTITY_KEY_RENDERTYPE);
+		if (renderType != null && renderType.length() != 0) {
+			RendererManager.NativeRenderer renderer = RendererManager.NativeRendererApi.getByName(renderType);
+			if (renderer != null) NativeEntityApi.setRenderTypeImpl(entity, renderer.getRenderType());
+		}
+		String customSkin = NativeEntityApi.getExtraData(entity, ENTITY_KEY_SKIN);
+		if (customSkin != null && customSkin.length() != 0) {
+			System.out.println("Custom skin: " + customSkin);
+			NativeEntityApi.setMobSkinImpl(entity, customSkin, false);
+		}
+		String immobile = NativeEntityApi.getExtraData(entity, ENTITY_KEY_IMMOBILE);
+		if (immobile != null && immobile.length() != 0) {
+			System.out.println("Immobile: " + customSkin);
+			NativeEntityApi.setImmobileImpl(entity, immobile.equals("1"));
+		}
 		// check if entity is player
 		if (NativePlayerApi.isPlayer(entity)) {
 			playerAddedHandler(entity);
 		}
 		allentities.add(entity);
-		String renderType = NativeEntityApi.getExtraData(entity, ENTITY_KEY_RENDERTYPE);
-		if (renderType != null) {
-			RendererManager.NativeRenderer renderer = RendererManager.NativeRendererApi.getByName(renderType);
-			if (renderer != null) NativeEntityApi.setRenderTypeImpl(entity, renderer.getRenderType());
-		}
-		String customSkin = NativeEntityApi.getExtraData(entity, ENTITY_KEY_SKIN);
-		if (customSkin != null) {
-			NativeEntityApi.setMobSkinImpl(entity, customSkin, false);
-		}
 		callScriptMethod("entityAddedHook", entity);
 		// entityList.put(entityList.getLength(), entityList, entity);
 	}
@@ -2955,7 +2962,10 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static String getMobSkin(Object entity) {
-			return nativeEntityGetMobSkin(getEntityId(entity));
+			long entityId = getEntityId(entity);
+			int entityType = getEntityTypeId(entityId);
+			if (!(entityType > 0 && entityType < 64)) return "";
+			return nativeEntityGetMobSkin(entityId);
 		}
 
 		@JSStaticFunction
@@ -3110,6 +3120,11 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setImmobile(Object entity, boolean immobile) {
+			setImmobileImpl(entity, immobile);
+			setExtraData(entity, ENTITY_KEY_IMMOBILE, immobile? "1": "0");
+		}
+
+		public static void setImmobileImpl(Object entity, boolean immobile) {
 			nativeEntitySetImmobile(getEntityId(entity), immobile);
 		}
 
