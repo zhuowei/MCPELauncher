@@ -133,6 +133,7 @@ public:
 	void setStackedByData(bool);
 	bool isStackedByData() const;
 	void setMaxDamage(int);
+	int getMaxDamage();
 };
 
 #define ITEM_HAND_EQUIPPED (1 << 1)

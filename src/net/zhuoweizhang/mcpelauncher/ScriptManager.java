@@ -1879,6 +1879,7 @@ public class ScriptManager {
 	public static native int nativePlayerGetScore();
 	public static native String nativeMobGetArmorCustomName(long entity, int slot);
 	public static native void nativeMobSetArmorCustomName(long entity, int slot, String name);
+	public static native int nativeGetItemMaxDamage(int id);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3597,6 +3598,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setMaxDamage(int id, int maxDamage) {
 			nativeSetItemMaxDamage(id, maxDamage);
+		}
+
+		@JSStaticFunction
+		public static int getMaxDamage(int id) {
+			return nativeGetItemMaxDamage(id);
 		}
 
 		@JSStaticFunction

@@ -1048,6 +1048,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Item_setMaxDamage(item, maxDamage);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemMaxDamage
+  (JNIEnv *env, jclass clazz, jint id) {
+	if (id <= 0 || id >= bl_item_id_count) return -1;
+	Item* item = bl_Item_mItems[id];
+	if(item == NULL) return -1;
+	return item->getMaxDamage();
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
   (JNIEnv *env, jclass clazz, jstring worlddir, jstring worldName) {
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
