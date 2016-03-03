@@ -184,8 +184,6 @@ public class AtlasProvider implements TexturePack {
 			int uvslength = uvs.length();
 			for (int j = 0; j < uvslength; j++) {
 				JSONArray uv = uvs.getJSONArray(j);
-				uv.put(0, uv.getDouble(0) / xscale); // x1
-				uv.put(2, uv.getDouble(2) / xscale); // x2
 				uv.put(4, uv.getDouble(4) * xscale); // xwidth
 			}
 		}
