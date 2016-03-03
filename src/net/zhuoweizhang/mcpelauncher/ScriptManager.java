@@ -8,7 +8,9 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.PrintWriter;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
@@ -326,6 +328,7 @@ public class ScriptManager {
 
 	@CallbackName(name="newLevel")
 	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemote) {
+		isRemote = nativeLevelIsRemote();
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
 		//ScriptManager.isRemote = isRemote;
@@ -360,7 +363,7 @@ public class ScriptManager {
 	}
 
 	@CallbackName(name="selectLevelHook")
-	public static void selectLevelCallback(String wName, String wDir) {
+	private static void selectLevelCallback(String wName, String wDir) {
 		System.out.println("World name: " + wName);
 		System.out.println("World dir: " + wDir);
 
@@ -390,7 +393,7 @@ public class ScriptManager {
 	}
 
 	@CallbackName(name="leaveGame")
-	public static void leaveGameCallback(boolean thatboolean) {
+	private static void leaveGameCallback(boolean thatboolean) {
 		ScriptManager.isRemote = false;
 		ScriptManager.scriptingEnabled = true;
 		ScriptManager.hasLevel = false;
@@ -560,7 +563,7 @@ public class ScriptManager {
 		callScriptMethod("blockEventHook", x, y, z, type, data);
 	}
 
-	public static void rakNetConnectCallback(String hostname, int port) {
+	private static void rakNetConnectCallback(String hostname, int port) {
 		Log.i("BlockLauncher", "Connecting to " + hostname + ":" + port);
 		ScriptManager.scriptingEnabled = ScriptManager.isLocalAddress(hostname);
 		Log.i("BlockLauncher", "Scripting is now " + (scriptingEnabled? "enabled" : "disabled"));
@@ -619,7 +622,7 @@ public class ScriptManager {
 	}
 
 	@CallbackName(name="chatReceiveHook", args={"str", "sender"})
-	public static void handleMessagePacketCallback(String sender, String str) {
+	private static void handleMessagePacketCallback(String sender, String str) {
 		if (str == null || str.length() < 1)
 			return;
 		if (sender.length() == 0 && str.equals("\u00a70BlockLauncher, enable scripts")) {
@@ -710,7 +713,7 @@ public class ScriptManager {
 		// call it before the first frame renders
 
 		ContextFactory.initGlobal(new BlockContextFactory());
-		NativeJavaMethod.blockLauncherMethodWatcher = new MyMethodWatcher();
+		NativeJavaMethod.setMethodWatcher(new MyMethodWatcher());
 		requestReloadAllScripts = true;
 		nativeRequestFrameCallback();
 		prepareEnabledScripts();
@@ -1553,6 +1556,12 @@ public class ScriptManager {
 			return name.equals("showAsDropDown") || name.equals("showAtLocation");
 		}
 		public boolean canCall(Method method, Object javaObject) {
+			if (javaObject instanceof AccessibleObject && method.getName().equals("setAccessible")) {
+				Class<?> cls = null;
+				if (javaObject instanceof Member) cls = ((Member)javaObject).getDeclaringClass();
+				if (cls == ScriptManager.class || cls == NativeJavaMethod.class ||
+					cls == ContextFactory.class) return false;
+			}
 			if (ScriptManager.scriptingEnabled) return true;
 			return !(javaObject instanceof PopupWindow && testName(method.getName()));
 		}
