@@ -1437,6 +1437,8 @@ public class ScriptManager {
 	}
 
 	private static void loadPackagedScript(File file, boolean firstLoad) throws IOException {
+		if (!firstLoad) modPkgTexturePack.addPackage(file);
+		boolean success = false;
 		ZipFile zipFile = null;
 		try {
 			zipFile = new ZipFile(file);
@@ -1473,10 +1475,11 @@ public class ScriptManager {
 				}
 				break;
 			}
+			success = true;
 		} finally {
 			if (zipFile != null) zipFile.close();
+			if (!firstLoad && !success) modPkgTexturePack.removePackage(file.getName());
 		}
-		if (!firstLoad) modPkgTexturePack.addPackage(file);
 	}
 
 	private static void verifyBlockTextures(TextureRequests requests) {
@@ -1885,6 +1888,8 @@ public class ScriptManager {
 	public static native String nativeMobGetArmorCustomName(long entity, int slot);
 	public static native void nativeMobSetArmorCustomName(long entity, int slot, String name);
 	public static native int nativeGetItemMaxDamage(int id);
+	// not added to JS yet
+	public static native int nativeEntityGetCarriedItem(long id, int type);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);

@@ -378,8 +378,6 @@ class LevelChunk;
 
 typedef void ModelRenderer;
 
-typedef void ScreenChooser;
-
 #ifdef __cplusplus
 struct ArmorItem : public Item {
 	int armorType; // 68

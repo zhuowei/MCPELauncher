@@ -4,6 +4,8 @@ class Timer;
 class TextureGroup;
 class Mob;
 class Options;
+class AbstractScreen;
+class ScreenChooser;
 class Minecraft {
 public:
 	Level* getLevel();
@@ -17,4 +19,6 @@ public:
 	TextureGroup& getTextures() const;
 	void setCameraTargetEntity(Entity*);
 	Options* getOptions();
+	AbstractScreen* getScreen();
+	ScreenChooser& getScreenChooser() const;
 };

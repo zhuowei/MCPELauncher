@@ -213,15 +213,6 @@ public class MainActivity extends NativeActivity {
 		currentMainActivity = new WeakReference<MainActivity>(this);
 		if (hasAlreadyInited) {
 			globalRestart = true;
-			if (lastDestroyTime != 0) {
-				long elapsedTime = System.currentTimeMillis() - lastDestroyTime;
-				if (elapsedTime < MILLISECONDS_FOR_WORLD_SAVE) {
-					try {
-						if (BuildConfig.DEBUG) Log.i(TAG, "Bae caught me slipping for " + elapsedTime);
-						Thread.sleep(elapsedTime);
-					} catch (InterruptedException ie) {}
-				}
-			}
 			// restart if already initialized before
 			finish();
 			NerdyStuffActivity.forceRestart(this, 1000, false);

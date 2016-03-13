@@ -45,6 +45,7 @@
 #include "mcpe/enchant.h"
 #include "mcpe/inventory.h"
 #include "mcpe/options.h"
+#include "mcpe/screenchooser.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -1082,7 +1083,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
 	//bl_Minecraft_setLeaveGame(bl_minecraft);
 	// Is this boolean right?
-	bl_MinecraftClient_leaveGame(bl_minecraft, saveMultiplayerWorld);
+	bl_MinecraftClient_leaveGame(bl_minecraft, true);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -2001,6 +2002,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSc
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
   (JNIEnv *env, jclass clazz) {
 	//bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
+	AbstractScreen* screen = bl_minecraft->getScreen();
+	if (!screen) return;
+	bl_minecraft->getScreenChooser().popScreen(*screen, 1);
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
   (JNIEnv *env, jclass clazz) {

@@ -871,6 +871,26 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	*item = ItemInstance(itemId, itemCount, itemDamage);
 }
 
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetCarriedItem
+  (JNIEnv *env, jclass clazz, jlong entityId, jint type) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == NULL) return -1;
+	void* vtableEntry = entity->vtable[vtable_indexes.mob_get_carried_item];
+	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
+	ItemInstance* item = fn(entity);
+	if (item == NULL) return -1;
+	switch (type) {
+		case ITEMID:
+			return item->getId();
+		case DAMAGE:
+			return item->damage;
+		case AMOUNT:
+			return item->count;
+		default:
+			return -1;
+	}
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
   (JNIEnv *env, jclass clazz, jfloat newfov, jboolean override) {
 	bl_newfov = newfov;
