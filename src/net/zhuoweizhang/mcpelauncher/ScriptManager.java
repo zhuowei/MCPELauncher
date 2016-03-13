@@ -423,6 +423,11 @@ public class ScriptManager {
 		callScriptMethod("attackHook", attacker, victim);
 	}
 
+	@CallbackName(name="entityHurtHook", args={"attacker", "victim", "halfhearts"})
+	public static void entityHurtCallback(long attacker, long victim, int halfhearts) {
+		callScriptMethod("entityHurtHook", attacker, victim, halfhearts);
+	}
+
 	@CallbackName(name="modTick")
 	public static void tickCallback() {
 		if (nextTickCallsSetLevel) {

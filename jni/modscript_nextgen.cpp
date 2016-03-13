@@ -233,6 +233,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_get_screen_type;
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
+	int entity_hurt;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -279,6 +280,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform14useCenteredGUIEv");
+	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+		"_ZN6Entity4hurtERK18EntityDamageSourcei");
 
 }
 
@@ -2727,6 +2730,33 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 	}
 }
 
+bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSource, int hearts) {
+	JNIEnv *env;
+	preventDefaultStatus = false;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityHurtCallback", "(JJI)V");
+	long long victimId = entity->getUniqueID();
+	long long attackerId = -1;
+	if (damageSource.isEntitySource()) {
+		attackerId = damageSource.getEntity()->getUniqueID();
+	}
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, attackerId, victimId, hearts);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	return preventDefaultStatus;
+}
+
+#include "hurthook.h"
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -3057,6 +3087,8 @@ void bl_setuphooks_cppside() {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
+
+	bl_entity_hurt_hook_init(mcpelibhandle);
 
 	bl_renderManager_init(mcpelibhandle);
 }
