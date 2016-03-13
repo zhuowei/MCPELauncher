@@ -331,8 +331,6 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-static std::string const (*bl_ItemInstance_getName)(ItemInstance*);
-static TextureUVCoordinateSet* (*bl_ItemInstance_getIcon)(ItemInstance*, int, bool);
 static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
@@ -1177,8 +1175,8 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
 	if (itemId <= 0 || itemId >= bl_item_id_count) return nullptr;
-	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
-	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return NULL;
+	ItemInstance myStack(itemId, 1, itemDamage);
+	if (myStack.getId() != itemId) return NULL;
 	switch(itemId) {
 		case 95:
 		case 255:
@@ -1190,7 +1188,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 		bak = I18n::mCurrentLanguage;
 		I18n::mCurrentLanguage = nullptr;
 	}
-	std::string descriptionId = bl_ItemInstance_getName(myStack);
+	std::string descriptionId = myStack.getName();
 	if (raw) {
 		I18n::mCurrentLanguage = bak;
 	}
@@ -1206,9 +1204,9 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
 	if (itemId <= 0 || itemId >= 512) return false;
-	ItemInstance* myStack = bl_newItemInstance(itemId, 1, itemDamage);
-	if (myStack == NULL || bl_ItemInstance_getId(myStack) != itemId) return false;
-	TextureUVCoordinateSet* set = bl_ItemInstance_getIcon(myStack, 0, true);
+	ItemInstance myStack(itemId, 1, itemDamage);
+	if (myStack.getId() != itemId) return false;
+	TextureUVCoordinateSet* set = myStack.getIcon(0, true);
 	if (set == NULL || set->bounds == NULL) return false;
 	float lasttwo[] = {(float) set->size[0], (float) set->size[1]};
 	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
@@ -1564,9 +1562,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
 
-	ItemInstance outStack;
-	outStack.tag = NULL;
-	bl_setItemInstance(&outStack, itemId, itemCount, itemDamage);
+	ItemInstance outStack(itemId, itemCount, itemDamage);
 	std::vector<ItemInstance> outStacks;
 	outStacks.push_back(outStack);
 
@@ -1591,11 +1587,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
-  	ItemInstance outputStack;
-	outputStack.tag = NULL;
-	bl_setItemInstance(&outputStack, outputId, 1, outputDamage); // Should this be null? You don't need count, not sure how to omit it completely
+	// You don't need count, not sure how to omit it completely
+  	ItemInstance outputStack(outputId, 1, outputDamage);
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-  	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
+	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
@@ -2087,10 +2082,10 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
 
-	ItemInstance* instance = bl_newItemInstance(id, count, damage);
+	ItemInstance instance(id, count, damage);
 
 	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
-	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), *instance, 10 /* pickup delay */);
+	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), instance, 10 /* pickup delay */);
 
 	*((int*)((uintptr_t)entity + kItemEntity_pickupDelay_offset)) = 10;
 
@@ -2422,10 +2417,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 }
 
 mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
-	if (bl_ItemInstance_getId(const_cast<ItemInstance*>(&itemStack)) >= 0x200) { // extended item ID
-		ItemInstance temp;
-		temp.tag = NULL;
-		bl_setItemInstance(&temp, 0x100, 1, 0);
+	if (itemStack.getId() >= 0x200) { // extended item ID
+		ItemInstance temp(0x100, 1, 0);
 		return bl_ItemRenderer_getGraphics_real(temp);
 	}
 	return bl_ItemRenderer_getGraphics_real(itemStack);
@@ -2904,10 +2897,6 @@ void bl_setuphooks_cppside() {
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
-
-	bl_ItemInstance_getName = (std::string const (*) (ItemInstance*)) dlsym(mcpelibhandle, "_ZNK12ItemInstance7getNameEv");
-	bl_ItemInstance_getIcon = (TextureUVCoordinateSet* (*) (ItemInstance*, int, bool))
-		dlsym(mcpelibhandle, "_ZNK12ItemInstance7getIconEib");
 
 	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN5Block10getTextureEai");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");

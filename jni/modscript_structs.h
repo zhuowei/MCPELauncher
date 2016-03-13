@@ -153,11 +153,20 @@ public:
 	Item* item; // 12
 	void* block; //16
 
+	ItemInstance();
+	ItemInstance(int, int, int);
+	ItemInstance(ItemInstance const&);
+	ItemInstance& operator=(ItemInstance const&);
+	bool operator==(ItemInstance const&) const;
+	bool operator!=(ItemInstance const&) const;
 	ItemEnchants getEnchantsFromUserData() const;
 	bool hasCustomHoverName() const;
 	std::string getCustomName() const;
 	void setCustomName(std::string const&);
 	void init(int, int, int);
+	int getId() const;
+	TextureUVCoordinateSet* getIcon(int, bool) const;
+	std::string getName() const;
 }; // see ItemInstance::fromTag for size
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");

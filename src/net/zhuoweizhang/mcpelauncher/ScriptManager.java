@@ -3485,6 +3485,44 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
+		public static int internalNameToId(String name) {
+			return nameToIdImpl(name, true);
+		}
+
+		@JSStaticFunction
+		public static int translatedNameToId(String name) {
+			return nameToIdImpl(name, false);
+		}
+
+		private static int nameToIdImpl(String name, boolean internal) {
+			if (name == null) return -1;
+			name = name.replace(" ", "_").toLowerCase();
+			for (int i = 0x100; i < 0x1000; i++) {
+				if (idHasName(name, i, internal)) return i;
+			}
+			for (int i = 1; i < 0x100; i++) {
+				if (idHasName(name, i, internal)) return i;
+			}
+			try {
+				return Integer.parseInt(name);
+			} catch (Exception e) {
+				return -1;
+			}
+		}
+
+		private static boolean idHasName(String targetname, int id, boolean internal) {
+			String name = nativeGetItemName(id, 0, internal);
+			if (name == null) return false;
+			if (internal) {
+				int endSub = name.endsWith(".name")? name.length() - 5: name.length() /* .name */;
+				int startSub = name.startsWith("tile.") || name.startsWith("item.")? 5: 0;
+				name = name.substring(startSub, endSub);
+			}
+			name = name.replace(" ", "_").toLowerCase();
+			return targetname.equals(name);
+		}
+
+		@JSStaticFunction
 		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredientsScriptable) {
 			int[] expanded = expandShapelessRecipe(ingredientsScriptable);
 			StringBuilder temprow = new StringBuilder();

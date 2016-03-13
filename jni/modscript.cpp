@@ -207,10 +207,7 @@ void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 }
 
 ItemInstance* bl_newItemInstance(int id, int count, int damage) {
-	ItemInstance* instance = new ItemInstance;
-	instance->tag = NULL;
-	bl_setItemInstance(instance, id, count, damage);
-	return instance;
+	return new ItemInstance(id, count, damage);
 }
 
 void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
@@ -807,14 +804,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (bl_localplayer == NULL) return;
 	bool remove = amount < 0;
 	if (remove) amount *= -1;
-	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
+	ItemInstance instance(id, amount, damage);
 	//we grab the inventory instance from the player
 	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
 	if (invPtr == nullptr) return;
 	if (!remove) {
-		invPtr->add(*instance, true);
+		invPtr->add(instance, true);
 	} else {
-		bl_FillingContainer_removeResource(invPtr, instance, 0);
+		bl_FillingContainer_removeResource(invPtr, &instance, 0);
 	}
 }
 
@@ -871,7 +868,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
 	ItemInstance* item = fn(entity);
 	if (item == NULL) return;
-	bl_setItemInstance(item, itemId, itemCount, itemDamage);
+	*item = ItemInstance(itemId, itemCount, itemDamage);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetFov
