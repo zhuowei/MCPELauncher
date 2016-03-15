@@ -1211,7 +1211,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
-	if (itemId <= 0 || itemId >= 512) return false;
+	if (itemId <= 0 || itemId >= bl_item_id_count) return false;
 	ItemInstance myStack(itemId, 1, itemDamage);
 	if (myStack.getId() != itemId) return false;
 	TextureUVCoordinateSet* set = myStack.getIcon(0, true);
@@ -2801,6 +2801,13 @@ void bl_Player_addLevels_hook(Player* player, int experience) {
 		bl_JavaVM->DetachCurrentThread();
 	}
 	if (!preventDefaultStatus) bl_Player_addLevels_real(player, experience);
+}
+
+JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMaxStackSize
+  (JNIEnv* env, jclass clazz, jint id) {
+	if (id < 0 || id >= bl_item_id_count || !bl_Item_mItems[id]) return -1;
+	ItemInstance stack(id, 1, 0);
+	return stack.getMaxStackSize();
 }
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {

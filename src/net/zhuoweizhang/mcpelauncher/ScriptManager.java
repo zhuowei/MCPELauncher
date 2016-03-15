@@ -1902,6 +1902,7 @@ public class ScriptManager {
 	public static native int nativeGetItemMaxDamage(int id);
 	// not added to JS yet
 	public static native int nativeEntityGetCarriedItem(long id, int type);
+	public static native int nativeItemGetMaxStackSize(int id);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3767,6 +3768,11 @@ public class ScriptManager {
 				(int) (retval[2] * retval[4] + 0.5), (int) (retval[3] * retval[5] + 0.5),
 				(int) (retval[4] + 0.5), (int) (retval[5] + 0.5)};
 			return newretval;
+		}
+
+		@JSStaticFunction
+		public static int getMaxStackSize(int id) {
+			return nativeItemGetMaxStackSize(id);
 		}
 
 		@Override
