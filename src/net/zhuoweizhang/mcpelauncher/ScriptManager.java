@@ -674,9 +674,9 @@ public class ScriptManager {
 	@CallbackName(name="projectileHitEntityHook", args={"projectile", "targetEntity"})
 	public static void dummyThrowableHitEntityCallback() {};
 
-	@CallbackName(name="playerAddExperienceHook", args={"player", "experienceAdded"}, prevent=true)
+	@CallbackName(name="playerAddExpHook", args={"player", "experienceAdded"}, prevent=true)
 	public static void playerAddExperienceCallback(long player, int experienceAdded) {
-		callScriptMethod("playerAddExperienceHook", player, experienceAdded);
+		callScriptMethod("playerAddExpHook", player, experienceAdded);
 	}
 
 	@CallbackName(name="playerExpLevelChangeHook", args={"player", "levelsAdded"}, prevent=true)
