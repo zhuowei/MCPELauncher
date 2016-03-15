@@ -806,6 +806,8 @@ static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entity
 
 	bool retval = bl_Level_addEntity_real(level, std::move(entityPtr));
 
+	if (!retval) return retval; // entity wasn't added
+
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -827,6 +829,8 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> e
 	jlong entityId = entity->getUniqueID();
 	uintptr_t retval = bl_Level_addPlayer_real(level, std::move(entity));
 	JNIEnv *env;
+
+	if (!retval) return retval; // entity wasn't added
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -851,6 +855,8 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Ent
 	Entity* entity = entityPtr.get();
 
 	bool retval = bl_MultiPlayerLevel_addEntity_real(level, std::move(entityPtr));
+
+	if (!retval) return retval; // entity wasn't added
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
