@@ -4,4 +4,5 @@ import java.lang.annotation.*;
 public @interface CallbackName {
 	String name();
 	String[] args() default {};
+	boolean prevent() default false;
 }

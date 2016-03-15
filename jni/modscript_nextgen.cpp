@@ -420,7 +420,8 @@ static Attribute* bl_Player_EXHAUSTION;
 static Attribute* bl_Player_SATURATION;
 static Attribute* bl_Player_LEVEL;
 static Attribute* bl_Player_EXPERIENCE;
-static void (*bl_Player_addExperience)(Player*, int);
+static void (*bl_Player_addExperience_real)(Player*, int);
+static void (*bl_Player_addLevels_real)(Player*, int);
 static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
@@ -2411,7 +2412,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerAddExperience
   (JNIEnv *env, jclass clazz, jint value) {
 	if (!bl_localplayer) return;
-	bl_Player_addExperience(bl_localplayer, value);
+	bl_Player_addExperience_real(bl_localplayer, value);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetScore
@@ -2754,6 +2755,48 @@ bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSourc
 
 #include "hurthook.h"
 
+void bl_Player_addExperience_hook(Player* player, int experience) {
+	JNIEnv *env;
+	preventDefaultStatus = false;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jlong playerId = player->getUniqueID();
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "playerAddExperienceCallback", "(JI)V");
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, playerId, experience);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	if (!preventDefaultStatus) bl_Player_addExperience_real(player, experience);
+}
+
+void bl_Player_addLevels_hook(Player* player, int experience) {
+	JNIEnv *env;
+	preventDefaultStatus = false;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	jlong playerId = player->getUniqueID();
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "playerAddLevelsCallback", "(JI)V");
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, playerId, experience);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	if (!preventDefaultStatus) bl_Player_addLevels_real(player, experience);
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -3056,8 +3099,12 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN6Player5LEVELE");
 	bl_Player_EXPERIENCE = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player10EXPERIENCEE");
-	bl_Player_addExperience = (void (*)(Player*, int))
-		dlsym(mcpelibhandle, "_ZN6Player13addExperienceEi");
+
+	mcpelauncher_hook((void*) &Player::addExperience, (void*) &bl_Player_addExperience_hook,
+		(void**) &bl_Player_addExperience_real);
+	mcpelauncher_hook((void*) &Player::addLevels, (void*) &bl_Player_addLevels_hook,
+		(void**) &bl_Player_addLevels_real);
+
 	bl_Item_setCategory = (void (*)(Item*, int))
 		dlsym(mcpelibhandle, "_ZN4Item11setCategoryE20CreativeItemCategory");
 	bl_Minecraft_getCommandParser = (ServerCommandParser* (*)(Minecraft*))

@@ -96,6 +96,8 @@ public:
 class Player: public Mob {
 public:
 	int getScore();
+	void addExperience(int);
+	void addLevels(int);
 };
 
 struct TextureUVCoordinateSet {

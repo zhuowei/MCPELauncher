@@ -289,18 +289,18 @@ public class ScriptManager {
 		}
 	}
 
-	@CallbackName(name="useItem", args={"x", "y", "z", "itemid", "blockid", "side", "itemDamage", "blockDamage"})
+	@CallbackName(name="useItem", args={"x", "y", "z", "itemid", "blockid", "side", "itemDamage", "blockDamage"}, prevent=true)
 	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side,
 			int itemDamage, int blockDamage) {
 		callScriptMethod("useItem", x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	}
 
-	@CallbackName(name="destroyBlock", args={"x", "y", "z", "side"})
+	@CallbackName(name="destroyBlock", args={"x", "y", "z", "side"}, prevent=true)
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("destroyBlock", x, y, z, side);
 	}
 
-	@CallbackName(name="startDestroyBlock", args={"x", "y", "z", "side"})
+	@CallbackName(name="startDestroyBlock", args={"x", "y", "z", "side"}, prevent=true)
 	public static void startDestroyBlockCallback(int x, int y, int z, int side) {
 		callScriptMethod("startDestroyBlock", x, y, z, side);
 	}
@@ -308,7 +308,7 @@ public class ScriptManager {
 	private static float lastDestroyProgress = -1f;
 	private static int lastDestroyX = 0, lastDestroyY = -1, lastDestroyZ = 0, lastDestroySide = -1;
 
-	@CallbackName(name="continueDestroyBlock", args={"x", "y", "z", "side", "progress"})
+	@CallbackName(name="continueDestroyBlock", args={"x", "y", "z", "side", "progress"}, prevent=true)
 	public static void continueDestroyBlockCallback(int x, int y, int z, int side, float progress) {
 		boolean samePlace = x == lastDestroyX && y == lastDestroyY && z == lastDestroyZ && side == lastDestroySide;
 		if (progress == 0 && (progress != lastDestroyProgress || !samePlace)) {
@@ -418,12 +418,12 @@ public class ScriptManager {
 		serverPort = 0;
 	}
 
-	@CallbackName(name="attackHook", args={"attacker", "victim"})
+	@CallbackName(name="attackHook", args={"attacker", "victim"}, prevent=true)
 	public static void attackCallback(long attacker, long victim) {
 		callScriptMethod("attackHook", attacker, victim);
 	}
 
-	@CallbackName(name="entityHurtHook", args={"attacker", "victim", "halfhearts"})
+	@CallbackName(name="entityHurtHook", args={"attacker", "victim", "halfhearts"}, prevent=true)
 	public static void entityHurtCallback(long attacker, long victim, int halfhearts) {
 		callScriptMethod("entityHurtHook", attacker, victim, halfhearts);
 	}
@@ -487,7 +487,7 @@ public class ScriptManager {
 		nativeSetRot(nativeGetPlayerEnt(), newPlayerYaw, newPlayerPitch);
 	}
 
-	@CallbackName(name="chatHook", args={"str"})
+	@CallbackName(name="chatHook", args={"str"}, prevent=true)
 	// fixme callback 2
 	public static void chatCallback(String str) {
 		if (isRemote)
@@ -515,7 +515,7 @@ public class ScriptManager {
 	}
 
 	// KsyMC's additions
-	@CallbackName(name="deathHook", args={"attacker", "victim"})
+	@CallbackName(name="deathHook", args={"attacker", "victim"}, prevent=true)
 	public static void mobDieCallback(long attacker, long victim) {
 		callScriptMethod("deathHook", attacker == -1 ? -1 : attacker, victim);
 		if (worldData != null) worldData.clearEntityData(victim);
@@ -616,7 +616,7 @@ public class ScriptManager {
 		}
 	}
 
-	@CallbackName(name="serverMessageReceiveHook", args={"str"})
+	@CallbackName(name="serverMessageReceiveHook", args={"str"}, prevent=true)
 	public static void handleChatPacketCallback(String str) {
 		if (str == null || str.length() < 1)
 			return;
@@ -626,7 +626,7 @@ public class ScriptManager {
 		}
 	}
 
-	@CallbackName(name="chatReceiveHook", args={"str", "sender"})
+	@CallbackName(name="chatReceiveHook", args={"str", "sender"}, prevent=true)
 	private static void handleMessagePacketCallback(String sender, String str) {
 		if (str == null || str.length() < 1)
 			return;
@@ -647,7 +647,7 @@ public class ScriptManager {
 		}
 	}
 
-	@CallbackName(name="explodeHook", args={"entity", "x", "y", "z", "power", "onFire"})
+	@CallbackName(name="explodeHook", args={"entity", "x", "y", "z", "power", "onFire"}, prevent=true)
 	public static void explodeCallback(long entity, float x, float y, float z, float power, boolean onFire) {
 		callScriptMethod("explodeHook", entity, x, y, z, power, onFire);
 	}
@@ -673,6 +673,16 @@ public class ScriptManager {
 	}
 	@CallbackName(name="projectileHitEntityHook", args={"projectile", "targetEntity"})
 	public static void dummyThrowableHitEntityCallback() {};
+
+	@CallbackName(name="playerAddExperienceHook", args={"player", "experienceAdded"}, prevent=true)
+	public static void playerAddExperienceCallback(long player, int experienceAdded) {
+		callScriptMethod("playerAddExperienceHook", player, experienceAdded);
+	}
+
+	@CallbackName(name="playerExpLevelChangeHook", args={"player", "levelsAdded"}, prevent=true)
+	public static void playerAddLevelsCallback(long player, int experienceAdded) {
+		callScriptMethod("playerExpLevelChangeHook", player, experienceAdded);
+	}
 
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
 		System.out.println("Get sound input stream");
@@ -1100,6 +1110,7 @@ public class ScriptManager {
 		for (Method met: ScriptManager.class.getMethods()) {
 			CallbackName name = met.getAnnotation(CallbackName.class);
 			if (name == null) continue;
+			if (name.prevent()) builder.append("// can use preventDefault()\n");
 			builder.append("function ").append(name.name()).append("(").
 				append(Utils.joinArray(name.args(), ", ")).append(")\n");
 		}
@@ -1499,6 +1510,7 @@ public class ScriptManager {
 	}
 
 	private static long getEntityId(Object entityId) {
+		if (entityId == null) return -1;
 		if (entityId instanceof NativeJavaObject) {
 			return (Long) ((NativeJavaObject) entityId).unwrap();
 		}
@@ -2887,11 +2899,19 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setHealth(Object ent, int halfhearts) {
+			int entityType = getEntityTypeId(ent);
+			if (!(entityType >= 10 && entityType < 64)) {
+				throw new RuntimeException("setHealth called on non-mob: entityType=" + entityType);
+			}
 			nativeSetMobHealth(getEntityId(ent), halfhearts);
 		}
 
 		@JSStaticFunction
 		public static void setMaxHealth(Object ent, int halfhearts) {
+			int entityType = getEntityTypeId(ent);
+			if (!(entityType >= 10 && entityType < 64)) {
+				throw new RuntimeException("setMaxHealth called on non-mob: entityType=" + entityType);
+			}
 			nativeSetMobMaxHealth(getEntityId(ent), halfhearts);
 		}
 
