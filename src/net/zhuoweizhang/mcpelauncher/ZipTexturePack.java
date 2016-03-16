@@ -26,8 +26,8 @@ public class ZipTexturePack implements TexturePack {
 		while (i.hasMoreElements()) {
 			ZipEntry entry = i.nextElement();
 			if (entry.getName().contains("__MACOSX")) continue; //A pox on ye, Mac OS X
-			fullNameEntries.put(entry.getName().toLowerCase(), entry);
-			entries.put(getFilenameOnly(entry.getName().toLowerCase()), entry);
+			fullNameEntries.put(entry.getName(), entry);
+			entries.put(getFilenameOnly(entry.getName()), entry);
 		}
 	}
 
@@ -44,7 +44,6 @@ public class ZipTexturePack implements TexturePack {
 	}
 
 	private ZipEntry getEntry(String fileName) {
-		fileName = fileName.toLowerCase();
 		ZipEntry entry = fullNameEntries.get(fileName);
 		if (entry != null) return entry;
 		entry = fullNameEntries.get("assets/" + fileName);
