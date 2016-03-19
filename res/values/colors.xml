@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- green 500 -->
+    <color name="theme_primary">#ff4caf50</color>
+    <!-- green 700 -->
+    <color name="theme_primary_dark">#ff388e3c</color>
+    <!-- green 700 -->
+    <color name="theme_primary_accent">#ff388e3c</color>
+</resources>

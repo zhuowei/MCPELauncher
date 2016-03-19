@@ -36,5 +36,12 @@
     <style name="ButtonBar.Button" parent="@android:style/Widget.Button">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
+
+    <style name="simple_fab">
+        <item name="android:background">@drawable/simple_fab_background</item>
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:elevation">6dp</item>
+    </style>
     
 </resources>

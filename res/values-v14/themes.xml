@@ -1,14 +1,21 @@
 <resources>
     <style name="FullscreenTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
         <item name="switchStyle">@style/switch_light</item>
+        <item name="android:actionBarStyle">@style/BlockLauncherActionBarStyle</item>
     </style>
     <style name="FullscreenDarkTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="switchStyle">@style/switch_dark</item>
+        <item name="android:actionBarStyle">@style/BlockLauncherActionBarStyle</item>
     </style>
     <style name="BlockLauncherTheme" parent="@android:style/Theme.DeviceDefault.Light.DarkActionBar">
         <item name="switchStyle">@style/switch_light</item>
+        <item name="android:actionBarStyle">@style/BlockLauncherActionBarStyle</item>
     </style>
     <style name="BlockLauncherDarkTheme" parent="@android:style/Theme.DeviceDefault">
         <item name="switchStyle">@style/switch_dark</item>
+        <item name="android:actionBarStyle">@style/BlockLauncherActionBarStyle</item>
+    </style>
+    <style name="BlockLauncherActionBarStyle" parent="@android:style/Widget.DeviceDefault.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/theme_primary</item>
     </style>
 </resources>

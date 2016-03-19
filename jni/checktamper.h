@@ -61,6 +61,7 @@ static void checkTamper(JNIEnv* env, jobject activity) {
 static time_t tamper2time = 0;
 
 static void checkTamper2() {
+#if 0
 	if (tamper2time < 1448427600) return;
 	char buf1[80];
 	const char proName[] = {0x57,0x8c,0x89,0x9c,0x89,0x57,0x8c,0x89,0x9c,0x89,0x57,0x96,0x8d,
@@ -84,4 +85,5 @@ static void checkTamper2() {
 		return;
 	}
 	*((void**) &bl_JavaVM) = (void*) &checkTamper2;
+#endif
 }

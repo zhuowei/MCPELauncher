@@ -51,7 +51,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 
 	private ContentListItem selectedPatchItem;
 
-	private Button importButton;
+	private ImageButton importButton;
 
 	private byte[] libBytes = null;
 
@@ -73,7 +73,7 @@ public class ManagePatchesActivity extends ListActivity implements View.OnClickL
 				openManagePatchWindow(patches.get(position));
 			}
 		});
-		importButton = (Button) findViewById(R.id.manage_patches_import_button);
+		importButton = (ImageButton) findViewById(R.id.manage_patches_import_button);
 		importButton.setOnClickListener(this);
 		prePatchConfigure = getIntent().getBooleanExtra("prePatchConfigure", true);
 		PatchUtils.minecraftVersion = MinecraftVersion.get(this);

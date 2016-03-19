@@ -11,4 +11,6 @@
     <style name="BlockLauncherDarkTheme" parent="@android:style/Theme">
         <item name="switchStyle">@style/switch_dark</item>
     </style>
+    <style name="BlockLauncherActionBarStyle">
+    </style>
 </resources>

@@ -53,6 +53,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -84,7 +85,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 
 	private ContentListItem selectedPatchItem;
 
-	private Button importButton;
+	private ImageButton importButton;
 
 	private String importClipboardName = "";
 	
@@ -106,7 +107,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 				openManagePatchWindow(patches.get(position));
 			}
 		});
-		importButton = (Button) findViewById(R.id.manage_patches_import_button);
+		importButton = (ImageButton) findViewById(R.id.manage_patches_import_button);
 		importButton.setOnClickListener(this);
 		ScriptManager.androidContext = this.getApplicationContext();
 		//if (!versionIsSupported()) {
