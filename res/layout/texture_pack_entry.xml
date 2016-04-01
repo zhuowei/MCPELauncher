@@ -11,7 +11,7 @@
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
     card_view:cardCornerRadius="4dp"
-    card_view:cardBackgroundColor="#ffffff"
+    style="?attr/cardStyle"
 >
 <RelativeLayout android:id="@+id/texture_entry_container"
     android:layout_width="match_parent"

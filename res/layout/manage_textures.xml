@@ -10,9 +10,9 @@
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/texture_list_background_color"
         android:divider="@null"
-        android:dividerHeight="0dp"/>
+        android:dividerHeight="0dp"
+        style="?attr/cardBackgroundStyle"/>
 
     <ImageButton android:id="@+id/manage_textures_select"
         style="@style/simple_fab"

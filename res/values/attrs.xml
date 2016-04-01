@@ -2,6 +2,8 @@
 <resources>
 
     <attr name="switchStyle" format="reference" />
+    <attr name="cardStyle" format="reference" />
+    <attr name="cardBackgroundStyle" format="reference" />
 
     <declare-styleable name="Switch">
         <attr name="thumb" format="reference" />

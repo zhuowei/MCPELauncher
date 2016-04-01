@@ -1,15 +1,23 @@
 <resources>
     <style name="FullscreenTheme" parent="@android:style/Theme.Light.NoTitleBar.Fullscreen">
         <item name="switchStyle">@style/switch_light</item>
+        <item name="cardStyle">@style/card_light</item>
+        <item name="cardBackgroundStyle">@style/card_background_light</item>
     </style>
     <style name="FullscreenDarkTheme" parent="@android:style/Theme.NoTitleBar.Fullscreen">
         <item name="switchStyle">@style/switch_dark</item>
+        <item name="cardStyle">@style/card_dark</item>
+        <item name="cardBackgroundStyle">@style/card_background_dark</item>
     </style>
     <style name="BlockLauncherTheme" parent="@android:style/Theme.Light">
         <item name="switchStyle">@style/switch_light</item>
+        <item name="cardStyle">@style/card_light</item>
+        <item name="cardBackgroundStyle">@style/card_background_light</item>
     </style>
     <style name="BlockLauncherDarkTheme" parent="@android:style/Theme">
         <item name="switchStyle">@style/switch_dark</item>
+        <item name="cardStyle">@style/card_dark</item>
+        <item name="cardBackgroundStyle">@style/card_background_dark</item>
     </style>
     <style name="BlockLauncherActionBarStyle">
     </style>

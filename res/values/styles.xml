@@ -1,4 +1,5 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto">
     
     <style name="switch_dark">
         <item name="track">@drawable/switch_track_holo_dark</item>
@@ -35,6 +36,22 @@
     </style>
     <style name="ButtonBar.Button" parent="@android:style/Widget.Button">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="card_light" parent="CardView">
+        <item name="cardBackgroundColor">@color/card_background_light</item>
+    </style>
+
+    <style name="card_background_light">
+        <item name="android:background">@color/card_list_background_color_light</item>
+    </style>
+
+    <style name="card_dark" parent="CardView">
+        <item name="cardBackgroundColor">@color/card_background_dark</item>
+    </style>
+
+    <style name="card_background_dark">
+        <item name="android:background">@color/card_list_background_color_dark</item>
     </style>
 
     <style name="simple_fab">
