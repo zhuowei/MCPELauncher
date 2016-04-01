@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+<android.support.v7.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardBackgroundColor="#ffffff"
+>
+<RelativeLayout android:id="@+id/texture_entry_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="16dp"
@@ -49,3 +63,5 @@
     android:onClick="onTextureRemoveClick"
     android:drawableLeft="@drawable/ic_delete_white_18dp"/>
 </RelativeLayout>
+</android.support.v7.widget.CardView>
+</LinearLayout>

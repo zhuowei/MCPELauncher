@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/manage_textures_extract"
+          android:title="@string/textures_extract"
+          android:showAsAction="ifRoom"/>
+    <item android:id="@+id/manage_textures_clear_script_texture_overrides"
+          android:title="@string/textures_clear_script_texture_overrides"/>
+</menu>

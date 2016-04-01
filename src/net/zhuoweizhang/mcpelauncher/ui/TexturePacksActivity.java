@@ -26,7 +26,7 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 
 	private List<TexturePackDescription> list;
 	private ArrayAdapter<TexturePackDescription> adapter;
-	private Button addButton, extractButton;
+	private ImageButton addButton;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -44,20 +44,12 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 		adapter = new TexturesAdapter(this);
 		this.setListAdapter(adapter);
 
-		extractButton = fb(R.id.manage_textures_extract);
-		addButton = fb(R.id.manage_textures_select);
-	}
-
-	private Button fb(int id) {
-		Button b = (Button) findViewById(id);
-		b.setOnClickListener(this);
-		return b;
+		addButton = (ImageButton) findViewById(R.id.manage_textures_select);
+		addButton.setOnClickListener(this);
 	}
 
 	public void onClick(View v) {
-		if (v == extractButton) {
-			new ExtractTextureTask().execute();
-		} else if (v == addButton) {
+		if (v == addButton) {
 			Intent target = FileUtils.createGetContentIntent();
 			target.setType("application/zip");
 			target.putExtra(FileUtils.EXTRA_MIME_TYPES, new String[] {
@@ -134,21 +126,24 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 		updateContents();
 	}
 
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(getResources().getString(R.string.textures_clear_script_texture_overrides));
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.manage_textures_menu, menu);
 		return true;
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-		if (item.getTitle().equals(getResources().getString(R.string.textures_clear_script_texture_overrides))) {
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.manage_textures_extract) {
+			new ExtractTextureTask().execute();
+			return true;
+		} else if (item.getItemId() == R.id.manage_textures_clear_script_texture_overrides) {
 			ScriptManager.clearTextureOverrides();
 			Toast.makeText(this, R.string.textures_clear_script_texture_overrides,
 					Toast.LENGTH_SHORT).show();
 			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private class TexturesAdapter extends ArrayAdapter<TexturePackDescription> {
@@ -165,7 +160,8 @@ public class TexturePacksActivity extends ListActivity implements View.OnClickLi
 				v = inflater.inflate(R.layout.texture_pack_entry, parent, false);
 			}
 			TexturePackDescription item = getItem(position);
-			v.setTag(position);
+			View buttonParent = v.findViewById(R.id.texture_entry_container);
+			buttonParent.setTag(position);
 			TextView text = (TextView) v.findViewById(R.id.texture_entry_name);
 			text.setText(TexturePackLoader.describeTexturePack(TexturePacksActivity.this, item));
 			TextView desc = (TextView) v.findViewById(R.id.texture_entry_desc);

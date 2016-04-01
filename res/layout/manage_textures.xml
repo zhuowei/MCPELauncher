@@ -1,37 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ui.ManageTexturepacksActivity" >
 
     <ListView
         android:id="@android:id/list"
         android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="@color/texture_list_background_color"
+        android:divider="@null"
+        android:dividerHeight="0dp"/>
 
-    <LinearLayout
-        style="@style/ButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-        <Button
-            android:id="@+id/manage_textures_extract"
-            style="@style/ButtonBar.Button"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:text="@string/textures_extract" />
+    <ImageButton android:id="@+id/manage_textures_select"
+        style="@style/simple_fab"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_white_24dp"/>
 
-        <Button
-            android:id="@+id/manage_textures_select"
-            style="@style/ButtonBar.Button"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:text="@string/textures_select" />
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

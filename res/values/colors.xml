@@ -6,4 +6,5 @@
     <color name="theme_primary_dark">#ff388e3c</color>
     <!-- green 700 -->
     <color name="theme_primary_accent">#ff388e3c</color>
+    <color name="texture_list_background_color">#ffeeeeee</color>
 </resources>

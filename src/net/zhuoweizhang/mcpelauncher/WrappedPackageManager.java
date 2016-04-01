@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -32,7 +33,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 
 import java.util.List;
 
@@ -422,4 +425,53 @@ public class WrappedPackageManager extends PackageManager {
 	public void setInstallerPackageName(String targetPackage, String installerPackageName) {
 		wrapped.setInstallerPackageName(targetPackage, installerPackageName);
 	}
+
+    @Override
+    public Drawable getActivityBanner(ComponentName activityName)
+            throws NameNotFoundException {
+        return wrapped.getActivityBanner(activityName);
+    }
+
+    @Override
+    public Drawable getActivityBanner(Intent intent) throws NameNotFoundException {
+        return wrapped.getActivityBanner(intent);
+    }
+
+    @Override
+    public Drawable getApplicationBanner(ApplicationInfo info) {
+        return wrapped.getApplicationBanner(info);
+    }
+
+    @Override
+    public Drawable getApplicationBanner(String packageName) throws NameNotFoundException {
+        return wrapped.getApplicationBanner(packageName);
+    }
+
+    @Override
+    public Intent getLeanbackLaunchIntentForPackage(String packageName) {
+        return wrapped.getLeanbackLaunchIntentForPackage(packageName);
+    }
+
+    @Override
+    public PackageInstaller getPackageInstaller() {
+        return wrapped.getPackageInstaller();
+    }
+
+    @Override
+    public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
+        return wrapped.getUserBadgedIcon(icon, user);
+    }
+
+    @Override
+    public Drawable getUserBadgedDrawableForDensity(Drawable drawable, UserHandle user,
+            Rect badgeLocation,
+            int badgeDensity) {
+        return wrapped.getUserBadgedDrawableForDensity(drawable, user, badgeLocation, badgeDensity);
+    }
+
+    @Override
+    public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
+        return wrapped.getUserBadgedLabel(label, user);
+    }
+
 }
