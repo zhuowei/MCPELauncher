@@ -39,29 +39,32 @@
     android:layout_below="@id/texture_entry_name"
     android:layout_toRightOf="@id/texture_entry_img"/>
 <Button android:id="@+id/texture_entry_up"
+    style="@style/ButtonBar.Button"
     android:text="@string/texture_entry_up"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_img"
     android:onClick="onTextureUpClick"
-    android:drawableLeft="@drawable/ic_keyboard_arrow_up_white_18dp"/>
+    android:drawableLeft="@drawable/ic_keyboard_arrow_up_tinted_18dp"/>
 <Button android:id="@+id/texture_entry_down"
+    style="@style/ButtonBar.Button"
     android:text="@string/texture_entry_down"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_up"
     android:onClick="onTextureDownClick"
-    android:drawableLeft="@drawable/ic_keyboard_arrow_down_white_18dp"/>
+    android:drawableLeft="@drawable/ic_keyboard_arrow_down_tinted_18dp"/>
 <Button android:id="@+id/texture_entry_remove"
+    style="@style/ButtonBar.Button"
     android:text="@string/texture_entry_remove"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/texture_entry_desc"
     android:layout_toRightOf="@id/texture_entry_down"
     android:onClick="onTextureRemoveClick"
-    android:drawableLeft="@drawable/ic_delete_white_18dp"/>
+    android:drawableLeft="@drawable/ic_delete_tinted_18dp"/>
 </RelativeLayout>
 </android.support.v7.widget.CardView>
 </LinearLayout>

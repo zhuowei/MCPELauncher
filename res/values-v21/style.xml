@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <style name="ButtonBar" parent="@android:style/Holo.ButtonBar">
+    <style name="ButtonBar" parent="@android:style/Widget.Material.ButtonBar">
         
     </style>
-    <style name="ButtonBar.Button" parent="@android:style/Widget.Holo.Button.Borderless">
+    <style name="ButtonBar.Button" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:textColor">@color/theme_primary_accent</item>
     </style>
     
