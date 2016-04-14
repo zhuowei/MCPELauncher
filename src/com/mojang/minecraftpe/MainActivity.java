@@ -76,7 +76,7 @@ public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "0.14";
-	public static final String HALF_SUPPORT_VERSION = "~~~~";
+	public static final String HALF_SUPPORT_VERSION = "0.15";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -253,8 +253,8 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) ||
-				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
+			boolean isSupportedVersion = true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) ||
+			//	mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
@@ -410,6 +410,8 @@ public class MainActivity extends NativeActivity {
 		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		initAtlasMeta();
+
+		nativeProcessIntentUriQuery("", "edu=true");
 
 		displayMetrics = new DisplayMetrics();
 
@@ -651,6 +653,8 @@ public class MainActivity extends NativeActivity {
 	public native void nativeBackSpacePressed();
 
 	public native void nativeReturnKeyPressed();
+
+	public native void nativeProcessIntentUriQuery(String a, String b);
 
 	public void buyGame() {
 	}
@@ -1074,15 +1078,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
-		/*
-		if (getMCPEVersion().startsWith("0.14")) {
+		if (getMCPEVersion().startsWith("0.15")) {
 			try {
-				return getAssets().open("14/" + name);
+				return getAssets().open("15/" + name);
 			} catch (IOException ie) {
 				System.err.println(ie);
 			}
 		}
-		*/
 		return getAssets().open(name);
 	}
 
@@ -1939,8 +1941,16 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
+	// 0.15
+	public void setFileDialogCallback(long pointer) {
+		if (BuildConfig.DEBUG) System.out.println("Set file dialog callback: " + Long.toString(pointer, 16));
+	}
+
 	@Override
 	public void onBackPressed() {
+		if (getMCPEVersion().startsWith("0.15")) {
+			nativeBackPressed();
+		}
 	}
 
 	private InputStream getRegularInputStream(String path) {
@@ -2367,7 +2377,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return false; //getMCPEVersion().startsWith("0.14");
+		return getMCPEVersion().startsWith("0.15");
 	}
 
 	public void reportReimported(final String scripts) {
