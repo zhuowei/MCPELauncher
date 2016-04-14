@@ -411,8 +411,6 @@ public class MainActivity extends NativeActivity {
 
 		initAtlasMeta();
 
-		nativeProcessIntentUriQuery("", "edu=true");
-
 		displayMetrics = new DisplayMetrics();
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
