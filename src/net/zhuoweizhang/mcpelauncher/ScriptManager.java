@@ -139,6 +139,7 @@ public class ScriptManager {
 	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack();
 	private static WorldData worldData = null;
 	private static int worldDataSaveCounter = 1;
+	private static AndroidPrintStream scriptErrorStream = null;
 
 	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
@@ -259,7 +260,7 @@ public class ScriptManager {
 						classConstantsToJSObject(clazz));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			dumpScriptError(e);
 			reportScriptError(state, e);
 		}
 
@@ -282,7 +283,7 @@ public class ScriptManager {
 				try {
 					((Function) obj).call(ctx, scope, scope, args);
 				} catch (Exception e) {
-					e.printStackTrace();
+					dumpScriptError(e);
 					reportScriptError(state, e);
 				}
 			}
@@ -595,7 +596,7 @@ public class ScriptManager {
 				loadEnabledScripts();
 				nativeArmorAddQueuedTextures();
 			} catch (Exception e) {
-				e.printStackTrace();
+				dumpScriptError(e);
 				reportScriptError(null, e);
 			}
 		}
@@ -877,7 +878,7 @@ public class ScriptManager {
 			try {
 				loadScript(file, true);
 			} catch (Exception e) {
-				e.printStackTrace();
+				dumpScriptError(e);
 				MainActivity.currentMainActivity.get().reportError(e);
 			}
 		}
@@ -898,7 +899,7 @@ public class ScriptManager {
 				theReader = new InputStreamReader(is);
 				loadScript(theReader, "Addon " + s.getKey() + ":main.js");
 			} catch (Exception e) {
-				e.printStackTrace();
+				dumpScriptError(e);
 				mainActivity.reportError(e);
 			} finally {
 				if (theReader != null) {
@@ -929,7 +930,7 @@ public class ScriptManager {
 				}
 				prepareScript(file);
 			} catch (Exception e) {
-				e.printStackTrace();
+				dumpScriptError(e);
 				MainActivity.currentMainActivity.get().reportError(e);
 			}
 		}
@@ -1570,6 +1571,11 @@ public class ScriptManager {
 			ie.printStackTrace();
 		}
 		return "Steve"; // I DUNNO
+	}
+
+	private static void dumpScriptError(Throwable t) {
+		if (scriptErrorStream == null) scriptErrorStream = new AndroidPrintStream(android.util.Log.ERROR, "ScriptError");
+		t.printStackTrace(scriptErrorStream);
 	}
 
 	private static final class MyMethodWatcher implements NativeJavaMethod.MethodWatcher {
