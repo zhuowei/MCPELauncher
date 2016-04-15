@@ -10,6 +10,7 @@ import java.util.*;
 
 import javax.net.ssl.*;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 import android.annotation.SuppressLint;
@@ -51,6 +52,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.webkit.*;
 import android.widget.*;
+
+import dalvik.system.BaseDexClassLoader;
 
 import org.mozilla.javascript.RhinoException;
 
@@ -220,8 +223,6 @@ public class MainActivity extends NativeActivity {
 		}
 		hasAlreadyInited = true;
 
-		checkForSubstrate();
-
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
 		System.out.println("Current fails: " + safeModeCounter);
 		if (safeModeCounter == MAX_FAILS) {
@@ -240,6 +241,7 @@ public class MainActivity extends NativeActivity {
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
+			checkArch();
 			minecraftApkForwardLocked = !mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
 			int minecraftVersionCode = mcPkgInfo.versionCode;
 			minecraftVersion = MinecraftVersion.getRaw(minecraftVersionCode);
@@ -269,6 +271,8 @@ public class MainActivity extends NativeActivity {
 				} catch (Throwable t) {
 				}
 			}
+
+			checkForSubstrate();
 
 			fixMyEpicFail();
 
@@ -307,8 +311,6 @@ public class MainActivity extends NativeActivity {
 			}
 			return;
 		}
-
-		checkArch();
 
 		try {
 			if (this.getPackageName().equals("com.mojang.minecraftpe")) {
@@ -2149,10 +2151,30 @@ public class MainActivity extends NativeActivity {
 			Field natfield = Utils.getDeclaredFieldRecursive(pathListClass,
 					"nativeLibraryDirectories");
 			natfield.setAccessible(true);
-			File[] fileList = (File[]) natfield.get(pathListObj);
-			File[] newList = addToFileList(fileList, new File(path));
-			if (fileList != newList)
-				natfield.set(pathListObj, newList);
+			Object theFileList = natfield.get(pathListObj);
+			if (theFileList instanceof File[]) {
+				File[] fileList = (File[]) theFileList;
+				File[] newList = addToFileList(fileList, new File(path));
+				if (fileList != newList)
+					natfield.set(pathListObj, newList);
+			}
+			Field natElemsField = Utils.getDeclaredFieldRecursive(pathListClass,
+					"nativeLibraryPathElements");
+			if (natElemsField != null && classLoader instanceof BaseDexClassLoader &&
+				((BaseDexClassLoader) classLoader).findLibrary("minecraftpe") == null) {
+				// Android 6.0 and above; needed on N
+				natElemsField.setAccessible(true);
+				Object[] theObjects = (Object[]) natElemsField.get(pathListObj);
+				Class<? extends Object> elemClass = theObjects.getClass().getComponentType();
+				Constructor<? extends Object> elemConstructor =
+					elemClass.getConstructor(File.class, Boolean.TYPE, File.class, dalvik.system.DexFile.class);
+				elemConstructor.setAccessible(true);
+				Object newObject = elemConstructor.newInstance(new File(path), true, null, null);
+				Object[] newObjects = Arrays.copyOf(theObjects, theObjects.length + 1);
+				newObjects[newObjects.length - 1] = newObject;
+				System.out.println(newObjects);
+				natElemsField.set(pathListObj, newObjects);
+			}
 			// check
 			// System.out.println("Class loader shenanigans: " +
 			// ((PathClassLoader) getClassLoader()).findLibrary("minecraftpe"));
