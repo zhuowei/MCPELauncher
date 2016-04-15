@@ -235,6 +235,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
 	int entity_hurt;
+	int mobrenderer_render;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -283,7 +284,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11AppPlatform14useCenteredGUIEv");
 	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity4hurtERK18EntityDamageSourcei");
-
+	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
+		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 }
 
 extern "C" {
@@ -427,6 +429,8 @@ static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
+static void* (*bl_MobRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
+static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
 static void (*bl_Block_onPlace)(Block*, BlockSource&, BlockPos const&);
 
 static bool* bl_Block_mSolid;
@@ -2443,6 +2447,14 @@ mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Ent
 	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
 }
 
+static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, Entity& ent, Vec3 const& vec, float a, float b) {
+	auto foundIter = bl_mobTexturesMap.find(ent.getUniqueID());
+	if (foundIter != bl_mobTexturesMap.end()) {
+		return bl_MobRenderer_render_real(renderer, ent, vec, a, b);
+	}
+	return bl_SkeletonRenderer_render_real(renderer, ent, vec, a, b);
+}
+
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
   (JNIEnv *env, jclass clazz, jint blockId, jint damage) {
 	Block* block = bl_Block_mBlocks[blockId];
@@ -3140,6 +3152,12 @@ void bl_setuphooks_cppside() {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
+	void** skeletonRendererVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV16SkeletonRenderer");
+	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, Entity&, Vec3 const&, float, float))
+		skeletonRendererVtable[vtable_indexes.mobrenderer_render];
+	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, Entity&, Vec3 const&, float, float))
+		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
+	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	bl_entity_hurt_hook_init(mcpelibhandle);
 

@@ -1536,6 +1536,7 @@ public class ScriptManager {
 	}
 
 	private static long spawnEntityImpl(float x, float y, float z, int entityType, String skinPath) {
+		if (entityType <= 0) throw new RuntimeException("Invalid entity type: " + entityType);
 		long retval = nativeSpawnEntity(x, y, z, entityType, skinPath);
 		if (nativeEntityHasCustomSkin(retval)) {
 			NativeEntityApi.setExtraData(retval, ENTITY_KEY_SKIN, skinPath);
@@ -2902,7 +2903,9 @@ public class ScriptManager {
 		public static void setHealth(Object ent, int halfhearts) {
 			int entityType = getEntityTypeId(ent);
 			if (!(entityType >= 10 && entityType < 64)) {
-				throw new RuntimeException("setHealth called on non-mob: entityType=" + entityType);
+				return;
+				// Pokecube 4.0 crashes with this
+				// throw new RuntimeException("setHealth called on non-mob: entityType=" + entityType);
 			}
 			nativeSetMobHealth(getEntityId(ent), halfhearts);
 		}
