@@ -378,7 +378,7 @@ public class MainActivity extends NativeActivity {
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
 					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport());
-					if (Utils.getPrefs(0).getBoolean("zz_desktop_gui", false)) {
+					if (hasScriptSupport() && Utils.getPrefs(0).getBoolean("zz_desktop_gui", false)) {
 						ScriptManager.nativeModPESetDesktopGui(true);
 					}
 					if (!isSafeMode()) loadNativeAddons();
@@ -832,7 +832,7 @@ public class MainActivity extends NativeActivity {
 						} else if (button == 2) {
 							boolean hasLoadedScripts = Utils.getPrefs(0).getBoolean(
 									"zz_script_enable", true)
-									&& !isSafeMode();
+									&& !isSafeMode() && hasScriptSupport();
 							if (hasLoadedScripts) {
 								ScriptManager.takeScreenshot("screenshot");
 							} else {
