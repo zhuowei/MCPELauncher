@@ -178,11 +178,6 @@ public class MainActivity extends NativeActivity {
 	private List<String> commandHistoryList = new ArrayList<String>();
 	private Button prevButton, nextButton;
 	private int commandHistoryIndex = 0;
-	/* restarter */
-	private static boolean hasAlreadyInited = false;
-	private static boolean globalRestart = false;
-	private static long lastDestroyTime = 0;
-	private static final int MILLISECONDS_FOR_WORLD_SAVE = 3000; //3 seconds
 
 	protected boolean hasRecorder = false;
 	protected boolean isRecording = false;
@@ -214,14 +209,6 @@ public class MainActivity extends NativeActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		currentMainActivity = new WeakReference<MainActivity>(this);
-		if (hasAlreadyInited) {
-			globalRestart = true;
-			// restart if already initialized before
-			finish();
-			NerdyStuffActivity.forceRestart(this, 1000, false);
-			System.exit(0);
-		}
-		hasAlreadyInited = true;
 
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
 		System.out.println("Current fails: " + safeModeCounter);
@@ -487,10 +474,6 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void onDestroy() {
-		if (globalRestart) {
-			super.onDestroy();
-			return;
-		}
 		nativeUnregisterThis();
 		super.onDestroy();
 		File lockFile = new File(getFilesDir(), "running.lock");
@@ -2572,16 +2555,6 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 
-	}
-
-	private class ShutdownTask implements Runnable {
-		public void run() {
-			try {
-				Thread.sleep(MILLISECONDS_FOR_WORLD_SAVE); // to give the worlds some time to save
-			} catch (InterruptedException ie) {}
-			System.out.println("Preparing to exit");
-			if (!globalRestart) System.exit(0);
-		}
 	}
 
 }
