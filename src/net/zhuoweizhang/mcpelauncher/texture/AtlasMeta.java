@@ -11,9 +11,13 @@ public class AtlasMeta {
 	public int width, height;
 	public int tileWidth;
 	public int originalUVCount = 0;
+	public int realWidth;
+	public boolean needsHDWorkaround;
 
-	public AtlasMeta(JSONArray data) {
+	public AtlasMeta(JSONArray data, boolean needsHDWorkaround, int realWidth) {
 		this.data = data;
+		this.needsHDWorkaround = needsHDWorkaround;
+		this.realWidth = realWidth;
 		try {
 			calculateStuff();
 		} catch (JSONException e) {
@@ -33,6 +37,7 @@ public class AtlasMeta {
 		}
 		occupied = new boolean[(width / tileWidth) * (height / tileWidth)];
 		calculateOccupied();
+		if (needsHDWorkaround && realWidth != width) markWorkaroundOccupied();
 	}
 
 	private void calculateOccupied() throws JSONException {
@@ -57,6 +62,19 @@ public class AtlasMeta {
 				occupied[index + row] = true; // bottom
 				occupied[index + row + 1] = true; // bottomright
 				originalUVCount += 3;
+			}
+		}
+	}
+
+	private void markWorkaroundOccupied() {
+		System.out.println("width: " + width + " realWidth: " + realWidth);
+		int tileCountX = (width / tileWidth);
+		int realTileWidth = (realWidth / tileCountX);
+		int smallXend = width / realTileWidth;
+		int smallYend = height / realTileWidth;
+		for (int y = 0; y < smallYend; y++) {
+			for (int x = 0; x < smallXend; x++) {
+				occupied[y*tileCountX + x] = true;
 			}
 		}
 	}

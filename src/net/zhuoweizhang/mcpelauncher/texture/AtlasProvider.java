@@ -29,7 +29,10 @@ public class AtlasProvider implements TexturePack {
 	private Paint tempPaint = new Paint();
 	private String mipPrefix;
 	private int mipLevels;
-	public AtlasProvider(String metaName, String atlasName, String importDir, ImageLoader loader, int xscale, int mipLevels) {
+	private final boolean needsHDWorkaround;
+	private boolean hdWorkaroundActive = false;
+	public AtlasProvider(String metaName, String atlasName, String importDir, ImageLoader loader, int xscale, int mipLevels,
+		boolean needsHDWorkaround) {
 		this.metaName = metaName;
 		this.atlasName = atlasName;
 		this.importDir = importDir;
@@ -37,6 +40,7 @@ public class AtlasProvider implements TexturePack {
 		this.xscale = xscale;
 		this.mipLevels = mipLevels;
 		this.mipPrefix = getMipMapPrefix(atlasName);
+		this.needsHDWorkaround = needsHDWorkaround;
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
@@ -106,17 +110,23 @@ public class AtlasProvider implements TexturePack {
 			bos.write(a, 0, p);
 		}
 		metaIs.close();
-		JSONArray metaArr = new JSONArray(new String(bos.toByteArray(), "UTF-8"));
-		calcXScale(activity, new AtlasMeta(metaArr));
-		scaleMeta(metaArr);
-		metaObj = new AtlasMeta(metaArr);
 
 		// read and decode the original atlas
 		InputStream atlasIs = activity.getInputStreamForAsset(atlasName);
 		Bitmap atlasImgRaw = loader.load(atlasIs);
+
+		// calculate Xscale and load atlas meta
+		JSONArray metaArr = new JSONArray(new String(bos.toByteArray(), "UTF-8"));
+		calcXScale(activity, new AtlasMeta(metaArr, needsHDWorkaround, atlasImgRaw.getWidth()));
+		scaleMeta(metaArr);
+		metaObj = new AtlasMeta(metaArr, needsHDWorkaround, atlasImgRaw.getWidth() * xscale);
+
+		// scale atlas image
 		atlasImg = scaleAtlas(atlasImgRaw);
 		atlasCanvas = new Canvas(atlasImg);
 		atlasIs.close();
+
+		hdWorkaroundActive = needsHDWorkaround && (metaObj.width != atlasImg.getWidth());
 	}
 
 	private boolean addAllToMeta(MainActivity activity) throws Exception {
@@ -173,6 +183,13 @@ public class AtlasProvider implements TexturePack {
 		tempRect.top = (int) ((uv.getDouble(1) * atlasheight / metaObj.height) + 0.5);
 		tempRect.bottom = (int) ((uv.getDouble(3) * atlasheight / metaObj.height) + 0.5);
 		atlasCanvas.drawBitmap(bmp, tempRect2, tempRect, tempPaint);
+		if (hdWorkaroundActive) {
+			tempRect.left = (int) (uv.getDouble(0) + 0.5);
+			tempRect.right = (int) (uv.getDouble(2) + 0.5);
+			tempRect.top = (int) (uv.getDouble(1) + 0.5);
+			tempRect.bottom = (int) (uv.getDouble(3) + 0.5);
+			atlasCanvas.drawBitmap(bmp, tempRect2, tempRect, tempPaint);
+		}
 	}
 
 	private void scaleMeta(JSONArray arr) throws JSONException {

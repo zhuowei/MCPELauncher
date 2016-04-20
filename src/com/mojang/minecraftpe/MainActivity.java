@@ -2352,9 +2352,9 @@ public class MainActivity extends NativeActivity {
 		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
-				"images/terrain-atlas/", new TGAImageLoader(), 1, 4);
+				"images/terrain-atlas/", new TGAImageLoader(), 1, 4, false);
 			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.tga",
-				"images/items-opaque/", new TGAImageLoader(), 2, 0);
+				"images/items-opaque/", new TGAImageLoader(), 2, 0, true);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
 			if (dumpAtlas) {
