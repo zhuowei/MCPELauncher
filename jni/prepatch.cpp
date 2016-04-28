@@ -18,11 +18,14 @@ void* bl_marauder_translation_function(void* input);
 
 static int bl_hasinit_prepatch = 0;
 
-static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
+//static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
+static void (*bl_Minecraft_stopGame_real)(Minecraft*);
 
-void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
+//void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
+void bl_Minecraft_stopGame_hook(Minecraft* minecraft) {
 	JNIEnv *env;
-	bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
+	//bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
+	bl_Minecraft_stopGame_real(minecraft);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Leave game callback");
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -34,7 +37,7 @@ void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "leaveGameCallback", "(Z)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, thatotherboolean);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, true /*thatotherboolean*/);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -80,7 +83,7 @@ bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
 	}
 	bool got_success = false;
 	void** got_rw = (void**) bl_marauder_translation_function((void*) got);
-	for (int i = 0; i < 5000; i++) {
+	for (int i = 0; i < 35000; i++) {
 		if (got[i] == original) {
 			got_rw[i] = newptr;
 			got_success = true;
@@ -126,8 +129,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 	bl_scriptmanager_class = (jclass) env->NewGlobalRef(clz);
 	//get a callback when the level is exited
-	void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
-	mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+	//void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
+	//mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
+	void* stopGame = dlsym(mcpelibhandle, "_ZN9Minecraft8stopGameEv");
+	mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
 
 	bl_prepatch_fmod((soinfo2*) mcpelibhandle);
 

@@ -242,14 +242,17 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isSupportedVersion = true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) ||
-			//	mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
+			boolean is0140or0141 = mcPkgInfo.versionName.startsWith("0.14.0") ||
+				mcPkgInfo.versionName.equals("0.14.1");
+			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
+				!is0140or0141) ||
+				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.14.0");
+				intent.putExtra("supportedVersion", "0.14.2");
 				startActivity(intent);
 				finish();
 				try {
@@ -1931,9 +1934,7 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (getMCPEVersion().startsWith("0.15")) {
-			nativeBackPressed();
-		}
+		nativeBackPressed();
 	}
 
 	private InputStream getRegularInputStream(String path) {
@@ -2339,8 +2340,20 @@ public class MainActivity extends NativeActivity {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
 		if (mcPkgInfo.versionName.startsWith("0.14")) {
-			if (version.startsWith("0.14.0")) return true;
-			if (version.startsWith("0.14.1")) return true;
+			String subVer = mcPkgInfo.versionName.substring(mcPkgInfo.versionName.lastIndexOf(".") + 1);
+			try {
+				int theSubVer = Integer.parseInt(subVer);
+				if (theSubVer < 2) {
+					if (version.startsWith("0.14.0")) return true;
+					if (version.equals("0.14.1")) return true;
+				} else {
+					if (version.equals("0.14.2")) return true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (BuildConfig.DEBUG) throw new RuntimeException(e);
+				return true;
+			}
 		} else if (mcPkgInfo.versionName.startsWith("0.15")) {
 			if (version.startsWith("0.15.0")) return true;
 		}
@@ -2379,7 +2392,7 @@ public class MainActivity extends NativeActivity {
 	protected boolean hasScriptSupport() {
 		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
-	private String getMCPEVersion() {
+	protected String getMCPEVersion() {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {

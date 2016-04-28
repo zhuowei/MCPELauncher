@@ -30,7 +30,7 @@ bool bl_setArmorTexture(int id, std::string const& filename) {
 		bl_queuedArmorTextures.emplace_back(id, filename);
 		return true;
 	}
-	mce::TexturePtr* texturePtr = new mce::TexturePtr(bl_minecraft->getTextures(), filename);
+	mce::TexturePtr* texturePtr = new mce::TexturePtr(bl_minecraft->getTextures(), filename, TEXTURE_LOCATION_INTERNAL);
 	return bl_setArmorTexture(id, texturePtr);
 }
 
@@ -47,7 +47,7 @@ static void bl_reload_armor_textures_real() {
 	auto& textures = bl_minecraft->getTextures();
 	for (auto t: bl_armorRenders) {
 		if (!t) continue;
-		textures.loadTexture(t->textureName, true, false, false, false);
+		textures.loadTexture(t->textureName, TEXTURE_LOCATION_INTERNAL, false);
 	}
 }
 

@@ -38,20 +38,22 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 3468
+// FIXME 0.14
+#define PLAYER_INVENTORY_OFFSET 3476
 #else
-#define PLAYER_INVENTORY_OFFSET 3480
+#define PLAYER_INVENTORY_OFFSET 3488
 #endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
-#define GAMERENDERER_GETFOV_SIZE 0x1d3
+#define GAMERENDERER_GETFOV_SIZE 0x1cb
 #else
 #define GAMERENDERER_GETFOV_SIZE 0x13c
 #endif
 
+// todo: call the getDestroyProgress method instead
 const unsigned int kGameMode_progress_offset = 36;
 
 #define LOG_TAG "BlockLauncher/ModScript"

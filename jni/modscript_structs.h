@@ -127,7 +127,7 @@ public:
 	unsigned char attribs; // 26
 	char filler[32-27]; //27
 	unsigned char useAnimation; // 32
-	char filler3[68-33]; // 33
+	char filler3[64-33]; // 33
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -383,14 +383,14 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 68
-	int damageReduceAmount; // 72
-	int renderIndex; // 76
-	void* armorMaterial; // 80
+	int armorType; // 64
+	int damageReduceAmount; // 68
+	int renderIndex; // 72
+	void* armorMaterial; // 76
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 84, "armor item size");
+static_assert(sizeof(ArmorItem) == 80, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {

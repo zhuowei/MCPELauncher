@@ -15,7 +15,7 @@
 #include "mcpe/mce/textureptr.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 204
+#define MOBRENDERER_SIZE 220
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 28
 // ModelPart destructor
@@ -55,6 +55,9 @@ static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char*
 		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
 	}
 	HumanoidModel* model = (HumanoidModel*) renderer->model; //TODO: make sure that this is indeed a humanoid model
+	Dl_info theDlInfo;
+	dladdr(model->vtable, &theDlInfo);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "wat %p %s", model->vtable, theDlInfo.dli_sname);
 	*modelPtr = model;
 	if (strcmp(modelPartName, "head") == 0) {
 		return &model->bipedHead;
@@ -112,7 +115,7 @@ int bl_renderManager_createHumanoidRenderer() {
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr(bl_minecraft->getTextures(), "mob/steve.png"), 0);
+		mce::TexturePtr(bl_minecraft->getTextures(), "mob/steve.png", TEXTURE_LOCATION_INTERNAL), 0);
 
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	return retval;

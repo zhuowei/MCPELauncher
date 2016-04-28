@@ -1,7 +1,10 @@
 #pragma once
 #include <string>
-class TextureGroup;
+enum TextureLocation {
+	TEXTURE_LOCATION_INTERNAL, // 0
+};
 namespace mce {
+class TextureGroup;
 class Texture {
 public:
 	bool isLoaded() const;
@@ -12,16 +15,16 @@ public:
 	Texture* texture; // 4
 	std::string textureName;
 	TexturePtr();
-	TexturePtr(TextureGroup&, std::string const&);
+	TexturePtr(TextureGroup&, std::string const&, TextureLocation);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);
 	void onGroupReloaded();
 	static TexturePtr NONE;
 };
-}; // namespace mce
 class TextureGroup {
 public:
-	mce::TexturePtr getTexture(std::string const&);
-	void loadTexture(std::string const&, bool, bool, bool, bool);
+	TexturePtr getTexture(std::string const&);
+	void loadTexture(std::string const&, TextureLocation, bool);
 };
+}; // namespace mce

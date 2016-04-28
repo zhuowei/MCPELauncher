@@ -46,6 +46,7 @@
 #include "mcpe/inventory.h"
 #include "mcpe/options.h"
 #include "mcpe/screenchooser.h"
+#include "mcpe/guidata.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -62,7 +63,7 @@ typedef void Font;
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3308
+#define PLAYER_ABILITIES_OFFSET 3316
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -72,25 +73,25 @@ typedef void Font;
 // from Player::getSelectedItem
 #ifdef __i386
 // FIXME 0.14
-#define PLAYER_INVENTORY_OFFSET 3468
+#define PLAYER_INVENTORY_OFFSET 3476
 #else
-#define PLAYER_INVENTORY_OFFSET 3480
+#define PLAYER_INVENTORY_OFFSET 3488
 #endif
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = 0x98;
-const size_t kLiquidBlockDynamicSize = 252;
-const size_t kLiquidBlockStaticSize = 232;
+const size_t kLiquidBlockDynamicSize = 244;
+const size_t kLiquidBlockStaticSize = 224;
 // found in registerBlock
-const size_t kBlockItemSize = 72;
+const size_t kBlockItemSize = 64;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 68;
+const size_t kItemSize = 64;
 // found in Entity::spawnAtLocation
-const size_t kItemEntitySize = 400;
+const size_t kItemEntitySize = 416;
 // found in Entity::spawnAtLocation
-const size_t kItemEntity_pickupDelay_offset = 376;
+const size_t kItemEntity_pickupDelay_offset = 392;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 352;
+const size_t kItemEntity_itemInstance_offset = 368;
 // found in TextPacket::handle
 const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 11;
 
@@ -292,8 +293,6 @@ extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
 
-static void (*bl_Gui_displayClientMessage)(void*, std::string const&);
-
 static void (*bl_Item_Item)(Item*, std::string const&, short);
 
 static void** bl_Item_vtable;
@@ -341,7 +340,6 @@ static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> co
 	std::vector<RecipesType> const&);
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
-static void (*bl_Gui_showTipMessage)(void*, std::string const&);
 
 static void** bl_ShapelessRecipe_vtable;
 
@@ -398,7 +396,6 @@ static AABB* (*bl_ReedBlock_getAABB)(Block*, BlockSource&, BlockPos const&, AABB
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
-static void* (*bl_MinecraftClient_getGui)(MinecraftClient* minecraft);
 static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
@@ -407,7 +404,7 @@ static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
 static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
-static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, Vec3 const&, ItemInstance const&, int);
+static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, Vec3 const&, ItemInstance const&, int, float);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 static bool (*bl_Zombie_isBaby)(Entity*);
@@ -968,8 +965,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
-	bl_Gui_displayClientMessage(mygui, mystr);
+	bl_minecraft->getGuiData()->displayClientMessage(mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
@@ -1030,6 +1026,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineArmor
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
 		jint damageReduceAmount, jint maxDamage, jint armorType) {
+	// FIXME 0.14.2
+	Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem(env, clazz, id, iconName, iconIndex, name, 1);
+#if 0
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 
@@ -1041,7 +1040,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
 	if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
-	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), textureUTFChars);
+	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), textureUTFChars, TEXTURE_LOCATION_INTERNAL);
 	env->ReleaseStringUTFChars(name, textureUTFChars);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -1051,6 +1050,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
@@ -1160,7 +1160,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
-	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), newSkin);
+	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), newSkin, TEXTURE_LOCATION_INTERNAL);
 }
 void bl_clearMobTextures() {
 	bl_mobTexturesMap.clear();
@@ -1609,8 +1609,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	void* mygui = bl_MinecraftClient_getGui(bl_minecraft);
-	bl_Gui_showTipMessage(mygui, mystr);
+	bl_minecraft->getGuiData()->showTipMessage(mystr);
 	env->ReleaseStringUTFChars(text, utfChars);
 }
 
@@ -2100,7 +2099,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeD
 	ItemInstance instance(id, count, damage);
 
 	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
-	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), instance, 10 /* pickup delay */);
+	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), instance, 10 /* pickup delay */, 0);
 
 	*((int*)((uintptr_t)entity + kItemEntity_pickupDelay_offset)) = 10;
 
@@ -2887,8 +2886,6 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
-	bl_Gui_displayClientMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui20displayClientMessageERKSs");
-
 	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
@@ -2978,7 +2975,6 @@ void bl_setuphooks_cppside() {
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
 		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
-	bl_Gui_showTipMessage = (void (*)(void*, const std::string&)) dlsym(RTLD_DEFAULT, "_ZN3Gui14showTipMessageERKSs");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
@@ -3056,8 +3052,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN6Entity7setSizeEff");
-	bl_MinecraftClient_getGui = (void* (*)(MinecraftClient*))
-		dlsym(mcpelibhandle, "_ZNK15MinecraftClient6getGuiEv");
 	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
 		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
@@ -3088,8 +3082,8 @@ void bl_setuphooks_cppside() {
 	bl_Mob_removeAllEffects = (void (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
 
-	bl_ItemEntity_ItemEntity = (void (*)(Entity*, BlockSource&, Vec3 const&, ItemInstance const&, int))
-		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER11BlockSourceRK4Vec3RK12ItemInstancei");
+	bl_ItemEntity_ItemEntity = (void (*)(Entity*, BlockSource&, Vec3 const&, ItemInstance const&, int, float))
+		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER11BlockSourceRK4Vec3RK12ItemInstanceif");
 	bl_Item_addCreativeItem = (void (*)(short, short))
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
 	bl_Minecraft_getPacketSender = (PacketSender* (*)(Minecraft*))
