@@ -296,9 +296,9 @@ typedef void EntityRenderer;
 
 typedef struct {
 	void** vtable; //0
-	char filler[132-4]; //4
-	void* model; // 132 (from MobRenderer::MobRenderer)
-	char filler2[180-136]; // 136
+	char filler[144-4]; //4
+	void* model; // 144 (from MobRenderer::MobRenderer)
+	char filler2[196-136]; // 148
 } MobRenderer;
 
 typedef void Tag;
@@ -394,9 +394,9 @@ static_assert(sizeof(ArmorItem) == 80, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 180
-	HumanoidModel* modelArmor; // 184
-	HumanoidModel* modelArmorChestplate; // 188
+	int something; // 196
+	HumanoidModel* modelArmor; // 200
+	HumanoidModel* modelArmorChestplate; // 204
 };
 #endif
 
