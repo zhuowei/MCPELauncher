@@ -1,41 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    
+    <!--以下中文翻译由吴健蓬于2016年4月24日更新，Pocket Vibrant Team监制 -->
+    <string name="textOn" translatable="false" tools:ignore="MissingTranslation">开启</string>
+    <string name="textOff" translatable="false" tools:ignore="MissingTranslation">关闭</string>
     <string name="pref_ctrl_touchscreen">使用触摸屏</string>
     <string name="pref_ctrl_touchscreen_summary">如果你用的不是Xperia Play，请勾上此处</string>
     <string name="pref_mp_username">多人游戏用户名</string>
     <string name="pref_mp_username_summary">填你的名字，嗯</string>
     <string name="pref_texture_pack">材质包</string>
     <string name="pref_texture_pack_summary">使用你的1秒钟来换材质</string>
-    <string name="pref_zz_longvibration">超级振动</string>
+    <string name="pref_zz_longvibration">超长振动</string>
     <string name="pref_zz_longvibration_summary">滋滋滋滋滋滋滋滋滋滋！（增加5倍振动长度）</string>
     <string name="pref_zz_safe_mode">安全模式</string>
-    <string name="pref_zz_safe_mode_summary">不打任何补丁</string>
+    <string name="pref_zz_safe_mode_summary">不使用任何插件和补丁</string>
+    <string name="pref_zz_texture_pack_enable">使用材质包</string>
+    <string name="pref_zz_custom_dpi">自定义DPI</string>
+    <string name="pref_zz_custom_dpi_summary">修改你屏幕上的方向键大小，留空白自动设置默认大小</string>
+    <string name="pref_zz_texture_pack_demo">显示材质包支持</string>
+    <string name="pref_zz_texture_pack_demo_summary">使用内置NathanX的Slickcraft材质包 </string>
     <string name="pref_mp_server_visible_default">服务器默认开启</string>
     <string name="pref_mp_title">多人游戏</string>
     <string name="pref_ctrl_title">控制</string>
     <string name="pref_gfx_title">图像</string>
     <string name="pref_addons_title">插件和补丁</string>
+    <string name="pref_textures_title">材质</string>
+    <string name="pref_support_title">支持</string>
     <string name="pref_zz_load_native_addons">启用实验插件支持</string>
     <string name="pref_zz_enable_hovercar">启用游戏内部补丁管理</string>
     <string name="texture_pack_unable_to_load">无法加载材质包。</string>
     <string name="pref_zz_extract_original_textures">用ROOT提取原材质</string>
     <string name="pref_zz_extract_original_textures_summary">用ROOT备份原APK然后把它设为材质包</string>
     <string name="extracting_textures">正在备份原APK</string>
-    <string name="extract_textures_success">成功备份原APK并把它设为材质包.</string>
+    <string name="extract_textures_success">成功备份原APK并把它设为材质包。</string>
     <string name="extract_textures_error">无法访问原始APK</string>
     <string name="extract_textures_no_root">无法获取权限，你ROOT了么？</string>
-    <string name="extract_textures_need_update">请再运行\"用ROOT提取原材质\"来提取新版本Minecraft的材质。</string>
+    <string name="extract_textures_need_update">你使用了一个旧版本的Minecraft PE材质。请运行\"用ROOT提取原材质\"来提取新版本的材质。</string>
     <string name="pref_zz_skin_enable">使用皮肤</string>
     <string name="pref_zz_skin">设定皮肤</string>
     <string name="pref_zz_skin_summary">选择*.png文件来改变皮肤(只有你自己看得见)</string>
-    <string name="pref_zz_hovercar_hide">隐藏补丁管理器按钮</string>
+    <string name="pref_zz_hovercar_hide">隐藏启动器管理按钮</string>
+    <string name="pref_zz_redirect_mco">重定向Realms到第三方服务器列表</string>
+    <string name="pref_zz_manage_scripts">管理ModPE脚本(.js)</string>
+    <string name="pref_zz_script_enable">管理ModPE脚本(.js)</string>
+    <string name="pref_zz_sensorcontrol">传感器控制</string>
+    <string name="pref_zz_sensorcontrol_summary">通过旋转设备控制玩家，需要打开ModPE脚本选项。</string>
+    <string name="pref_zz_show_insert_text">在启动器中显示\"插入文本\"选项</string>
+    <string name="pref_zz_language_override">语言</string>
+    <string name="pref_zz_language_override_default">默认</string>
+    <string name="pref_zz_script_paranoid_mode">限制模式</string>
+    <string name="pref_zz_script_paranoid_mode_summary">禁止ModPE脚本使用Android的功能，\n例如删除文件和使用互联网</string>
+    <string name="pref_zz_legacy_keyboard_input">使用旧式键盘输入</string>
+    <string name="pref_zz_legacy_keyboard_input_summary">在0.8.x中修复键盘错误</string>
+    <string name="pref_zz_texture_pack_enable_extracted">使用被提取的原版材质</string>
+    <string name="pref_zz_skin_download_source">PC皮肤</string>
+    <string name="skin_download_do_not_download">不要下载皮肤</string>
+    <string name="skin_download_download_pc">以PC用户名为基础来下载他的皮肤</string>
     <string name="nerdy_stuff_page">计算机迷的东西</string>
     <string name="dump_libminecraftpe">从内存导出libminecraftpe.so</string>
-    <string name="nerdy_stuff_are_useless">这页上基本上所有的东西都没用。它们为了修复故障才留在这里。</string>
+    <string name="nerdy_stuff_are_useless">基本上本页面所有的东西都没用，它们为了修复故障才留在这里。</string>
     <string name="restart_app">重新启动程序</string>
-    <string name="manage_patches">管理补丁</string>
+    <string name="manage_patches">管理补丁(.mod)</string>
+    <string name="world_create_title">新建世界</string>
+    <string name="world_name_prompt">世界名: </string>
+    <string name="world_seed_prompt">种子:</string>
+    <string name="world_gamemode_prompt">游戏模式: </string>
+    <string name="gamemode_survival">生存模式</string>
+    <string name="gamemode_creative">创造模式</string>
+    <string name="copy_world_title">保存世界</string>
     <string name="manage_patches_crash_safe_mode">BlockLauncher已检测到崩溃。安全模式已启用，防止进一步的崩溃。</string>
+    <string name="manage_patches_too_many">升级到专业版解除3个补丁的限制</string>
     <string name="manage_patches_delete">删除</string>
+    <string name="manage_patches_crash_safe_mode">BlockLauncher检测到最近的游戏崩溃。安全模式已启用，以防止进一步的崩溃。在该模式下，所有的插件和补丁都会被禁用。
+    你想继续使用不能启用插件和补丁的安全模式还是回到正常状态？</string>
     <string name="manage_patches_import_error">补丁输入失败</string>
     <string name="manage_patches_import">输入</string>
     <string name="manage_patches_info">信息</string>
@@ -43,39 +80,129 @@
     <string name="manage_patches_path">路径</string>
     <string name="manage_patches_no_metadata">没有作者信息</string>
     <string name="manage_patches_enable">启用</string>
-    <string name="manage_patches_too_many">升级到专业版解除3个补丁限制</string>
     <string name="manage_patches_disable">禁用</string>
     <string name="manage_patches_disabled">(已禁用)</string>
     <string name="manage_patches_invalid_patches">无法加载这些补丁，因为BlockLauncher无法识别它们的格式：</string>
-    <string name="manage_patches_import_confirm">你想要添加这个补丁么?</string>
+    <string name="manage_patches_import_confirm">你想要添加这个补丁么？</string>
     <string name="manage_patches_import_done">补丁已添加</string>
+    <string name="skin_import_confirm">你想要设定为这个皮肤吗？</string>
+    <string name="texturepack_import_confirm">你想要设定为这个材质包吗？</string>
+    <string name="script_import_confirm">你想要导入这个ModPE脚本吗？</string>
     <string name="skin_imported">已设定皮肤</string>
+    <string name="texturepack_imported">已设定材质包</string>
+    <string name="script_imported">已导入ModPE脚本</string>
     <string name="manage_addons">管理插件</string>
-    <string name="world_create_title">新建世界</string>
-    <string name="world_name_prompt">世界名: </string>
-    <string name="world_seed_prompt">种子:</string>
-    <string name="world_gamemode_prompt">游戏模式: </string>
-    <string name="gamemode_survival">生存模式</string>
-    <string name="gamemode_creative">创造模式</string>
-    <string name="pref_zz_custom_dpi">定制DPI</string>
-    <string name="pref_zz_custom_dpi_summary">修改你屏幕上的方向键大小 - 留空白自动设置默认大小</string>
-    <string name="get_pro">升级到Pro</string>
+    <string name="get_pro">升级到Pro版</string>
     <string name="about_about">关于BlockLauncher</string>
-    <string name="pref_zz_texture_pack_enable">使用材质包</string>
-    <string name="pref_zz_texture_pack_demo">显示材质包支持</string>
-    <string name="pref_zz_texture_pack_demo_summary">使用内置NathanX的Slickcraft材质包 </string>
-    <string name="no_minecraft_installed">BlockLauncher无法在您的手机上检测到Minecraft PE。 此程序需要Mojang的Minecraft PE 完整版。</string>
+    <string name="about_copyright">版权所有 &#169; 2013&#8211;2014 Zhuowei Zhang。</string>
+    <string name="about_copyright_pro">版权所有 &#169; 2013&#8211;2014 Zhuowei Zhang。 未经许可不得分享。</string>
+    <string name="about_librarycredits">本程序使用了Paul Burke编写的aFileChooser。 \n
+本程序的代码包含了Snowbound的PTPatchTool，授权根据Eclipse Public License的许可条款。 \n
+本程序包含一个改进的NathanX的Slickcraft材质包：许可使用。\n
+内置的部分RepetiCraft材质包由Theevilpplz制作和许可使用。\n
+此程序包含了Saurik编写的Cydia Substrate框架的一个版本，授权根据GNU Lesser General Public License的许可条款。\n
+本程序使用Chainfire的libsuperuser library。\n
+本程序包含了一份来自于Mozilla project的Rhino JavaScript engine。\n
+获取完整的授权信息，请查看Minecraft Forum论坛。\n
+本程序中文翻译由吴健蓬更新，Pocket Vibrant Team监制，10935336协助翻译。</string>
+    <string name="about_thankscommunity">感谢许多翻译人员、测试人员和工程师的工作让这个应用成为可能。\n你可以在Minecraft Forum论坛的贴子查看贡献者的名单。</string>
+    <string name="about_go_to_forums">访问BlockLauncher的Minecraft Forum贴子</string>
+    <string name="no_minecraft_installed">BlockLauncher无法在您的手机上检测到Minecraft PE。 此应用程序需要Mojang的Minecraft PE 完整版。</string>
+    <string name="firstlaunch_title">欢迎使用BlockLauncher!</string>
     <string name="firstlaunch_help">帮助</string>
     <string name="permlab_mcpelauncher_addon">BlockLauncher的插件</string>
-    <string name="permdesc_mcpelauncher_addon">允许在BlockLauncher里载入插件.这意味着这个应用被允许访问网络,存储,以及任何Minecraft PE被允许可以做的.</string>
-    <string name="firstlaunch_title">欢迎使用BlockLauncher!</string>
-    <string name="firstlaunch_generic_intro">感谢你使用BlockLauncher!BlockLauncher可以给你的MinecraftPE添加额外的功能，通过它增加补丁，皮肤，和材质等.</string>
-    <string name="firstlaunch_jelly_bean">您的设备是果冻豆（4.1）及以上，BlockLauncher无法访问默认的材质包，已启用演示材质您可以启动测试看看.</string>
-    <string name="firstlaunch_see_options">开始BlockLauncher请点击屏幕上方的设置按钮。更多的帮助请访问Minecraft Forum。</string>
-    <string name="about_go_to_forums">访问BlockLauncher的Minecraft Forum贴子</string>
-
+    <string name="permdesc_mcpelauncher_addon">允许在BlockLauncher里载入插件.这意味着这个应用被允许访问网络,存储,以及任何Minecraft PE被允许可以做的。</string>
+    <string name="firstlaunch_generic_intro">感谢你使用BlockLauncher!BlockLauncher可以给MinecraftPE增加额外的功能，通过它在游戏内增加插件、补丁、皮肤、和材质等。</string>
+    <string name="firstlaunch_jelly_bean">您的设备使用的系统是果冻豆（安卓4.1）及以上，BlockLauncher无法访问默认的材质包，已启用材质包展示，您可以测试启动器看看。</string>
+    <string name="firstlaunch_see_options">请点击屏幕上方的设置按钮开始BlockLauncher。更多的帮助请访问Minecraft Forum论坛。</string>
+    <string name="version_mismatch_message">BlockLauncher不支持该版本的Minecraft PE，将会暂时运行在安全模式下。 请检查BlockLauncher是否有支持该版本的更新。</string>
     <string name="feature_not_supported">BlockLauncher现在还不支持此功能。</string>
     <string name="hovercar_title">游戏内部补丁管理器</string>
     <string name="hovercar_live_patch">游戏内打补丁</string>
     <string name="hovercar_options">启动器设置(需要重启)</string>
+    <string name="hovercar_insert_text">插入文本（键盘问题解决方法）</string>
+    <string name="safe_mode_exit">回到正常状态</string>
+    <string name="safe_mode_continue">继续使用安全模式</string>
+    <string name="script_import_from">导入ModPE脚本</string>
+    <string name="script_import_from_local">从本地存储导入</string>
+    <string name="script_import_from_cfgy">从Treebl官方储存空间导入</string>
+    <string name="script_import_from_bl_repo">BlockLauncher测试报告</string>
+    <string name="script_import_from_url">从网站导入</string>
+    <string name="script_import_from_clipboard">使用剪贴板直接导入</string>
+    <string name="script_import_from_clipboard_name">输入ModPE脚本名称</string>
+    <string name="script_import_from_clipboard_code">输入代码完成导入</string>
+    <string name="script_import_from_cfgy_id">输入要导入的ModPE脚本的ID</string>
+    <string name="script_import_from_url_enter">输入要导入的ModPE脚本的网址</string>
+    <string name="script_import_too_many">升级到BlockLauncher专业版一次导入更多ModPE脚本</string>
+    <string name="script_execution_error">ModPE脚本发生错误</string>
+    <string name="script_disabled_in_multiplayer">ModPE脚本在多人游戏中被禁用。 当您从服务器断开连接时，它们将重新启用。</string>
+    <string name="script_minecraft_version_incompatible">ModPE脚本不支持你所使用的Minecraft PE版本。Mod脚本中的一些东西可能失去作用或者直接使游戏崩溃。使用它将会存在风险。</string>
+    <string name="script_import_from_intent_warning">你想输入这个ModPE脚本吗？ 它将从BlockLauncher上访问相关资源和信息, 包括您的密码和其他敏感信息。</string>
+    <string name="script_view_source">查看源代码</string>
+    <string name="script_too_many_errors">已将它禁用，因为它遇到了太多的错误。抱歉!</string>
+    <string name="take_screenshot">截屏</string>
+    <string name="take_screenshot_requires_modpe_script">ModPE脚本要求截入图中。 \n你可以在启动器设置页的\"管理Mod脚本\"的选项中更改。</string>
+    <string name="screenshot_saved_as">保存截图在</string>
+    <string name="selinux_broke_everything">不幸的是，由于您的手机安全软件拥有阻止应用修补的权限，所以BlockLauncher不能运行在你的设备上。 \n\n
+BlockLauncher的功能只限于启动补丁插件和使用材质包。希望你能解决问题让应用正常工作。 \n\n现在ModPE脚本不能被加载，所有mod和补丁需要重新启动。</string>
+    <string name="permlab_mcpelauncher_addon">BlockLauncher插件</string>
+    <string name="permdesc_mcpelauncher_addon">允许应用程序作为一个插件加载到BlockLauncher。这意味着，这个应用程序可以访问网络、存储以及访问Minecraft PE许可的权限。</string>
+    <string name="hovercar_insert_text_backspace">使用插入键</string>
+    <string name="hovercar_start_recording">开始记录</string>
+    <string name="hovercar_stop_recording">停止记录</string>
+    
+    <string name="textures_select">选择</string>
+    <string name="textures_demo">演示</string>
+    <string name="textures_extract">提取原版材质</string>
+    <string name="textures_clear_script_texture_overrides">清除代替材质的脚本</string>
+    <string name="plurals_patches_one">补丁</string>
+    <string name="plurals_patches_more">补丁</string>
+    <string name="plurals_patches_no">没有补丁</string>
+    <string name="plurals_scripts_one">ModPE脚本</string>
+    <string name="plurals_scripts_more">ModPE脚本</string>
+    <string name="plurals_scripts_no">没有ModPE脚本</string>
+    <string name="nerdy_stuff_dump_modpe">转储ModPE脚本方法</string>
+    <string name="nerdy_stuff_set_skin">保存皮肤到 /sdcard/skin.png</string>
+    <string name="nerdy_stuff_secret">只允许经过授权的人</string>
+    <string name="pref_other_title">其它</string>
+    <string name="pref_zz_legacy_live_patch">使用BlockLauncher 1.6.8的旧版补丁代码</string>
+    <string name="pref_zz_legacy_live_patch_summary">如果你更新BlockLauncher到1.6.9后更高版本后，本程序却停止运行的话请打开。</string>
+    <string name="previous_command">上一页</string>
+    <string name="next_command">下一页</string>
+    <string name="pref_zz_command_history">在聊天界面上启用历史记录命令</string>
+    <string name="pref_zz_immersive_mode">全屏模式</string>
+    <string name="pref_zz_immersive_mode_summary">在游戏中隐藏导航按钮</string>
+    <string name="pref_zz_watch_recording">查看记录</string>
+    <string name="pref_zz_reshare_last_recording">查看最后的正常记录</string>
+    <string name="pref_zz_upload_skin">多人游戏中上传皮肤</string>
+    <string name="pref_zz_enable_kamcord">启用实验中的屏幕录制器</string>
+    <string name="recorder_no_recording">这里没有记录可供查看。</string>
+    <string name="advertising_privacy_policy">广告隐私权政策</string>
+    <string name="about_kamcord_credits">某些视频和音频录制功能的支持是来自于Kamcord™ (kamcord.com)的，你使用这些功能需要遵守Kamcord条款(kamcord.com/tos) 和隐私政策(kamcord.com/privacy)。</string>
+    <string name="about_fmod_credits">音频工具 : 来自于FMOD Studio的Firelight Technologies。</string>
+    
+    <string name="get_substrate_explanation">您需要安装Substrate程序才能使用BlockLauncher。(您只需要安装它。并不需要打开或设置它，同时也不需要ROOT权限。)</string>
+    <string name="get_substrate_button">安装Substrate</string>
+    
+    <string name="texture_entry_up">向上</string>
+    <string name="texture_entry_down">向下</string>
+    <string name="texture_entry_remove">删除</string>
+    
+    <string name="about_oss_license_info">查看软件库许可</string>
+    <string name="pref_zz_signal_handler">将错误报告写出到共享存储</string>
+    <string name="minecraft_version_not_supported">该版本的BlockLauncher不支持您现在使用的Minecraft PE版本。\n您有Minecraft PE中的MINECRAFT_VERSION文件， 但是BlockLauncher只支持Minecraft PE的SUPPORTED_VERSION文件。 请更新您的Minecraft PE。</string>
+    <string name="pref_zz_use_controller">使用控制器</string>
+    <string name="purchase_extras_package">你需要购买额外的BlockLauncher扩充包来使用此功能。</string>
+    <string name="minecraft_wrong_arch">不幸的是，该版本的Minecraft PE在这个设备上与BlockLauncher不兼容。请为Minecraft PE安装ARCH处理器.\n(你可能没有购买Minecraft：如果是这样的话，请去购买官方合法版本的Minecraft PE，这将会兼容ARCH处理器)</string>
+    <string name="addons_wrong_arch">这些插件不支持ARCH处理器所以无法被加载。</string>
+    <string name="pref_zz_theme_dark">使用黑色风格的界面</string>
+    <string name="pref_zz_reimport_scripts">启动后重新加载有更改的ModPE脚本</string>
+    <string name="manage_scripts_reimported_toast">重新导入</string>
+    <string name="manage_scripts_reimport_enable_dialog">使用此功能前，您需要重新手动导入每个ModPE脚本，这样BlockLauncher可以存储它们的地址。\n自动重新导入脚本可能造成安全漏洞：不需要时请关掉此功能。</string>
+    <string name="textures_clear_script_texture_overrides_success">已清除代替材质的脚本</string>
+    <string name="no_minecraft_learn_more">更多信息</string>
+    <string name="pref_zz_desktop_gui">使用PC版界面</string>
+    <string name="pref_zz_desktop_gui_summary">使用PC版的合成方式和Windows10版界面</string>
+    
+    <string name="report_error_title">哎呦怎么全坏了</string>
 </resources>
