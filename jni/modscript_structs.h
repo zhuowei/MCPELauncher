@@ -298,7 +298,7 @@ typedef struct {
 	void** vtable; //0
 	char filler[144-4]; //4
 	void* model; // 144 (from MobRenderer::MobRenderer)
-	char filler2[196-136]; // 148
+	char filler2[196-148]; // 148
 } MobRenderer;
 
 typedef void Tag;
@@ -398,10 +398,13 @@ struct HumanoidMobRenderer : public MobRenderer {
 	HumanoidModel* modelArmor; // 200
 	HumanoidModel* modelArmorChestplate; // 204
 };
+#ifdef __arm__
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 200, "armour model offset");
 #endif
+#endif // ifdef __cplusplus
 
 #ifdef __cplusplus
-}
+} // extern "C"
 #endif
 
 enum GameType {

@@ -5,15 +5,18 @@ enum TextureLocation {
 };
 namespace mce {
 class TextureGroup;
+class TextureDescription;
 class Texture {
 public:
 	bool isLoaded() const;
+	TextureDescription* getDescription() const;
 };
 class TexturePtr {
 public:
 	char filler[0x4]; // 0
 	Texture* texture; // 4
-	std::string textureName;
+	std::string textureName; // 8
+	TextureLocation myLocation; // 12
 	TexturePtr();
 	TexturePtr(TextureGroup&, std::string const&, TextureLocation);
 	TexturePtr(TexturePtr&&);
