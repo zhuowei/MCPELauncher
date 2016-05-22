@@ -260,6 +260,13 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 
 	bl_JavaVM->DetachCurrentThread();
 
+	{
+		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
+		ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
+		ItemInstance* item = fn(player);
+		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
+	}
+
 	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
 }
 
@@ -296,6 +303,13 @@ void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, x, y, z, itemId, blockId, side, itemDamage, blockDamage);
 
 	bl_JavaVM->DetachCurrentThread();
+
+	{
+		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
+		ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
+		ItemInstance* item = fn(player);
+		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
+	}
 
 	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
 }
@@ -814,6 +828,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		invPtr->add(instance, true);
 	} else {
 		bl_FillingContainer_removeResource(invPtr, &instance, 0);
+		// note: this may free the original item stack. Don't hold onto it
 	}
 }
 

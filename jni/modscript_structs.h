@@ -170,8 +170,10 @@ public:
 	TextureUVCoordinateSet* getIcon(int, bool) const;
 	std::string getName() const;
 	int getMaxStackSize() const;
+	void remove(int);
 }; // see ItemInstance::fromTag for size
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
+static_assert(offsetof(ItemInstance, item) == 12, "item offset wrong");
 static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 
 enum CreativeItemCategory {
