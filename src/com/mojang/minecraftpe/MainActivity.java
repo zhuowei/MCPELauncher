@@ -27,6 +27,7 @@ import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.media.AudioManager;
@@ -1998,6 +1999,28 @@ public class MainActivity extends NativeActivity {
 			public void run() {
 				Toast.makeText(MainActivity.this, "Script " + scriptName + ": " + message,
 						Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
+	private Typeface minecraftTypeface = null;
+	private Toast lastToast = null;
+	public void fakeTipMessageCallback(final String message) {
+		if (minecraftTypeface == null) {
+			minecraftTypeface = Typeface.createFromAsset(this.getAssets(), "fonts/minecraft.ttf");
+		}
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				TextView toastText = new TextView(MainActivity.this);
+				toastText.setText(message);
+				toastText.setTypeface(minecraftTypeface);
+				toastText.setTextColor(0xffffffff);
+				toastText.setShadowLayer(0.1f, 8f, 8f, 0xff000000);
+				if (lastToast != null) lastToast.cancel();
+				Toast myToast = new Toast(MainActivity.this);
+				myToast.setView(toastText);
+				lastToast = myToast;
+				myToast.show();
 			}
 		});
 	}

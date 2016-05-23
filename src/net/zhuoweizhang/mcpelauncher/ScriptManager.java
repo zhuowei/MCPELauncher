@@ -797,6 +797,15 @@ public class ScriptManager {
 		}
 	}
 
+	private static void scriptFakeTipMessage(String str) {
+		if (MainActivity.currentMainActivity != null) {
+			MainActivity main = MainActivity.currentMainActivity.get();
+			if (main != null) {
+				main.fakeTipMessageCallback(str);
+			}
+		}
+	}
+
 	public static void requestGraphicsReset() {
 		requestedGraphicsReset = true;
 	}
@@ -3410,6 +3419,8 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void showTipMessage(String msg) {
 			nativeShowTipMessage(msg);
+			// showTipMessage doesn't work anymore?
+			scriptFakeTipMessage(msg);
 		}
 
 		@JSStaticFunction
