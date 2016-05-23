@@ -14,6 +14,7 @@ public class RendererManager {
 	private static native void nativeModelClear(int rendererId, String modelPart);
 	private static native boolean nativeModelPartExists(int rendererId, String modelPart);
 	private static native int nativeCreateHumanoidRenderer();
+	public static native int nativeCreateItemSpriteRenderer(int itemId);
 	public static native void nativeModelSetRotationPoint(int rendererId, String modelPart, float x, float y, float z);
 
 	public static void defineClasses(Scriptable scope) throws Exception {

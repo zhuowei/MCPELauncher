@@ -958,6 +958,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 	bl_Entity_remove(entity); //yes, I know I probably need to call through the vtable
 }
 
+int bl_getEntityTypeIdThroughVtable(Entity* entity) {
+	if (!entity) return 0;
+	void* vtable = entity->vtable[vtable_indexes.entity_get_entity_type_id];
+	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
+	return fn(entity) & 0xff;
+}
+
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityTypeId
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);

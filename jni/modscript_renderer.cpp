@@ -13,6 +13,7 @@
 #include "modscript_renderer_jni.h"
 #include "modscript_shared.h"
 #include "mcpe/mce/textureptr.h"
+#include "mcpe/itemspriterenderer.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
 #define MOBRENDERER_SIZE 220
@@ -44,6 +45,7 @@ static void (*bl_ModelPart_reset)(ModelPart*);
 static std::vector<EntityRenderer*> bl_entityRenderers;
 
 static std::map<long long, int> bl_renderTypeMap;
+static std::unordered_map<int, int> bl_itemSpriteRendererTypeMap;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
 
@@ -116,6 +118,21 @@ int bl_renderManager_createHumanoidRenderer() {
 
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	return retval;
+}
+
+Item** bl_getItemsArray();
+
+int bl_renderManager_createItemSpriteRenderer(int itemId) {
+	Item** mItems = bl_getItemsArray();
+	if (!mItems[itemId]) return -1;
+	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(bl_minecraft->getTextures(), mItems[itemId], false);
+	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
+	bl_itemSpriteRendererTypeMap[itemId] = retval;
+	return retval;
+}
+
+int bl_renderManager_renderTypeForItemSprite(int itemId) {
+	return bl_itemSpriteRendererTypeMap[itemId];
 }
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
@@ -200,6 +217,11 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_Renderer
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
   (JNIEnv *env, jclass clazz) {
 	return bl_renderManager_createHumanoidRenderer();
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateItemSpriteRenderer
+  (JNIEnv *env, jclass clazz, jint itemId) {
+	return bl_renderManager_createItemSpriteRenderer(itemId);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelSetRotationPoint

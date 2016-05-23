@@ -237,6 +237,9 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_use_centered_gui;
 	int entity_hurt;
 	int mobrenderer_render;
+	int snowball_item_vtable_size;
+	int item_use;
+	int item_dispense;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -287,6 +290,11 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN6Entity4hurtERK18EntityDamageSourcei");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
+	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
+	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
+		"_ZN4Item3useER12ItemInstanceR6Player");
+	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
+		" _ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 }
 
 extern "C" {
@@ -425,6 +433,7 @@ static void (*bl_Item_setCategory)(Item*, int);
 static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
+static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
 static void* (*bl_MobRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
 static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
@@ -468,6 +477,8 @@ int bl_item_id_count = 512;
 Item* bl_items[BL_ITEMS_EXPANDED_COUNT];
 unsigned char bl_anyAuxValue[BL_ITEMS_EXPANDED_COUNT];
 void** bl_CustomItem_vtable;
+static void** bl_CustomSnowballItem_vtable;
+static void** bl_SnowballItem_vtable;
 unsigned short bl_customItem_allowEnchantments[BL_ITEMS_EXPANDED_COUNT];
 int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
 
@@ -801,6 +812,8 @@ int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 }
 #endif
 
+static void bl_CustomSnowball_processAddEntity(Entity*);
+
 static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
 	JNIEnv *env;
 	Entity* entity = entityPtr.get();
@@ -808,6 +821,7 @@ static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entity
 	bool retval = bl_Level_addEntity_real(level, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
+	bl_CustomSnowball_processAddEntity(entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -858,6 +872,7 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Ent
 	bool retval = bl_MultiPlayerLevel_addEntity_real(level, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
+	bl_CustomSnowball_processAddEntity(entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -1001,6 +1016,15 @@ Item* bl_constructItem(std::string const& name, int id) {
 	return retval;
 }
 
+Item* bl_constructSnowballItem(std::string const& name, int id) {
+	Item* retval = (Item*) ::operator new(kItemSize);
+	bl_Item_Item(retval, name, id - 0x100);
+	*((void***)retval) = bl_CustomSnowballItem_vtable + 2;
+	retval->setStackedByData(true);
+	bl_registerItem(retval, name);
+	return retval;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
@@ -1043,6 +1067,28 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
 	bl_Item_setIcon(item, iconNameString, iconIndex);
+
+	bl_set_i18n("item." + mystr + ".name", mystr);
+	env->ReleaseStringUTFChars(name, utfChars);
+	env->ReleaseStringUTFChars(iconName, iconUTFChars);
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineSnowballItem
+  (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
+	const char * utfChars = env->GetStringUTFChars(name, NULL);
+	std::string mystr = std::string(utfChars);
+
+	Item* item = bl_constructSnowballItem(mystr, id);
+
+	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
+	std::string iconNameString = std::string(iconUTFChars);
+	bl_Item_setIcon(item, iconNameString, iconIndex);
+
+	if (maxStackSize <= 0) {
+		bl_Item_setMaxStackSize(item, 64);
+	} else {
+		bl_Item_setMaxStackSize(item, maxStackSize);
+	}
 
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -1272,6 +1318,40 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 		bl_customItem_enchantValue[item->itemId]);
 	return bl_customItem_enchantValue[item->itemId];
 }
+class Container;
+static void* (*bl_CustomSnowballItem_use_real)(Item*, ItemInstance&, Player&);
+static void* (*bl_CustomSnowballItem_dispense_real)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char);
+static int bl_activeSnowballId;
+
+static void* bl_CustomSnowballItem_use_hook(Item* item, ItemInstance& stack, Player& player) {
+	bl_activeSnowballId = item->itemId;
+	void* retval = bl_CustomSnowballItem_use_real(item, stack, player);
+	bl_activeSnowballId = 0;
+	return retval;
+}
+
+static void* bl_CustomSnowballItem_dispense_hook(Item* item, BlockSource& blockSource, Container& container,
+	int something, Vec3 const& vec3, signed char side) {
+	bl_activeSnowballId = item->itemId;
+	void* retval = bl_CustomSnowballItem_dispense_real(item, blockSource, container, something, vec3, side);
+	bl_activeSnowballId = 0;
+	return retval;
+}
+
+int bl_renderManager_renderTypeForItemSprite(int itemId);
+int bl_getEntityTypeIdThroughVtable(Entity* entity);
+
+Item** bl_getItemsArray() {
+	return bl_Item_mItems;
+}
+
+static void bl_CustomSnowball_processAddEntity(Entity* entity) {
+	if (bl_getEntityTypeIdThroughVtable(entity) != 81 /* snowball */) return;
+	if (!bl_activeSnowballId) return;
+	int renderType = bl_renderManager_renderTypeForItemSprite(bl_activeSnowballId);
+	if (!renderType) return;
+	bl_renderManager_setRenderType(entity, renderType);
+}
 
 void bl_initCustomBlockVtable() {
 	//copy existing vtable
@@ -1308,6 +1388,16 @@ void bl_initCustomBlockVtable() {
 		(void*) &bl_CustomItem_getEnchantSlot_hook;
 	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_value] =
 		(void*) &bl_CustomItem_getEnchantValue_hook;
+	bl_CustomSnowballItem_vtable = (void**) ::operator new(vtable_indexes.snowball_item_vtable_size);
+	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
+	bl_CustomSnowballItem_use_real = (void* (*)(Item*, ItemInstance&, Player&))
+		bl_SnowballItem_vtable[vtable_indexes.item_use];
+	bl_CustomSnowballItem_dispense_real = (void* (*)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char))
+		bl_SnowballItem_vtable[vtable_indexes.item_dispense];
+	bl_CustomSnowballItem_vtable[vtable_indexes.item_use] =
+		(void*) &bl_CustomSnowballItem_use_hook;
+	bl_CustomSnowballItem_vtable[vtable_indexes.item_dispense] =
+		(void*) &bl_CustomSnowballItem_dispense_hook;
 }
 
 void* bl_getMaterial(int materialType) {
@@ -2434,6 +2524,14 @@ mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& item
 	return bl_ItemRenderer_getGraphics_real(itemStack);
 }
 
+mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook_item(Item* item) {
+	if (item->itemId >= 0x200) { // extended item ID
+		return bl_ItemRenderer_getGraphics_real_item(bl_Item_mItems[0x100]);
+	}
+	return bl_ItemRenderer_getGraphics_real_item(item);
+}
+
+
 mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Entity& ent) {
 	auto foundIter = bl_mobTexturesMap.find(ent.getUniqueID());
 	if (foundIter != bl_mobTexturesMap.end()) {
@@ -2872,8 +2970,12 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	}
 #endif
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
-	mcpelauncher_hook((void*) &ItemRenderer::getGraphics, (void*) &bl_ItemRenderer_getGraphics_hook,
+	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(ItemInstance const&)>(&ItemRenderer::getGraphics),
+		(void*) &bl_ItemRenderer_getGraphics_hook,
 		(void**) &bl_ItemRenderer_getGraphics_real);
+	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(Item const&)>(&ItemRenderer::getGraphics),
+		(void*) &bl_ItemRenderer_getGraphics_hook_item,
+		(void**) &bl_ItemRenderer_getGraphics_real_item);
 
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];
@@ -2907,6 +3009,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(raknet_connect, (void*) &bl_RakNetInstance_connect_hook, (void**) &bl_RakNetInstance_connect_real);
 
 	bl_Item_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV4Item"));
+	bl_SnowballItem_vtable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV12SnowballItem");
 	//I have no idea why I have to subtract 24 (or add 8).
 	//tracing out the original vtable seems to suggest this.
 

@@ -6,4 +6,5 @@ namespace mce {
 class ItemRenderer {
 public:
 	static mce::TexturePtr const& getGraphics(ItemInstance const&);
+	static mce::TexturePtr const& getGraphics(Item const&);
 };

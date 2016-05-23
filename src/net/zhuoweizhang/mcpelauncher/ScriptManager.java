@@ -666,9 +666,17 @@ public class ScriptManager {
 	@CallbackName(name="projectileHitBlockHook", args={"projectile", "blockX", "blockY", "blockZ", "side"})
 	public static void throwableHitCallback(long projectile, int type, int side,
 		int x, int y, int z, float hX, float hY, float hZ, long targetEntity) {
+		Integer customProjectileId = (nativeGetEntityTypeId(projectile) == EntityType.SNOWBALL)?
+			NativeItemApi.itemIdToRendererId.get(nativeEntityGetRenderType(projectile)): null;
 		if (type == 0) {
+			if (customProjectileId != null) {
+				callScriptMethod("customThrowableHitBlockHook", projectile, (int)customProjectileId, x, y, z, side);
+			}
 			callScriptMethod("projectileHitBlockHook", projectile, x, y, z, side);
 		} else if (type == 1) {
+			if (customProjectileId != null) {
+				callScriptMethod("customThrowableHitEntityHook", projectile, (int)customProjectileId, targetEntity);
+			}
 			callScriptMethod("projectileHitEntityHook", projectile, targetEntity);
 		}
 	}
@@ -1919,6 +1927,8 @@ public class ScriptManager {
 	// not added to JS yet
 	public static native int nativeEntityGetCarriedItem(long id, int type);
 	public static native int nativeItemGetMaxStackSize(int id);
+	public static native void nativeDefineSnowballItem(int itemId, String iconName, int iconId,
+			String name, int maxStackSize);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3519,6 +3529,8 @@ public class ScriptManager {
 
 	private static class NativeItemApi extends ScriptableObject {
 		private static List<Object[]> activeRecipes = new ArrayList<Object[]>();
+		private static Map<Integer, Integer> itemIdToRendererId = new HashMap<Integer, Integer>();
+		private static Map<Integer, Integer> rendererToItemId = new HashMap<Integer, Integer>();
 		public NativeItemApi() {
 		}
 		
@@ -3793,6 +3805,28 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static int getMaxStackSize(int id) {
 			return nativeItemGetMaxStackSize(id);
+		}
+
+
+		@JSStaticFunction
+		public static void defineThrowable(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
+			if (id < 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be >= 0 and < ITEM_ID_COUNT");
+			}
+			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
+				throw new MissingTextureException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
+			}
+			nativeDefineSnowballItem(id, iconName, iconSubindex, name, maxStackSize);
+			int renderer = RendererManager.nativeCreateItemSpriteRenderer(id);
+			itemIdToRendererId.put(renderer, id);
+			rendererToItemId.put(id, renderer);
+		}
+
+		@JSStaticFunction
+		public static int getCustomThrowableRenderType(int itemId) {
+			Integer i = rendererToItemId.get(itemId);
+			if (i == null) throw new RuntimeException("Not a custom throwable item ID: " + itemId);
+			return i;
 		}
 
 		@Override
