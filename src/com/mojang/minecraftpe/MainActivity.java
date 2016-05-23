@@ -2339,6 +2339,7 @@ public class MainActivity extends NativeActivity {
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
+		if (version.equals(mcPkgInfo.versionName)) return true;
 		if (mcPkgInfo.versionName.startsWith("0.14")) {
 			String subVer = mcPkgInfo.versionName.substring(mcPkgInfo.versionName.lastIndexOf(".") + 1);
 			try {
@@ -2348,6 +2349,7 @@ public class MainActivity extends NativeActivity {
 					if (version.equals("0.14.1")) return true;
 				} else {
 					if (version.equals("0.14.2")) return true;
+					if (version.equals("0.14.3")) return true;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

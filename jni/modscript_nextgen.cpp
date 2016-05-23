@@ -2864,6 +2864,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 #ifdef __i386
 	if (setItemCode[22] == 0xff && setItemCode[23] == 0x01) {
 		setItemCode[22] = (BL_ITEMS_EXPANDED_COUNT & 0xff); setItemCode[23] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+	} else if (setItemCode[23] == 0xff && setItemCode[24] == 0x01) {
+		setItemCode[23] = (BL_ITEMS_EXPANDED_COUNT & 0xff); setItemCode[24] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
 	} else {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
 		return;
