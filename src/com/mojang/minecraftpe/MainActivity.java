@@ -2005,10 +2005,12 @@ public class MainActivity extends NativeActivity {
 
 	private Typeface minecraftTypeface = null;
 	private Toast lastToast = null;
-	public void fakeTipMessageCallback(final String message) {
+	public void fakeTipMessageCallback(final String messageRaw) {
 		if (minecraftTypeface == null) {
 			minecraftTypeface = Typeface.createFromAsset(this.getAssets(), "fonts/minecraft.ttf");
 		}
+		// strip all colour characters
+		final String message = messageRaw.replaceAll(ChatColor.BEGIN + ".", "");
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				TextView toastText = new TextView(MainActivity.this);
