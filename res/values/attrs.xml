@@ -21,7 +21,8 @@
     <declare-styleable name="TextAppearanceSwitch">
         <attr name="textColor" format="color" />
         <attr name="textSize" format="dimension" />
-        <attr name="textStyle" format="reference" />
+        <!--<attr name="textStyle" format="reference" />-->
+        <attr name="switchTextStyle" format="reference" />
         <attr name="typeface" format="reference" />
         <attr name="fontFamily" format="reference" />
         <attr name="textColorHighlight" format="color" />

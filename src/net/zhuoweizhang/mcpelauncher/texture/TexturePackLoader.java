@@ -49,16 +49,16 @@ public class TexturePackLoader {
 
 	public static List<TexturePack> loadTexturePacks(Context context, List<String> incompatibles,
 		byte[] terrainMeta, byte[] itemsMeta) throws Exception {
-		List<String> terrainList = metaToList(terrainMeta);
-		List<String> itemsList = metaToList(itemsMeta);
+		//List<String> terrainList = metaToList(terrainMeta);
+		//List<String> itemsList = metaToList(itemsMeta);
 		List<TexturePackDescription> descs = loadDescriptions(context);
 		List<TexturePack> packs = new ArrayList<TexturePack>(descs.size());
 		for (TexturePackDescription d: descs) {
 			TexturePack pack = loadTexturePack(d);
-			if (!isCompatible(pack, terrainList, itemsList)) {
-				incompatibles.add(describeTexturePack(context, d));
-				continue;
-			}
+			//if (!isCompatible(pack, terrainList, itemsList)) {
+			//	incompatibles.add(describeTexturePack(context, d));
+			//	continue;
+			//}
 			packs.add(pack);
 		}
 		return packs;

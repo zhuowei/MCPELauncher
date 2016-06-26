@@ -79,8 +79,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.14";
-	public static final String HALF_SUPPORT_VERSION = "0.15";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.14!!!!!";
+	public static final String HALF_SUPPORT_VERSION = "0.14.99";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -1003,7 +1003,14 @@ public class MainActivity extends NativeActivity {
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
 		System.out.println("Get file data: " + name);
 		try {
-			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
+			InputStream is = null;
+			if (name.charAt(0) == '/') {
+				is = getRegularInputStream(name);
+			} else if (name.endsWith("start_screen.json")) {
+				is = openFallbackAsset(name);
+			} else {
+				is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
+			}
 			if (is == null || TAG.hashCode() != -1771687045)
 				return null;
 			// can't always find length - use the method from
@@ -1100,6 +1107,10 @@ public class MainActivity extends NativeActivity {
 			System.err.println(e);
 			return null;
 		}
+	}
+
+	public int[] getImageData(String name) {
+		return getImageData(name, true);
 	}
 
 	public int[] getImageData(String name, boolean fromAssets) {
@@ -1623,6 +1634,7 @@ public class MainActivity extends NativeActivity {
 
 	public void initPatching() throws Exception {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
+		System.out.println("MCPE Version is " + getMCPEVersion());
 		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 			System.loadLibrary("mcpelauncher_lite");
 		} else {
@@ -1931,6 +1943,25 @@ public class MainActivity extends NativeActivity {
 	// 0.15
 	public void setFileDialogCallback(long pointer) {
 		if (BuildConfig.DEBUG) System.out.println("Set file dialog callback: " + Long.toString(pointer, 16));
+	}
+
+	public void updateLocalization(String a, String b) {
+		System.out.println("Update localization: " + a + ":" + b);
+	}
+
+	public String[] getIPAddresses() {
+		System.out.println("get IP addresses?");
+		return new String[] {"127.0.0.1"};
+	}
+
+	public Intent getLaunchIntent() {
+		System.out.println("get launch intent");
+		return getIntent();
+	}
+
+	public Intent createAndroidLaunchIntent() {
+		System.out.println("create android launch intent");
+		return getIntent();
 	}
 
 	@Override
@@ -2388,6 +2419,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
+/*
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
@@ -2409,6 +2441,7 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			reportError(e);
 		}
+*/
 	}
 
 	private boolean isForcingController() {
