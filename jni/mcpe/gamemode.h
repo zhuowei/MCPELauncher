@@ -2,4 +2,5 @@
 class GameMode {
 public:
 	void _destroyBlockInternal(Player&, BlockPos, signed char);
+	float getDestroyProgress();
 };

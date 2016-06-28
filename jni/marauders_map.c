@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <jni.h>
+#include <stdlib.h>
 #include <android/log.h>
 
 #define LOG_TAG "BlockLauncher/Marauder"
@@ -51,6 +52,11 @@ int marauder_remap_text(uintptr_t originalBegin, size_t length, const char* shar
 }
 
 void* bl_marauder_translation_function(void* input) {
+	uint32_t* ptr = (uint32_t*)(((uintptr_t) input) & ~1);
+	if (ptr[0] == 0xe28fc610) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Trying to edit %p which is a plt entry!", ptr);
+		abort();
+	}
 	if (!isTranslating) return input;
 	uintptr_t addr = (uintptr_t) input;
 	//__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Input %x", addr);

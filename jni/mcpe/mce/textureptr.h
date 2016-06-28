@@ -3,6 +3,7 @@
 enum TextureLocation {
 	TEXTURE_LOCATION_INTERNAL, // 0
 };
+class ResourceLocation;
 namespace mce {
 class TextureGroup;
 class TextureDescription;
@@ -18,7 +19,7 @@ public:
 	std::string textureName; // 8
 	TextureLocation myLocation; // 12
 	TexturePtr();
-	TexturePtr(TextureGroup&, std::string const&, TextureLocation);
+	TexturePtr(TextureGroup&, ResourceLocation const&);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);
@@ -28,6 +29,6 @@ public:
 class TextureGroup {
 public:
 	TexturePtr getTexture(std::string const&);
-	void loadTexture(std::string const&, TextureLocation, bool);
+	void loadTexture(ResourceLocation const&, bool);
 };
 }; // namespace mce

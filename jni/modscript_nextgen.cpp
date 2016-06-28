@@ -47,6 +47,7 @@
 #include "mcpe/options.h"
 #include "mcpe/screenchooser.h"
 #include "mcpe/guidata.h"
+#include "mcpe/blockgraphics.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -59,11 +60,11 @@ typedef void Font;
 //#define MOB_TARGET_OFFSET 3156
 // Updated 0.13.0
 // found in ChatScreen::setTextboxText
-#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 136
+#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 140
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3316
+#define PLAYER_ABILITIES_OFFSET 3372
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -72,39 +73,42 @@ typedef void Font;
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.14
+// FIXME 0.15
 #define PLAYER_INVENTORY_OFFSET 3476
 #else
-#define PLAYER_INVENTORY_OFFSET 3488
+#define PLAYER_INVENTORY_OFFSET 3556
 #endif
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
-const size_t kTileSize = 0x98;
-const size_t kLiquidBlockDynamicSize = 244;
-const size_t kLiquidBlockStaticSize = 224;
+const size_t kTileSize = 120;
+const size_t kLiquidBlockDynamicSize = 144;
+const size_t kLiquidBlockStaticSize = 124;
 // found in registerBlock
-const size_t kBlockItemSize = 64;
+const size_t kBlockItemSize = 68;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 64;
+const size_t kItemSize = 68;
 // found in Entity::spawnAtLocation
-const size_t kItemEntitySize = 416;
+const size_t kItemEntitySize = 464;
 // found in Entity::spawnAtLocation
-const size_t kItemEntity_pickupDelay_offset = 392;
+const size_t kItemEntity_pickupDelay_offset = 444;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 368;
+const size_t kItemEntity_itemInstance_offset = 420;
 // found in TextPacket::handle
-const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 11;
+const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
 
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
 "_ZTV11MobRenderer",
 "_ZTV11PigRenderer",
+"_ZTV11TntRenderer",
 "_ZTV12WolfRenderer",
 "_ZTV13BlazeRenderer",
 "_ZTV13GhastRenderer",
+"_ZTV13HorseRenderer",
 "_ZTV13SheepRenderer",
 "_ZTV13SlimeRenderer",
 "_ZTV13SquidRenderer",
+"_ZTV13StrayRenderer",
 "_ZTV13WitchRenderer",
 "_ZTV14OcelotRenderer",
 "_ZTV14RabbitRenderer",
@@ -116,7 +120,9 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV16VillagerRenderer",
 "_ZTV17IronGolemRenderer",
 "_ZTV17LavaSlimeRenderer",
+"_ZTV17LiveHorseRenderer",
 "_ZTV17SnowGolemRenderer",
+"_ZTV18LivePlayerRenderer",
 "_ZTV18SilverfishRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
@@ -172,12 +178,13 @@ public:
 	virtual ~Packet();
 };
 
+// fixme 0.15: size?
+
 class TextPacket : public Packet {
 public:
 	char filler[8-4]; // 4
 	int shouldBeOne; // 8
-	unsigned char shouldBeZero; // 12
-	unsigned char type; //13
+	unsigned char type; //12
 	char filler2[16-14]; // 14
 	std::string username; // 16
 	std::string message; // 20
@@ -215,7 +222,7 @@ public:
 struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
 	int tile_vtable_size;
-	int tile_get_texture_char_int;
+	//int tile_get_texture_char_int;
 	int tile_get_color;
 	int tile_get_color_data;
 	int tile_get_visual_shape;
@@ -232,7 +239,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_get_enchant_slot;
 	int item_get_enchant_value;
 	int level_set_difficulty;
-	int appplatform_get_screen_type;
+	//int appplatform_get_screen_type;
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
 	int entity_hurt;
@@ -248,8 +255,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZN5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV5Block")->st_size;
-	vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block10getTextureEai");
+	//vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+	//	"_ZN5Block10getTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block8getColorER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
@@ -280,8 +287,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item15getEnchantValueEv");
 	vtable_indexes.level_set_difficulty = bl_vtableIndex(mcpelibhandle, "_ZTV5Level",
 		"_ZN5Level13setDifficultyE10Difficulty");
-	vtable_indexes.appplatform_get_screen_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK19AppPlatform_android13getScreenTypeEv");
+	//vtable_indexes.appplatform_get_screen_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+	//	"_ZNK19AppPlatform_android13getScreenTypeEv");
 	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
@@ -294,7 +301,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZN4Item3useER12ItemInstanceR6Player");
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		" _ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
+		"_ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 }
 
 extern "C" {
@@ -341,7 +348,6 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-static TextureUVCoordinateSet* (*bl_Tile_getTexture)(Tile*, signed char, int);
 static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
@@ -655,6 +661,7 @@ const char* bl_getCharArr(void* str){
 }
 
 TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, signed char side, int data) {
+/*
 	int blockId = tile->id;
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL) {
@@ -666,6 +673,9 @@ TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, signed char si
 		myIndex = side;
 	}
 	return ptrToBlockInfo[myIndex];
+*/
+	// FIXME 0.15
+	return nullptr;
 }
 
 bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
@@ -986,18 +996,25 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 
 JNIEXPORT int JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId) {
+	// FIXME 0.15
+/*
 	Tile* tile = bl_Block_mBlocks[blockId];
 	if(tile == NULL) return 0;
 	
 	return tile->renderType;//bl_CustomBlock_getRenderShapeHook(tile);
+*/
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetBlockRenderShape
   (JNIEnv *env, jclass clazz, jint blockId, jint renderType) {
 	//bl_custom_block_renderShape[blockId] = renderType;
+	// FIXME 0.15
+/*
 	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == nullptr) return;
 	tile->renderType = renderType;
+*/
 }
 
 static void bl_registerItem(Item* item, std::string const& name) {
@@ -1061,7 +1078,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
 	if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
-	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), textureUTFChars, TEXTURE_LOCATION_INTERNAL);
+	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(textureUTFChars));
 	env->ReleaseStringUTFChars(name, textureUTFChars);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -1202,7 +1219,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
-	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), newSkin, TEXTURE_LOCATION_INTERNAL);
+	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(newSkin));
 }
 void bl_clearMobTextures() {
 	bl_mobTexturesMap.clear();
@@ -1271,6 +1288,9 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForBlock
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jint side, jfloatArray outputArray) {
 	if (itemId <= 0 || itemId >= 256) return false;
+	return false;
+	// FIXME 0.15
+/*
 	Block* block = bl_Block_mBlocks[itemId];
 	if (!block) return false;
 	TextureUVCoordinateSet* (*gettex)(Block*, signed char, int) =
@@ -1282,6 +1302,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
 	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
 	return true;
+*/
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
@@ -1359,7 +1380,10 @@ void bl_initCustomBlockVtable() {
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, vtable_indexes.tile_vtable_size);
 
 	//set the texture getter to our overridden version
+	// FIXME 0.15
+/*
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
+*/
 	bl_Block_onPlace = (void (*)(Block*, BlockSource&, BlockPos const&))
 		bl_CustomBlock_vtable[vtable_indexes.tile_on_place];
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_place] = (void*) &bl_CustomBlock_onPlace_hook;
@@ -1410,7 +1434,7 @@ void* bl_getMaterial(int materialType) {
 
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	for (int i = 0; i < 16*6; i++) {
-		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(Block::getTextureUVCoordinateSet(
+		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(BlockGraphics::getTextureUVCoordinateSet(
 			textureNames[i], textureCoords[i]));
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
 		output[i] = mySet;
@@ -1444,18 +1468,21 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Block* retval;
-	if (customBlockType == 0) {
+	if (customBlockType == 0 || true) { // FIXME 0.15
 		retval = (Block*) ::operator new(kTileSize);
 		bl_Block_Block(retval, nameStr, blockId, bl_getMaterial(materialType));
 		retval->vtable = bl_CustomBlock_vtable + 2;
-		retval->renderType = renderShape;
+		// FIXME 0.15
+		//retval->renderType = renderShape;
 		retval->setSolid(opaque);
 	} else if (customBlockType == 1 /* liquid */ ) {
+		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockDynamicSize);
 		bl_LiquidBlockDynamic_LiquidBlockDynamic(retval, nameStr, blockId, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
 		retval->vtable = bl_CustomLiquidBlockDynamic_vtable + 2;
 	} else if (customBlockType == 2 /* still liquid */ ) {
+		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockStaticSize);
 		bl_LiquidBlockStatic_LiquidBlockStatic(retval, nameStr, blockId, blockId - 1, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
@@ -1752,6 +1779,7 @@ void bl_sendIdentPacket() {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
   (JNIEnv *env, jclass clazz, jstring message) {
+#if 0
 	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
 	std::string* myName = bl_Entity_getNameTag(bl_localplayer);
 	TextPacket textPacket;
@@ -1764,6 +1792,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	textPacket.message = messageUtfChars;
 	bl_sendPacket(&textPacket);
 	env->ReleaseStringUTFChars(message, messageUtfChars);
+#endif
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetNameTag
@@ -2061,11 +2090,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
 	Item* item = bl_Item_mItems[id];
 	if (item == nullptr) return;
-	if (handEquipped) {
-		item->attribs |= ITEM_HAND_EQUIPPED;
-	} else {
-		item->attribs &= ~ITEM_HAND_EQUIPPED;
-	}
+	item->handEquipped = handEquipped;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
@@ -2767,12 +2792,14 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDi
 }
 
 static void** bl_AppPlatform_vtable;
-static void* bl_AppPlatform_getScreenType_real;
+//static void* bl_AppPlatform_getType_real;
 static void* bl_AppPlatform_getEdition_real;
 static void* bl_AppPlatform_useCenteredGui_real;
+/*
 static int bl_AppPlatform_getScreenType_hook(void* appPlatform) {
 	return 0;
 }
+*/
 
 static bool bl_AppPlatform_useCenteredGui_hook(void* appPlatform) {
 	return true;
@@ -2784,8 +2811,10 @@ static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv* env, jclass clazz, jboolean desktop) {
+/*
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type] = desktop?
 		(void*) &bl_AppPlatform_getScreenType_hook: bl_AppPlatform_getScreenType_real;
+*/
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition] = desktop?
 		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
@@ -2978,7 +3007,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		(void**) &bl_ItemRenderer_getGraphics_real_item);
 
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
-	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];
+//	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 }
@@ -2986,7 +3015,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
-	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen15sendChatMessageEv");
+	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen16_sendChatMessageEv");
 	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
 
 	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
@@ -3053,12 +3082,13 @@ void bl_setuphooks_cppside() {
 
 	bl_LiquidBlockStatic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV17LiquidBlockStatic");
 	bl_LiquidBlockDynamic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV18LiquidBlockDynamic");
-	bl_LiquidBlockStatic_LiquidBlockStatic = (void (*)(Block*, std::string const&, int, BlockID, void*,
-		std::string const&, std::string const&))
-		dlsym(mcpelibhandle, "_ZN17LiquidBlockStaticC1ERKSsi7BlockIDRK8MaterialS1_S1_");
-	bl_LiquidBlockDynamic_LiquidBlockDynamic = (void (*)(Block*, std::string const&, int, void*,
-		std::string const&, std::string const&))
-		dlsym(mcpelibhandle, "_ZN18LiquidBlockDynamicC1ERKSsiRK8MaterialS1_S1_");
+	// FIXME 0.15
+	//bl_LiquidBlockStatic_LiquidBlockStatic = (void (*)(Block*, std::string const&, int, BlockID, void*,
+	//	std::string const&, std::string const&))
+	//	dlsym(mcpelibhandle, "_ZN17LiquidBlockStaticC1ERKSsi7BlockIDRK8MaterialS1_S1_");
+	//bl_LiquidBlockDynamic_LiquidBlockDynamic = (void (*)(Block*, std::string const&, int, void*,
+	//	std::string const&, std::string const&))
+	//	dlsym(mcpelibhandle, "_ZN18LiquidBlockDynamicC1ERKSsiRK8MaterialS1_S1_");
 	bl_BlockItem_vtable = (void**) dlsym(mcpelibhandle, "_ZTV9BlockItem");
 
 	bl_initCustomBlockVtable();
@@ -3068,7 +3098,6 @@ void bl_setuphooks_cppside() {
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
 
-	bl_Tile_getTexture = (TextureUVCoordinateSet* (*)(Tile*, signed char, int)) dlsym(mcpelibhandle, "_ZN5Block10getTextureEai");
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
 	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,

@@ -16,11 +16,11 @@
 #include "mcpe/itemspriterenderer.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 220
+#define MOBRENDERER_SIZE 208
 // ModelPart::addBox
-#define MODELPART_CUBEVECTOR_OFFSET 28
+#define MODELPART_CUBEVECTOR_OFFSET 40
 // ModelPart destructor
-#define MODELPART_MESHBUFFER_OFFSET 76
+#define MODELPART_MESHBUFFER_OFFSET 88
 
 
 extern "C" {
@@ -114,7 +114,7 @@ int bl_renderManager_createHumanoidRenderer() {
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr(bl_minecraft->getTextures(), "mob/steve.png", TEXTURE_LOCATION_INTERNAL), 0);
+		mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("mob/steve.png")), 0);
 
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	return retval;

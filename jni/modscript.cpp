@@ -38,23 +38,21 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.14
+// FIXME 0.15
 #define PLAYER_INVENTORY_OFFSET 3476
 #else
-#define PLAYER_INVENTORY_OFFSET 3488
+#define PLAYER_INVENTORY_OFFSET 3556
 #endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
+// FIXME 0.15
 #define GAMERENDERER_GETFOV_SIZE 0x1cb
 #else
-#define GAMERENDERER_GETFOV_SIZE 0x13c
+#define GAMERENDERER_GETFOV_SIZE 0x140
 #endif
-
-// todo: call the getDestroyProgress method instead
-const unsigned int kGameMode_progress_offset = 36;
 
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
@@ -368,7 +366,7 @@ void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, Bloc
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "continueDestroyBlockCallback", "(IIIIF)V");
-	float progress = *((float*) ((uintptr_t)gamemode + kGameMode_progress_offset));
+	float progress = ((GameMode*)gamemode)->getDestroyProgress();
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, blockPos.x, blockPos.y, blockPos.z, side, progress);
 
@@ -401,7 +399,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "setLevelCallback", "(ZZ)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, (int) (level != NULL), (jboolean) level->isRemote);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, (int) (level != NULL), (jboolean) !level->isClientSide());
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -788,8 +786,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 	if (rider == NULL) return;
 	if (mount == NULL) {
 		void* vtable = rider->vtable[vtable_indexes.entity_stop_riding];
-		void (*fn)(Entity*, bool) = (void (*)(Entity*, bool)) vtable;
-		fn(rider, true);
+		auto fn = (void (*)(Entity*, bool, bool)) vtable;
+		fn(rider, true, true);
 	} else {
 		// horrible kludge: we hook and unhook canAddRider
 		void* oldCanAddRider = nullptr;
@@ -1205,7 +1203,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity11startRidingERS_") - 2;
 	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity10stopRidingEb") - 2;
+		"_ZN6Entity10stopRidingEbb") - 2;
 	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZNK6Entity11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
@@ -1404,7 +1402,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_Inventory_getSelectedSlot = (int (*)(void*)) dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
 	bl_Inventory_selectSlot = (void (*)(void*, int)) dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
 	bl_AgableMob_getAge = (int (*)(Entity*)) dlsym(mcpelibhandle,
-		"_ZN9AgableMob6getAgeEv");
+		"_ZNK9AgableMob6getAgeEv");
 
 	bl_setuphooks_cppside();
 

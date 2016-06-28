@@ -5,6 +5,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <android/log.h>
 
 #include <mcpelauncher.h>
@@ -27,6 +28,12 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_pokerface_PokerFace_sysconf
 
 void mcpelauncher_hook(void *orig_fcn, void* new_fcn, void **orig_fcn_ptr)
 {
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Hooking %p %p %p", orig_fcn, new_fcn, orig_fcn_ptr);
+	uint32_t* ptr = (uint32_t*)(((uintptr_t) orig_fcn) & ~1);
+	if (ptr[0] == 0xe28fc610) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Trying to hook %p which is a plt entry!", orig_fcn);
+		abort();
+	}
 	MSHookFunction(orig_fcn, new_fcn, orig_fcn_ptr);
 }
 

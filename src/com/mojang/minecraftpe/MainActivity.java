@@ -79,8 +79,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.14!!!!!";
-	public static final String HALF_SUPPORT_VERSION = "0.14.99";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.15";
+	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -2414,6 +2414,7 @@ public class MainActivity extends NativeActivity {
 			}
 		} else if (mcPkgInfo.versionName.startsWith("0.15")) {
 			if (version.startsWith("0.15.0")) return true;
+			if (version.startsWith("0.15.1")) return true;
 		}
 		return false;
 	}
@@ -2456,7 +2457,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return getMCPEVersion().startsWith("0.15");
+		return false;//getMCPEVersion().startsWith("0.15");
 	}
 
 	public void reportReimported(final String scripts) {
