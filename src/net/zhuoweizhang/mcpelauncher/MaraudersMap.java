@@ -50,6 +50,7 @@ public final class MaraudersMap {
 					if (newLoc > 0) {
 						MainActivity.minecraftLibBuffer = PokerFace.createDirectByteBuffer(loc, minecraftLibLength);
 						minecraftTextBuffer = PokerFace.createDirectByteBuffer(newLoc, len);
+						android.util.Log.i("BlockLauncher", "libminecraftpe.so mapped at 0x" + Long.toString(loc, 16));
 					}
 				} else {
 					int returnStatus = PokerFace.mprotect(loc, len, PokerFace.PROT_WRITE | PokerFace.PROT_READ);

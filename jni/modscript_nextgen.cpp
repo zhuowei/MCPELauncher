@@ -1077,8 +1077,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	bl_Item_setMaxDamage(item, maxDamage);
 
 	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
-	if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
-	bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(textureUTFChars));
+	//if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
+	//bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(textureUTFChars));
 	env->ReleaseStringUTFChars(name, textureUTFChars);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -2543,17 +2543,16 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
 	if (itemStack.getId() >= 0x200) { // extended item ID
-		ItemInstance temp(0x100, 1, 0);
-		return bl_ItemRenderer_getGraphics_real(temp);
+		return ItemRenderer::mItemGraphics[0x100];
 	}
-	return bl_ItemRenderer_getGraphics_real(itemStack);
+	return ItemRenderer::mItemGraphics[itemStack.getId()];
 }
 
 mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook_item(Item* item) {
 	if (item->itemId >= 0x200) { // extended item ID
-		return bl_ItemRenderer_getGraphics_real_item(bl_Item_mItems[0x100]);
+		return ItemRenderer::mItemGraphics[0x100];
 	}
-	return bl_ItemRenderer_getGraphics_real_item(item);
+	return ItemRenderer::mItemGraphics[item->itemId];
 }
 
 
