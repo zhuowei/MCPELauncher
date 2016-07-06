@@ -2943,6 +2943,55 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMax
 	return stack.getMaxStackSize();
 }
 
+static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {
+	const char* const toPatch[] = {
+"_ZN12ItemInstanceC1EPK4Item",
+"_ZN12ItemInstanceC1EPK4Itemi",
+"_ZN12ItemInstanceC1EPK4Itemii",
+"_ZN12ItemInstanceC1EPK4ItemiiPK11CompoundTag",
+"_ZN12ItemInstanceC1Eiii",
+"_ZN12ItemInstanceC1EiiiPK11CompoundTag",
+"_ZN12ItemInstanceC1ERKS_",
+"_ZN12ItemInstance4initEiii",
+"_ZN12ItemInstance4loadERK11CompoundTag",
+"_ZN12ItemInstance8_setItemEi",
+nullptr
+	};
+	for (int j = 0; ; j++) {
+		const char* theName = toPatch[j];
+		if (!theName) return true;
+		void* ItemInstance_init = (void*) dlsym(mcpelibhandle, theName);
+		unsigned char* itemInitCode = (unsigned char*)
+			bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance_init) & ~1));
+		bool hasSet = false;
+		for (int i = 0; i < (j == 8? 0x900: 0x100); i += 2) {
+#ifdef __arm__
+			// f5b? 7f00
+			if ((itemInitCode[i] & 0xf0) == 0xb0 && itemInitCode[i+1] == 0xf5 &&
+				itemInitCode[i+2] == 0x00 && itemInitCode[i+3] == 0x7f) {
+				itemInitCode[i+2] = 0x80; itemInitCode[i+3] = 0x5f;
+				hasSet = true;
+				break;
+			}
+#else
+			// x86.
+			// fixme: this could probably use a better pattern matcher?
+			if (itemInitCode[i] == 0xff && itemInitCode[i+1] == 0x01) {
+				itemInitCode[i] = (BL_ITEMS_EXPANDED_COUNT & 0xff); itemInitCode[i+1] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+				hasSet = true;
+				break;
+			}
+#endif
+		}
+		if (!hasSet) {
+			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch %s",
+				theName);
+			return false;
+		}
+	}
+	return false; // WHAT
+}
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -2974,29 +3023,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		return;
 	}
 
-	void* ItemInstance__setItem = dlsym(mcpelibhandle, "_ZN12ItemInstance8_setItemEi");
-	unsigned char* setItemCode = (unsigned char*)
-		bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance__setItem) & ~1));
-#ifdef __arm__
-	if (setItemCode[4] == 0x00 && setItemCode[5] == 0x7f) {
-		setItemCode[4] = 0x80; setItemCode[5] = 0x5f;
-	} else if (setItemCode[2] == 0x00 && setItemCode[3] == 0x7f) {
-		setItemCode[2] = 0x80; setItemCode[3] = 0x5f;
-	} else {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
-		return;
-	}
-#endif
-#ifdef __i386
-	if (setItemCode[22] == 0xff && setItemCode[23] == 0x01) {
-		setItemCode[22] = (BL_ITEMS_EXPANDED_COUNT & 0xff); setItemCode[23] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
-	} else if (setItemCode[23] == 0xff && setItemCode[24] == 0x01) {
-		setItemCode[23] = (BL_ITEMS_EXPANDED_COUNT & 0xff); setItemCode[24] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
-	} else {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch setItem");
-		return;
-	}
-#endif
+	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
+
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(ItemInstance const&)>(&ItemRenderer::getGraphics),
 		(void*) &bl_ItemRenderer_getGraphics_hook,

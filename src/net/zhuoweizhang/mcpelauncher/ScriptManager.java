@@ -587,6 +587,10 @@ public class ScriptManager {
 
 	public static void frameCallback() {
 		if (requestReloadAllScripts) {
+			if (!nativeIsValidItem(256)) {
+				nativeRequestFrameCallback();
+				return;
+			}
 			requestReloadAllScripts = false;
 			try {
 				if (!new File("/sdcard/mcpelauncher_do_not_create_placeholder_blocks").exists()) {
@@ -2037,6 +2041,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public void addItemInventory(int id, int amount, int damage) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			nativeAddItemInventory(id, amount, damage);
 		}
 
@@ -2261,6 +2266,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static long dropItem(double x, double y, double z, double range, int id, int count,
 				int damage) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			return nativeDropItem((float) x, (float) y, (float) z, (float) range, id, count, damage);
 		}
 
@@ -2304,6 +2310,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setChestSlot(int x, int y, int z, int slot, int id, int damage,
 				int amount) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			nativeAddItemChest(x, y, z, slot, id, damage, amount);
 		}
 
@@ -2359,6 +2366,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setFurnaceSlot(int x, int y, int z, int slot, int id, int damage,
 				int amount) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			nativeAddItemFurnace(x, y, z, slot, id, damage, amount);
 		}
 
@@ -2505,6 +2513,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void addItemInventory(int id, int amount, int damage) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			nativeAddItemInventory(id, amount, damage);
 		}
 
@@ -2557,6 +2566,10 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void addItemCreativeInv(int id, int count, int damage) {
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("You must make an item with id " + id +
+					" before you can add it to the creative inventory.");
+			}
 			nativeAddItemCreativeInv(id, count, damage);
 		}
 
@@ -2574,6 +2587,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setArmorSlot(int slot, int id, int damage) {
+			if (!nativeIsValidItem(id)) throw new RuntimeException("invalid item id " + id);
 			NativeEntityApi.setArmor(getEntity(), slot, id, damage);
 		}
 
@@ -2946,6 +2960,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, Object renderType) {
+			Log.i("BlockLauncher", "set render type of entity " + ent + " to  " + renderType);
 			RendererManager.NativeRenderer theRenderer = null;
 			if (renderType instanceof NativeJavaObject) {
 				renderType = ((NativeJavaObject)renderType).unwrap();
@@ -3430,7 +3445,7 @@ public class ScriptManager {
 		public static void showTipMessage(String msg) {
 			nativeShowTipMessage(msg);
 			// showTipMessage doesn't work anymore?
-			scriptFakeTipMessage(msg);
+			//scriptFakeTipMessage(msg);
 		}
 
 		@JSStaticFunction

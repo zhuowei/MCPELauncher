@@ -296,12 +296,14 @@ typedef struct {
 
 typedef void EntityRenderer;
 
-typedef struct {
+class MobRenderer {
+public:
 	void** vtable; //0
 	char filler[132-4]; //4
 	void* model; // 132 (from MobRenderer::MobRenderer)
 	char filler2[184-136]; // 136
-} MobRenderer;
+	mce::TexturePtr const& getSkinPtr(Entity&) const;
+};
 static_assert(sizeof(MobRenderer) == 184, "mobrenderer");
 
 typedef void Tag;

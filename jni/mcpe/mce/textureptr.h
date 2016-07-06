@@ -24,6 +24,7 @@ public:
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);
 	void onGroupReloaded();
+	TexturePtr clone() const;
 	static TexturePtr NONE;
 };
 class TextureGroup {

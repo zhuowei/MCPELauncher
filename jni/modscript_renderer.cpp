@@ -109,12 +109,14 @@ int bl_renderManager_createHumanoidRenderer() {
 
 	HumanoidModel* model3 = new HumanoidModel(0, 0, 64, 64);
 
+	MobRenderer* sacrificialRenderer =
+		(MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, 3 /* human */);
 
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("mob/steve.png")), 0);
+		sacrificialRenderer->getSkinPtr(*((Entity*)0xfeeeeeed)).clone(), 0);
 
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	return retval;
@@ -137,6 +139,7 @@ int bl_renderManager_renderTypeForItemSprite(int itemId) {
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
 	long long entityId = entity->getUniqueID();
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "trying to get render type of %lld", entityId);
 	if (bl_renderTypeMap.count(entityId) != 0) {
 		return bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
 	}
@@ -149,6 +152,7 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Ent
 
 bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 	long long entityId = entity->getUniqueID();
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "trying to set render type of %lld to %d", entityId, renderType);
 	if (renderType >= 0x1000) {
 		if ((renderType - 0x1000) >= bl_entityRenderers.size()) {
 			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d is over size of %d",

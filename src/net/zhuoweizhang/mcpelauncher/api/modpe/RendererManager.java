@@ -48,7 +48,7 @@ public class RendererManager {
 
 		@JSStaticFunction
 		public static NativeRenderer createHumanoidRenderer() {
-			int id = 0x1000;//nativeCreateHumanoidRenderer();
+			int id = nativeCreateHumanoidRenderer();
 			return new NativeRenderer(id);
 		}
 
@@ -92,7 +92,7 @@ public class RendererManager {
 			this.rendererId = rendererId;
 		}
 		public NativeModelPart getPart(String name) {
-			boolean partExists = true;//nativeModelPartExists(rendererId, name);
+			boolean partExists = nativeModelPartExists(rendererId, name);
 			if (!partExists) throw new RuntimeException("The model part " + name + " does not exist.");
 			return new NativeModelPart(rendererId, name);
 		}
@@ -125,14 +125,14 @@ public class RendererManager {
 		}
 
 		public void addBox(float xOffset, float yOffset, float zOffset, int width, int height, int depth, float scale) {
-			//nativeModelAddBox(rendererId, modelPartName, xOffset, yOffset, zOffset, 
-			//	width, height, depth, scale,
-			//	this.textureX, this.textureY, this.transparent,
-			//	this.textureWidth, this.textureHeight);
+			nativeModelAddBox(rendererId, modelPartName, xOffset, yOffset, zOffset, 
+				width, height, depth, scale,
+				this.textureX, this.textureY, this.transparent,
+				this.textureWidth, this.textureHeight);
 		}
 
 		public NativeModelPart clear() {
-			//nativeModelClear(rendererId, modelPartName);
+			nativeModelClear(rendererId, modelPartName);
 			return this;
 		}
 
@@ -143,7 +143,7 @@ public class RendererManager {
 		}
 
 		public NativeModelPart setRotationPoint(float x, float y, float z) {
-			//nativeModelSetRotationPoint(rendererId, modelPartName, x, y, z);
+			nativeModelSetRotationPoint(rendererId, modelPartName, x, y, z);
 			return this;
 		}
 	}
