@@ -21,7 +21,7 @@
 #define MODELPART_CUBEVECTOR_OFFSET 40
 // ModelPart destructor
 #define MODELPART_MESHBUFFER_OFFSET 88
-
+static const int kEntityRenderDispatcher_renderersOffset = 52;
 
 extern "C" {
 #define DLSYM_DEBUG
@@ -47,7 +47,8 @@ static std::vector<EntityRenderer*> bl_entityRenderers;
 static std::map<long long, int> bl_renderTypeMap;
 static std::unordered_map<int, int> bl_itemSpriteRendererTypeMap;
 
-static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
+//static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
+static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b);
 
 static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
 	MobRenderer* renderer;
@@ -137,6 +138,7 @@ int bl_renderManager_renderTypeForItemSprite(int itemId) {
 	return bl_itemSpriteRendererTypeMap[itemId];
 }
 
+/*
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
 	long long entityId = entity->getUniqueID();
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "trying to get render type of %lld", entityId);
@@ -145,10 +147,35 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Ent
 	}
 	return bl_EntityRenderDispatcher_getRenderer_real(dispatcher, entity);
 }
+*/
 
+EntityRenderer* bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook(void* dispatcher, int renderType) {
+	if (renderType >= 0x1000) {
+		return bl_entityRenderers[renderType - 0x1000];
+	}
+	return bl_EntityRenderDispatcher_getRenderer(dispatcher, renderType);
+}
 //static void* getMCPERenderType(int renderType) {
 //	return bl_EntityRenderDispatcher_getRenderer_EntityRenderId(*bl_EntityRenderDispatcher_instance, renderType);
 //}
+
+void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b) {
+	if (entity.renderType < 0x1000) {
+		return bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
+	}
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "doing the render type dance: %lld", entity.getUniqueID());
+	int oldRenderType = entity.renderType;
+	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
+	EntityRenderer* tntRenderer = renderers[2]; // TNT
+	renderers[2] = bl_entityRenderers[oldRenderType - 0x1000];
+	entity.renderType = 2; // steal TNT's render type
+
+	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
+
+	renderers[2] = tntRenderer; // restore
+	entity.renderType = oldRenderType;
+	return retval;
+}
 
 bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 	long long entityId = entity->getUniqueID();
@@ -160,6 +187,7 @@ bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 			return false;
 		}
 		bl_renderTypeMap[entityId] = renderType;
+		entity->renderType = renderType;
 	} else {
 		//if (!getMCPERenderType(renderType)) return false;
 		bl_renderTypeMap.erase(entityId);
@@ -250,11 +278,21 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float))
 		dlsym(mcpelibhandle,
 			"_ZN19HumanoidMobRendererC1ESt10unique_ptrI13HumanoidModelSt14default_deleteIS1_EES4_S4_N3mce10TexturePtrEf");
-	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
-	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
-		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
+	//void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
+	//mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
+	//	(void**) &bl_EntityRenderDispatcher_getRenderer_real);
+	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, Entity&, Vec3 const&, float, float))
+		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6renderER6EntityRK4Vec3ff");
+	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_render_real, (void*)&bl_EntityRenderDispatcher_render_hook)) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook render");
+		abort();
+	}
 	bl_ModelPart_reset = (void (*)(ModelPart*))
 		dlsym(mcpelibhandle, "_ZN9ModelPart5resetEv");
+	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer, (void*)&bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook)) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
+		abort();
+	}
 }
 
 } //extern "C"
