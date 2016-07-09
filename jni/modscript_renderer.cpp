@@ -163,7 +163,6 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, Entity& enti
 	if (entity.renderType < 0x1000) {
 		return bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
 	}
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "doing the render type dance: %lld", entity.getUniqueID());
 	int oldRenderType = entity.renderType;
 	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
 	EntityRenderer* tntRenderer = renderers[2]; // TNT
@@ -179,7 +178,6 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, Entity& enti
 
 bool bl_renderManager_setRenderType(Entity* entity, int renderType) {
 	long long entityId = entity->getUniqueID();
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "trying to set render type of %lld to %d", entityId, renderType);
 	if (renderType >= 0x1000) {
 		if ((renderType - 0x1000) >= bl_entityRenderers.size()) {
 			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Renderer id %d is over size of %d",

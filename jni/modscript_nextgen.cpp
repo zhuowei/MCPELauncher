@@ -73,8 +73,7 @@ typedef void Font;
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.15
-#define PLAYER_INVENTORY_OFFSET 3476
+#define PLAYER_INVENTORY_OFFSET 3548
 #else
 #define PLAYER_INVENTORY_OFFSET 3556
 #endif
@@ -2964,8 +2963,8 @@ nullptr
 		unsigned char* itemInitCode = (unsigned char*)
 			bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance_init) & ~1));
 		bool hasSet = false;
-		for (int i = 0; i < (j == 8? 0x900: 0x100); i += 2) {
 #ifdef __arm__
+		for (int i = 0; i < (j == 8? 0x900: 0x100); i += 2) {
 			// f5b? 7f00
 			if ((itemInitCode[i] & 0xf0) == 0xb0 && itemInitCode[i+1] == 0xf5 &&
 				itemInitCode[i+2] == 0x00 && itemInitCode[i+3] == 0x7f) {
@@ -2973,16 +2972,19 @@ nullptr
 				hasSet = true;
 				break;
 			}
+		}
 #else
-			// x86.
-			// fixme: this could probably use a better pattern matcher?
-			if (itemInitCode[i] == 0xff && itemInitCode[i+1] == 0x01) {
-				itemInitCode[i] = (BL_ITEMS_EXPANDED_COUNT & 0xff); itemInitCode[i+1] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+		for (int i = 0; i < (j == 8? 0x900: 0x100); i++) {
+			// x86: 81 f? 00 02 00 00
+			if (itemInitCode[i] == 0x81 && (itemInitCode[i+1] & 0xf0) == 0xf0
+				&& itemInitCode[i+2] == 0x00 && itemInitCode[i+3] == 0x02
+				&& itemInitCode[i+4] == 0x00 && itemInitCode[i+5] == 0x00) {
+				itemInitCode[i+2] = (BL_ITEMS_EXPANDED_COUNT & 0xff); itemInitCode[i+3] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
 				hasSet = true;
 				break;
 			}
-#endif
 		}
+#endif
 		if (!hasSet) {
 			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch %s",
 				theName);

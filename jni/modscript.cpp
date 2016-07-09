@@ -38,8 +38,7 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-// FIXME 0.15
-#define PLAYER_INVENTORY_OFFSET 3476
+#define PLAYER_INVENTORY_OFFSET 3548
 #else
 #define PLAYER_INVENTORY_OFFSET 3556
 #endif
@@ -48,8 +47,7 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
-// FIXME 0.15
-#define GAMERENDERER_GETFOV_SIZE 0x1cb
+#define GAMERENDERER_GETFOV_SIZE 0x1b8
 #else
 #define GAMERENDERER_GETFOV_SIZE 0x140
 #endif

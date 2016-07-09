@@ -1072,6 +1072,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
+		/*
 		if (getMCPEVersion().startsWith("0.15")) {
 			try {
 				return getAssets().open("15/" + name);
@@ -1079,6 +1080,7 @@ public class MainActivity extends NativeActivity {
 				System.err.println(ie);
 			}
 		}
+		*/
 		return getAssets().open(name);
 	}
 

@@ -56,8 +56,8 @@ static void setupIsModded(void* mcpelibhandle) {
 	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
 		dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv")));
 	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
-	isModdedArray[0] = 0xb0;
-	isModdedArray[1] = 0x01;
+	isModdedArray[6] = 0xb0;
+	isModdedArray[7] = 0x01;
 #endif
 }
 
@@ -132,7 +132,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
 	//mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 	void* stopGame = dlsym(mcpelibhandle, "_ZN9Minecraft8stopGameEv");
-	mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
+	//mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
+	bl_patch_got((soinfo2*)mcpelibhandle, stopGame, (void*)bl_Minecraft_stopGame_hook);
+	bl_Minecraft_stopGame_real = (void (*)(Minecraft*)) stopGame;
 
 	bl_prepatch_fmod((soinfo2*) mcpelibhandle);
 

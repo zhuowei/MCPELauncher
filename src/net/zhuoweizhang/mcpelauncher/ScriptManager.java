@@ -2960,7 +2960,6 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, Object renderType) {
-			Log.i("BlockLauncher", "set render type of entity " + ent + " to  " + renderType);
 			RendererManager.NativeRenderer theRenderer = null;
 			if (renderType instanceof NativeJavaObject) {
 				renderType = ((NativeJavaObject)renderType).unwrap();
