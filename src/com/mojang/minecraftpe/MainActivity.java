@@ -1117,8 +1117,9 @@ public class MainActivity extends NativeActivity {
 
 	public int[] getImageData(String name, boolean fromAssets) {
 		System.out.println("Get image data: " + name + " from assets? " + fromAssets);
+		boolean externalData = (name.length() > 0 && name.charAt(0) == '/');
 		try {
-			InputStream is = fromAssets? getInputStreamForAsset(name): getRegularInputStream(name);
+			InputStream is = externalData? getRegularInputStream(name) : getInputStreamForAsset(name);
 			if (is == null)
 				return getFakeImageData(name, fromAssets);
 			Bitmap bmp = BitmapFactory.decodeStream(is);

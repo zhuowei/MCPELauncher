@@ -196,6 +196,7 @@ public:
 	void setFriction(float);
 	void setSolid(bool);
 	void setCategory(CreativeItemCategory);
+	static std::unordered_map<std::string, Block*> mBlockLookupMap;
 };
 
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");

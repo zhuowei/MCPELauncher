@@ -697,6 +697,18 @@ public class ScriptManager {
 		callScriptMethod("playerExpLevelChangeHook", player, experienceAdded);
 	}
 
+	private static String currentScreen;
+
+	@CallbackName(name="screenChangeHook", args={"screenName"})
+	public static void screenChangeCallback(String s1, String s2, String s3) {
+		if ("options_screen".equals(s1) && "resource_packs_screen".equals(currentScreen)) {
+			// reload scripts
+			loadResourcePackScripts();
+		}
+		currentScreen = s1;
+		callScriptMethod("screenChangeHook", s1);
+	}
+
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
 		System.out.println("Get sound input stream");
 		if (MainActivity.currentMainActivity != null) {
@@ -904,6 +916,7 @@ public class ScriptManager {
 			}
 		}
 		//loadAddonScripts();
+		loadResourcePackScripts();
 	}
 
 	protected static void loadAddonScripts() {
@@ -931,6 +944,44 @@ public class ScriptManager {
 					}
 				}
 			}
+		}
+	}
+
+	protected static void loadResourcePackScripts() {
+		MainActivity mainActivity = MainActivity.currentMainActivity.get();
+		if (mainActivity == null) return;
+		try {
+			List<ResourcePack> resourcePacks = ResourcePack.getAllResourcePacks();
+			System.out.println(resourcePacks);
+			// disable existing resource pack scripts
+			for (int i = scripts.size() - 1; i >= 0; i--) {
+				if (scripts.get(i).name.startsWith("__bl_ResourcePack_")) {
+					scripts.remove(i);
+					break;
+				}
+			}
+			for (ResourcePack pack: resourcePacks) {
+				Reader theReader = null;
+				try {
+					InputStream is = pack.getInputStream("main.js");
+					if (is == null) continue;
+					theReader = new InputStreamReader(is);
+					loadScript(theReader, "__bl_ResourcePack_" + pack.getName() + "_main.js");
+				} catch (Exception e) {
+					dumpScriptError(e);
+					mainActivity.reportError(e);
+				} finally {
+					if (theReader != null) {
+						try {
+							theReader.close();
+						} catch (IOException ie) {
+							ie.printStackTrace();
+						}
+					}
+				}
+			}
+		} catch (IOException ie) {
+			ie.printStackTrace();
 		}
 	}
 

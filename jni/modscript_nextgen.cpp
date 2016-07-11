@@ -10,6 +10,7 @@
 #include <map>
 #include <unordered_map>
 #include <array>
+#include <sstream>
 
 #include "utf8proc.h"
 
@@ -303,6 +304,14 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 }
 
+template <typename T>
+std::string bl_to_string(T value)
+{
+    std::ostringstream os ;
+    os << value ;
+    return os.str() ;
+}
+
 extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
@@ -453,6 +462,7 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
 static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
+static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::string const&, std::string const&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1462,11 +1472,13 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		bl_custom_block_textures[blockId] = nullptr;
 	}
 
-	std::string nameStr = std::string(name);
+	std::string realNameStr = std::string(name);
+	std::string nameStr = realNameStr + "." + bl_to_string(blockId);
 
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Block* retval;
+	BlockGraphics* retGraphics;
 	if (customBlockType == 0 || true) { // FIXME 0.15
 		retval = (Block*) ::operator new(kTileSize);
 		bl_Block_Block(retval, nameStr, blockId, bl_getMaterial(materialType));
@@ -1474,18 +1486,22 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		// FIXME 0.15
 		//retval->renderType = renderShape;
 		retval->setSolid(opaque);
+		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
+		// todo: graphics
 	} else if (customBlockType == 1 /* liquid */ ) {
 		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockDynamicSize);
 		bl_LiquidBlockDynamic_LiquidBlockDynamic(retval, nameStr, blockId, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
 		retval->vtable = bl_CustomLiquidBlockDynamic_vtable + 2;
+		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 	} else if (customBlockType == 2 /* still liquid */ ) {
 		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockStaticSize);
 		bl_LiquidBlockStatic_LiquidBlockStatic(retval, nameStr, blockId, blockId - 1, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
 		retval->vtable = bl_CustomLiquidBlockStatic_vtable + 2;
+		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 	}
 
 	bl_set_i18n("tile." + nameStr + ".name", nameStr);
@@ -2942,6 +2958,30 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMax
 	return stack.getMaxStackSize();
 }
 
+void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string const& s1, std::string const& s2, std::string const& s3) {
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "screenChangeCallback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+	jstring s1j = env->NewStringUTF(s1.c_str());
+	jstring s2j = env->NewStringUTF(s1.c_str());
+	jstring s3j = env->NewStringUTF(s1.c_str());
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, s1j, s2j /* we eSports now */, s3j);
+	env->DeleteLocalRef(s1j);
+	env->DeleteLocalRef(s2j);
+	env->DeleteLocalRef(s3j);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, s2, s3);
+}
+
 static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {
 	const char* const toPatch[] = {
 "_ZN12ItemInstanceC1EPK4Item",
@@ -3311,6 +3351,12 @@ void bl_setuphooks_cppside() {
 	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, Entity&, Vec3 const&, float, float))
 		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
+
+	bl_MinecraftTelemetry_fireEventScreenChanged_real = (void* (*)(void*, std::string const&, std::string const&, std::string const&))
+		dlsym(mcpelibhandle, "_ZN18MinecraftTelemetry22fireEventScreenChangedERKSsS1_S1_");
+	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
+		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
+
 
 	bl_entity_hurt_hook_init(mcpelibhandle);
 
