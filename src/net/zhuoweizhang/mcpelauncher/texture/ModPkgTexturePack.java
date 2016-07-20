@@ -21,9 +21,18 @@ public class ModPkgTexturePack implements TexturePack {
 		filterTheseOut.add("images/terrain-atlas_mip2.tga");
 		filterTheseOut.add("images/terrain-atlas_mip3.tga");
 		filterTheseOut.add("images/items-opaque.png");
+		filterTheseOut.add("resources.json");
+		filterTheseOut.add("items.json");
+		filterTheseOut.add("blocks.json");
+		filterTheseOut.add("images/terrain_texture.json");
+		filterTheseOut.add("images/item_texture.json");
 	}
 
 	public List<ZipTexturePack> subPacks = new ArrayList<ZipTexturePack>();
+	public String prefix;
+	public ModPkgTexturePack(String prefix) {
+		this.prefix = prefix;
+	}
 
 	public void addPackage(File file) throws ZipException, IOException {
 		subPacks.add(new ZipTexturePack(file));
@@ -40,6 +49,7 @@ public class ModPkgTexturePack implements TexturePack {
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
+		if (fileName.startsWith(prefix)) fileName = fileName.substring(prefix.length());
 		if (filterTheseOut.contains(fileName)) return null;
 		for (ZipTexturePack pack: subPacks) {
 			InputStream is = pack.getInputStream(fileName);

@@ -17,62 +17,31 @@ import net.zhuoweizhang.mcpelauncher.*;
 
 public class AtlasProvider implements TexturePack {
 
-	public String metaName, atlasName, importDir;
+	public String metaName;
+	public String importDir;
+	public String textureNamePrefix;
+	public List<String[]> addedTextureNames = new ArrayList<String[]>();
+	public JSONObject metaObj;
 	public boolean hasChanges = false;
-	public Bitmap atlasImg;
-	public AtlasMeta metaObj;
-	public ImageLoader loader;
-	public int xscale;
-	private Canvas atlasCanvas;
-	private Rect tempRect = new Rect();
-	private Rect tempRect2 = new Rect();
-	private Paint tempPaint = new Paint();
-	private String mipPrefix;
-	private int mipLevels;
-	private final boolean needsHDWorkaround;
-	private boolean hdWorkaroundActive = false;
-	public AtlasProvider(String metaName, String atlasName, String importDir, ImageLoader loader, int xscale, int mipLevels,
-		boolean needsHDWorkaround) {
+	public AtlasProvider(String metaName, String importDir, String textureNamePrefix) {
 		this.metaName = metaName;
-		this.atlasName = atlasName;
 		this.importDir = importDir;
-		this.loader = loader;
-		this.xscale = xscale;
-		this.mipLevels = mipLevels;
-		this.mipPrefix = getMipMapPrefix(atlasName);
-		this.needsHDWorkaround = needsHDWorkaround;
+		this.textureNamePrefix = textureNamePrefix;
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(metaName)) {
-			return new ByteArrayInputStream(metaObj.data.toString().getBytes("UTF-8"));
-		} else if (fileName.equals(atlasName)) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			loader.save(atlasImg, bos);
-			/*
-			if (BuildConfig.DEBUG && fileName.contains("terrain")) {
-				FileOutputStream fos = new FileOutputStream(new File("/sdcard/terrain.tga"));
-				fos.write(bos.toByteArray());
-				fos.close();
-			}
-			*/
-			return new ByteArrayInputStream(bos.toByteArray());
-		} else if (mipLevels > 0 && fileName.startsWith(mipPrefix)) {
-			try {
-				int mipLevel = Integer.parseInt(
-					fileName.substring(fileName.lastIndexOf("_mip") + 4, fileName.lastIndexOf(".")));
-				if (!(mipLevel >= 0 && mipLevel < mipLevels)) return null;
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				loader.save(getMipMap(mipLevel), bos);
-				return new ByteArrayInputStream(bos.toByteArray());
-			} catch (NumberFormatException nfe) {
-				nfe.printStackTrace();
-				return null;
-			}
-		} else {
-			return null;
+			return new ByteArrayInputStream(metaObj.toString().getBytes("UTF-8"));
 		}
+		return null;
+	}
+
+	public void dumpAtlas() throws IOException {
+		File file = new File("/sdcard/bl_dump_" + textureNamePrefix + "json");
+		FileOutputStream fos = new FileOutputStream(file);
+		fos.write(metaObj.toString().getBytes("UTF-8"));
+		fos.close();
 	}
 
 	public List<String> listFiles() throws IOException {
@@ -81,23 +50,8 @@ public class AtlasProvider implements TexturePack {
 
 	public void initAtlas(MainActivity activity) throws Exception {
 		hasChanges = false;
-		tempPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
 		loadAtlas(activity);
 		hasChanges = addAllToMeta(activity);
-		atlasCanvas = null;
-	}
-
-	private void calcXScale(MainActivity activity, AtlasMeta metaArr) throws IOException {
-		List<String> pathsForMeta = TextureUtils.getAllFilesFilter(activity.textureOverrides, importDir);
-		int curMetaSize = (metaArr.width / metaArr.tileWidth) * (metaArr.height / metaArr.tileWidth);
-		int curRemaining = (curMetaSize - metaArr.originalUVCount);
-		int needed = pathsForMeta.size();
-		xscale = 1;
-		int cr = curRemaining;
-		while (cr < needed && xscale < 64) {
-			xscale *= 2;
-			cr = curRemaining + (curMetaSize*(xscale-1));
-		}
 	}
 
 	private void loadAtlas(MainActivity activity) throws Exception {
@@ -111,22 +65,7 @@ public class AtlasProvider implements TexturePack {
 		}
 		metaIs.close();
 
-		// read and decode the original atlas
-		InputStream atlasIs = activity.getInputStreamForAsset(atlasName);
-		Bitmap atlasImgRaw = loader.load(atlasIs);
-
-		// calculate Xscale and load atlas meta
-		JSONArray metaArr = new JSONArray(new String(bos.toByteArray(), "UTF-8"));
-		calcXScale(activity, new AtlasMeta(metaArr, needsHDWorkaround, atlasImgRaw.getWidth()));
-		scaleMeta(metaArr);
-		metaObj = new AtlasMeta(metaArr, needsHDWorkaround, atlasImgRaw.getWidth() * xscale);
-
-		// scale atlas image
-		atlasImg = scaleAtlas(atlasImgRaw);
-		atlasCanvas = new Canvas(atlasImg);
-		atlasIs.close();
-
-		hdWorkaroundActive = needsHDWorkaround && (metaObj.width != atlasImg.getWidth());
+		metaObj = new JSONObject(new String(bos.toByteArray(), "UTF-8"));
 	}
 
 	private boolean addAllToMeta(MainActivity activity) throws Exception {
@@ -142,10 +81,8 @@ public class AtlasProvider implements TexturePack {
 			if (!filePath.toLowerCase().endsWith(".png")) continue;
 			parseNameParts(filePath, nameParts);
 			if (nameParts[0] == null) continue;
-			JSONArray uv = metaObj.getOrAddIcon((String) nameParts[0], (Integer) nameParts[1]);
-			Bitmap bmp = readBitmap(activity, filePath);
-			if (bmp == null) continue;
-			placeIntoAtlas(bmp, uv, metaObj);
+			// place into meta obj
+			addFileIntoObj(filePath, nameParts);
 		}
 		return true;
 	}
@@ -165,87 +102,47 @@ public class AtlasProvider implements TexturePack {
 		nameParts[0] = name;
 	}
 
-	private Bitmap readBitmap(MainActivity activity, String filePath) throws IOException {
-		InputStream is = activity.getInputStreamForAsset(filePath);
-		if (is == null) return null;
-		Bitmap bmp = BitmapFactory.decodeStream(is);
-		is.close();
-		return bmp;
-	}
-
-	private void placeIntoAtlas(Bitmap bmp, JSONArray uv, AtlasMeta metaObj) throws JSONException {
-		tempRect2.left = tempRect2.top = 0;
-		tempRect2.right = tempRect2.bottom = bmp.getWidth();
-		int atlaswidth = atlasImg.getWidth();
-		int atlasheight = atlasImg.getHeight();
-		tempRect.left = (int) ((uv.getDouble(0) * atlaswidth / metaObj.width) + 0.5);
-		tempRect.right = (int) ((uv.getDouble(2) * atlaswidth / metaObj.width) + 0.5);
-		tempRect.top = (int) ((uv.getDouble(1) * atlasheight / metaObj.height) + 0.5);
-		tempRect.bottom = (int) ((uv.getDouble(3) * atlasheight / metaObj.height) + 0.5);
-		atlasCanvas.drawBitmap(bmp, tempRect2, tempRect, tempPaint);
-		if (hdWorkaroundActive) {
-			tempRect.left = (int) (uv.getDouble(0) + 0.5);
-			tempRect.right = (int) (uv.getDouble(2) + 0.5);
-			tempRect.top = (int) (uv.getDouble(1) + 0.5);
-			tempRect.bottom = (int) (uv.getDouble(3) + 0.5);
-			atlasCanvas.drawBitmap(bmp, tempRect2, tempRect, tempPaint);
+	private void addFileIntoObj(String filePath, Object[] nameParts) throws JSONException {
+		String texName = (String)nameParts[0];
+		int texIndex = (Integer)nameParts[1];
+		String textureResName = this.textureNamePrefix + nameParts[0] + "." + texIndex;
+		JSONObject obj = metaObj.getJSONObject("texture_data").optJSONObject(texName);
+		if (obj == null) {
+			obj = new JSONObject();
+			metaObj.getJSONObject("texture_data").put(texName, obj);
 		}
-	}
-
-	private void scaleMeta(JSONArray arr) throws JSONException {
-		if (xscale == 1) return;
-		int arrsize = arr.length();
-		for (int i = 0; i < arrsize; i++) {
-			JSONObject obj = arr.getJSONObject(i);
-			JSONArray uvs = obj.getJSONArray("uvs");
-			int uvslength = uvs.length();
-			for (int j = 0; j < uvslength; j++) {
-				JSONArray uv = uvs.getJSONArray(j);
-				uv.put(4, uv.getDouble(4) * xscale); // xwidth
+		JSONArray arr = obj.optJSONArray("textures");
+		if (arr == null) {
+			arr = new JSONArray();
+			obj.put("textures", arr);
+		}
+		if (texIndex < arr.length()) {
+			arr.put(texIndex, textureResName);
+		} else {
+			for (int i = arr.length(); i <= texIndex; i++) {
+				arr.put(i, textureResName);
 			}
 		}
+		addedTextureNames.add(new String[] {textureResName, filePath});
 	}
 
-	private Bitmap scaleAtlas(Bitmap in) {
-		int inW = in.getWidth();
-		int inH = in.getHeight();
-		Bitmap newBmp = Bitmap.createBitmap(inW * xscale, inH, Bitmap.Config.ARGB_8888);
-		int[] buf = new int[inW * inH];
-		in.getPixels(buf, 0, inW, 0, 0, inW, inH);
-		newBmp.setPixels(buf, 0, inW, 0, 0, inW, inH);
-		return newBmp;
-	}
-
-	public void dumpAtlas() throws IOException {
-		FileOutputStream os = new FileOutputStream(
-			new File("/sdcard", "bl_atlas_dump_" + new File(atlasName).getName() + ".png"));
-		atlasImg.compress(Bitmap.CompressFormat.PNG, 100, os);
-		os.close();
-		FileOutputStream os2 = new FileOutputStream(
-			new File("/sdcard", "bl_atlas_dump_" + new File(atlasName).getName() + "mip0.png"));
-		getMipMap(0).compress(Bitmap.CompressFormat.PNG, 100, os2);
-		os2.close();
-		FileOutputStream os3 = new FileOutputStream(
-			new File("/sdcard", "bl_atlas_dump_" + new File(metaName).getName()));
-		os3.write(metaObj.data.toString().getBytes("UTF-8"));
-		os3.close();
-	}
-
-	private String getMipMapPrefix(String atlasName) {
-		int dotIndex = atlasName.lastIndexOf(".");
-		return atlasName.substring(0, dotIndex) + "_mip";
-	}
-
-	private Bitmap getMipMap(int level) {
-		int newwidth = atlasImg.getWidth() >> (level + 1);
-		int newheight = atlasImg.getHeight() >> (level + 1);
-		return Bitmap.createScaledBitmap(atlasImg, newwidth, newheight, true);
+	public boolean hasIcon(String name, int index) {
+		try {
+			JSONObject obj = metaObj.getJSONObject("texture_data").optJSONObject(name);
+			if (obj == null) return false;
+			JSONArray arr = obj.optJSONArray("textures");
+			if (arr == null) {
+				return index == 0 && obj.optString("textures") != null;
+			}
+			return index < arr.length();
+		} catch (JSONException je) {
+			je.printStackTrace();
+			return false;
+		}
 	}
 
 	public void close() throws IOException {
-		atlasImg = null;
 		metaObj = null;
-		atlasCanvas = null;
 		hasChanges = false;
 	}
 

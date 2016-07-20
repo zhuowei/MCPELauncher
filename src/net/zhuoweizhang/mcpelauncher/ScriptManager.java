@@ -48,7 +48,7 @@ import org.json.*;
 import com.mojang.minecraftpe.MainActivity;
 
 import net.zhuoweizhang.mcpelauncher.api.modpe.*;
-import net.zhuoweizhang.mcpelauncher.texture.AtlasMeta;
+import net.zhuoweizhang.mcpelauncher.texture.AtlasProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ModPkgTexturePack;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
@@ -125,7 +125,7 @@ public class ScriptManager {
 	private static Map<Long, String> entityUUIDMap = new HashMap<Long, String>();
 	private static boolean nextTickCallsSetLevel = false;
 	// initialized in MainActivity now
-	public static AtlasMeta terrainMeta, itemsMeta;
+	public static AtlasProvider terrainMeta, itemsMeta;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
 	public static boolean requestScreenshot = false;
@@ -136,7 +136,7 @@ public class ScriptManager {
 	public static int ITEM_ID_COUNT = 512;
 	private static android.app.Instrumentation instrumentation;
 	private static ExecutorService instrumentationExecutor;
-	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack();
+	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack("resourcepacks/vanilla/");
 	private static WorldData worldData = null;
 	private static int worldDataSaveCounter = 1;
 	private static AndroidPrintStream scriptErrorStream = null;

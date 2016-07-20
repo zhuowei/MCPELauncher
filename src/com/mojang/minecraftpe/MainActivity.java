@@ -2423,29 +2423,33 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-/*
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
-			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
-				"images/terrain-atlas/", new TGAImageLoader(), 1, 4, false);
-			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.tga",
-				"images/items-opaque/", new TGAImageLoader(), 2, 0, true);
+			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/images/terrain_texture.json",
+				"images/terrain-atlas/", "block.bl_modpkg.");
+			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/images/item_texture.json",
+				"images/items-opaque/", "item.bl_modpkg.");
+			ResourcePackManifestProvider resourcePackManifestProvider =
+				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
+			resourcePackManifestProvider.init(this);
+			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
+			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
 			if (dumpAtlas) {
 				terrainProvider.dumpAtlas();
 				itemsProvider.dumpAtlas();
 			}
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
-			ScriptManager.terrainMeta = terrainProvider.metaObj;
-			ScriptManager.itemsMeta = itemsProvider.metaObj;
+			textureOverrides.add(2, resourcePackManifestProvider);
+			ScriptManager.terrainMeta = terrainProvider;
+			ScriptManager.itemsMeta = itemsProvider;
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
-*/
 	}
 
 	private boolean isForcingController() {
