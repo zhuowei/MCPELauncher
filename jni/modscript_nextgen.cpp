@@ -222,7 +222,8 @@ public:
 struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
 	int tile_vtable_size;
-	//int tile_get_texture_char_int;
+	int blockgraphics_vtable_size;
+	int blockgraphics_get_carried_texture;
 	int tile_get_color;
 	int tile_get_color_data;
 	int tile_get_visual_shape;
@@ -255,8 +256,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZN5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV5Block")->st_size;
-	//vtable_indexes.tile_get_texture_char_int = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-	//	"_ZN5Block10getTextureEai");
+	vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
+	vtable_indexes.blockgraphics_get_carried_texture = bl_vtableIndex(mcpelibhandle, "_ZTV13BlockGraphics",
+		"_ZNK13BlockGraphics17getCarriedTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block8getColorER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
@@ -320,6 +322,7 @@ static void (*bl_Item_Item)(Item*, std::string const&, short);
 
 static void** bl_Item_vtable;
 static void** bl_Tile_vtable;
+static void** bl_BlockGraphics_vtable;
 static void** bl_BlockItem_vtable;
 static void** bl_CustomBlockItem_vtable;
 static Block** bl_Block_mBlocks;
@@ -375,6 +378,7 @@ bool bl_text_parse_color_codes = true;
 
 //custom blocks
 void** bl_CustomBlock_vtable;
+void** bl_CustomBlockGraphics_vtable;
 void** bl_CustomLiquidBlockStatic_vtable;
 void** bl_CustomLiquidBlockDynamic_vtable;
 TextureUVCoordinateSet** bl_custom_block_textures[256];
@@ -463,6 +467,8 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
 static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
 static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::string const&, std::string const&);
+static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
+static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -669,22 +675,25 @@ const char* bl_getCharArr(void* str){
 	return cs;
 }
 
-TextureUVCoordinateSet* bl_CustomBlock_getTextureHook(Tile* tile, signed char side, int data) {
-/*
-	int blockId = tile->id;
+TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
+	int blockId = graphics->getBlock()->id;
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL) {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Block pointer IS NULL! %d\n", blockId);
-		return &tile->texture;
+		return bl_BlockGraphics_getTexture_real(graphics, side, data);
 	}
 	int myIndex = (data * 6) + side;
 	if (myIndex < 0 || myIndex >= 16*6) {
 		myIndex = side;
 	}
 	return ptrToBlockInfo[myIndex];
-*/
-	// FIXME 0.15
-	return nullptr;
+}
+
+TextureUVCoordinateSet* bl_CustomBlockGraphics_getTexture_char_hook(BlockGraphics* graphics, signed char side) {
+	return bl_CustomBlockGraphics_getTextureHook(graphics, side, 0);
+}
+
+TextureUVCoordinateSet* bl_CustomBlockGraphics_getCarriedTexture_hook(BlockGraphics* graphics, signed char side, int data) {
+	return bl_CustomBlockGraphics_getTextureHook(graphics, side, data);
 }
 
 bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
@@ -1297,14 +1306,13 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForBlock
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jint side, jfloatArray outputArray) {
 	if (itemId <= 0 || itemId >= 256) return false;
-	return false;
 	// FIXME 0.15
 /*
-	Block* block = bl_Block_mBlocks[itemId];
+	BlockGraphics* block = BlockGraphics::mBlocks[itemId];
 	if (!block) return false;
-	TextureUVCoordinateSet* (*gettex)(Block*, signed char, int) =
-		(TextureUVCoordinateSet* (*)(Block*, signed char, int))
-		block->vtable[vtable_indexes.tile_get_texture_char_int - 2];
+	TextureUVCoordinateSet* (*gettex)(BlockGraphics*, signed char, int) =
+		(TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
+		block->vtable[vtable_indexes.blockgraphics_get_texture_char_int - 2];
 	TextureUVCoordinateSet* set = gettex(block, itemDamage, side);
 	if (set == NULL || set->bounds == NULL) return false;
 	float lasttwo[] = {(float) set->size[0], (float) set->size[1]};
@@ -1387,12 +1395,13 @@ void bl_initCustomBlockVtable() {
 	//copy existing vtable
 	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, vtable_indexes.tile_vtable_size);
+	bl_CustomBlockGraphics_vtable = (void**) ::operator new(vtable_indexes.blockgraphics_vtable_size);
+	memcpy(bl_CustomBlockGraphics_vtable, bl_BlockGraphics_vtable, vtable_indexes.blockgraphics_vtable_size);
 
 	//set the texture getter to our overridden version
-	// FIXME 0.15
-/*
-	bl_CustomBlock_vtable[vtable_indexes.tile_get_texture_char_int] = (void*) &bl_CustomBlock_getTextureHook;
-*/
+
+	bl_CustomBlockGraphics_vtable[vtable_indexes.blockgraphics_get_carried_texture] = (void*) &bl_CustomBlockGraphics_getCarriedTexture_hook;
+
 	bl_Block_onPlace = (void (*)(Block*, BlockSource&, BlockPos const&))
 		bl_CustomBlock_vtable[vtable_indexes.tile_on_place];
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_place] = (void*) &bl_CustomBlock_onPlace_hook;
@@ -1488,6 +1497,9 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		retval->setSolid(opaque);
 		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 		// todo: graphics
+		retGraphics = new BlockGraphics(nameStr);
+		retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
+		BlockGraphics::mBlocks[blockId] = retGraphics;
 	} else if (customBlockType == 1 /* liquid */ ) {
 		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockDynamicSize);
@@ -3080,6 +3092,9 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 }
+#define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\
+}}while(false)
 
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
@@ -3122,6 +3137,7 @@ void bl_setuphooks_cppside() {
 #endif
 
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV5Block"));
+	bl_BlockGraphics_vtable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV13BlockGraphics");
 	//bl_dumpVtable(bl_Tile_vtable, 0x100);
 
 	bl_Block_Block = (void (*)(Block*, std::string const&, int, void*)) dlsym(RTLD_DEFAULT, "_ZN5BlockC1ERKSsiRK8Material");
@@ -3356,6 +3372,12 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN18MinecraftTelemetry22fireEventScreenChangedERKSsS1_S1_");
 	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
 		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
+	bl_BlockGraphics_getTexture_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
+		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEai");
+	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_real, (void*) bl_CustomBlockGraphics_getTextureHook);
+	bl_BlockGraphics_getTexture_char_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char))
+		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEa");
+	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_char_real, (void*) bl_CustomBlockGraphics_getTexture_char_hook);
 
 
 	bl_entity_hurt_hook_init(mcpelibhandle);

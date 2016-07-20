@@ -5,13 +5,15 @@ namespace Json {
 };
 class BlockGraphics {
 public:
-	char filler[324];
+	void** vtable;
+	char filler[324-4]; // 0
 	BlockGraphics(std::string const&);
 	~BlockGraphics();
 	void setTextures(BlockGraphics&, Json::Value const&);
 	void setBlockShape(BlockGraphics&, Json::Value const&);
 	void setCarriedTextures(BlockGraphics&, Json::Value const&);
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
+	Block* getBlock() const;
 	TextureUVCoordinateSet const& getTexture(signed char, int);
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);
 	static BlockGraphics* mBlocks[0x100];
