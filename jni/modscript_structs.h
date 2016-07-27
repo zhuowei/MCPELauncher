@@ -302,10 +302,10 @@ public:
 	void** vtable; //0
 	char filler[132-4]; //4
 	void* model; // 132 (from MobRenderer::MobRenderer)
-	char filler2[184-136]; // 136
+	char filler2[612-136]; // 136
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(sizeof(MobRenderer) == 184, "mobrenderer");
+static_assert(sizeof(MobRenderer) == 612, "mobrenderer");
 
 typedef void Tag;
 
@@ -400,12 +400,12 @@ static_assert(sizeof(ArmorItem) == 84, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 184
-	HumanoidModel* modelArmor; // 188
-	HumanoidModel* modelArmorChestplate; // 192
+	int something; // 612
+	HumanoidModel* modelArmor; // 616
+	HumanoidModel* modelArmorChestplate; // 620
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 188, "armour model offset");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 616, "armour model offset");
 #endif
 #endif // ifdef __cplusplus
 

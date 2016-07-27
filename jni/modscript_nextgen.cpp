@@ -314,6 +314,8 @@ std::string bl_to_string(T value)
     return os.str() ;
 }
 
+bool bl_setArmorTexture(int, std::string const&);
+
 extern "C" {
 
 static void (*bl_ChatScreen_sendChatMessage_real)(void*);
@@ -1038,7 +1040,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
-	std::string lowercaseStr = Util::toLower(name);
+	//std::string lowercaseStr = Util::toLower(name);
+	if (item->itemId > 0x200) {
+		if (item->itemId < ItemRenderer::mItemGraphics.size()) {
+			ItemRenderer::mItemGraphics[item->itemId] = ItemRenderer::mItemGraphics[0x100];
+		} else {
+			ItemRenderer::mItemGraphics.resize(item->itemId + 1,
+				ItemRenderer::mItemGraphics[0x100]);
+		}
+	}
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
 
@@ -1097,6 +1107,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	const char * textureUTFChars = env->GetStringUTFChars(texture, NULL);
 	//if (bl_armorRenders[id] != nullptr) delete bl_armorRenders[id];
 	//bl_armorRenders[id] = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(textureUTFChars));
+	bl_setArmorTexture(id, std::string(textureUTFChars));
 	env->ReleaseStringUTFChars(name, textureUTFChars);
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
@@ -1516,7 +1527,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 	}
 
-	bl_set_i18n("tile." + nameStr + ".name", nameStr);
+	bl_set_i18n("tile." + nameStr + ".name", realNameStr);
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
 	// set default category
@@ -2568,19 +2579,20 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 	return bl_localplayer->getScore();
 }
 
-mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
+/*ItemGraphics const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {
 	if (itemStack.getId() >= 0x200) { // extended item ID
 		return ItemRenderer::mItemGraphics[0x100];
 	}
 	return ItemRenderer::mItemGraphics[itemStack.getId()];
 }
 
-mce::TexturePtr const& bl_ItemRenderer_getGraphics_hook_item(Item* item) {
+ItemGraphics const& bl_ItemRenderer_getGraphics_hook_item(Item* item) {
 	if (item->itemId >= 0x200) { // extended item ID
 		return ItemRenderer::mItemGraphics[0x100];
 	}
 	return ItemRenderer::mItemGraphics[item->itemId];
 }
+*/
 
 
 mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Entity& ent) {
@@ -3080,12 +3092,14 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
 
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
+/*
 	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(ItemInstance const&)>(&ItemRenderer::getGraphics),
 		(void*) &bl_ItemRenderer_getGraphics_hook,
 		(void**) &bl_ItemRenderer_getGraphics_real);
 	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(Item const&)>(&ItemRenderer::getGraphics),
 		(void*) &bl_ItemRenderer_getGraphics_hook_item,
 		(void**) &bl_ItemRenderer_getGraphics_real_item);
+*/
 
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 //	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];

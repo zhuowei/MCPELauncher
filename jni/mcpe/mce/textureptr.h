@@ -17,7 +17,7 @@ public:
 	char filler[0x4]; // 0
 	Texture* texture; // 4
 	std::string textureName; // 8
-	TextureLocation myLocation; // 12
+	std::string something; // 12
 	TexturePtr();
 	TexturePtr(TextureGroup&, ResourceLocation const&);
 	TexturePtr(TexturePtr&&);
@@ -27,6 +27,8 @@ public:
 	TexturePtr clone() const;
 	static TexturePtr NONE;
 };
+
+static_assert(sizeof(TexturePtr) == 16, "textureptr size");
 class TextureGroup {
 public:
 	TexturePtr getTexture(std::string const&);

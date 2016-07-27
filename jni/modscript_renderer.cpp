@@ -16,7 +16,7 @@
 #include "mcpe/itemspriterenderer.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 208
+#define MOBRENDERER_SIZE 636
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 40
 // ModelPart destructor

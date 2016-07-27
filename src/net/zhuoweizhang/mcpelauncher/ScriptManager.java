@@ -390,6 +390,7 @@ public class ScriptManager {
 		}
 
 		callScriptMethod("selectLevelHook");
+		nativeArmorAddQueuedTextures();
 		nextTickCallsSetLevel = true;
 	}
 
@@ -598,7 +599,7 @@ public class ScriptManager {
 				}
 				MobEffect.initIds();
 				loadEnabledScripts();
-				nativeArmorAddQueuedTextures();
+				//nativeArmorAddQueuedTextures();
 			} catch (Exception e) {
 				dumpScriptError(e);
 				reportScriptError(null, e);
@@ -1336,6 +1337,20 @@ public class ScriptManager {
 			stringArray[i] = texName;
 		}
 		return retval;
+	}
+
+	public static TextureRequests mapTextureNames(TextureRequests requests) {
+		for (int i = 0; i < requests.coords.length; i++) {
+			String name = requests.names[i];
+			if (name.equals("stonecutter")) {
+				String[] stonecutterNames = new String[] {"stonecutter_side", "stonecutter_other_side", "stonecutter_top", "stonecutter_bottom"};
+				requests.names[i] = stonecutterNames[requests.coords[i] % 4];
+				requests.coords[i] = 0;
+			} else if (name.equals("piston_inner")) {
+				requests.names[i] = "piston_top";
+			}
+		}
+		return requests;
 	}
 
 	/*
@@ -3938,7 +3953,7 @@ public class ScriptManager {
 				renderType = ((Number) renderTypeSrc).intValue();
 				Log.i("BlockLauncher", "setting renderType to " + renderType);
 			}
-			TextureRequests finalTextures = expandTexturesArray(textures);
+			TextureRequests finalTextures = mapTextureNames(expandTexturesArray(textures));
 			verifyBlockTextures(finalTextures);
 			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
 					materialSourceId, opaque, renderType, customBlockType);

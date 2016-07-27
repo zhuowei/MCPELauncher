@@ -26,10 +26,11 @@ static std::vector<std::pair<int, std::string>> bl_queuedArmorTextures;
 static bool needsReload = true;
 
 bool bl_setArmorTexture(int id, std::string const& filename) {
-	if (!bl_minecraft) {
-		bl_queuedArmorTextures.emplace_back(id, filename);
-		return true;
-	}
+	bl_queuedArmorTextures.emplace_back(id, filename);
+	return true;
+}
+bool bl_setArmorTextureReal(int id, std::string const& filename) {
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "set armor texture real id: %d, %s", id, filename.c_str());
 	mce::TexturePtr* texturePtr = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(filename));
 	return bl_setArmorTexture(id, texturePtr);
 }
@@ -44,11 +45,12 @@ bool bl_setArmorTexture(int id, mce::TexturePtr* texturePtr) {
 extern "C" {
 
 static void bl_reload_armor_textures_real() {
-	auto& textures = bl_minecraft->getTextures();
+/*	auto& textures = bl_minecraft->getTextures();
 	for (auto t: bl_armorRenders) {
 		if (!t) continue;
 		textures.loadTexture(ResourceLocation(t->textureName), false);
 	}
+*/
 }
 
 void bl_reload_armor_textures() {
@@ -89,9 +91,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAr
   (JNIEnv *env, jclass clazz) {
 	if (!bl_minecraft) return; // WTF
 	for (auto& t: bl_queuedArmorTextures) {
-		bl_setArmorTexture(t.first, t.second);
+		bl_setArmorTextureReal(t.first, t.second);
 	}
-	bl_queuedArmorTextures.clear();
+	//bl_queuedArmorTextures.clear();
 }
 
 void bl_cape_init(void* mcpelibinfo) {
