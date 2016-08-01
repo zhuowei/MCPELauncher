@@ -1729,7 +1729,7 @@ public class MainActivity extends NativeActivity {
 				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
 			));
 		}
-		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this);
+		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resourcepacks/vanilla/");
 		textureOverrides.add(addonOverrideTexturePackInstance);
 	}
 

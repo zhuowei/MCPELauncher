@@ -240,7 +240,8 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_get_enchant_slot;
 	int item_get_enchant_value;
 	int level_set_difficulty;
-	//int appplatform_get_screen_type;
+	int appplatform_get_ui_scaling_rules;
+	int appplatform_get_default_input_mode;
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
 	int entity_hurt;
@@ -289,8 +290,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item15getEnchantValueEv");
 	vtable_indexes.level_set_difficulty = bl_vtableIndex(mcpelibhandle, "_ZTV5Level",
 		"_ZN5Level13setDifficultyE10Difficulty");
-	//vtable_indexes.appplatform_get_screen_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-	//	"_ZNK19AppPlatform_android13getScreenTypeEv");
+	vtable_indexes.appplatform_get_ui_scaling_rules = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK11AppPlatform17getUIScalingRulesEv");
+	vtable_indexes.appplatform_get_default_input_mode = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK19AppPlatform_android19getDefaultInputModeEv");
 	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
@@ -1508,9 +1511,6 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		retval->setSolid(opaque);
 		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 		// todo: graphics
-		retGraphics = new BlockGraphics(nameStr);
-		retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
-		BlockGraphics::mBlocks[blockId] = retGraphics;
 	} else if (customBlockType == 1 /* liquid */ ) {
 		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockDynamicSize);
@@ -1527,6 +1527,10 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
 	}
 
+	retGraphics = new BlockGraphics(nameStr);
+	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
+	BlockGraphics::mBlocks[blockId] = retGraphics;
+
 	bl_set_i18n("tile." + nameStr + ".name", realNameStr);
 	//add it to the global tile list
 	bl_Block_mBlocks[blockId] = retval;
@@ -1540,6 +1544,10 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	tileItem->setStackedByData(true);
 	bl_registerItem(tileItem, nameStr);
 	bl_Item_setCategory(tileItem, 2 /* Decoration */);
+	if (BlockGraphics::mBlocks[blockId] == nullptr) {
+		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
+		abort();
+	}
 	return retval;
 }
 
@@ -1911,7 +1919,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_minecraft->setCameraTargetEntity(entity);
+	bl_minecraft->setCameraEntity(entity);
 }
 
 JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetUUID
@@ -1934,10 +1942,8 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
-#if 0
-#ifdef __arm__
 	for (int i = 1; i < 0x100; i++) {
-		if (bl_Block_mBlocks[i] == NULL) {
+		if (BlockGraphics::mBlocks[i] == NULL) {
 			char name[100];
 			snprintf(name, sizeof(name), "Missing block ID: %d", i);
 			std::string textureNames[16*6];
@@ -1946,11 +1952,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 			}
 			int textureCoords[16*6];
 			memset(textureCoords, 0, sizeof(textureCoords));
-			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name);
+			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name, 0);
 		}
 	}
-#endif
-#endif
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
@@ -2830,14 +2834,18 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDi
 }
 
 static void** bl_AppPlatform_vtable;
-//static void* bl_AppPlatform_getType_real;
+static void* bl_AppPlatform_getUIScalingRules_real;
 static void* bl_AppPlatform_getEdition_real;
 static void* bl_AppPlatform_useCenteredGui_real;
-/*
-static int bl_AppPlatform_getScreenType_hook(void* appPlatform) {
+static void* bl_AppPlatform_getDefaultInputMode_real;
+
+static int bl_AppPlatform_getDefaultInputMode_hook(void* appPlatform) {
+	return 1;
+}
+
+static int bl_AppPlatform_getUIScalingRules_hook(void* appPlatform) {
 	return 0;
 }
-*/
 
 static bool bl_AppPlatform_useCenteredGui_hook(void* appPlatform) {
 	return true;
@@ -2849,10 +2857,10 @@ static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv* env, jclass clazz, jboolean desktop) {
-/*
-	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type] = desktop?
-		(void*) &bl_AppPlatform_getScreenType_hook: bl_AppPlatform_getScreenType_real;
-*/
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules] = desktop?
+		(void*) &bl_AppPlatform_getUIScalingRules_hook: bl_AppPlatform_getUIScalingRules_real;
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_default_input_mode] = desktop?
+		(void*) &bl_AppPlatform_getDefaultInputMode_hook: bl_AppPlatform_getDefaultInputMode_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition] = desktop?
 		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
@@ -3102,9 +3110,10 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 */
 
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
-//	bl_AppPlatform_getScreenType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_screen_type];
+	bl_AppPlatform_getUIScalingRules_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules];
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
+	bl_AppPlatform_getDefaultInputMode_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_default_input_mode];
 }
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\

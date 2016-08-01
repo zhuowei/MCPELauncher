@@ -20,6 +20,7 @@ public:
 	Minecraft* getServer();
 	Player* getLocalPlayer();
 	mce::TextureGroup& getTextures() const;
+	void setCameraEntity(Entity*);
 	void setCameraTargetEntity(Entity*);
 	Options* getOptions();
 	AbstractScreen* getScreen();

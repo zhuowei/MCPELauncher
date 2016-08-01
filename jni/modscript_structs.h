@@ -183,7 +183,9 @@ class Block {
 public:
 	void** vtable; //0
 	unsigned char id; // 4
-	char filler0[20-5]; //5
+	char filler0[8-5]; //5
+	std::string nameId; // 8
+	char filler1[20-12]; // 12
 	int renderLayer; //20
 	char filler2[52-24]; //24
 	void* material; //52
@@ -196,6 +198,7 @@ public:
 	void setFriction(float);
 	void setSolid(bool);
 	void setCategory(CreativeItemCategory);
+	std::string const& getDescriptionId() const;
 	static std::unordered_map<std::string, Block*> mBlockLookupMap;
 };
 

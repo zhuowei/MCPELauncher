@@ -16,9 +16,11 @@ public class AddonOverrideTexturePack implements TexturePack {
 	private final MainActivity activity;
 	private final Map<String, ZipFile> assets = new HashMap<String, ZipFile>();
 	private final Map<String, ZipFile> zipsByPackage = new HashMap<String, ZipFile>();
+	private final String prefix;
 
-	public AddonOverrideTexturePack(MainActivity activity) {
+	public AddonOverrideTexturePack(MainActivity activity, String prefix) {
 		this.activity = activity;
+		this.prefix = prefix;
 		initAddons();
 	}
 
@@ -53,6 +55,7 @@ public class AddonOverrideTexturePack implements TexturePack {
 	}
 
 	public InputStream getInputStream(String fileName) throws IOException {
+		if (fileName.startsWith(prefix)) fileName = fileName.substring(prefix.length());
 		String name = "assets/" + fileName;
 		ZipFile file = assets.get(name);
 		if (file == null) return null;
@@ -60,6 +63,7 @@ public class AddonOverrideTexturePack implements TexturePack {
 	}
 
 	public long getSize(String fileName) throws IOException {
+		if (fileName.startsWith(prefix)) fileName = fileName.substring(prefix.length());
 		String name = "assets/" + fileName;
 		ZipFile file = assets.get(name);
 		if (file == null) return -1;
