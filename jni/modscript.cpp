@@ -415,11 +415,14 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 	}*/
 }
 
+extern void bl_cpp_selectLevel_hook();
+
 void* bl_MinecraftClient_startLocalServer_hook(MinecraftClient* minecraft, void* wDir, void* wName, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
 	}
+	bl_cpp_selectLevel_hook();
 	bl_minecraft = minecraft;
 	JNIEnv *env;
 

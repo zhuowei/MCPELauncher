@@ -120,9 +120,7 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV16VillagerRenderer",
 "_ZTV17IronGolemRenderer",
 "_ZTV17LavaSlimeRenderer",
-"_ZTV17LiveHorseRenderer",
 "_ZTV17SnowGolemRenderer",
-"_ZTV18LivePlayerRenderer",
 "_ZTV18SilverfishRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
@@ -241,9 +239,10 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_get_enchant_value;
 	int level_set_difficulty;
 	int appplatform_get_ui_scaling_rules;
-	int appplatform_get_default_input_mode;
+	int appplatform_get_platform_type;
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
+	int appplatform_use_metadata_driven_screens;
 	int entity_hurt;
 	int mobrenderer_render;
 	int snowball_item_vtable_size;
@@ -291,13 +290,15 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.level_set_difficulty = bl_vtableIndex(mcpelibhandle, "_ZTV5Level",
 		"_ZN5Level13setDifficultyE10Difficulty");
 	vtable_indexes.appplatform_get_ui_scaling_rules = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK11AppPlatform17getUIScalingRulesEv");
-	vtable_indexes.appplatform_get_default_input_mode = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK19AppPlatform_android19getDefaultInputModeEv");
+		"_ZNK19AppPlatform_android25getPlatformUIScalingRulesEv");
+	vtable_indexes.appplatform_get_platform_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK11AppPlatform15getPlatformTypeEv");
 	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform14useCenteredGUIEv");
+	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
 	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity4hurtERK18EntityDamageSourcei");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
@@ -1053,6 +1054,20 @@ static void bl_registerItem(Item* item, std::string const& name) {
 		}
 	}
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
+}
+
+void bl_cpp_selectLevel_hook() {
+	for (int i = 0x200; i < bl_item_id_count; i++) {
+		Item* item = bl_Item_mItems[i];
+		if (!item) continue;
+		if (item->itemId < ItemRenderer::mItemGraphics.size() && !(((void**)&ItemRenderer::mItemGraphics[item->itemId])[1])) {
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
+			ItemRenderer::mItemGraphics[item->itemId] = ItemRenderer::mItemGraphics[0x100];
+		} else {
+			ItemRenderer::mItemGraphics.resize(item->itemId + 1,
+				ItemRenderer::mItemGraphics[0x100]);
+		}
+	}
 }
 
 Item* bl_constructItem(std::string const& name, int id) {
@@ -2837,10 +2852,11 @@ static void** bl_AppPlatform_vtable;
 static void* bl_AppPlatform_getUIScalingRules_real;
 static void* bl_AppPlatform_getEdition_real;
 static void* bl_AppPlatform_useCenteredGui_real;
-static void* bl_AppPlatform_getDefaultInputMode_real;
+static void* bl_AppPlatform_getPlatformType_real;
+static void* bl_AppPlatform_useMetadataDrivenScreens_real;
 
-static int bl_AppPlatform_getDefaultInputMode_hook(void* appPlatform) {
-	return 1;
+static int bl_AppPlatform_getPlatformType_hook(void* appPlatform) {
+	return 0;
 }
 
 static int bl_AppPlatform_getUIScalingRules_hook(void* appPlatform) {
@@ -2855,16 +2871,22 @@ static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
 	return "win10";
 }
 
+static bool bl_AppPlatform_useMetadataDrivenScreens_hook(void* appPlatform) {
+	return true;
+}
+
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv* env, jclass clazz, jboolean desktop) {
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules] = desktop?
 		(void*) &bl_AppPlatform_getUIScalingRules_hook: bl_AppPlatform_getUIScalingRules_real;
-	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_default_input_mode] = desktop?
-		(void*) &bl_AppPlatform_getDefaultInputMode_hook: bl_AppPlatform_getDefaultInputMode_real;
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type] = desktop?
+		(void*) &bl_AppPlatform_getPlatformType_hook: bl_AppPlatform_getPlatformType_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition] = desktop?
 		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
 		(void*) &bl_AppPlatform_useCenteredGui_hook: bl_AppPlatform_useCenteredGui_real;
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens] = desktop?
+		(void*) &bl_AppPlatform_useMetadataDrivenScreens_hook: bl_AppPlatform_useMetadataDrivenScreens_real;
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetImmobile
@@ -3113,7 +3135,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_getUIScalingRules_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules];
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
-	bl_AppPlatform_getDefaultInputMode_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_default_input_mode];
+	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
+	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
 }
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\
@@ -3382,6 +3405,12 @@ void bl_setuphooks_cppside() {
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
+#if 0
+		Dl_info info;
+		if (dladdr(vtable[vtable_indexes.mobrenderer_get_skin_ptr], &info)) {
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Patching %s in %s", info.dli_sname, listOfRenderersToPatchTextures[i]);
+		}
+#endif
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
 	void** skeletonRendererVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV16SkeletonRenderer");
