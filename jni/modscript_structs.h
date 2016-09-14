@@ -275,7 +275,7 @@ public:
 	ModelPart bipedLeftLeg;//1344
 	char mystery2[2]; // 1528
 	char filler3[1540-1530]; // 1530
-	HumanoidModel(float, float, int, int);
+	HumanoidModel(float, float, int, int, bool);
 };
 
 static_assert(sizeof(HumanoidModel) == 1540, "HumanoidModel size");
