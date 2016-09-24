@@ -1,7 +1,15 @@
 #pragma once
+#include "mce/textureptr.h"
 class ItemInstance;
 class ItemGraphics {
-	char filler[16 /*sizeof(mce::TexturePtr)*/]; // 0
+public:
+	//char filler[16 /*sizeof(mce::TexturePtr)*/]; // 0
+	mce::TexturePtr texturePtr;
+	ItemGraphics(mce::TexturePtr&& _texturePtr) {
+		texturePtr = std::move(_texturePtr);
+	}
+	ItemGraphics() {
+	}
 };
 class ItemRenderer {
 public:

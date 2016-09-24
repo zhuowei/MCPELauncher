@@ -74,9 +74,9 @@ typedef void Font;
 
 // from Player::getSelectedItem
 #ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 3548
+#define PLAYER_INVENTORY_OFFSET 3572
 #else
-#define PLAYER_INVENTORY_OFFSET 3556
+#define PLAYER_INVENTORY_OFFSET 3580
 #endif
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
@@ -1046,12 +1046,13 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_mItems[item->itemId] = item;
 	//std::string lowercaseStr = Util::toLower(name);
 	if (item->itemId > 0x200) {
-		if (item->itemId < ItemRenderer::mItemGraphics.size()) {
-			ItemRenderer::mItemGraphics[item->itemId] = ItemRenderer::mItemGraphics[0x100];
-		} else {
-			ItemRenderer::mItemGraphics.resize(item->itemId + 1,
-				ItemRenderer::mItemGraphics[0x100]);
+		ResourceLocation location;
+		location.str1 = "atlas.items";
+		location.str2 = "InUserPackage";
+		if (!(item->itemId < ItemRenderer::mItemGraphics.size())) {
+			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 		}
+		ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 	}
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
@@ -1060,12 +1061,21 @@ void bl_cpp_selectLevel_hook() {
 	for (int i = 0x200; i < bl_item_id_count; i++) {
 		Item* item = bl_Item_mItems[i];
 		if (!item) continue;
-		if (item->itemId < ItemRenderer::mItemGraphics.size() && !(((void**)&ItemRenderer::mItemGraphics[item->itemId])[1])) {
+		bool needsSetting = false;
+		if (item->itemId >= ItemRenderer::mItemGraphics.size()) {
+			// outside the array, expand and populate
+			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
+			needsSetting = true;
+		} else if (!(((void**)&ItemRenderer::mItemGraphics[item->itemId])[1])) {
+			// inside but not set, populate
+			needsSetting = true;
+		}
+		if (needsSetting) {
 			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
-			ItemRenderer::mItemGraphics[item->itemId] = ItemRenderer::mItemGraphics[0x100];
-		} else {
-			ItemRenderer::mItemGraphics.resize(item->itemId + 1,
-				ItemRenderer::mItemGraphics[0x100]);
+			ResourceLocation location;
+			location.str1 = "atlas.items";
+			location.str2 = "InUserPackage";
+			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 		}
 	}
 }

@@ -38,9 +38,9 @@ typedef struct {
 
 // from Player::getSelectedItem
 #ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 3548
+#define PLAYER_INVENTORY_OFFSET 3572
 #else
-#define PLAYER_INVENTORY_OFFSET 3556
+#define PLAYER_INVENTORY_OFFSET 3580
 #endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21

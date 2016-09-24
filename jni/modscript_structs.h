@@ -110,6 +110,7 @@ struct TextureUVCoordinateSet {
 	};
 };
 //static_assert(offsetof(TextureUVCoordinateSet, textureFile) == 24, "textureFile offset wrong");
+static_assert(sizeof(TextureUVCoordinateSet) == 28, "TextureUVCoordinateSet size wrong");
 
 namespace Json {
 	class Value;
@@ -406,6 +407,7 @@ struct HumanoidMobRenderer : public MobRenderer {
 	int something; // 612
 	HumanoidModel* modelArmor; // 616
 	HumanoidModel* modelArmorChestplate; // 620
+	char hmr_filler1[636-624]; // 624
 };
 #ifdef __arm__
 static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 616, "armour model offset");
