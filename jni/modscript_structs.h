@@ -190,9 +190,10 @@ public:
 	int renderLayer; //20
 	char filler2[52-24]; //24
 	void* material; //52
-	char filler3[112-56]; // 56
+	char filler3[80-56]; // 56
 	float destroyTime; //80
 	float explosionResistance; //84
+	char filler4[112-88]; // 88
 
 	float getDestroySpeed();
 	float getFriction();
