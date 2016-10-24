@@ -3,6 +3,6 @@
 
 class ChestBlockEntity : public BlockEntity {
 public:
-	void setItem(int, ItemInstance*);
+	void setItem(int, ItemInstance const*);
 	ItemInstance* getItem(int) const;
 };

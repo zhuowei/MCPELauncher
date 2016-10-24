@@ -2,7 +2,7 @@
 
 class Attribute {
 public:
-	char filler[0x14];
+	char filler[8];
 };
 
 class SharedAttributes {

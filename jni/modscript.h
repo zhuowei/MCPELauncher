@@ -68,10 +68,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeExplode
- * Signature: (FFFFZ)V
+ * Signature: (FFFFZZF)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
-  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jfloat, jboolean);
+  (JNIEnv *, jclass, jfloat, jfloat, jfloat, jfloat, jboolean, jboolean, jfloat);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -408,6 +408,14 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
  */
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *, jclass, jint, jint, jfloatArray);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetTextureCoordinatesForBlock
+ * Signature: (III[F)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForBlock
+  (JNIEnv *, jclass, jint, jint, jint, jfloatArray);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -1443,6 +1451,94 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntitySetImmobile
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetImmobile
+  (JNIEnv *, jclass, jlong, jboolean);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeModPESetRenderDebug
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetRenderDebug
+  (JNIEnv *, jclass, jboolean);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntityGetTarget
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetTarget
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntitySetTarget
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetTarget
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativePlayerGetScore
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetScore
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeMobGetArmorCustomName
+ * Signature: (JI)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobGetArmorCustomName
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeMobSetArmorCustomName
+ * Signature: (JILjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmorCustomName
+  (JNIEnv *, jclass, jlong, jint, jstring);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeGetItemMaxDamage
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemMaxDamage
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeEntityGetCarriedItem
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetCarriedItem
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeItemGetMaxStackSize
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMaxStackSize
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeDefineSnowballItem
+ * Signature: (ILjava/lang/String;ILjava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineSnowballItem
+  (JNIEnv *, jclass, jint, jstring, jint, jstring, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetupHooks
  * Signature: (I)V
  */
@@ -2009,6 +2105,17 @@ extern "C" {
 
 #ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
 #define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_ScriptState
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class net_zhuoweizhang_mcpelauncher_ScriptManager_MyMethodWatcher */
+
+#ifndef _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_MyMethodWatcher
+#define _Included_net_zhuoweizhang_mcpelauncher_ScriptManager_MyMethodWatcher
 #ifdef __cplusplus
 extern "C" {
 #endif

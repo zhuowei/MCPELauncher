@@ -4,12 +4,15 @@
 enum EntityType {
 };
 
-class MobFactory {
+class EntityDefinitionIdentifier {
 public:
-	static std::unique_ptr<Entity> CreateMob(EntityType, TileSource&, Vec3 const&, Vec2 const&);
+	std::string part1;
+	std::string part2;
+	std::string part3;
+	EntityDefinitionIdentifier(EntityType);
 };
 
 class EntityFactory {
 public:
-	static std::unique_ptr<Entity> CreateEntity(EntityType, TileSource&);
+	static std::unique_ptr<Entity> createSpawnedEntity(EntityDefinitionIdentifier const&, Entity*, Vec3 const&, Vec2 const&);
 };

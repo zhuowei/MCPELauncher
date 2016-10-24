@@ -33,3 +33,5 @@ proguard/
 .idea/
 
 scriptscramble.c
+tools/readelfout.txt
+tools/thesyms.txt

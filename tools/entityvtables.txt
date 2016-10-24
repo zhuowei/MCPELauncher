@@ -1,13 +1,11 @@
 _ZTV11LocalPlayer
 _ZTV12RemotePlayer
 _ZTV12ServerPlayer
-_ZTV9AgableMob
-_ZTV3Bat
 _ZTV6Animal
+_ZTV3Bat
 _ZTV7Chicken
 _ZTV11MushroomCow
 _ZTV3Cow
-_ZTV5Golem
 _ZTV5Horse
 _ZTV9IronGolem
 _ZTV6Ocelot
@@ -16,9 +14,8 @@ _ZTV6Rabbit
 _ZTV5Sheep
 _ZTV9SnowGolem
 _ZTV5Squid
-_ZTV13TamableAnimal
-_ZTV11WaterAnimal
 _ZTV4Wolf
+_ZTV10WitherBoss
 _ZTV6Entity
 _ZTV11FishingHook
 _ZTV13LightningBolt
@@ -40,6 +37,7 @@ _ZTV5Blaze
 _ZTV7Creeper
 _ZTV8EnderMan
 _ZTV5Ghast
+_ZTV8Guardian
 _ZTV15HumanoidMonster
 _ZTV9LavaSlime
 _ZTV7Monster
@@ -52,6 +50,7 @@ _ZTV6Spider
 _ZTV5Witch
 _ZTV6Zombie
 _ZTV14ZombieVillager
+_ZTV3Npc
 _ZTV8Villager
 _ZTV8Painting
 _ZTV13PathfinderMob
@@ -66,3 +65,4 @@ _ZTV9Throwable
 _ZTV9ThrownEgg
 _ZTV16ThrownEnderpearl
 _ZTV12ThrownPotion
+_ZTV11WitherSkull

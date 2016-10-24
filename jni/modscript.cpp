@@ -36,20 +36,15 @@ typedef struct {
 	void* ptr;
 } unique_ptr;
 
-// from Player::getSelectedItem
-#ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 3572
-#else
-#define PLAYER_INVENTORY_OFFSET 3580
-#endif
 /*
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
+// FIXME 0.16
 #define GAMERENDERER_GETFOV_SIZE 0x1b8
 #else
-#define GAMERENDERER_GETFOV_SIZE 0x140
+#define GAMERENDERER_GETFOV_SIZE 0x154
 #endif
 
 #define LOG_TAG "BlockLauncher/ModScript"
@@ -649,11 +644,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	levelData->setGameType((GameType) type);
 	if (bl_localplayer == NULL) return;
 	bl_MinecraftClient_setGameMode(bl_minecraft, type == 1);
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	auto invPtr = bl_localplayer->getInventory();
+	// FIXME 0.16
 	//((char*) invPtr)[32] = type == 1;
 	//bl_Inventory_clearInventoryWithDefault(invPtr);
-	bl_Inventory_delete1_Inventory(invPtr);
-	bl_Inventory_Inventory(invPtr, bl_localplayer);
+	//bl_Inventory_delete1_Inventory(invPtr);
+	//bl_Inventory_Inventory(invPtr, bl_localplayer);
 	//int dim = type == 1? 10: 0; //daylight cycle
 	//bl_LevelData_setDimension(levelData, dim);
 }
@@ -810,8 +806,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
-  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire) {
-	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire);
+  (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire, jboolean smoke, jfloat something) {
+	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire, smoke, something);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
@@ -821,12 +817,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (remove) amount *= -1;
 	ItemInstance instance(id, amount, damage);
 	//we grab the inventory instance from the player
-	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	auto invPtr = bl_localplayer->getInventory();
 	if (invPtr == nullptr) return;
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "invPtr %p", invPtr);
 	if (!remove) {
 		invPtr->add(instance, true);
 	} else {
-		bl_FillingContainer_removeResource(invPtr, &instance, 0);
+		invPtr->removeResource(instance, false);
 		// note: this may free the original item stack. Don't hold onto it
 	}
 }
@@ -991,7 +988,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	Inventory* invPtr = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
+	auto invPtr = bl_localplayer->getInventory();
 	invPtr->clearSlot(slot);
 }
 
@@ -999,8 +996,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jint slot, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	//we grab the inventory instance from the player
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO fix this for 0.7.2
-	ItemInstance* instance = bl_FillingContainer_getItem(invPtr, slot);
+	auto invPtr = bl_localplayer->getInventory();
+	ItemInstance* instance = invPtr->getItem(slot);
 	if (instance == NULL) return 0;
 	switch (type) {
 		case ITEMID:
@@ -1018,7 +1015,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	Inventory* invPtr = *((Inventory**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET)); //TODO Merge this into a macro
+	auto invPtr = bl_localplayer->getInventory();
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
 	if (itemStack == NULL) return;
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
@@ -1028,7 +1025,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "slot old %d new %d slot %d", oldslot, slot, linkedSlotsCount);
 	}
 	if (slot >= 0) {
-		bl_FillingContainer_replaceSlot(invPtr, slot, itemStack);
+		invPtr->replaceSlot(slot, *itemStack);
 	}
 	delete itemStack;
 }
@@ -1042,7 +1039,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	void* invPtr = bl_localplayer->getInventory();
 	if (invPtr == NULL) return 0;
 	return bl_Inventory_getSelectedSlot(invPtr);
 }
@@ -1050,7 +1047,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSelectedSlotId
   (JNIEnv *env, jclass clazz, jint newSlot) {
 	if (bl_localplayer == NULL) return;
-	void* invPtr = *((void**) (((intptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	void* invPtr = bl_localplayer->getInventory();
 	if (invPtr == NULL) return;
 	bl_Inventory_selectSlot(invPtr, newSlot);
 }

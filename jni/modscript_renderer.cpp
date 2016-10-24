@@ -16,7 +16,7 @@
 #include "mcpe/itemspriterenderer.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 636
+#define MOBRENDERER_SIZE 640
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 40
 // ModelPart destructor
@@ -104,11 +104,11 @@ int bl_renderManager_addRenderer(EntityRenderer* renderer) {
 }
 
 int bl_renderManager_createHumanoidRenderer() {
-	HumanoidModel* model = new HumanoidModel(0, 0, 64, 64, false);
+	HumanoidModel* model = new HumanoidModel(0, 0, 64, 64);
 
-	HumanoidModel* model2 = new HumanoidModel(0, 0, 64, 64, false);
+	HumanoidModel* model2 = new HumanoidModel(0, 0, 64, 64);
 
-	HumanoidModel* model3 = new HumanoidModel(0, 0, 64, 64, false);
+	HumanoidModel* model3 = new HumanoidModel(0, 0, 64, 64);
 
 	MobRenderer* sacrificialRenderer =
 		(MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, 3 /* human */);

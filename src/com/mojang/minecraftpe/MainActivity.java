@@ -79,7 +79,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.15";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.16";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -348,7 +348,7 @@ public class MainActivity extends NativeActivity {
 		//org.fmod.FMOD.assetManager = getAssets();
 
 		try {
-			System.load(mcAppInfo.nativeLibraryDir + "/libgnustl_shared.so");
+			//System.load(mcAppInfo.nativeLibraryDir + "/libgnustl_shared.so");
 			System.load(mcAppInfo.nativeLibraryDir + "/libfmod.so");
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
@@ -1636,6 +1636,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void initPatching() throws Exception {
+		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
@@ -2423,12 +2424,14 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
+/*
+		FIXME 0.16
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
-			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/images/terrain_texture.json",
+			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/terrain_texture.json",
 				"images/terrain-atlas/", "block.bl_modpkg.");
-			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/images/item_texture.json",
+			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/item_texture.json",
 				"images/items-opaque/", "item.bl_modpkg.");
 			ResourcePackManifestProvider resourcePackManifestProvider =
 				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
@@ -2450,6 +2453,7 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			reportError(e);
 		}
+*/
 	}
 
 	private boolean isForcingController() {

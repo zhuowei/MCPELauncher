@@ -22,5 +22,5 @@ for vt in vtables:
 	#a = vtaddr + 20 - 0x1000
 	#b = m[a] | m[a+1]<<8 | m[a+2] << 16 | m[a+3] << 24
 	#if b == resetaddr:
-	if (vtaddr + 20) in p:
+	if (vtaddr + 32) in p:
 		print(vt[5])

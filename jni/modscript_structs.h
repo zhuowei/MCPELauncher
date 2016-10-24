@@ -61,44 +61,58 @@ struct Vec2 {
 class Entity {
 public:
 	void** vtable; //0
-	int filler3;//4
-	float x; //8
-	float y; //12
-	float z; //16
-	char filler2[44-20]; // 20
-	float motionX; //44 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //48
-	float motionZ; //52
-	float pitch; //56 Entity::setRot
-	float yaw; //60
-	float prevPitch; //64
-	float prevYaw; //68
+	char filler3[64-4]; // 4
+	float x; //64
+	float y; //68
+	float z; //72
+	char filler2[100-76]; // 76
+	float motionX; //100 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //104
+	float motionZ; //108
+	float pitch; //112 Entity::setRot
+	float yaw; //116
+	float prevPitch; //120
+	float prevYaw; //124
 
-	char filler4[264-72]; //72
-	int renderType; //264
-	char filler5[292-268]; // 268
-	struct Entity* rider; //292
-	struct Entity* riding; //296 from Entity::getRide
+	char filler4[224-128]; //128
+	int renderType; //224
+	char filler5[400-228]; // 228
+	struct Entity* rider; //400
+	struct Entity* riding; //404 from Entity::getRide
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;
 	void setNameTag(std::string const&);
 	SynchedEntityData* getEntityData();
+	EntityUniqueID const& getTargetId();
+	void setTarget(Entity*);
+	Level* getLevel();
 };
-static_assert(offsetof(Entity, renderType) == 264, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
 
 class Mob: public Entity {
 public:
-	Mob* getTarget();
-	void setTarget(Mob*);
 };
-
+enum ContainerID {
+	ContainerIDInventory = 0,
+};
+class PlayerInventoryProxy {
+public:
+	void add(ItemInstance&, bool);
+	void removeResource(ItemInstance const&, bool);
+	void clearSlot(int, ContainerID id=ContainerIDInventory);
+	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
+	int getLinkedSlot(int) const;
+	int getLinkedSlotsCount() const;
+	void replaceSlot(int, ItemInstance const&);
+};
 class Player: public Mob {
 public:
 	int getScore();
 	void addExperience(int);
 	void addLevels(int);
+	PlayerInventoryProxy* getInventory() const;
 };
 
 struct TextureUVCoordinateSet {
@@ -124,21 +138,24 @@ public:
 	//void** vtable; //0
 	char filler0[18-4]; //4
 	short itemId; //18
-	char filler1[27-20]; // 20
-	bool handEquipped; // 27
-	char filler[37-28]; //28
-	unsigned char useAnimation; // 37
-	char filler3[68-38]; // 38
+	char filler1[33-20]; // 20
+	bool handEquipped; // 33
+	char filler[43-34]; //34
+	unsigned char useAnimation; // 43
+	char filler3[76-44]; // 44
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
-	void init(Json::Value&);
+	// this one loads textures
+	void initClient(Json::Value&);
+	// this one doesn't
+	void initServer(Json::Value&);
 	void setStackedByData(bool);
 	bool isStackedByData() const;
 	void setMaxDamage(int);
 	int getMaxDamage();
 };
-static_assert(sizeof(Item) == 68, "item size is wrong");
+static_assert(sizeof(Item) == 76, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -193,7 +210,7 @@ public:
 	char filler3[80-56]; // 56
 	float destroyTime; //80
 	float explosionResistance; //84
-	char filler4[112-88]; // 88
+	char filler4[120-88]; // 88
 
 	float getDestroySpeed();
 	float getFriction();
@@ -231,11 +248,11 @@ public:
 	MaterialPtr* material; //72 from ModelPart::draw
 	int textureOffsetX; // 76
 	int textureOffsetY; // 80
-	char filler2[184-84]; // 84
+	char filler2[188-84]; // 84
 
 	void addBox(Vec3 const&, Vec3 const&, float);
-}; // 184 bytes
-static_assert(sizeof(ModelPart) == 184, "modelpart size wrong");
+}; // 188 bytes
+static_assert(sizeof(ModelPart) == 188, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
@@ -267,23 +284,24 @@ public:
 	MaterialPtr materialMultitextureColorMask; // 192
 	MaterialPtr materialMultitextureAlphaTest; // 204
 	MaterialPtr materialMultitextureAlphaTestColorMask; // 216
-	char filler2[240-228]; // 228
-	ModelPart bipedHead;//240
-	ModelPart bipedHeadwear;//424
-	ModelPart bipedBody;//608
-	ModelPart bipedRightArm;//792
-	ModelPart bipedLeftArm;//976
-	ModelPart bipedRightLeg;//1160
-	ModelPart bipedLeftLeg;//1344
-	char mystery2[2]; // 1528
-	char filler3[1540-1530]; // 1530
-	HumanoidModel(float, float, int, int, bool);
+	MaterialPtr materialGuardianGhost; // 228
+	char filler2[252-240]; // 240
+	ModelPart bipedHead;//252
+	ModelPart bipedHeadwear;//440
+	ModelPart bipedBody;//628
+	ModelPart bipedRightArm;//816
+	ModelPart bipedLeftArm;//1004
+	ModelPart bipedRightLeg;//1192
+	ModelPart bipedLeftLeg;//1380
+	short unknownshort; // 1568
+	char filler3[1580-1570]; // 1570
+	HumanoidModel(float, float, int, int);
 };
 
-static_assert(sizeof(HumanoidModel) == 1540, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 1580, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
-static_assert(offsetof(HumanoidModel, bipedHead) == 240, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedHead) == 252, "HumanoidModel bipedHead");
 
 typedef struct {
 	Item* item; //0
@@ -307,10 +325,10 @@ public:
 	void** vtable; //0
 	char filler[132-4]; //4
 	void* model; // 132 (from MobRenderer::MobRenderer)
-	char filler2[612-136]; // 136
+	char filler2[616-136]; // 136
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(sizeof(MobRenderer) == 612, "mobrenderer");
+static_assert(sizeof(MobRenderer) == 616, "mobrenderer");
 
 typedef void Tag;
 
@@ -394,24 +412,24 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 68
-	int damageReduceAmount; // 72
-	int renderIndex; // 76
-	void* armorMaterial; // 80
+	int armorType; // 76
+	int damageReduceAmount; // 80
+	int renderIndex; // 84
+	void* armorMaterial; // 88
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 84, "armor item size");
+static_assert(sizeof(ArmorItem) == 92, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 612
-	HumanoidModel* modelArmor; // 616
-	HumanoidModel* modelArmorChestplate; // 620
-	char hmr_filler1[636-624]; // 624
+	int something; // 616
+	HumanoidModel* modelArmor; // 620
+	HumanoidModel* modelArmorChestplate; // 624
+	char hmr_filler1[640-624]; // 628
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 616, "armour model offset");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 620, "armour model offset");
 #endif
 #endif // ifdef __cplusplus
 
@@ -429,14 +447,19 @@ public:
 	GameType getGameType() const;
 };
 
+class Spawner {
+public:
+	Entity* spawnItem(BlockSource&, ItemInstance const&, Entity*, Vec3 const&, int);
+};
+
 class Level {
 public:
 	void** vtable;
 
-	Entity* getEntity(EntityUniqueID, bool) const;
-	void addEntity(std::unique_ptr<Entity>);
-	void addGlobalEntity(std::unique_ptr<Entity>);
-	void explode(BlockSource&, Entity*, Vec3 const&, float, bool);
+	Entity* fetchEntity(EntityUniqueID, bool) const;
+	void addEntity(BlockSource&, std::unique_ptr<Entity>);
+	void addGlobalEntity(BlockSource&, std::unique_ptr<Entity>);
+	void explode(BlockSource&, Entity*, Vec3 const&, float, bool, bool, float);
 	void setNightMode(bool);
 	void setTime(int);
 	int getTime() const;
@@ -445,6 +468,7 @@ public:
 	bool isClientSide() const;
 	HitResult const& getHitResult();
 	int getDifficulty() const;
+	Spawner* getSpawner() const;
 };
 
 class EntityRenderDispatcher {

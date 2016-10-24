@@ -59,43 +59,33 @@ typedef void Font;
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 //#define MOB_TARGET_OFFSET 3156
-// Updated 0.13.0
+// FIXME 0.16
 // found in ChatScreen::setTextboxText
-#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 140
+//#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 140
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3372
+#define PLAYER_ABILITIES_OFFSET 3724
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
 // FIXME 0.14
 //#define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
-// from Player::getSelectedItem
-#ifdef __i386
-#define PLAYER_INVENTORY_OFFSET 3572
-#else
-#define PLAYER_INVENTORY_OFFSET 3580
-#endif
-
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = 120;
 const size_t kLiquidBlockDynamicSize = 144;
 const size_t kLiquidBlockStaticSize = 124;
 // found in registerBlock
-const size_t kBlockItemSize = 68;
+const size_t kBlockItemSize = 76;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 68;
-// found in Entity::spawnAtLocation
-const size_t kItemEntitySize = 464;
-// found in Entity::spawnAtLocation
-const size_t kItemEntity_pickupDelay_offset = 444;
+const size_t kItemSize = 76;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 420;
+const size_t kItemEntity_itemInstance_offset = 3212;
 // found in TextPacket::handle
-const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 13;
+const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 17;
 
+// FIXME 0.16
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
 "_ZTV11MobRenderer",
@@ -242,7 +232,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_get_platform_type;
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
-	int appplatform_use_metadata_driven_screens;
+//	int appplatform_use_metadata_driven_screens;
 	int entity_hurt;
 	int mobrenderer_render;
 	int snowball_item_vtable_size;
@@ -297,10 +287,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform14useCenteredGUIEv");
-	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
+//	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+//		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
 	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity4hurtERK18EntityDamageSourcei");
+		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
@@ -526,10 +516,12 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 		return bl_removedEntity;
 	}
 	if (bl_onLockDown || level == nullptr) return nullptr;
-	return level->getEntity(entityId, 0 /* false */);
+	return level->fetchEntity(entityId, false);
 }
 
 void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
+#if 0
+// FIXME 0.16
 	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
 	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
@@ -556,6 +548,7 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 		//clear the chat string
 		chatMessagePtr->clear();
 	}
+#endif
 }
 
 void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* host, int port) {
@@ -1223,10 +1216,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
+/*
+	FIXME 0.16
 	const char * utfChars = env->GetStringUTFChars(sound, NULL);
 	std::string soundstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(sound, utfChars);
 	bl_level->playSound(Vec3(x, y, z), soundstr, volume, pitch);
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -2189,10 +2185,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSc
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCloseScreen
   (JNIEnv *env, jclass clazz) {
+/*
 	//bl_MinecraftClient_setScreen(bl_minecraft, nullptr);
 	AbstractScreen* screen = bl_minecraft->getScreen();
 	if (!screen) return;
 	bl_minecraft->getScreenChooser().popScreen(*screen, 1);
+*/
 }
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowProgressScreen
   (JNIEnv *env, jclass clazz) {
@@ -2232,18 +2230,13 @@ void bl_Mob_die_hook(Entity* entity1, EntityDamageSource const& damageSource) {
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnEntity
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jint type, jstring skinPath) {
 	//TODO: spawn entities, not just mobs
-	std::unique_ptr<Entity> entity;
 	Vec3 pos;
 	pos.x = x;
 	pos.y = y;
 	pos.z = z;
 	Vec2 rot {0, 0};
-	if (type < 64) {
-		entity = MobFactory::CreateMob((EntityType) type, *bl_localplayer->getRegion(), pos, rot);
-			//the last two vec3s are pos and rot
-	} else {
-		entity = EntityFactory::CreateEntity((EntityType)type, *bl_localplayer->getRegion());
-	}
+	EntityDefinitionIdentifier identifier((EntityType)type);
+	std::unique_ptr<Entity> entity = EntityFactory::createSpawnedEntity(identifier, bl_localplayer, pos, rot);
 
 	if (entity == nullptr) {
 		//WTF?
@@ -2252,6 +2245,12 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	Entity* e = entity.get();
 	bl_Entity_setPos_helper(e, x, y, z);
 
+	if (type != 93) {
+		bl_level->addEntity(*bl_localplayer->getRegion(), std::move(entity));
+	} else { // lightning
+		bl_level->addGlobalEntity(*bl_localplayer->getRegion(), std::move(entity));
+	}
+
 	//skins
 	if (skinPath != NULL && type < 64) {
 		const char * skinUtfChars = env->GetStringUTFChars(skinPath, NULL);
@@ -2259,12 +2258,6 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 			bl_changeEntitySkin(e, skinUtfChars);
 		}
 		env->ReleaseStringUTFChars(skinPath, skinUtfChars);
-	}
-
-	if (type != 93) {
-		bl_level->addEntity(std::move(entity));
-	} else { // lightning
-		bl_level->addGlobalEntity(std::move(entity));
 	}
 
 	return e->getUniqueID();
@@ -2276,13 +2269,8 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeD
 
 	ItemInstance instance(id, count, damage);
 
-	Entity* entity = (Entity*) ::operator new(kItemEntitySize);
-	bl_ItemEntity_ItemEntity(entity, *(bl_localplayer->getRegion()), Vec3(x, y + range, z), instance, 10 /* pickup delay */, 0);
-
-	*((int*)((uintptr_t)entity + kItemEntity_pickupDelay_offset)) = 10;
-
-	bl_level->addEntity(std::unique_ptr<Entity>(entity));
-	//delete instance;
+	Entity* entity = bl_level->getSpawner()->spawnItem(*bl_localplayer->getRegion(),
+		instance, bl_localplayer, Vec3(x, y + range, z), 10);
 
 	return entity->getUniqueID();
 }
@@ -2625,6 +2613,7 @@ ItemGraphics const& bl_ItemRenderer_getGraphics_hook_item(Item* item) {
 
 
 mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Entity& ent) {
+	if (ent.getLevel() == nullptr) return bl_MobRenderer_getSkinPtr_real(renderer, ent);
 	auto foundIter = bl_mobTexturesMap.find(ent.getUniqueID());
 	if (foundIter != bl_mobTexturesMap.end()) {
 		return foundIter->second;
@@ -2683,7 +2672,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	bool ret = false;
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
-		item->init(jsonValue);
+		item->initClient(jsonValue);
 	}
 	env->ReleaseStringUTFChars(text, utfChars);
 	return ret;
@@ -2748,7 +2737,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
   (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
-	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	auto inventory = bl_localplayer->getInventory();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return false;
 	return EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
@@ -2756,7 +2745,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
   (JNIEnv *env, jclass clazz, jint slot) {
-	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	auto inventory = bl_localplayer->getInventory();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	std::vector<EnchantmentInstance> enchantments = itemInstance->getEnchantsFromUserData().getAllEnchants();
@@ -2774,7 +2763,7 @@ JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaye
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot) {
-	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	auto inventory = bl_localplayer->getInventory();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	if (!itemInstance->hasCustomHoverName()) return nullptr;
@@ -2784,7 +2773,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerG
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot, jstring name) {
-	Inventory* inventory = *((Inventory**) (((uintptr_t) bl_localplayer) + PLAYER_INVENTORY_OFFSET));
+	auto inventory = bl_localplayer->getInventory();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
@@ -2863,7 +2852,7 @@ static void* bl_AppPlatform_getUIScalingRules_real;
 static void* bl_AppPlatform_getEdition_real;
 static void* bl_AppPlatform_useCenteredGui_real;
 static void* bl_AppPlatform_getPlatformType_real;
-static void* bl_AppPlatform_useMetadataDrivenScreens_real;
+//static void* bl_AppPlatform_useMetadataDrivenScreens_real;
 
 static int bl_AppPlatform_getPlatformType_hook(void* appPlatform) {
 	return 0;
@@ -2881,9 +2870,9 @@ static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
 	return "win10";
 }
 
-static bool bl_AppPlatform_useMetadataDrivenScreens_hook(void* appPlatform) {
-	return true;
-}
+//static bool bl_AppPlatform_useMetadataDrivenScreens_hook(void* appPlatform) {
+//	return true;
+//}
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv* env, jclass clazz, jboolean desktop) {
@@ -2895,8 +2884,8 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDe
 		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
 		(void*) &bl_AppPlatform_useCenteredGui_hook: bl_AppPlatform_useCenteredGui_real;
-	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens] = desktop?
-		(void*) &bl_AppPlatform_useMetadataDrivenScreens_hook: bl_AppPlatform_useMetadataDrivenScreens_real;
+//	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens] = desktop?
+//		(void*) &bl_AppPlatform_useMetadataDrivenScreens_hook: bl_AppPlatform_useMetadataDrivenScreens_real;
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetImmobile
@@ -2927,9 +2916,7 @@ JNIEXPORT jlong Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGet
 	if (bl_level == nullptr) return -1;
 	Mob* entity = static_cast<Mob*>(bl_getEntityWrapper(bl_level, entityId));
 	if (entity == nullptr) return -1;
-	Mob* target = entity->getTarget();
-	if (target == nullptr) return -1;
-	return target->getUniqueID().id;
+	return entity->getTargetId().id;
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetTarget
@@ -2946,7 +2933,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 	}
 }
 
-bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSource, int hearts) {
+bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b) {
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -3146,7 +3133,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
-	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
+//	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
 }
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\

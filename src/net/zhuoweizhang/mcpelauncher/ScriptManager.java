@@ -593,6 +593,7 @@ public class ScriptManager {
 				return;
 			}
 			requestReloadAllScripts = false;
+			System.out.println("BlockLauncher is loading scripts");
 			try {
 				if (!new File("/sdcard/mcpelauncher_do_not_create_placeholder_blocks").exists()) {
 					nativeDefinePlaceholderBlocks();
@@ -1691,7 +1692,7 @@ public class ScriptManager {
 
 	public static native void nativeSetVel(long entityId, float vel, int axis);
 
-	public static native void nativeExplode(float x, float y, float z, float radius, boolean onfire);
+	public static native void nativeExplode(float x, float y, float z, float radius, boolean onfire, boolean smoke, float override);
 
 	public static native void nativeAddItemInventory(int id, int amount, int damage);
 
@@ -2101,8 +2102,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void explode(double x, double y, double z, double radius, boolean onfire) {
-			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire);
+		public void explode(double x, double y, double z, double radius, boolean onfire, boolean smoke, double somethingElse) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire, smoke, (float)somethingElse);
 		}
 
 		@JSFunction
@@ -2254,8 +2255,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void explode(double x, double y, double z, double radius, boolean onfire) {
-			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire);
+		public static void explode(double x, double y, double z, double radius, boolean onfire, boolean smoke, double somethingelse) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire, smoke, (float)somethingelse);
 		}
 
 		@JSStaticFunction
