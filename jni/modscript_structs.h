@@ -57,6 +57,8 @@ struct Vec2 {
 	};
 };
 
+class AgeableComponent;
+
 // last update: 0.15.1
 class Entity {
 public:
@@ -88,6 +90,7 @@ public:
 	EntityUniqueID const& getTargetId();
 	void setTarget(Entity*);
 	Level* getLevel();
+	AgeableComponent* getAgeableComponent() const;
 };
 static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
 
@@ -203,7 +206,8 @@ public:
 	unsigned char id; // 4
 	char filler0[8-5]; //5
 	std::string nameId; // 8
-	char filler1[20-12]; // 12
+	std::string mappingId; // 12
+	char filler1[20-16]; // 16
 	int renderLayer; //20
 	char filler2[52-24]; //24
 	void* material; //52
@@ -219,6 +223,7 @@ public:
 	void setCategory(CreativeItemCategory);
 	std::string const& getDescriptionId() const;
 	static std::unordered_map<std::string, Block*> mBlockLookupMap;
+	static Block* mBlocks[0x100];
 };
 
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
@@ -475,6 +480,11 @@ class EntityRenderDispatcher {
 public:
 	EntityRenderer* getRenderer(Entity&);
 	static EntityRenderDispatcher& getInstance();
+};
+
+class MinecraftScreenModel {
+public:
+	void updateTextBoxText(std::string const&);
 };
 
 #include "mcpe/blockentity/chestblockentity.h"

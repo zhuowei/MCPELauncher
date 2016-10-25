@@ -22,6 +22,7 @@
 #include "modscript.h"
 #include "dobby_public.h"
 #include "simpleuuid.h"
+#include "logutil.h"
 
 #define cppbool bool
 
@@ -49,6 +50,7 @@
 #include "mcpe/screenchooser.h"
 #include "mcpe/guidata.h"
 #include "mcpe/blockgraphics.h"
+#include "mcpe/minecraftcommands.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -312,7 +314,8 @@ bool bl_setArmorTexture(int, std::string const&);
 
 extern "C" {
 
-static void (*bl_ChatScreen_sendChatMessage_real)(void*);
+static void (*bl_MinecraftScreenModel_sendChatMessage_real)(MinecraftScreenModel*, std::string const&);
+static void (*bl_MinecraftScreenModel_executeCommand_real)(MinecraftScreenModel*, std::string const&);
 
 static void (*bl_Item_Item)(Item*, std::string const&, short);
 
@@ -429,8 +432,6 @@ static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, Vec3 const&, ItemInstance const&, int, float);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
-static bool (*bl_Zombie_isBaby)(Entity*);
-static void (*bl_Zombie_setBaby)(Entity*, bool);
 static int (*bl_Mob_getHealth)(Entity*);
 static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 static void (*bl_Player_eat_real)(Entity*, int, float);
@@ -444,7 +445,6 @@ static Attribute* bl_Player_EXPERIENCE;
 static void (*bl_Player_addExperience_real)(Player*, int);
 static void (*bl_Player_addLevels_real)(Player*, int);
 static void (*bl_Item_setCategory)(Item*, int);
-static ServerCommandParser* (*bl_Minecraft_getCommandParser)(Minecraft*);
 static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
@@ -519,14 +519,8 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	return level->fetchEntity(entityId, false);
 }
 
-void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
-#if 0
-// FIXME 0.16
-	std::string* chatMessagePtr = (std::string*) ((uintptr_t) chatScreen + CHATSCREEN_TEXTBOX_TEXT_OFFSET);
-	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s\n", chatMessagePtr->c_str());
-	/*int chatMessagePtr = *(*((int**) ((int) chatScreen + 84))) - 12; 
-	char* chatMessageChars = *((char**) chatMessagePtr);*/
-	const char* chatMessageChars = chatMessagePtr->c_str();
+void bl_MinecraftScreenModel_sendChatMessage_hook(MinecraftScreenModel* chatScreen, std::string const& message) {
+	const char* chatMessageChars = message.c_str();
 
 	JNIEnv *env;
 	preventDefaultStatus = false;
@@ -540,15 +534,39 @@ void bl_ChatScreen_sendChatMessage_hook(void* chatScreen) {
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, chatMessageJString);
 
 	bl_JavaVM->DetachCurrentThread();
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s preventDefault %d\n", chatMessagePtr->c_str(),
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s preventDefault %d\n", chatMessageChars,
 		(int) preventDefaultStatus);
 	if (!preventDefaultStatus) {
-		bl_ChatScreen_sendChatMessage_real(chatScreen);
+		bl_MinecraftScreenModel_sendChatMessage_real(chatScreen, message);
 	} else {
 		//clear the chat string
-		chatMessagePtr->clear();
+		chatScreen->updateTextBoxText("");
 	}
-#endif
+}
+
+void bl_MinecraftScreenModel_executeCommand_hook(MinecraftScreenModel* chatScreen, std::string const& message) {
+	const char* chatMessageChars = message.c_str();
+
+	JNIEnv *env;
+	preventDefaultStatus = false;
+	bl_JavaVM->AttachCurrentThread(&env, NULL);
+
+	jstring chatMessageJString = env->NewStringUTF(chatMessageChars);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "chatCallback", "(Ljava/lang/String;)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, chatMessageJString);
+
+	bl_JavaVM->DetachCurrentThread();
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Command message: %s preventDefault %d\n", chatMessageChars,
+		(int) preventDefaultStatus);
+	if (!preventDefaultStatus) {
+		bl_MinecraftScreenModel_executeCommand_real(chatScreen, message);
+	} else {
+		//clear the chat string
+		chatScreen->updateTextBoxText("");
+	}
 }
 
 void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* host, int port) {
@@ -1494,6 +1512,26 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 	}
 }
 
+struct BLBlockBuildTextureRequest {
+	int blockId;
+	std::string textureNames[16*6];
+	int textureCoords[16*6];
+};
+
+static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
+
+static void bl_finishBlockBuildTextureRequests() {
+	for (auto& request: buildTextureRequests) {
+		if (!bl_custom_block_textures[request.blockId]) continue;
+		bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
+	}
+	buildTextureRequests.clear();
+}
+
+void bl_cpp_tick_hook() {
+	if (BlockGraphics::mTerrainTextureAtlas && buildTextureRequests.size() != 0) bl_finishBlockBuildTextureRequests();
+}
+
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
@@ -1511,7 +1549,16 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//bl_custom_block_opaque[blockId] = opaque;
 	if (customBlockType == 0 /* standard */) {
 		bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
-		bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
+		if (BlockGraphics::mTerrainTextureAtlas) {
+			bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
+		} else {
+			// we're on the title screen; can't access textures
+			BLBlockBuildTextureRequest request;
+			request.blockId = blockId;
+			memcpy(request.textureNames, textureNames, sizeof(std::string)*16*6);
+			memcpy(request.textureCoords, textureCoords, sizeof(int)*16*6);
+			buildTextureRequests.push_back(request);
+		}
 	} else {
 		bl_custom_block_textures[blockId] = nullptr;
 	}
@@ -1530,7 +1577,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		// FIXME 0.15
 		//retval->renderType = renderShape;
 		retval->setSolid(opaque);
-		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
+		Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
 		// todo: graphics
 	} else if (customBlockType == 1 /* liquid */ ) {
 		// FIXME 0.15
@@ -1538,17 +1585,17 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		bl_LiquidBlockDynamic_LiquidBlockDynamic(retval, nameStr, blockId, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
 		retval->vtable = bl_CustomLiquidBlockDynamic_vtable + 2;
-		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
+		Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
 	} else if (customBlockType == 2 /* still liquid */ ) {
 		// FIXME 0.15
 		retval = (Block*) ::operator new(kLiquidBlockStaticSize);
 		bl_LiquidBlockStatic_LiquidBlockStatic(retval, nameStr, blockId, blockId - 1, bl_getMaterial(materialType),
 			textureNames[0], textureNames[1]);
 		retval->vtable = bl_CustomLiquidBlockStatic_vtable + 2;
-		Block::mBlockLookupMap[Util::toLower(nameStr)] = retval;
+		Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
 	}
-
-	retGraphics = new BlockGraphics(nameStr);
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %s", retval->mappingId.c_str());
+	retGraphics = new BlockGraphics(retval->mappingId);
 	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
 	BlockGraphics::mBlocks[blockId] = retGraphics;
 
@@ -1569,6 +1616,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
 		abort();
 	}
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %d", blockId);
 	return retval;
 }
 
@@ -1961,15 +2009,21 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return bl_level->isClientSide();
 }
 
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsBlockTextureAtlasLoaded
+  (JNIEnv *env, jclass clazz) {
+	return BlockGraphics::mTerrainTextureAtlas != nullptr;
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
 	for (int i = 1; i < 0x100; i++) {
-		if (BlockGraphics::mBlocks[i] == NULL) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "mBlocks[%d] = %p", i, Block::mBlocks[i]);
+		if (Block::mBlocks[i] == NULL) {
 			char name[100];
 			snprintf(name, sizeof(name), "Missing block ID: %d", i);
 			std::string textureNames[16*6];
 			for (int a = 0; a < 16*6; a++) {
-				textureNames[a] = "missing_tile";
+				textureNames[a] = "cobblestone";
 			}
 			int textureCoords[16*6];
 			memset(textureCoords, 0, sizeof(textureCoords));
@@ -2444,25 +2498,12 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	ServerCommandParser* parser = bl_Minecraft_getCommandParser(bl_minecraft->getServer());
-	if (!parser) return false;
-	int findCount = parser->commands.count(mystr);
+	MinecraftCommands* commands = bl_minecraft->getServer()->getCommands();
+	if (!commands) return false;
+	bool hasCommand = commands->getCommand(mystr, 0) != nullptr;
+	BL_LOG("command: %s hasCommand: %s", utfChars, hasCommand? "yes": "no");
 	env->ReleaseStringUTFChars(text, utfChars);
-	return findCount != 0;
-}
-
-JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
-  (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return false;
-	return bl_Zombie_isBaby(entity);
-}
-
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieSetBaby
-  (JNIEnv *env, jclass clazz, jlong entityId, jboolean yep) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
-	if (entity == NULL) return;
-	bl_Zombie_setBaby(entity, yep);
+	return hasCommand;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetSecondPart
@@ -3142,8 +3183,10 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
-	void* sendChatMessage = dlsym(RTLD_DEFAULT, "_ZN10ChatScreen16_sendChatMessageEv");
-	mcpelauncher_hook(sendChatMessage, (void*) &bl_ChatScreen_sendChatMessage_hook, (void**) &bl_ChatScreen_sendChatMessage_real);
+	void* sendChatMessage = dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel15sendChatMessageERKSs");
+	mcpelauncher_hook(sendChatMessage, (void*) &bl_MinecraftScreenModel_sendChatMessage_hook, (void**) &bl_MinecraftScreenModel_sendChatMessage_real);
+	void* executeCommand = dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel14executeCommandERKSs");
+	mcpelauncher_hook(executeCommand, (void*) &bl_MinecraftScreenModel_executeCommand_hook, (void**) &bl_MinecraftScreenModel_executeCommand_real);
 
 	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
 
@@ -3346,10 +3389,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
 	bl_Minecraft_getPacketSender = (PacketSender* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN9Minecraft15getPacketSenderEv");
-	bl_Zombie_isBaby = (bool (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZNK6Zombie6isBabyEv");
-	bl_Zombie_setBaby = (void (*)(Entity*, bool))
-		dlsym(mcpelibhandle, "_ZN6Zombie7setBabyEb");
 /* FIXME 0.13
 	bl_Mob_getTexture = (std::string* (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob10getTextureEv");
@@ -3384,8 +3423,6 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_setCategory = (void (*)(Item*, int))
 		dlsym(mcpelibhandle, "_ZN4Item11setCategoryE20CreativeItemCategory");
-	bl_Minecraft_getCommandParser = (ServerCommandParser* (*)(Minecraft*))
-		dlsym(mcpelibhandle, "_ZN9Minecraft16getCommandParserEv");
 	void* initCreativeItems =
 		dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
 	mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,

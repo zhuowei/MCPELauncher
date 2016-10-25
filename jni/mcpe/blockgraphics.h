@@ -1,5 +1,6 @@
 #pragma once
 class TextureUVCoordinateSet;
+class TextureAtlas;
 namespace Json {
 	class Value;
 };
@@ -17,5 +18,6 @@ public:
 	TextureUVCoordinateSet const& getTexture(signed char, int);
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);
 	static BlockGraphics* mBlocks[0x100];
+	static TextureAtlas* mTerrainTextureAtlas;
 };
 static_assert(sizeof(BlockGraphics) == 324, "blockgraphics size");

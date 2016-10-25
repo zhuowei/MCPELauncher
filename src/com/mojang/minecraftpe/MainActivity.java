@@ -643,6 +643,9 @@ public class MainActivity extends NativeActivity {
 
 	public native void nativeProcessIntentUriQuery(String a, String b);
 
+	// added in 0.16.0
+	public native void nativeKeyHandler(int keyCode, boolean keyDown);
+
 	public void buyGame() {
 	}
 
@@ -2506,11 +2509,7 @@ public class MainActivity extends NativeActivity {
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Editor action: " + actionId);
-			if (hiddenTextDismissAfterOneLine) {
-				hiddenTextWindow.dismiss();
-			} else {
-				nativeReturnKeyPressed();
-			}
+			nativeReturnKeyPressed();
 			return true;
 		}
 	}

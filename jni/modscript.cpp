@@ -12,6 +12,7 @@
 #include "mcpelauncher.h"
 #include "modscript.h"
 #include "dobby_public.h"
+#include "logutil.h"
 
 #define DLSYM_DEBUG
 
@@ -20,6 +21,7 @@ typedef bool cppbool;
 #include "modscript_structs.h"
 #include "mcpe/inventory.h"
 #include "mcpe/gamemode.h"
+#include "mcpe/entitycomponent.h"
 
 typedef Player LocalPlayer;
 
@@ -98,7 +100,6 @@ static void (*bl_NinecraftApp_onGraphicsReset)(Minecraft*);
 */
 static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Entity_remove)(Entity*);
-static void (*bl_AgebleMob_setAge)(Entity*, int);
 static void (*bl_GameMode_destroyBlock_real)(void*, Player*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
@@ -110,7 +111,6 @@ static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(MinecraftClient*);
-static void (*bl_FillingContainer_replaceSlot)(void*, int, ItemInstance*);
 
 static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
 static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
@@ -118,11 +118,9 @@ static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, 
 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
-static int (*bl_FillingContainer_removeResource)(void*, ItemInstance*, bool);
 static int (*bl_Inventory_getSelectedSlot)(void*);
 static void (*bl_Inventory_selectSlot)(void*, int);
 static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
-static int (*bl_AgableMob_getAge)(Entity*);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -462,7 +460,7 @@ void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
 
 	if (!preventDefaultStatus) bl_GameMode_attack_real(gamemode, player, entity);
 }
-
+void bl_cpp_tick_hook();
 void bl_GameMode_tick_hook(void* gamemode) {
 	JNIEnv *env;
 
@@ -480,7 +478,7 @@ void bl_GameMode_tick_hook(void* gamemode) {
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid);
 
 	bl_JavaVM->DetachCurrentThread();
-
+	bl_cpp_tick_hook();
 	bl_GameMode_tick_real(gamemode);
 }
 
@@ -974,14 +972,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint age) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_AgebleMob_setAge(entity, age);
+	AgeableComponent* component = entity->getAgeableComponent();
+	if (component == nullptr) return;
+	component->setAge(age);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAnimalAge
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	return bl_AgableMob_getAge(entity);
+	AgeableComponent* component = entity->getAgeableComponent();
+	if (component == nullptr) return 0;
+	return component->getAge();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory
@@ -1372,7 +1374,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
-	bl_AgebleMob_setAge = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN9AgableMob6setAgeEi");
 	bl_MinecraftClient_setGameMode = (void (*)(MinecraftClient*, int))
 		dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
 	bl_Mob_getArmor = (ItemInstance* (*)(Entity*, int))
@@ -1392,15 +1393,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	minecraftVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
 
-	bl_FillingContainer_replaceSlot = (void (*)(void*, int, ItemInstance*))
-		dlsym(mcpelibhandle, "_ZN16FillingContainer11replaceSlotEiR12ItemInstance");
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
-	bl_FillingContainer_removeResource = (int (*)(void*, ItemInstance*, bool))
-		dlsym(mcpelibhandle, "_ZN16FillingContainer14removeResourceERK12ItemInstanceb");
-	bl_Inventory_getSelectedSlot = (int (*)(void*)) dlsym(mcpelibhandle, "_ZNK9Inventory15getSelectedSlotEv");
-	bl_Inventory_selectSlot = (void (*)(void*, int)) dlsym(mcpelibhandle, "_ZN9Inventory10selectSlotEi");
-	bl_AgableMob_getAge = (int (*)(Entity*)) dlsym(mcpelibhandle,
-		"_ZNK9AgableMob6getAgeEv");
 
 	bl_setuphooks_cppside();
 

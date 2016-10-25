@@ -1904,6 +1904,7 @@ public class ScriptManager {
 	
 	public static native void nativeSetBlockRenderShape(int blockId, int renderType);
 
+	public static native boolean nativeIsBlockTextureAtlasLoaded();
 	public static native void nativeDefinePlaceholderBlocks();
 
 	public static native long nativePlayerGetPointedEntity();
@@ -1943,8 +1944,6 @@ public class ScriptManager {
 	public static native int nativeGetItemEntityItem(long entity, int type);
 	public static native boolean nativeIsValidItem(int id);
 	public static native boolean nativeIsValidCommand(String name);
-	public static native boolean nativeZombieIsBaby(long entity);
-	public static native void nativeZombieSetBaby(long entity, boolean yep);
 	public static native int nativeBlockGetSecondPart(int x, int y, int z, int axis);
 	public static native int nativePlayerGetDimension();
 
@@ -2959,23 +2958,12 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setAnimalAge(Object animal, int age) {
 			int type = getEntityTypeId(animal);
-			if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.PIG_ZOMBIE) {
-				nativeZombieSetBaby(getEntityId(animal), age < 0);
-				return;
-			} else if (type < 10 || type >= 32) {
-				throw new RuntimeException("Age can only be set for animals and zombies/skeletons/pigmen");
-			}
 			nativeSetAnimalAge(getEntityId(animal), age);
 		}
 
 		@JSStaticFunction
 		public static int getAnimalAge(Object animal) {
 			int type = getEntityTypeId(animal);
-			if (type == EntityType.ZOMBIE || type == EntityType.SKELETON || type == EntityType.PIG_ZOMBIE) {
-				return nativeZombieIsBaby(getEntityId(animal))? -24000: 0;
-			} else if (type < 10 || type >= 32) {
-				throw new RuntimeException("Age can only be get for animals and zombies/skeletons/pigmen");
-			}
 			return nativeGetAnimalAge(getEntityId(animal));
 		}
 

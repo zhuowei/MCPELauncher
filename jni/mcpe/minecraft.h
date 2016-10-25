@@ -9,10 +9,12 @@ class Options;
 class AbstractScreen;
 class ScreenChooser;
 class GuiData;
+class MinecraftCommands;
 class Minecraft {
 public:
 	Level* getLevel();
 	Timer* getTimer();
+	MinecraftCommands* getCommands();
 };
 
 class MinecraftClient {

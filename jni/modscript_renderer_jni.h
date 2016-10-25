@@ -41,6 +41,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
+ * Method:    nativeCreateItemSpriteRenderer
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateItemSpriteRenderer
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager
  * Method:    nativeModelSetRotationPoint
  * Signature: (ILjava/lang/String;FFF)V
  */
