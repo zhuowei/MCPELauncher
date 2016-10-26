@@ -695,7 +695,7 @@ const char* bl_getCharArr(void* str){
 TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
 	int blockId = graphics->getBlock()->id;
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
-	if (ptrToBlockInfo == NULL) {
+	if (ptrToBlockInfo == NULL || ptrToBlockInfo[0] == nullptr) {
 		return bl_BlockGraphics_getTexture_real(graphics, side, data);
 	}
 	int myIndex = (data * 6) + side;
@@ -1056,7 +1056,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
 	//std::string lowercaseStr = Util::toLower(name);
-	if (item->itemId > 0x200) {
+	if (item->itemId > 0x200 && Item::mItemTextureAtlas != nullptr) {
 		ResourceLocation location;
 		location.str1 = "atlas.items";
 		location.str2 = "InUserPackage";
@@ -1109,6 +1109,8 @@ Item* bl_constructSnowballItem(std::string const& name, int id) {
 	return retval;
 }
 
+static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int iconIndex);
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
@@ -1118,7 +1120,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
-	bl_Item_setIcon(item, iconNameString, iconIndex);
+	bl_Item_setIcon_wrapper(item, iconNameString, iconIndex);
 
 	if (maxStackSize <= 0) {
 		bl_Item_setMaxStackSize(item, 64);
@@ -1151,7 +1153,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
-	bl_Item_setIcon(item, iconNameString, iconIndex);
+	bl_Item_setIcon_wrapper(item, iconNameString, iconIndex);
 
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -1167,7 +1169,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	const char * iconUTFChars = env->GetStringUTFChars(iconName, NULL);
 	std::string iconNameString = std::string(iconUTFChars);
-	bl_Item_setIcon(item, iconNameString, iconIndex);
+	bl_Item_setIcon_wrapper(item, iconNameString, iconIndex);
 
 	if (maxStackSize <= 0) {
 		bl_Item_setMaxStackSize(item, 64);
@@ -1521,15 +1523,82 @@ struct BLBlockBuildTextureRequest {
 static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
 
 static void bl_finishBlockBuildTextureRequests() {
+	BL_LOG("finishBlockBuildTextureRequests");
 	for (auto& request: buildTextureRequests) {
 		if (!bl_custom_block_textures[request.blockId]) continue;
+		BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
 		bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
 	}
 	buildTextureRequests.clear();
 }
 
+class BLItemSetRequest {
+public:
+	int itemId;
+	virtual ~BLItemSetRequest(){};
+	virtual void setItem() = 0;
+};
+
+class BLItemSetIconRequest : public BLItemSetRequest {
+public:
+	std::string iconName;
+	int iconIndex;
+	virtual void setItem();
+};
+
+void BLItemSetIconRequest::setItem() {
+	Item* item = bl_Item_mItems[this->itemId];
+	if (!item) return;
+	bl_Item_setIcon(item, this->iconName, this->iconIndex);
+}
+
+class BLItemSetJsonRequest : public BLItemSetRequest {
+public:
+	Json::Value value;
+	virtual void setItem();
+};
+
+void BLItemSetJsonRequest::setItem() {
+	Item* item = bl_Item_mItems[this->itemId];
+	if (!item) return;
+	item->initClient(this->value);
+}
+
+static std::vector<std::shared_ptr<BLItemSetRequest>> itemSetIconRequests;
+
+static void bl_finishItemSetIconRequests() {
+	for (auto& request: itemSetIconRequests) {
+		request->setItem();
+	}
+	itemSetIconRequests.clear();
+}
+
+static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int iconIndex) {
+	if (Item::mItemTextureAtlas) {
+		bl_Item_setIcon(item, iconName, iconIndex);
+	} else {
+		auto request = std::make_shared<BLItemSetIconRequest>();
+		request->itemId = item->itemId;
+		request->iconName = iconName;
+		request->iconIndex = iconIndex;
+		itemSetIconRequests.push_back(request);
+	}
+}
+
+static void bl_Item_initClient_wrapper(Item* item, Json::Value& value) {
+	if (Item::mItemTextureAtlas) {
+		item->initClient(value);
+	} else {
+		auto request = std::make_shared<BLItemSetJsonRequest>();
+		request->itemId = item->itemId;
+		request->value = value;
+		itemSetIconRequests.push_back(request);
+	}
+}
+
 void bl_cpp_tick_hook() {
 	if (BlockGraphics::mTerrainTextureAtlas && buildTextureRequests.size() != 0) bl_finishBlockBuildTextureRequests();
+	if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
@@ -1549,13 +1618,16 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//bl_custom_block_opaque[blockId] = opaque;
 	if (customBlockType == 0 /* standard */) {
 		bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
+		memset(bl_custom_block_textures[blockId], 0, sizeof(TextureUVCoordinateSet*)*16*6);
 		if (BlockGraphics::mTerrainTextureAtlas) {
 			bl_buildTextureArray(bl_custom_block_textures[blockId], textureNames, textureCoords);
 		} else {
 			// we're on the title screen; can't access textures
 			BLBlockBuildTextureRequest request;
 			request.blockId = blockId;
-			memcpy(request.textureNames, textureNames, sizeof(std::string)*16*6);
+			for (int i = 0; i < 16*6; i++) {
+				request.textureNames[i] = textureNames[i];
+			}
 			memcpy(request.textureCoords, textureCoords, sizeof(int)*16*6);
 			buildTextureRequests.push_back(request);
 		}
@@ -2703,6 +2775,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
 }
 
+static void bl_Item_initClient_wrapper(Item* item, Json::Value& value);
+
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
   (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
 	Item* item = bl_Item_mItems[itemId];
@@ -2713,7 +2787,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	bool ret = false;
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
-		item->initClient(jsonValue);
+		bl_Item_initClient_wrapper(item, jsonValue);
 	}
 	env->ReleaseStringUTFChars(text, utfChars);
 	return ret;

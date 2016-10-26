@@ -118,8 +118,6 @@ static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, 
 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
-static int (*bl_Inventory_getSelectedSlot)(void*);
-static void (*bl_Inventory_selectSlot)(void*, int);
 static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
 
 static soinfo2* mcpelibhandle = NULL;
@@ -1041,17 +1039,17 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
-	void* invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getInventory();
 	if (invPtr == NULL) return 0;
-	return bl_Inventory_getSelectedSlot(invPtr);
+	return invPtr->getSelectedSlot().slot;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSelectedSlotId
   (JNIEnv *env, jclass clazz, jint newSlot) {
 	if (bl_localplayer == NULL) return;
-	void* invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getInventory();
 	if (invPtr == NULL) return;
-	bl_Inventory_selectSlot(invPtr, newSlot);
+	invPtr->selectSlot(newSlot);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetEntityRenderType

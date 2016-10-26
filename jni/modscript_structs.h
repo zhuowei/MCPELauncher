@@ -97,9 +97,15 @@ static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
 class Mob: public Entity {
 public:
 };
-enum ContainerID {
+enum ContainerID : unsigned char {
 	ContainerIDInventory = 0,
 };
+
+struct PlayerInventorySlot {
+	ContainerID containerID;
+	int slot;
+};
+
 class PlayerInventoryProxy {
 public:
 	void add(ItemInstance&, bool);
@@ -109,6 +115,8 @@ public:
 	int getLinkedSlot(int) const;
 	int getLinkedSlotsCount() const;
 	void replaceSlot(int, ItemInstance const&);
+	PlayerInventorySlot getSelectedSlot() const;
+	void selectSlot(int, ContainerID=ContainerIDInventory);
 };
 class Player: public Mob {
 public:
@@ -132,7 +140,7 @@ static_assert(sizeof(TextureUVCoordinateSet) == 28, "TextureUVCoordinateSet size
 namespace Json {
 	class Value;
 };
-
+class TextureAtlas;
 // Updated 0.14.0b7
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 // for useAnimation see setUseAnimation
@@ -157,6 +165,7 @@ public:
 	bool isStackedByData() const;
 	void setMaxDamage(int);
 	int getMaxDamage();
+	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
 static_assert(sizeof(Item) == 76, "item size is wrong");
 
