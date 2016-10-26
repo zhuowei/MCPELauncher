@@ -1068,7 +1068,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
 
-void bl_cpp_selectLevel_hook() {
+void bl_repopulateItemGraphics() {
 	for (int i = 0x200; i < bl_item_id_count; i++) {
 		Item* item = bl_Item_mItems[i];
 		if (!item) continue;
@@ -1083,6 +1083,9 @@ void bl_cpp_selectLevel_hook() {
 		}
 		if (needsSetting) {
 			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
+			if (Item::mItemTextureAtlas == nullptr) {
+				BL_LOG("item texture atlas null when populating graphics?");
+			}
 			ResourceLocation location;
 			location.str1 = "atlas.items";
 			location.str2 = "InUserPackage";
@@ -1091,6 +1094,10 @@ void bl_cpp_selectLevel_hook() {
 	}
 }
 
+void bl_cpp_selectLevel_hook() {
+	if (Item::mItemTextureAtlas == nullptr) return;
+	bl_repopulateItemGraphics();
+}
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
 	bl_Item_Item(retval, name, id - 0x100);
@@ -1596,9 +1603,16 @@ static void bl_Item_initClient_wrapper(Item* item, Json::Value& value) {
 	}
 }
 
+static bool hasRepopulatedItemGraphics = false;
+
 void bl_cpp_tick_hook() {
 	if (BlockGraphics::mTerrainTextureAtlas && buildTextureRequests.size() != 0) bl_finishBlockBuildTextureRequests();
 	if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
+	if (!hasRepopulatedItemGraphics && Item::mItemTextureAtlas) {
+		BL_LOG("repopulating item graphics");
+		bl_repopulateItemGraphics();
+		hasRepopulatedItemGraphics = true;
+	}
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
