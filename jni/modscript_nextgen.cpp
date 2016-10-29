@@ -62,9 +62,6 @@ typedef void Font;
 // found in LocalPlayer::displayClientMessage, also before the first call to Gui constructor
 //#define MINECRAFT_GUI_OFFSET 252
 //#define MOB_TARGET_OFFSET 3156
-// FIXME 0.16
-// found in ChatScreen::setTextboxText
-//#define CHATSCREEN_TEXTBOX_TEXT_OFFSET 140
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
@@ -88,12 +85,11 @@ const size_t kItemEntity_itemInstance_offset = 3212;
 // found in TextPacket::handle
 const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 17;
 
-// FIXME 0.16
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
 "_ZTV11MobRenderer",
+"_ZTV11NpcRenderer",
 "_ZTV11PigRenderer",
-"_ZTV11TntRenderer",
 "_ZTV12WolfRenderer",
 "_ZTV13BlazeRenderer",
 "_ZTV13GhastRenderer",
@@ -109,12 +105,14 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV15ChickenRenderer",
 "_ZTV15CreeperRenderer",
 "_ZTV16EnderManRenderer",
+"_ZTV16GuardianRenderer",
 "_ZTV16SkeletonRenderer",
 "_ZTV16VillagerRenderer",
 "_ZTV17IronGolemRenderer",
 "_ZTV17LavaSlimeRenderer",
 "_ZTV17SnowGolemRenderer",
 "_ZTV18SilverfishRenderer",
+"_ZTV18WitherBossRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
 "_ZTV22VillagerZombieRenderer"
@@ -413,7 +411,7 @@ static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static bool (*bl_Level_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
-static void (*bl_Level_removeEntity_real)(Level*, Entity*, bool);
+static void (*bl_Level_removeEntity_real)(Level*, std::unique_ptr<Entity>&&, bool);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Block_getAABB)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
@@ -938,7 +936,7 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, BlockSource& blockS
 	return retval;
 }
 
-static void bl_Level_removeEntity_hook(Level* level, Entity* entity, bool arg2) {
+static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& entity, bool arg2) {
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -947,15 +945,16 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity, bool arg2) 
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
 
-	bl_removedEntity = NULL;
+	bl_removedEntity = entity.get();
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(J)V");
 	BL_LOG("Entity removed: %lld", (long long) entity->getUniqueID());
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID());
+	bl_removedEntity = nullptr;
 
-	bl_Level_removeEntity_real(level, entity, arg2);
+	bl_Level_removeEntity_real(level, std::move(entity), arg2);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
@@ -3447,7 +3446,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
 	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
-	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level22removeEntityReferencesER6Entityb");
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level18queueEntityRemovalEOSt10unique_ptrI6EntitySt14default_deleteIS1_EEb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);

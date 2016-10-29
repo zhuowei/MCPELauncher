@@ -43,8 +43,7 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
-// FIXME 0.16
-#define GAMERENDERER_GETFOV_SIZE 0x1b8
+#define GAMERENDERER_GETFOV_SIZE 0x1d6
 #else
 #define GAMERENDERER_GETFOV_SIZE 0x154
 #endif

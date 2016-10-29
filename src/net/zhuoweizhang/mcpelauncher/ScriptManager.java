@@ -1631,6 +1631,9 @@ public class ScriptManager {
 		if (skinPath != null) {
 			String newSkinPath = OldEntityTextureFilenameMapping.m.get(skinPath);
 			if (newSkinPath != null) skinPath = newSkinPath;
+			if (skinPath.endsWith(".png") || skinPath.endsWith(".tga")) {
+				skinPath = skinPath.substring(0, skinPath.length() - 4);
+			}
 		}
 		long retval = nativeSpawnEntity(x, y, z, entityType, skinPath);
 		if (nativeEntityHasCustomSkin(retval)) {
@@ -2107,8 +2110,8 @@ public class ScriptManager {
 		}
 
 		@JSFunction
-		public void explode(double x, double y, double z, double radius, boolean onfire, boolean smoke, double somethingElse) {
-			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire, smoke, (float)somethingElse);
+		public void explode(double x, double y, double z, double radius, boolean onfire) {
+			nativeExplode((float) x, (float) y, (float) z, (float) radius, onfire, true, Float.POSITIVE_INFINITY);
 		}
 
 		@JSFunction
@@ -2979,6 +2982,11 @@ public class ScriptManager {
 		}
 
 		public static void setMobSkinImpl(Object entity, String text, boolean persist) {
+			String newSkinPath = OldEntityTextureFilenameMapping.m.get(text);
+			if (newSkinPath != null) text = newSkinPath;
+			if (text.endsWith(".png") || text.endsWith(".tga")) {
+				text = text.substring(0, text.length() - 4);
+			}
 			nativeSetMobSkin(getEntityId(entity), text);
 			if (persist) {
 				setExtraData(entity, ENTITY_KEY_SKIN, text);
@@ -3813,6 +3821,8 @@ public class ScriptManager {
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
 				throw new MissingTextureException("The item icon " + iconName + ":" + iconIndex + " does not exist");
 			}
+			String newSkinPath = OldEntityTextureFilenameMapping.m.get(texture);
+			if (newSkinPath != null) texture = newSkinPath;
 			nativeDefineArmor(id, iconName, iconIndex, name,
 				texture, damageReduceAmount, maxDamage, armorType);
 		}
