@@ -2427,8 +2427,6 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-/*
-		FIXME 0.16
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
@@ -2436,26 +2434,37 @@ public class MainActivity extends NativeActivity {
 				"images/terrain-atlas/", "block.bl_modpkg.");
 			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/item_texture.json",
 				"images/items-opaque/", "item.bl_modpkg.");
-			ResourcePackManifestProvider resourcePackManifestProvider =
-				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
-			resourcePackManifestProvider.init(this);
-			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
-			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
+
+			TextureListProvider textureListProvider = new TextureListProvider("resourcepacks/vanilla/client/textures.list");
+			textureListProvider.init(this);
+
+			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resourcepacks/vanilla/client/blocks.json");
+			blocksJsonProvider.init(this);
 			if (dumpAtlas) {
 				terrainProvider.dumpAtlas();
 				itemsProvider.dumpAtlas();
+				textureListProvider.dumpAtlas();
 			}
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
-			textureOverrides.add(2, resourcePackManifestProvider);
+			textureOverrides.add(2, textureListProvider);
+			textureOverrides.add(3, blocksJsonProvider);
 			ScriptManager.terrainMeta = terrainProvider;
 			ScriptManager.itemsMeta = itemsProvider;
+			ScriptManager.blocksJson = blocksJsonProvider;
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
+/*
+		FIXME 0.16
+			ResourcePackManifestProvider resourcePackManifestProvider =
+				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
+			resourcePackManifestProvider.init(this);
+			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
+			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
 */
 	}
 

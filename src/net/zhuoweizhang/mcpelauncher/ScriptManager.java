@@ -49,6 +49,7 @@ import com.mojang.minecraftpe.MainActivity;
 
 import net.zhuoweizhang.mcpelauncher.api.modpe.*;
 import net.zhuoweizhang.mcpelauncher.texture.AtlasProvider;
+import net.zhuoweizhang.mcpelauncher.texture.ClientBlocksJsonProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ModPkgTexturePack;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
@@ -126,6 +127,7 @@ public class ScriptManager {
 	private static boolean nextTickCallsSetLevel = false;
 	// initialized in MainActivity now
 	public static AtlasProvider terrainMeta, itemsMeta;
+	public static ClientBlocksJsonProvider blocksJson;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
 	public static boolean requestScreenshot = false;
@@ -3944,6 +3946,11 @@ public class ScriptManager {
 			}
 			TextureRequests finalTextures = mapTextureNames(expandTexturesArray(textures));
 			verifyBlockTextures(finalTextures);
+			try {
+				blocksJson.setBlockTextures(name, blockId, finalTextures.names, finalTextures.coords);
+			} catch (JSONException je) {
+				throw new RuntimeException(je);
+			}
 			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
 					materialSourceId, opaque, renderType, customBlockType);
 		}

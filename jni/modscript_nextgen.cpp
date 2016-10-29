@@ -409,8 +409,8 @@ static void (*bl_Level_addParticle)(Level*, int, Vec3 const&, Vec3 const&, int);
 static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
 static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
-static bool (*bl_Level_addEntity_real)(Level*, std::unique_ptr<Entity>);
-static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, std::unique_ptr<Entity>);
+static bool (*bl_Level_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
+static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, Entity*, bool);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool);
@@ -694,6 +694,9 @@ const char* bl_getCharArr(void* str){
 
 TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
 	int blockId = graphics->getBlock()->id;
+	if (blockId == 193) {
+		BL_LOG("get texture hook!");
+	}
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL || ptrToBlockInfo[0] == nullptr) {
 		return bl_BlockGraphics_getTexture_real(graphics, side, data);
@@ -859,11 +862,11 @@ int bl_Entity_load_hook(Entity* entity, void* compoundTag) {
 
 static void bl_CustomSnowball_processAddEntity(Entity*);
 
-static bool bl_Level_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
+static bool bl_Level_addEntity_hook(Level* level, BlockSource& blockSource, std::unique_ptr<Entity> entityPtr) {
 	JNIEnv *env;
 	Entity* entity = entityPtr.get();
 
-	bool retval = bl_Level_addEntity_real(level, std::move(entityPtr));
+	bool retval = bl_Level_addEntity_real(level, blockSource, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
 	bl_CustomSnowball_processAddEntity(entity);
@@ -909,12 +912,12 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> e
 	return retval;
 }
 
-static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, std::unique_ptr<Entity> entityPtr) {
+static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, BlockSource& blockSource, std::unique_ptr<Entity> entityPtr) {
 	JNIEnv *env;
 
 	Entity* entity = entityPtr.get();
 
-	bool retval = bl_MultiPlayerLevel_addEntity_real(level, std::move(entityPtr));
+	bool retval = bl_MultiPlayerLevel_addEntity_real(level, blockSource, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
 	bl_CustomSnowball_processAddEntity(entity);
@@ -949,6 +952,7 @@ static void bl_Level_removeEntity_hook(Level* level, Entity* entity, bool arg2) 
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(J)V");
+	BL_LOG("Entity removed: %lld", (long long) entity->getUniqueID());
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID());
 
@@ -1057,9 +1061,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_mItems[item->itemId] = item;
 	//std::string lowercaseStr = Util::toLower(name);
 	if (item->itemId > 0x200 && Item::mItemTextureAtlas != nullptr) {
-		ResourceLocation location;
-		location.str1 = "atlas.items";
-		location.str2 = "InUserPackage";
+		ResourceLocation location("atlas.items");
 		if (!(item->itemId < ItemRenderer::mItemGraphics.size())) {
 			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 		}
@@ -1086,9 +1088,7 @@ void bl_repopulateItemGraphics() {
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}
-			ResourceLocation location;
-			location.str1 = "atlas.items";
-			location.str2 = "InUserPackage";
+			ResourceLocation location("atlas.items");
 			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 		}
 	}
@@ -1523,8 +1523,9 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 
 struct BLBlockBuildTextureRequest {
 	int blockId;
-	std::string textureNames[16*6];
-	int textureCoords[16*6];
+	//std::string textureNames[16*6];
+	//int textureCoords[16*6];
+	std::array<std::string, 6> textureSides;
 };
 
 static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
@@ -1532,9 +1533,13 @@ static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
 static void bl_finishBlockBuildTextureRequests() {
 	BL_LOG("finishBlockBuildTextureRequests");
 	for (auto& request: buildTextureRequests) {
-		if (!bl_custom_block_textures[request.blockId]) continue;
-		BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
-		bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
+		auto bg = BlockGraphics::mBlocks[request.blockId];
+		if (!bg) continue;
+		bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
+			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
+		//if (!bl_custom_block_textures[request.blockId]) continue;
+		//BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
+		//bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
 	}
 	buildTextureRequests.clear();
 }
@@ -1630,6 +1635,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	}
 
 	//bl_custom_block_opaque[blockId] = opaque;
+#if 0
 	if (customBlockType == 0 /* standard */) {
 		bl_custom_block_textures[blockId] = new TextureUVCoordinateSet*[16*6];
 		memset(bl_custom_block_textures[blockId], 0, sizeof(TextureUVCoordinateSet*)*16*6);
@@ -1648,6 +1654,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	} else {
 		bl_custom_block_textures[blockId] = nullptr;
 	}
+#endif
+	bl_custom_block_textures[blockId] = nullptr;	
 
 	std::string realNameStr = std::string(name);
 	std::string nameStr = realNameStr + "." + bl_to_string(blockId);
@@ -1702,7 +1710,6 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
 		abort();
 	}
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %d", blockId);
 	return retval;
 }
 
@@ -2103,7 +2110,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
 	for (int i = 1; i < 0x100; i++) {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "mBlocks[%d] = %p", i, Block::mBlocks[i]);
+		//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "mBlocks[%d] = %p", i, Block::mBlocks[i]);
 		if (Block::mBlocks[i] == NULL) {
 			char name[100];
 			snprintf(name, sizeof(name), "Missing block ID: %d", i);
@@ -3415,13 +3422,14 @@ void bl_setuphooks_cppside() {
 	//bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
-	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
+	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI6EntitySt14default_deleteIS3_EE");
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
-	void* mpAddEntity = dlsym(mcpelibhandle, "_ZN16MultiPlayerLevel9addEntityESt10unique_ptrI6EntitySt14default_deleteIS1_EE");
+	void* mpAddEntity = dlsym(mcpelibhandle,
+		"_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI6EntitySt14default_deleteIS3_EE");
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
 	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
-	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level12removeEntityER6Entityb");
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level22removeEntityReferencesER6Entityb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);

@@ -32,6 +32,8 @@ public class AtlasProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(metaName)) {
+			System.out.println("Loading meta!");
+			dumpAtlas();
 			return new ByteArrayInputStream(metaObj.toString().getBytes("UTF-8"));
 		}
 		return null;
@@ -103,9 +105,10 @@ public class AtlasProvider implements TexturePack {
 	}
 
 	private void addFileIntoObj(String filePath, Object[] nameParts) throws JSONException {
-		String texName = (String)nameParts[0];
-		int texIndex = (Integer)nameParts[1];
-		String textureResName = this.textureNamePrefix + nameParts[0] + "." + texIndex;
+		String texName = (String) nameParts[0];
+		int texIndex = (Integer) nameParts[1];
+		int index = filePath.lastIndexOf(".");
+		String textureResName = (index != -1? filePath.substring(0, index): filePath);
 		JSONObject obj = metaObj.getJSONObject("texture_data").optJSONObject(texName);
 		if (obj == null) {
 			obj = new JSONObject();
@@ -139,6 +142,36 @@ public class AtlasProvider implements TexturePack {
 			je.printStackTrace();
 			return false;
 		}
+	}
+
+	public String getIcon(String name, int index) {
+		try {
+			JSONObject obj = metaObj.getJSONObject("texture_data").optJSONObject(name);
+			if (obj == null) return null;
+			JSONArray arr = obj.optJSONArray("textures");
+			if (arr == null) {
+				// just one texture.
+				if (index == 0) {
+					return obj.optString("textures");
+				}
+				return null;
+			}
+			return arr.optString(index);
+		} catch (JSONException je) {
+			je.printStackTrace();
+			return null;
+		}
+	}
+
+	public void setIcon(String texName, String[] textures) throws JSONException {
+		JSONObject obj = metaObj.getJSONObject("texture_data").optJSONObject(texName);
+		if (obj == null) {
+			obj = new JSONObject();
+			metaObj.getJSONObject("texture_data").put(texName, obj);
+		}
+		JSONArray arr = new JSONArray(Arrays.asList(textures));
+		obj.put("textures", arr);
+		hasChanges = true;
 	}
 
 	public void close() throws IOException {
