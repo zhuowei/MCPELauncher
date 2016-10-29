@@ -28,4 +28,5 @@ public:
 	AbstractScreen* getScreen();
 	ScreenChooser& getScreenChooser() const;
 	GuiData* getGuiData();
+	void onResourcesLoaded();
 };

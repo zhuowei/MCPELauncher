@@ -33,5 +33,6 @@ class TextureGroup {
 public:
 	TexturePtr getTexture(std::string const&);
 	void loadTexture(ResourceLocation const&, bool);
+	static bool mCanLoadTextures;
 };
 }; // namespace mce

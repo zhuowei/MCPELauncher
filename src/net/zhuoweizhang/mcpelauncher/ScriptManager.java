@@ -1628,6 +1628,10 @@ public class ScriptManager {
 
 	private static long spawnEntityImpl(float x, float y, float z, int entityType, String skinPath) {
 		if (entityType <= 0) throw new RuntimeException("Invalid entity type: " + entityType);
+		if (skinPath != null) {
+			String newSkinPath = OldEntityTextureFilenameMapping.m.get(skinPath);
+			if (newSkinPath != null) skinPath = newSkinPath;
+		}
 		long retval = nativeSpawnEntity(x, y, z, entityType, skinPath);
 		if (nativeEntityHasCustomSkin(retval)) {
 			NativeEntityApi.setExtraData(retval, ENTITY_KEY_SKIN, skinPath);
@@ -2201,7 +2205,7 @@ public class ScriptManager {
 		@JSFunction
 		public long spawnPigZombie(double x, double y, double z, int item, String tex) {
 			if (invalidTexName(tex)) {
-				tex = "mob/pigzombie.png";
+				tex = null;
 			}
 			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 36, tex);
 			if (item == 0 || !nativeIsValidItem(item)) item = 283; // gold sword
@@ -2274,7 +2278,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static long spawnChicken(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
-				tex = "mob/chicken.png";
+				tex = null;
 			}
 			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 10, tex);
 			return entityId;
@@ -2283,7 +2287,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static long spawnCow(double x, double y, double z, String tex) {
 			if (invalidTexName(tex)) {
-				tex = "mob/cow.png";
+				tex = null;
 			}
 			long entityId = spawnEntityImpl((float) x, (float) y, (float) z, 11, tex);
 			return entityId;

@@ -51,6 +51,7 @@
 #include "mcpe/guidata.h"
 #include "mcpe/blockgraphics.h"
 #include "mcpe/minecraftcommands.h"
+#include "mcpe/gameconnectioninfo.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -337,7 +338,7 @@ static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
 
 //static void (*bl_Level_addListener)(Level*, LevelListener*);
 
-static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, char const*, int);
+static void (*bl_RakNetInstance_connect_real)(RakNetInstance*, Social::GameConnectionInfo, Social::GameConnectionInfo);
 
 #if 0
 
@@ -569,7 +570,8 @@ void bl_MinecraftScreenModel_executeCommand_hook(MinecraftScreenModel* chatScree
 	}
 }
 
-void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* host, int port) {
+void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::GameConnectionInfo remoteInfo, Social::GameConnectionInfo myInfo) {
+	BL_LOG("Connecting to server!");
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -577,12 +579,12 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
 
-	jstring hostJString = env->NewStringUTF(host);
+	jstring hostJString = env->NewStringUTF(remoteInfo.host.c_str());
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "rakNetConnectCallback", "(Ljava/lang/String;I)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hostJString, port);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hostJString, remoteInfo.port);
 
 	bl_onLockDown = !isLocalAddress(env, hostJString);
 
@@ -592,7 +594,7 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, char const* 
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	bl_RakNetInstance_connect_real(rakNetInstance, host, port);
+	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
 #if 0
@@ -694,9 +696,6 @@ const char* bl_getCharArr(void* str){
 
 TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
 	int blockId = graphics->getBlock()->id;
-	if (blockId == 193) {
-		BL_LOG("get texture hook!");
-	}
 	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
 	if (ptrToBlockInfo == NULL || ptrToBlockInfo[0] == nullptr) {
 		return bl_BlockGraphics_getTexture_real(graphics, side, data);
@@ -1300,6 +1299,7 @@ std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
 	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(newSkin));
+	bl_forceTextureLoad(newSkin);
 }
 void bl_clearMobTextures() {
 	bl_mobTexturesMap.clear();
@@ -1535,13 +1535,15 @@ static void bl_finishBlockBuildTextureRequests() {
 	for (auto& request: buildTextureRequests) {
 		auto bg = BlockGraphics::mBlocks[request.blockId];
 		if (!bg) continue;
+		//BL_LOG("Setting texs for %d: %s:%s:%s:%s:%s:%s", request.blockId,
+		//	request.textureSides[0].c_str(), request.textureSides[1].c_str(), request.textureSides[2].c_str(),
+		//	request.textureSides[3].c_str(), request.textureSides[4].c_str(), request.textureSides[5].c_str());
 		bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
 			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
 		//if (!bl_custom_block_textures[request.blockId]) continue;
 		//BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
 		//bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
 	}
-	buildTextureRequests.clear();
 }
 
 class BLItemSetRequest {
@@ -1611,7 +1613,6 @@ static void bl_Item_initClient_wrapper(Item* item, Json::Value& value) {
 static bool hasRepopulatedItemGraphics = false;
 
 void bl_cpp_tick_hook() {
-	if (BlockGraphics::mTerrainTextureAtlas && buildTextureRequests.size() != 0) bl_finishBlockBuildTextureRequests();
 	if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
 	if (!hasRepopulatedItemGraphics && Item::mItemTextureAtlas) {
 		BL_LOG("repopulating item graphics");
@@ -1710,6 +1711,12 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
 		abort();
 	}
+	BLBlockBuildTextureRequest request;
+	request.blockId = blockId;
+	request.textureSides = {nameStr + "_up", nameStr + "_down", nameStr + "_north",
+		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
+	buildTextureRequests.push_back(request);
+	
 	return retval;
 }
 
@@ -2558,6 +2565,11 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 }
 
 void bl_forceTextureLoad(std::string const& name) {
+	BL_LOG("Forcing texture reload: %s canLoad: %s", name.c_str(), mce::TextureGroup::mCanLoadTextures? "yes": "no");
+	bool old = mce::TextureGroup::mCanLoadTextures;
+	mce::TextureGroup::mCanLoadTextures = true;
+	mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(name));
+	mce::TextureGroup::mCanLoadTextures = old;
 }
 void bl_reload_armor_textures();
 void bl_cppNewLevelInit() {
@@ -2594,7 +2606,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	MinecraftCommands* commands = bl_minecraft->getServer()->getCommands();
 	if (!commands) return false;
 	bool hasCommand = commands->getCommand(mystr, 0) != nullptr;
-	BL_LOG("command: %s hasCommand: %s", utfChars, hasCommand? "yes": "no");
+	//BL_LOG("command: %s hasCommand: %s", utfChars, hasCommand? "yes": "no");
 	env->ReleaseStringUTFChars(text, utfChars);
 	return hasCommand;
 }
@@ -3169,6 +3181,12 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, s2, s3);
 }
 
+void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
+void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
+	bl_MinecraftClient_onResourcesLoaded_real(client);
+	bl_finishBlockBuildTextureRequests();
+}
+
 static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {
 	const char* const toPatch[] = {
 "_ZN12ItemInstanceC1EPK4Item",
@@ -3298,7 +3316,7 @@ void bl_setuphooks_cppside() {
 	//bl_Level_addListener = (void (*) (Level*, LevelListener*))
 	//	dlsym(RTLD_DEFAULT, "_ZN5Level11addListenerEP13LevelListener");
 
-	void* raknet_connect = dlsym(mcpelibhandle, "_ZN14RakNetInstance7connectEPKci");
+	void* raknet_connect = dlsym(mcpelibhandle, "_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_");
 
 	mcpelauncher_hook(raknet_connect, (void*) &bl_RakNetInstance_connect_hook, (void**) &bl_RakNetInstance_connect_real);
 
@@ -3551,16 +3569,19 @@ void bl_setuphooks_cppside() {
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	bl_MinecraftTelemetry_fireEventScreenChanged_real = (void* (*)(void*, std::string const&, std::string const&, std::string const&))
-		dlsym(mcpelibhandle, "_ZN18MinecraftTelemetry22fireEventScreenChangedERKSsS1_S1_");
+		dlsym(mcpelibhandle, "_ZN17MinecraftEventing22fireEventScreenChangedERKSsS1_S1_");
 	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
 		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
+/*
 	bl_BlockGraphics_getTexture_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEai");
 	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_real, (void*) bl_CustomBlockGraphics_getTextureHook);
 	bl_BlockGraphics_getTexture_char_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEa");
 	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_char_real, (void*) bl_CustomBlockGraphics_getTexture_char_hook);
+*/
 
+	mcpelauncher_hook((void*)&MinecraftClient::onResourcesLoaded, (void*)bl_MinecraftClient_onResourcesLoaded_hook, (void**)&bl_MinecraftClient_onResourcesLoaded_real);
 
 	bl_entity_hurt_hook_init(mcpelibhandle);
 
