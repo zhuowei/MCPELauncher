@@ -3238,6 +3238,8 @@ nullptr
 	return false; // WHAT
 }
 
+void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
+
 void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
@@ -3287,6 +3289,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
 //	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
+	bl_prepatch_fakeassets(mcpelibhandle);
 }
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\

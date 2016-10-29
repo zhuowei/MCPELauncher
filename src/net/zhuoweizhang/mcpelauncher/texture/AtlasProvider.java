@@ -32,8 +32,6 @@ public class AtlasProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(metaName)) {
-			System.out.println("Loading meta!");
-			dumpAtlas();
 			return new ByteArrayInputStream(metaObj.toString().getBytes("UTF-8"));
 		}
 		return null;

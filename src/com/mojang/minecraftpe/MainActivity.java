@@ -2454,6 +2454,7 @@ public class MainActivity extends NativeActivity {
 			ScriptManager.terrainMeta = terrainProvider;
 			ScriptManager.itemsMeta = itemsProvider;
 			ScriptManager.blocksJson = blocksJsonProvider;
+			ScriptManager.textureList = textureListProvider;
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);

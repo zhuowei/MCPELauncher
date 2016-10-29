@@ -10,6 +10,8 @@ public class TextureListProvider implements TexturePack {
 
 	public String manifestPath;
 	public List<String> files;
+	public List<String> addedFiles = new ArrayList<String>();
+	public Set<String> addedFilesSet = new HashSet<String>();
 	public boolean hasChanges = false;
 	public TextureListProvider(String manifestPath) {
 		this.manifestPath = manifestPath;
@@ -18,9 +20,7 @@ public class TextureListProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(manifestPath)) {
-			System.out.println("new textures list!");
 			StringBuilder builder = new StringBuilder();
-			builder.append("texture/blocks/harambe\n");
 			for (String s: files) {
 				builder.append(s);
 				builder.append('\n');
@@ -75,6 +75,8 @@ public class TextureListProvider implements TexturePack {
 		for (TexturePack pack : activity.textureOverrides) {
 			List<String> newFiles = pack.listFiles();
 			for (String rawS: newFiles) {
+				addedFiles.add(rawS);
+				addedFilesSet.add(rawS);
 				int lastIndex = rawS.lastIndexOf('.');
 				if (lastIndex == -1) continue; // no file extension?
 				String s = rawS.substring(0, lastIndex);
@@ -84,6 +86,18 @@ public class TextureListProvider implements TexturePack {
 				}
 			}
 		}
+	}
+	public boolean containsFile(String file) {
+		return addedFilesSet.contains(file);
+	}
+	public Set<String> listDir(String dirPath) {
+		String prefix = dirPath + "/";
+		Set<String> outList = new HashSet<String>();
+		for (String path: addedFiles) {
+			if (!path.startsWith(prefix) || path.indexOf("/", prefix.length()) != -1) continue;
+			outList.add(path.substring(path.lastIndexOf("/")));
+		}
+		return outList;
 	}
 
 	public void close() throws IOException {

@@ -51,6 +51,7 @@ import net.zhuoweizhang.mcpelauncher.api.modpe.*;
 import net.zhuoweizhang.mcpelauncher.texture.AtlasProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ClientBlocksJsonProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ModPkgTexturePack;
+import net.zhuoweizhang.mcpelauncher.texture.TextureListProvider;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
@@ -128,6 +129,7 @@ public class ScriptManager {
 	// initialized in MainActivity now
 	public static AtlasProvider terrainMeta, itemsMeta;
 	public static ClientBlocksJsonProvider blocksJson;
+	public static TextureListProvider textureList;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
 	public static boolean requestScreenshot = false;
@@ -1689,6 +1691,36 @@ public class ScriptManager {
 			if (ScriptManager.scriptingEnabled) return true;
 			return !(javaObject instanceof PopupWindow && testName(method.getName()));
 		}
+	}
+
+	// called from native AssetManager simulator
+	// the path should already have the resourcepack/vanilla bit removed
+	// paths returned don't have the resourcepack/vanilla bit
+	private static boolean assetFileExists(String path) {
+		if (textureList == null) return false;
+		return textureList.containsFile(path);
+	}
+	private static final String assetsResPackPath = "resourcepacks/vanilla/client";
+	// path still has original res pack path;
+	private static String[] assetListDir(String path) {
+		if (textureList == null) return null;
+		Set<String> texList = textureList.listDir(path.substring(assetsResPackPath.length()));
+		if (texList == null || texList.size() == 0) return null;
+		MainActivity activity = MainActivity.currentMainActivity.get();
+		if (activity == null) return null;
+		String[] origDir = null;
+		try {
+			origDir = activity.getAssets().list(path);
+		} catch (IOException ie) {
+			origDir = new String[0];
+		}
+		// merge
+		List<String> outList = new ArrayList<String>(texList);
+		for (String s: origDir) {
+			if (texList.contains(s)) continue;
+			outList.add(s);
+		}
+		return outList.toArray(new String[0]);
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
