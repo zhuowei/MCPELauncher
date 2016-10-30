@@ -103,6 +103,7 @@ public class AtlasProvider implements TexturePack {
 	}
 
 	private void addFileIntoObj(String filePath, Object[] nameParts) throws JSONException {
+		filePath = TextureUtils.removeExtraDotsFromPath(filePath);
 		String texName = (String) nameParts[0];
 		int texIndex = (Integer) nameParts[1];
 		int index = filePath.lastIndexOf(".");

@@ -18,4 +18,14 @@ public class TextureUtils {
 		}
 		return allFiles;
 	}
+	/**
+	 * test 2.4/what.the/cheese.png -> test 2_4/what_the/cheese.png
+	 */
+	public static String removeExtraDotsFromPath(String inStr) {
+		int endDot = inStr.lastIndexOf('.');
+		if (endDot == -1) return inStr;
+		int startDot = inStr.indexOf('.');
+		if (startDot == endDot) return inStr;
+		return inStr.substring(0, endDot).replace('.', '_') + inStr.substring(endDot);
+	}
 }

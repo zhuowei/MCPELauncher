@@ -1082,7 +1082,7 @@ void bl_repopulateItemGraphics() {
 			needsSetting = true;
 		}
 		if (needsSetting) {
-			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
+			//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}

@@ -14,6 +14,7 @@ static bool prefix(const char *pre, const char *str)
 static const char kResourcePackPrefix[] = "resourcepacks/vanilla/client/";
 static const char kResourcePackDirPrefix[] = "resourcepacks/vanilla/client";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
+	//BL_LOG("Asset: open %s", filename);
 	if (prefix(kResourcePackPrefix, filename)) {
 		JNIEnv *env;
 		int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);

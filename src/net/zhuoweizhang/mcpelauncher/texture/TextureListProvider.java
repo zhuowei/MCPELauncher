@@ -70,13 +70,15 @@ public class TextureListProvider implements TexturePack {
 		}
 	}
 
+
 	private void addExtraTextures(MainActivity activity) throws IOException {
 		Set<String> theSet = new HashSet<String>(files);
 		for (TexturePack pack : activity.textureOverrides) {
 			List<String> newFiles = pack.listFiles();
 			for (String rawS: newFiles) {
+				rawS = TextureUtils.removeExtraDotsFromPath(rawS);
 				addedFiles.add(rawS);
-				addedFilesSet.add(rawS);
+				addedFilesSet.add(rawS.substring(rawS.lastIndexOf("/") + 1));
 				int lastIndex = rawS.lastIndexOf('.');
 				if (lastIndex == -1) continue; // no file extension?
 				String s = rawS.substring(0, lastIndex);
@@ -88,7 +90,7 @@ public class TextureListProvider implements TexturePack {
 		}
 	}
 	public boolean containsFile(String file) {
-		return addedFilesSet.contains(file);
+		return addedFilesSet.contains(file.substring(file.lastIndexOf("/") + 1));
 	}
 	public Set<String> listDir(String dirPath) {
 		String prefix = dirPath + "/";
