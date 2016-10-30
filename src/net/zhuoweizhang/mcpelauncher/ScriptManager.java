@@ -356,6 +356,7 @@ public class ScriptManager {
 				NativeItemApi.reregisterRecipes();
 			}
 		});
+		nativeNewLevelCallbackStarted();
 
 		callScriptMethod("newLevel", hasLevel);
 		if (MainActivity.currentMainActivity != null) {
@@ -365,6 +366,8 @@ public class ScriptManager {
 				main.setLevelCallback(!ScriptManager.scriptingEnabled);
 			}
 		}
+
+		nativeNewLevelCallbackEnded();
 	}
 
 	@CallbackName(name="selectLevelHook")
@@ -2062,6 +2065,8 @@ public class ScriptManager {
 	public static native void nativeSetExitEnabled(boolean enabled);
 	public static native void nativeRecipeSetAnyAuxValue(int id, boolean anyAux);
 	public static native void nativeModPESetDesktopGui(boolean desktop);
+	public static native void nativeNewLevelCallbackStarted();
+	public static native void nativeNewLevelCallbackEnded();
 
 	public static class ScriptState {
 		public Script script;

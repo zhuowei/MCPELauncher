@@ -17,6 +17,7 @@ public:
 	Block* getBlock() const;
 	TextureUVCoordinateSet const& getTexture(signed char, int);
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);
+	static void initBlocks();
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);
 	static BlockGraphics* mBlocks[0x100];
 	static std::unordered_map<std::string, BlockGraphics*> mBlockLookupMap;

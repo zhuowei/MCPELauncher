@@ -52,6 +52,7 @@
 #include "mcpe/blockgraphics.h"
 #include "mcpe/minecraftcommands.h"
 #include "mcpe/gameconnectioninfo.h"
+#include "mcpe/textureatlas.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -497,6 +498,8 @@ static void** bl_CustomSnowballItem_vtable;
 static void** bl_SnowballItem_vtable;
 unsigned short bl_customItem_allowEnchantments[BL_ITEMS_EXPANDED_COUNT];
 int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
+// was a new custom block added
+static bool bl_customBlocksCreated = false;
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -1461,7 +1464,7 @@ void bl_initCustomBlockVtable() {
 
 	//set the texture getter to our overridden version
 
-	bl_CustomBlockGraphics_vtable[vtable_indexes.blockgraphics_get_carried_texture] = (void*) &bl_CustomBlockGraphics_getCarriedTexture_hook;
+	//bl_CustomBlockGraphics_vtable[vtable_indexes.blockgraphics_get_carried_texture] = (void*) &bl_CustomBlockGraphics_getCarriedTexture_hook;
 
 	bl_Block_onPlace = (void (*)(Block*, BlockSource&, BlockPos const&))
 		bl_CustomBlock_vtable[vtable_indexes.tile_on_place];
@@ -1714,7 +1717,13 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	request.blockId = blockId;
 	request.textureSides = {nameStr + "_up", nameStr + "_down", nameStr + "_north",
 		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
+	if (BlockGraphics::mTerrainTextureAtlas) {
+		retGraphics->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
+			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
+	}
+	//BL_LOG("Created blockGraphics %p for blockId %d", retGraphics, blockId);
 	buildTextureRequests.push_back(request);
+	bl_customBlocksCreated = true;
 	
 	return retval;
 }
@@ -3189,6 +3198,21 @@ void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
 void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
 	bl_MinecraftClient_onResourcesLoaded_real(client);
 	bl_finishBlockBuildTextureRequests();
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
+  (JNIEnv* env, jclass clazz) {
+	bl_customBlocksCreated = false;
+}
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackEnded
+  (JNIEnv* env, jclass clazz) {
+	if (bl_customBlocksCreated) {
+		// some derp created a custom block in newLevel
+		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
+		BlockGraphics::initBlocks();
+		bl_finishBlockBuildTextureRequests();
+	}
 }
 
 static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {

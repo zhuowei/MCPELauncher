@@ -22,8 +22,6 @@ public class ClientBlocksJsonProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(manifestPath)) {
-			System.out.println("Grabbing clients json!");
-			dumpAtlas();
 			return new ByteArrayInputStream(metaObj.toString().getBytes("UTF-8"));
 		}
 		return null;
