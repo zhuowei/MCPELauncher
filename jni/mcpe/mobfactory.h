@@ -6,9 +6,12 @@ enum EntityType {
 
 class EntityDefinitionIdentifier {
 public:
+/*
 	std::string part1;
 	std::string part2;
 	std::string part3;
+*/
+	char filler[12]; // FIXME 0.16: yes this will leak memory sigh
 	EntityDefinitionIdentifier(EntityType);
 };
 

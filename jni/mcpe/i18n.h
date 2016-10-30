@@ -4,6 +4,8 @@
 
 class Localization {
 public:
+	char filler[12]; // 0
+	std::map<std::string, std::string> stringsMap; // 12
 	std::map<std::string, std::string>& _getStrings() const;
 	std::string getFullLanguageCode() const;
 };

@@ -412,7 +412,7 @@ static bool (*bl_Level_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Ent
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, std::unique_ptr<Entity>&&, bool);
-static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool);
+static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool, bool, float);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Block_getAABB)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
 static AABB* (*bl_ReedBlock_getAABB)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
@@ -961,7 +961,7 @@ static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& e
 	}
 }
 
-static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire) {
+static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire, bool anotherBool, float something) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -981,7 +981,7 @@ static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, p, power, onFire);
+	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, p, power, onFire, anotherBool, something);
 }
 
 static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y, int z, int type, int data) {
@@ -2097,9 +2097,10 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
   (JNIEnv *env, jclass clazz, jint type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
+	// FIXME 0.16
 	Vec3 pos {x, y, z};
 	Vec3 vel {xVel, yVel, zVel};
-	bl_Level_addParticle(bl_level, type, pos, vel, data);
+	//bl_Level_addParticle(bl_level, type, pos, vel, data);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
@@ -2577,7 +2578,7 @@ void bl_cppNewLevelInit() {
 }
 
 void bl_set_i18n(std::string const& key, std::string const& value) {
-	(I18n::getCurrentLanguage()->_getStrings())[key] = value;
+	(I18n::mCurrentLanguage->_getStrings())[key] = value;
 }
 
 static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
@@ -2811,6 +2812,8 @@ static void bl_Item_initClient_wrapper(Item* item, Json::Value& value);
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
   (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
+	// FIXME 0.16
+#if 0
 	Item* item = bl_Item_mItems[itemId];
 	if (!item) return false;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
@@ -2819,10 +2822,12 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	bool ret = false;
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
-		bl_Item_initClient_wrapper(item, jsonValue);
+		//bl_Item_initClient_wrapper(item, jsonValue);
+		//item->initServer(jsonValue);
 	}
 	env->ReleaseStringUTFChars(text, utfChars);
 	return ret;
+#endif
 }
 
 static void* (*bl_Throwable_throwableHit_real)(Entity* entity, HitResult const& hitResult, int param1, int param2);
