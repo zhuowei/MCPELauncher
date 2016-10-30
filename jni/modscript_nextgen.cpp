@@ -1586,7 +1586,7 @@ static void bl_finishItemSetIconRequests() {
 	for (auto& request: itemSetIconRequests) {
 		request->setItem();
 	}
-	itemSetIconRequests.clear();
+	//itemSetIconRequests.clear();
 }
 
 static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int iconIndex) {
@@ -1615,7 +1615,7 @@ static void bl_Item_initClient_wrapper(Item* item, Json::Value& value) {
 static bool hasRepopulatedItemGraphics = false;
 
 void bl_cpp_tick_hook() {
-	if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
+	//if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
 	if (!hasRepopulatedItemGraphics && Item::mItemTextureAtlas) {
 		BL_LOG("repopulating item graphics");
 		bl_repopulateItemGraphics();
@@ -3198,6 +3198,8 @@ void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
 void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
 	bl_MinecraftClient_onResourcesLoaded_real(client);
 	bl_finishBlockBuildTextureRequests();
+	bl_finishItemSetIconRequests();
+	bl_repopulateItemGraphics();
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
@@ -3327,10 +3329,11 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
 
-	void* sendChatMessage = dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel15sendChatMessageERKSs");
-	mcpelauncher_hook(sendChatMessage, (void*) &bl_MinecraftScreenModel_sendChatMessage_hook, (void**) &bl_MinecraftScreenModel_sendChatMessage_real);
-	void* executeCommand = dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel14executeCommandERKSs");
-	mcpelauncher_hook(executeCommand, (void*) &bl_MinecraftScreenModel_executeCommand_hook, (void**) &bl_MinecraftScreenModel_executeCommand_real);
+	bl_MinecraftScreenModel_sendChatMessage_real = (void (*)(MinecraftScreenModel*, std::string const&)) dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel15sendChatMessageERKSs");
+	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftScreenModel_sendChatMessage_real, (void*)bl_MinecraftScreenModel_sendChatMessage_hook);
+
+	bl_MinecraftScreenModel_executeCommand_real = (void (*)(MinecraftScreenModel*, std::string const&))  dlsym(mcpelibhandle, "_ZN20MinecraftScreenModel14executeCommandERKSs");
+	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftScreenModel_executeCommand_real, (void*)bl_MinecraftScreenModel_executeCommand_hook);
 
 	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
 
