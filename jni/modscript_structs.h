@@ -59,6 +59,10 @@ struct Vec2 {
 
 class AgeableComponent;
 
+enum EntityFlags {
+	EntityFlagsImmobile = 16,
+};
+
 // last update: 0.15.1
 class Entity {
 public:
@@ -89,6 +93,7 @@ public:
 	SynchedEntityData* getEntityData();
 	EntityUniqueID const& getTargetId();
 	void setTarget(Entity*);
+	void setStatusFlag(EntityFlags, bool);
 	Level* getLevel();
 	AgeableComponent* getAgeableComponent() const;
 };

@@ -1715,7 +1715,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	}
 	BLBlockBuildTextureRequest request;
 	request.blockId = blockId;
-	request.textureSides = {nameStr + "_up", nameStr + "_down", nameStr + "_north",
+	request.textureSides = {nameStr + "_down", nameStr + "_up", nameStr + "_north",
 		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
 	if (BlockGraphics::mTerrainTextureAtlas) {
 		retGraphics->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
@@ -3054,9 +3054,12 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetI
 	if (bl_level == nullptr) return;
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return;
+/*
 	DataItem* synchedData = entity->getEntityData()->_get(0xf);
 	if (synchedData == nullptr) return;
 	synchedData->thevalue = (char) immobile;
+*/
+	entity->setStatusFlag(EntityFlagsImmobile, immobile);
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetRenderDebug

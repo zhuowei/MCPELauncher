@@ -1005,11 +1005,13 @@ public class MainActivity extends NativeActivity {
 
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
 		System.out.println("Get file data: " + name);
+
 		try {
 			InputStream is = null;
 			if (name.charAt(0) == '/') {
 				is = getRegularInputStream(name);
-			} else if (name.endsWith("start_screen.json")) {
+			} else if (name.equals("resourcepacks/vanilla/server/entities/villager.json")) {
+				// kludge to make villagers rideable
 				is = openFallbackAsset(name);
 			} else {
 				is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
