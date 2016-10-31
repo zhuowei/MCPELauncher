@@ -3649,6 +3649,7 @@ public class ScriptManager {
 
 	private static class NativeItemApi extends ScriptableObject {
 		private static List<Object[]> activeRecipes = new ArrayList<Object[]>();
+		private static List<int[]> activeFurnaceRecipes = new ArrayList<int[]>();
 		private static Map<Integer, Integer> itemIdToRendererId = new HashMap<Integer, Integer>();
 		private static Map<Integer, Integer> rendererToItemId = new HashMap<Integer, Integer>();
 		public NativeItemApi() {
@@ -3749,6 +3750,13 @@ public class ScriptManager {
 				throw new RuntimeException("Invalid output in furnace recipe: " + outputId + " is not a valid item. " +
 					"You must create the item before you can add it to a recipe.");
 			}
+			for (int[] recipe: activeFurnaceRecipes) {
+				if (recipe[0] == inputId && recipe[1] == outputId && recipe[2] == outputDamage) {
+					System.out.println("Furnace recipe already exists.");
+					return;
+				}
+			}
+			activeFurnaceRecipes.add(new int[]{inputId, outputId, outputDamage});
 			nativeAddFurnaceRecipe(inputId, outputId, outputDamage);
 		}
 
@@ -3813,6 +3821,9 @@ public class ScriptManager {
 		public static void reregisterRecipes() {
 			for (Object[] r: activeRecipes) {
 				nativeAddShapedRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (String[]) r[3], (int[]) r[4]);
+			}
+			for (int[] r: activeFurnaceRecipes) {
+				nativeAddFurnaceRecipe(r[0], r[1], r[2]);
 			}
 		}
 
