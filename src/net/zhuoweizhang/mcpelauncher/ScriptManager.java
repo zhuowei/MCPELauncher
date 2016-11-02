@@ -3604,7 +3604,9 @@ public class ScriptManager {
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
 				if (main != null) {
-					return main.getFileDataBytes(name);
+					byte[] bytes = main.getFileDataBytes(name);
+					if (bytes != null) return bytes;
+					return main.getFileDataBytes("resourcepacks/vanilla/client/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;
@@ -3615,7 +3617,9 @@ public class ScriptManager {
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
 				if (main != null) {
-					return main.getInputStreamForAsset(name);
+					InputStream is = main.getInputStreamForAsset(name);
+					if (is != null) return is;
+					return main.getInputStreamForAsset("resourcepacks/vanilla/client/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;
