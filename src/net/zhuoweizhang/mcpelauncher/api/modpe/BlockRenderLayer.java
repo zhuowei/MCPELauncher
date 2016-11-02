@@ -10,8 +10,8 @@ public final class BlockRenderLayer {
 	alpha_seasons = 5,
 	blend = 6,
 	water = 7,
-	far = 8,
-	seasons_far = 9,
-	seasons_far_alpha = 10;
+	far = 9,
+	seasons_far = 10,
+	seasons_far_alpha = 11;
 }
 	

@@ -1674,6 +1674,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		// FIXME 0.15
 		//retval->renderType = renderShape;
 		retval->setSolid(opaque);
+		//retval->blockProperties = (retval->blockProperties & ~BlockPropertyOpaque) | (opaque? BlockPropertyOpaque: 0);
+		//Block::mTranslucency[blockId] = opaque? 0: 1;
 		Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
 		// todo: graphics
 	} else if (customBlockType == 1 /* liquid */ ) {
@@ -1825,7 +1827,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
 	if (blockId < 0 || blockId > 255) return;
 	Block* tile = bl_Block_mBlocks[blockId];
+	if (!tile) return;
 	tile->renderLayer = level;
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetRenderLayer
+  (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+	if (blockId < 0 || blockId > 255) return 0;
+	Block* tile = bl_Block_mBlocks[blockId];
+	if (!tile) return 0;
+	return tile->getRenderLayer();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemCreativeInv

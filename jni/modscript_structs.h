@@ -214,6 +214,10 @@ static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
 enum CreativeItemCategory {
 };
 
+enum BlockProperty {
+	BlockPropertyOpaque = 32, // from _istransparent
+};
+
 class Block {
 public:
 	void** vtable; //0
@@ -223,7 +227,8 @@ public:
 	std::string mappingId; // 12
 	char filler1[20-16]; // 16
 	int renderLayer; //20
-	char filler2[52-24]; //24
+	int blockProperties; // 24 - getProperties
+	char filler2[52-28]; //28
 	void* material; //52
 	char filler3[80-56]; // 56
 	float destroyTime; //80
@@ -236,11 +241,15 @@ public:
 	void setSolid(bool);
 	void setCategory(CreativeItemCategory);
 	std::string const& getDescriptionId() const;
+	int getRenderLayer() const;
 	static std::unordered_map<std::string, Block*> mBlockLookupMap;
 	static Block* mBlocks[0x100];
+	static bool mSolid[0x100];
+	static float mTranslucency[0x100];
 };
 
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
+static_assert(offsetof(Block, explosionResistance) == 84, "explosionResistance is wrong");
 #define Tile Block
 
 typedef struct {

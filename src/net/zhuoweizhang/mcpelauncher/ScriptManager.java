@@ -1846,6 +1846,8 @@ public class ScriptManager {
 
 	public static native void nativeBlockSetRenderLayer(int blockId, int renderLayer);
 
+	public static native int nativeBlockGetRenderLayer(int blockId);
+
 	public static native void nativeSetInventorySlot(int slot, int id, int count, int damage);
 
 	public static native float nativeGetEntityVel(long entity, int axis);
@@ -4072,7 +4074,13 @@ public class ScriptManager {
 			} else if (layer == BlockRenderLayer.alpha) {
 				layer = 3;
 			}
+			if (layer == 4) layer = 3; // layer 4 is dead
 			nativeBlockSetRenderLayer(blockId, layer);
+		}
+
+		@JSStaticFunction
+		public static int getRenderLayer(int blockId) {
+			return nativeBlockGetRenderLayer(blockId);
 		}
 
 		/*@JSStaticFunction
