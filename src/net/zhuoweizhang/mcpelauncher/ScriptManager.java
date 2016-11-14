@@ -714,6 +714,12 @@ public class ScriptManager {
 			// reload scripts
 			loadResourcePackScripts();
 		}
+		if ("store_screen".equals(s1)) {
+			MainActivity activity = MainActivity.currentMainActivity.get();
+			if (activity != null) {
+				activity.showStoreNotWorkingDialog();
+			}
+		}
 		currentScreen = s1;
 		callScriptMethod("screenChangeHook", s1);
 	}
@@ -3550,9 +3556,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void showTipMessage(String msg) {
-			nativeShowTipMessage(msg);
+			//nativeShowTipMessage(msg);
 			// showTipMessage doesn't work anymore?
-			//scriptFakeTipMessage(msg);
+			scriptFakeTipMessage(msg);
 		}
 
 		@JSStaticFunction

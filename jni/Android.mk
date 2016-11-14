@@ -54,7 +54,7 @@ ifeq ("x","x")
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := mcpelauncher_lite
-LOCAL_SRC_FILES := nativepatch.c dobby.cpp marauders_map.c fmod_filesystem.cpp prepatch.cpp
+LOCAL_SRC_FILES := nativepatch.c dobby.cpp marauders_map.c fmod_filesystem.cpp prepatch.cpp fakeassets.cpp
 LOCAL_LDLIBS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog -landroid -lfmod -Wl,-soname,libmcpelauncher.so
 LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 LOCAL_CFLAGS += -DMCPELAUNCHER_LITE

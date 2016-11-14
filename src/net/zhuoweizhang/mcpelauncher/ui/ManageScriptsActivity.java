@@ -309,10 +309,16 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			case DIALOG_MANAGE_PATCH:
 			case DIALOG_MANAGE_PATCH_CURRENTLY_ENABLED:
 			case DIALOG_MANAGE_PATCH_CURRENTLY_DISABLED:
+				if (selectedPatchItem == null) {
+					break;
+				}
 				AlertDialog aDialog = (AlertDialog) dialog;
 				aDialog.setTitle(selectedPatchItem.toString(getResources()));
 				break;
 			case DIALOG_PATCH_INFO:
+				if (selectedPatchItem == null) {
+					break;
+				}
 				preparePatchInfo((AlertDialog) dialog, selectedPatchItem);
 				break;
 			case DIALOG_IMPORT_FROM_CLIPBOARD_CODE:

@@ -40,6 +40,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -253,7 +254,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.14.2");
+				intent.putExtra("supportedVersion", "0.16.1");
 				startActivity(intent);
 				finish();
 				try {
@@ -1004,7 +1005,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
-		System.out.println("Get file data: " + name);
+		if (BuildConfig.DEBUG) System.out.println("Get file data: " + name);
 
 		try {
 			InputStream is = null;
@@ -1972,6 +1973,33 @@ public class MainActivity extends NativeActivity {
 		System.out.println("create android launch intent");
 		return getIntent();
 	}
+	private TextToSpeech tts;
+	// 0.17
+	public void startTextToSpeech(String a) {
+		System.out.println("Text to speech: " + a);
+		if (tts != null) tts.speak(a, TextToSpeech.QUEUE_ADD, null);
+	}
+
+	public void stopTextToSpeech() {
+		System.out.println("Shutting up");
+		if (tts != null) tts.stop();
+	}
+
+	public boolean isTextToSpeechInProgress() {
+		return false;
+	}
+
+	public void setTextToSpeechEnabled(boolean enabled) {
+		System.out.println("Text to speech?");
+		if (enabled) {
+			if (tts == null) tts = new TextToSpeech(this, null);
+		} else {
+			if (tts != null) {
+				tts.shutdown();
+				tts = null;
+			}
+		}
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -2058,6 +2086,7 @@ public class MainActivity extends NativeActivity {
 				toastText.setTypeface(minecraftTypeface);
 				toastText.setTextColor(0xffffffff);
 				toastText.setShadowLayer(0.1f, 8f, 8f, 0xff000000);
+				toastText.setTextSize(18);
 				if (lastToast != null) lastToast.cancel();
 				Toast myToast = new Toast(MainActivity.this);
 				myToast.setView(toastText);
@@ -2492,6 +2521,17 @@ public class MainActivity extends NativeActivity {
 				Toast.makeText(MainActivity.this, MainActivity.this.getResources().
 					getString(R.string.manage_scripts_reimported_toast) + " " + scripts,
 					Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+
+	public void showStoreNotWorkingDialog() {
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.store_not_supported_title).
+					setMessage(R.string.store_not_supported_message).
+					setPositiveButton(android.R.string.ok, null).
+					show();
 			}
 		});
 	}

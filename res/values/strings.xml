@@ -201,6 +201,8 @@ We are working on a fix for this, but in the meantime, BlockLauncher functions a
     <string name="no_minecraft_learn_more">Learn more</string>
     <string name="pref_zz_desktop_gui">Use Desktop GUI</string>
     <string name="pref_zz_desktop_gui_summary">Change inventory and crafting windows to Desktop mode</string>
+    <string name="store_not_supported_title">Store not supported</string>
+    <string name="store_not_supported_message">Unfortunately, the Store functionality is not supported in BlockLauncher.</string>
 
     <string name="report_error_title">Oh nose everything broke</string>
 </resources>

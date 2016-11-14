@@ -108,6 +108,7 @@ static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
 
 extern void bl_prepatch_cside(void* mcpelibhandle, JNIEnv *env, jclass clazz,
 	jboolean signalhandler, jobject activity, jboolean limitedPrepatch);
+extern void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
 
 void bl_setmcpelibhandle(void* _mcpelibhandle);
 
@@ -140,6 +141,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 
 #ifndef MCPELAUNCHER_LITE
 	bl_prepatch_cside(mcpelibhandle, env, clazz, signalhandler, activity, limitedPrepatch);
+#else
+	bl_prepatch_fakeassets((soinfo2*) mcpelibhandle);
 #endif
 	bl_hasinit_prepatch = 1;
 }
