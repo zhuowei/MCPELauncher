@@ -53,6 +53,7 @@
 #include "mcpe/minecraftcommands.h"
 #include "mcpe/gameconnectioninfo.h"
 #include "mcpe/textureatlas.h"
+#include "mcpe/particle.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -1244,13 +1245,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaySound
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jstring sound, jfloat volume, jfloat pitch) {
-/*
-	FIXME 0.16
 	const char * utfChars = env->GetStringUTFChars(sound, NULL);
 	std::string soundstr = std::string(utfChars);
 	env->ReleaseStringUTFChars(sound, utfChars);
-	bl_level->playSound(Vec3(x, y, z), soundstr, volume, pitch);
-*/
+	bl_minecraft->play(soundstr, Vec3(x, y, z), volume, pitch);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -2116,11 +2114,16 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
-  (JNIEnv *env, jclass clazz, jint type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
-	// FIXME 0.16
+  (JNIEnv *env, jclass clazz, jstring type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
+	if (!type) return;
+	const char * typeChars = env->GetStringUTFChars(type, nullptr);
+	std::string typeStr(typeChars);
+	env->ReleaseStringUTFChars(type, typeChars);
+	int particleType = ParticleTypeFromString(typeStr);
+	if (particleType <= 0) return;
 	Vec3 pos {x, y, z};
 	Vec3 vel {xVel, yVel, zVel};
-	//bl_Level_addParticle(bl_level, type, pos, vel, data);
+	bl_Level_addParticle(bl_level, particleType, pos, vel, data);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote

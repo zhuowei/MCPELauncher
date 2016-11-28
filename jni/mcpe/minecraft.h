@@ -10,6 +10,9 @@ class AbstractScreen;
 class ScreenChooser;
 class GuiData;
 class MinecraftCommands;
+class LevelRenderer;
+class Vec3;
+class ResourcePackManager;
 class Minecraft {
 public:
 	Level* getLevel();
@@ -29,4 +32,7 @@ public:
 	ScreenChooser& getScreenChooser() const;
 	GuiData* getGuiData();
 	void onResourcesLoaded();
+	LevelRenderer* getLevelRenderer() const;
+	void play(std::string const&, Vec3 const&, float, float);
+	ResourcePackManager& getResourcePackManager() const;
 };

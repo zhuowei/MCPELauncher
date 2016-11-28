@@ -35,19 +35,69 @@ public final class ParticleType {
 	public static final int enchantmenttable = 32;
 	//public static final int something = 33;
 	public static final int note = 34;
+	public static final String witchspell = "witchspell";
+	public static final String carrotboost = "carrotboost";
 	private ParticleType() {}
-	public static boolean checkValid(int type, int data) {
-		if (type < 0 || type > 34) {
-			throw new RuntimeException("Invalid particle type: must be between 1 and 34");
-		}
-		if (type == itemBreak && data < 0x100) {
+	private static String[] mapping = new String[35];
+	private static void map(int id, String name) {
+		mapping[id] = name;
+	}
+	static {
+		// 0.16.0 added names
+		map(bubble, "bubble");
+		map(crit, "crit");
+		map(smoke, "smoke");
+		map(largeexplode, "explode");
+		map(cloud, "evaporation");
+		map(flame, "flame");
+		map(lava, "lava");
+		map(smoke2, "largesmoke");
+		map(redstone, "reddust");
+		map(itemBreak, "iconcrack");
+		map(snowballpoof, "snowballpoof");
+		map(hugeexplosionSeed, "largeexplode");
+		map(hugeexplosion, "hugeexposion");
+		map(mobFlame, "mobflame");
+		map(heart, "heart");
+		map(terrain, "terrain");
+		map(suspendedTown, "townaura");
+		map(portal, "portal");
+		map(splash, "watersplash");
+		map(waterWake, "waterwake");
+		map(dripWater, "dripwater");
+		map(dripLava, "driplava");
+		map(fallingDust, "fallingdust");
+		map(spell, "mobspell");
+		map(spell2, "mobspellambient");
+		map(spell3, "mobspellinstantaneous");
+		map(ink, "ink");
+		map(slime, "slime");
+		map(rainSplash, "rainsplash");
+		map(angryVillager, "villagerangry");
+		map(happyVillager, "villagerhappy");
+		map(enchantmenttable, "enchantingtable");
+		map(note, "note");
+	}
+	public static boolean checkValid(String type, int data) {
+		if ("iconcrack".equals(type) && data < 0x100) {
 			throw new RuntimeException("Breaking item particle requires argument of id<<16|data");
 		}
-		if (type == smoke || type == smoke2 || type == ink) { // smoke and ink
+		if ("smoke".equals(type) || "largesmoke".equals(type) || "ink".equals(type)) { // smoke and ink
 			if (data < 100) {
 				throw new RuntimeException("Size percent parameter for smoke particle must be 100 or above");
 			}
 		}
 		return true;
+	}
+	public static String getTypeFromRaw(Object raw) {
+		if (raw instanceof Number) {
+			int offset = ((Number)raw).intValue();
+			if (offset >= 0 && offset < mapping.length) {
+				return mapping[offset];
+			}
+		} else if (raw instanceof String) {
+			return (String)raw;
+		}
+		throw new RuntimeException("Invalid particle type: " + raw);
 	}
 }

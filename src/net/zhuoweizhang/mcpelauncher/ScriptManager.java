@@ -1884,7 +1884,7 @@ public class ScriptManager {
 	public static native int nativeEntityGetRenderType(long entityId);
 	public static native void nativeSetCameraEntity(long entityId);
 	public static native long[] nativeEntityGetUUID(long entityId);
-	public static native void nativeLevelAddParticle(int type, float x, float y, float z, float xVel, float yVel, float zVel, int data);
+	public static native void nativeLevelAddParticle(String type, float x, float y, float z, float xVel, float yVel, float zVel, int data);
 
 	// MrARM's additions
 	public static native int nativeGetData(int x, int y, int z);
@@ -2464,7 +2464,7 @@ public class ScriptManager {
 		public static void playSound(double x, double y, double z, String sound, double volume,
 				double pitch) {
 			nativePlaySound((float) x, (float) y, (float) z, sound,
-				volume <= 0? 1.0f: (float) volume, pitch <= 0? 1.0f: (float) pitch);
+				(volume <= 0 || volume != volume)? 1.0f: (float) volume, (pitch <= 0 || pitch != pitch)? 1.0f: (float) pitch);
 		}
 
 		@JSStaticFunction
@@ -2474,7 +2474,7 @@ public class ScriptManager {
 			float z = nativeGetEntityLoc(getEntityId(ent), AXIS_Z);
 
 			nativePlaySound(x, y, z, sound,
-				volume <= 0? 1.0f: (float) volume, pitch <= 0? 1.0f: (float) pitch);
+				(volume <= 0 || volume != volume)? 1.0f: (float) volume, (pitch <= 0 || pitch != pitch)? 1.0f: (float) pitch);
 		}
 
 		// Byteandahalf's additions
@@ -2506,7 +2506,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static void addParticle(int type, double x, double y, double z, double xVel, double yVel, double zVel, int size) {
+		public static void addParticle(Object typeRaw, double x, double y, double z, double xVel, double yVel, double zVel, int size) {
+			String type = ParticleType.getTypeFromRaw(typeRaw);
 			if (!ParticleType.checkValid(type, size)) return;
 			nativeLevelAddParticle(type, (float) x, (float) y, (float) z, (float) xVel, (float) yVel, (float) zVel, size);
 		}
