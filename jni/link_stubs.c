@@ -13,3 +13,8 @@ extern void _ZN16ResourceLocationD2Ev(void* a);
 void _ZN16ResourceLocationD1Ev(void* a) {
 	_ZN16ResourceLocationD2Ev(a);
 }
+
+extern void _ZN4Json6ReaderD2Ev(void* a);
+void _ZN4Json6ReaderD1Ev(void* a) {
+	_ZN4Json6ReaderD2Ev(a);
+}

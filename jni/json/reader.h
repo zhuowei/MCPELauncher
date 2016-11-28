@@ -57,6 +57,9 @@ public:
    */
   Reader(const Features& features);
 
+  // zhuowei: BlockLauncher: MCPE has this?
+  ~Reader();
+
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document.
    * \param document UTF-8 encoded string containing the document to read.

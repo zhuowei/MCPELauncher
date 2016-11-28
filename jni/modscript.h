@@ -491,6 +491,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeBlockGetRenderLayer
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetRenderLayer
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetInventorySlot
  * Signature: (IIII)V
  */
@@ -620,10 +628,10 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeLevelAddParticle
- * Signature: (IFFFFFFI)V
+ * Signature: (Ljava/lang/String;FFFFFFI)V
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
-  (JNIEnv *, jclass, jint, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jint);
+  (JNIEnv *, jclass, jstring, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jint);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -883,6 +891,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeIsBlockTextureAtlasLoaded
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsBlockTextureAtlasLoaded
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeDefinePlaceholderBlocks
  * Signature: ()V
  */
@@ -1128,22 +1144,6 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
  */
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *, jclass, jstring);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeZombieIsBaby
- * Signature: (J)Z
- */
-JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieIsBaby
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeZombieSetBaby
- * Signature: (JZ)V
- */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeZombieSetBaby
-  (JNIEnv *, jclass, jlong, jboolean);
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
@@ -1648,6 +1648,22 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
  */
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDesktopGui
   (JNIEnv *, jclass, jboolean);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeNewLevelCallbackStarted
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
+ * Method:    nativeNewLevelCallbackEnded
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackEnded
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }

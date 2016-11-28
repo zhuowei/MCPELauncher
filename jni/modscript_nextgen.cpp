@@ -1568,14 +1568,20 @@ void BLItemSetIconRequest::setItem() {
 
 class BLItemSetJsonRequest : public BLItemSetRequest {
 public:
-	Json::Value value;
+	std::string value;
 	virtual void setItem();
 };
 
 void BLItemSetJsonRequest::setItem() {
 	Item* item = bl_Item_mItems[this->itemId];
 	if (!item) return;
-	item->initClient(this->value);
+	Json::Value jsonValue;
+	Json::Reader jsonReader;
+	bool ret = false;
+	if (jsonReader.parse(value, jsonValue)) {
+		item->initServer(jsonValue);
+		item->initClient(jsonValue);
+	}
 }
 
 static std::vector<std::shared_ptr<BLItemSetRequest>> itemSetIconRequests;
@@ -1599,14 +1605,10 @@ static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int
 	}
 }
 
-static void bl_Item_initClient_wrapper(Item* item, Json::Value& value) {
+static void bl_Item_initServer_wrapper(Item* item, Json::Value& value) {
 	if (Item::mItemTextureAtlas) {
-		item->initClient(value);
+		item->initServer(value);
 	} else {
-		auto request = std::make_shared<BLItemSetJsonRequest>();
-		request->itemId = item->itemId;
-		request->value = value;
-		itemSetIconRequests.push_back(request);
 	}
 }
 
@@ -1830,7 +1832,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetRenderLayer
-  (JNIEnv *env, jclass clazz, jint blockId, jint level) {
+  (JNIEnv *env, jclass clazz, jint blockId) {
 	if (blockId < 0 || blockId > 255) return 0;
 	Block* tile = bl_Block_mBlocks[blockId];
 	if (!tile) return 0;
@@ -2831,12 +2833,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
 }
 
-static void bl_Item_initClient_wrapper(Item* item, Json::Value& value);
-
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
   (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
 	// FIXME 0.16
-#if 0
 	Item* item = bl_Item_mItems[itemId];
 	if (!item) return false;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
@@ -2845,12 +2844,15 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	bool ret = false;
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
-		//bl_Item_initClient_wrapper(item, jsonValue);
-		//item->initServer(jsonValue);
+		item->initServer(jsonValue);
+		if (Item::mItemTextureAtlas != nullptr) item->initClient(jsonValue);
+		auto request = std::make_shared<BLItemSetJsonRequest>();
+		request->itemId = item->itemId;
+		request->value = std::string(utfChars);
+		itemSetIconRequests.push_back(request);
 	}
 	env->ReleaseStringUTFChars(text, utfChars);
 	return ret;
-#endif
 }
 
 static void* (*bl_Throwable_throwableHit_real)(Entity* entity, HitResult const& hitResult, int param1, int param2);

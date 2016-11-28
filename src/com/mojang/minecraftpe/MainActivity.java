@@ -2086,7 +2086,7 @@ public class MainActivity extends NativeActivity {
 				toastText.setTypeface(minecraftTypeface);
 				toastText.setTextColor(0xffffffff);
 				toastText.setShadowLayer(0.1f, 8f, 8f, 0xff000000);
-				toastText.setTextSize(18);
+				toastText.setTextSize(16);
 				if (lastToast != null) lastToast.cancel();
 				Toast myToast = new Toast(MainActivity.this);
 				myToast.setView(toastText);
