@@ -62,8 +62,9 @@ class AgeableComponent;
 enum EntityFlags {
 	EntityFlagsImmobile = 16,
 };
-
-// last update: 0.15.1
+class PlayerInventoryProxy;
+class EntityDamageSource;
+// last update: 0.17b2
 class Entity {
 public:
 	void** vtable; //0
@@ -82,9 +83,8 @@ public:
 
 	char filler4[224-128]; //128
 	int renderType; //224
-	char filler5[400-228]; // 228
-	struct Entity* rider; //400
-	struct Entity* riding; //404 from Entity::getRide
+	char filler5[420-228]; // 228
+	struct Entity* rider; //420 (inaccurate, Entity::getRide() - 4)
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
@@ -96,6 +96,8 @@ public:
 	void setStatusFlag(EntityFlags, bool);
 	Level* getLevel();
 	AgeableComponent* getAgeableComponent() const;
+	void hurt(EntityDamageSource const&, int, bool, bool);
+	Entity* getRide() const;
 };
 static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
 
@@ -128,7 +130,7 @@ public:
 	int getScore();
 	void addExperience(int);
 	void addLevels(int);
-	PlayerInventoryProxy* getInventory() const;
+	PlayerInventoryProxy* getSupplies() const;
 };
 
 struct TextureUVCoordinateSet {
@@ -158,12 +160,12 @@ public:
 	bool handEquipped; // 33
 	char filler[43-34]; //34
 	unsigned char useAnimation; // 43
-	char filler3[76-44]; // 44
+	char filler3[108-44]; // 44
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 	// this one loads textures
-	void initClient(Json::Value&);
+	void initClient(Json::Value&, Json::Value&);
 	// this one doesn't
 	void initServer(Json::Value&);
 	void setStackedByData(bool);
@@ -172,7 +174,7 @@ public:
 	int getMaxDamage();
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
-static_assert(sizeof(Item) == 76, "item size is wrong");
+static_assert(sizeof(Item) == 108, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -235,8 +237,8 @@ public:
 	float explosionResistance; //84
 	char filler4[120-88]; // 88
 
-	float getDestroySpeed();
-	float getFriction();
+	float getDestroySpeed() const;
+	float getFriction() const;
 	void setFriction(float);
 	void setSolid(bool);
 	void setCategory(CreativeItemCategory);
@@ -247,13 +249,13 @@ public:
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-
+static_assert(sizeof(Block) == 120, "Block size is wrong");
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
 static_assert(offsetof(Block, explosionResistance) == 84, "explosionResistance is wrong");
 #define Tile Block
 
 typedef struct {
-	char filler0[664]; //0
+	char filler0[172]; //0: from ModelPart::addBox
 } Cube;
 
 typedef struct {
@@ -322,11 +324,11 @@ public:
 	ModelPart bipedRightLeg;//1192
 	ModelPart bipedLeftLeg;//1380
 	short unknownshort; // 1568
-	char filler3[1580-1570]; // 1570
+	char filler3[1584-1570]; // 1570
 	HumanoidModel(float, float, int, int);
 };
 
-static_assert(sizeof(HumanoidModel) == 1580, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 1584, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 252, "HumanoidModel bipedHead");
@@ -440,24 +442,25 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 76
-	int damageReduceAmount; // 80
-	int renderIndex; // 84
-	void* armorMaterial; // 88
+	int armorType; // 108
+	int damageReduceAmount; // 112
+	int renderIndex; // 116
+	void* armorMaterial; // 120
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 92, "armor item size");
+static_assert(sizeof(ArmorItem) == 124, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
 	int something; // 616
 	HumanoidModel* modelArmor; // 620
 	HumanoidModel* modelArmorChestplate; // 624
-	char hmr_filler1[640-624]; // 628
+	char hmr_filler1[644-628]; // 628
 };
 #ifdef __arm__
 static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 620, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 644, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 

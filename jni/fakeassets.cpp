@@ -11,8 +11,8 @@ static bool prefix(const char *pre, const char *str)
 {
     return strncmp(pre, str, strlen(pre)) == 0;
 }
-static const char kResourcePackPrefix[] = "resourcepacks/vanilla/client/";
-static const char kResourcePackDirPrefix[] = "resourcepacks/vanilla/client";
+static const char kResourcePackPrefix[] = "resource_packs/vanilla/";
+static const char kResourcePackDirPrefix[] = "resource_packs/vanilla";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
 	//BL_LOG("Asset: open %s", filename);
 	if (prefix(kResourcePackPrefix, filename)) {
@@ -33,7 +33,7 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 			bl_JavaVM->DetachCurrentThread();
 		}
 		//if (exists) BL_LOG("Assets: exists %s", filename);
-		if (exists) filename = "resourcepacks/vanilla/client/textures.list"; // known to exist.
+		if (exists) filename = "resource_packs/vanilla/pack_manifest.json"; // known to exist.
 	}
 	return AAssetManager_open(mgr, filename, mode);
 };

@@ -1,5 +1,3 @@
-_ZTV11LocalPlayer
-_ZTV12RemotePlayer
 _ZTV12ServerPlayer
 _ZTV6Animal
 _ZTV3Bat
@@ -10,11 +8,14 @@ _ZTV5Horse
 _ZTV9IronGolem
 _ZTV6Ocelot
 _ZTV3Pig
+_ZTV9PolarBear
 _ZTV6Rabbit
 _ZTV5Sheep
 _ZTV9SnowGolem
 _ZTV5Squid
 _ZTV4Wolf
+_ZTV15AreaEffectCloud
+_ZTV12EnderCrystal
 _ZTV10WitherBoss
 _ZTV6Entity
 _ZTV11FishingHook
@@ -22,6 +23,7 @@ _ZTV13LightningBolt
 _ZTV13HangingEntity
 _ZTV4Boat
 _ZTV13ExperienceOrb
+_ZTV10EyeOfEnder
 _ZTV12FallingBlock
 _ZTV10ItemEntity
 _ZTV8Minecart
@@ -32,16 +34,20 @@ _ZTV11MinecartTNT
 _ZTV9PrimedTnt
 _ZTV12TripodCamera
 _ZTV20LeashFenceKnotEntity
+_ZTV17LearnToCodeMascot
 _ZTV3Mob
 _ZTV5Blaze
 _ZTV7Creeper
+_ZTV11EnderDragon
 _ZTV8EnderMan
+_ZTV9Endermite
 _ZTV5Ghast
 _ZTV8Guardian
 _ZTV15HumanoidMonster
 _ZTV9LavaSlime
 _ZTV7Monster
 _ZTV9PigZombie
+_ZTV7Shulker
 _ZTV10Silverfish
 _ZTV8Skeleton
 _ZTV5Slime
@@ -56,9 +62,11 @@ _ZTV8Painting
 _ZTV13PathfinderMob
 _ZTV6Player
 _ZTV5Arrow
+_ZTV14DragonFireball
 _ZTV16ExperiencePotion
 _ZTV8Fireball
 _ZTV13LargeFireball
+_ZTV13ShulkerBullet
 _ZTV13SmallFireball
 _ZTV8Snowball
 _ZTV9Throwable
@@ -66,3 +74,5 @@ _ZTV9ThrownEgg
 _ZTV16ThrownEnderpearl
 _ZTV12ThrownPotion
 _ZTV11WitherSkull
+_ZTV11LocalPlayer
+_ZTV12RemotePlayer

@@ -140,7 +140,7 @@ public class ScriptManager {
 	public static int ITEM_ID_COUNT = 512;
 	private static android.app.Instrumentation instrumentation;
 	private static ExecutorService instrumentationExecutor;
-	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack("resourcepacks/vanilla/");
+	public static ModPkgTexturePack modPkgTexturePack = new ModPkgTexturePack("resource_packs/vanilla/");
 	private static WorldData worldData = null;
 	private static int worldDataSaveCounter = 1;
 	private static AndroidPrintStream scriptErrorStream = null;
@@ -1709,7 +1709,7 @@ public class ScriptManager {
 		if (textureList == null) return false;
 		return textureList.containsFile(path);
 	}
-	private static final String assetsResPackPath = "resourcepacks/vanilla/client";
+	private static final String assetsResPackPath = "resource_packs/vanilla";
 	// path still has original res pack path;
 	private static String[] assetListDir(String path) {
 		if (textureList == null) return null;
@@ -3615,7 +3615,7 @@ public class ScriptManager {
 				if (main != null) {
 					byte[] bytes = main.getFileDataBytes(name);
 					if (bytes != null) return bytes;
-					return main.getFileDataBytes("resourcepacks/vanilla/client/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
+					return main.getFileDataBytes("resource_packs/vanilla/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;
@@ -3628,7 +3628,7 @@ public class ScriptManager {
 				if (main != null) {
 					InputStream is = main.getInputStreamForAsset(name);
 					if (is != null) return is;
-					return main.getInputStreamForAsset("resourcepacks/vanilla/client/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
+					return main.getInputStreamForAsset("resource_packs/vanilla/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;

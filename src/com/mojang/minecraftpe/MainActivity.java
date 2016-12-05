@@ -80,7 +80,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.16";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.0";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -254,7 +254,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.16.1");
+				intent.putExtra("supportedVersion", "1.0.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -1011,7 +1011,8 @@ public class MainActivity extends NativeActivity {
 			InputStream is = null;
 			if (name.charAt(0) == '/') {
 				is = getRegularInputStream(name);
-			} else if (name.equals("resourcepacks/vanilla/server/entities/villager.json")) {
+			} else if (name.equals("behavior_packs/vanilla/entities/villager.json")) {
+				// FIXME 0.17: villagers
 				// kludge to make villagers rideable
 				is = openFallbackAsset(name);
 			} else {
@@ -1736,7 +1737,7 @@ public class MainActivity extends NativeActivity {
 				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
 			));
 		}
-		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resourcepacks/vanilla/");
+		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
 		textureOverrides.add(addonOverrideTexturePackInstance);
 	}
 
@@ -1999,6 +2000,21 @@ public class MainActivity extends NativeActivity {
 				tts = null;
 			}
 		}
+	}
+
+	public void setClipboard(String text) {
+		ClipboardManager mgr = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
+		mgr.setText(text);
+	}
+
+	public long calculateAvailableDiskFreeSpace(String disk) {
+		System.out.println("Calculate disk free space: " + disk);
+		return 0;
+	}
+
+	public int getCursorPosition() {
+		if (hiddenTextView == null) return 0;
+		return hiddenTextView.getSelectionStart();
 	}
 
 	@Override
@@ -2461,17 +2477,17 @@ public class MainActivity extends NativeActivity {
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
-			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/terrain_texture.json",
+			AtlasProvider terrainProvider = new AtlasProvider("resource_packs/vanilla/textures/terrain_texture.json",
 				"images/terrain-atlas/", "block.bl_modpkg.");
-			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/item_texture.json",
+			AtlasProvider itemsProvider = new AtlasProvider("resource_packs/vanilla/textures/item_texture.json",
 				"images/items-opaque/", "item.bl_modpkg.");
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
 
-			TextureListProvider textureListProvider = new TextureListProvider("resourcepacks/vanilla/client/textures.list");
+			TextureListProvider textureListProvider = new TextureListProvider("resource_packs/vanilla/textures.list");
 			textureListProvider.init(this);
 
-			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resourcepacks/vanilla/client/blocks.json");
+			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resource_packs/vanilla/blocks.json");
 			blocksJsonProvider.init(this);
 			if (dumpAtlas) {
 				terrainProvider.dumpAtlas();
@@ -2480,8 +2496,8 @@ public class MainActivity extends NativeActivity {
 			}
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
-			textureOverrides.add(2, textureListProvider);
-			textureOverrides.add(3, blocksJsonProvider);
+			//textureOverrides.add(2, textureListProvider);
+			textureOverrides.add(2, blocksJsonProvider);
 			ScriptManager.terrainMeta = terrainProvider;
 			ScriptManager.itemsMeta = itemsProvider;
 			ScriptManager.blocksJson = blocksJsonProvider;

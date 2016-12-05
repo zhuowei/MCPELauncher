@@ -43,6 +43,7 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 #ifdef __i386
+// FIXME 0.17
 #define GAMERENDERER_GETFOV_SIZE 0x1d6
 #else
 #define GAMERENDERER_GETFOV_SIZE 0x154
@@ -639,7 +640,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	levelData->setGameType((GameType) type);
 	if (bl_localplayer == NULL) return;
 	bl_MinecraftClient_setGameMode(bl_minecraft, type == 1);
-	auto invPtr = bl_localplayer->getInventory();
+	//auto invPtr = bl_localplayer->getSupplies();
 	// FIXME 0.16
 	//((char*) invPtr)[32] = type == 1;
 	//bl_Inventory_clearInventoryWithDefault(invPtr);
@@ -812,7 +813,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (remove) amount *= -1;
 	ItemInstance instance(id, amount, damage);
 	//we grab the inventory instance from the player
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	if (invPtr == nullptr) return;
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "invPtr %p", invPtr);
 	if (!remove) {
@@ -987,7 +988,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
   (JNIEnv *env, jclass clazz, jint slot) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	invPtr->clearSlot(slot);
 }
 
@@ -995,7 +996,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jint slot, jint type) {
 	if (bl_localplayer == NULL) return 0;
 	//we grab the inventory instance from the player
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	ItemInstance* instance = invPtr->getItem(slot);
 	if (instance == NULL) return 0;
 	switch (type) {
@@ -1014,7 +1015,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
 	if (itemStack == NULL) return;
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
@@ -1038,7 +1039,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSelectedSlotId
   (JNIEnv *env, jclass clazz) {
 	if (bl_localplayer == NULL) return 0;
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	if (invPtr == NULL) return 0;
 	return invPtr->getSelectedSlot().slot;
 }
@@ -1046,7 +1047,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSelectedSlotId
   (JNIEnv *env, jclass clazz, jint newSlot) {
 	if (bl_localplayer == NULL) return;
-	auto invPtr = bl_localplayer->getInventory();
+	auto invPtr = bl_localplayer->getSupplies();
 	if (invPtr == NULL) return;
 	invPtr->selectSlot(newSlot);
 }

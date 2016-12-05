@@ -16,7 +16,7 @@
 #include "mcpe/itemspriterenderer.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
-#define MOBRENDERER_SIZE 640
+#define MOBRENDERER_SIZE 644
 // ModelPart::addBox
 #define MODELPART_CUBEVECTOR_OFFSET 40
 // ModelPart destructor
@@ -47,7 +47,7 @@ static std::vector<EntityRenderer*> bl_entityRenderers;
 static std::map<long long, int> bl_renderTypeMap;
 static std::unordered_map<int, int> bl_itemSpriteRendererTypeMap;
 
-//static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_real)(void*, Entity*);
+static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_entity_real)(void*, Entity*);
 static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b);
 
 static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
@@ -138,16 +138,13 @@ int bl_renderManager_renderTypeForItemSprite(int itemId) {
 	return bl_itemSpriteRendererTypeMap[itemId];
 }
 
-/*
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
-	long long entityId = entity->getUniqueID();
-	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "trying to get render type of %lld", entityId);
-	if (bl_renderTypeMap.count(entityId) != 0) {
-		return bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
+	int renderType = entity->renderType;
+	if (renderType >= 0x1000) {
+		return bl_entityRenderers[renderType - 0x1000];
 	}
-	return bl_EntityRenderDispatcher_getRenderer_real(dispatcher, entity);
+	return bl_EntityRenderDispatcher_getRenderer_entity_real(dispatcher, entity);
 }
-*/
 
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook(void* dispatcher, int renderType) {
 	if (renderType >= 0x1000) {
@@ -268,6 +265,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
+	bl_EntityRenderDispatcher_getRenderer_entity_real = (EntityRenderer* (*)(void*, Entity*))
+		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
 	bl_EntityRenderDispatcher_instance = (void**)
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
@@ -291,6 +290,8 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
 		abort();
 	}
+	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer_entity_real,
+		(void*)&bl_EntityRenderDispatcher_getRenderer_hook);
 }
 
 } //extern "C"

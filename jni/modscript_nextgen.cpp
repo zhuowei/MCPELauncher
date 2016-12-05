@@ -67,7 +67,7 @@ typedef void Font;
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3724
+#define PLAYER_ABILITIES_OFFSET 3788
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -76,14 +76,14 @@ typedef void Font;
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = 120;
-const size_t kLiquidBlockDynamicSize = 144;
+const size_t kLiquidBlockDynamicSize = 120;
 const size_t kLiquidBlockStaticSize = 124;
 // found in registerBlock
-const size_t kBlockItemSize = 76;
+const size_t kBlockItemSize = 108;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 76;
+const size_t kItemSize = 108;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3212;
+const size_t kItemEntity_itemInstance_offset = 3244;
 // found in TextPacket::handle
 const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 17;
 
@@ -106,15 +106,19 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV14SpiderRenderer",
 "_ZTV15ChickenRenderer",
 "_ZTV15CreeperRenderer",
+"_ZTV15ShulkerRenderer",
 "_ZTV16EnderManRenderer",
 "_ZTV16GuardianRenderer",
 "_ZTV16SkeletonRenderer",
 "_ZTV16VillagerRenderer",
+"_ZTV17EndermiteRenderer",
 "_ZTV17IronGolemRenderer",
 "_ZTV17LavaSlimeRenderer",
+"_ZTV17PolarBearRenderer",
 "_ZTV17SnowGolemRenderer",
 "_ZTV18SilverfishRenderer",
 "_ZTV18WitherBossRenderer",
+"_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
 "_ZTV22VillagerZombieRenderer"
@@ -236,18 +240,19 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_get_edition;
 	int appplatform_use_centered_gui;
 //	int appplatform_use_metadata_driven_screens;
-	int entity_hurt;
+//	int entity_hurt;
 	int mobrenderer_render;
 	int snowball_item_vtable_size;
 	int item_use;
 	int item_dispense;
+	int clientnetworkhandler_handle_text_packet;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
+		"_ZNK5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV5Block")->st_size;
 	vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
 	vtable_indexes.blockgraphics_get_carried_texture = bl_vtableIndex(mcpelibhandle, "_ZTV13BlockGraphics",
@@ -257,19 +262,19 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block8getColorEi");
 	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block14getVisualShapeEhR4AABBb");
+		"_ZNK5Block14getVisualShapeEhR4AABBb");
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
 	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZNK11MobRenderer10getSkinPtrER6Entity");
 	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
+		"_ZNK5Block16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
 	vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block15isRedstoneBlockEv");
 	vtable_indexes.tile_on_loaded = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block8onLoadedER11BlockSourceRK8BlockPos");
+		"_ZNK5Block8onLoadedER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZN5Block7onPlaceER11BlockSourceRK8BlockPos");
+		"_ZNK5Block7onPlaceER11BlockSourceRK8BlockPos");
 	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob11setSneakingEb") - 2;
 	vtable_indexes.blockitem_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV9BlockItem")->st_size;
@@ -285,15 +290,15 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.appplatform_get_ui_scaling_rules = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK19AppPlatform_android25getPlatformUIScalingRulesEv");
 	vtable_indexes.appplatform_get_platform_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK11AppPlatform15getPlatformTypeEv");
+		"_ZNK19AppPlatform_android15getPlatformTypeEv");
 	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform10getEditionEv");
 	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK11AppPlatform14useCenteredGUIEv");
 //	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 //		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
-	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
+//	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
+//		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
@@ -301,6 +306,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN4Item3useER12ItemInstanceR6Player");
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
+	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
+		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
 }
 
 template <typename T>
@@ -430,7 +437,6 @@ static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
 static bool bl_forceController = false;
 static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
-static void (*bl_ItemEntity_ItemEntity)(Entity*, TileSource&, Vec3 const&, ItemInstance const&, int, float);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
 static int (*bl_Mob_getHealth)(Entity*);
@@ -1580,7 +1586,7 @@ void BLItemSetJsonRequest::setItem() {
 	bool ret = false;
 	if (jsonReader.parse(value, jsonValue)) {
 		item->initServer(jsonValue);
-		item->initClient(jsonValue);
+		item->initClient(jsonValue, jsonValue);
 	}
 }
 
@@ -2042,7 +2048,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	Entity* riding = entity->riding;
+	Entity* riding = entity->getRide();
 	if (riding == NULL) return -1;
 	return riding->getUniqueID();
 }
@@ -2835,7 +2841,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
   (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
-	// FIXME 0.16
 	Item* item = bl_Item_mItems[itemId];
 	if (!item) return false;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
@@ -2845,7 +2850,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
 		item->initServer(jsonValue);
-		if (Item::mItemTextureAtlas != nullptr) item->initClient(jsonValue);
+		if (Item::mItemTextureAtlas != nullptr) item->initClient(jsonValue, jsonValue);
 		auto request = std::make_shared<BLItemSetJsonRequest>();
 		request->itemId = item->itemId;
 		request->value = std::string(utfChars);
@@ -2914,7 +2919,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
   (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
-	auto inventory = bl_localplayer->getInventory();
+	auto inventory = bl_localplayer->getSupplies();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return false;
 	return EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
@@ -2922,7 +2927,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
   (JNIEnv *env, jclass clazz, jint slot) {
-	auto inventory = bl_localplayer->getInventory();
+	auto inventory = bl_localplayer->getSupplies();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	std::vector<EnchantmentInstance> enchantments = itemInstance->getEnchantsFromUserData().getAllEnchants();
@@ -2940,7 +2945,7 @@ JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaye
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot) {
-	auto inventory = bl_localplayer->getInventory();
+	auto inventory = bl_localplayer->getSupplies();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	if (!itemInstance->hasCustomHoverName()) return nullptr;
@@ -2950,7 +2955,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerG
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot, jstring name) {
-	auto inventory = bl_localplayer->getInventory();
+	auto inventory = bl_localplayer->getSupplies();
 	ItemInstance* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
@@ -3113,7 +3118,9 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 	}
 }
 
-bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b) {
+void (*bl_Entity_hurt_real)(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b);
+
+void bl_Entity_hurt_hook(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b) {
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -3135,10 +3142,8 @@ bool bl_Entity_hurt_report(Entity* entity, EntityDamageSource const& damageSourc
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	return preventDefaultStatus;
+	if (!preventDefaultStatus) bl_Entity_hurt_real(entity, damageSource, hearts, a, b);
 }
-
-#include "hurthook.h"
 
 void bl_Player_addExperience_hook(Player* player, int experience) {
 	JNIEnv *env;
@@ -3454,11 +3459,11 @@ void bl_setuphooks_cppside() {
 	void** clientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV20ClientNetworkHandler") + 2;
 	// first two entries are removed
 	bl_ClientNetworkHandler_handleTextPacket_real = (void (*)(void*, void*, TextPacket*))
-		clientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket];
-	clientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket] =
+		clientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet];
+	clientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet] =
 		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
 	void** legacyClientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV26LegacyClientNetworkHandler") + 2;
-	legacyClientNetworkHandlerVtable[kClientNetworkHandler_vtable_offset_handleTextPacket] =
+	legacyClientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet] =
 		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
 	// FIXME 0.11
@@ -3510,9 +3515,9 @@ void bl_setuphooks_cppside() {
 
 	bl_Block_mSolid = (bool*) dlsym(RTLD_DEFAULT, "_ZN5Block6mSolidE");
 	bl_Block_getAABB = (AABB* (*)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int))
-		dlsym(mcpelibhandle, "_ZN5Block7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
+		dlsym(mcpelibhandle, "_ZNK5Block7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
 	bl_ReedBlock_getAABB = (AABB* (*)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int))
-		dlsym(mcpelibhandle, "_ZN9ReedBlock7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
+		dlsym(mcpelibhandle, "_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
 
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
@@ -3550,8 +3555,6 @@ void bl_setuphooks_cppside() {
 	bl_Mob_removeAllEffects = (void (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
 
-	bl_ItemEntity_ItemEntity = (void (*)(Entity*, BlockSource&, Vec3 const&, ItemInstance const&, int, float))
-		dlsym(mcpelibhandle, "_ZN10ItemEntityC1ER11BlockSourceRK4Vec3RK12ItemInstanceif");
 	bl_Item_addCreativeItem = (void (*)(short, short))
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
 	bl_Minecraft_getPacketSender = (PacketSender* (*)(Minecraft*))
@@ -3570,7 +3573,7 @@ void bl_setuphooks_cppside() {
 	bl_Entity_getDimensionId = (int (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
 	bl_Tile_getVisualShape = (AABB& (*)(Tile*, unsigned char, AABB&, bool))
-		dlsym(mcpelibhandle, "_ZN5Block14getVisualShapeEhR4AABBb");
+		dlsym(mcpelibhandle, "_ZNK5Block14getVisualShapeEhR4AABBb");
 
 	bl_Player_HUNGER = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player6HUNGERE");
@@ -3602,7 +3605,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
 		(void**) &bl_Recipe_isAnyAuxValue_real);
 	bl_TntBlock_onLoaded = (void (*)(Block*, BlockSource&, BlockPos const&))
-		dlsym(mcpelibhandle, "_ZN8TntBlock8onLoadedER11BlockSourceRK8BlockPos");
+		dlsym(mcpelibhandle, "_ZNK8TntBlock8onLoadedER11BlockSourceRK8BlockPos");
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
@@ -3635,8 +3638,9 @@ void bl_setuphooks_cppside() {
 */
 
 	mcpelauncher_hook((void*)&MinecraftClient::onResourcesLoaded, (void*)bl_MinecraftClient_onResourcesLoaded_hook, (void**)&bl_MinecraftClient_onResourcesLoaded_real);
+	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)bl_Entity_hurt_real);
 
-	bl_entity_hurt_hook_init(mcpelibhandle);
+	//bl_entity_hurt_hook_init(mcpelibhandle);
 
 	bl_renderManager_init(mcpelibhandle);
 }
