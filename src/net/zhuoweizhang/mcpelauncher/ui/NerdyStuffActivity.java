@@ -24,30 +24,8 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	private Button setSkinButton;
 	private Button chefSpecialButton;
 	private Button dumpModPEMethodsButton;
-
-	private static final String[] magicWords = { "nimubla", "muirab", "otrecnoc", "atled",
-			"nolispe", "etagirf", "repeeketag" };
-
-	public void onCreate(Bundle icicle) {
-		Utils.setLanguageOverride();
-		super.onCreate(icicle);
-		setContentView(R.layout.nerdy_stuff);
-		dumpLibMinecraftPeButton = (Button) findViewById(R.id.dump_libminecraftpe_button);
-		dumpLibMinecraftPeButton.setOnClickListener(this);
-		restartAppButton = (Button) findViewById(R.id.restart_app_button);
-		restartAppButton.setOnClickListener(this);
-		setSkinButton = (Button) findViewById(R.id.set_skin_button);
-		setSkinButton.setOnClickListener(this);
-		chefSpecialButton = (Button) findViewById(R.id.chef_special);
-		chefSpecialButton.setOnClickListener(this);
-		if (BuildConfig.DEBUG)
-			chefSpecialButton.setVisibility(View.VISIBLE);
-		dumpModPEMethodsButton = (Button) findViewById(R.id.dump_modpe_methods);
-		dumpModPEMethodsButton.setOnClickListener(this);
-
-		printMagicWord();
 	}
-
+	
 	public void onClick(View v) {
 		if (v == dumpLibMinecraftPeButton) {
 			dumpLib();
@@ -147,21 +125,5 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 
 		new AlertDialog.Builder(this).setTitle("modpescript_dump.txt").setMessage(allMethods)
 				.setPositiveButton(android.R.string.ok, null).show();
-	}
-
-	public void printMagicWord() {
-		int appVersion = 0;
-		try {
-			appVersion = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
-		} catch (Exception e) {
-			// impossible
-		}
-		String giro = magicWords[appVersion % magicWords.length];
-		String[] lettersarr = giro.split("");
-		List<String> letters = Arrays.asList(lettersarr);
-		Collections.reverse(letters);
-		String orig = PatchManager.join(lettersarr, "");
-		Log.i("BlockLauncher", "The magic word is " + orig);
-		Log.i("BlockLauncher", "https://groups.google.com/forum/#!forum/blocklauncher-beta");
 	}
 }
