@@ -1220,6 +1220,8 @@ public class ScriptManager {
 	public static native int nativeGetBlockRenderShape(int blockId);
 	
 	public static native void nativeSetBlockRenderShape(int blockId, int renderType);
+	
+	public static native void nativeSetFov(float fov);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -1696,6 +1698,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setHealth(int value) {
 			nativeHurtTo(value);
+		}
+
+		@JSStaticFunction
+		public static void setFov(float fov) {
+			nativeSetFov(fov);	
 		}
 
 		@JSStaticFunction
