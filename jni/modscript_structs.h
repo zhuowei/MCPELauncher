@@ -98,6 +98,7 @@ public:
 	AgeableComponent* getAgeableComponent() const;
 	void hurt(EntityDamageSource const&, int, bool, bool);
 	Entity* getRide() const;
+	void setNameTagVisible(bool);
 };
 static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
 

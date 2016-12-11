@@ -67,7 +67,7 @@ typedef void Font;
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3788
+#define PLAYER_ABILITIES_OFFSET 3776
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -366,7 +366,6 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
-static TextureUVCoordinateSet (*bl_Tile_getTextureUVCoordinateSet)(Tile*, std::string const&, int);
 static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 	std::vector<RecipesType> const&);
@@ -1069,7 +1068,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_mItems[item->itemId] = item;
 	//std::string lowercaseStr = Util::toLower(name);
 	if (item->itemId > 0x200 && Item::mItemTextureAtlas != nullptr) {
-		ResourceLocation location("atlas.items");
+		ResourceLocation location("atlas.items", 0);
 		if (!(item->itemId < ItemRenderer::mItemGraphics.size())) {
 			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 		}
@@ -1096,7 +1095,7 @@ void bl_repopulateItemGraphics() {
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}
-			ResourceLocation location("atlas.items");
+			ResourceLocation location("atlas.items", 0);
 			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 		}
 	}
@@ -1304,6 +1303,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
+	if (strlen(newSkin) == 0) return; // WHAT
 	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(newSkin));
 	bl_forceTextureLoad(newSkin);
 }
@@ -1971,6 +1971,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	const char * nameUtfChars = env->GetStringUTFChars(name, NULL);
+	entity->setNameTagVisible(true);
 	entity->setNameTag(std::string(nameUtfChars));
 	env->ReleaseStringUTFChars(name, nameUtfChars);
 }
@@ -2596,6 +2597,7 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 }
 
 void bl_forceTextureLoad(std::string const& name) {
+	if (name.length() == 0) return;
 	BL_LOG("Forcing texture reload: %s canLoad: %s", name.c_str(), mce::TextureGroup::mCanLoadTextures? "yes": "no");
 	bool old = mce::TextureGroup::mCanLoadTextures;
 	mce::TextureGroup::mCanLoadTextures = true;
@@ -3638,7 +3640,7 @@ void bl_setuphooks_cppside() {
 */
 
 	mcpelauncher_hook((void*)&MinecraftClient::onResourcesLoaded, (void*)bl_MinecraftClient_onResourcesLoaded_hook, (void**)&bl_MinecraftClient_onResourcesLoaded_real);
-	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)bl_Entity_hurt_real);
+	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
 
