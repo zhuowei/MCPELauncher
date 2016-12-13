@@ -80,8 +80,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.0";
-	public static final String HALF_SUPPORT_VERSION = "~~~~";
+	public static final String SCRIPT_SUPPORT_VERSION = "0.16";
+	public static final String HALF_SUPPORT_VERSION = "1.0";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -205,6 +205,7 @@ public class MainActivity extends NativeActivity {
 	};
 	private int mcpeArch = ScriptManager.ARCH_ARM;
 	public AddonOverrideTexturePack addonOverrideTexturePackInstance = null;
+	private boolean textureVerbose = false;
 
 	/** Called when the activity is first created. */
 
@@ -220,6 +221,7 @@ public class MainActivity extends NativeActivity {
 		}
 		safeModeCounter++;
 		Utils.getPrefs(2).edit().putInt("safe_mode_counter", safeModeCounter).commit();
+		textureVerbose = new File("/sdcard/bl_textureVerbose.txt").exists();
 
 		MinecraftVersion.context = this.getApplicationContext();
 		boolean needsToClearOverrides = false;
@@ -254,7 +256,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.0.0");
+				intent.putExtra("supportedVersion", "0.16.2, 1.0.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -1079,15 +1081,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
-		/*
-		if (getMCPEVersion().startsWith("0.15")) {
+		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 			try {
-				return getAssets().open("15/" + name);
+				return getAssets().open("1007/" + name);
 			} catch (IOException ie) {
-				System.err.println(ie);
+				if (textureVerbose) System.err.println(ie);
 			}
 		}
-		*/
 		return getAssets().open(name);
 	}
 
@@ -1101,11 +1101,11 @@ public class MainActivity extends NativeActivity {
 				is = minecraftApkContext.getAssets().open(name);
 			} catch (Exception e) {
 				// e.printStackTrace();
-				System.out.println("Attempting to load fallback");
+				if (textureVerbose) System.out.println("Attempting to load fallback");
 				is = openFallbackAsset(name);
 			}
 			if (is == null) {
-				System.out.println("Can't find it in the APK - attempting to load fallback");
+				if (textureVerbose) System.out.println("Can't find it in the APK - attempting to load fallback");
 				is = openFallbackAsset(name);
 			}
 			if (is != null && lengthOut != null) {
@@ -1113,9 +1113,69 @@ public class MainActivity extends NativeActivity {
 			}
 			return is;
 		} catch (Exception e) {
-			System.err.println(e);
+			if (textureVerbose) System.err.println(e);
 			return null;
 		}
+	}
+
+	public String[] listDirForPath(String dirPath) {
+		System.out.println("Listing dir for " + dirPath);
+		String prefix = dirPath + "/";
+		Set<String> outList = new HashSet<String>();
+		for (TexturePack pack: textureOverrides) {
+			List<String> addedFiles = null;
+			try {
+				addedFiles = pack.listFiles();
+			} catch (IOException ie) {
+				continue;
+			}
+			for (String path: addedFiles) {
+				if (!path.startsWith(prefix) || path.indexOf("/", prefix.length()) != -1) continue;
+				outList.add(path.substring(path.lastIndexOf("/")));
+			}
+		}
+		String[] origDir = null;
+		String newPath = dirPath;
+		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+			newPath = "1007/" + dirPath;
+		}
+		try {
+			origDir = this.getAssets().list(newPath);
+		} catch (IOException ie) {
+			origDir = new String[0];
+		}
+		// merge
+		for (String s: origDir) {
+			outList.add(s);
+		}
+
+		try {
+			origDir = minecraftApkContext.getAssets().list(dirPath);
+		} catch (IOException ie) {
+			origDir = new String[0];
+		}
+		// merge
+		for (String s: origDir) {
+			outList.add(s);
+		}
+		String[] retval = outList.toArray(origDir);
+		System.out.println(Arrays.toString(retval));
+		return retval;
+	}
+
+	public boolean existsForPath(String path) {
+		InputStream is = null;
+		if (path.startsWith("resource_packs/") && !path.startsWith("resource_packs/vanilla")) {
+			is = getLocalInputStreamForAsset(path);
+		} else {
+			is = getInputStreamForAsset(path);
+		}
+		if (is != null) {
+			try {
+				is.close();
+			} catch (IOException ie) {}
+		}
+		return is != null;
 	}
 
 	public int[] getImageData(String name) {
@@ -1647,7 +1707,7 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
-			System.loadLibrary("mcpelauncher_lite");
+			System.loadLibrary("mcpelauncher_new");
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
@@ -2474,6 +2534,53 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
+		if (getMCPEVersion().startsWith("1.0")) {
+			initAtlasMetaNew();
+			return;
+		}
+		final boolean dumpAtlas = BuildConfig.DEBUG;
+		if (isSafeMode()) return;
+		try {
+			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/terrain_texture.json",
+				"images/terrain-atlas/", "block.bl_modpkg.");
+			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/item_texture.json",
+				"images/items-opaque/", "item.bl_modpkg.");
+			terrainProvider.initAtlas(this);
+			itemsProvider.initAtlas(this);
+
+			TextureListProvider textureListProvider = new TextureListProvider("resourcepacks/vanilla/client/textures.list");
+			textureListProvider.init(this);
+
+			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resourcepacks/vanilla/client/blocks.json");
+			blocksJsonProvider.init(this);
+			if (dumpAtlas) {
+				terrainProvider.dumpAtlas();
+				itemsProvider.dumpAtlas();
+				textureListProvider.dumpAtlas();
+			}
+			textureOverrides.add(0, terrainProvider);
+			textureOverrides.add(1, itemsProvider);
+			textureOverrides.add(2, textureListProvider);
+			textureOverrides.add(3, blocksJsonProvider);
+			ScriptManager.terrainMeta = terrainProvider;
+			ScriptManager.itemsMeta = itemsProvider;
+			ScriptManager.blocksJson = blocksJsonProvider;
+			ScriptManager.textureList = textureListProvider;
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+/*
+		FIXME 0.16
+			ResourcePackManifestProvider resourcePackManifestProvider =
+				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
+			resourcePackManifestProvider.init(this);
+			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
+			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
+*/
+	}
+
+	private void initAtlasMetaNew() {
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {

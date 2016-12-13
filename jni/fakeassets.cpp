@@ -15,7 +15,10 @@ static const char kResourcePackPrefix[] = "resource_packs/vanilla/";
 static const char kResourcePackDirPrefix[] = "resource_packs/vanilla";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
 	//BL_LOG("Asset: open %s", filename);
-	if (prefix(kResourcePackPrefix, filename)) {
+	std::string newFilename = std::string("1007/") + filename;
+	AAsset *in = AAssetManager_open(mgr, newFilename.c_str(), mode);
+	if (in) return in;
+	if (true||prefix(kResourcePackPrefix, filename)) {
 		JNIEnv *env;
 		int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 		if (attachStatus == JNI_EDETACHED) {
@@ -24,7 +27,7 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 
 		//Call back across JNI into the ScriptManager
 		jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "assetFileExists", "(Ljava/lang/String;)Z");
-		jstring str = env->NewStringUTF(filename + (sizeof(kResourcePackPrefix)-1));
+		jstring str = env->NewStringUTF(filename);
 
 		bool exists = env->CallStaticBooleanMethod(bl_scriptmanager_class, mid, str);
 		env->DeleteLocalRef(str);
@@ -33,7 +36,7 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 			bl_JavaVM->DetachCurrentThread();
 		}
 		//if (exists) BL_LOG("Assets: exists %s", filename);
-		if (exists) filename = "resource_packs/vanilla/pack_manifest.json"; // known to exist.
+		if (exists) filename = "startup.images"; // known to exist.
 	}
 	return AAssetManager_open(mgr, filename, mode);
 };
@@ -47,7 +50,7 @@ struct BLAssetDir {
 
 AAssetDir* bl_AAssetManager_openDir_hook(AAssetManager *mgr, const char *dirName) {
 	//BL_LOG("Asset: Opening dir %s", dirName);
-	if (prefix(kResourcePackDirPrefix, dirName)) {
+	if (true||prefix(kResourcePackDirPrefix, dirName)) {
 		JNIEnv *env;
 		int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 		if (attachStatus == JNI_EDETACHED) {

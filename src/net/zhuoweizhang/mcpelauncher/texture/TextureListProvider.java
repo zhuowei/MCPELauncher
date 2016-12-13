@@ -54,7 +54,11 @@ public class TextureListProvider implements TexturePack {
 
 	private void loadTextureList(MainActivity activity) throws Exception {
 		// read the meta file
-/*		InputStream metaIs = activity.getInputStreamForAsset(manifestPath);
+		InputStream metaIs = activity.getInputStreamForAsset(manifestPath);
+		if (metaIs == null) {
+			files = new ArrayList<String>();
+			return;
+		}
 		byte[] a = new byte[0x1000];
 		int p;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -68,8 +72,6 @@ public class TextureListProvider implements TexturePack {
 		for (String str: strs) {
 			if (str.length() > 0) files.add(str);
 		}
-*/
-		files = new ArrayList<String>();
 	}
 
 

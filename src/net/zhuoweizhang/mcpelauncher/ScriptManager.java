@@ -1256,9 +1256,11 @@ public class ScriptManager {
 		}
 	}
 
+	public static File externalFilesDir = null;
 	public static File getTextureOverrideFile(String textureName) {
 		if (androidContext == null) return null;
-		File stagingTextures = new File(androidContext.getExternalFilesDir(null), "textures");
+		if (externalFilesDir == null) externalFilesDir = androidContext.getExternalFilesDir(null);
+		File stagingTextures = new File(externalFilesDir, "textures");
 		return new File(stagingTextures, textureName.replace("..", ""));
 	}
 
@@ -1706,18 +1708,20 @@ public class ScriptManager {
 	// the path should already have the resourcepack/vanilla bit removed
 	// paths returned don't have the resourcepack/vanilla bit
 	private static boolean assetFileExists(String path) {
-		if (textureList == null) return false;
-		return textureList.containsFile(path);
+		MainActivity activity = MainActivity.currentMainActivity.get();
+		if (activity == null) return false;
+		boolean retval = activity.existsForPath(path);
+		return retval;
 	}
 	private static final String assetsResPackPath = "resource_packs/vanilla";
 	// path still has original res pack path;
 	private static String[] assetListDir(String path) {
-		if (textureList == null) return null;
-		Set<String> texList = textureList.listDir(path.substring(assetsResPackPath.length()));
-		if (texList == null || texList.size() == 0) return null;
+		//if (textureList == null) return null;
+		//Set<String> texList = textureList.listDir(path.substring(assetsResPackPath.length()));
+		//if (texList == null || texList.size() == 0) return null;
 		MainActivity activity = MainActivity.currentMainActivity.get();
 		if (activity == null) return null;
-		String[] origDir = null;
+		/*String[] origDir = null;
 		try {
 			origDir = activity.getAssets().list(path);
 		} catch (IOException ie) {
@@ -1730,6 +1734,8 @@ public class ScriptManager {
 			outList.add(s);
 		}
 		return outList.toArray(new String[0]);
+		*/
+		return activity.listDirForPath(path);
 	}
 
 	public static native float nativeGetPlayerLoc(int axis);
