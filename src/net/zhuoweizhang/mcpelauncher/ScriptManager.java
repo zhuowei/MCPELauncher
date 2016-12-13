@@ -747,6 +747,10 @@ public class ScriptManager {
 
 	public static void init(android.content.Context cxt) throws IOException {
 		scriptingInitialized = true;
+		MainActivity mainActivity = MainActivity.currentMainActivity.get();
+		if (mainActivity != null && mainActivity.getMCPEVersion().startsWith("0.16")) {
+			modPkgTexturePack = new ModPkgTexturePack("resourcepacks/vanilla/");
+		}
 		// set up hooks
 		int versionCode = 0;
 		try {
@@ -3621,7 +3625,9 @@ public class ScriptManager {
 				if (main != null) {
 					byte[] bytes = main.getFileDataBytes(name);
 					if (bytes != null) return bytes;
-					return main.getFileDataBytes("resource_packs/vanilla/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
+					String startingPath = main.getMCPEVersion().startsWith("0.16")?
+						"resourcepacks/vanilla/client/": "resource_packs/vanilla/";
+					return main.getFileDataBytes(startingPath + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;
@@ -3634,7 +3640,9 @@ public class ScriptManager {
 				if (main != null) {
 					InputStream is = main.getInputStreamForAsset(name);
 					if (is != null) return is;
-					return main.getInputStreamForAsset("resource_packs/vanilla/" + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
+					String startingPath = main.getMCPEVersion().startsWith("0.16")?
+						"resourcepacks/vanilla/client/": "resource_packs/vanilla/";
+					return main.getInputStreamForAsset(startingPath + (name.startsWith("images/")? "textures/" + name.substring("images/".length()) : name));
 				}
 			}
 			return null;

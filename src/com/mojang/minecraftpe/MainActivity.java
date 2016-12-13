@@ -1013,7 +1013,8 @@ public class MainActivity extends NativeActivity {
 			InputStream is = null;
 			if (name.charAt(0) == '/') {
 				is = getRegularInputStream(name);
-			} else if (name.equals("behavior_packs/vanilla/entities/villager.json")) {
+			} else if (name.equals("behavior_packs/vanilla/entities/villager.json") ||
+				name.equals("resourcepacks/vanilla/server/entities/villager.json")) {
 				// FIXME 0.17: villagers
 				// kludge to make villagers rideable
 				is = openFallbackAsset(name);
@@ -1165,7 +1166,8 @@ public class MainActivity extends NativeActivity {
 
 	public boolean existsForPath(String path) {
 		InputStream is = null;
-		if (path.startsWith("resource_packs/") && !path.startsWith("resource_packs/vanilla")) {
+		if ((path.startsWith("resource_packs/") && !path.startsWith("resource_packs/vanilla")) ||
+			(path.startsWith("resourcepacks") && !path.startsWith("resourcepacks/vanilla"))) {
 			is = getLocalInputStreamForAsset(path);
 		} else {
 			is = getInputStreamForAsset(path);
@@ -1797,7 +1799,11 @@ public class MainActivity extends NativeActivity {
 				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
 			));
 		}
-		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
+		if (getMCPEVersion().startsWith("0.16")) {
+			addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resourcepacks/vanilla/");
+		} else {
+			addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
+		}
 		textureOverrides.add(addonOverrideTexturePackInstance);
 	}
 
@@ -2631,7 +2637,7 @@ public class MainActivity extends NativeActivity {
 	protected boolean hasScriptSupport() {
 		return true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
-	protected String getMCPEVersion() {
+	public String getMCPEVersion() {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
