@@ -2629,13 +2629,13 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected boolean hasScriptSupport() {
-		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
+		return true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	protected String getMCPEVersion() {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return false;//getMCPEVersion().startsWith("0.15");
+		return getMCPEVersion().startsWith(HALF_SUPPORT_VERSION);
 	}
 
 	public void reportReimported(final String scripts) {

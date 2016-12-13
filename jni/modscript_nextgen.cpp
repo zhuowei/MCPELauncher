@@ -86,6 +86,8 @@ const size_t kItemSize = 108;
 const size_t kItemEntity_itemInstance_offset = 3244;
 // found in TextPacket::handle
 const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 17;
+// ProjectileComponent::throwableHit
+const size_t kProjectileComponent_entity_offset = 16;
 
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11BatRenderer",
@@ -468,7 +470,7 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
 static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
-static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::string const&, std::string const&);
+static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::unordered_map<std::string, std::string> const&);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 
@@ -2862,9 +2864,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return ret;
 }
 
-static void* (*bl_Throwable_throwableHit_real)(Entity* entity, HitResult const& hitResult, int param1, int param2);
+static void* (*bl_Throwable_throwableHit_real)(void* component, HitResult const& hitResult);
 
-void* bl_Throwable_throwableHit_hook(Entity* entity, HitResult const& hitResult, int param1, int param2) {
+void* bl_Throwable_throwableHit_hook(void* projectileComponent, HitResult const& hitResult) {
+	Entity* entity = *((Entity**)(((uintptr_t)projectileComponent) + kProjectileComponent_entity_offset));
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -2883,7 +2886,7 @@ void* bl_Throwable_throwableHit_hook(Entity* entity, HitResult const& hitResult,
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	return bl_Throwable_throwableHit_real(entity, hitResult, param1, param2);
+	return bl_Throwable_throwableHit_real(projectileComponent, hitResult);
 }
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18NString
@@ -3196,7 +3199,7 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMax
 	return stack.getMaxStackSize();
 }
 
-void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string const& s1, std::string const& s2, std::string const& s3) {
+void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string const& s1, std::unordered_map<std::string, std::string> const& theMap) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -3207,17 +3210,13 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "screenChangeCallback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 	jstring s1j = env->NewStringUTF(s1.c_str());
-	jstring s2j = env->NewStringUTF(s1.c_str());
-	jstring s3j = env->NewStringUTF(s1.c_str());
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, s1j, s2j /* we eSports now */, s3j);
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, s1j, nullptr, nullptr);
 	env->DeleteLocalRef(s1j);
-	env->DeleteLocalRef(s2j);
-	env->DeleteLocalRef(s3j);
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, s2, s3);
+	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, theMap);
 }
 
 void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
@@ -3601,7 +3600,7 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Item_initCreativeItems_real);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
-	void* throwableHit = dlsym(mcpelibhandle, "_ZN9Throwable12throwableHitERK9HitResultii");
+	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitERK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
@@ -3626,8 +3625,8 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
-	bl_MinecraftTelemetry_fireEventScreenChanged_real = (void* (*)(void*, std::string const&, std::string const&, std::string const&))
-		dlsym(mcpelibhandle, "_ZN17MinecraftEventing22fireEventScreenChangedERKSsS1_S1_");
+	bl_MinecraftTelemetry_fireEventScreenChanged_real = (void* (*)(void*, std::string const&, std::unordered_map<std::string, std::string> const&))
+		dlsym(mcpelibhandle, "_ZN17MinecraftEventing22fireEventScreenChangedERKSsRKSt13unordered_mapISsSsSt4hashISsESt8equal_toISsESaISt4pairIS0_SsEEE");
 	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
 		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
 /*
