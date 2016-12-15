@@ -54,6 +54,7 @@
 #include "mcpe/gameconnectioninfo.h"
 #include "mcpe/textureatlas.h"
 #include "mcpe/particle.h"
+#include "mcpe/blocktessellator.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -248,6 +249,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_use;
 	int item_dispense;
 	int clientnetworkhandler_handle_text_packet;
+	int block_get_visual_shape_blocksource;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -310,6 +312,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
 		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
+	vtable_indexes.block_get_visual_shape_blocksource = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZNK5Block14getVisualShapeER11BlockSourceRK8BlockPosR4AABBb");
 }
 
 template <typename T>
@@ -393,7 +397,7 @@ TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 bool bl_custom_block_collisionDisabled[256];
 int* bl_custom_block_colors[256];
-AABB** bl_custom_block_visualShapes[256];
+AABB** bl_custom_block_visualShapes[BL_ITEMS_EXPANDED_COUNT];
 //end custom blocks
 unsigned char bl_custom_block_redstone[256];
 
@@ -508,6 +512,8 @@ unsigned short bl_customItem_allowEnchantments[BL_ITEMS_EXPANDED_COUNT];
 int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
 // was a new custom block added
 static bool bl_customBlocksCreated = false;
+static BlockGraphics* bl_extendedBlockGraphics[BL_ITEMS_EXPANDED_COUNT];
+static Block* bl_extendedBlocks[BL_ITEMS_EXPANDED_COUNT];
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -606,89 +612,6 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
-#if 0
-
-void bl_Font_drawCached_hook(Font* font, std::string const& textStr, float xOffset, float yOffset, Color const& color, bool isShadow, MaterialPtr* material) {
-	if (bl_text_parse_color_codes) {
-		char const* currentTextBegin = textStr.c_str(); //the current coloured section
-		int currentLength = 0; //length in bytes of the current coloured section
-		const uint8_t* iteratePtr = (const uint8_t*) textStr.c_str(); //where we are iterating
-		const uint8_t* endIteratePtr = (const uint8_t*) iteratePtr + textStr.length(); //once we reach here, stop iterating
-		//int lengthOfStringRemaining = length;
-		float substringOffset = xOffset; //where we draw the currently coloured section
-		Color curColor = color; //the colour for the current section
-		int flags = 0;
-		//Loop through the string.
-		//When we find the first colour control character:
-		//call draw with text pointer at original position and length num of characters already scanned
-		//increment text pointer with characters already drawn
-		//length of scanned to 0
-		//once we get to the end of the string,
-		//call draw with text pointer and length num of characters
-
-		//to loop, we use our embedded copy of utf8proc
-		//which is the same library that MCPE uses
-
-		while(iteratePtr < endIteratePtr) {
-			int myChar = -1;
-			int bytesAdvanced = utf8proc_iterate(iteratePtr, endIteratePtr - iteratePtr, &myChar);
-			if (bytesAdvanced < 0 || myChar < 0) break;
-			iteratePtr += bytesAdvanced;
-
-			if (myChar == 0xA7 && iteratePtr < endIteratePtr) {
-				//is chat colouring code
-				bytesAdvanced = utf8proc_iterate(iteratePtr, endIteratePtr - iteratePtr, &myChar);
-				if (bytesAdvanced < 0 || myChar < 0) break;
-				iteratePtr += bytesAdvanced;
-
-				int newColor = -1;
-				bool newFlags = flags;
-				if (myChar >= '0' && myChar <= '9') {
-					newColor = bl_minecraft_colors[myChar - '0'];
-				} else if (myChar >= 'a' && myChar <= 'f') {
-					newColor = bl_minecraft_colors[myChar - 'a' + 10];
-				} else if (myChar == 0x7caa) { // chinese character for "poo"
-					newColor = 0x2d3b00; // veggie poop green
-				} else if (myChar == 'l') {
-					newFlags |= TEXT_BOLD;
-				} else if (myChar == 'r') {
-					newFlags = 0;
-				}
-
-				std::string cppStringPart = std::string(currentTextBegin, currentLength);
-
-				bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
-				if (flags & TEXT_BOLD) {
-					bl_Font_drawCached_real(font, cppStringPart, substringOffset + 1, yOffset, curColor, isShadow, material);
-				}
-
-				substringOffset += bl_Font_width(font, cppStringPart);
-
-				if (newColor != -1) curColor = {((newColor >> 16) & 0xff) / 255.0f, ((newColor >> 8) & 0xff) / 255.0f,
-					(newColor & 0xff) / 255.0f, 1.0f};;
-				flags = newFlags;
-				currentTextBegin = (const char *) iteratePtr;
-				currentLength = 0;
-
-			} else {
-				currentLength += bytesAdvanced;
-			}
-		}
-		if (currentLength > 0) {
-			std::string cppStringPart = std::string(currentTextBegin, currentLength);
-			bl_Font_drawCached_real(font, cppStringPart, substringOffset, yOffset, curColor, isShadow, material);
-			if (flags & TEXT_BOLD) {
-				bl_Font_drawCached_real(font, cppStringPart, substringOffset + 1, yOffset, curColor, isShadow, material);
-			}
-		}
-	} else {
-		bl_Font_drawCached_real(font, textStr, xOffset, yOffset, color, isShadow, material);
-		return;
-	}
-}
-
-#endif
-
 static void bl_Item_initCreativeItems_hook() {
 	bl_Item_initCreativeItems_real();
 	for (short*& pair: bl_creativeItems) {
@@ -701,27 +624,6 @@ const char* bl_getCharArr(void* str){
 	std::string mystr2 = *mystr;
 	const char* cs = mystr2.c_str();
 	return cs;
-}
-
-TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
-	int blockId = graphics->getBlock()->id;
-	TextureUVCoordinateSet** ptrToBlockInfo = bl_custom_block_textures[blockId];
-	if (ptrToBlockInfo == NULL || ptrToBlockInfo[0] == nullptr) {
-		return bl_BlockGraphics_getTexture_real(graphics, side, data);
-	}
-	int myIndex = (data * 6) + side;
-	if (myIndex < 0 || myIndex >= 16*6) {
-		myIndex = side;
-	}
-	return ptrToBlockInfo[myIndex];
-}
-
-TextureUVCoordinateSet* bl_CustomBlockGraphics_getTexture_char_hook(BlockGraphics* graphics, signed char side) {
-	return bl_CustomBlockGraphics_getTextureHook(graphics, side, 0);
-}
-
-TextureUVCoordinateSet* bl_CustomBlockGraphics_getCarriedTexture_hook(BlockGraphics* graphics, signed char side, int data) {
-	return bl_CustomBlockGraphics_getTextureHook(graphics, side, data);
 }
 
 bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
@@ -1541,7 +1443,7 @@ static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
 static void bl_finishBlockBuildTextureRequests() {
 	BL_LOG("finishBlockBuildTextureRequests");
 	for (auto& request: buildTextureRequests) {
-		auto bg = BlockGraphics::mBlocks[request.blockId];
+		auto bg = request.blockId >= 0x100? bl_extendedBlockGraphics[request.blockId]: BlockGraphics::mBlocks[request.blockId];
 		if (!bg) continue;
 		//BL_LOG("Setting texs for %d: %s:%s:%s:%s:%s:%s", request.blockId,
 		//	request.textureSides[0].c_str(), request.textureSides[1].c_str(), request.textureSides[2].c_str(),
@@ -1629,6 +1531,63 @@ void bl_cpp_tick_hook() {
 		bl_repopulateItemGraphics();
 		hasRepopulatedItemGraphics = true;
 	}
+}
+
+static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
+	if (bl_custom_block_visualShapes[blockId]) {
+		AABB** a = bl_custom_block_visualShapes[blockId];
+		for (int i = 0; i < 15; i++) {
+			if (a[i]) delete[] a[i];
+		}
+		delete[] a;
+		bl_custom_block_visualShapes[blockId] = nullptr;
+	}
+
+	std::string realNameStr = std::string(name);
+	std::string nameStr = realNameStr + "." + bl_to_string(blockId);
+
+	//Allocate memory for the block
+	// size found before the Tile::Tile constructor for tile ID #4
+	Block* retval;
+	BlockGraphics* retGraphics;
+	retval = (Block*) ::operator new(kTileSize);
+	bl_Block_Block(retval, nameStr, 245, bl_getMaterial(materialType));
+	retval->vtable = bl_CustomBlock_vtable + 2;
+	retval->setSolid(opaque);
+	Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
+
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %s", retval->mappingId.c_str());
+
+	retGraphics = new BlockGraphics(retval->mappingId);
+	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
+
+	bl_extendedBlockGraphics[blockId] = retGraphics;
+
+	bl_set_i18n("tile." + nameStr + ".name", realNameStr);
+	//add it to the global tile list
+	bl_extendedBlocks[blockId] = retval;
+	// set default category
+	retval->setCategory((CreativeItemCategory) 2 /* Decoration */);
+
+	BLBlockBuildTextureRequest request;
+	request.blockId = blockId;
+	request.textureSides = {nameStr + "_down", nameStr + "_up", nameStr + "_north",
+		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
+	if (BlockGraphics::mTerrainTextureAtlas) {
+		retGraphics->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
+			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
+	}
+	//BL_LOG("Created blockGraphics %p for blockId %d", retGraphics, blockId);
+	buildTextureRequests.push_back(request);
+	bl_customBlocksCreated = true;
+
+	Item* item = bl_constructItem(nameStr, blockId);
+
+	bl_Item_setIcon_wrapper(item, "apple", 0);
+
+	bl_set_i18n("item." + nameStr + ".name", nameStr);
+	
+	return retval;
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
@@ -1751,7 +1710,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		myStringArray[i] = myStringChars;
 		env->ReleaseStringUTFChars(myString, myStringChars);
 	}
-	Tile* tile = bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
+	if (blockId < 0x100) {
+		bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
+	} else {
+		bl_createExtendedBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
+	}
 	env->ReleaseStringUTFChars(name, utfChars);
 }
 
@@ -1780,6 +1743,23 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
   (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6, jint damage) {
+	if (blockId >= 256 && blockId < BL_ITEMS_EXPANDED_COUNT) {
+		// expanded blocks?
+		AABB** aabbs = bl_custom_block_visualShapes[blockId];
+		if (!aabbs) {
+			bl_custom_block_visualShapes[blockId] = aabbs = new AABB*[16]();
+		}
+		AABB* theAABB = aabbs[damage];
+		if (!theAABB) aabbs[damage] = theAABB = new AABB();
+		theAABB->shouldBeFalse = false;
+		theAABB->x1 = v1;
+		theAABB->y1 = v2;
+		theAABB->z1 = v3;
+		theAABB->x2 = v4;
+		theAABB->y2 = v5;
+		theAABB->z2 = v6;
+		return;
+	}
 	if (blockId < 0 || blockId > 255) return;
 	Tile* tile = bl_Block_mBlocks[blockId];
 	if (tile == NULL) {
@@ -3218,7 +3198,109 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 	}
 	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, theMap);
 }
+
+// extended block IDs
+
+static const unsigned char kStonecutterId = 245;
+
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetExtraData
+  (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jshort data) {
+	bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
+}
+
+struct BLTessellateBlock {
+	unsigned char blockId;
+	unsigned char blockData;
+	unsigned short blockExtraData;
+};
+
+static pthread_key_t bl_tessellateBlock_key;
+
+static void bl_tessellateBlock_key_destructor(void* value) {
+	if (value) delete (BLTessellateBlock*)value;
+	pthread_setspecific(bl_tessellateBlock_key, nullptr);
+}
+
+static void (*bl_BlockTessellator_tessellateInWorld_real)(BlockTessellator*, Block const&, BlockPos const&, unsigned char, bool);
+void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, Block const& block, BlockPos const& pos, unsigned char data, bool something) {
+	BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
+	if (!blockInfo) {
+		blockInfo = new BLTessellateBlock();
+		pthread_setspecific(bl_tessellateBlock_key, blockInfo);
+	}
+	blockInfo->blockId = block.id;
+	blockInfo->blockData = data;
+	blockInfo->blockExtraData = block.id == kStonecutterId? self->getRegion()->getExtraData(pos) : 0;
+	bl_BlockTessellator_tessellateInWorld_real(self, block, pos, data, something);
+	blockInfo->blockId = 0;
+	blockInfo->blockData = 0;
+	blockInfo->blockExtraData = 0;
+}
+
+TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
+	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
+		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
+		if (blockInfo && blockInfo->blockExtraData && bl_extendedBlockGraphics[blockInfo->blockExtraData]) {
+			graphics = bl_extendedBlockGraphics[blockInfo->blockExtraData];
+		}
+	}
+	return bl_BlockGraphics_getTexture_real(graphics, side, data);
+}
+
+TextureUVCoordinateSet* bl_CustomBlockGraphics_getTexture_char_hook(BlockGraphics* graphics, signed char side) {
+	return bl_CustomBlockGraphics_getTextureHook(graphics, side, 0);
+}
+
+static AABB& (*bl_StonecutterBlock_getVisualShape_real)(Block*, BlockSource&, BlockPos const&, AABB&, bool);
+static AABB& bl_StonecutterBlock_getVisualShape_hook(Block* self, BlockSource& blockSource, BlockPos const& pos,
+	AABB& inaabb, bool something) {
+	unsigned short extraData = blockSource.getExtraData(pos);
+	if (extraData != 0 && extraData < sizeof(bl_custom_block_visualShapes) && bl_custom_block_visualShapes[extraData]) {
+		int data = blockSource.getData(pos);
+		AABB* aabb = bl_custom_block_visualShapes[extraData][data]; // note: 0 is also handled here, not in the regular block obj.
+									// may change later.
+		if (!aabb) {
+			aabb = bl_custom_block_visualShapes[extraData][0];
+		}
+		return *aabb;
+	}
+	return bl_StonecutterBlock_getVisualShape_real(self, blockSource, pos, inaabb, something);
+}
+
+#if 0
+	BlockGraphics* tempGraphics = nullptr;
+	Block* tempBlock = nullptr;
+#if 0
+	if (block.id == 245 /* stonecutter */) {
+		unsigned short extraData = 4000;//self->getRegion()->getExtraData(pos);
+		if (extraData != 0 && bl_extendedBlockGraphics[extraData]) {
+			tempGraphics = BlockGraphics::mBlocks[block.id];
+			BlockGraphics::mBlocks[block.id] = bl_extendedBlockGraphics[extraData];
+			tempBlock = Block::mBlocks[block.id];
+			Block::mBlocks[block.id] = bl_extendedBlocks[extraData];
+		}
+	}
+#endif
+	if ((pos.x & 1) == 0) {
+		tempBlock = Block::mBlocks[block.id];
+		tempGraphics = BlockGraphics::mBlocks[block.id];
+		Block::mBlocks[block.id] = Block::mBlocks[1];
+		BlockGraphics::mBlocks[block.id] = BlockGraphics::mBlocks[1];
+	}
+
+
+	if (tempBlock) {
+		BlockGraphics::mBlocks[block.id] = tempGraphics;
+		Block::mBlocks[block.id] = tempBlock;
+	}
+}
+
+#endif
+
+// initialization
+
 void bl_armorInit_postLoad();
+
 void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
 void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
 	bl_MinecraftClient_onResourcesLoaded_real(client);
@@ -3241,6 +3323,11 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 		BlockGraphics::initBlocks();
 		bl_finishBlockBuildTextureRequests();
 	}
+}
+
+static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
+	*origFunc = vtable[index];
+	vtable[index] = newFunc;
 }
 
 static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {
@@ -3676,19 +3763,24 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN17MinecraftEventing22fireEventScreenChangedERKSsRKSt13unordered_mapISsSsSt4hashISsESt8equal_toISsESaISt4pairIS0_SsEEE");
 	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
 		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
-/*
+
 	bl_BlockGraphics_getTexture_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEai");
 	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_real, (void*) bl_CustomBlockGraphics_getTextureHook);
 	bl_BlockGraphics_getTexture_char_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEa");
 	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_char_real, (void*) bl_CustomBlockGraphics_getTexture_char_hook);
-*/
 
 	mcpelauncher_hook((void*)&MinecraftClient::onResourcesLoaded, (void*)bl_MinecraftClient_onResourcesLoaded_hook, (void**)&bl_MinecraftClient_onResourcesLoaded_real);
 	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
+	pthread_key_create(&bl_tessellateBlock_key, &bl_tessellateBlock_key_destructor);
+	mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
+		(void**)&bl_BlockTessellator_tessellateInWorld_real);
+	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
+	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
+		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);
 
 	bl_renderManager_init(mcpelibhandle);
 }

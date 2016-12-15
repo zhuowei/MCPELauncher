@@ -2061,6 +2061,7 @@ public class ScriptManager {
 	public static native int nativeItemGetMaxStackSize(int id);
 	public static native void nativeDefineSnowballItem(int itemId, String iconName, int iconId,
 			String name, int maxStackSize);
+	public static native void nativeLevelSetExtraData(int x, int y, int z, short data);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2210,7 +2211,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public void setTile(int x, int y, int z, int id, int damage) {
-			nativeSetTile(x, y, z, id, damage);
+			NativeLevelApi.setTile(x, y, z, id, damage);
 		}
 
 		@JSFunction
@@ -2324,6 +2325,13 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setTile(int x, int y, int z, int id, int damage) {
+			if (id >= 0x100) {
+				// extended block ID.
+				nativeSetTile(x, y, z, 0, 0);
+				nativeSetTile(x, y, z, 245, damage);
+				nativeLevelSetExtraData(x, y, z, (short)id);
+				return;
+			}
 			nativeSetTile(x, y, z, id, damage);
 		}
 
@@ -2601,6 +2609,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setDifficulty(int difficulty) {
 			nativeLevelSetDifficulty(difficulty);
+		}
+
+		@JSStaticFunction
+		public static void setBlockExtraData(int x, int y, int z, int data) {
+			nativeLevelSetExtraData(x, y, z, (short)data);
 		}
 
 		@Override
@@ -4020,9 +4033,9 @@ public class ScriptManager {
 
 		private static void defineBlockImpl(int blockId, String name, Object textures,
 				Object materialSourceIdSrc, Object opaqueSrc, Object renderTypeSrc, int customBlockType) {
-			if (blockId < 0 || blockId >= 256) {
-				throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
-			}
+			//if (blockId < 0 || blockId >= 256) {
+			//	throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
+			//}
 			int materialSourceId = 17; // wood
 			boolean opaque = true;
 			int renderType = 0;

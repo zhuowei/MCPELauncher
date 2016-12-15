@@ -24,5 +24,7 @@ public:
 	Dimension*	getDimension();
 	bool		canSeeSky(int, int, int);
 	Level*		getLevel();
+	unsigned short	getExtraData(BlockPos const&);
+	void		setExtraData(BlockPos const&, unsigned short);
 };
 #define TileSource BlockSource
