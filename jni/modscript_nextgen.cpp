@@ -3294,6 +3294,51 @@ nullptr
 	return false; // WHAT
 }
 
+static bool bl_patchItemEntityChecks(soinfo2* mcpelibhandle) {
+	const char* const toPatch[] = {
+"_ZN10ItemEntity15reloadHardcodedEN6Entity20InitializationMethodERK20VariantParameterList",
+"_ZN10ItemEntity22readAdditionalSaveDataERK11CompoundTag",
+nullptr
+	};
+	for (int j = 0; ; j++) {
+		const char* theName = toPatch[j];
+		if (!theName) return true;
+		void* ItemInstance_init = (void*) dlsym(mcpelibhandle, theName);
+		unsigned char* itemInitCode = (unsigned char*)
+			bl_marauder_translation_function((void*)(((uintptr_t) ItemInstance_init) & ~1));
+		bool hasSet = false;
+#ifdef __arm__
+		for (int i = 0; i < 0x400; i += 2) {
+			// ebb? 2f50 d1??
+			if ((itemInitCode[i] & 0xf0) == 0xb0 && itemInitCode[i+1] == 0xeb &&
+				itemInitCode[i+2] == 0x50 && itemInitCode[i+3] == 0x2f && itemInitCode[i+5] == 0xd1) {
+				itemInitCode[i+4] = 0x00; itemInitCode[i+5] = 0xbf;
+				hasSet = true;
+				break;
+			}
+		}
+#else
+		// FIXME 0.17 x86
+		for (int i = 0; i < 0x400; i++) {
+			// x86: 3d ff 01 00 00
+			if (itemInitCode[i] == 0x3d && itemInitCode[i+1] == 0xff
+				&& itemInitCode[i+2] == 0x01 && itemInitCode[i+3] == 0x00
+				&& itemInitCode[i+4] == 0x00) {
+				itemInitCode[i+1] = (BL_ITEMS_EXPANDED_COUNT & 0xff); itemInitCode[i+2] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+				hasSet = true;
+				break;
+			}
+		}
+#endif
+		if (!hasSet) {
+			__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't patch %s",
+				theName);
+			return false;
+		}
+	}
+	return false; // WHAT
+}
+
 void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
@@ -3328,6 +3373,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	}
 
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
+	bl_patchItemEntityChecks(mcpelibhandle);
 
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 /*

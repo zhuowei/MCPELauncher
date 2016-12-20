@@ -3567,9 +3567,9 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void showTipMessage(String msg) {
-			//nativeShowTipMessage(msg);
+			nativeShowTipMessage(msg);
 			// showTipMessage doesn't work anymore?
-			scriptFakeTipMessage(msg);
+			//scriptFakeTipMessage(msg);
 		}
 
 		@JSStaticFunction
@@ -3666,6 +3666,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setUiRenderDebug(boolean render) {
 			nativeModPESetRenderDebug(render);
+		}
+
+		@JSStaticFunction
+		public static String getOS() {
+			return "Android";
 		}
 
 		@Override
