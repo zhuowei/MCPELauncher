@@ -89,6 +89,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeCl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeArmorAddQueuedTextures
   (JNIEnv *env, jclass clazz) {
+}
+void bl_armorInit_postLoad() {
 	if (!bl_minecraft) return; // WTF
 	for (auto& t: bl_queuedArmorTextures) {
 		bl_setArmorTextureReal(t.first, t.second);

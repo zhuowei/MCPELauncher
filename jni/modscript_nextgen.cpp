@@ -3218,13 +3218,14 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 	}
 	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, theMap);
 }
-
+void bl_armorInit_postLoad();
 void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
 void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
 	bl_MinecraftClient_onResourcesLoaded_real(client);
 	bl_finishBlockBuildTextureRequests();
 	bl_finishItemSetIconRequests();
 	bl_repopulateItemGraphics();
+	bl_armorInit_postLoad();
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted

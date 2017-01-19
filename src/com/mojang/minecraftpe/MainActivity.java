@@ -1007,7 +1007,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
-		if (BuildConfig.DEBUG) System.out.println("Get file data: " + name);
+		//if (BuildConfig.DEBUG) System.out.println("Get file data: " + name);
 
 		try {
 			InputStream is = null;
