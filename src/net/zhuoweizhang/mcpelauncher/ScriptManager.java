@@ -298,11 +298,20 @@ public class ScriptManager {
 	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side,
 			int itemDamage, int blockDamage) {
 		callScriptMethod("useItem", x, y, z, itemid, blockid, side, itemDamage, blockDamage);
+		if (itemid >= 0x100 && nativeItemIsExtendedBlock(itemid) && !nativeHasPreventedDefault()) {
+			nativePreventDefault();
+			doUseItemOurselves(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
+		}
 	}
 
 	@CallbackName(name="destroyBlock", args={"x", "y", "z", "side"}, prevent=true)
 	public static void destroyBlockCallback(int x, int y, int z, int side) {
+		int blockId = nativeGetTileWrap(x, y, z);
 		callScriptMethod("destroyBlock", x, y, z, side);
+		if (blockId >= 0x100 && !nativeHasPreventedDefault()) {
+			nativePreventDefault();
+			NativeLevelApi.destroyBlock(x, y, z, true);
+		}
 	}
 
 	@CallbackName(name="startDestroyBlock", args={"x", "y", "z", "side"}, prevent=true)
@@ -1742,6 +1751,35 @@ public class ScriptManager {
 		return activity.listDirForPath(path);
 	}
 
+	public static int nativeGetTileWrap(int x, int y, int z) {
+		int tile = nativeGetTile(x, y, z);
+		if (tile == 245) {
+			int extraData = nativeLevelGetExtraData(x, y, z);
+			if (extraData != 0) return extraData;
+		}
+		return tile;
+	}
+
+	private static final int[] useItemSideOffsets = {
+		0, -1, 0,
+		0, 1, 0,
+		0, 0, -1,
+		0, 0, 1,
+		-1, 0, 0,
+		1, 0, 0
+	};
+
+	public static void doUseItemOurselves(int x, int y, int z, int itemId, int blockId, int side, int itemDamage, int blockDamage) {
+		// maybe implement in native instead?
+		int blockX = x + useItemSideOffsets[side*3];
+		int blockY = y + useItemSideOffsets[side*3 + 1];
+		int blockZ = z + useItemSideOffsets[side*3 + 2];
+		if (NativeLevelApi.getTile(blockX, blockY, blockZ) != 0) {
+			return;
+		}
+		NativeLevelApi.setTile(blockX, blockY, blockZ, itemId, itemDamage);
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native long nativeGetPlayerEnt();
@@ -2061,7 +2099,9 @@ public class ScriptManager {
 	public static native int nativeItemGetMaxStackSize(int id);
 	public static native void nativeDefineSnowballItem(int itemId, String iconName, int iconId,
 			String name, int maxStackSize);
-	public static native void nativeLevelSetExtraData(int x, int y, int z, short data);
+	public static native void nativeLevelSetExtraData(int x, int y, int z, int data);
+	public static native int nativeLevelGetExtraData(int x, int y, int z);
+	public static native boolean nativeItemIsExtendedBlock(int itemId);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2086,6 +2126,7 @@ public class ScriptManager {
 	public static native void nativeModPESetDesktopGui(boolean desktop);
 	public static native void nativeNewLevelCallbackStarted();
 	public static native void nativeNewLevelCallbackEnded();
+	public static native boolean nativeHasPreventedDefault();
 
 	public static class ScriptState {
 		public Script script;
@@ -2226,7 +2267,7 @@ public class ScriptManager {
 
 		@JSFunction
 		public int getTile(int x, int y, int z) {
-			return nativeGetTile(x, y, z);
+			return nativeGetTileWrap(x, y, z);
 		}
 
 		@JSFunction
@@ -2315,7 +2356,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static int getTile(int x, int y, int z) {
-			return nativeGetTile(x, y, z);
+			return nativeGetTileWrap(x, y, z);
 		}
 
 		@JSStaticFunction
@@ -2329,7 +2370,7 @@ public class ScriptManager {
 				// extended block ID.
 				nativeSetTile(x, y, z, 0, 0);
 				nativeSetTile(x, y, z, 245, damage);
-				nativeLevelSetExtraData(x, y, z, (short)id);
+				nativeLevelSetExtraData(x, y, z, id);
 				return;
 			}
 			nativeSetTile(x, y, z, id, damage);
@@ -2613,7 +2654,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setBlockExtraData(int x, int y, int z, int data) {
-			nativeLevelSetExtraData(x, y, z, (short)data);
+			nativeLevelSetExtraData(x, y, z, data);
 		}
 
 		@Override
@@ -4033,9 +4074,9 @@ public class ScriptManager {
 
 		private static void defineBlockImpl(int blockId, String name, Object textures,
 				Object materialSourceIdSrc, Object opaqueSrc, Object renderTypeSrc, int customBlockType) {
-			//if (blockId < 0 || blockId >= 256) {
-			//	throw new IllegalArgumentException("Block IDs must be >= 0 and < 256");
-			//}
+			if (blockId < 0 || blockId >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Block IDs must be >= 0 and < " + ITEM_ID_COUNT);
+			}
 			int materialSourceId = 17; // wood
 			boolean opaque = true;
 			int renderType = 0;

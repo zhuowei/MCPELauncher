@@ -18,6 +18,7 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 	std::string newFilename = std::string("1007/") + filename;
 	AAsset *in = AAssetManager_open(mgr, newFilename.c_str(), mode);
 	if (in) return in;
+	if (prefix("resource_packs/skins", filename)) return in;
 	if (true||prefix(kResourcePackPrefix, filename)) {
 		JNIEnv *env;
 		int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);

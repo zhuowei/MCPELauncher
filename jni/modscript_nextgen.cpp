@@ -250,6 +250,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_dispense;
 	int clientnetworkhandler_handle_text_packet;
 	int block_get_visual_shape_blocksource;
+	int block_use;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -314,6 +315,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
 	vtable_indexes.block_get_visual_shape_blocksource = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block14getVisualShapeER11BlockSourceRK8BlockPosR4AABBb");
+	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZNK5Block3useER6PlayerRK8BlockPos");
 }
 
 template <typename T>
@@ -396,7 +399,7 @@ void** bl_CustomLiquidBlockDynamic_vtable;
 TextureUVCoordinateSet** bl_custom_block_textures[256];
 bool bl_custom_block_opaque[256];
 bool bl_custom_block_collisionDisabled[256];
-int* bl_custom_block_colors[256];
+int* bl_custom_block_colors[BL_ITEMS_EXPANDED_COUNT];
 AABB** bl_custom_block_visualShapes[BL_ITEMS_EXPANDED_COUNT];
 //end custom blocks
 unsigned char bl_custom_block_redstone[256];
@@ -1802,7 +1805,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
   (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
-	if (blockId < 0 || blockId > 255) return;
+	if (blockId < 0 || blockId >= BL_ITEMS_EXPANDED_COUNT) return;
 	int* myIntArray = bl_custom_block_colors[blockId];
 	if (myIntArray == NULL) {
 		myIntArray = new int[16];
@@ -2173,9 +2176,16 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 			return objectMouseOver.z;
 		case BLOCK_SIDE:
 			return objectMouseOver.side;
-		case BLOCK_ID:
-			return bl_localplayer->getRegion()->getBlockID(
+		case BLOCK_ID: {
+			int id = bl_localplayer->getRegion()->getBlockID(
 				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
+			if (id == 245) {
+				int extraData = bl_localplayer->getRegion()->getExtraData(
+					{objectMouseOver.x, objectMouseOver.y, objectMouseOver.z});
+				if (extraData != 0) return extraData;
+			}
+			return id;
+		}
 		case BLOCK_DATA:
 			return bl_localplayer->getRegion()->getData(
 				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
@@ -3204,8 +3214,18 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 static const unsigned char kStonecutterId = 245;
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetExtraData
-  (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jshort data) {
+  (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jint data) {
 	bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
+}
+
+JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetExtraData
+  (JNIEnv* env, jclass clazz, jint x, jint y, jint z) {
+	return bl_localplayer->getRegion()->getExtraData({x, y, z});
+}
+
+JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemIsExtendedBlock
+  (JNIEnv* env, jclass clazz, jint itemId) {
+	return itemId >= 0x100 && itemId < BL_ITEMS_EXPANDED_COUNT && bl_extendedBlockGraphics[itemId] != nullptr;
 }
 
 struct BLTessellateBlock {
@@ -3267,35 +3287,27 @@ static AABB& bl_StonecutterBlock_getVisualShape_hook(Block* self, BlockSource& b
 	return bl_StonecutterBlock_getVisualShape_real(self, blockSource, pos, inaabb, something);
 }
 
-#if 0
-	BlockGraphics* tempGraphics = nullptr;
-	Block* tempBlock = nullptr;
-#if 0
-	if (block.id == 245 /* stonecutter */) {
-		unsigned short extraData = 4000;//self->getRegion()->getExtraData(pos);
-		if (extraData != 0 && bl_extendedBlockGraphics[extraData]) {
-			tempGraphics = BlockGraphics::mBlocks[block.id];
-			BlockGraphics::mBlocks[block.id] = bl_extendedBlockGraphics[extraData];
-			tempBlock = Block::mBlocks[block.id];
-			Block::mBlocks[block.id] = bl_extendedBlocks[extraData];
-		}
-	}
-#endif
-	if ((pos.x & 1) == 0) {
-		tempBlock = Block::mBlocks[block.id];
-		tempGraphics = BlockGraphics::mBlocks[block.id];
-		Block::mBlocks[block.id] = Block::mBlocks[1];
-		BlockGraphics::mBlocks[block.id] = BlockGraphics::mBlocks[1];
-	}
-
-
-	if (tempBlock) {
-		BlockGraphics::mBlocks[block.id] = tempGraphics;
-		Block::mBlocks[block.id] = tempBlock;
-	}
+static int bl_StonecutterBlock_getColor_hook(Block* tile, BlockSource& blockSource, BlockPos const& pos) {
+	unsigned short extraData = blockSource.getExtraData(pos);
+	if (extraData == 0) return -1;
+	int blockId = tile->id;
+	int* myColours = bl_custom_block_colors[extraData];
+	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
+	int data = blockSource.getData(pos.x, pos.y, pos.z);
+	return myColours[data];
 }
 
-#endif
+static bool (*bl_StonecutterBlock_use_real)(Block* tile, Player& player, BlockPos const& pos);
+static bool bl_StonecutterBlock_use_hook(Block* tile, Player& player, BlockPos const& pos) {
+	unsigned short extraData = player.getRegion()->getExtraData(pos);
+	if (extraData == 0) return bl_StonecutterBlock_use_real(tile, player, pos);
+	return false;
+}
+
+JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
+	(JNIEnv* env, jclass clazz) {
+	return preventDefaultStatus;
+}
 
 // initialization
 
@@ -3308,6 +3320,11 @@ void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
 	bl_finishItemSetIconRequests();
 	bl_repopulateItemGraphics();
 	bl_armorInit_postLoad();
+	if (bl_Block_mBlocks[kStonecutterId]) {
+		bl_Block_mBlocks[kStonecutterId]->setSolid(false);
+		bl_Block_mBlocks[kStonecutterId]->renderLayer = 3;
+		bl_Block_setVisualShape(bl_Block_mBlocks[kStonecutterId], Vec3(0, 0, 0), Vec3(1, 0.999, 1));
+	}
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
@@ -3781,6 +3798,9 @@ void bl_setuphooks_cppside() {
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
 		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);
+	stonecutterVtable[vtable_indexes.tile_get_color] = (void*)&bl_StonecutterBlock_getColor_hook;
+	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
+		(void**)&bl_StonecutterBlock_use_real);
 
 	bl_renderManager_init(mcpelibhandle);
 }
