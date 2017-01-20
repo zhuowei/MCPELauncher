@@ -15,7 +15,7 @@ public:
 	void setCarriedTextures(BlockGraphics&, Json::Value const&);
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
 	Block* getBlock() const;
-	TextureUVCoordinateSet const& getTexture(signed char, int);
+	TextureUVCoordinateSet const& getTexture(signed char, int) const;
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);
 	static void initBlocks();
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);

@@ -2516,25 +2516,9 @@ public class MainActivity extends NativeActivity {
 		if (version == null) return false;
 		//if (version.matches("0\\.11\\.0.*")) return true;
 		if (version.equals(mcPkgInfo.versionName)) return true;
-		if (mcPkgInfo.versionName.startsWith("0.14")) {
-			String subVer = mcPkgInfo.versionName.substring(mcPkgInfo.versionName.lastIndexOf(".") + 1);
-			try {
-				int theSubVer = Integer.parseInt(subVer);
-				if (theSubVer < 2) {
-					if (version.startsWith("0.14.0")) return true;
-					if (version.equals("0.14.1")) return true;
-				} else {
-					if (version.equals("0.14.2")) return true;
-					if (version.equals("0.14.3")) return true;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				if (BuildConfig.DEBUG) throw new RuntimeException(e);
-				return true;
-			}
-		} else if (mcPkgInfo.versionName.startsWith("0.15")) {
-			if (version.startsWith("0.15.0")) return true;
-			if (version.startsWith("0.15.1")) return true;
+		if (mcPkgInfo.versionName.startsWith("1.0")) {
+			if (version.startsWith("1.0.0")) return true;
+			if (version.startsWith("1.0.2")) return true;
 		}
 		return false;
 	}

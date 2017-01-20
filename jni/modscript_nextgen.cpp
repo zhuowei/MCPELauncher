@@ -251,6 +251,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int clientnetworkhandler_handle_text_packet;
 	int block_get_visual_shape_blocksource;
 	int block_use;
+	int item_get_icon;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -317,6 +318,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK5Block14getVisualShapeER11BlockSourceRK8BlockPosR4AABBb");
 	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block3useER6PlayerRK8BlockPos");
+	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
+		"_ZNK4Item7getIconEiib");
 }
 
 template <typename T>
@@ -480,6 +483,7 @@ static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
 static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::unordered_map<std::string, std::string> const&);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
+static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -975,7 +979,8 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_mItems[item->itemId] = item;
 	//std::string lowercaseStr = Util::toLower(name);
 	if (item->itemId > 0x200 && Item::mItemTextureAtlas != nullptr) {
-		ResourceLocation location("atlas.items", 0);
+		bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
+		ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
 		if (!(item->itemId < ItemRenderer::mItemGraphics.size())) {
 			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 		}
@@ -1002,7 +1007,8 @@ void bl_repopulateItemGraphics() {
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}
-			ResourceLocation location("atlas.items", 0);
+			bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
+			ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
 			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 		}
 	}
@@ -1331,6 +1337,13 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 		bl_customItem_enchantValue[item->itemId]);
 	return bl_customItem_enchantValue[item->itemId];
 }
+
+static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data, int int2, bool bool1) {
+	if (bl_extendedBlockGraphics[item->itemId]) {
+		return bl_extendedBlockGraphics[item->itemId]->getTexture(2, (data & 0xf));
+	}
+	return bl_Item_getIcon(item, data, int2, bool1);
+}
 class Container;
 static void* (*bl_CustomSnowballItem_use_real)(Item*, ItemInstance&, Player&);
 static void* (*bl_CustomSnowballItem_dispense_real)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char);
@@ -1405,6 +1418,8 @@ void bl_initCustomBlockVtable() {
 		(void*) &bl_CustomItem_getEnchantSlot_hook;
 	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_value] =
 		(void*) &bl_CustomItem_getEnchantValue_hook;
+	bl_Item_getIcon = (TextureUVCoordinateSet const& (*)(Item*, int, int, bool)) bl_CustomItem_vtable[vtable_indexes.item_get_icon];
+	bl_CustomItem_vtable[vtable_indexes.item_get_icon] = (void*)bl_CustomItem_getIcon;
 	bl_CustomSnowballItem_vtable = (void**) ::operator new(vtable_indexes.snowball_item_vtable_size);
 	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
 	bl_CustomSnowballItem_use_real = (void* (*)(Item*, ItemInstance&, Player&))
@@ -1588,7 +1603,7 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 
 	bl_Item_setIcon_wrapper(item, "apple", 0);
 
-	bl_set_i18n("item." + nameStr + ".name", nameStr);
+	bl_set_i18n("item." + nameStr + ".name", realNameStr);
 	
 	return retval;
 }
