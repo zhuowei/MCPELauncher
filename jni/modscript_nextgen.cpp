@@ -55,6 +55,7 @@
 #include "mcpe/textureatlas.h"
 #include "mcpe/particle.h"
 #include "mcpe/blocktessellator.h"
+#include "mcpe/inventoryitemrenderer.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -3319,6 +3320,14 @@ static bool bl_StonecutterBlock_use_hook(Block* tile, Player& player, BlockPos c
 	return false;
 }
 
+static void (*bl_InventoryItemRenderer_update_real)(InventoryItemRenderer* renderer, MinecraftClient& client, std::shared_ptr<UIControl>& aUIControl);
+static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer, MinecraftClient& client, std::shared_ptr<UIControl>& aUIControl) {
+	bl_InventoryItemRenderer_update_real(renderer, client, aUIControl);
+	if (renderer->itemId >= 0x100 && bl_extendedBlockGraphics[renderer->itemId]) {
+		renderer->atlasName = "atlas.terrain";
+	}
+}
+
 JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
 	return preventDefaultStatus;
@@ -3816,6 +3825,9 @@ void bl_setuphooks_cppside() {
 	stonecutterVtable[vtable_indexes.tile_get_color] = (void*)&bl_StonecutterBlock_getColor_hook;
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
+
+	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
+		(void**)&bl_InventoryItemRenderer_update_real);
 
 	bl_renderManager_init(mcpelibhandle);
 }
