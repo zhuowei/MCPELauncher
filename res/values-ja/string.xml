@@ -4,7 +4,7 @@
     <string name = "pref_ctrl_touchscreen">タッチスクリーンを使用する</string>
     <string name = "pref_ctrl_touchscreen_summary"> Xperia Playを使用していない場合は、これをチェックしてください</string>
     <string name = "pref_mp_username">マルチユーザ名</string>
-    <string name = "pref_mp_username_summary">あなたの名前、duh </string>
+    <string name = "pref_mp_username_summary">あなたの名前</string>
     <string name = "pref_texture_pack">テクスチャパック</string>
     <string name = "pref_texture_pack_summary">テクスチャパックを変更する</string>
     <string name = "pref_zz_longvibration">非常に長い振動</string>
@@ -47,7 +47,7 @@
     <string name = "pref_zz_language_override_default">デフォルト</string>
     <string name = "pref_zz_script_paranoid_mode">パラノイドモード</string>
     <string name = "pref_zz_script_paranoid_mode_summary"> ModPEスクリプトのAndroid機能へのアクセスを無効にします。\nファイルの削除とインターネットの使用</string>
-<string name = "pref_zz_legacy_keyboard_input">古いキーボード入力コードを使用</string>
+    <string name = "pref_zz_legacy_keyboard_input">古いキーボード入力コードを使用</string>
     <string name = "pref_zz_legacy_keyboard_input_summary">新しい0.8.xアップデートのキーボードバグに対する修正</string>
     <string name = "pref_zz_texture_pack_enable_extracted">抽出された元のテクスチャを使用する</string>
     <string name = "pref_zz_skin_download_source"> PCスキン</string>
@@ -58,7 +58,7 @@
     <string name = "nerdy_stuff_are_useless">このページのほとんどは無用です。バグのトラブルシューティングのためにここにあります。</string>
     <string name = "restart_app">BlockLauncherを再起動する</string>
     <string name = "manage_patches">パッチを管理する</string>
-    <string name = "world_create_title">世界を作成する</string>
+    <string name = "world_create_title">ワールドを作成する</string>
     <string name = "world_name_prompt">名前：</string>
     <string name = "world_seed_prompt">シード：</string>
     <string name = "world_gamemode_prompt">ゲームモード：</string>
@@ -89,7 +89,7 @@
     <string name = "manage_addons">アドオンの管理</string>
     <string name = "get_pro"> Proへのアップグレード</string>
     <string name = "about_about"> BlockLauncherについて</string>
-    <string name = "about_copyright">著作権©2013-2014 Zhuowei Zhang </string>
+    <string name = "about_copyright">著作権 ©2013-2014 Zhuowei Zhang </string>
     <string name = "about_copyright_pro"> Copyright©2013-2014 Zhuowei Zhang. 許可なく配布しないでください。</string>
     <string name = "about_librarycredits">このプログラムは、Paul BurkeのaFileChooserライブラリを使用します。\nこのプログラムには、Eclipse Public Licenseの下でライセンスされたSnowboundのPTPatchToolのコードが含まれています。\nこのプログラムには、NathanXのSlickcraftテクスチャパックの修正版が含まれています：許可とともに使用されています。\nビルトインテクスチャパックの一部は、TheevilpplzのRepetiCraftに基づいており、許可を得て使用されています。\nこのプログラムには、SaurikのCydia Substrateフレームワークのバージョンが含まれており、GNU Lesser General Public Licenseの下でライセンスされています。\nこのプログラムはChainfireによってlibsuperuserライブラリを使用します。\nこのプログラムには、MozillaプロジェクトのRhino JavaScriptエンジンのコピーが含まれています。\n完全なライセンス情報については、Minecraft Forumsスレッドを確認してください。\n </string>
     <string name = "about_pro_library_credits"> </ string>
@@ -107,7 +107,7 @@
     <string name = "hovercar_live_patch">パッチ・モッズ・イン・ゲーム</string>
     <string name = "hovercar_options">ランチャーオプション（再起動が必要）</string>
     <string name = "hovercar_insert_text">テキストを挿入する（キーボードの問題を回避する方法）</string>
-    <string name = "safe_mode_exit">通常のに戻ります。</string>
+    <string name = "safe_mode_exit">通常のモードに戻ります。</string>
     <string name = "safe_mode_continue">続行</string>
     <string name = "script_import_from">スクリプトをからインポートします。</string>
     <string name = "script_import_from_local">ローカルストレージ</string>
@@ -125,7 +125,7 @@
     <string name = "script_minecraft_version_incompatible">いま使用されているバージョンのMinecraft PEではModPEスクリプトがサポートされていません。スクリプトの一部のメソッドが機能しない、またはランチャーがクラッシュする可能性があります。自己責任で使用してください。</string>
     <string name = "script_import_from_intent_warning">このスクリプトをインポートしますか？あなたのパスワードやその他の機密情報を含むBlockLauncherインスタンスと同じリソースにアクセスできます。</string>
     <string name = "script_view_source">ソースの表示</string>
-    <string name = "script_too_many_errors">はエラーが多すぎるため無効になっています。申し訳ありません！</string>
+    <string name = "script_too_many_errors"> エラーが多すぎるため無効になっています。申し訳ありません！</string>
     <string name = "take_screenshot">スクリーンショットを撮る</string>
     <string name = "take_screenshot_requires_modpe_script">スクリーンショットを撮るには、ModPEスクリプトのサポートが必要です。 \nランチャーオプションページでModPEスクリプトサポートを有効にすることができます。</string>
     <string name = "screenshot_saved_as">保存されたスクリーンショット</string>
