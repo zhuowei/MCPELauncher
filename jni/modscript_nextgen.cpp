@@ -85,9 +85,8 @@ const size_t kBlockItemSize = 108;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = 108;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3244;
-// found in TextPacket::handle
-const size_t kClientNetworkHandler_vtable_offset_handleTextPacket = 17;
+const size_t kItemEntity_itemInstance_offset = 3252;
+const size_t kItemEntity_itemInstance_offset103 = 3244;
 // ProjectileComponent::throwableHit
 const size_t kProjectileComponent_entity_offset = 16;
 
@@ -485,6 +484,8 @@ static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::str
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
+static void (*bl_BlockGraphics_initBlocks_old)();
+static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -718,6 +719,7 @@ void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddres
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
+
 	if (packet->type == 0) { // client message
 		jstring messageJString = env->NewStringUTF(packet->message.c_str());
 		preventDefaultStatus = false;
@@ -2531,7 +2533,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv* env, jclass clazz, jlong entityId, jint type) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + kItemEntity_itemInstance_offset);
+	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + (bl_BlockGraphics_initBlocks_old? kItemEntity_itemInstance_offset103: kItemEntity_itemInstance_offset));
 	switch (type) {
 		case ITEMID:
 			return bl_ItemInstance_getId(instance);
@@ -3361,7 +3363,11 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 	if (bl_customBlocksCreated) {
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
-		BlockGraphics::initBlocks();
+		if (bl_BlockGraphics_initBlocks_new) {
+			bl_BlockGraphics_initBlocks_new(bl_minecraft->getServer()->getResourceLoader());
+		} else {
+			bl_BlockGraphics_initBlocks_old();
+		}
 		bl_finishBlockBuildTextureRequests();
 	}
 }
@@ -3632,13 +3638,13 @@ void bl_setuphooks_cppside() {
 	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
 	//mcpelauncher_hook(handleTextPacket, (void*) &bl_ClientNetworkHandler_handleTextPacket_hook,
 	//	(void**) &bl_ClientNetworkHandler_handleTextPacket_real);
-	void** clientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV20ClientNetworkHandler") + 2;
+	void** clientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV20ClientNetworkHandler");
 	// first two entries are removed
 	bl_ClientNetworkHandler_handleTextPacket_real = (void (*)(void*, void*, TextPacket*))
 		clientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet];
 	clientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet] =
 		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
-	void** legacyClientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV26LegacyClientNetworkHandler") + 2;
+	void** legacyClientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV26LegacyClientNetworkHandler");
 	legacyClientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet] =
 		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
 	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
@@ -3828,6 +3834,11 @@ void bl_setuphooks_cppside() {
 
 	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
 		(void**)&bl_InventoryItemRenderer_update_real);
+	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
+			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
+	if (!bl_BlockGraphics_initBlocks_new) {
+		bl_BlockGraphics_initBlocks_old = (void (*)()) dlsym(mcpelibhandle, "_ZN13BlockGraphics10initBlocksEv");
+	}
 
 	bl_renderManager_init(mcpelibhandle);
 }

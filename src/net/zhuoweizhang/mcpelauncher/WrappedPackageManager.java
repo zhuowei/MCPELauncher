@@ -38,6 +38,7 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 
 import java.util.List;
+import java.lang.reflect.Method;
 
 /**
  * A mock {@link android.content.pm.PackageManager} class.  All methods are functional.
@@ -474,4 +475,14 @@ public class WrappedPackageManager extends PackageManager {
         return wrapped.getUserBadgedLabel(label, user);
     }
 
+    // Samsung Nougat ROMs use this
+    public int getSystemFeatureLevel(String feature) {
+        try {
+            Method method = wrapped.getClass().getMethod("getSystemFeatureLevel", String.class);
+            return (Integer)method.invoke(wrapped, feature);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

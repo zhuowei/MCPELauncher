@@ -80,8 +80,8 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "0.16";
-	public static final String HALF_SUPPORT_VERSION = "1.0";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.0";
+	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -256,7 +256,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "0.16.2, 1.0.0");
+				intent.putExtra("supportedVersion", "1.0.3, 1.0.4");
 				startActivity(intent);
 				finish();
 				try {
@@ -1060,6 +1060,7 @@ public class MainActivity extends NativeActivity {
 				} catch (IOException e) {
 				}
 			}
+
 			if (texturePack == null) {
 				return getLocalInputStreamForAsset(name, lengthOut);
 			} else {
@@ -1082,7 +1083,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
-		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+		if (!getMCPEVersion().startsWith("1.0.4")) {
 			try {
 				return getAssets().open("1007/" + name);
 			} catch (IOException ie) {
@@ -1137,9 +1138,11 @@ public class MainActivity extends NativeActivity {
 		}
 		String[] origDir = null;
 		String newPath = dirPath;
-		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+
+		if (!getMCPEVersion().startsWith("1.0.4")) {
 			newPath = "1007/" + dirPath;
 		}
+
 		try {
 			origDir = this.getAssets().list(newPath);
 		} catch (IOException ie) {
@@ -1708,11 +1711,11 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
-		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 			System.loadLibrary("mcpelauncher_new");
-		} else {
-			System.loadLibrary("mcpelauncher");
-		}
+		//} else {
+		//	System.loadLibrary("mcpelauncher");
+		//}
 
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
@@ -2519,6 +2522,8 @@ public class MainActivity extends NativeActivity {
 		if (mcPkgInfo.versionName.startsWith("1.0")) {
 			if (version.startsWith("1.0.0")) return true;
 			if (version.startsWith("1.0.2")) return true;
+			if (version.startsWith("1.0.3")) return true;
+			if (version.startsWith("1.0.4")) return true;
 		}
 		return false;
 	}

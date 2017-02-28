@@ -745,6 +745,10 @@ public class ScriptManager {
 	}
 
 	public static byte[] getSoundBytes(String name) {
+		if (name == null || !name.startsWith("file:///android_asset/")) {
+			System.out.println("Invalid sound byte: " + name);
+			return null;
+		}
 		if (MainActivity.currentMainActivity != null) {
 			MainActivity main = MainActivity.currentMainActivity.get();
 			if (main != null) {

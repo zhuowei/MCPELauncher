@@ -18,6 +18,7 @@ public:
 	Level* getLevel();
 	Timer* getTimer();
 	MinecraftCommands* getCommands();
+	ResourcePackManager* getResourceLoader();
 };
 
 class MinecraftClient {
@@ -34,5 +35,4 @@ public:
 	void onResourcesLoaded();
 	LevelRenderer* getLevelRenderer() const;
 	void play(std::string const&, Vec3 const&, float, float);
-	ResourcePackManager& getResourcePackManager() const;
 };
