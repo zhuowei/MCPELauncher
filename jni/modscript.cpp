@@ -119,6 +119,8 @@ static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
 static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
+static void (*bl_PlayerInventoryProxy_removeResource)(PlayerInventoryProxy*, ItemInstance&, bool, int);
+static void (*bl_PlayerInventoryProxy_removeResource_old)(PlayerInventoryProxy*, ItemInstance&, bool);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -819,7 +821,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (!remove) {
 		invPtr->add(instance, true);
 	} else {
-		invPtr->removeResource(instance, false);
+		if (bl_PlayerInventoryProxy_removeResource) {
+			bl_PlayerInventoryProxy_removeResource(invPtr, instance, false, -1);
+		} else {
+			bl_PlayerInventoryProxy_removeResource_old(invPtr, instance, false);
+		}
+		//invPtr->removeResource(instance, false);
 		// note: this may free the original item stack. Don't hold onto it
 	}
 }
@@ -1392,6 +1399,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	minecraftVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
+	bl_PlayerInventoryProxy_removeResource = (void (*)(PlayerInventoryProxy*, ItemInstance&, bool, int))
+		dlsym(mcpelibhandle, "_ZN20PlayerInventoryProxy14removeResourceERK12ItemInstancebi");
+	bl_PlayerInventoryProxy_removeResource_old = (void (*)(PlayerInventoryProxy*, ItemInstance&, bool))
+		dlsym(mcpelibhandle, "_ZN20PlayerInventoryProxy14removeResourceERK12ItemInstanceb");
 
 	bl_setuphooks_cppside();
 

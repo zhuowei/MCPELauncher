@@ -13,6 +13,11 @@ public class StoreFactory {
 		return new Store(listener);
 	}
 
+	public static Store createAmazonAppStore(StoreListener listener, boolean a) {
+		if (BuildConfig.DEBUG) System.out.println("Amazon Store: " + listener + ":" + a);
+		return new Store(listener);
+	}
+
 	public static Store createSamsungAppStore(StoreListener listener) {
 		if (BuildConfig.DEBUG) System.out.println("Amazon Store: " + listener);
 		return new Store(listener);

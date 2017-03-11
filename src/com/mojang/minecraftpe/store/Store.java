@@ -32,4 +32,14 @@ public class Store {
 	public void acknowledgePurchase(String a, String b) {
 		System.out.println("Acknowledge purchase: " + a + ":" + b);
 	}
+
+	public String getProductSkuPrefix() {
+		System.out.println("Get product SKU prefix");
+		return "";
+	}
+
+	public String getRealmsSkuPrefix() {
+		System.out.println("Get realms SKU prefix");
+		return "";
+	}
 }

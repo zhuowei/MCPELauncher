@@ -256,7 +256,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.0.3, 1.0.4");
+				intent.putExtra("supportedVersion", "1.0.3, 1.0.4, 1.0.5");
 				startActivity(intent);
 				finish();
 				try {
@@ -1083,7 +1083,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected InputStream openFallbackAsset(String name) throws IOException {
-		if (!getMCPEVersion().startsWith("1.0.4")) {
+		if (!(getMCPEVersion().startsWith("1.0.4") || getMCPEVersion().startsWith("1.0.5"))) {
 			try {
 				return getAssets().open("1007/" + name);
 			} catch (IOException ie) {
@@ -1139,7 +1139,7 @@ public class MainActivity extends NativeActivity {
 		String[] origDir = null;
 		String newPath = dirPath;
 
-		if (!getMCPEVersion().startsWith("1.0.4")) {
+		if (!(getMCPEVersion().startsWith("1.0.4") || getMCPEVersion().startsWith("1.0.5"))) {
 			newPath = "1007/" + dirPath;
 		}
 
@@ -2086,6 +2086,23 @@ public class MainActivity extends NativeActivity {
 		return hiddenTextView.getSelectionStart();
 	}
 
+	// 1.0.5
+	public long getAvailableMemory() {
+		return 0x40000000L;
+	}
+
+	public void requestStoragePermission(int requestId) {
+		System.out.println("Request storage: " + requestId);
+	}
+
+	public boolean hasWriteExternalStoragePermission() {
+		return true;
+	}
+
+	public void trackPurchaseEvent(String a, String b, String c) {
+		System.out.println("Track purchase event: " + a + ":" + b + ":" + c);
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
@@ -2524,6 +2541,7 @@ public class MainActivity extends NativeActivity {
 			if (version.startsWith("1.0.2")) return true;
 			if (version.startsWith("1.0.3")) return true;
 			if (version.startsWith("1.0.4")) return true;
+			if (version.startsWith("1.0.5")) return true;
 		}
 		return false;
 	}
