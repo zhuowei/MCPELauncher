@@ -246,8 +246,9 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean is0140or0141 = mcPkgInfo.versionName.startsWith("0.14.0") ||
-				mcPkgInfo.versionName.equals("0.14.1");
+			boolean is0140or0141 = mcPkgInfo.versionName.startsWith("1.0.0") ||
+				mcPkgInfo.versionName.equals("1.0.2") ||
+				mcPkgInfo.versionName.equals("1.0.3");
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!is0140or0141) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
@@ -256,7 +257,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.0.3, 1.0.4, 1.0.5");
+				intent.putExtra("supportedVersion", "1.0.4, 1.0.5, 1.0.6");
 				startActivity(intent);
 				finish();
 				try {
@@ -1082,14 +1083,22 @@ public class MainActivity extends NativeActivity {
 		return getLocalInputStreamForAsset(name, null);
 	}
 
+	private boolean mcpeGreaterEqualThan(int major, int minor, int rel) {
+		String[] parts = getMCPEVersion().split("\\.");
+		if (parts.length == 0) return true;
+		int theirMajor = Integer.parseInt(parts[0]);
+		int theirMinor = parts.length < 2? 0: Integer.parseInt(parts[1]);
+		int theirRel = parts.length < 3? 0: Integer.parseInt(parts[2]);
+		if (theirMajor > major) return true;
+		if (theirMajor < major) return false;
+		// major is equal
+		if (theirMinor > minor) return true;
+		if (theirMinor < minor) return false;
+		// minor is also equal
+		return theirRel >= rel;
+	}
+
 	protected InputStream openFallbackAsset(String name) throws IOException {
-		if (!(getMCPEVersion().startsWith("1.0.4") || getMCPEVersion().startsWith("1.0.5"))) {
-			try {
-				return getAssets().open("1007/" + name);
-			} catch (IOException ie) {
-				if (textureVerbose) System.err.println(ie);
-			}
-		}
 		return getAssets().open(name);
 	}
 
@@ -1138,10 +1147,6 @@ public class MainActivity extends NativeActivity {
 		}
 		String[] origDir = null;
 		String newPath = dirPath;
-
-		if (!(getMCPEVersion().startsWith("1.0.4") || getMCPEVersion().startsWith("1.0.5"))) {
-			newPath = "1007/" + dirPath;
-		}
 
 		try {
 			origDir = this.getAssets().list(newPath);
@@ -1712,10 +1717,11 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+		if (!mcpeGreaterEqualThan(1, 0, 6)) {
 			System.loadLibrary("mcpelauncher_new");
-		//} else {
-		//	System.loadLibrary("mcpelauncher");
-		//}
+		} else {
+			System.loadLibrary("mcpelauncher");
+		}
 
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
@@ -2542,6 +2548,7 @@ public class MainActivity extends NativeActivity {
 			if (version.startsWith("1.0.3")) return true;
 			if (version.startsWith("1.0.4")) return true;
 			if (version.startsWith("1.0.5")) return true;
+			if (version.startsWith("1.0.6")) return true;
 		}
 		return false;
 	}
