@@ -401,6 +401,12 @@ public class ScriptManager {
 		serverAddress = hostname;
 		serverPort = port;
 	}
+	
+	//InusualZ's Addition
+	public static void OnChestOpenCallback(int PlayerID, int px, int py, int pz)
+	{
+		callScriptMethod("OnChestOpen", PlayerID, px, py, pz);
+	}
 
 	public static void frameCallback() {
 		if (requestReloadAllScripts) {
