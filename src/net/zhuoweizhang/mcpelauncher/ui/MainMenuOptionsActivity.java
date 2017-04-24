@@ -16,7 +16,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.*;
-import de.ankri.views.Switch;
+import android.widget.CompoundButton;
 
 public class MainMenuOptionsActivity extends PreferenceActivity implements
 		Preference.OnPreferenceClickListener, SwitchPreference.OnCheckedChangeListener {
@@ -316,7 +316,7 @@ public class MainMenuOptionsActivity extends PreferenceActivity implements
 	}
 
 	@Override
-	public void onCheckedChange(Switch data) {
+	public void onCheckedChange(CompoundButton data) {
 		needsRestart = true;
 		synchronized (ui) {
 			ui.notifyAll();
