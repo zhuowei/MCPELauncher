@@ -69,7 +69,7 @@ typedef void Font;
 
 // found in GameMode::initPlayer
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 3776
+#define PLAYER_ABILITIES_OFFSET 4024
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -77,16 +77,15 @@ typedef void Font;
 //#define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
-const size_t kTileSize = 120;
-const size_t kLiquidBlockDynamicSize = 120;
-const size_t kLiquidBlockStaticSize = 124;
+const size_t kTileSize = sizeof(Block);
+const size_t kLiquidBlockDynamicSize = 632;
+const size_t kLiquidBlockStaticSize = 636;
 // found in registerBlock
-const size_t kBlockItemSize = 108;
+const size_t kBlockItemSize = 112;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-const size_t kItemSize = 108;
+const size_t kItemSize = 112;
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3252;
-const size_t kItemEntity_itemInstance_offset103 = 3244;
+const size_t kItemEntity_itemInstance_offset = 3304;
 // ProjectileComponent::throwableHit
 const size_t kProjectileComponent_entity_offset = 16;
 
@@ -95,10 +94,12 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11MobRenderer",
 "_ZTV11NpcRenderer",
 "_ZTV11PigRenderer",
+"_ZTV11VexRenderer",
 "_ZTV12WolfRenderer",
 "_ZTV13BlazeRenderer",
 "_ZTV13GhastRenderer",
 "_ZTV13HorseRenderer",
+"_ZTV13LlamaRenderer",
 "_ZTV13SheepRenderer",
 "_ZTV13SlimeRenderer",
 "_ZTV13SquidRenderer",
@@ -124,7 +125,9 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
-"_ZTV22VillagerZombieRenderer"
+"_ZTV22VillagerZombieRenderer",
+"_ZTV24EvocationIllagerRenderer",
+"_ZTV26VindicationIllagerRenderer",
 };
 
 #define AXIS_X 0
@@ -221,14 +224,14 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
 	int tile_vtable_size;
 	int blockgraphics_vtable_size;
-	int blockgraphics_get_carried_texture;
+	//int blockgraphics_get_carried_texture;
 	int tile_get_color;
 	int tile_get_color_data;
 	int tile_get_visual_shape;
 	//int raknet_instance_connect;
 	int mobrenderer_get_skin_ptr;
 	int tile_on_redstone_update;
-	int tile_is_redstone_block;
+	//int tile_is_redstone_block;
 	int tile_on_loaded;
 	int tile_on_place;
 	int mob_set_sneaking;
@@ -261,8 +264,6 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK5Block13getSecondPartER11BlockSourceRK8BlockPosRS2_");
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV5Block")->st_size;
 	vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
-	vtable_indexes.blockgraphics_get_carried_texture = bl_vtableIndex(mcpelibhandle, "_ZTV13BlockGraphics",
-		"_ZNK13BlockGraphics17getCarriedTextureEai");
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block8getColorER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
@@ -275,8 +276,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11MobRenderer10getSkinPtrER6Entity");
 	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
-	vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZNK5Block15isRedstoneBlockEv");
+	//vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+	//	"_ZNK5Block15isRedstoneBlockEv");
 	vtable_indexes.tile_on_loaded = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block8onLoadedER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
@@ -309,9 +310,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		"_ZN4Item3useER12ItemInstanceR6Player");
+		"_ZNK4Item3useER12ItemInstanceR6Player");
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		"_ZN4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
+		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
 		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
 	vtable_indexes.block_get_visual_shape_blocksource = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
@@ -350,7 +351,6 @@ static unsigned char* bl_Block_mLightBlock;
 
 static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
-static void (*bl_MinecraftClient_leaveGame)(MinecraftClient*, bool saveWorld);
 static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
 
 //static void* (*bl_Level_getAllEntities)(Level*);
@@ -445,8 +445,6 @@ static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
-static bool bl_forceController = false;
-static bool (*bl_MinecraftClient_useController)(Minecraft*);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_Item_addCreativeItem)(short, short);
 static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
@@ -484,7 +482,6 @@ static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::str
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
-static void (*bl_BlockGraphics_initBlocks_old)();
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 
 #define STONECUTTER_STATUS_DEFAULT 0
@@ -542,6 +539,10 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	}
 	if (bl_onLockDown || level == nullptr) return nullptr;
 	return level->fetchEntity(entityId, false);
+}
+
+bool bl_isActiveLevel(Level* level) {
+	return level == bl_level;
 }
 
 void bl_MinecraftScreenModel_sendChatMessage_hook(MinecraftScreenModel* chatScreen, std::string const& message) {
@@ -610,7 +611,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, hostJString, remoteInfo.port);
 
-	bl_onLockDown = !isLocalAddress(env, hostJString);
+	// fixme 1.1
+	bl_onLockDown = false;//!isLocalAddress(env, hostJString);
 
 	env->DeleteLocalRef(hostJString);
 
@@ -789,6 +791,7 @@ static bool bl_Level_addEntity_hook(Level* level, BlockSource& blockSource, std:
 	bool retval = bl_Level_addEntity_real(level, blockSource, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
+	if (!bl_isActiveLevel(level)) return retval;
 	bl_CustomSnowball_processAddEntity(entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -814,6 +817,7 @@ static uintptr_t bl_Level_addPlayer_hook(Level* level, std::unique_ptr<Player> e
 	JNIEnv *env;
 
 	if (!retval) return retval; // entity wasn't added
+	if (!bl_isActiveLevel(level)) return retval;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -840,6 +844,7 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, BlockSource& blockS
 	bool retval = bl_MultiPlayerLevel_addEntity_real(level, blockSource, std::move(entityPtr));
 
 	if (!retval) return retval; // entity wasn't added
+	if (!bl_isActiveLevel(level)) return retval;
 	bl_CustomSnowball_processAddEntity(entity);
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -860,6 +865,10 @@ static bool bl_MultiPlayerLevel_addEntity_hook(Level* level, BlockSource& blockS
 }
 
 static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& entity, bool arg2) {
+	if (level->isClientSide()) {
+		bl_Level_removeEntity_real(level, std::move(entity), arg2);
+		return;
+	}
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -885,6 +894,10 @@ static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& e
 }
 
 static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire, bool anotherBool, float something) {
+	if (level->isClientSide()) {
+		bl_Level_explode_real(level, tileSource, entity, p, power, onFire, anotherBool, something);
+		return;
+	}
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -928,6 +941,10 @@ static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y
 }
 
 static void bl_Player_eat_hook(Entity* player, int hearts, float notHearts) {
+	if (!bl_isActiveLevel(player->getLevel())) {
+		bl_Player_eat_real(player, hearts, notHearts);
+		return;
+	}
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "I'm EATING %d %f", hearts, notHearts);
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -1006,20 +1023,20 @@ void bl_repopulateItemGraphics() {
 			needsSetting = true;
 		}
 		if (needsSetting) {
-			//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d", item->itemId);
+			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d (cur size = %d)", item->itemId, ItemRenderer::mItemGraphics.size());
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}
-			bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
-			ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
-			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
+			//bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
+			//ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
+			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(/*std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)*/ItemRenderer::mItemGraphics[0x100].texturePtr.clone());
 		}
 	}
 }
 
 void bl_cpp_selectLevel_hook() {
 	if (Item::mItemTextureAtlas == nullptr) return;
-	bl_repopulateItemGraphics();
+	//bl_repopulateItemGraphics();
 }
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
@@ -1130,6 +1147,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSelectLevel
   (JNIEnv *env, jclass clazz, jstring worlddir, jstring worldName) {
+/* fixme 1.1
 	const char * utfChars = env->GetStringUTFChars(worlddir, NULL);
 	const char * nameUtfChars = env->GetStringUTFChars(worldName, NULL);
 	std::string worlddirstr = std::string(utfChars);
@@ -1147,13 +1165,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_MinecraftClient_startLocalServer(bl_minecraft, worlddirstr, std::string(nameUtfChars), &levelSettings);
 	env->ReleaseStringUTFChars(worlddir, utfChars);
 	env->ReleaseStringUTFChars(worldName, nameUtfChars);
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLeaveGame
   (JNIEnv *env, jclass clazz, jboolean saveMultiplayerWorld) {
 	//bl_Minecraft_setLeaveGame(bl_minecraft);
 	// Is this boolean right?
-	bl_MinecraftClient_leaveGame(bl_minecraft, true);
+	bl_minecraft->leaveGame(true);
 }
 
 /*JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeJoinServer
@@ -1319,7 +1338,7 @@ static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
+	//bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
 }
@@ -1343,7 +1362,7 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 
 static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data, int int2, bool bool1) {
 	if (bl_extendedBlockGraphics[item->itemId]) {
-		return bl_extendedBlockGraphics[item->itemId]->getTexture(2, (data & 0xf));
+		return bl_extendedBlockGraphics[item->itemId]->getTexture(2, (data & 0xf), 0);
 	}
 	return bl_Item_getIcon(item, data, int2, bool1);
 }
@@ -1440,13 +1459,13 @@ void* bl_getMaterial(int materialType) {
 	if (baseTile == NULL) {
 		baseTile = bl_Block_mBlocks[1];
 	}
-	return baseTile->material;
+	return baseTile->getMaterial();
 }
 
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(BlockGraphics::getTextureUVCoordinateSet(
-			textureNames[i], textureCoords[i]));
+			textureNames[i], textureCoords[i], 0));
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Building %s %d\n", textureNames[i].c_str(), textureCoords[i]);
 		output[i] = mySet;
 	}
@@ -1464,17 +1483,30 @@ static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
 static void bl_finishBlockBuildTextureRequests() {
 	BL_LOG("finishBlockBuildTextureRequests");
 	for (auto& request: buildTextureRequests) {
-		auto bg = request.blockId >= 0x100? bl_extendedBlockGraphics[request.blockId]: BlockGraphics::mBlocks[request.blockId];
-		if (!bg) continue;
-		//BL_LOG("Setting texs for %d: %s:%s:%s:%s:%s:%s", request.blockId,
-		//	request.textureSides[0].c_str(), request.textureSides[1].c_str(), request.textureSides[2].c_str(),
-		//	request.textureSides[3].c_str(), request.textureSides[4].c_str(), request.textureSides[5].c_str());
-		bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
-			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
+		int blockId = request.blockId;
+		auto bg = blockId >= 0x100? bl_extendedBlockGraphics[blockId]: BlockGraphics::mBlocks[blockId];
+		if (!bg) {
+			if (blockId < 0x100) {
+				if (Block::mBlocks[blockId]) {
+					bg = BlockGraphics::mBlocks[blockId] = new BlockGraphics(Block::mBlocks[blockId]->mappingId);
+				}
+			} else {
+				if (bl_extendedBlocks[blockId]) {
+					bg = bl_extendedBlockGraphics[blockId] = new BlockGraphics(bl_extendedBlocks[blockId]->mappingId);
+				}
+			}
+			if (!bg) continue;
+		};
+		BL_LOG("Setting texs for %d: %s:%s:%s:%s:%s:%s", request.blockId,
+			request.textureSides[0].c_str(), request.textureSides[1].c_str(), request.textureSides[2].c_str(),
+			request.textureSides[3].c_str(), request.textureSides[4].c_str(), request.textureSides[5].c_str());
+		//bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
+		//	request.textureSides[3], request.textureSides[4], request.textureSides[5]);
 		//if (!bl_custom_block_textures[request.blockId]) continue;
 		//BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
 		//bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
 	}
+	BL_LOG("end finishBlockBuildTextureRequests");
 }
 
 class BLItemSetRequest {
@@ -1506,6 +1538,7 @@ public:
 void BLItemSetJsonRequest::setItem() {
 	Item* item = bl_Item_mItems[this->itemId];
 	if (!item) return;
+	BL_LOG("Setting icon for %d", this->itemId);
 	Json::Value jsonValue;
 	Json::Reader jsonReader;
 	bool ret = false;
@@ -1518,9 +1551,11 @@ void BLItemSetJsonRequest::setItem() {
 static std::vector<std::shared_ptr<BLItemSetRequest>> itemSetIconRequests;
 
 static void bl_finishItemSetIconRequests() {
+	BL_LOG("Setting item icons: %p", Item::mItemTextureAtlas.get());
 	for (auto& request: itemSetIconRequests) {
 		request->setItem();
 	}
+	BL_LOG("Setting icon done");
 	//itemSetIconRequests.clear();
 }
 
@@ -1547,11 +1582,13 @@ static bool hasRepopulatedItemGraphics = false;
 
 void bl_cpp_tick_hook() {
 	//if (Item::mItemTextureAtlas && itemSetIconRequests.size() != 0) bl_finishItemSetIconRequests();
+/* fixme 1.1
 	if (!hasRepopulatedItemGraphics && Item::mItemTextureAtlas) {
 		BL_LOG("repopulating item graphics");
 		bl_repopulateItemGraphics();
 		hasRepopulatedItemGraphics = true;
 	}
+*/
 }
 
 static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
@@ -1570,7 +1607,7 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Block* retval;
-	BlockGraphics* retGraphics;
+	//BlockGraphics* retGraphics;
 	retval = (Block*) ::operator new(kTileSize);
 	bl_Block_Block(retval, nameStr, 245, bl_getMaterial(materialType));
 	retval->vtable = bl_CustomBlock_vtable + 2;
@@ -1579,10 +1616,12 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %s", retval->mappingId.c_str());
 
+/*
 	retGraphics = new BlockGraphics(retval->mappingId);
 	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
 
 	bl_extendedBlockGraphics[blockId] = retGraphics;
+*/
 
 	bl_set_i18n("tile." + nameStr + ".name", realNameStr);
 	//add it to the global tile list
@@ -1594,10 +1633,12 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 	request.blockId = blockId;
 	request.textureSides = {nameStr + "_down", nameStr + "_up", nameStr + "_north",
 		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
+/*
 	if (BlockGraphics::mTerrainTextureAtlas) {
 		retGraphics->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
 			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
 	}
+*/
 	//BL_LOG("Created blockGraphics %p for blockId %d", retGraphics, blockId);
 	buildTextureRequests.push_back(request);
 	bl_customBlocksCreated = true;
@@ -1654,7 +1695,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	//Allocate memory for the block
 	// size found before the Tile::Tile constructor for tile ID #4
 	Block* retval;
-	BlockGraphics* retGraphics;
+	//BlockGraphics* retGraphics;
 	if (customBlockType == 0 || true) { // FIXME 0.15
 		retval = (Block*) ::operator new(kTileSize);
 		bl_Block_Block(retval, nameStr, blockId, bl_getMaterial(materialType));
@@ -1682,9 +1723,9 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
 	}
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %s", retval->mappingId.c_str());
-	retGraphics = new BlockGraphics(retval->mappingId);
+	/*retGraphics = new BlockGraphics(retval->mappingId);
 	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;
-	BlockGraphics::mBlocks[blockId] = retGraphics;
+	BlockGraphics::mBlocks[blockId] = retGraphics;*/
 
 	bl_set_i18n("tile." + nameStr + ".name", realNameStr);
 	//add it to the global tile list
@@ -1699,20 +1740,25 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	tileItem->setStackedByData(true);
 	bl_registerItem(tileItem, nameStr);
 	bl_Item_setCategory(tileItem, 2 /* Decoration */);
+/*
 	if (BlockGraphics::mBlocks[blockId] == nullptr) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
 		abort();
 	}
+*/
 	BLBlockBuildTextureRequest request;
 	request.blockId = blockId;
 	request.textureSides = {nameStr + "_down", nameStr + "_up", nameStr + "_north",
 		nameStr + "_south", nameStr + "_west", nameStr + "_east"};
+/*
 	if (BlockGraphics::mTerrainTextureAtlas) {
 		retGraphics->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
 			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
 	}
+*/
 	//BL_LOG("Created blockGraphics %p for blockId %d", retGraphics, blockId);
 	buildTextureRequests.push_back(request);
+
 	bl_customBlocksCreated = true;
 	
 	return retval;
@@ -1995,7 +2041,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_sendPacket(Packet* packet) {
-	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft->getServer());
+	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft->getMinecraftGame());
 	sender->send(*packet);
 /*
 	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
@@ -2115,7 +2161,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCameraEntity
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* localPlayer = bl_minecraft->getLocalPlayer();
+	if (!localPlayer) return;
+	Entity* entity = bl_getEntityWrapper(localPlayer->getLevel(), entityId);
 	if (entity == NULL) return;
 	bl_minecraft->setCameraEntity(entity);
 }
@@ -2169,8 +2217,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
   (JNIEnv *env, jclass clazz) {
-	if (!bl_level) return -1;
-	HitResult const& objectMouseOver = bl_level->getHitResult();
+	Level* level = bl_minecraft->getLevel();
+	if (!level) return -1;
+	HitResult const& objectMouseOver = level->getHitResult();
 	if (objectMouseOver.type != HIT_RESULT_ENTITY) return -1;
 	//Entity* hoverEntity = *((Entity**) ((uintptr_t) bl_level + MINECRAFT_HIT_ENTITY_OFFSET));
 	Entity* hoverEntity = objectMouseOver.entity;
@@ -2180,8 +2229,9 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeP
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
   (JNIEnv *env, jclass clazz, jint axis) {
-	if (!bl_level) return -1;
-	HitResult const& objectMouseOver = bl_level->getHitResult();
+	Level* level = bl_minecraft->getLevel();
+	if (!level) return -1;
+	HitResult const& objectMouseOver = level->getHitResult();
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "hit %d %d %d %d", objectMouseOver->type,
 	//	objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
 	if (objectMouseOver.type != HIT_RESULT_BLOCK) return -1;
@@ -2214,8 +2264,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT float JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedVec
   (JNIEnv *env, jclass clazz, jint axis) {
-	if (!bl_level) return -1;
-	HitResult const& objectMouseOver = bl_level->getHitResult();
+	Level* level = bl_minecraft->getLevel();
+	if (!level) return -1;
+	HitResult const& objectMouseOver = level->getHitResult();
 	switch (axis) {
 		case AXIS_X:
 			return objectMouseOver.hitVec.x;
@@ -2398,6 +2449,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 }
 
 void bl_Mob_die_hook(Entity* entity1, EntityDamageSource const& damageSource) {
+	if (!bl_isActiveLevel(entity1->getLevel())) {
+		bl_Mob_die_real(entity1, damageSource);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -2473,12 +2528,6 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeD
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetUseController
   (JNIEnv *env, jclass clazz, jboolean use) {
-	if (bl_forceController) return;
-#ifdef __arm__
-	unsigned char* ptr = (unsigned char*) bl_marauder_translation_function(
-		(void*) (((uintptr_t) bl_MinecraftClient_useController) & ~1));
-	*ptr = use;
-#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDumpVtable
@@ -2533,7 +2582,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv* env, jclass clazz, jlong entityId, jint type) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + (bl_BlockGraphics_initBlocks_old? kItemEntity_itemInstance_offset103: kItemEntity_itemInstance_offset));
+	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + kItemEntity_itemInstance_offset);
 	switch (type) {
 		case ITEMID:
 			return bl_ItemInstance_getId(instance);
@@ -2644,9 +2693,11 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *env, jclass clazz, jstring text) {
+	// fixme 1.1
+	return true;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	MinecraftCommands* commands = bl_minecraft->getServer()->getCommands();
+	MinecraftCommands* commands = bl_minecraft->getMinecraftGame()->getCommands();
 	if (!commands) return false;
 	bool hasCommand = commands->getCommand(mystr, 0) != nullptr;
 	//BL_LOG("command: %s hasCommand: %s", utfChars, hasCommand? "yes": "no");
@@ -2876,6 +2927,7 @@ static void* (*bl_Throwable_throwableHit_real)(void* component, HitResult const&
 
 void* bl_Throwable_throwableHit_hook(void* projectileComponent, HitResult const& hitResult) {
 	Entity* entity = *((Entity**)(((uintptr_t)projectileComponent) + kProjectileComponent_entity_offset));
+	if (!bl_isActiveLevel(entity->getLevel())) return bl_Throwable_throwableHit_real(projectileComponent, hitResult);
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -3134,6 +3186,10 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 void (*bl_Entity_hurt_real)(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b);
 
 void bl_Entity_hurt_hook(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b) {
+	if (!bl_isActiveLevel(entity->getLevel())) {
+		bl_Entity_hurt_real(entity, damageSource, hearts, a, b);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -3159,6 +3215,10 @@ void bl_Entity_hurt_hook(Entity* entity, EntityDamageSource const& damageSource,
 }
 
 void bl_Player_addExperience_hook(Player* player, int experience) {
+	if (!bl_isActiveLevel(player->getLevel())) {
+		bl_Player_addExperience_real(player, experience);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -3180,6 +3240,10 @@ void bl_Player_addExperience_hook(Player* player, int experience) {
 }
 
 void bl_Player_addLevels_hook(Player* player, int experience) {
+	if (!bl_isActiveLevel(player->getLevel())) {
+		bl_Player_addLevels_real(player, experience);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = false;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -3339,17 +3403,35 @@ JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPrevent
 
 void bl_armorInit_postLoad();
 
-void (*bl_MinecraftClient_onResourcesLoaded_real)(MinecraftClient*);
-void bl_MinecraftClient_onResourcesLoaded_hook(MinecraftClient* client) {
-	bl_MinecraftClient_onResourcesLoaded_real(client);
+void (*bl_MinecraftGame_updateFoliageColors_real)(MinecraftGame*);
+void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
+	bl_MinecraftGame_updateFoliageColors_real(client);
+	if (!Item::mItemTextureAtlas) return;
 	bl_finishBlockBuildTextureRequests();
 	bl_finishItemSetIconRequests();
 	bl_repopulateItemGraphics();
+
 	bl_armorInit_postLoad();
 	if (bl_Block_mBlocks[kStonecutterId]) {
 		bl_Block_mBlocks[kStonecutterId]->setSolid(false);
 		bl_Block_mBlocks[kStonecutterId]->renderLayer = 3;
 		bl_Block_setVisualShape(bl_Block_mBlocks[kStonecutterId], Vec3(0, 0, 0), Vec3(1, 0.999, 1));
+	}
+}
+
+size_t bl_itemrenderer_test() {
+	return ItemRenderer::instance.itemGraphics.size();
+}
+
+void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
+	//BL_LOG("item graphics: %p, %p, %d, %d", renderer, &ItemRenderer::instance,
+	//		ItemRenderer::instance.itemGraphics.size(), ItemRenderer::mItemGraphics.size());
+	bool needUpdate = ItemRenderer::instance.itemGraphics.size() == 0;
+	renderer->_loadItemGraphics();
+	if (needUpdate) {
+		BL_LOG("Need to update graphics: %p, %p, %d", ItemRenderer::instance.itemGraphics.data(), ItemRenderer::mItemGraphics.data(),
+			ItemRenderer::instance.itemGraphics.size());
+		bl_repopulateItemGraphics();
 	}
 }
 
@@ -3363,13 +3445,20 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 	if (bl_customBlocksCreated) {
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
-		if (bl_BlockGraphics_initBlocks_new) {
-			bl_BlockGraphics_initBlocks_new(bl_minecraft->getServer()->getResourceLoader());
-		} else {
-			bl_BlockGraphics_initBlocks_old();
-		}
+		bl_BlockGraphics_initBlocks_new(bl_minecraft->getMinecraftGame()->getResourceLoader());
 		bl_finishBlockBuildTextureRequests();
 	}
+}
+
+bool addHook(PlayerInventoryProxy* a, ItemInstance& b, bool c) {
+	BL_LOG("Add: %p %d", a, b.getId());
+	return a->add(b, c);
+}
+
+std::string getNameHook(ItemInstance* itemStack) {
+	if (!itemStack) return "HACK";
+	BL_LOG("Getting name: %d", itemStack->getId());
+	return itemStack->getName();
 }
 
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
@@ -3379,12 +3468,12 @@ static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFu
 
 static bool bl_patchAllItemInstanceConstructors(soinfo2* mcpelibhandle) {
 	const char* const toPatch[] = {
-"_ZN12ItemInstanceC1EPK4Item",
-"_ZN12ItemInstanceC1EPK4Itemi",
-"_ZN12ItemInstanceC1EPK4Itemii",
-"_ZN12ItemInstanceC1EPK4ItemiiPK11CompoundTag",
 "_ZN12ItemInstanceC1Eiii",
 "_ZN12ItemInstanceC1EiiiPK11CompoundTag",
+"_ZN12ItemInstanceC1ERK4Item",
+"_ZN12ItemInstanceC1ERK4Itemi",
+"_ZN12ItemInstanceC1ERK4Itemii",
+"_ZN12ItemInstanceC1ERK4ItemiiPK11CompoundTag",
 "_ZN12ItemInstanceC1ERKS_",
 "_ZN12ItemInstance4initEiii",
 "_ZN12ItemInstance4loadERK11CompoundTag",
@@ -3427,6 +3516,37 @@ nullptr
 		}
 	}
 	return false; // WHAT
+}
+
+static bool bl_patchReadItemInstance(soinfo2* mcpelibhandle) {
+	void* readItemInstance = dlsym(mcpelibhandle, "_ZN9serializeI12ItemInstanceE4readER20ReadOnlyBinaryStream");
+	uint8_t* code = (uint8_t*)bl_marauder_translation_function((void*)(((uintptr_t)readItemInstance) & ~1));
+#ifdef __arm__
+	for (int i = 0; i < 0x100; i+=2) {
+		// f5b.7fff: cmp r?, #510
+		// this does a (if itemId == 0 || itemId > maxItemId) goto setup placeholder
+		// our replacement lets item id 4096 though when it shouldn't but it otherwise works
+		if ((code[i] & 0xff) == 0xb0 && code[i+1] == 0xf5 && code[i+2] == 0xff && code[i+3] == 0x7f && (code[i+5] & 0xf0) == 0xd0) {
+/* Original:
+ 12b20ac:       f1a9 0001       sub.w   r0, r9, #1
+ 12b20b0:       f5b0 7fff       cmp.w   r0, #510        ; 0x1fe
+/* New:
+   4:	f5b0 5f80 	cmp.w	r0, #4096	; 0x1000
+*/
+			//BL_LOG("The addr is start + %x", i);
+			//code[i-4] = 0x09; code[i+2] = 0x80; code[i+3] = 0x5f;
+			code[i+2] = 0x80; code[i+3] = 0x5f;
+			return true;
+		}
+	}
+	//code[0x12b20d8 - 0x012b200c] = 0xde;
+	//code[0x12b20d8 - 0x012b200c + 1] = 0xde;
+	//return true;
+#else
+// fixme 1.1
+#endif
+	abort();
+	return false;
 }
 
 static bool bl_patchItemEntityChecks(soinfo2* mcpelibhandle) {
@@ -3508,6 +3628,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	}
 
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
+	bl_patchReadItemInstance(mcpelibhandle);
 	bl_patchItemEntityChecks(mcpelibhandle);
 
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
@@ -3527,6 +3648,8 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
 //	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
 	bl_prepatch_fakeassets(mcpelibhandle);
+	//mcpelauncher_hook((void*)&Options::getUseLocalServer, (void*)&bl_Options_getUseLocalServer_hook,
+	//	(void**)&bl_Options_getUseLocalServer_real);
 }
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\
@@ -3544,10 +3667,8 @@ void bl_setuphooks_cppside() {
 	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
 
 	// FIXME 0.11
-	bl_MinecraftClient_startLocalServer = (void (*) (MinecraftClient*, std::string const&, std::string const&, void*))
-		dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
-	bl_MinecraftClient_leaveGame = (void (*) (MinecraftClient*, bool))
-		dlsym(mcpelibhandle, "_ZN15MinecraftClient9leaveGameEb"); //hooked - just pull whichever version MCPE uses
+	//bl_MinecraftClient_startLocalServer = (void (*) (MinecraftClient*, std::string const&, std::string const&, void*))
+	//	dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
 	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Level_getAllEntities = (void* (*)(Level*))
@@ -3634,6 +3755,7 @@ void bl_setuphooks_cppside() {
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
 
 	bl_Item_mItems = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item6mItemsE");
+	// known good
 	// FIXME 0.11
 	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
 	//mcpelauncher_hook(handleTextPacket, (void*) &bl_ClientNetworkHandler_handleTextPacket_hook,
@@ -3675,6 +3797,7 @@ void bl_setuphooks_cppside() {
 	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadER11CompoundTag");
 	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 #endif
+	// known good.
 	bl_Level_addParticle = (void (*)(Level*, int, Vec3 const&, Vec3 const&, int))
 		dlsym(mcpelibhandle, "_ZN5Level11addParticleE12ParticleTypeRK4Vec3S3_i");
 	//bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
@@ -3694,7 +3817,7 @@ void bl_setuphooks_cppside() {
 
 	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
 		(void**) &bl_BlockSource_fireBlockEvent_real);
-
+// known to work
 	bl_Block_mSolid = (bool*) dlsym(RTLD_DEFAULT, "_ZN5Block6mSolidE");
 	bl_Block_getAABB = (AABB* (*)(Block*, BlockSource&, BlockPos const&, AABB&, int, bool, int))
 		dlsym(mcpelibhandle, "_ZNK5Block7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
@@ -3703,6 +3826,7 @@ void bl_setuphooks_cppside() {
 
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
+// known to work
 	bl_Biome_getBiome = (Biome* (*)(int))
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
@@ -3716,17 +3840,9 @@ void bl_setuphooks_cppside() {
 	// FIXME 0.11
 	//bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
 	//	dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");
-
+	// known to fail.
 	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieERK18EntityDamageSource");
 	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
-
-	bl_MinecraftClient_useController = (bool (*) (Minecraft*))
-		dlsym(mcpelibhandle, "_ZN15MinecraftClient13useControllerEv");
-
-#ifdef __arm__
-	unsigned char* useControllerPtr = (unsigned char*) (((uintptr_t) bl_MinecraftClient_useController) & ~1);
-	bl_forceController = *useControllerPtr;
-#endif
 
 	bl_Entity_getNameTag = (std::string* (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK6Entity10getNameTagEv");
@@ -3817,8 +3933,9 @@ void bl_setuphooks_cppside() {
 	bl_BlockGraphics_getTexture_char_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEa");
 	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_char_real, (void*) bl_CustomBlockGraphics_getTexture_char_hook);
-
-	mcpelauncher_hook((void*)&MinecraftClient::onResourcesLoaded, (void*)bl_MinecraftClient_onResourcesLoaded_hook, (void**)&bl_MinecraftClient_onResourcesLoaded_real);
+	// known to fail.
+	// fixme 1.1.0
+	mcpelauncher_hook((void*)&MinecraftGame::updateFoliageColors, (void*)bl_MinecraftGame_updateFoliageColors_hook, (void**)&bl_MinecraftGame_updateFoliageColors_real);
 	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
@@ -3832,13 +3949,15 @@ void bl_setuphooks_cppside() {
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
 
-	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
-		(void**)&bl_InventoryItemRenderer_update_real);
+	bl_patch_got_wrap(mcpelibhandle, (void*)&ItemRenderer::_loadItemGraphics, (void*)&bl_ItemRenderer__loadItemGraphics_hook);
+
+	// fixme 1.1.0
+	//mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
+	//	(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
-	if (!bl_BlockGraphics_initBlocks_new) {
-		bl_BlockGraphics_initBlocks_old = (void (*)()) dlsym(mcpelibhandle, "_ZN13BlockGraphics10initBlocksEv");
-	}
+	bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
+	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 
 	bl_renderManager_init(mcpelibhandle);
 }

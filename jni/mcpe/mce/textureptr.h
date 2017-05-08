@@ -20,7 +20,7 @@ public:
 	std::string something; // 12
 	char filler2[4]; // 16
 	TexturePtr();
-	TexturePtr(TextureGroup&, ResourceLocation const&);
+	TexturePtr(TextureGroup&, ResourceLocation const&, bool a=false);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);

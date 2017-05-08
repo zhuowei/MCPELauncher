@@ -5,6 +5,7 @@ public:
 	void setDevRenderBoundingBoxes(bool);
 	void setDevRenderPaths(bool);
 	void setRenderDebug(bool);
+	bool getUseLocalServer() const;
 };
 class ScreenView {
 public:

@@ -61,7 +61,7 @@ void bl_reload_armor_textures() {
 int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* mob, int armorPart, float partialTicks) {
 	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, mob, armorPart, partialTicks);
 	ItemInstance* armor = bl_Mob_getArmor(mob, armorPart);
-	if (!bl_ItemInstance_isArmorItem(armor)) return retval; // no armour
+	if (!armor->isArmorItem()) return retval; // no armour
 
 	ArmorItem* armorItem = (ArmorItem*) armor->item;
 	if (armorItem->renderIndex != 42) return retval;
@@ -100,10 +100,8 @@ void bl_armorInit_postLoad() {
 
 void bl_cape_init(void* mcpelibinfo) {
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mob9ArmorSlotf");
-	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
-		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
-	bl_ItemInstance_isArmorItem = (bool (*)(ItemInstance*))
-		dlsym(mcpelibinfo, "_ZN12ItemInstance11isArmorItemEPKS_");
+	//mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
+	//	(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
 }
 
 } // extern "C"

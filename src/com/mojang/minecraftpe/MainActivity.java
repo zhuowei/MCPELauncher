@@ -80,7 +80,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.0";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.1";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -1646,11 +1646,13 @@ public class MainActivity extends NativeActivity {
 			hiddenTextWindow.setOutsideTouchable(true);
 			// These flags were taken from a dumpsys window output of Mojang's
 			// window
+			/*
 			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
 				public void onDismiss() {
 					nativeBackPressed();
 				}
 			});
+			*/
 		}
 
 		if (commandHistory) {
@@ -1678,7 +1680,11 @@ public class MainActivity extends NativeActivity {
 		if (hiddenTextWindow == null)
 			return;
 		hiddenTextWindow.dismiss();
-		hideKeyboardView();
+		this.getWindow().getDecorView().postDelayed(new Runnable() {
+			public void run() {
+				hideKeyboardView();
+			}
+		}, 100);
 	}
 
 	// added in 0.9.0
@@ -1944,6 +1950,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void hideKeyboardView() {
+		System.out.println("Hiding the keyboard view");
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 		touchImmersiveMode();
@@ -2107,6 +2114,27 @@ public class MainActivity extends NativeActivity {
 
 	public void trackPurchaseEvent(String a, String b, String c) {
 		System.out.println("Track purchase event: " + a + ":" + b + ":" + c);
+	}
+
+	// 1.1
+	public String getFormattedDateString(int date) {
+		return getDateString(date);
+	}
+
+	public String getFileTimestamp(int date) {
+		return getDateString(date);
+	}
+
+	public long getUsedMemory() {
+		return 0;
+	}
+
+	public void trackPurchaseEvent(String a, String b, String c, String d, String e) {
+		System.out.println("Track purchase event: " + a + ":" + b + ":" + c + ":" + d + ":" + e);
+	}
+
+	public String createDeviceID() {
+		return getDeviceId();
 	}
 
 	@Override
@@ -2554,53 +2582,6 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-		if (getMCPEVersion().startsWith("1.0")) {
-			initAtlasMetaNew();
-			return;
-		}
-		final boolean dumpAtlas = BuildConfig.DEBUG;
-		if (isSafeMode()) return;
-		try {
-			AtlasProvider terrainProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/terrain_texture.json",
-				"images/terrain-atlas/", "block.bl_modpkg.");
-			AtlasProvider itemsProvider = new AtlasProvider("resourcepacks/vanilla/client/textures/item_texture.json",
-				"images/items-opaque/", "item.bl_modpkg.");
-			terrainProvider.initAtlas(this);
-			itemsProvider.initAtlas(this);
-
-			TextureListProvider textureListProvider = new TextureListProvider("resourcepacks/vanilla/client/textures.list");
-			textureListProvider.init(this);
-
-			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resourcepacks/vanilla/client/blocks.json");
-			blocksJsonProvider.init(this);
-			if (dumpAtlas) {
-				terrainProvider.dumpAtlas();
-				itemsProvider.dumpAtlas();
-				textureListProvider.dumpAtlas();
-			}
-			textureOverrides.add(0, terrainProvider);
-			textureOverrides.add(1, itemsProvider);
-			textureOverrides.add(2, textureListProvider);
-			textureOverrides.add(3, blocksJsonProvider);
-			ScriptManager.terrainMeta = terrainProvider;
-			ScriptManager.itemsMeta = itemsProvider;
-			ScriptManager.blocksJson = blocksJsonProvider;
-			ScriptManager.textureList = textureListProvider;
-		} catch (Exception e) {
-			e.printStackTrace();
-			reportError(e);
-		}
-/*
-		FIXME 0.16
-			ResourcePackManifestProvider resourcePackManifestProvider =
-				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
-			resourcePackManifestProvider.init(this);
-			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
-			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
-*/
-	}
-
-	private void initAtlasMetaNew() {
 		final boolean dumpAtlas = BuildConfig.DEBUG;
 		if (isSafeMode()) return;
 		try {
@@ -2611,16 +2592,19 @@ public class MainActivity extends NativeActivity {
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
 
-			TextureListProvider textureListProvider = new TextureListProvider("resource_packs/vanilla/textures.list");
+			TextureListProvider textureListProvider = new TextureListProvider("resource_packs/vanilla/textures/textures_list.json");
 			textureListProvider.init(this);
 
 			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resource_packs/vanilla/blocks.json");
 			blocksJsonProvider.init(this);
+			/*
 			if (dumpAtlas) {
 				terrainProvider.dumpAtlas();
 				itemsProvider.dumpAtlas();
 				textureListProvider.dumpAtlas();
+				blocksJsonProvider.dumpAtlas();
 			}
+			*/
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
 			//textureOverrides.add(2, textureListProvider);
@@ -2655,7 +2639,7 @@ public class MainActivity extends NativeActivity {
 		return mcPkgInfo.versionName;
 	}
 	private boolean requiresPatchingInSafeMode() {
-		return getMCPEVersion().startsWith(HALF_SUPPORT_VERSION);
+		return true;// fixme 1.1 getMCPEVersion().startsWith(HALF_SUPPORT_VERSION);
 	}
 
 	public void reportReimported(final String scripts) {
@@ -2704,7 +2688,8 @@ public class MainActivity extends NativeActivity {
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Editor action: " + actionId);
-			nativeReturnKeyPressed();
+			//nativeReturnKeyPressed();
+			nativeTypeCharacter("\n");
 			return true;
 		}
 	}

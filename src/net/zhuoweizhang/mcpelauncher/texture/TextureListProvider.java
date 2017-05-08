@@ -20,6 +20,7 @@ public class TextureListProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(manifestPath)) {
+			dumpAtlas();
 			StringBuilder builder = new StringBuilder();
 			for (String s: files) {
 				builder.append(s);

@@ -42,11 +42,13 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_UPDATE 21
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
+
+const int kGameMode_level_offset = 8;
 #ifdef __i386
-// FIXME 0.17
+// FIXME 1.1
 #define GAMERENDERER_GETFOV_SIZE 0x1d6
 #else
-#define GAMERENDERER_GETFOV_SIZE 0x154
+#define GAMERENDERER_GETFOV_SIZE 0x188
 #endif
 
 #define LOG_TAG "BlockLauncher/ModScript"
@@ -88,10 +90,11 @@ extern jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_SurvivalMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
-void* (*bl_MinecraftClient_startLocalServer_real)(MinecraftClient*, void*, void*, void*);
+void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, void*, void*, void*, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
+static void (*bl_SurvivalMode_tick_real)(void*);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
 static float (*bl_LevelRenderer_getFov)(void*, float, int);
 static float (*bl_LevelRenderer_getFov_real)(void*, float, int);
@@ -110,11 +113,11 @@ static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
 void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
-static void (*bl_NinecraftApp_update_real)(MinecraftClient*);
+static void (*bl_NinecraftApp_update_real)(MinecraftGame*);
 
-static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
-static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char);
-static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, signed char);
+static void (*bl_SurvivalMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char, bool&);
+static void (*bl_CreativeMode_startDestroyBlock_real)(void*, Player*, BlockPos, signed char, bool&);
+static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, signed char, bool&);
 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
@@ -217,6 +220,14 @@ extern void bl_panicTamper();
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
+	BL_LOG("Creative useItemOn");
+
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+	if (myLevel != bl_level) {
+		bl_GameMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
+		return;
+	}
+
 	JNIEnv *env;
 	int x = pos->x;
 	int y = pos->y;
@@ -261,6 +272,14 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 
 void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
+	BL_LOG("Survival useItemOn");
+
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+	if (myLevel != bl_level) {
+		bl_SurvivalMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
+		return;
+	}
+
 	JNIEnv *env;
 	int x = pos->x;
 	int y = pos->y;
@@ -303,7 +322,12 @@ void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance
 	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, player, itemStack, pos, side, vec3);
 }
 
-void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side) {
+void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side, bool& someBool) {
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+	if (myLevel != bl_level) {
+		bl_SurvivalMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -322,10 +346,15 @@ void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 		bl_JavaVM->DetachCurrentThread();
 	}
 	
-	if(!preventDefaultStatus) bl_SurvivalMode_startDestroyBlock_real(gamemode, player, blockPos, side);
+	if(!preventDefaultStatus) bl_SurvivalMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
 }
 
-void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side) {
+void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side, bool& someBool) {
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+	if (myLevel != bl_level) {
+		bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -343,10 +372,14 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side);
+	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
 }
 
-void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, BlockPos blockPos, signed char side) {
+void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, BlockPos blockPos, signed char side, bool& abool) {
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+	if (myLevel != bl_level) {
+		return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side, abool);
+	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -365,7 +398,7 @@ void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, Bloc
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	if(!preventDefaultStatus) return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side);
+	if(!preventDefaultStatus) return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side, abool);
 	return nullptr;
 }
 
@@ -410,13 +443,13 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 extern void bl_cpp_selectLevel_hook();
 
-void* bl_MinecraftClient_startLocalServer_hook(MinecraftClient* minecraft, void* wDir, void* wName, void* levelSettings) {
+void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, void* wDir, void* wName, void* str3, void* str4, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
 	}
 	bl_cpp_selectLevel_hook();
-	bl_minecraft = minecraft;
+	//bl_minecraft = minecraft;
 	JNIEnv *env;
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -436,14 +469,20 @@ void* bl_MinecraftClient_startLocalServer_hook(MinecraftClient* minecraft, void*
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	void* retval = bl_MinecraftClient_startLocalServer_real(minecraft, wDir, wName, levelSettings);
-	bl_level = minecraft->getServer()->getLevel();
-	bl_localplayer = minecraft->getLocalPlayer();
+	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, str4, levelSettings);
+	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	bl_localplayer = bl_minecraft->getLocalPlayer();
 	bl_onLockDown = false;
 	return retval;
 }
 
 void bl_GameMode_attack_hook(void* gamemode, Player* player, Entity* entity) {
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+
+	if (myLevel != bl_level) {
+		bl_GameMode_attack_real(gamemode, player, entity);
+		return;
+	}
 	JNIEnv *env;
 	bl_localplayer = player;
 	preventDefaultStatus = FALSE;
@@ -464,9 +503,26 @@ void bl_cpp_tick_hook();
 void bl_GameMode_tick_hook(void* gamemode) {
 	JNIEnv *env;
 
-	bl_level = bl_minecraft->getServer()->getLevel();
+	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	if (bl_minecraft->getLocalPlayer()) {
+		bl_localplayer = bl_level->getPlayer(bl_minecraft->getLocalPlayer()->getUniqueID());
+	} else {
+		bl_localplayer = nullptr;
+	}
 
-	bl_localplayer = bl_minecraft->getLocalPlayer();
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+
+	if (myLevel != bl_level) {
+		bl_GameMode_tick_real(gamemode);
+		return;
+	}
+
+	/*BL_LOG("Creative tick hook: %p %p %p, %p %p", gamemode, bl_level, bl_localplayer, myLevel,
+		__builtin_return_address(0));
+	Dl_info info;
+	if (dladdr(*((void**)myLevel), &info)) {
+		BL_LOG("level %p: %s", myLevel, info.dli_sname);
+	}*/
 
 	bl_gamemode = gamemode;
 
@@ -479,16 +535,73 @@ void bl_GameMode_tick_hook(void* gamemode) {
 
 	bl_JavaVM->DetachCurrentThread();
 	bl_cpp_tick_hook();
+	//abort();
 	bl_GameMode_tick_real(gamemode);
+}
+
+void bl_SurvivalMode_tick_hook(void* gamemode) {
+	JNIEnv *env;
+
+	//bl_level = bl_minecraft->getMinecraftGame()->getLevel();
+	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	if (bl_minecraft->getLocalPlayer()) {
+		bl_localplayer = bl_level->getPlayer(bl_minecraft->getLocalPlayer()->getUniqueID());
+	} else {
+		bl_localplayer = nullptr;
+	}
+
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+
+	if (myLevel != bl_level) {
+		bl_SurvivalMode_tick_real(gamemode);
+		return;
+	}
+
+	/*
+	BL_LOG("Survival tick hook: %p %p %p, %p %p", gamemode, bl_level, bl_localplayer, myLevel,
+		__builtin_return_address(0));
+	Dl_info info;
+	if (dladdr(*((void**)myLevel), &info)) {
+		BL_LOG("level %p: %s", myLevel, info.dli_sname);
+	}
+	*/
+
+
+	bl_gamemode = gamemode;
+
+	bl_JavaVM->AttachCurrentThread(&env, NULL);
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "tickCallback", "()V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid);
+
+	bl_JavaVM->DetachCurrentThread();
+	bl_cpp_tick_hook();
+	bl_SurvivalMode_tick_real(gamemode);
 }
 
 void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 	bl_GameMode_initPlayer_real(gamemode, player);
+	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+
+	if (myLevel != bl_level) {
+		return;
+	}
+
 	bl_localplayer = player;
 	bl_gamemode = gamemode;
 }
 
 void bl_GameMode_destroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side){
+	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
+
+	if (myLevel != bl_level) {
+		bl_GameMode_destroyBlock_real(gamemode, player, blockPos, side);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
@@ -530,9 +643,9 @@ void bl_handleFrameCallback() {
 	}
 }
 
-void bl_NinecraftApp_update_hook(MinecraftClient* minecraft) {
+void bl_NinecraftApp_update_hook(MinecraftGame* minecraft) {
 	bl_NinecraftApp_update_real(minecraft);
-	bl_minecraft = minecraft;
+	bl_minecraft = minecraft->getPrimaryClientInstance();
 	if (bl_frameCallbackRequested) {
 		bl_frameCallbackRequested = 0;
 		bl_handleFrameCallback();
@@ -542,7 +655,7 @@ void bl_NinecraftApp_update_hook(MinecraftClient* minecraft) {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
-	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
+	ItemInstance instance(id, amount, damage);
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
@@ -606,7 +719,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
 	instance->setCustomName(std::string(nameUtf));
 	env->ReleaseStringUTFChars(name, nameUtf);
-	te->setItem(slot, instance);
+	te->setItem(slot, *instance);
 }
 
 
@@ -808,6 +921,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEx
 	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire, smoke, something);
 }
 
+static void bl_dumpType(void* a) {
+	Dl_info info;
+	if (dladdr(*((void**)a), &info)) {
+		BL_LOG("object %p: %s", a, info.dli_sname);
+	}
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemInventory
   (JNIEnv *env, jclass clazz, jint id, jint amount, jint damage) {
 	if (bl_localplayer == NULL) return;
@@ -819,7 +939,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (invPtr == nullptr) return;
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "invPtr %p", invPtr);
 	if (!remove) {
-		invPtr->add(instance, true);
+		//invPtr->add(instance, true);
+		bl_dumpType(bl_localplayer);
+		BL_LOG("Adding id %d to inventory: %d", id, instance.getId());
+		addItem(*bl_localplayer, instance);
 	} else {
 		if (bl_PlayerInventoryProxy_removeResource) {
 			bl_PlayerInventoryProxy_removeResource(invPtr, instance, false, -1);
@@ -833,8 +956,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetNightMode
   (JNIEnv *env, jclass clazz, jboolean nightMode) {
-	if (!bl_level) return;
-	bl_level->setNightMode(nightMode);
+	//if (!bl_level) return;
+	//bl_level->setNightMode(nightMode);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
@@ -1039,7 +1162,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	Timer* timer = bl_minecraft->getServer()->getTimer();
+	Timer* timer = bl_minecraft->getMinecraftGame()->getTimer();
+	if (!timer) return;
 	timer->ticksPerSecond = ticksPerSecond;
 }
 
@@ -1117,7 +1241,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
-	ItemInstance* instance = bl_newItemInstance(id, amount, damage);
+	ItemInstance instance(id, amount, damage);
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return;
@@ -1186,17 +1310,17 @@ static void App_quit_hook(void* self) {
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode9useItemOnER6PlayerP12ItemInstanceRK8BlockPosaRK4Vec3");
+		"_ZN8GameMode9useItemOnER6PlayerR12ItemInstanceRK8BlockPosaRK4Vec3");
 	vtable_indexes.gamemode_attack = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode6attackER6PlayerR6Entity");
 	vtable_indexes.gamemode_tick = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode4tickEv");
-	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
-		"_ZN15MinecraftClient6updateEv");
-	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
-		"_ZN3App4quitEv");
+	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV13MinecraftGame",
+		"_ZN13MinecraftGame6updateEv");
+	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV14ClientInstance",
+		"_ZN14ClientInstance4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode17startDestroyBlockER6Player8BlockPosa");
+		"_ZN8GameMode17startDestroyBlockER6Player8BlockPosaRb");
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -1204,7 +1328,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity6setPosERK4Vec3") - 2;
 	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob14getCarriedItemEv") - 2;
+		"_ZNK3Mob14getCarriedItemEv") - 2;
 	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity11startRidingERS_") - 2;
 	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
@@ -1212,7 +1336,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZNK6Entity11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode20continueDestroyBlockER6Player8BlockPosa");
+		"_ZN8GameMode20continueDestroyBlockER6Player8BlockPosaRb");
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1247,7 +1371,7 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 	populate_vtable_indexes(mcpelibhandle);
 
 	if (!limitedPrepatch) {
-		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
+		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV14ClientInstance");
 		App_quit_real = (void (*)(void*)) minecraftVtable[vtable_indexes.minecraft_quit];
 		minecraftVtable[vtable_indexes.minecraft_quit] = (void*) &App_quit_hook;
 	}
@@ -1301,7 +1425,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//edit the vtables of the GameMode implementations
 
-	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12CreativeMode");
+	// fixme 1.1
+	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV8GameMode");
 	bl_GameMode_useItemOn_real = (void (*)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*))
 		creativeVtable[vtable_indexes.gamemode_use_item_on];
 	creativeVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
@@ -1314,17 +1439,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackER6PlayerR6Entity");
 	creativeVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
 	survivalVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
-	bl_GameMode_tick_real = (void (*)(void*))
-		dlsym(RTLD_DEFAULT, "_ZN8GameMode4tickEv");
+
+	bl_GameMode_tick_real = (void (*)(void*)) creativeVtable[vtable_indexes.gamemode_tick];
+	bl_SurvivalMode_tick_real = (void (*)(void*)) survivalVtable[vtable_indexes.gamemode_tick];
 	creativeVtable[vtable_indexes.gamemode_tick] = (void*) &bl_GameMode_tick_hook;
-	survivalVtable[vtable_indexes.gamemode_tick] = (void*) &bl_GameMode_tick_hook;
+	survivalVtable[vtable_indexes.gamemode_tick] = (void*) &bl_SurvivalMode_tick_hook;
 
 	//bl_GameMode_initPlayer_real = dlsym(RTLD_DEFAULT, "_ZN8GameMode10initPlayerEP6Player");
 	//creativeVtable[vtable_indexes.gamemode_init_player] = (void*) &bl_GameMode_initPlayer_hook;
 	//survivalVtable[vtable_indexes.gamemode_init_player] = (void*) &bl_GameMode_initPlayer_hook;
 
 	//edit the vtable of NinecraftApp to get a callback when levels are switched
-	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV15MinecraftClient");
+	void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV14ClientInstance");
 	//void** levelVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV5Level");
 	//bl_dumpVtable((void**) minecraftVtable, 0x100);
 	//int minecraftVtableOnClientStartedLevel = bl_vtableIndex(mcpelibhandle, "_ZTV15MinecraftClient",
@@ -1333,23 +1459,23 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
-	void* selectLevel = dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
-	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftClient_startLocalServer_hook,
-		(void**) &bl_MinecraftClient_startLocalServer_real);
+	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSsSs13LevelSettings");
+	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftGame_startLocalServer_hook,
+		(void**) &bl_MinecraftGame_startLocalServer_real);
 
 	void* destroyBlock = dlsym(RTLD_DEFAULT, "_ZN8GameMode12destroyBlockER6Player8BlockPosa");
 	mcpelauncher_hook(destroyBlock, (void*) &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
 	
 	//void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
-	bl_CreativeMode_startDestroyBlock_real = (void (*)(void*, Player*, BlockPos, signed char))
+	bl_CreativeMode_startDestroyBlock_real = (void (*)(void*, Player*, BlockPos, signed char, bool&))
 		creativeVtable[vtable_indexes.gamemode_start_destroy_block];
 	creativeVtable[vtable_indexes.gamemode_start_destroy_block] = (void*) &bl_CreativeMode_startDestroyBlock_hook;
-	bl_SurvivalMode_startDestroyBlock_real = (void (*)(void*, Player*, BlockPos, signed char))
+	bl_SurvivalMode_startDestroyBlock_real = (void (*)(void*, Player*, BlockPos, signed char, bool&))
 		survivalVtable[vtable_indexes.gamemode_start_destroy_block];
 	survivalVtable[vtable_indexes.gamemode_start_destroy_block] = (void*) &bl_SurvivalMode_startDestroyBlock_hook;
 
-	bl_GameMode_continueDestroyBlock_real = (void* (*)(void*, Player&, BlockPos, signed char))
+	bl_GameMode_continueDestroyBlock_real = (void* (*)(void*, Player&, BlockPos, signed char, bool&))
 		creativeVtable[vtable_indexes.gamemode_continue_destroy_block];
 	creativeVtable[vtable_indexes.gamemode_continue_destroy_block] = (void*) &bl_GameMode_continueDestroyBlock_hook;
 	survivalVtable[vtable_indexes.gamemode_continue_destroy_block] = (void*) &bl_GameMode_continueDestroyBlock_hook;
@@ -1357,7 +1483,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
-	void* getFov = dlsym(RTLD_DEFAULT, "_ZN13LevelRenderer6getFovEfb");
+	void* getFov = dlsym(RTLD_DEFAULT, "_ZN19LevelRendererPlayer6getFovEfb");
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
 	mcpelauncher_hook(getFov, (void*) &bl_LevelRenderer_getFov_hook, (void**) &bl_LevelRenderer_getFov_real);
 	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
@@ -1366,7 +1492,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LevelRenderer_getFov = (float (*)(void*, float, int)) getFov;
 
 	bl_Player_getCarriedItem = (ItemInstance* (*)(Player*))
-		dlsym(RTLD_DEFAULT, "_ZN6Player14getCarriedItemEv");
+		dlsym(RTLD_DEFAULT, "_ZNK6Player14getCarriedItemEv");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
@@ -1386,8 +1512,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
 	bl_Inventory_Inventory = (void (*)(void*, Player*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryC1EP6Player");
 	bl_Inventory_delete1_Inventory = (void (*)(void*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
+	void** minecraftGameVtable = (void**)dlsym(mcpelibhandle, "_ZTV13MinecraftGame");
 	//replace the update method in Minecraft with our own
-	bl_NinecraftApp_update_real = (void (*)(MinecraftClient*)) minecraftVtable[vtable_indexes.minecraft_update];
+	bl_NinecraftApp_update_real = (void (*)(MinecraftGame*)) minecraftGameVtable[vtable_indexes.minecraft_update];
 #if 0
 	for (int i = 0; i < 40; i++) {
 		if (minecraftVtable[i] == (int) bl_NinecraftApp_update_real) {
@@ -1396,7 +1523,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 #endif
 
-	minecraftVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
+	minecraftGameVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 	bl_PlayerInventoryProxy_removeResource = (void (*)(PlayerInventoryProxy*, ItemInstance&, bool, int))

@@ -13,12 +13,11 @@ static bool prefix(const char *pre, const char *str)
 {
     return strncmp(pre, str, strlen(pre)) == 0;
 }
-static bool version103;
 static const char kResourcePackPrefix[] = "resource_packs/vanilla/";
 static const char kResourcePackDirPrefix[] = "resource_packs/vanilla";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
 	//BL_LOG("Asset: open %s", filename);
-	std::string newFilename = version103? std::string("1007/") + filename : filename;
+	std::string newFilename = filename;
 	AAsset *in = AAssetManager_open(mgr, newFilename.c_str(), mode);
 	if (in) return in;
 	if (prefix("resource_packs/skins", filename)) return in;
@@ -156,6 +155,5 @@ void bl_prepatch_fakeassets(soinfo2* mcpelibhandle) {
 	success = success && bl_patch_got(mcpelibhandle, (void*)AAsset_getLength, (void*)bl_AAsset_getLength_hook);
 	success = success && bl_patch_got(mcpelibhandle, (void*)AAsset_getBuffer, (void*)bl_AAsset_getBuffer_hook);
 	if (!success) BL_LOG("Failed to patch textures");
-	version103 = dlsym(mcpelibhandle, "_ZN13BlockGraphics10initBlocksEv") != nullptr;
 }
 } // extern "C"

@@ -342,7 +342,7 @@ public class ScriptManager {
 
 	@CallbackName(name="newLevel")
 	public static void setLevelFakeCallback(boolean hasLevel, boolean isRemote) {
-		isRemote = nativeLevelIsRemote();
+		isRemote = false;//nativeLevelIsRemote();
 		nextTickCallsSetLevel = false;
 		System.out.println("Level: " + hasLevel);
 		//ScriptManager.isRemote = isRemote;
@@ -719,6 +719,7 @@ public class ScriptManager {
 
 	@CallbackName(name="screenChangeHook", args={"screenName"})
 	public static void screenChangeCallback(String s1, String s2, String s3) {
+		System.out.println("Screen change: " + s1 + ":" + s2 + ":" + s3);
 		if ("options_screen".equals(s1) && "resource_packs_screen".equals(currentScreen)) {
 			// reload scripts
 			loadResourcePackScripts();
@@ -728,6 +729,10 @@ public class ScriptManager {
 			if (activity != null) {
 				activity.showStoreNotWorkingDialog();
 			}
+		}
+		if ("in_game_play_screen".equals(s1)) {
+			// DesnoGuns r18 needs this
+			s1 = "hud_screen";
 		}
 		currentScreen = s1;
 		callScriptMethod("screenChangeHook", s1);
@@ -3345,9 +3350,12 @@ public class ScriptManager {
 			}
 			long entityId = getEntityId(entity);
 			int typeId = nativeGetEntityTypeId(entityId);
+// fixme 1.1
+/*
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("getArmor only works for mobs");
 			}
+*/
 			return nativeMobGetArmor(entityId, slot, ITEMID);
 		}
 		@JSStaticFunction
@@ -3357,9 +3365,12 @@ public class ScriptManager {
 			}
 			long entityId = getEntityId(entity);
 			int typeId = nativeGetEntityTypeId(entityId);
+// fixme 1.1
+/*
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("getArmorDamage only works for mobs");
 			}
+*/
 			return nativeMobGetArmor(entityId, slot, DAMAGE);
 		}
 
@@ -3750,6 +3761,7 @@ public class ScriptManager {
 			if (!nativeIsValidItem(id)) {
 				throw new RuntimeException("getName called with invalid item ID: " + id);
 			}
+			if (id == 358) return "Map"; // Maps need an NBT, otherwise crash
 			return nativeGetItemName(id, damage, raw);
 		}
 
@@ -3780,6 +3792,7 @@ public class ScriptManager {
 		}
 
 		private static boolean idHasName(String targetname, int id, boolean internal) {
+			if (id == 358) return false;
 			String name = nativeGetItemName(id, 0, internal);
 			if (name == null) return false;
 			if (internal) {

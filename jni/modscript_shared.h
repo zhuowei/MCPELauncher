@@ -87,6 +87,8 @@ bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr);
 
 extern int bl_item_id_count;
 
+bool bl_isActiveLevel(Level* level);
+
 
 #ifdef __cplusplus
 }

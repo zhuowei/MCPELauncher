@@ -13,17 +13,30 @@ class MinecraftCommands;
 class LevelRenderer;
 class Vec3;
 class ResourcePackManager;
+class ClientInstance;
+
+enum GameType {
+};
+
 class Minecraft {
 public:
 	Level* getLevel();
 	Timer* getTimer();
 	MinecraftCommands* getCommands();
 	ResourcePackManager* getResourceLoader();
+	void setGameModeReal(GameType);
 };
 
-class MinecraftClient {
+class MinecraftGame : public Minecraft {
 public:
-	Minecraft* getServer();
+	ClientInstance* getPrimaryClientInstance();
+	Level* getLocalServerLevel() const;
+	void updateFoliageColors();
+};
+
+class ClientInstance {
+public:
+	MinecraftGame* getMinecraftGame() const;
 	Player* getLocalPlayer();
 	mce::TextureGroup& getTextures() const;
 	void setCameraEntity(Entity*);
@@ -35,4 +48,7 @@ public:
 	void onResourcesLoaded();
 	LevelRenderer* getLevelRenderer() const;
 	void play(std::string const&, Vec3 const&, float, float);
+	void leaveGame(bool);
+	Level* getLevel();
 };
+#define MinecraftClient ClientInstance

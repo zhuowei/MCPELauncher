@@ -15,10 +15,10 @@ public:
 	void setCarriedTextures(BlockGraphics&, Json::Value const&);
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
 	Block* getBlock() const;
-	TextureUVCoordinateSet const& getTexture(signed char, int) const;
+	TextureUVCoordinateSet const& getTexture(signed char, int, int) const;
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);
 	static void initBlocks();
-	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int);
+	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int, int);
 	static BlockGraphics* mBlocks[0x100];
 	static std::unordered_map<std::string, BlockGraphics*> mBlockLookupMap;
 	static std::vector<std::unique_ptr<BlockGraphics>> mOwnedBlocks;

@@ -22,6 +22,7 @@ public class ClientBlocksJsonProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(manifestPath)) {
+			dumpAtlas();
 			return new ByteArrayInputStream(metaObj.toString().getBytes("UTF-8"));
 		}
 		return null;
@@ -95,6 +96,8 @@ public class ClientBlocksJsonProvider implements TexturePack {
 		obj.put("textures", textureObj);
 
 		hasChanges = true;
+		System.out.println("Client blocks.json: " + blockName + ":" + blockId + ":" +
+			Arrays.toString(textureNames) + ":" + Arrays.toString(textureOffsets));
 	}
 
 	public void close() throws IOException {

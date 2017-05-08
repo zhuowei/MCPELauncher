@@ -64,27 +64,27 @@ enum EntityFlags {
 };
 class PlayerInventoryProxy;
 class EntityDamageSource;
-// last update: 0.17b2
+// last update: 1.1b1
 class Entity {
 public:
 	void** vtable; //0
-	char filler3[64-4]; // 4
-	float x; //64
-	float y; //68
-	float z; //72
-	char filler2[100-76]; // 76
-	float motionX; //100 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //104
-	float motionZ; //108
-	float pitch; //112 Entity::setRot
-	float yaw; //116
-	float prevPitch; //120
-	float prevYaw; //124
+	char filler3[72-4]; // 4
+	float x; //72 - Entity::setPos(Vec3 const&)
+	float y; //76
+	float z; //80
+	char filler2[108-84]; // 84
+	float motionX; //108 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //112
+	float motionZ; //116
+	float pitch; //120 Entity::setRot
+	float yaw; //124
+	float prevPitch; //128
+	float prevYaw; //132
 
-	char filler4[224-128]; //128
-	int renderType; //224
-	char filler5[420-228]; // 228
-	struct Entity* rider; //420 (inaccurate, Entity::getRide() - 4)
+	char filler4[244-136]; //136
+	int renderType; //244
+	char filler5[440-248]; // 248
+	struct Entity* rider; //440 (inaccurate, Entity::getRide() - 4)
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
@@ -100,7 +100,7 @@ public:
 	Entity* getRide() const;
 	void setNameTagVisible(bool);
 };
-static_assert(offsetof(Entity, renderType) == 224, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 
 class Mob: public Entity {
 public:
@@ -116,7 +116,7 @@ struct PlayerInventorySlot {
 
 class PlayerInventoryProxy {
 public:
-	void add(ItemInstance&, bool);
+	bool add(ItemInstance&, bool);
 	void removeResource(ItemInstance const&, bool);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
 	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
@@ -136,20 +136,21 @@ public:
 
 struct TextureUVCoordinateSet {
 	float bounds[4];
-	unsigned short size[2]; // 16
+	float extra;
+	unsigned short size[2]; // 20
 	ResourceLocation location;
 	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
 };
 //static_assert(offsetof(TextureUVCoordinateSet, textureFile) == 24, "textureFile offset wrong");
-static_assert(sizeof(TextureUVCoordinateSet) == 32, "TextureUVCoordinateSet size wrong");
+static_assert(sizeof(TextureUVCoordinateSet) == 36, "TextureUVCoordinateSet size wrong");
 
 namespace Json {
 	class Value;
 };
 class TextureAtlas;
-// Updated 0.14.0b7
+// Updated 1.1b1
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 // for useAnimation see setUseAnimation
 class Item {
@@ -159,9 +160,9 @@ public:
 	short itemId; //18
 	char filler1[33-20]; // 20
 	bool handEquipped; // 33
-	char filler[43-34]; //34
-	unsigned char useAnimation; // 43
-	char filler3[108-44]; // 44
+	char filler[45-34]; //34
+	unsigned char useAnimation; // 45
+	char filler3[112-46]; // 46
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -172,10 +173,10 @@ public:
 	void setStackedByData(bool);
 	bool isStackedByData() const;
 	void setMaxDamage(int);
-	int getMaxDamage();
+	int getMaxDamage() const;
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
-static_assert(sizeof(Item) == 108, "item size is wrong");
+static_assert(sizeof(Item) == 112, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -191,6 +192,7 @@ public:
 	CompoundTag* tag; // 8
 	Item* item; // 12
 	void* block; //16
+	char filler2[44-20]; // 20
 
 	ItemInstance();
 	ItemInstance(int, int, int);
@@ -208,11 +210,13 @@ public:
 	std::string getName() const;
 	int getMaxStackSize() const;
 	void remove(int);
+	bool isArmorItem() const;
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
+// or look at ItemInstance::EMPTY_ITEM
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
 static_assert(offsetof(ItemInstance, item) == 12, "item offset wrong");
-static_assert(sizeof(ItemInstance) == 20, "ItemInstance wrong");
+static_assert(sizeof(ItemInstance) == 44, "ItemInstance wrong");
 
 enum CreativeItemCategory {
 };
@@ -221,6 +225,7 @@ enum BlockProperty {
 	BlockPropertyOpaque = 32, // from _istransparent
 };
 
+// last updated 1.1.0.5 beta
 class Block {
 public:
 	void** vtable; //0
@@ -231,12 +236,10 @@ public:
 	char filler1[20-16]; // 16
 	int renderLayer; //20
 	int blockProperties; // 24 - getProperties
-	char filler2[52-28]; //28
-	void* material; //52
-	char filler3[80-56]; // 56
-	float destroyTime; //80
-	float explosionResistance; //84
-	char filler4[120-88]; // 88
+	char filler2[84-28]; //28
+	float destroyTime; //84
+	float explosionResistance; //88
+	char filler4[636-92]; // 92
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -245,14 +248,15 @@ public:
 	void setCategory(CreativeItemCategory);
 	std::string const& getDescriptionId() const;
 	int getRenderLayer() const;
+	void* getMaterial() const;
 	static std::unordered_map<std::string, Block*> mBlockLookupMap;
 	static Block* mBlocks[0x100];
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(Block) == 120, "Block size is wrong");
+static_assert(sizeof(Block) == 636, "Block size is wrong");
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
-static_assert(offsetof(Block, explosionResistance) == 84, "explosionResistance is wrong");
+static_assert(offsetof(Block, explosionResistance) == 88, "explosionResistance is wrong");
 #define Tile Block
 
 typedef struct {
@@ -279,18 +283,18 @@ public:
 	MaterialPtr* material; //72 from ModelPart::draw
 	int textureOffsetX; // 76
 	int textureOffsetY; // 80
-	char filler2[200-84]; // 84
+	char filler2[204-84]; // 84
 
 	void addBox(Vec3 const&, Vec3 const&, float);
-}; // 200 bytes
-static_assert(sizeof(ModelPart) == 200, "modelpart size wrong");
+}; // 204 bytes
+static_assert(sizeof(ModelPart) == 204, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
 };
 
 // from HumanoidModel::render
-
+// last updated 1.1.0.8
 class HumanoidModel {
 public:
 	void** vtable; //0
@@ -316,23 +320,22 @@ public:
 	MaterialPtr materialMultitextureAlphaTest; // 204
 	MaterialPtr materialMultitextureAlphaTestColorMask; // 216
 	MaterialPtr materialGuardianGhost; // 228
-	char filler2[252-240]; // 240
-	ModelPart bipedHead;//252
-	ModelPart bipedHeadwear;//452
-	ModelPart bipedBody;//652
-	ModelPart bipedRightArm;//852
-	ModelPart bipedLeftArm;//1052
-	ModelPart bipedRightLeg;//1252
-	ModelPart bipedLeftLeg;//1452
-	short unknownshort; // 1652
-	char filler3[3868-1654]; // 1654
+	char filler2[264-240]; // 240
+	ModelPart bipedHead;//264
+	ModelPart bipedHeadwear;//468
+	ModelPart bipedBody;//672
+	ModelPart bipedRightArm;//876
+	ModelPart bipedLeftArm;//1080
+	ModelPart bipedRightLeg;//1284
+	ModelPart bipedLeftLeg;//1488
+	char filler3[3960-1692]; // 1692 - more model parts
 	HumanoidModel(float, float, int, int);
 };
 
-static_assert(sizeof(HumanoidModel) == 3868, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 3960, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
-static_assert(offsetof(HumanoidModel, bipedHead) == 252, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedHead) == 264, "HumanoidModel bipedHead");
 
 typedef struct {
 	Item* item; //0
@@ -354,12 +357,12 @@ typedef void EntityRenderer;
 class MobRenderer {
 public:
 	void** vtable; //0
-	char filler[136-4]; //4
-	void* model; // 136 (from MobRenderer::MobRenderer)
-	char filler2[624-140]; // 140
+	char filler[140-4]; //4
+	void* model; // 140 (from MobRenderer::MobRenderer)
+	char filler2[640-144]; // 140
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(sizeof(MobRenderer) == 624, "mobrenderer");
+static_assert(sizeof(MobRenderer) == 640, "mobrenderer");
 
 typedef void Tag;
 
@@ -443,34 +446,31 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 108
-	int damageReduceAmount; // 112
-	int renderIndex; // 116
-	void* armorMaterial; // 120
+	int armorType; // 112
+	int damageReduceAmount; // 116
+	int renderIndex; // 120
+	void* armorMaterial; // 124
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 124, "armor item size");
+static_assert(sizeof(ArmorItem) == 128, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 624
-	HumanoidModel* modelArmor; // 628
-	HumanoidModel* modelArmorChestplate; // 632
-	char hmr_filler1[652-636]; // 636
+	int something; // 640
+	HumanoidModel* modelArmor; // 644
+	HumanoidModel* modelArmorChestplate; // 648
+	char hmr_filler1[668-652]; // 652
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 628, "armour model offset");
-static_assert(sizeof(HumanoidMobRenderer) == 652, "humanoid mob renderer size");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 644, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 668, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
-enum GameType {
-};
 
 class LevelData {
 public:
@@ -501,6 +501,8 @@ public:
 	HitResult const& getHitResult();
 	int getDifficulty() const;
 	Spawner* getSpawner() const;
+	Player* getPlayer(EntityUniqueID) const;
+	Player* getPrimaryLocalPlayer() const;
 };
 
 class EntityRenderDispatcher {
@@ -513,6 +515,8 @@ class MinecraftScreenModel {
 public:
 	void updateTextBoxText(std::string const&);
 };
+
+void addItem(Player&, ItemInstance&);
 
 #include "mcpe/blockentity/chestblockentity.h"
 #include "mcpe/blockentity/furnaceblockentity.h"

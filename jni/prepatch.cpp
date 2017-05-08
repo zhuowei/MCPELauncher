@@ -66,6 +66,10 @@ static void setupIsModded(void* mcpelibhandle) {
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
 
 bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
+	if (original == nullptr || newptr == nullptr) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Invalid bl_patch got! %p: %p", original, newptr);
+		return false;
+	}
 	// now edit the GOT
 	// for got, got_end_addr[got_entry] = addr
 	// FIND THE .GOT SECTION OR DIE TRYING
