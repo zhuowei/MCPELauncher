@@ -256,6 +256,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int block_get_visual_shape_blocksource;
 	int block_use;
 	int item_get_icon;
+	int appplatform_get_settings_path;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -322,6 +323,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK5Block3useER6PlayerRK8BlockPos");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item7getIconEiib");
+	vtable_indexes.appplatform_get_settings_path = bl_vtableIndex(mcpelibhandle, "_ZTV11AppPlatform",
+		"_ZN11AppPlatform15getSettingsPathEv");
 }
 
 template <typename T>
@@ -3661,6 +3664,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
 //	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
+	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_settings_path] = dlsym(mcpelibhandle, "_ZN11AppPlatform15getSettingsPathEv");
 	bl_prepatch_fakeassets(mcpelibhandle);
 	//mcpelauncher_hook((void*)&Options::getUseLocalServer, (void*)&bl_Options_getUseLocalServer_hook,
 	//	(void**)&bl_Options_getUseLocalServer_real);
