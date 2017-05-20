@@ -17,6 +17,10 @@ static const char kResourcePackPrefix[] = "resource_packs/vanilla/";
 static const char kResourcePackDirPrefix[] = "resource_packs/vanilla";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
 	//BL_LOG("Asset: open %s", filename);
+
+	// zero length filename or an absolute path (on the filesystem) definitely won't be in the assets.
+	if (strlen(filename) == 0 || filename[0] == '/') return nullptr;
+
 	std::string newFilename = filename;
 	AAsset *in = AAssetManager_open(mgr, newFilename.c_str(), mode);
 	if (in) return in;
