@@ -462,8 +462,8 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, void* wDi
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "selectLevelCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
 
 	
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, env->NewStringUTF(bl_getCharArr(wName)),
-		env->NewStringUTF(bl_getCharArr(wDir)));
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, env->NewStringUTF(wName.c_str()),
+		env->NewStringUTF(wDir.c_str()));
 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();

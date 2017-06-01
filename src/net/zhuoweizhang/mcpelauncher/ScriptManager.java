@@ -2111,6 +2111,7 @@ public class ScriptManager {
 	public static native void nativeLevelSetExtraData(int x, int y, int z, int data);
 	public static native int nativeLevelGetExtraData(int x, int y, int z);
 	public static native boolean nativeItemIsExtendedBlock(int itemId);
+	public static native String nativeLevelExecuteCommand(String cmd);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2664,6 +2665,13 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setBlockExtraData(int x, int y, int z, int data) {
 			nativeLevelSetExtraData(x, y, z, data);
+		}
+
+		@JSStaticFunction
+		public static String executeCommand(String command) {
+			String result = nativeLevelExecuteCommand(command);
+			if ("<no result>".equals(result)) return "";
+			return result;
 		}
 
 		@Override
@@ -3962,6 +3970,9 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineArmor(int id, String iconName, int iconIndex, String name,
 			String texture, int damageReduceAmount, int maxDamage, int armorType) {
+			if (texture != null && texture.toLowerCase().endsWith(".png")) {
+				texture = texture.substring(0, texture.length() - 4);
+			}
 			if (!(armorType >= 0 && armorType <= 3)) {
 				throw new RuntimeException("Invalid armor type: use ArmorType.helmet, ArmorType.chestplate," +
 					"ArmorType.leggings, or ArmorType.boots");
