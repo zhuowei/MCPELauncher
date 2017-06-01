@@ -3301,8 +3301,8 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 	std::string mystr = std::string(utfChars);
 	env->ReleaseStringUTFChars(text, utfChars);
 
-	Minecraft* minecraft = bl_minecraft->getServer();
-	DedicatedServerCommandOrigin* origin = new DedicatedServerCommandOrigin(*minecraft);
+	Minecraft* minecraft = bl_minecraft->getMinecraftGame();
+	DedicatedServerCommandOrigin* origin = new DedicatedServerCommandOrigin("ModPE Script", *minecraft);
 	std::string outStr = "<no result>";
 	minecraft->getCommands()->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, outStr);
 	return env->NewStringUTF(outStr.c_str());

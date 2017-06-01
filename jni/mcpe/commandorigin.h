@@ -7,7 +7,7 @@ public:
 };
 class DedicatedServerCommandOrigin : public CommandOrigin {
 public:
-	DedicatedServerCommandOrigin(Minecraft&);
+	DedicatedServerCommandOrigin(std::string const&, Minecraft&);
 	virtual ~DedicatedServerCommandOrigin();
 	char filler[168-4]; // 4 from DedicatedServerCommandOrigin::clone()
 };

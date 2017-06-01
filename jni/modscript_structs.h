@@ -117,7 +117,7 @@ struct PlayerInventorySlot {
 class PlayerInventoryProxy {
 public:
 	bool add(ItemInstance&, bool);
-	void removeResource(ItemInstance const&, bool);
+	void removeResource(ItemInstance const&, bool, int);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
 	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
 	int getLinkedSlot(int) const;

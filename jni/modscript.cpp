@@ -90,7 +90,7 @@ extern jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_SurvivalMode_useItemOn_real)(void*, Player*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
-void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, void*, void*, void*, void*, void*);
+void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, std::string, void*);
 static void (*bl_GameMode_attack_real)(void*, Player*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
@@ -122,8 +122,6 @@ static void* (*bl_GameMode_continueDestroyBlock_real)(void*, Player&, BlockPos, 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
 static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
-static void (*bl_PlayerInventoryProxy_removeResource)(PlayerInventoryProxy*, ItemInstance&, bool, int);
-static void (*bl_PlayerInventoryProxy_removeResource_old)(PlayerInventoryProxy*, ItemInstance&, bool);
 
 static soinfo2* mcpelibhandle = NULL;
 
@@ -161,6 +159,7 @@ struct bl_vtable_indexes {
 	int entity_stop_riding;
 	int entity_can_add_rider;
 	int gamemode_continue_destroy_block;
+	int player_set_player_game_type;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -443,7 +442,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 extern void bl_cpp_selectLevel_hook();
 
-void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, void* wDir, void* wName, void* str3, void* str4, void* levelSettings) {
+void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, std::string str4, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -753,16 +752,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (bl_level == NULL) return;
 	LevelData* levelData = bl_level->getLevelData();
 	levelData->setGameType((GameType) type);
-	if (bl_localplayer == NULL) return;
-	bl_MinecraftClient_setGameMode(bl_minecraft, type == 1);
-	//auto invPtr = bl_localplayer->getSupplies();
-	// FIXME 0.16
-	//((char*) invPtr)[32] = type == 1;
-	//bl_Inventory_clearInventoryWithDefault(invPtr);
-	//bl_Inventory_delete1_Inventory(invPtr);
-	//bl_Inventory_Inventory(invPtr, bl_localplayer);
-	//int dim = type == 1? 10: 0; //daylight cycle
-	//bl_LevelData_setDimension(levelData, dim);
+	if (!bl_localplayer) return;
+	void (*setPlayerGameType)(Player* player, GameType gameType) = 
+		(void (*)(Player*, GameType)) (*((void***)bl_localplayer))[vtable_indexes.player_set_player_game_type];
+	setPlayerGameType(bl_localplayer, (GameType)type);
 }
 
 
@@ -944,12 +937,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		BL_LOG("Adding id %d to inventory: %d", id, instance.getId());
 		addItem(*bl_localplayer, instance);
 	} else {
-		if (bl_PlayerInventoryProxy_removeResource) {
-			bl_PlayerInventoryProxy_removeResource(invPtr, instance, false, -1);
-		} else {
-			bl_PlayerInventoryProxy_removeResource_old(invPtr, instance, false);
-		}
-		//invPtr->removeResource(instance, false);
+		invPtr->removeResource(instance, false, -1);
 		// note: this may free the original item stack. Don't hold onto it
 	}
 }
@@ -1324,7 +1312,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob8setArmorE9ArmorSlotPK12ItemInstance") - 2;
+		"_ZN3Mob8setArmorE9ArmorSlotRK12ItemInstance") - 2;
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity6setPosERK4Vec3") - 2;
 	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -1337,6 +1325,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK6Entity11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode20continueDestroyBlockER6Player8BlockPosaRb");
+	vtable_indexes.player_set_player_game_type = bl_vtableIndex(mcpelibhandle, "_ZTV6Player",
+		"_ZN6Player17setPlayerGameTypeE8GameType");
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1526,10 +1516,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	minecraftGameVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
-	bl_PlayerInventoryProxy_removeResource = (void (*)(PlayerInventoryProxy*, ItemInstance&, bool, int))
-		dlsym(mcpelibhandle, "_ZN20PlayerInventoryProxy14removeResourceERK12ItemInstancebi");
-	bl_PlayerInventoryProxy_removeResource_old = (void (*)(PlayerInventoryProxy*, ItemInstance&, bool))
-		dlsym(mcpelibhandle, "_ZN20PlayerInventoryProxy14removeResourceERK12ItemInstanceb");
 
 	bl_setuphooks_cppside();
 
