@@ -1014,6 +1014,9 @@ static void bl_registerItem(Item* item, std::string const& name) {
 }
 
 void bl_repopulateItemGraphics() {
+	if (ItemRenderer::mItemGraphics.size() == 0) {
+		return;
+	}
 	for (int i = 0x200; i < bl_item_id_count; i++) {
 		Item* item = bl_Item_mItems[i];
 		if (!item) continue;
@@ -3436,18 +3439,11 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 	}
 }
 
-size_t bl_itemrenderer_test() {
-	return ItemRenderer::instance.itemGraphics.size();
-}
-
 void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
-	//BL_LOG("item graphics: %p, %p, %d, %d", renderer, &ItemRenderer::instance,
-	//		ItemRenderer::instance.itemGraphics.size(), ItemRenderer::mItemGraphics.size());
-	bool needUpdate = ItemRenderer::instance.itemGraphics.size() == 0;
+	size_t mysize = ItemRenderer::mItemGraphics.size();
 	renderer->_loadItemGraphics();
+	bool needUpdate = mysize != ItemRenderer::mItemGraphics.size();
 	if (needUpdate) {
-		BL_LOG("Need to update graphics: %p, %p, %d", ItemRenderer::instance.itemGraphics.data(), ItemRenderer::mItemGraphics.data(),
-			ItemRenderer::instance.itemGraphics.size());
 		bl_repopulateItemGraphics();
 	}
 }
