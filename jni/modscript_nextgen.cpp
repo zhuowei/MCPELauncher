@@ -1025,7 +1025,8 @@ void bl_repopulateItemGraphics() {
 			// outside the array, expand and populate
 			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 			needsSetting = true;
-		} else if (!(((void**)&ItemRenderer::mItemGraphics[item->itemId])[1])) {
+		} else if (ItemRenderer::mItemGraphics[item->itemId].texturePtr.get() !=
+			ItemRenderer::mItemGraphics[0x100].texturePtr.get()) {
 			// inside but not set, populate
 			needsSetting = true;
 		}
@@ -2675,9 +2676,20 @@ void bl_cppNewLevelInit() {
 	//bl_entityUUIDMap.clear();
 	bl_reload_armor_textures();
 }
-
-void bl_set_i18n(std::string const& key, std::string const& value) {
+static void bl_set_i18n_real(std::string const& key, std::string const& value) {
 	(I18n::mCurrentLanguage->_getStrings())[key] = value;
+}
+
+static std::vector<std::pair<std::string, std::string>> bl_i18nOverrides;
+void bl_set_i18n(std::string const& key, std::string const& value) {
+	bl_i18nOverrides.emplace_back(key, value);
+	bl_set_i18n_real(key, value);
+}
+
+static void bl_reapply_i18n_overrides() {
+	for (auto& o: bl_i18nOverrides) {
+		bl_set_i18n_real(o.first, o.second);
+	}
 }
 
 static bool isLocalAddress(JNIEnv* env, jstring hostJString) {
@@ -3429,7 +3441,8 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 	if (!Item::mItemTextureAtlas) return;
 	bl_finishBlockBuildTextureRequests();
 	bl_finishItemSetIconRequests();
-	bl_repopulateItemGraphics();
+	//bl_repopulateItemGraphics();
+	bl_reapply_i18n_overrides();
 
 	bl_armorInit_postLoad();
 	if (bl_Block_mBlocks[kStonecutterId]) {
@@ -3441,9 +3454,13 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 
 void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
 	size_t mysize = ItemRenderer::mItemGraphics.size();
+	mce::Texture* oldtex = (mysize > 0x100? ItemRenderer::mItemGraphics[0x100].texturePtr.get(): nullptr);
 	renderer->_loadItemGraphics();
-	bool needUpdate = mysize != ItemRenderer::mItemGraphics.size();
+	size_t newsize = ItemRenderer::mItemGraphics.size();
+	mce::Texture* newtex = (newsize > 0x100? ItemRenderer::mItemGraphics[0x100].texturePtr.get(): nullptr);
+	bool needUpdate = mysize != newsize || oldtex != newtex;
 	if (needUpdate) {
+		bl_finishItemSetIconRequests(); // otherwise exit and returning to the world doesn't work
 		bl_repopulateItemGraphics();
 	}
 }

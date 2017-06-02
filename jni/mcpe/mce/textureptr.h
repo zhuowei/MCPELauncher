@@ -26,6 +26,7 @@ public:
 	TexturePtr& operator=(TexturePtr&&);
 	void onGroupReloaded();
 	TexturePtr clone() const;
+	Texture* get() const;
 	static TexturePtr NONE;
 };
 
