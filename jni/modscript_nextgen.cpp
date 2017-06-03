@@ -487,6 +487,7 @@ static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics
 static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
+static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1493,7 +1494,7 @@ static void bl_finishBlockBuildTextureRequests() {
 	for (auto& request: buildTextureRequests) {
 		int blockId = request.blockId;
 		auto bg = blockId >= 0x100? bl_extendedBlockGraphics[blockId]: BlockGraphics::mBlocks[blockId];
-		if (!bg) {
+		if (true||!bg) {
 			if (blockId < 0x100) {
 				if (Block::mBlocks[blockId]) {
 					bg = BlockGraphics::mBlocks[blockId] = new BlockGraphics(Block::mBlocks[blockId]->mappingId);
@@ -1508,8 +1509,8 @@ static void bl_finishBlockBuildTextureRequests() {
 		BL_LOG("Setting texs for %d: %s:%s:%s:%s:%s:%s", request.blockId,
 			request.textureSides[0].c_str(), request.textureSides[1].c_str(), request.textureSides[2].c_str(),
 			request.textureSides[3].c_str(), request.textureSides[4].c_str(), request.textureSides[5].c_str());
-		//bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
-		//	request.textureSides[3], request.textureSides[4], request.textureSides[5]);
+		bg->setTextureItem(request.textureSides[0], request.textureSides[1], request.textureSides[2],
+			request.textureSides[3], request.textureSides[4], request.textureSides[5]);
 		//if (!bl_custom_block_textures[request.blockId]) continue;
 		//BL_LOG("finishBlockBuildTextureRequests for %d", request.blockId);
 		//bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
@@ -3439,7 +3440,7 @@ void (*bl_MinecraftGame_updateFoliageColors_real)(MinecraftGame*);
 void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 	bl_MinecraftGame_updateFoliageColors_real(client);
 	if (!Item::mItemTextureAtlas) return;
-	bl_finishBlockBuildTextureRequests();
+	//bl_finishBlockBuildTextureRequests();
 	bl_finishItemSetIconRequests();
 	//bl_repopulateItemGraphics();
 	bl_reapply_i18n_overrides();
@@ -3476,7 +3477,6 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
 		bl_BlockGraphics_initBlocks_new(bl_minecraft->getMinecraftGame()->getResourceLoader());
-		bl_finishBlockBuildTextureRequests();
 	}
 }
 
@@ -3489,6 +3489,11 @@ std::string getNameHook(ItemInstance* itemStack) {
 	if (!itemStack) return "HACK";
 	BL_LOG("Getting name: %d", itemStack->getId());
 	return itemStack->getName();
+}
+
+void bl_BlockGraphics_initBlocks_hook(ResourcePackManager& resourceLoader) {
+	bl_BlockGraphics_initBlocks_real(resourceLoader);
+	bl_finishBlockBuildTextureRequests();
 }
 
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
@@ -3987,6 +3992,8 @@ void bl_setuphooks_cppside() {
 	//	(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
+	mcpelauncher_hook((void*)bl_BlockGraphics_initBlocks_new, (void*)&bl_BlockGraphics_initBlocks_hook,
+		(void**)&bl_BlockGraphics_initBlocks_real);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 
