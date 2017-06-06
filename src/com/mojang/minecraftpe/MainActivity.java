@@ -246,9 +246,10 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean is0140or0141 = mcPkgInfo.versionName.startsWith("1.0.0") ||
+			boolean is0140or0141 = false;/*mcPkgInfo.versionName.startsWith("1.0.0") ||
 				mcPkgInfo.versionName.equals("1.0.2") ||
 				mcPkgInfo.versionName.equals("1.0.3");
+			*/
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!is0140or0141) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
@@ -257,7 +258,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.0.4, 1.0.5, 1.0.6");
+				intent.putExtra("supportedVersion", "1.1.0");
 				startActivity(intent);
 				finish();
 				try {

@@ -1150,7 +1150,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
   (JNIEnv *env, jclass clazz, jfloat ticksPerSecond) {
-	Timer* timer = bl_minecraft->getMinecraftGame()->getTimer();
+	if (!bl_minecraft) return;
+	auto game = bl_minecraft->getMinecraftGame();
+	if (!game) return;
+	Timer* timer = game->getTimer();
 	if (!timer) return;
 	timer->ticksPerSecond = ticksPerSecond;
 }

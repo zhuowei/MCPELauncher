@@ -3526,8 +3526,8 @@ public class ScriptManager {
 					+ " is not updated for 0.8.0. Please ask the script author to update");
 			} catch (NumberFormatException e) {
 			}
-			if (id < 0 || id >= ITEM_ID_COUNT) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < ITEM_ID_COUNT");
+			if (id <= 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be > 0 and < ITEM_ID_COUNT");
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
 				throw new MissingTextureException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
@@ -3977,8 +3977,8 @@ public class ScriptManager {
 				throw new RuntimeException("Invalid armor type: use ArmorType.helmet, ArmorType.chestplate," +
 					"ArmorType.leggings, or ArmorType.boots");
 			}
-			if (id < 0 || id >= ITEM_ID_COUNT) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < " + ITEM_ID_COUNT);
+			if (id <= 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be > 0 and < " + ITEM_ID_COUNT);
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
 				throw new MissingTextureException("The item icon " + iconName + ":" + iconIndex + " does not exist");
@@ -4057,8 +4057,8 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void defineThrowable(int id, String iconName, int iconSubindex, String name, int maxStackSize) {
-			if (id < 0 || id >= ITEM_ID_COUNT) {
-				throw new IllegalArgumentException("Item IDs must be >= 0 and < ITEM_ID_COUNT");
+			if (id <= 0 || id >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Item IDs must be > 0 and < ITEM_ID_COUNT");
 			}
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconSubindex)) {
 				throw new MissingTextureException("The item icon " + iconName + ":" + iconSubindex + " does not exist");
