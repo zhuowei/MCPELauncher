@@ -3578,7 +3578,19 @@ static bool bl_patchReadItemInstance(soinfo2* mcpelibhandle) {
 	//code[0x12b20d8 - 0x012b200c + 1] = 0xde;
 	//return true;
 #else
-// fixme 1.1
+/* Original:
+ 163709d:       3d fe 01 00 00          cmp    $0x1fe,%eax
+ 16370a2:       77 46
+Patch the 0x1fe to 4096-2.
+*/
+	for (int i = 0; i < 0x200; i++) {
+		if (code[i] == 0x3d && code[i+1] == 0xfe && code[i+2] == 0x01 && code[i+3] == 0x00 && code[i+4] == 0x00) {
+			int count = BL_ITEMS_EXPANDED_COUNT - 2;
+			code[i+1] = count & 0xff;
+			code[i+2] = (count >> 8) & 0xff;
+			return true;
+		}
+	}
 #endif
 	abort();
 	return false;
