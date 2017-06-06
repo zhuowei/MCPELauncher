@@ -3553,9 +3553,7 @@ nullptr
 	return false; // WHAT
 }
 
-static bool bl_patchReadItemInstance(soinfo2* mcpelibhandle) {
-	void* readItemInstance = dlsym(mcpelibhandle, "_ZN9serializeI12ItemInstanceE4readER20ReadOnlyBinaryStream");
-	uint8_t* code = (uint8_t*)bl_marauder_translation_function((void*)(((uintptr_t)readItemInstance) & ~1));
+static bool bl_patchCompare510(uint8_t* code) {
 #ifdef __arm__
 	for (int i = 0; i < 0x100; i+=2) {
 		// f5b.7fff: cmp r?, #510
@@ -3592,9 +3590,23 @@ Patch the 0x1fe to 4096-2.
 		}
 	}
 #endif
-	abort();
 	return false;
 }
+
+
+static bool bl_patchReadItemInstance(soinfo2* mcpelibhandle) {
+	void* readItemInstance = dlsym(mcpelibhandle, "_ZN9serializeI12ItemInstanceE4readER20ReadOnlyBinaryStream");
+	uint8_t* code = (uint8_t*)bl_marauder_translation_function((void*)(((uintptr_t)readItemInstance) & ~1));
+	return bl_patchCompare510(code);
+}
+
+
+static bool bl_patchInventoryItemRenderer(soinfo2* mcpelibhandle) {
+	void* rendererUpdate = (void*)&InventoryItemRenderer::update;
+	uint8_t* code = (uint8_t*)bl_marauder_translation_function((void*)(((uintptr_t)rendererUpdate) & ~1));
+	return bl_patchCompare510(code);
+}
+
 
 static bool bl_patchItemEntityChecks(soinfo2* mcpelibhandle) {
 	const char* const toPatch[] = {
@@ -3677,6 +3689,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
 	bl_patchReadItemInstance(mcpelibhandle);
 	bl_patchItemEntityChecks(mcpelibhandle);
+	bl_patchInventoryItemRenderer(mcpelibhandle);
 
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 /*
