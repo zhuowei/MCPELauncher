@@ -3532,12 +3532,23 @@ nullptr
 			}
 		}
 #else
-		for (int i = 0; i < (j == 8? 0x900: 0x100); i++) {
+		for (int i = 0; i < (j == 8? 0x1000: 0x100); i++) {
 			// x86: 81 f? 00 02 00 00
 			if (itemInitCode[i] == 0x81 && (itemInitCode[i+1] & 0xf0) == 0xf0
 				&& itemInitCode[i+2] == 0x00 && itemInitCode[i+3] == 0x02
 				&& itemInitCode[i+4] == 0x00 && itemInitCode[i+5] == 0x00) {
 				itemInitCode[i+2] = (BL_ITEMS_EXPANDED_COUNT & 0xff); itemInitCode[i+3] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
+				hasSet = true;
+				break;
+			} else if (itemInitCode[i] == 0x3d && itemInitCode[i+1] == 0x00
+					&& itemInitCode[i+2] == 0x02 && itemInitCode[i+3] == 0x00
+					&& itemInitCode[i+4] == 0x00 && itemInitCode[i+5] == 0x73) {
+/* for load(CompoundTag)
+ 1a4045b:       3d 00 02 00 00          cmp    $0x200,%eax
+ 1a40460:       73 1d                   jae    1a4047f <ItemInstance::load(CompoundTag const&)+0x63f>
+*/
+				itemInitCode[i+1] = (BL_ITEMS_EXPANDED_COUNT & 0xff);
+				itemInitCode[i+2] = (BL_ITEMS_EXPANDED_COUNT>>8) & 0xff;
 				hasSet = true;
 				break;
 			}
@@ -3562,7 +3573,7 @@ static bool bl_patchCompare510(uint8_t* code) {
 /* Original:
  12b20ac:       f1a9 0001       sub.w   r0, r9, #1
  12b20b0:       f5b0 7fff       cmp.w   r0, #510        ; 0x1fe
-/* New:
+ New:
    4:	f5b0 5f80 	cmp.w	r0, #4096	; 0x1000
 */
 			//BL_LOG("The addr is start + %x", i);
@@ -3685,10 +3696,19 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		return;
 	}
 
-	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) return;
-	bl_patchReadItemInstance(mcpelibhandle);
-	bl_patchItemEntityChecks(mcpelibhandle);
-	bl_patchInventoryItemRenderer(mcpelibhandle);
+	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) {
+		BL_LOG("Failed to patch constructors");
+		return;
+	}
+	if (!bl_patchReadItemInstance(mcpelibhandle)) {
+		BL_LOG("Failed to patch read");
+	};
+	if (!bl_patchItemEntityChecks(mcpelibhandle)) {
+		BL_LOG("Failed to patch item entity");
+	}
+	if (!bl_patchInventoryItemRenderer(mcpelibhandle)) {
+		BL_LOG("Failed to patch hotbar");
+	}
 
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
 /*

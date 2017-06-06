@@ -45,10 +45,9 @@ typedef struct {
 
 const int kGameMode_level_offset = 8;
 #ifdef __i386
-// FIXME 1.1
-#define GAMERENDERER_GETFOV_SIZE 0x1d6
+#define GAMERENDERER_GETFOV_SIZE 0x1f0
 #else
-#define GAMERENDERER_GETFOV_SIZE 0x188
+#define GAMERENDERER_GETFOV_SIZE 0x184
 #endif
 
 #define LOG_TAG "BlockLauncher/ModScript"
