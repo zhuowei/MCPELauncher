@@ -100,8 +100,8 @@ void bl_armorInit_postLoad() {
 
 void bl_cape_init(void* mcpelibinfo) {
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mob9ArmorSlotf");
-	//mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
-	//	(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
+	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
+		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
 }
 
 } // extern "C"

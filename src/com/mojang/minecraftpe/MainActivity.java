@@ -993,7 +993,7 @@ public class MainActivity extends NativeActivity {
 	 */
 
 	public String getDateString(int time) {
-		System.out.println("getDateString: " + time);
+		//System.out.println("getDateString: " + time);
 		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(
 				new Date(((long) time) * 1000));
 	}
