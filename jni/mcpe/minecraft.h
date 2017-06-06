@@ -27,7 +27,8 @@ public:
 	void setGameModeReal(GameType);
 };
 
-class MinecraftGame : public Minecraft {
+// actually an App::App subclass. Technically equivalent to MinecraftClient <= 1.0, but most functions moved to ClientInstance
+class MinecraftGame {
 public:
 	ClientInstance* getPrimaryClientInstance();
 	Level* getLocalServerLevel() const;
@@ -37,6 +38,7 @@ public:
 class ClientInstance {
 public:
 	MinecraftGame* getMinecraftGame() const;
+	Minecraft* getServerData();
 	Player* getLocalPlayer();
 	mce::TextureGroup& getTextures() const;
 	void setCameraEntity(Entity*);

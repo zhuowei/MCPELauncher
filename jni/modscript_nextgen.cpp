@@ -2050,9 +2050,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 
 void bl_sendPacket(Packet* packet) {
+/*
 	PacketSender* sender = bl_Minecraft_getPacketSender(bl_minecraft->getMinecraftGame());
 	sender->send(*packet);
-/*
 	void* bl_raknet = *((void**) (((uintptr_t) bl_minecraft) + MINECRAFT_RAKNET_INSTANCE_OFFSET));
 	void* vtable = ((void***) bl_raknet)[0][RAKNET_INSTANCE_VTABLE_OFFSET_SEND];
 	void (*fn)(void*, void*) = (void (*) (void*, void*)) vtable;
@@ -2713,11 +2713,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
   (JNIEnv *env, jclass clazz, jstring text) {
-	// fixme 1.1
-	return true;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
-	MinecraftCommands* commands = bl_minecraft->getMinecraftGame()->getCommands();
+	if (mystr.length() == 0) return false;
+	MinecraftCommands* commands = bl_minecraft->getServerData()->getCommands();
 	if (!commands) return false;
 	bool hasCommand = commands->getCommand(mystr, 0) != nullptr;
 	//BL_LOG("command: %s hasCommand: %s", utfChars, hasCommand? "yes": "no");
@@ -3317,7 +3316,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 	std::string mystr = std::string(utfChars);
 	env->ReleaseStringUTFChars(text, utfChars);
 
-	Minecraft* minecraft = bl_minecraft->getMinecraftGame();
+	Minecraft* minecraft = bl_minecraft->getServerData();
 	DedicatedServerCommandOrigin* origin = new DedicatedServerCommandOrigin("ModPE Script", *minecraft);
 	std::string outStr = "<no result>";
 	minecraft->getCommands()->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, outStr);
@@ -3476,7 +3475,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 	if (bl_customBlocksCreated) {
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
-		bl_BlockGraphics_initBlocks_new(bl_minecraft->getMinecraftGame()->getResourceLoader());
+		bl_BlockGraphics_initBlocks_new(bl_minecraft->getServerData()->getResourceLoader());
 	}
 }
 
