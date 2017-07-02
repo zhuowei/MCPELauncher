@@ -321,11 +321,6 @@ void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance
 }
 
 void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side, bool& someBool) {
-	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
-	if (myLevel != bl_level) {
-		bl_SurvivalMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
-		return;
-	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -348,11 +343,6 @@ void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 }
 
 void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side, bool& someBool) {
-	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
-	if (myLevel != bl_level) {
-		bl_CreativeMode_startDestroyBlock_real(gamemode, player, blockPos, side, someBool);
-		return;
-	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -374,10 +364,6 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, Player* player, Bloc
 }
 
 void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, Player& player, BlockPos blockPos, signed char side, bool& abool) {
-	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
-	if (myLevel != bl_level) {
-		return bl_GameMode_continueDestroyBlock_real(gamemode, player, blockPos, side, abool);
-	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -594,12 +580,6 @@ void bl_GameMode_initPlayer_hook(void* gamemode, Player* player) {
 }
 
 void bl_GameMode_destroyBlock_hook(void* gamemode, Player* player, BlockPos blockPos, signed char side){
-	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
-
-	if (myLevel != bl_level) {
-		bl_GameMode_destroyBlock_real(gamemode, player, blockPos, side);
-		return;
-	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
