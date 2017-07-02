@@ -35,3 +35,4 @@ proguard/
 scriptscramble.c
 tools/readelfout.txt
 tools/thesyms.txt
+jni/glm

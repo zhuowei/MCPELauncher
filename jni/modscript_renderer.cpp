@@ -14,6 +14,7 @@
 #include "modscript_shared.h"
 #include "mcpe/mce/textureptr.h"
 #include "mcpe/itemspriterenderer.h"
+#include "mcpe/guidata.h"
 #include "logutil.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
@@ -119,7 +120,7 @@ int bl_renderManager_createHumanoidRenderer() {
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, *bl_EntityRenderDispatcher_instance, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr::NONE.clone(), 0);
+		bl_minecraft->getGuiData()->getGuiTex().clone(), 0);
 	BL_LOG("Adding renderer");
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	BL_LOG("Created renderer %d", retval);

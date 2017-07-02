@@ -275,26 +275,26 @@ public:
 	float offsetZ; //8
 	float rotateAngleX; // 12
 	float rotateAngleY; // 16
-	char filler0[37-20]; // 20
-	bool showModel; // 37 from HumanoidMobRenderer::prepareArmor
-	char filler1[64-38]; //38
-	float textureWidth; //64
-	float textureHeight; //68
-	MaterialPtr* material; //72 from ModelPart::draw
-	int textureOffsetX; // 76
-	int textureOffsetY; // 80
-	char filler2[204-84]; // 84
+	char filler0[53-20]; // 20
+	bool showModel; // 53 from HumanoidMobRenderer::prepareArmor
+	char filler1[80-54]; //54
+	float textureWidth; //80
+	float textureHeight; //84
+	MaterialPtr* material; //88 from ModelPart::draw
+	int textureOffsetX; // 92
+	int textureOffsetY; // 96
+	char filler2[220-100]; // 100
 
 	void addBox(Vec3 const&, Vec3 const&, float);
-}; // 204 bytes
-static_assert(sizeof(ModelPart) == 204, "modelpart size wrong");
+}; // 220 bytes
+static_assert(sizeof(ModelPart) == 220, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
 };
 
 // from HumanoidModel::render
-// last updated 1.1.0.8
+// last updated 1.1.3.1
 class HumanoidModel {
 public:
 	void** vtable; //0
@@ -308,34 +308,21 @@ public:
 	MaterialPtr materialAlphaBlend; // 60
 	MaterialPtr materialStatic; // 72
 	MaterialPtr materialEmissive; // 84
-	MaterialPtr materialEmissiveAlpha; // 96
-	MaterialPtr materialChangeColor; // 108
-	MaterialPtr materialGlint; // 120
-	MaterialPtr materialAlphaTestGlint; // 132
-	MaterialPtr materialChargedCreeper; // 144
-	MaterialPtr materialAlphaTestChangeColor; // 156
-	MaterialPtr materialAlphaTestChangeColorGlint; // 168
-	MaterialPtr materialMultitexture; // 180
-	MaterialPtr materialMultitextureColorMask; // 192
-	MaterialPtr materialMultitextureAlphaTest; // 204
-	MaterialPtr materialMultitextureAlphaTestColorMask; // 216
-	MaterialPtr materialGuardianGhost; // 228
-	char filler2[264-240]; // 240
-	ModelPart bipedHead;//264
-	ModelPart bipedHeadwear;//468
-	ModelPart bipedBody;//672
-	ModelPart bipedRightArm;//876
-	ModelPart bipedLeftArm;//1080
-	ModelPart bipedRightLeg;//1284
-	ModelPart bipedLeftLeg;//1488
-	char filler3[3960-1692]; // 1692 - more model parts
+	ModelPart bipedHead;//96
+	ModelPart bipedHeadwear;//316
+	ModelPart bipedBody;//536
+	ModelPart bipedRightArm;//756
+	ModelPart bipedLeftArm;//976
+	ModelPart bipedRightLeg;//1196
+	ModelPart bipedLeftLeg;//1416
+	char filler3[4308-1636]; // 1636 - more model parts
 	HumanoidModel(float, float, int, int);
 };
 
-static_assert(sizeof(HumanoidModel) == 3960, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 4308, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
-static_assert(offsetof(HumanoidModel, bipedHead) == 264, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
 
 typedef struct {
 	Item* item; //0
