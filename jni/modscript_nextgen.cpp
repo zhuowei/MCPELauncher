@@ -4042,6 +4042,12 @@ void bl_setuphooks_cppside() {
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 
 	bl_renderManager_init(mcpelibhandle);
+	void** mobVtable = ((void**)dlsym(mcpelibhandle, "_ZTV3Mob")) + 2;
+	void* whatIsThis = mobVtable[912 / 4];
+	Dl_info info;
+	if (dladdr(whatIsThis, &info)) {
+		BL_LOG("The mob vtable entry is %s", info.dli_sname);
+	}
 }
 
 } //extern

@@ -20,9 +20,9 @@
 // search for HumanoidMobRenderer::HumanoidMobRenderer
 #define MOBRENDERER_SIZE (sizeof(HumanoidMobRenderer))
 // ModelPart::addBox
-#define MODELPART_CUBEVECTOR_OFFSET 40
+#define MODELPART_CUBEVECTOR_OFFSET 56
 // ModelPart destructor
-#define MODELPART_MESHBUFFER_OFFSET 88
+#define MODELPART_MESHBUFFER_OFFSET 104
 static const int kEntityRenderDispatcher_renderersOffset = 44;
 
 extern "C" {
@@ -161,16 +161,19 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook(void
 //}
 
 void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b) {
-	if (entity.renderType < 0x1000) {
+	auto entityId = entity.getUniqueID();
+	if (bl_renderTypeMap.count(entityId) == 0) {
 		return bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
 	}
 	int oldRenderType = entity.renderType;
 	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
 	EntityRenderer* tntRenderer = renderers[2]; // TNT
-	renderers[2] = bl_entityRenderers[oldRenderType - 0x1000];
+	renderers[2] = bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
 	entity.renderType = 2; // steal TNT's render type
 
+	BL_LOG("Rendering custom! material = %p", *((void**)(((uintptr_t)renderers[2]) + 28)));
 	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
+	BL_LOG("Done rendering custom!");
 
 	renderers[2] = tntRenderer; // restore
 	entity.renderType = oldRenderType;
@@ -217,7 +220,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	part->textureOffsetX = textureX;
 	part->textureOffsetY = textureY;
 	//part->transparent = transparent;
-	if (transparent) part->material = &(model->materialAlphaTest);
+	//if (transparent) part->material = &(model->materialAlphaTest);
 	if (textureWidth > 0) part->textureWidth = textureWidth;
 	if (textureHeight > 0) part->textureHeight = textureHeight;
 	part->addBox(Vec3(xOffset, yOffset, zOffset), Vec3(width, height, depth), scale);

@@ -85,6 +85,8 @@ public:
 	int renderType; //244
 	char filler5[440-248]; // 248
 	struct Entity* rider; //440 (inaccurate, Entity::getRide() - 4)
+	char filler6[476-444]; // 444
+	bool teleported; // 476: Entity::hasTeleported
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
@@ -99,6 +101,12 @@ public:
 	void hurt(EntityDamageSource const&, int, bool, bool);
 	Entity* getRide() const;
 	void setNameTagVisible(bool);
+	void sendMotionPacketIfNeeded();
+	void sendMotionToServer(bool);
+	bool isAutoSendEnabled() const;
+	void enableAutoSendPosRot(bool);
+	void teleportTo(Vec3 const&, int, int);
+	bool hasTeleported() const;
 };
 static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
 
@@ -132,6 +140,11 @@ public:
 	void addExperience(int);
 	void addLevels(int);
 	PlayerInventoryProxy* getSupplies() const;
+};
+
+class ServerPlayer : public Player {
+public:
+	void push(Vec3 const&);
 };
 
 struct TextureUVCoordinateSet {

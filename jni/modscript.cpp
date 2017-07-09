@@ -216,6 +216,20 @@ static void bl_panicTamper() {
 extern void bl_panicTamper();
 #endif
 
+void bl_forceLocationUpdate(Entity* entity) {
+	if (!entity) return;
+	if (!bl_localplayer) return;
+	if (entity->getUniqueID() != bl_localplayer->getUniqueID()) return;
+	Player* clientPlayer = bl_minecraft->getLocalPlayer();
+	if (!clientPlayer) return;
+	// probably need to make this work for other players. Oh well...
+	bl_Entity_setPos_helper(clientPlayer, entity->x, entity->y, entity->z);
+	clientPlayer->setRot(Vec2(entity->pitch, entity->yaw));
+	clientPlayer->motionX = entity->motionX;
+	clientPlayer->motionY = entity->motionY;
+	clientPlayer->motionZ = entity->motionZ;
+}
+
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
 	BL_LOG("Creative useItemOn");
@@ -835,6 +849,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setPos_helper(entity, x, y, z);
+	bl_forceLocationUpdate(entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetVel
@@ -853,6 +868,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 			entity->motionZ = vel;
 			break;
 	}
+	bl_forceLocationUpdate(entity);
 }
 
 static bool alwaysReturnTrue(Entity* a, Entity* b) {
@@ -912,7 +928,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "invPtr %p", invPtr);
 	if (!remove) {
 		//invPtr->add(instance, true);
-		bl_dumpType(bl_localplayer);
+		//bl_dumpType(bl_localplayer);
 		BL_LOG("Adding id %d to inventory: %d", id, instance.getId());
 		addItem(*bl_localplayer, instance);
 	} else {
@@ -943,6 +959,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (entity == NULL) return;
 	//again, the iOS implement probably uses Entity::move, but too mainstream
 	bl_Entity_setPos_helper(entity, entity->x + deltax, entity->y + deltay, entity->z + deltaz);
+	bl_forceLocationUpdate(entity);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetRot
@@ -950,6 +967,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	entity->setRot(Vec2(pitch, yaw));
+	bl_forceLocationUpdate(entity);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
@@ -1365,6 +1383,8 @@ void bl_dumpVtable(void** vtable, size_t size) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "%d: %s", i, info.dli_sname);
 	}
 }
+
+void bl_patch_got(void*, void*, void*);
 int bl_findVtable(void** vtable, void* needle) {
 	int i = 0;
 	while (vtable[i] != needle) i++;
