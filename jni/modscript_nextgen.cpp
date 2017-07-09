@@ -3291,22 +3291,6 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMax
 }
 
 void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string const& s1, std::unordered_map<std::string, std::string> const& theMap) {
-	JNIEnv *env;
-	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
-	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
-	if (attachStatus == JNI_EDETACHED) {
-		bl_JavaVM->AttachCurrentThread(&env, NULL);
-	}
-
-	//Call back across JNI into the ScriptManager
-	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "screenChangeCallback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-	jstring s1j = env->NewStringUTF(s1.c_str());
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, s1j, nullptr, nullptr);
-	env->DeleteLocalRef(s1j);
-
-	if (attachStatus == JNI_EDETACHED) {
-		bl_JavaVM->DetachCurrentThread();
-	}
 	return bl_MinecraftTelemetry_fireEventScreenChanged_real(a, s1, theMap);
 }
 
@@ -3429,6 +3413,41 @@ static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer
 JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
 	return preventDefaultStatus;
+}
+
+static std::string bl_lastScreen;
+
+static void bl_fireScreenChange(std::string const& s1) {
+	if (s1 == bl_lastScreen) return;
+	bl_lastScreen = s1;
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "screenChangeCallback", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+	jstring s1j = env->NewStringUTF(s1.c_str());
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, s1j, nullptr, nullptr);
+	env->DeleteLocalRef(s1j);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+}
+
+static void (*bl_ScreenStack__popScreen_real)(ScreenStack*, bool);
+void bl_ScreenStack__popScreen_hook(ScreenStack* self, bool arg1) {
+	bl_ScreenStack__popScreen_real(self, arg1);
+	bl_fireScreenChange(self->getScreenName());
+}
+
+static void (*bl_ScreenStack_pushScreen_real)(ScreenStack*, std::shared_ptr<AbstractScreen>, bool);
+void bl_ScreenStack_pushScreen_hook(ScreenStack* self, std::shared_ptr<AbstractScreen> screen, bool arg2) {
+	bl_ScreenStack_pushScreen_real(self, screen, arg2);
+	bl_fireScreenChange(self->getScreenName());
 }
 
 // initialization
@@ -4004,8 +4023,8 @@ void bl_setuphooks_cppside() {
 
 	bl_MinecraftTelemetry_fireEventScreenChanged_real = (void* (*)(void*, std::string const&, std::unordered_map<std::string, std::string> const&))
 		dlsym(mcpelibhandle, "_ZN17MinecraftEventing22fireEventScreenChangedERKSsRKSt13unordered_mapISsSsSt4hashISsESt8equal_toISsESaISt4pairIS0_SsEEE");
-	bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
-		(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
+	//bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
+	//	(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
 
 	bl_BlockGraphics_getTexture_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
 		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEai");
@@ -4040,14 +4059,13 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_BlockGraphics_initBlocks_real);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
+	mcpelauncher_hook((void*)&ScreenStack::_popScreen, (void*)&bl_ScreenStack__popScreen_hook,
+		(void**)&bl_ScreenStack__popScreen_real);
+	mcpelauncher_hook((void*)&ScreenStack::pushScreen, (void*)&bl_ScreenStack_pushScreen_hook,
+		(void**)&bl_ScreenStack_pushScreen_real);
+
 
 	bl_renderManager_init(mcpelibhandle);
-	void** mobVtable = ((void**)dlsym(mcpelibhandle, "_ZTV3Mob")) + 2;
-	void* whatIsThis = mobVtable[912 / 4];
-	Dl_info info;
-	if (dladdr(whatIsThis, &info)) {
-		BL_LOG("The mob vtable entry is %s", info.dli_sname);
-	}
 }
 
 } //extern
