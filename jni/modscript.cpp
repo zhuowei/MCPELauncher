@@ -190,6 +190,7 @@ void* debug_dlsym(void* handle, const char* symbol) {
 #endif //DLSYM_DEBUG
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId);
+Entity* bl_getEntityWrapperWithLocalHack(Level* level, long long entityId);
 
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
@@ -832,14 +833,17 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
   (JNIEnv *env, jclass clazz, jint axis) {
-	if (bl_localplayer == NULL) return 0;
+	// hack to read location from clientside player
+	Entity* player = bl_minecraft->getLocalPlayer();
+	if (!player) player = bl_localplayer;
+	if (player == NULL) return 0;
 	switch (axis) {
 		case AXIS_X:
-			return bl_localplayer->x;
+			return player->x;
 		case AXIS_Y:
-			return bl_localplayer->y;
+			return player->y;
 		case AXIS_Z:
-			return bl_localplayer->z;
+			return player->z;
 	}
 	return 0;
 }
@@ -972,14 +976,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPitch
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* entity = bl_getEntityWrapperWithLocalHack(bl_level, entityId);
 	if (entity == NULL) return 0.0f;
 	return entity->pitch;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetYaw
   (JNIEnv *env, jclass clazz, jlong entityId) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* entity = bl_getEntityWrapperWithLocalHack(bl_level, entityId);
 	if (entity == NULL) return 0.0f;
 	return entity->yaw;
 }
@@ -1044,7 +1048,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityLoc
   (JNIEnv *env, jclass clazz, jlong entityId, jint axis) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* entity = bl_getEntityWrapperWithLocalHack(bl_level, entityId);
 	if (entity == NULL) return 0;
 	switch (axis) {
 		case AXIS_X:
@@ -1212,7 +1216,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetEntityVel
   (JNIEnv *env, jclass clazz, jlong entityId, jint axis) {
-	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	Entity* entity = bl_getEntityWrapperWithLocalHack(bl_level, entityId);
 	if (entity == NULL) return 0;
 	switch (axis) {
 		case AXIS_X:

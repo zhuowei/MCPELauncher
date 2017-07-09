@@ -546,6 +546,16 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 	return level->fetchEntity(entityId, false);
 }
 
+// grab the clientside entity if it's the player. A hack.
+Entity* bl_getEntityWrapperWithLocalHack(Level* level, long long entityId) {
+	if (bl_onLockDown || level == nullptr) return nullptr;
+	if (bl_localplayer && entityId == bl_localplayer->getUniqueID()) {
+		Entity* retval = bl_minecraft->getLocalPlayer();
+		if (retval) return retval;
+	}
+	return bl_getEntityWrapper(level, entityId);
+}
+
 bool bl_isActiveLevel(Level* level) {
 	return level == bl_level;
 }
