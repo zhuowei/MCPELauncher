@@ -232,7 +232,7 @@ void bl_forceLocationUpdate(Entity* entity) {
 
 void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
-	BL_LOG("Creative useItemOn");
+	//BL_LOG("Creative useItemOn");
 
 	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
 	if (myLevel != bl_level) {
@@ -284,7 +284,7 @@ void bl_GameMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* it
 
 void bl_SurvivalMode_useItemOn_hook(void* gamemode, Player* player, ItemInstance* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
-	BL_LOG("Survival useItemOn");
+	//BL_LOG("Survival useItemOn");
 
 	void* myLevel = *((void**)(((uintptr_t)gamemode) + kGameMode_level_offset));
 	if (myLevel != bl_level) {

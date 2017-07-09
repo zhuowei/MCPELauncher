@@ -2111,7 +2111,7 @@ public class ScriptManager {
 	public static native void nativeLevelSetExtraData(int x, int y, int z, int data);
 	public static native int nativeLevelGetExtraData(int x, int y, int z);
 	public static native boolean nativeItemIsExtendedBlock(int itemId);
-	public static native String nativeLevelExecuteCommand(String cmd);
+	public static native String nativeLevelExecuteCommand(String cmd, boolean silent);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2532,7 +2532,7 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void playSound(double x, double y, double z, String sound, double volume,
 				double pitch) {
-			nativePlaySound((float) x, (float) y, (float) z, sound,
+			playSoundImpl((float) x, (float) y, (float) z, sound,
 				(volume <= 0 || volume != volume)? 1.0f: (float) volume, (pitch <= 0 || pitch != pitch)? 1.0f: (float) pitch);
 		}
 
@@ -2542,8 +2542,16 @@ public class ScriptManager {
 			float y = nativeGetEntityLoc(getEntityId(ent), AXIS_Y);
 			float z = nativeGetEntityLoc(getEntityId(ent), AXIS_Z);
 
-			nativePlaySound(x, y, z, sound,
+			playSoundImpl(x, y, z, sound,
 				(volume <= 0 || volume != volume)? 1.0f: (float) volume, (pitch <= 0 || pitch != pitch)? 1.0f: (float) pitch);
+		}
+
+		private static void playSoundImpl(double x, double y, double z, String sound, float volume, float pitch) {
+			String cmd = new StringBuilder().append("/playsound ").append(sound).append(' ').
+				append("@a ").append(Math.round(x)).append(' ').append(Math.round(y)).append(' ').
+				append(Math.round(z)).append(' ').append(volume).append(' ').append(pitch).toString();
+			String retval = executeCommand(cmd, true);
+			if (retval != null) System.err.println("Failed to play sound " + sound + ": " + retval);
 		}
 
 		// Byteandahalf's additions
@@ -2668,8 +2676,8 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static String executeCommand(String command) {
-			String result = nativeLevelExecuteCommand(command);
+		public static String executeCommand(String command, boolean silent) {
+			String result = nativeLevelExecuteCommand(command, silent);
 			if ("<no result>".equals(result)) return "";
 			return result;
 		}

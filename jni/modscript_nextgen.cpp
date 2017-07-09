@@ -3295,12 +3295,20 @@ void* bl_MinecraftTelemetry_fireEventScreenChanged_hook(void* a, std::string con
 }
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelExecuteCommand
-  (JNIEnv* env, jclass clazz, jstring text) {
+  (JNIEnv* env, jclass clazz, jstring text, jboolean silent) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	std::string mystr = std::string(utfChars);
 	env->ReleaseStringUTFChars(text, utfChars);
 
 	Minecraft* minecraft = bl_minecraft->getServerData();
+
+	if (silent) {
+		DevConsoleCommandOrigin* origin = new DevConsoleCommandOrigin(bl_localplayer? bl_localplayer->getUniqueID(): EntityUniqueID(0), bl_level);
+		std::string outStr = "<no result>";
+		minecraft->getCommands()->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, outStr);
+		return env->NewStringUTF(outStr.c_str());
+	}
+
 	DedicatedServerCommandOrigin* origin = new DedicatedServerCommandOrigin("ModPE Script", *minecraft);
 	std::string outStr = "<no result>";
 	minecraft->getCommands()->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, outStr);
