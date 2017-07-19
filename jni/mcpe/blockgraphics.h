@@ -1,6 +1,7 @@
 #pragma once
 class TextureUVCoordinateSet;
 class TextureAtlas;
+class BlockPos;
 namespace Json {
 	class Value;
 };
@@ -16,6 +17,7 @@ public:
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
 	Block* getBlock() const;
 	TextureUVCoordinateSet const& getTexture(signed char, int, int) const;
+	TextureUVCoordinateSet const& getTexture(BlockPos const&, signed char, int) const;
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);
 	static void initBlocks();
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int, int);

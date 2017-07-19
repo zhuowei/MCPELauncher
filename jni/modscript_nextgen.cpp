@@ -483,8 +483,6 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
 static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
 static void*(*bl_MinecraftTelemetry_fireEventScreenChanged_real)(void*, std::string const&, std::unordered_map<std::string, std::string> const&);
-static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_real)(BlockGraphics*, signed char, int);
-static TextureUVCoordinateSet* (*bl_BlockGraphics_getTexture_char_real)(BlockGraphics*, signed char);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
@@ -530,6 +528,8 @@ enum CustomBlockRedstoneType {
 	// this is a bitfield
 	REDSTONE_CONSUMER = (1 << 0),
 };
+
+static const unsigned char kStonecutterId = 245;
 
 static void dumpEnchantNames() {
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "enchant dump: %d", Enchant::mEnchants.size());
@@ -1037,7 +1037,9 @@ void bl_repopulateItemGraphics() {
 			ItemRenderer::mItemGraphics.resize(item->itemId + 1);
 			needsSetting = true;
 		} else if (ItemRenderer::mItemGraphics[item->itemId].texturePtr.get() !=
-			ItemRenderer::mItemGraphics[0x100].texturePtr.get()) {
+			ItemRenderer::mItemGraphics[0x100].texturePtr.get() &&
+			ItemRenderer::mItemGraphics[item->itemId].texturePtr.get() !=
+			ItemRenderer::mItemGraphics[0x1].texturePtr.get()) {
 			// inside but not set, populate
 			needsSetting = true;
 		}
@@ -1046,9 +1048,10 @@ void bl_repopulateItemGraphics() {
 			if (Item::mItemTextureAtlas == nullptr) {
 				BL_LOG("item texture atlas null when populating graphics?");
 			}
-			//bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
+			bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
 			//ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
-			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(/*std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)*/ItemRenderer::mItemGraphics[0x100].texturePtr.clone());
+			int sourceId = isExtendedBlock? 0x1: 0x100;
+			ItemRenderer::mItemGraphics[item->itemId] = ItemGraphics(/*std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)*/ItemRenderer::mItemGraphics[sourceId].texturePtr.clone());
 		}
 	}
 }
@@ -1628,7 +1631,7 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 	Block* retval;
 	//BlockGraphics* retGraphics;
 	retval = (Block*) ::operator new(kTileSize);
-	bl_Block_Block(retval, nameStr, 245, bl_getMaterial(materialType));
+	bl_Block_Block(retval, nameStr, kStonecutterId, bl_getMaterial(materialType));
 	retval->vtable = bl_CustomBlock_vtable + 2;
 	retval->setSolid(opaque);
 	Block::mBlockLookupMap[Util::toLower(retval->mappingId)] = retval;
@@ -2266,7 +2269,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_ID: {
 			int id = bl_localplayer->getRegion()->getBlockID(
 				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
-			if (id == 245) {
+			if (id == kStonecutterId) {
 				int extraData = bl_localplayer->getRegion()->getExtraData(
 					{objectMouseOver.x, objectMouseOver.y, objectMouseOver.z});
 				if (extraData != 0) return extraData;
@@ -3327,8 +3330,6 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 
 // extended block IDs
 
-static const unsigned char kStonecutterId = 245;
-
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetExtraData
   (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jint data) {
 	bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
@@ -3373,18 +3374,25 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, Block co
 	blockInfo->blockExtraData = 0;
 }
 
-TextureUVCoordinateSet* bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data) {
+TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data, int extra) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
 		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
 		if (blockInfo && blockInfo->blockExtraData && bl_extendedBlockGraphics[blockInfo->blockExtraData]) {
 			graphics = bl_extendedBlockGraphics[blockInfo->blockExtraData];
 		}
 	}
-	return bl_BlockGraphics_getTexture_real(graphics, side, data);
+	return graphics->getTexture(side, data, extra);
 }
 
-TextureUVCoordinateSet* bl_CustomBlockGraphics_getTexture_char_hook(BlockGraphics* graphics, signed char side) {
-	return bl_CustomBlockGraphics_getTextureHook(graphics, side, 0);
+TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(BlockGraphics* graphics, BlockPos const& pos, signed char side, int data) {
+	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
+		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
+		if (blockInfo && blockInfo->blockExtraData && bl_extendedBlockGraphics[blockInfo->blockExtraData]) {
+			graphics = bl_extendedBlockGraphics[blockInfo->blockExtraData];
+		}
+	}
+
+	return graphics->getTexture(pos, side, data);
 }
 
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(Block*, BlockSource&, BlockPos const&, AABB&, bool);
@@ -4062,12 +4070,15 @@ void bl_setuphooks_cppside() {
 	//bl_patch_got(mcpelibhandle, (void*)bl_MinecraftTelemetry_fireEventScreenChanged_real, 
 	//	(void*)bl_MinecraftTelemetry_fireEventScreenChanged_hook);
 
-	bl_BlockGraphics_getTexture_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char, int))
-		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEai");
-	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_real, (void*) bl_CustomBlockGraphics_getTextureHook);
-	bl_BlockGraphics_getTexture_char_real = (TextureUVCoordinateSet* (*)(BlockGraphics*, signed char))
-		dlsym(mcpelibhandle, "_ZNK13BlockGraphics10getTextureEa");
-	bl_patch_got_wrap(mcpelibhandle, (void*)bl_BlockGraphics_getTexture_char_real, (void*) bl_CustomBlockGraphics_getTexture_char_hook);
+	// custom blocks.
+	bl_patch_got_wrap(mcpelibhandle, (void*)
+		(TextureUVCoordinateSet const& (BlockGraphics::*)(signed char, int, int) const)
+		&BlockGraphics::getTexture,
+		(void*)&bl_CustomBlockGraphics_getTextureHook);
+	bl_patch_got_wrap(mcpelibhandle, (void*)
+		(TextureUVCoordinateSet const& (BlockGraphics::*)(BlockPos const&, signed char, int) const)
+		&BlockGraphics::getTexture,
+		(void*)&bl_CustomBlockGraphics_getTexture_blockPos_hook);
 	// known to fail.
 	// fixme 1.1.0
 	mcpelauncher_hook((void*)&MinecraftGame::updateFoliageColors, (void*)bl_MinecraftGame_updateFoliageColors_hook, (void**)&bl_MinecraftGame_updateFoliageColors_real);
@@ -4086,9 +4097,8 @@ void bl_setuphooks_cppside() {
 
 	bl_patch_got_wrap(mcpelibhandle, (void*)&ItemRenderer::_loadItemGraphics, (void*)&bl_ItemRenderer__loadItemGraphics_hook);
 
-	// fixme 1.1.0
-	//mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
-	//	(void**)&bl_InventoryItemRenderer_update_real);
+	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
+		(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
 	mcpelauncher_hook((void*)bl_BlockGraphics_initBlocks_new, (void*)&bl_BlockGraphics_initBlocks_hook,
