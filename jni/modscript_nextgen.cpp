@@ -3435,9 +3435,12 @@ JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPrevent
 
 static std::string bl_lastScreen;
 
+static void bl_cpp_screenchange_handler(std::string const& s1);
+
 static void bl_fireScreenChange(std::string const& s1) {
 	if (s1 == bl_lastScreen) return;
 	bl_lastScreen = s1;
+	bl_cpp_screenchange_handler(s1);
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -3489,6 +3492,8 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 	}
 }
 
+static bool bl_needItemIconReload = false;
+
 void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
 	size_t mysize = ItemRenderer::mItemGraphics.size();
 	mce::Texture* oldtex = (mysize > 0x100? ItemRenderer::mItemGraphics[0x100].texturePtr.get(): nullptr);
@@ -3499,8 +3504,10 @@ void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
 	if (needUpdate) {
 		bl_finishItemSetIconRequests(); // otherwise exit and returning to the world doesn't work
 		bl_repopulateItemGraphics();
+		bl_needItemIconReload = false;
 	}
 }
+
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
   (JNIEnv* env, jclass clazz) {
@@ -3513,6 +3520,17 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
 		bl_BlockGraphics_initBlocks_new(bl_minecraft->getServerData()->getResourceLoader());
+	}
+	bl_needItemIconReload = true;
+}
+
+static void bl_cpp_screenchange_handler(std::string const& screen) {
+	if (!(screen == "in_game_play_screen" || screen == "hud_screen")) return;
+	if (bl_needItemIconReload) {
+		BL_LOG("Forcing a reload prior to hud load");
+		bl_finishItemSetIconRequests();
+		bl_repopulateItemGraphics();
+		bl_needItemIconReload = false;
 	}
 }
 
