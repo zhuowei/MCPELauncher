@@ -1230,6 +1230,8 @@ public class ScriptManager {
 	// end method dumping code
 
 	private static boolean isLocalAddress(String str) {
+		return true;
+/*
 		// Use Java's built-in support for this
 		try {
 			InetAddress address = InetAddress.getByName(str);
@@ -1241,6 +1243,7 @@ public class ScriptManager {
 			e.printStackTrace();
 			return false;
 		}
+*/
 	}
 
 	public static void takeScreenshot(String fileName) {
