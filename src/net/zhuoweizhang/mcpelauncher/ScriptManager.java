@@ -3644,8 +3644,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void takeScreenshot(String fileName) {
-			screenshotFileName = fileName.replace("/", "").replace("\\", "");
-			nativeRequestFrameCallback();
+			ScriptManager.takeScreenshot(fileName);
 		}
 
 		@JSStaticFunction
