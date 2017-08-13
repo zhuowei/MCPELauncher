@@ -1,5 +1,6 @@
 #pragma once
+//#include <gsl/string_span>
 class Util {
 public:
-	static std::string toLower(std::string const&);
+	//static gsl::string_span<> toLower(gsl::string_span<> const&);
 };

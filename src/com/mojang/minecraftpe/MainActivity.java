@@ -80,7 +80,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.1";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.2";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -2136,6 +2136,21 @@ public class MainActivity extends NativeActivity {
 
 	public String createDeviceID() {
 		return getDeviceId();
+	}
+
+	// 1.2.0
+	public boolean unpackMonoAssemblies() {
+		// WHAT
+		System.out.println("Unpack Mono assemblies");
+		return false;
+	}
+
+	public void share(String shareText) {
+		System.out.println("Share: " + shareText);
+	}
+
+	public void trackPurchaseEvent(String a, String b, String c, String d, String e, String f) {
+		System.out.println("Track purchase event: " + a + ":" + b + ":" + c + ":" + d + ":" + e + ":" + f);
 	}
 
 	@Override

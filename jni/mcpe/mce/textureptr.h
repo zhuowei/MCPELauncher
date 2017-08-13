@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
+#include "../resourcelocation.h"
 enum TextureLocation {
 	TEXTURE_LOCATION_INTERNAL, // 0
 };
-class ResourceLocation;
 namespace mce {
 class TextureGroup;
 class TextureDescription;
@@ -20,7 +20,7 @@ public:
 	std::string something; // 12
 	char filler2[4]; // 16
 	TexturePtr();
-	TexturePtr(TextureGroup&, ResourceLocation const&, bool a=false);
+	TexturePtr(TextureGroup&, ResourceLocation, bool a=false);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);

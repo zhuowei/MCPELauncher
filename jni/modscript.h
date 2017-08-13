@@ -355,22 +355,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 
 /*
  * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeGetSignText
- * Signature: (IIII)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetSignText
-  (JNIEnv *, jclass, jint, jint, jint, jint);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
- * Method:    nativeSetSignText
- * Signature: (IIIILjava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetSignText
-  (JNIEnv *, jclass, jint, jint, jint, jint, jstring);
-
-/*
- * Class:     net_zhuoweizhang_mcpelauncher_ScriptManager
  * Method:    nativeSetSneaking
  * Signature: (JZ)V
  */

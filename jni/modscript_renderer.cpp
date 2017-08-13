@@ -120,7 +120,7 @@ int bl_renderManager_createHumanoidRenderer() {
 	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, *bl_EntityRenderDispatcher_instance, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		bl_minecraft->getGuiData()->getGuiTex().clone(), 0);
+		mce::TexturePtr::NONE.clone()/*bl_minecraft->getGuiData()->getGuiTex().clone()*/, 0);
 	BL_LOG("Adding renderer");
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	BL_LOG("Created renderer %d", retval);
@@ -132,7 +132,7 @@ Item** bl_getItemsArray();
 int bl_renderManager_createItemSpriteRenderer(int itemId) {
 	Item** mItems = bl_getItemsArray();
 	if (!mItems[itemId]) return -1;
-	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(*((EntityRenderDispatcher*)(*bl_EntityRenderDispatcher_instance)), bl_minecraft->getTextures(), mItems[itemId], false);
+	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(bl_minecraft->getTextures(), mItems[itemId], false);
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	bl_itemSpriteRendererTypeMap[itemId] = retval;
 	return retval;
@@ -293,12 +293,14 @@ void bl_renderManager_init(void* mcpelibhandle) {
 	}
 	bl_ModelPart_reset = (void (*)(ModelPart*))
 		dlsym(mcpelibhandle, "_ZN9ModelPart5resetEv");
+/* FIXME 1.2
 	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer, (void*)&bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook)) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
 		abort();
 	}
 	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer_entity_real,
 		(void*)&bl_EntityRenderDispatcher_getRenderer_hook);
+*/
 }
 
 } //extern "C"

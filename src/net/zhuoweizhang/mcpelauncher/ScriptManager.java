@@ -1876,9 +1876,9 @@ public class ScriptManager {
 
 	public static native void nativeRequestFrameCallback();
 
-	public static native String nativeGetSignText(int x, int y, int z, int line);
+	public static native String nativeGetSignText(int x, int y, int z);
 
-	public static native void nativeSetSignText(int x, int y, int z, int line, String text);
+	public static native void nativeSetSignText(int x, int y, int z, String text);
 
 	public static native void nativeSetSneaking(long entityId, boolean doIt);
 	public static native boolean nativeIsSneaking(long entityId);
@@ -2428,14 +2428,38 @@ public class ScriptManager {
 		public static String getSignText(int x, int y, int z, int line) {
 			if (line < 0 || line >= 4)
 				throw new RuntimeException("Invalid line for sign: must be in the range of 0 to 3");
-			return nativeGetSignText(x, y, z, line);
+			String text = nativeGetSignText(x, y, z);
+			if (text == null) return "";
+			String[] textArr = text.split("\n");
+			if (line >= textArr.length) return "";
+			return textArr[line];
 		}
 
 		@JSStaticFunction
 		public static void setSignText(int x, int y, int z, int line, String newText) {
 			if (line < 0 || line >= 4)
 				throw new RuntimeException("Invalid line for sign: must be in the range of 0 to 3");
-			nativeSetSignText(x, y, z, line, newText);
+			String text = nativeGetSignText(x, y, z);
+			String newTextJoined = null;
+			if (text == null) {
+				StringBuilder out = new StringBuilder();
+				for (int i = 0; i < line; i++) {
+					out.append("\n");
+				}
+				newTextJoined = out.append(newText).toString();
+			} else {
+				String[] outArr = text.split("\n");
+				if (line >= outArr.length) {
+					String[] newArr = new String[line + 1];
+					for (int i = 0; i < outArr.length; i++) {
+						newArr[i] = outArr[i];
+					}
+					outArr = newArr;
+				}
+				outArr[line] = newText;
+				newTextJoined = Utils.joinArray(outArr, "\n");
+			}
+			nativeSetSignText(x, y, z, newTextJoined);
 		}
 
 		// thanks to MrARM

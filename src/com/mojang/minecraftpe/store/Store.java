@@ -42,4 +42,7 @@ public class Store {
 		System.out.println("Get realms SKU prefix");
 		return "";
 	}
+	public boolean hasVerifiedLicense() {
+		return true;
+	}
 }

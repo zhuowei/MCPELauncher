@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include "blockentity.h"
+class UIProfanityContext;
 class SignBlockEntity : public BlockEntity {
 public:
-	std::string const& getMessage(int) const;
-	void setMessage(std::string const&, int);
+	std::string const& getMessage(UIProfanityContext const&);
+	void setMessage(std::string const&);
 };

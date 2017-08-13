@@ -14,6 +14,9 @@ class LevelRenderer;
 class Vec3;
 class ResourcePackManager;
 class ClientInstance;
+class EntityRenderDispatcher;
+class ItemRenderer;
+class UIProfanityContext;
 
 enum GameType {
 };
@@ -50,7 +53,10 @@ public:
 	void onResourcesLoaded();
 	LevelRenderer* getLevelRenderer() const;
 	void play(std::string const&, Vec3 const&, float, float);
-	void leaveGame(bool);
+	void startLeaveGame(bool);
 	Level* getLevel();
+	EntityRenderDispatcher& getEntityRenderDispatcher();
+	ItemRenderer* getItemRenderer();
+	UIProfanityContext const& getUIProfanityContext() const;
 };
 #define MinecraftClient ClientInstance

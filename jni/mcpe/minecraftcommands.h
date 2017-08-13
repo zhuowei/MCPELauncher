@@ -6,8 +6,13 @@ struct MCRESULT {
 	int filler;
 };
 
+class CommandRegistry {
+public:
+	Command* findCommand(std::string const&) const;
+};
+
 class MinecraftCommands {
 public:
-	std::shared_ptr<Command> getCommand(std::string const&, int) const;
-	MCRESULT requestCommandExecution(std::unique_ptr<CommandOrigin>, std::string const&, std::string&) const;
+	CommandRegistry* getRegistry();
+	MCRESULT requestCommandExecution(std::unique_ptr<CommandOrigin>, std::string const&, int, bool) const;
 };

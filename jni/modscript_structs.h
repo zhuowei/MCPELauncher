@@ -64,7 +64,7 @@ enum EntityFlags {
 };
 class PlayerInventoryProxy;
 class EntityDamageSource;
-// last update: 1.1b1
+// last update: 1.2b11
 class Entity {
 public:
 	void** vtable; //0
@@ -81,12 +81,10 @@ public:
 	float prevPitch; //128
 	float prevYaw; //132
 
-	char filler4[244-136]; //136
-	int renderType; //244
-	char filler5[440-248]; // 248
-	struct Entity* rider; //440 (inaccurate, Entity::getRide() - 4)
-	char filler6[476-444]; // 444
-	bool teleported; // 476: Entity::hasTeleported
+	char filler4[248-136]; //136
+	int renderType; //248
+	char filler5[476-252]; // 252
+	std::vector<Entity*> riders; // 476
 
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
@@ -108,7 +106,7 @@ public:
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
 };
-static_assert(offsetof(Entity, renderType) == 244, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 248, "renderType offset wrong");
 
 class Mob: public Entity {
 public:
@@ -125,12 +123,12 @@ struct PlayerInventorySlot {
 class PlayerInventoryProxy {
 public:
 	bool add(ItemInstance&, bool);
-	void removeResource(ItemInstance const&, bool, int);
+	void removeResource(ItemInstance const&, bool, bool, int);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
 	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
 	int getLinkedSlot(int) const;
 	int getLinkedSlotsCount() const;
-	void replaceSlot(int, ItemInstance const&);
+	void setItem(int, ItemInstance const&, ContainerID=ContainerIDInventory);
 	PlayerInventorySlot getSelectedSlot() const;
 	void selectSlot(int, ContainerID=ContainerIDInventory);
 };
@@ -163,7 +161,7 @@ namespace Json {
 	class Value;
 };
 class TextureAtlas;
-// Updated 1.1b1
+// Updated 1.2b11
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 // for useAnimation see setUseAnimation
 class Item {
@@ -175,7 +173,7 @@ public:
 	bool handEquipped; // 33
 	char filler[45-34]; //34
 	unsigned char useAnimation; // 45
-	char filler3[112-46]; // 46
+	char filler3[116-46]; // 46
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -189,7 +187,7 @@ public:
 	int getMaxDamage() const;
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
-static_assert(sizeof(Item) == 112, "item size is wrong");
+static_assert(sizeof(Item) == 116, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -280,6 +278,13 @@ typedef struct {
 	char filler[12]; // 0
 } MaterialPtr; // actually mce::MaterialPtr
 
+struct Color {
+	float r;
+	float g;
+	float b;
+	float a;
+};
+
 // from ModelPart::setPos, ModelPart::setTexSize
 class ModelPart {
 public:
@@ -298,7 +303,7 @@ public:
 	int textureOffsetY; // 96
 	char filler2[220-100]; // 100
 
-	void addBox(Vec3 const&, Vec3 const&, float);
+	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
 }; // 220 bytes
 static_assert(sizeof(ModelPart) == 220, "modelpart size wrong");
 
@@ -418,13 +423,6 @@ typedef struct {
 } LevelSettings;
 
 typedef struct {
-	float r;
-	float g;
-	float b;
-	float a;
-} Color;
-
-typedef struct {
 	float x1; // 0
 	float y1; // 4
 	float z1; // 8
@@ -484,6 +482,9 @@ public:
 	Entity* spawnItem(BlockSource&, ItemInstance const&, Entity*, Vec3 const&, int);
 };
 
+enum ParticleType {
+};
+
 class Level {
 public:
 	void** vtable;
@@ -503,12 +504,12 @@ public:
 	Spawner* getSpawner() const;
 	Player* getPlayer(EntityUniqueID) const;
 	Player* getPrimaryLocalPlayer() const;
+	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
 };
 
 class EntityRenderDispatcher {
 public:
 	EntityRenderer* getRenderer(Entity&);
-	static EntityRenderDispatcher& getInstance();
 };
 
 class MinecraftScreenModel {

@@ -1,13 +1,13 @@
 #pragma once
-class AbstractScreen;
+class AbstractScene;
 class ScreenChooser {
 public:
-	void popScreen(AbstractScreen&, int);
+	void popScreen(AbstractScene&, int);
 };
 
-class ScreenStack {
+class SceneStack {
 public:
 	void _popScreen(bool);
-	void pushScreen(std::shared_ptr<AbstractScreen>, bool);
+	void pushScreen(std::shared_ptr<AbstractScene>, bool);
 	std::string getScreenName() const;
 };
