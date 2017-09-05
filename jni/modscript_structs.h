@@ -143,6 +143,7 @@ public:
 class ServerPlayer : public Player {
 public:
 	void push(Vec3 const&);
+	void sendInventory(bool);
 };
 
 struct TextureUVCoordinateSet {
@@ -155,7 +156,7 @@ struct TextureUVCoordinateSet {
 	};
 };
 //static_assert(offsetof(TextureUVCoordinateSet, textureFile) == 24, "textureFile offset wrong");
-static_assert(sizeof(TextureUVCoordinateSet) == 36, "TextureUVCoordinateSet size wrong");
+static_assert(sizeof(TextureUVCoordinateSet) == 32, "TextureUVCoordinateSet size wrong");
 
 namespace Json {
 	class Value;
@@ -193,22 +194,21 @@ class CompoundTag {
 public:
 	~CompoundTag();
 };
-
+class Block;
 class ItemInstance {
 public:
-	unsigned char count; //0
-	short damage; //2
-	unsigned char something; // 4
-	char filler[8-5]; // 5
+	Item* item; // 0
+	Block* block; // 4
 	CompoundTag* tag; // 8
-	Item* item; // 12
-	void* block; //16
-	char filler2[44-20]; // 20
+	short damage; // 12
+	unsigned char count; //14
+	char filler2[72-15]; // 15
 
 	ItemInstance();
 	ItemInstance(int, int, int);
 	ItemInstance(ItemInstance const&);
 	ItemInstance& operator=(ItemInstance const&);
+	~ItemInstance();
 	bool operator==(ItemInstance const&) const;
 	bool operator!=(ItemInstance const&) const;
 	ItemEnchants getEnchantsFromUserData() const;
@@ -226,8 +226,8 @@ public:
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
 static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
-static_assert(offsetof(ItemInstance, item) == 12, "item offset wrong");
-static_assert(sizeof(ItemInstance) == 44, "ItemInstance wrong");
+static_assert(offsetof(ItemInstance, item) == 0, "item offset wrong");
+static_assert(sizeof(ItemInstance) == 72, "ItemInstance wrong");
 
 enum CreativeItemCategory {
 };
@@ -250,7 +250,7 @@ public:
 	char filler2[84-28]; //28
 	float destroyTime; //84
 	float explosionResistance; //88
-	char filler4[636-92]; // 92
+	char filler4[640-92]; // 92
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -265,13 +265,13 @@ public:
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(Block) == 636, "Block size is wrong");
+static_assert(sizeof(Block) == 640, "Block size is wrong");
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
 static_assert(offsetof(Block, explosionResistance) == 88, "explosionResistance is wrong");
 #define Tile Block
 
 typedef struct {
-	char filler0[172]; //0: from ModelPart::addBox
+	char filler0[176]; //0: from ModelPart::addBox
 } Cube;
 
 typedef struct {
@@ -310,12 +310,11 @@ static_assert(sizeof(ModelPart) == 220, "modelpart size wrong");
 namespace mce {
 	class TexturePtr;
 };
-
+class GeometryPtr;
 // from HumanoidModel::render
 // last updated 1.1.3.1
 class HumanoidModel {
 public:
-	void** vtable; //0
 	char filler[25-4]; // 4
 	bool riding; // 25
 	char filler1[28-26]; // 26
@@ -335,6 +334,8 @@ public:
 	ModelPart bipedLeftLeg;//1416
 	char filler3[4308-1636]; // 1636 - more model parts
 	HumanoidModel(float, float, int, int);
+	HumanoidModel(GeometryPtr const&);
+	virtual ~HumanoidModel();
 };
 
 static_assert(sizeof(HumanoidModel) == 4308, "HumanoidModel size");
@@ -346,8 +347,11 @@ typedef struct {
 	Item* item; //0
 	Tile* tile; //4
 	ItemInstance itemInstance; //8
-	char letter; //28
+	char letter; //80
 } RecipesType;
+// std::vector<Recipes::Type, std::allocator<Recipes::Type> > definition<ItemInstance>(char, ItemInstance)
+static_assert(offsetof(RecipesType, letter) == 80, "RecipesType letter");
+static_assert(sizeof(RecipesType) == 84, "RecipesType size");
 
 typedef struct {
 } FurnaceRecipes;
@@ -364,10 +368,10 @@ public:
 	void** vtable; //0
 	char filler[140-4]; //4
 	void* model; // 140 (from MobRenderer::MobRenderer)
-	char filler2[640-144]; // 140
+	char filler2[644-144]; // 140
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(sizeof(MobRenderer) == 640, "mobrenderer");
+static_assert(sizeof(MobRenderer) == 644, "mobrenderer");
 
 typedef void Tag;
 
@@ -395,10 +399,10 @@ typedef struct {
 class Biome {
 public:
 	void** vtable; //0
-	char filler[56-4]; //4
-	cppstr name; //56 from Biome::setName
-	char filler2[148-60]; //60
-	int id; //148 from Biome::Biome
+	char filler[160-4]; //4
+	cppstr name; //160 from Biome::setName
+	char filler2[252-164]; //164
+	int id; //252 from Biome::Biome
 };
 
 typedef struct {
@@ -444,25 +448,26 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 112
-	int damageReduceAmount; // 116
-	int renderIndex; // 120
-	void* armorMaterial; // 124
+	int armorType; // 116
+	int damageReduceAmount; // 120
+	int renderIndex; // 124
+	void* armorMaterial; // 128
+	char fillerendarmor[152-132]; // 132
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 128, "armor item size");
+static_assert(sizeof(ArmorItem) == 152, "armor item size");
 #endif
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 640
-	HumanoidModel* modelArmor; // 644
-	HumanoidModel* modelArmorChestplate; // 648
-	char hmr_filler1[668-652]; // 652
+	int something; // 644
+	HumanoidModel* modelArmor; // 648
+	HumanoidModel* modelArmorChestplate; // 652
+	char hmr_filler1[672-656]; // 656
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 644, "armour model offset");
-static_assert(sizeof(HumanoidMobRenderer) == 668, "humanoid mob renderer size");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 648, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 672, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 
@@ -507,6 +512,28 @@ public:
 	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
 };
 
+class MinecraftCommands;
+class ServerLevel : public Level {
+public:
+	MinecraftCommands* getCommands();
+};
+
+class EntityRuntimeID {
+public:
+	long long id;
+	EntityRuntimeID(long long id) : id(id) {
+	}
+
+	operator long long() const {
+		return this->id;
+	}
+};
+
+class MultiPlayerLevel : public Level {
+public:
+	void* putEntity(BlockSource&, EntityUniqueID, EntityRuntimeID, std::unique_ptr<Entity>);
+};
+
 class EntityRenderDispatcher {
 public:
 	EntityRenderer* getRenderer(Entity&);
@@ -515,6 +542,12 @@ public:
 class MinecraftScreenModel {
 public:
 	void updateTextBoxText(std::string const&);
+};
+
+class ClientInstanceScreenModel : public MinecraftScreenModel {
+public:
+	void executeCommand(std::string const&);
+	void sendChatMessage(std::string const&);
 };
 
 void addItem(Player&, ItemInstance&);

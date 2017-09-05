@@ -23,7 +23,7 @@
 #define MODELPART_CUBEVECTOR_OFFSET 56
 // ModelPart destructor
 #define MODELPART_MESHBUFFER_OFFSET 104
-static const int kEntityRenderDispatcher_renderersOffset = 44;
+static const int kEntityRenderDispatcher_renderersOffset = 4;
 
 extern "C" {
 #define DLSYM_DEBUG
@@ -40,7 +40,7 @@ EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_Mesh_reset)(void*);
 
-static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, void*, std::unique_ptr<HumanoidModel>,
+static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, std::unique_ptr<HumanoidModel>,
 		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float);
 static void (*bl_ModelPart_reset)(ModelPart*);
 
@@ -50,7 +50,12 @@ static std::map<long long, int> bl_renderTypeMap;
 static std::unordered_map<int, int> bl_itemSpriteRendererTypeMap;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_entity_real)(void*, Entity*);
-static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b);
+class BaseEntityRenderContext;
+static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, BaseEntityRenderContext&, Entity&, Vec3 const&, Vec2 const&);
+class GeometryGroup;
+class BlockTessellator;
+static void (*bl_EntityRenderDispatcher_initializeEntityRenderers_real)(void* self, GeometryGroup& geometryGroup,
+	mce::TextureGroup& textureGroup, BlockTessellator& blockTessellator);
 
 static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
 	MobRenderer* renderer;
@@ -95,8 +100,10 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 }
 
 void bl_renderManager_invalidateModelPart(ModelPart* part) {
+	/* FIXME 1.2.0
 	void* meshBuffer = (void*) ((uintptr_t) part + MODELPART_MESHBUFFER_OFFSET);
 	bl_Mesh_reset(meshBuffer);
+	*/
 }
 
 int bl_renderManager_addRenderer(EntityRenderer* renderer) {
@@ -117,10 +124,10 @@ int bl_renderManager_createHumanoidRenderer() {
 	//	(MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, 3 /* human */);
 
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
-	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, *bl_EntityRenderDispatcher_instance, std::unique_ptr<HumanoidModel>(model),
+	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
 		std::unique_ptr<HumanoidModel>(model2),
 		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr::NONE.clone()/*bl_minecraft->getGuiData()->getGuiTex().clone()*/, 0);
+		mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("textures/entity/chest/double_normal")), 0);
 	BL_LOG("Adding renderer");
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	BL_LOG("Created renderer %d", retval);
@@ -141,7 +148,7 @@ int bl_renderManager_createItemSpriteRenderer(int itemId) {
 int bl_renderManager_renderTypeForItemSprite(int itemId) {
 	return bl_itemSpriteRendererTypeMap[itemId];
 }
-
+//static MobRenderer* bl_stupidRenderer;
 EntityRenderer* bl_EntityRenderDispatcher_getRenderer_hook(void* dispatcher, Entity* entity) {
 	int renderType = entity->renderType;
 	if (renderType >= 0x1000) {
@@ -159,23 +166,37 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook(void
 //static void* getMCPERenderType(int renderType) {
 //	return bl_EntityRenderDispatcher_getRenderer_EntityRenderId(*bl_EntityRenderDispatcher_instance, renderType);
 //}
+static const int kTempRenderType = 16; // zombie
 
-void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, Entity& entity, Vec3 const& pos, float a, float b) {
+void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseEntityRenderContext& context, Entity& entity,
+	Vec3 const& pos, Vec2 const& rot) {
 	auto entityId = entity.getUniqueID();
-	if (bl_renderTypeMap.count(entityId) == 0) {
-		return bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
-	}
 	int oldRenderType = entity.renderType;
+	if (entity.renderType == kTempRenderType || bl_renderTypeMap.count(entityId) == 0) {
+		return bl_EntityRenderDispatcher_render_real(renderDispatcher, context, entity, pos, rot);
+	}
 	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
-	EntityRenderer* tntRenderer = renderers[2]; // TNT
-	renderers[2] = bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
-	entity.renderType = 2; // steal TNT's render type
+	MobRenderer* tntRenderer = (MobRenderer*)renderers[kTempRenderType]; // Zombie
+	renderers[kTempRenderType] = bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
+	entity.renderType = kTempRenderType; // steal Zombie's render type
+/*
+	auto oldModel = tntRenderer->model;
+	tntRenderer->model = bl_stupidRenderer->model;
 
-	BL_LOG("Rendering custom! material = %p", *((void**)(((uintptr_t)renderers[2]) + 28)));
-	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, entity, pos, a, b);
+	Dl_info info;
+	if (dladdr(*(void**)tntRenderer, &info)) {
+		BL_LOG("Old renderer is %s", info.dli_sname);
+	}
+
+	BL_LOG("Rendering custom! material = %p, thing = %p", *((void**)(((uintptr_t)renderers[2]) + 28)), tntRenderer->model);
+*/
+	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, context, entity, pos, rot);
+/*
 	BL_LOG("Done rendering custom!");
+*/
 
-	renderers[2] = tntRenderer; // restore
+	renderers[kTempRenderType] = tntRenderer; // restore
+	//tntRenderer->model = oldModel;
 	entity.renderType = oldRenderType;
 	return retval;
 }
@@ -214,6 +235,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat xOffset, jfloat yOffset, jfloat zOffset,
     jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent,
     jfloat textureWidth, jfloat textureHeight) {
+	/* FIXME 1.2.0
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	HumanoidModel* model = nullptr;
 	ModelPart* part = bl_renderManager_getModelPart_impl(rendererId, utfChars, &model);
@@ -226,26 +248,32 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	part->addBox(Vec3(xOffset, yOffset, zOffset), Vec3(width, height, depth), scale);
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
+	*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelClear
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
+	/* FIXME 1.2.0
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	std::vector<Cube*>* cubeVector = (std::vector<Cube*>*) ((uintptr_t) part + MODELPART_CUBEVECTOR_OFFSET);
 	cubeVector->clear();
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
+	*/
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelPartExists
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
+	/* FIXME 1.2.0
 	jboolean exists;
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	exists = part != NULL;
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
 	return exists;
+	*/
+	return true;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
@@ -260,6 +288,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelSetRotationPoint
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat x, jfloat y, jfloat z) {
+	/* FIXME 1.2.0
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	part->offsetX = x;
@@ -267,7 +296,49 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	part->offsetZ = z;
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
+	*/
 }
+class GeometryPtr {
+	char filler[8];
+};
+class GeometryGroup {
+public:
+	GeometryPtr getGeometry(std::string const&);
+};
+
+#if 0
+static void bl_buildAStupidRenderer(void* renderDispatcher, GeometryGroup& geometryGroup,
+	mce::TextureGroup& textureGroup) {
+	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
+	BL_LOG("Building a stupid renderer");
+	auto group = geometryGroup.getGeometry("geometry.zombie");
+	BL_LOG("Zero!");
+	HumanoidModel* model = new HumanoidModel(group/*0, 0, 64, 64*/);
+	BL_LOG("One!");
+
+	HumanoidModel* model2 = new HumanoidModel(geometryGroup.getGeometry("geometry.humanoid.armor1")/*0, 0, 64, 64*/);
+	BL_LOG("Two!");
+
+	HumanoidModel* model3 = new HumanoidModel(geometryGroup.getGeometry("geometry.humanoid.armor2")/*0, 0, 64, 64*/);
+	BL_LOG("Three!");
+
+	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
+	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
+		std::unique_ptr<HumanoidModel>(model2),
+		std::unique_ptr<HumanoidModel>(model3),
+		textureGroup.getTexture(ResourceLocation("textures/entity/zombie/zombie"), false), 0);
+	BL_LOG("Four!");
+	bl_stupidRenderer = renderer;
+	//renderers[kTempRenderType] = renderer;
+}
+
+void bl_EntityRenderDispatcher_initializeEntityRenderers_hook(void* self, GeometryGroup& geometryGroup,
+	mce::TextureGroup& textureGroup, BlockTessellator& blockTessellator) {
+	bl_EntityRenderDispatcher_initializeEntityRenderers_real(self, geometryGroup, textureGroup, blockTessellator);
+	bl_buildAStupidRenderer(self, geometryGroup, textureGroup);
+}
+
+#endif
 
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
@@ -278,28 +349,36 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
-	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, void*, std::unique_ptr<HumanoidModel>,
+	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, std::unique_ptr<HumanoidModel>,
 		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float))
 		dlsym(mcpelibhandle,
-			"_ZN19HumanoidMobRendererC1ER22EntityRenderDispatcherSt10unique_ptrI13HumanoidModelSt14default_deleteIS3_EES6_S6_N3mce10TexturePtrEf");
-	//void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
-	//mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
-	//	(void**) &bl_EntityRenderDispatcher_getRenderer_real);
-	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, Entity&, Vec3 const&, float, float))
-		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6renderER6EntityRK4Vec3ff");
+			"_ZN19HumanoidMobRendererC1ESt10unique_ptrI13HumanoidModelSt14default_deleteIS1_EES4_S4_N3mce10TexturePtrEf");
+/*
+	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
+	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
+		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
+*/
+	// FIXME 1.2
+	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, BaseEntityRenderContext&, Entity&, Vec3 const&, Vec2 const&))
+		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6renderER23BaseEntityRenderContextR6EntityRK4Vec3RK4Vec2");
 	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_render_real, (void*)&bl_EntityRenderDispatcher_render_hook)) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook render");
 		abort();
 	}
 	bl_ModelPart_reset = (void (*)(ModelPart*))
 		dlsym(mcpelibhandle, "_ZN9ModelPart5resetEv");
-/* FIXME 1.2
+
 	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer, (void*)&bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook)) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
 		abort();
 	}
 	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer_entity_real,
 		(void*)&bl_EntityRenderDispatcher_getRenderer_hook);
+/*
+	void* initializeEntityRenderers = dlsym(mcpelibhandle,
+		"_ZN22EntityRenderDispatcher25initializeEntityRenderersER13GeometryGroupRN3mce12TextureGroupER16BlockTessellator");
+	mcpelauncher_hook((void*)initializeEntityRenderers, (void*)&bl_EntityRenderDispatcher_initializeEntityRenderers_hook,
+		(void**)&bl_EntityRenderDispatcher_initializeEntityRenderers_real);
 */
 }
 

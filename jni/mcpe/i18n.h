@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+class ResourcePackManager;
+class SkinRepository;
+
 class Localization {
 public:
 	std::map<std::string, std::string>& _getStrings() const;

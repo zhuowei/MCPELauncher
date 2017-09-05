@@ -24,6 +24,8 @@ public class MobEffect {
 	public static int digSpeed;
 	public static int movementSlowdown;
 	public static int movementSpeed;
+	public static int fatalPoison;
+	public static int levitation;
 	public static Map<Integer, String> effectIds = new HashMap<Integer, String>();
 
 	public static void initIds() {
@@ -50,6 +52,8 @@ public class MobEffect {
 		digSpeed = populate("digSpeed", "DIG_SPEED");
 		movementSlowdown = populate("movementSlowdown", "MOVEMENT_SLOWDOWN");
 		movementSpeed = populate("movementSpeed", "MOVEMENT_SPEED");
+		fatalPoison = populate("fatalPoison", "FATAL_POISON");
+		levitation = populate("levitation", "LEVITATION");
 	}
 
 	public static native int nativePopulate(String a);

@@ -1,4 +1,5 @@
 #pragma once
+
 class AbstractScene;
 class ScreenChooser {
 public:

@@ -1,11 +1,17 @@
 #pragma once
 class UIControl;
 class ClientInstance;
+
+class MinecraftUIRenderContext;
+class RectangleArea;
+
 class InventoryItemRenderer {
 public:
-	char filler[48]; // 0
-	int itemId; // 48; from render
-	char filler2[80-52]; // 52
+	char filler[52]; // 0
+	int itemId; // 52; from render
+	char filler2[80-56]; // 56
 	std::string atlasName; // 80 from update
 	void update(ClientInstance&, UIControl&);
+	void render(MinecraftUIRenderContext&, ClientInstance&, UIControl&, int, RectangleArea&);
 };
+static_assert(offsetof(InventoryItemRenderer, itemId) == 52, "itemId offset");

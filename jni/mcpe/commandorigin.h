@@ -22,3 +22,8 @@ public:
 	char filler[184-4]; // 4 from DevConsoleCommandOrigin::clone()
 };
 static_assert(sizeof(DevConsoleCommandOrigin) == 184, "dev console command size");
+
+class CommandVersion {
+public:
+	static int CurrentVersion;
+};

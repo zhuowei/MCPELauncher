@@ -27,5 +27,7 @@ public final class Enchantment {
 	FLAME = 21,
 	INFINITY = 22,
 	LUCK_OF_THE_SEA = 23,
-	LURE = 24;
+	LURE = 24,
+	FROST_WALKER = 25,
+	MENDING = 26;
 }

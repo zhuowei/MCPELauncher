@@ -2,8 +2,9 @@ package net.zhuoweizhang.mcpelauncher;
 
 import android.app.Application;
 import android.os.Build;
+import android.support.multidex.MultiDexApplication;
 
-public class BlockLauncher extends Application {
+public class BlockLauncher extends MultiDexApplication {
 	@Override
 	public void onCreate() {
 		Utils.setContext(getApplicationContext());

@@ -3,6 +3,7 @@ class Level;
 class Timer;
 namespace mce {
 class TextureGroup;
+class Texture;
 } // namespace mce
 class Mob;
 class Options;
@@ -17,6 +18,7 @@ class ClientInstance;
 class EntityRenderDispatcher;
 class ItemRenderer;
 class UIProfanityContext;
+class ServerNetworkHandler;
 
 enum GameType {
 };
@@ -36,6 +38,7 @@ public:
 	ClientInstance* getPrimaryClientInstance();
 	Level* getLocalServerLevel() const;
 	void updateFoliageColors();
+	ServerNetworkHandler* getServerNetworkHandler();
 };
 
 class ClientInstance {
@@ -53,10 +56,11 @@ public:
 	void onResourcesLoaded();
 	LevelRenderer* getLevelRenderer() const;
 	void play(std::string const&, Vec3 const&, float, float);
-	void startLeaveGame(bool);
+	void _startLeaveGame();
 	Level* getLevel();
 	EntityRenderDispatcher& getEntityRenderDispatcher();
 	ItemRenderer* getItemRenderer();
 	UIProfanityContext const& getUIProfanityContext() const;
+	mce::Texture const& getUITexture();
 };
 #define MinecraftClient ClientInstance

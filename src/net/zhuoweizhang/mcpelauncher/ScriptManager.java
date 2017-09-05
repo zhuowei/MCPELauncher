@@ -2578,7 +2578,7 @@ public class ScriptManager {
 				append("@a ").append(Math.round(x)).append(' ').append(Math.round(y)).append(' ').
 				append(Math.round(z)).append(' ').append(volume).append(' ').append(pitch).toString();
 			String retval = executeCommand(cmd, true);
-			if (retval != null) System.err.println("Failed to play sound " + sound + ": " + retval);
+			//if (retval != null) System.err.println("Failed to play sound " + sound + ": " + retval);
 		}
 
 		// Byteandahalf's additions
@@ -2703,10 +2703,19 @@ public class ScriptManager {
 		}
 
 		@JSStaticFunction
-		public static String executeCommand(String command, boolean silent) {
+		public static String executeCommand(final String command, final boolean silent) {
+			// fixme 1.2
+			runOnMainThread(new Runnable() {
+				public void run() {
+					nativeLevelExecuteCommand(command, silent);
+				}
+			});
+/*
 			String result = nativeLevelExecuteCommand(command, silent);
 			if ("<no result>".equals(result)) return "";
 			return result;
+*/
+			return "";
 		}
 
 		@Override

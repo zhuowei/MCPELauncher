@@ -258,7 +258,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.1.0");
+				intent.putExtra("supportedVersion", "1.2.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -1134,6 +1134,8 @@ public class MainActivity extends NativeActivity {
 		System.out.println("Listing dir for " + dirPath);
 		String prefix = dirPath + "/";
 		Set<String> outList = new HashSet<String>();
+		//System.out.println("Start listing texture overrides");
+		long start = System.currentTimeMillis();
 		for (TexturePack pack: textureOverrides) {
 			List<String> addedFiles = null;
 			try {
@@ -1146,6 +1148,7 @@ public class MainActivity extends NativeActivity {
 				outList.add(path.substring(path.lastIndexOf("/")));
 			}
 		}
+		//System.out.println("End listing texture overrides " + (System.currentTimeMillis() - start));
 		String[] origDir = null;
 		String newPath = dirPath;
 
@@ -1154,20 +1157,25 @@ public class MainActivity extends NativeActivity {
 		} catch (IOException ie) {
 			origDir = new String[0];
 		}
+		//System.out.println("list 1 " + (System.currentTimeMillis() - start));
 		// merge
 		for (String s: origDir) {
 			outList.add(s);
 		}
+
+		//System.out.println("End merge 1 " + (System.currentTimeMillis() - start));
 
 		try {
 			origDir = minecraftApkContext.getAssets().list(dirPath);
 		} catch (IOException ie) {
 			origDir = new String[0];
 		}
+		//System.out.println("list 2 " + (System.currentTimeMillis() - start));
 		// merge
 		for (String s: origDir) {
 			outList.add(s);
 		}
+		//System.out.println("End merge 2 " + (System.currentTimeMillis() - start));
 		String[] retval = outList.toArray(origDir);
 		System.out.println(Arrays.toString(retval));
 		return retval;
@@ -2153,6 +2161,10 @@ public class MainActivity extends NativeActivity {
 		System.out.println("Track purchase event: " + a + ":" + b + ":" + c + ":" + d + ":" + e + ":" + f);
 	}
 
+	public String getLegacyDeviceID() {
+		return getDeviceId();
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
@@ -2396,10 +2408,19 @@ public class MainActivity extends NativeActivity {
 				natElemsField.setAccessible(true);
 				Object[] theObjects = (Object[]) natElemsField.get(pathListObj);
 				Class<? extends Object> elemClass = theObjects.getClass().getComponentType();
-				Constructor<? extends Object> elemConstructor =
-					elemClass.getConstructor(File.class, Boolean.TYPE, File.class, dalvik.system.DexFile.class);
-				elemConstructor.setAccessible(true);
-				Object newObject = elemConstructor.newInstance(new File(path), true, null, null);
+				Object newObject = null;
+				try {
+					Constructor<? extends Object> elemConstructor =
+						elemClass.getConstructor(File.class, Boolean.TYPE, File.class, dalvik.system.DexFile.class);
+					elemConstructor.setAccessible(true);
+					newObject = elemConstructor.newInstance(new File(path), true, null, null);
+				} catch (NoSuchMethodException nsm) {
+					// Android 8.0 uses a different signature.
+					Constructor<? extends Object> elemConstructor =
+						elemClass.getConstructor(File.class);
+					elemConstructor.setAccessible(true);
+					newObject = elemConstructor.newInstance(new File(path));
+				}
 				Object[] newObjects = Arrays.copyOf(theObjects, theObjects.length + 1);
 				newObjects[newObjects.length - 1] = newObject;
 				System.out.println(newObjects);

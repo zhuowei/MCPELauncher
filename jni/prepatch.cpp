@@ -19,13 +19,13 @@ void* bl_marauder_translation_function(void* input);
 static int bl_hasinit_prepatch = 0;
 
 //static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
-static void (*bl_Minecraft_stopGame_real)(Minecraft*);
+static void (*bl_Minecraft_stopGame_real)(Minecraft*, bool);
 
 //void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
-void bl_Minecraft_stopGame_hook(Minecraft* minecraft) {
+void bl_Minecraft_stopGame_hook(Minecraft* minecraft, bool localServer) {
 	JNIEnv *env;
 	//bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
-	bl_Minecraft_stopGame_real(minecraft);
+	bl_Minecraft_stopGame_real(minecraft, localServer);
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Leave game callback");
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -136,10 +136,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//get a callback when the level is exited
 	//void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
 	//mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
-	void* stopGame = dlsym(mcpelibhandle, "_ZN9Minecraft8stopGameEv");
+	void* stopGame = dlsym(mcpelibhandle, "_ZN9Minecraft14startLeaveGameEb");
 	//mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
 	bl_patch_got((soinfo2*)mcpelibhandle, stopGame, (void*)bl_Minecraft_stopGame_hook);
-	bl_Minecraft_stopGame_real = (void (*)(Minecraft*)) stopGame;
+	bl_Minecraft_stopGame_real = (void (*)(Minecraft*, bool)) stopGame;
 
 	bl_prepatch_fmod((soinfo2*) mcpelibhandle);
 

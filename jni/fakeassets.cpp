@@ -16,7 +16,7 @@ static bool prefix(const char *pre, const char *str)
 static const char kResourcePackPrefix[] = "resource_packs/vanilla/";
 static const char kResourcePackDirPrefix[] = "resource_packs/vanilla";
 AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int mode) {
-	BL_LOG("Asset: open %s", filename);
+	//BL_LOG("Asset: open %s", filename);
 
 	// zero length filename or an absolute path (on the filesystem) definitely won't be in the assets.
 	if (strlen(filename) == 0 || filename[0] == '/') return nullptr;
@@ -25,6 +25,9 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 	AAsset *in = AAssetManager_open(mgr, newFilename.c_str(), mode);
 	if (in) return in;
 	if (prefix("resource_packs/skins", filename)) return in;
+	if (prefix("resource_packs/vanilla_loading_screens", filename)) return in;
+	if (prefix("resource_packs/vanilla_base", filename)) return in;
+	//BL_LOG("Asset: open %s", filename);
 	if (true||prefix(kResourcePackPrefix, filename)) {
 		JNIEnv *env;
 		int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -43,7 +46,7 @@ AAsset* bl_AAssetManager_open_hook(AAssetManager *mgr, const char *filename, int
 			bl_JavaVM->DetachCurrentThread();
 		}
 		//if (exists) BL_LOG("Assets: exists %s", filename);
-		if (exists) filename = "startup.images"; // known to exist.
+		if (exists) filename = "resource_packs/vanilla/manifest.json"; // known to exist.
 	}
 	return AAssetManager_open(mgr, filename, mode);
 };

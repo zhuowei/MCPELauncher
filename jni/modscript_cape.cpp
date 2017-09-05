@@ -14,7 +14,8 @@
 
 // HumanoidMobRenderer::prepareArmor
 
-static int (*bl_HumanoidMobRenderer_prepareArmor_real)(HumanoidMobRenderer* self, Entity* mob, int armorPart, float partialTicks);
+class ScreenContext;
+static int (*bl_HumanoidMobRenderer_prepareArmor_real)(HumanoidMobRenderer* self, ScreenContext&, Entity* mob, int armorPart, float partialTicks);
 static bool (*bl_ItemInstance_isArmorItem)(ItemInstance*);
 
 std::array<mce::TexturePtr*, BL_ITEMS_EXPANDED_COUNT> bl_armorRenders;
@@ -30,7 +31,7 @@ bool bl_setArmorTexture(int id, std::string const& filename) {
 	return true;
 }
 bool bl_setArmorTextureReal(int id, std::string const& filename) {
-	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "set armor texture real id: %d, %s", id, filename.c_str());
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "set armor texture real id: %d, %s", id, filename.c_str());
 	mce::TexturePtr* texturePtr = new mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(filename));
 	return bl_setArmorTexture(id, texturePtr);
 }
@@ -56,10 +57,10 @@ static void bl_reload_armor_textures_real() {
 void bl_reload_armor_textures() {
 	needsReload = true;
 }
-
 // armour
-int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, Entity* mob, int armorPart, float partialTicks) {
-	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, mob, armorPart, partialTicks);
+int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, ScreenContext& screenContext,
+		Mob* mob, int armorPart, float partialTicks) {
+	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, screenContext, mob, armorPart, partialTicks);
 	ItemInstance* armor = bl_Mob_getArmor(mob, armorPart);
 	if (!armor->isArmorItem()) return retval; // no armour
 
@@ -99,7 +100,7 @@ void bl_armorInit_postLoad() {
 }
 
 void bl_cape_init(void* mcpelibinfo) {
-	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER3Mob9ArmorSlotf");
+	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER13ScreenContextR3Mob9ArmorSlotf");
 	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
 		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
 }

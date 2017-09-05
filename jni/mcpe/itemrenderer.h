@@ -11,13 +11,15 @@ public:
 	ItemGraphics() {
 	}
 };
+static_assert(sizeof(ItemGraphics) == 24, "itemGraphics size");
 class ItemRenderer {
 public:
-	std::vector<ItemGraphics> itemGraphics; // 0
+	char filler[204];
+	std::vector<ItemGraphics> itemGraphics; // 204
 	void _loadItemGraphics();
+	void* getAtlasPos(ItemInstance const&);
+
 	static mce::TexturePtr const& getGraphics(ItemInstance const&);
 	static mce::TexturePtr const& getGraphics(Item const&);
-	static std::vector<ItemGraphics> mItemGraphics;
-	static ItemRenderer instance;
 };
-static_assert(offsetof(ItemRenderer, itemGraphics) == 0, "itemrenderer offset wrong");
+static_assert(offsetof(ItemRenderer, itemGraphics) == 204, "itemrenderer offset wrong");

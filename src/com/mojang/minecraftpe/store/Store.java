@@ -45,4 +45,8 @@ public class Store {
 	public boolean hasVerifiedLicense() {
 		return true;
 	}
+
+	public ExtraLicenseResponseData getExtraLicenseData() {
+		return new ExtraLicenseResponseData();
+	}
 }
