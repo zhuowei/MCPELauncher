@@ -405,12 +405,13 @@ public:
 	int id; //252 from Biome::Biome
 };
 
-typedef struct {
-	bool invulnerable; // from Desktop Edition's PlayerAbilities and also CreativeMode::initAbilities
-	bool flying;
-	bool mayFly;
-	bool instabuild;
-} Abilities;
+class Abilities {
+public:
+	bool getBool(std::string const& name) const;
+	void setAbility(std::string const&, bool);
+	static std::string FLYING;
+	static std::string MAYFLY;
+};
 
 // from LocalServerListItemElement::serverMainPressed 25c7d4
 typedef struct {

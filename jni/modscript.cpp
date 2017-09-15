@@ -88,7 +88,7 @@ extern jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
-void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, std::string, void*);
+void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, bool, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
@@ -191,6 +191,7 @@ void* debug_dlsym(void* handle, const char* symbol) {
 
 Entity* bl_getEntityWrapper(Level* level, long long entityId);
 Entity* bl_getEntityWrapperWithLocalHack(Level* level, long long entityId);
+int bl_getEntityTypeIdThroughVtable(Entity* entity);
 
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
@@ -440,7 +441,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 extern void bl_cpp_selectLevel_hook();
 
-void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, std::string str4, void* levelSettings) {
+void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, bool param4, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -466,7 +467,7 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::stri
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, str4, levelSettings);
+	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, param4, levelSettings);
 	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
 	bl_localplayer = bl_minecraft->getLocalPlayer();
 	bl_onLockDown = false;
@@ -1004,6 +1005,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	{
 		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
+		BL_LOG("calling the fn! %p", fn);
 		fn(entity, true);
 	}
 }
@@ -1353,7 +1355,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.player_set_player_game_type = bl_vtableIndex(mcpelibhandle, "_ZTV6Player",
 		"_ZN6Player17setPlayerGameTypeE8GameType");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob13sendInventoryEb");
+		"_ZN3Mob13sendInventoryEb") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1478,7 +1480,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
-	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSsSs13LevelSettings");
+	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSsb13LevelSettings");
 	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftGame_startLocalServer_hook,
 		(void**) &bl_MinecraftGame_startLocalServer_real);
 

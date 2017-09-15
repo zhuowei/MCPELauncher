@@ -70,7 +70,7 @@ typedef void Font;
 
 // found in Player::Player
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 4312
+#define PLAYER_ABILITIES_OFFSET 4320
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -2388,28 +2388,32 @@ static Abilities* bl_getAbilities(Player* player) {
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerIsFlying
   (JNIEnv *env, jclass clazz) {
-	if (bl_localplayer == NULL) return false;
-	return bl_getAbilities(bl_localplayer)->flying;
+	auto localplayer = bl_minecraft->getLocalPlayer();
+	if (localplayer == nullptr) return false;
+	return bl_getAbilities(localplayer)->getBool(Abilities::FLYING);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetFlying
   (JNIEnv *env, jclass clazz, jboolean val) {
-	if (bl_localplayer == NULL) return;
+	auto localplayer = bl_minecraft->getLocalPlayer();
+	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
-	bl_getAbilities(bl_localplayer)->flying = val;
+	bl_getAbilities(localplayer)->setAbility(Abilities::FLYING, val);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerCanFly
   (JNIEnv *env, jclass clazz) {
-	if (bl_localplayer == NULL) return false;
-	return bl_getAbilities(bl_localplayer)->mayFly;
+	auto localplayer = bl_minecraft->getLocalPlayer();
+	if (localplayer == nullptr) return false;
+	return bl_getAbilities(localplayer)->getBool(Abilities::MAYFLY);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetCanFly
   (JNIEnv *env, jclass clazz, jboolean val) {
-	if (bl_localplayer == NULL) return;
+	auto localplayer = bl_minecraft->getLocalPlayer();
+	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
-	bl_getAbilities(bl_localplayer)->mayFly = val;
+	bl_getAbilities(localplayer)->setAbility(Abilities::MAYFLY, val);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetCollisionEnabled
@@ -3058,6 +3062,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 	bool returnVal = EnchantUtils::applyEnchant(*itemInstance, enchantmentId, enchantmentLevel);
 	if (!bl_level->isClientSide()) {
 		// then our player is a serverside player; send inventory.
+		BL_LOG("Calling serverPlayer send: %p", (void*)&ServerPlayer::sendInventory);
 		((ServerPlayer*)bl_localplayer)->sendInventory(true);
 	}
 }
