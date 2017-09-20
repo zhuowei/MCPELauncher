@@ -15,7 +15,7 @@ m.put("mob/pig.png", "textures/entity/pig/pig.png");
 m.put("mob/husk.png", "textures/entity/zombie/husk.png");
 m.put("mob/saddle.png", "textures/entity/saddle.png");
 m.put("mob/snow_golem.png", "textures/entity/snow_golem.png");
-m.put("mob/zombie.png", "textures/entity/skulls/zombie.png");
+m.put("mob/zombie.png", "textures/entity/zombie/zombie.png");
 m.put("mob/wither_skeleton.png", "textures/entity/skeleton/wither_skeleton.png");
 m.put("mob/villager/butcher.png", "textures/entity/villager/butcher.png");
 m.put("mob/villager/librarian.png", "textures/entity/villager/librarian.png");

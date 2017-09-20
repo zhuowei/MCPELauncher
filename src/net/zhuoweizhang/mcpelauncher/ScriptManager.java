@@ -4013,6 +4013,8 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineArmor(int id, String iconName, int iconIndex, String name,
 			String texture, int damageReduceAmount, int maxDamage, int armorType) {
+			String newSkinPath = OldEntityTextureFilenameMapping.m.get(texture);
+			if (newSkinPath != null) texture = newSkinPath;
 			if (texture != null && texture.toLowerCase().endsWith(".png")) {
 				texture = texture.substring(0, texture.length() - 4);
 			}
@@ -4026,8 +4028,6 @@ public class ScriptManager {
 			if (itemsMeta != null && !itemsMeta.hasIcon(iconName, iconIndex)) {
 				throw new MissingTextureException("The item icon " + iconName + ":" + iconIndex + " does not exist");
 			}
-			String newSkinPath = OldEntityTextureFilenameMapping.m.get(texture);
-			if (newSkinPath != null) texture = newSkinPath;
 			nativeDefineArmor(id, iconName, iconIndex, name,
 				texture, damageReduceAmount, maxDamage, armorType);
 		}
@@ -4303,6 +4303,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setFriction(int id, double friction) {
+			if (friction < 0.1) friction = 0.1; // avoid crash - thanks @VeroXCode
 			nativeBlockSetFriction(id, (float)friction);
 		}
 

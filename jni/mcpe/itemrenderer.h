@@ -1,6 +1,8 @@
 #pragma once
 #include "mce/textureptr.h"
 class ItemInstance;
+class BaseEntityRenderContext;
+class EntityRenderData;
 class ItemGraphics {
 public:
 	//char filler[16 /*sizeof(mce::TexturePtr)*/]; // 0
@@ -18,6 +20,7 @@ public:
 	std::vector<ItemGraphics> itemGraphics; // 204
 	void _loadItemGraphics();
 	void* getAtlasPos(ItemInstance const&);
+	void render(BaseEntityRenderContext&, EntityRenderData&);
 
 	static mce::TexturePtr const& getGraphics(ItemInstance const&);
 	static mce::TexturePtr const& getGraphics(Item const&);

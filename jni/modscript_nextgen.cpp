@@ -1050,9 +1050,9 @@ static void bl_registerItem(Item* item, std::string const& name) {
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
 
-void bl_repopulateItemGraphics() {
-	bl_minecraft->getItemRenderer()->_loadItemGraphics();
-	auto& itemGraphics = bl_minecraft->getItemRenderer()->itemGraphics;
+void bl_repopulateItemGraphics(ItemRenderer* renderer) {
+	renderer->_loadItemGraphics();
+	auto& itemGraphics = renderer->itemGraphics;
 	BL_LOG("Populating: size = %d", itemGraphics.size());
 	if (itemGraphics.size() == 0) {
 		return;
@@ -3617,7 +3617,7 @@ static void bl_cpp_screenchange_handler(std::string const& screen, std::string c
 	if (lastScreen == "toast_screen" || bl_needItemIconReload) {
 		BL_LOG("Forcing a reload prior to hud load");
 		bl_finishItemSetIconRequests();
-		bl_repopulateItemGraphics();
+		bl_repopulateItemGraphics(bl_minecraft->getItemRenderer());
 		bl_reapply_i18n_overrides();
 		bl_armorInit_postLoad();
 		bl_needItemIconReload = false;
@@ -3638,6 +3638,15 @@ std::string getNameHook(ItemInstance* itemStack) {
 void bl_BlockGraphics_initBlocks_hook(ResourcePackManager& resourceLoader) {
 	bl_BlockGraphics_initBlocks_real(resourceLoader);
 	bl_finishBlockBuildTextureRequests();
+}
+
+void (*bl_ItemRenderer_render_real)(ItemRenderer* renderer, void* arg1, void* arg2);
+void bl_ItemRenderer_render_hook(ItemRenderer* renderer, void* arg1, void* arg2) {
+	if (renderer->itemGraphics.size() < bl_minecraft->getItemRenderer()->itemGraphics.size()) {
+		BL_LOG("Repopulating an itemrenderer %p", renderer);
+		bl_repopulateItemGraphics(renderer);
+	}
+	bl_ItemRenderer_render_real(renderer, arg1, arg2);
 }
 
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
@@ -4226,6 +4235,8 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_SceneStack__popScreen_real);
 	mcpelauncher_hook((void*)&SceneStack::pushScreen, (void*)&bl_SceneStack_pushScreen_hook,
 		(void**)&bl_SceneStack_pushScreen_real);
+	mcpelauncher_hook((void*)&ItemRenderer::render, (void*)&bl_ItemRenderer_render_hook,
+		(void**)&bl_ItemRenderer_render_real);
 
 	bl_renderManager_init(mcpelibhandle);
 }
