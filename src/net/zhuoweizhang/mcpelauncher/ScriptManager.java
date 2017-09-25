@@ -508,8 +508,6 @@ public class ScriptManager {
 	@CallbackName(name="chatHook", args={"str"}, prevent=true)
 	// fixme callback 2
 	public static void chatCallback(String str) {
-		if (isRemote)
-			nameAndShame(str);
 		if (str == null || str.length() < 1)
 			return;
 		callScriptMethod("chatHook", str);
@@ -2115,6 +2113,7 @@ public class ScriptManager {
 	public static native int nativeLevelGetExtraData(int x, int y, int z);
 	public static native boolean nativeItemIsExtendedBlock(int itemId);
 	public static native String nativeLevelExecuteCommand(String cmd, boolean silent);
+	public static native long[] nativeServerGetPlayers();
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -2716,6 +2715,11 @@ public class ScriptManager {
 			return result;
 */
 			return "";
+		}
+
+		@JSStaticFunction
+		public static boolean isRemote() {
+			return nativeLevelIsRemote();
 		}
 
 		@Override
@@ -4369,18 +4373,22 @@ public class ScriptManager {
 		// KMCPE's additions
 		@JSStaticFunction
 		public static long[] getAllPlayers() {
+			return nativeServerGetPlayers();
+			/*
 			long[] players = new long[allplayers.size()];
 			for(int n=0;players.length>n;n++){
 				players[n]=allplayers.get(n);
 			}
 			return players;
+			*/
 		}
 		
 		@JSStaticFunction
 		public static String[] getAllPlayerNames() {
-			String[] players = new String[allplayers.size()];
-			for(int n=0;players.length>n;n++){
-				players[n]=nativeGetPlayerName(allplayers.get(n));
+			long[] playerIds = getAllPlayers();
+			String[] players = new String[playerIds.length];
+			for(int n = 0; n < players.length; n++){
+				players[n] = nativeGetPlayerName(playerIds[n]);
 			}
 			return players;
 		}

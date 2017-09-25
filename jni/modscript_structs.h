@@ -493,7 +493,9 @@ enum ParticleType {
 
 class Level {
 public:
-	void** vtable;
+	void** vtable; // 0
+	char filler[24-4]; // 4
+	std::vector<Player*> allPlayers; // 24
 
 	Entity* fetchEntity(EntityUniqueID, bool) const;
 	void addEntity(BlockSource&, std::unique_ptr<Entity>);
@@ -512,6 +514,8 @@ public:
 	Player* getPrimaryLocalPlayer() const;
 	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
 };
+// Level::getActivePlayerCount
+static_assert(offsetof(Level, allPlayers) == 24, "allPlayers vec");
 
 class MinecraftCommands;
 class ServerLevel : public Level {

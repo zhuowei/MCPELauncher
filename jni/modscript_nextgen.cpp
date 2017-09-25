@@ -3175,6 +3175,21 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDi
 	setDifficulty(bl_level, difficulty);
 }
 
+JNIEXPORT jlongArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeServerGetPlayers
+  (JNIEnv* env, jclass clazz) {
+	if (bl_level == nullptr) {
+		return env->NewLongArray(0);
+	}
+	auto const& players = bl_level->allPlayers;
+	jlong ids[players.size()];
+	for (int i = 0; i < players.size(); i++) {
+		ids[i] = (long long)players[i]->getUniqueID();
+	}
+	jlongArray ret = env->NewLongArray(players.size());
+	env->SetLongArrayRegion(ret, 0, players.size(), ids);
+	return ret;
+}
+
 static void** bl_AppPlatform_vtable;
 static void* bl_AppPlatform_getUIScalingRules_real;
 static void* bl_AppPlatform_getEdition_real;
@@ -3504,7 +3519,7 @@ static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer
 	}
 }
 
-JNIEXPORT bool Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
+JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
 	return preventDefaultStatus;
 }
