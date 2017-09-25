@@ -20,13 +20,20 @@ static int bl_hasinit_prepatch = 0;
 
 //static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Minecraft_stopGame_real)(Minecraft*, bool);
+static ServerNetworkHandler* (*bl_Minecraft_getServerNetworkHandler)(Minecraft*);
 
 //void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 void bl_Minecraft_stopGame_hook(Minecraft* minecraft, bool localServer) {
 	JNIEnv *env;
 	//bl_Minecraft_leaveGame_real(minecraft, thatotherboolean);
 	bl_Minecraft_stopGame_real(minecraft, localServer);
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Leave game callback");
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Leave game callback: %p %s %p", minecraft,
+		localServer? "yes": "no", bl_Minecraft_getServerNetworkHandler(minecraft));
+	// we only trigger on the client Minecraft instance
+	if (bl_Minecraft_getServerNetworkHandler(minecraft)) {
+		// we're a server
+		return;
+	}
 
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
@@ -140,6 +147,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
 	bl_patch_got((soinfo2*)mcpelibhandle, stopGame, (void*)bl_Minecraft_stopGame_hook);
 	bl_Minecraft_stopGame_real = (void (*)(Minecraft*, bool)) stopGame;
+	bl_Minecraft_getServerNetworkHandler = (ServerNetworkHandler* (*)(Minecraft*))
+		dlsym(mcpelibhandle, "_ZN9Minecraft23getServerNetworkHandlerEv");
 
 	bl_prepatch_fmod((soinfo2*) mcpelibhandle);
 
