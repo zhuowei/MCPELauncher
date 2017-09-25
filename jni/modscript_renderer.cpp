@@ -372,8 +372,10 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
 		abort();
 	}
+	/* Crashes on Intel!
 	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer_entity_real,
 		(void*)&bl_EntityRenderDispatcher_getRenderer_hook);
+	*/
 /*
 	void* initializeEntityRenderers = dlsym(mcpelibhandle,
 		"_ZN22EntityRenderDispatcher25initializeEntityRenderersER13GeometryGroupRN3mce12TextureGroupER16BlockTessellator");
