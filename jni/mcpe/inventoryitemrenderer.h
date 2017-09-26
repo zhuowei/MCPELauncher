@@ -9,8 +9,8 @@ class InventoryItemRenderer {
 public:
 	char filler[52]; // 0
 	int itemId; // 52; from render
-	char filler2[80-56]; // 56
-	std::string atlasName; // 80 from update
+	char filler2[92-56]; // 56
+	std::string atlasName; // 92 from update
 	void update(ClientInstance&, UIControl&);
 	void render(MinecraftUIRenderContext&, ClientInstance&, UIControl&, int, RectangleArea&);
 };

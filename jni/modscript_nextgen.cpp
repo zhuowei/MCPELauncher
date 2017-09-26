@@ -3511,8 +3511,8 @@ static bool bl_StonecutterBlock_use_hook(Block* tile, Player& player, BlockPos c
 	return false;
 }
 
-static void (*bl_InventoryItemRenderer_update_real)(InventoryItemRenderer* renderer, MinecraftClient& client, std::shared_ptr<UIControl>& aUIControl);
-static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer, MinecraftClient& client, std::shared_ptr<UIControl>& aUIControl) {
+static void (*bl_InventoryItemRenderer_update_real)(InventoryItemRenderer* renderer, ClientInstance& client, UIControl& aUIControl);
+static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer, ClientInstance& client, UIControl& aUIControl) {
 	bl_InventoryItemRenderer_update_real(renderer, client, aUIControl);
 	if (renderer->itemId >= 0x100 && bl_extendedBlockGraphics[renderer->itemId]) {
 		renderer->atlasName = "atlas.terrain";
@@ -4237,9 +4237,8 @@ void bl_setuphooks_cppside() {
 
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemRenderer::_loadItemGraphics, (void*)&bl_ItemRenderer__loadItemGraphics_hook);
 
-	// FIXME 1.2.0
-	//mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
-	//	(void**)&bl_InventoryItemRenderer_update_real);
+	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
+		(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
 	mcpelauncher_hook((void*)bl_BlockGraphics_initBlocks_new, (void*)&bl_BlockGraphics_initBlocks_hook,
