@@ -2020,7 +2020,6 @@ bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jobjectArray shape, jintArray ingredientsArray) {
-#if 0
 // FIXME 1.2
 	std::vector<std::string> shapeVector;
 	int shapeLength = env->GetArrayLength(shape);
@@ -2053,7 +2052,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	Recipes* recipes = bl_Recipes_getInstance();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	bl_Recipes_addShapedRecipe(recipes, outStacks, shapeVector, ingredientsList);
-#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe

@@ -348,10 +348,11 @@ typedef struct {
 	Tile* tile; //4
 	ItemInstance itemInstance; //8
 	char letter; //80
+	char filler[7]; // 81
 } RecipesType;
 // std::vector<Recipes::Type, std::allocator<Recipes::Type> > definition<ItemInstance>(char, ItemInstance)
 static_assert(offsetof(RecipesType, letter) == 80, "RecipesType letter");
-static_assert(sizeof(RecipesType) == 84, "RecipesType size");
+static_assert(sizeof(RecipesType) == 88, "RecipesType size");
 
 typedef struct {
 } FurnaceRecipes;
