@@ -100,10 +100,8 @@ ModelPart* bl_renderManager_getModelPart(int rendererId, const char* modelPartNa
 }
 
 void bl_renderManager_invalidateModelPart(ModelPart* part) {
-	/* FIXME 1.2.0
 	void* meshBuffer = (void*) ((uintptr_t) part + MODELPART_MESHBUFFER_OFFSET);
 	bl_Mesh_reset(meshBuffer);
-	*/
 }
 
 int bl_renderManager_addRenderer(EntityRenderer* renderer) {
@@ -177,27 +175,25 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseEntityRe
 	}
 	auto renderers = (EntityRenderer**)(((uintptr_t)renderDispatcher) + kEntityRenderDispatcher_renderersOffset);
 	MobRenderer* tntRenderer = (MobRenderer*)renderers[kTempRenderType]; // Zombie
-	renderers[kTempRenderType] = bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
+	MobRenderer* newRenderer = (MobRenderer*)bl_entityRenderers[bl_renderTypeMap[entityId] - 0x1000];
+	renderers[kTempRenderType] = newRenderer;
 	entity.renderType = kTempRenderType; // steal Zombie's render type
-/*
-	auto oldModel = tntRenderer->model;
-	tntRenderer->model = bl_stupidRenderer->model;
 
-	Dl_info info;
-	if (dladdr(*(void**)tntRenderer, &info)) {
-		BL_LOG("Old renderer is %s", info.dli_sname);
-	}
+	auto savedMat = static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial;
 
-	BL_LOG("Rendering custom! material = %p, thing = %p", *((void**)(((uintptr_t)renderers[2]) + 28)), tntRenderer->model);
-*/
+	static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial =
+		static_cast<HumanoidModel*>(tntRenderer->model)->activeMaterial;
+
 	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, context, entity, pos, rot);
 /*
 	BL_LOG("Done rendering custom!");
 */
 
 	renderers[kTempRenderType] = tntRenderer; // restore
+	//memcpy(newRenderer, tmpBlob, sizeToBackup);
 	//tntRenderer->model = oldModel;
 	entity.renderType = oldRenderType;
+	static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial = savedMat;
 	return retval;
 }
 
@@ -235,7 +231,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName, jfloat xOffset, jfloat yOffset, jfloat zOffset,
     jint width, jint height, jint depth, jfloat scale, jint textureX, jint textureY, jboolean transparent,
     jfloat textureWidth, jfloat textureHeight) {
-	/* FIXME 1.2.0
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	HumanoidModel* model = nullptr;
 	ModelPart* part = bl_renderManager_getModelPart_impl(rendererId, utfChars, &model);
@@ -248,32 +243,26 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
 	part->addBox(Vec3(xOffset, yOffset, zOffset), Vec3(width, height, depth), scale);
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
-	*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelClear
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
-	/* FIXME 1.2.0
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	std::vector<Cube*>* cubeVector = (std::vector<Cube*>*) ((uintptr_t) part + MODELPART_CUBEVECTOR_OFFSET);
 	cubeVector->clear();
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
-	*/
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeModelPartExists
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
-	/* FIXME 1.2.0
 	jboolean exists;
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
 	exists = part != NULL;
 	env->ReleaseStringUTFChars(modelPartName, utfChars);
 	return exists;
-	*/
-	return true;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererManager_nativeCreateHumanoidRenderer
