@@ -400,11 +400,13 @@ typedef struct {
 class Biome {
 public:
 	void** vtable; //0
-	char filler[160-4]; //4
-	cppstr name; //160 from Biome::setName
-	char filler2[252-164]; //164
-	int id; //252 from Biome::Biome
+	char filler[176-4]; //4
+	cppstr name; //176 from Biome::setName
+	char filler2[268-180]; //180
+	int id; //268 from Biome::Biome
 };
+static_assert(offsetof(Biome, name) == 176, "Biome name");
+static_assert(offsetof(Biome, id) == 268, "Biome ID");
 
 class Abilities {
 public:
