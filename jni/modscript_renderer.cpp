@@ -34,8 +34,6 @@ void* debug_dlsym(void* handle, const char* symbol);
 #define dlsym debug_dlsym
 #endif //DLSYM_DEBUG
 
-void** bl_EntityRenderDispatcher_instance;
-
 EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 
 static void (*bl_Mesh_reset)(void*);
@@ -60,7 +58,7 @@ static void (*bl_EntityRenderDispatcher_initializeEntityRenderers_real)(void* se
 static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
 	MobRenderer* renderer;
 	if (rendererId < 0x1000) {
-		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, rendererId);
+		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(&bl_minecraft->getEntityRenderDispatcher(), rendererId);
 	} else {
 		renderer = (MobRenderer*) bl_entityRenderers[rendererId - 0x1000];
 	}
@@ -334,8 +332,6 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererE16EntityRendererId");
 	bl_EntityRenderDispatcher_getRenderer_entity_real = (EntityRenderer* (*)(void*, Entity*))
 		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
-	bl_EntityRenderDispatcher_instance = (void**)
-		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher8instanceE");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
 	bl_HumanoidMobRenderer_HumanoidMobRenderer = (void (*)(MobRenderer*, std::unique_ptr<HumanoidModel>,
