@@ -3140,6 +3140,14 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetSta
 	item->setStackedByData(stacked);
 }
 
+JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetAllowOffhand
+  (JNIEnv *env, jclass clazz, jint id, jboolean offhand) {
+	if (id < 0 || id >= bl_item_id_count) return;
+	Item* item = bl_Item_mItems[id];
+	if (!item) return;
+	item->setAllowOffhand(offhand);
+}
+
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRecipeSetAnyAuxValue
   (JNIEnv *env, jclass clazz, jint id, jboolean anyAux) {
 	if (id < 0 || id >= bl_item_id_count) return;

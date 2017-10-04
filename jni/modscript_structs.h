@@ -186,6 +186,7 @@ public:
 	bool isStackedByData() const;
 	void setMaxDamage(int);
 	int getMaxDamage() const;
+	void setAllowOffhand(bool);
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
 static_assert(sizeof(Item) == 116, "item size is wrong");

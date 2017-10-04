@@ -2139,6 +2139,7 @@ public class ScriptManager {
 	public static native void nativeNewLevelCallbackStarted();
 	public static native void nativeNewLevelCallbackEnded();
 	public static native boolean nativeHasPreventedDefault();
+	public static native void nativeItemSetAllowOffhand(int id, boolean yep);
 
 	public static class ScriptState {
 		public Script script;
@@ -4071,6 +4072,11 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void setStackedByData(int id, boolean stacked) {
 			nativeItemSetStackedByData(id, stacked);
+		}
+
+		@JSStaticFunction
+		public static void setAllowOffhand(int id, boolean allowOffhand) {
+			nativeItemSetAllowOffhand(id, allowOffhand);
 		}
 
 		/*
