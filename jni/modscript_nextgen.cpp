@@ -57,6 +57,7 @@
 #include "mcpe/blocktessellator.h"
 #include "mcpe/inventoryitemrenderer.h"
 #include "mcpe/commandorigin.h"
+#include "mcpe/entityrenderdata.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -315,7 +316,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 //		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
+		"_ZN11MobRenderer6renderER23BaseEntityRenderContextR16EntityRenderData");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item3useER12ItemInstanceR6Player");
@@ -472,8 +473,8 @@ static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
-static void* (*bl_MobRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
-static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, Entity&, Vec3 const&, float, float);
+static void* (*bl_MobRenderer_render_real)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&);
+static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&);
 static void (*bl_Block_onPlace)(Block*, BlockSource&, BlockPos const&);
 
 static bool* bl_Block_mSolid;
@@ -2931,12 +2932,12 @@ mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Ent
 	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
 }
 
-static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, Entity& ent, Vec3 const& vec, float a, float b) {
-	auto foundIter = bl_mobTexturesMap.find(ent.getUniqueID());
+static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, BaseEntityRenderContext& context, EntityRenderData& renderdata) {
+	auto foundIter = bl_mobTexturesMap.find(renderdata.entity->getUniqueID());
 	if (foundIter != bl_mobTexturesMap.end()) {
-		return bl_MobRenderer_render_real(renderer, ent, vec, a, b);
+		return bl_MobRenderer_render_real(renderer, context, renderdata);
 	}
-	return bl_SkeletonRenderer_render_real(renderer, ent, vec, a, b);
+	return bl_SkeletonRenderer_render_real(renderer, context, renderdata);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
@@ -4202,10 +4203,10 @@ void bl_setuphooks_cppside() {
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
 	void** skeletonRendererVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV16SkeletonRenderer");
-	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, Entity&, Vec3 const&, float, float))
+	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&))
 		skeletonRendererVtable[vtable_indexes.mobrenderer_render];
-	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, Entity&, Vec3 const&, float, float))
-		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER6EntityRK4Vec3ff");
+	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&))
+		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER23BaseEntityRenderContextR16EntityRenderData");
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	// custom blocks.
