@@ -58,6 +58,7 @@
 #include "mcpe/inventoryitemrenderer.h"
 #include "mcpe/commandorigin.h"
 #include "mcpe/entityrenderdata.h"
+#include "mcpe/clientinstancescreenmodel.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -87,9 +88,11 @@ const size_t kBlockItemSize = 116;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3416;
+const size_t kItemEntity_itemInstance_offset = 3424;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
+// ChatScreenController::_sendChatMessage
+const size_t kClientInstanceScreenModel_offset = 432;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -398,9 +401,9 @@ static void (*bl_RakNetInstance_send)(void*, void*);
 static void** bl_SetTimePacket_vtable;
 //static void (*bl_Packet_Packet)(void*);
 static void (*bl_ClientNetworkHandler_handleTextPacket_real)(void*, void*, TextPacket*);
-static void** bl_MessagePacket_vtable;
+//static void** bl_MessagePacket_vtable;
 
-bool bl_text_parse_color_codes = true;
+//bool bl_text_parse_color_codes = true;
 
 //custom blocks
 void** bl_CustomBlock_vtable;
@@ -432,8 +435,8 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 
 //static std::map<int, std::array<unsigned char, 16> > bl_entityUUIDMap;
 
-static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
-static void (*bl_ProgressScreen_ProgressScreen)(void*);
+//static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
+//static void (*bl_ProgressScreen_ProgressScreen)(void*);
 static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static bool (*bl_Level_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
@@ -1284,7 +1287,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTextParseColorCodes
   (JNIEnv *env, jclass clazz, jboolean colorText) {
-	bl_text_parse_color_codes = colorText;
+	//bl_text_parse_color_codes = colorText;
 }
 
 std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
@@ -2125,6 +2128,14 @@ void bl_sendIdentPacket() {
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
   (JNIEnv *env, jclass clazz, jstring message) {
+	if (!bl_localplayer) return;
+	const char * messageUtfChars = env->GetStringUTFChars(message, nullptr);
+	ClientInstanceScreenModel* screenModel = new ClientInstanceScreenModel(
+		*bl_minecraft->getMinecraftGame(), *bl_minecraft,
+		bl_minecraft->getClientSceneStack(), bl_minecraft->getSceneFactory());
+	screenModel->sendChatMessage(std::string(messageUtfChars));
+	delete screenModel;
+	env->ReleaseStringUTFChars(message, messageUtfChars);
 #if 0
 	const char * messageUtfChars = env->GetStringUTFChars(message, NULL);
 	std::string* myName = bl_Entity_getNameTag(bl_localplayer);
@@ -3064,6 +3075,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 		BL_LOG("Calling serverPlayer send: %p", (void*)&ServerPlayer::sendInventory);
 		((ServerPlayer*)bl_localplayer)->sendInventory(true);
 	}
+	return returnVal;
 }
 
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments

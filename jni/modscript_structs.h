@@ -556,17 +556,6 @@ public:
 	EntityRenderer* getRenderer(Entity&);
 };
 
-class MinecraftScreenModel {
-public:
-	void updateTextBoxText(std::string const&);
-};
-
-class ClientInstanceScreenModel : public MinecraftScreenModel {
-public:
-	void executeCommand(std::string const&);
-	void sendChatMessage(std::string const&);
-};
-
 void addItem(Player&, ItemInstance&);
 
 #include "mcpe/blockentity/chestblockentity.h"

@@ -19,6 +19,8 @@ class EntityRenderDispatcher;
 class ItemRenderer;
 class UIProfanityContext;
 class ServerNetworkHandler;
+class SceneStack;
+class SceneFactory;
 
 enum GameType {
 };
@@ -62,5 +64,7 @@ public:
 	ItemRenderer* getItemRenderer();
 	UIProfanityContext const& getUIProfanityContext() const;
 	mce::Texture const& getUITexture();
+	SceneStack& getClientSceneStack() const;
+	SceneFactory& getSceneFactory() const;
 };
 #define MinecraftClient ClientInstance

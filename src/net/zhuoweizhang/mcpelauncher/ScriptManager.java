@@ -3525,6 +3525,24 @@ public class ScriptManager {
 			nativeEntitySetTarget(entityId, targetId);
 		}
 
+		@JSStaticFunction
+		public static int getCarriedItem(Object entity) {
+			long entityId = getEntityId(entity);
+			return nativeEntityGetCarriedItem(entityId, ITEMID);
+		}
+
+		@JSStaticFunction
+		public static int getCarriedItemData(Object entity) {
+			long entityId = getEntityId(entity);
+			return nativeEntityGetCarriedItem(entityId, DAMAGE);
+		}
+
+		@JSStaticFunction
+		public static int getCarriedItemCount(Object entity) {
+			long entityId = getEntityId(entity);
+			return nativeEntityGetCarriedItem(entityId, AMOUNT);
+		}
+
 		@Override
 		public String getClassName() {
 			return "Entity";
