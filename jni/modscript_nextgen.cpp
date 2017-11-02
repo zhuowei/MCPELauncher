@@ -72,7 +72,8 @@ typedef void Font;
 
 // found in Player::Player
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 4320
+#define PLAYER_ABILITIES_OFFSET 4176
+#define PLAYER_ABILITIES_OFFSET_125 4184
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -81,8 +82,8 @@ typedef void Font;
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = sizeof(Block);
-const size_t kLiquidBlockDynamicSize = 640;
-const size_t kLiquidBlockStaticSize = 640;
+const size_t kLiquidBlockDynamicSize = 648;
+const size_t kLiquidBlockStaticSize = 648;
 // found in registerBlock
 const size_t kBlockItemSize = 116;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
@@ -529,6 +530,7 @@ int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
 static bool bl_customBlocksCreated = false;
 static BlockGraphics* bl_extendedBlockGraphics[BL_ITEMS_EXPANDED_COUNT];
 static Block* bl_extendedBlocks[BL_ITEMS_EXPANDED_COUNT];
+static bool bl_isRunning125;
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -1267,7 +1269,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	SignBlockEntity* te = static_cast<SignBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return NULL;
 
-	std::string const& lineStr = te->getMessage(bl_minecraft->getUIProfanityContext());
+	std::string const& lineStr = te->message;
 
 	jstring signJString = env->NewStringUTF(lineStr.c_str());
 	return signJString;
@@ -2393,6 +2395,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 }
 
 static Abilities* bl_getAbilities(Player* player) {
+	if (bl_isRunning125) return ((Abilities*) ((uintptr_t) player + PLAYER_ABILITIES_OFFSET_125));
 	return ((Abilities*) ((uintptr_t) player + PLAYER_ABILITIES_OFFSET));
 }
 
@@ -4270,6 +4273,7 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_SceneStack_pushScreen_real);
 	mcpelauncher_hook((void*)&ItemRenderer::render, (void*)&bl_ItemRenderer_render_hook,
 		(void**)&bl_ItemRenderer_render_real);
+	bl_isRunning125 = dlsym(mcpelibhandle, "_ZN15SignBlockEntity10getMessageERK18UIProfanityContext") == nullptr;
 
 	bl_renderManager_init(mcpelibhandle);
 }

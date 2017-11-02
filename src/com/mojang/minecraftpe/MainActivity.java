@@ -258,7 +258,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.2.0");
+				intent.putExtra("supportedVersion", "1.2.3");
 				startActivity(intent);
 				finish();
 				try {
@@ -2163,6 +2163,42 @@ public class MainActivity extends NativeActivity {
 
 	public String getLegacyDeviceID() {
 		return getDeviceId();
+	}
+
+	private boolean isPackageInstalledByName(String pkgName) {
+		try {
+			return this.getPackageManager().getPackageInfo(pkgName, 0) != null;
+		} catch (PackageManager.NameNotFoundException e) {
+			return false;
+		}
+	}
+	public boolean isMixerCreateInstalled() {
+		return isPackageInstalledByName("com.microsoft.beambroadcast") ||
+			isPackageInstalledByName("com.microsoft.beambroadcast.beta");
+	}
+	public void navigateToPlaystoreForMixerCreate() {
+		launchUri("market://details?id=com.microsoft.beambroadcast");
+	}
+	public boolean launchMixerCreateForBroadcast() {
+		try {
+			launchUri("beambroadcast://");
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public int getAPIVersion(String theName) {
+		System.out.println("Get API version: " + theName);
+		try {
+			Field field = Build.VERSION_CODES.class.getField(theName);
+			if (field == null) return -1;
+			return field.getInt(null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
 	@Override

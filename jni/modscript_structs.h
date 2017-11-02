@@ -83,9 +83,10 @@ public:
 
 	char filler4[248-136]; //136
 	int renderType; //248
-	char filler5[476-252]; // 252
-	std::vector<Entity*> riders; // 476
+	char filler5[488-252]; // 252
+	std::vector<Entity*> riders; // 488
 
+	~Entity();
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;
@@ -107,6 +108,8 @@ public:
 	bool hasTeleported() const;
 };
 static_assert(offsetof(Entity, renderType) == 248, "renderType offset wrong");
+// Entity::getRiderIndex
+static_assert(offsetof(Entity, riders) == 488, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
@@ -251,7 +254,7 @@ public:
 	char filler2[84-28]; //28
 	float destroyTime; //84
 	float explosionResistance; //88
-	char filler4[640-92]; // 92
+	char filler4[648-92]; // 92
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -266,7 +269,7 @@ public:
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(Block) == 640, "Block size is wrong");
+static_assert(sizeof(Block) == 648, "Block size is wrong");
 static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
 static_assert(offsetof(Block, explosionResistance) == 88, "explosionResistance is wrong");
 #define Tile Block
@@ -525,6 +528,7 @@ public:
 	Player* getPlayer(EntityUniqueID) const;
 	Player* getPrimaryLocalPlayer() const;
 	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
+	Abilities* getPlayerAbilities(EntityUniqueID const&);
 };
 // Level::getActivePlayerCount
 static_assert(offsetof(Level, allPlayers) == 24, "allPlayers vec");
