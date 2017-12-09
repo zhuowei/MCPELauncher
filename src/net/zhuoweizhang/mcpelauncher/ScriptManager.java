@@ -4036,6 +4036,10 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void defineArmor(int id, String iconName, int iconIndex, String name,
 			String texture, int damageReduceAmount, int maxDamage, int armorType) {
+			NativeModPEApi.setItem(id, iconName, iconIndex, name, 1);
+		}
+		public static void defineArmor2(int id, String iconName, int iconIndex, String name,
+			String texture, int damageReduceAmount, int maxDamage, int armorType) {
 			String newSkinPath = OldEntityTextureFilenameMapping.m.get(texture);
 			if (newSkinPath != null) texture = newSkinPath;
 			if (texture != null && texture.toLowerCase().endsWith(".png")) {

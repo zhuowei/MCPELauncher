@@ -72,8 +72,7 @@ typedef void Font;
 
 // found in Player::Player
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 4176
-#define PLAYER_ABILITIES_OFFSET_125 4184
+#define PLAYER_ABILITIES_OFFSET 4248
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -89,11 +88,11 @@ const size_t kBlockItemSize = 116;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3424;
+const size_t kItemEntity_itemInstance_offset = 3488;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 432;
+const size_t kClientInstanceScreenModel_offset = 460;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -530,7 +529,6 @@ int bl_customItem_enchantValue[BL_ITEMS_EXPANDED_COUNT];
 static bool bl_customBlocksCreated = false;
 static BlockGraphics* bl_extendedBlockGraphics[BL_ITEMS_EXPANDED_COUNT];
 static Block* bl_extendedBlocks[BL_ITEMS_EXPANDED_COUNT];
-static bool bl_isRunning125;
 
 enum CustomBlockRedstoneType {
 	// this is a bitfield
@@ -1284,6 +1282,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
 	te->setMessage(std::string(utfChars));
+	te->setChanged();
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
 
@@ -2060,12 +2059,37 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	bl_Recipes_addShapedRecipe(recipes, outStacks, shapeVector, ingredientsList);
 }
 
+class BLFurnaceRecipeRequest {
+public:
+	int inputId;
+	int outputId;
+	int outputDamage;
+};
+
+static std::vector<BLFurnaceRecipeRequest> furnaceRecipes;
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
 	// You don't need count, not sure how to omit it completely
   	ItemInstance outputStack(outputId, 1, outputDamage);
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
 	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
+	furnaceRecipes.push_back({inputId, outputId, outputDamage});
+}
+
+static void bl_readdFurnace() {
+	for (auto& f: furnaceRecipes) {
+		ItemInstance outputStack(f.outputId, 1, f.outputDamage);
+		FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
+		bl_FurnaceRecipes_addFurnaceRecipe(recipes, f.inputId, outputStack);
+	}
+}
+static void* (*bl_FurnaceRecipes__init_real)(FurnaceRecipes* recipes);
+static void* bl_FurnaceRecipes__init_hook(FurnaceRecipes* recipes) {
+	BL_LOG("Init furnace recipes");
+	void* retval = bl_FurnaceRecipes__init_real(recipes);
+	bl_readdFurnace();
+	return retval;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
@@ -2395,7 +2419,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 }
 
 static Abilities* bl_getAbilities(Player* player) {
-	if (bl_isRunning125) return ((Abilities*) ((uintptr_t) player + PLAYER_ABILITIES_OFFSET_125));
 	return ((Abilities*) ((uintptr_t) player + PLAYER_ABILITIES_OFFSET));
 }
 
@@ -4273,7 +4296,8 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_SceneStack_pushScreen_real);
 	mcpelauncher_hook((void*)&ItemRenderer::render, (void*)&bl_ItemRenderer_render_hook,
 		(void**)&bl_ItemRenderer_render_real);
-	bl_isRunning125 = dlsym(mcpelibhandle, "_ZN15SignBlockEntity10getMessageERK18UIProfanityContext") == nullptr;
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
+		(void**)&bl_FurnaceRecipes__init_real);
 
 	bl_renderManager_init(mcpelibhandle);
 }

@@ -246,19 +246,21 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean is0140or0141 = false;/*mcPkgInfo.versionName.startsWith("1.0.0") ||
-				mcPkgInfo.versionName.equals("1.0.2") ||
-				mcPkgInfo.versionName.equals("1.0.3");
-			*/
+			boolean isTooOldMinorVersion = mcPkgInfo.versionName.startsWith("1.2.0.") ||
+				mcPkgInfo.versionName.startsWith("1.2.1.") ||
+				mcPkgInfo.versionName.startsWith("1.2.2.") ||
+				mcPkgInfo.versionName.startsWith("1.2.3.") ||
+				mcPkgInfo.versionName.startsWith("1.2.4.") ||
+				mcPkgInfo.versionName.startsWith("1.2.5.");
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
-				!is0140or0141) ||
+				!isTooOldMinorVersion) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.2.3");
+				intent.putExtra("supportedVersion", "1.2.6");
 				startActivity(intent);
 				finish();
 				try {
@@ -2199,6 +2201,18 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			return -1;
 		}
+	}
+
+	public String getSecureStorageKey(String key) {
+		System.out.println("Get secure storage key: " + key);
+		SharedPreferences myprefs = Utils.getPrefs(1);
+		return myprefs.getString("secure_storage_" + key, "");
+	}
+
+	public void setSecureStorageKey(String key, String value) {
+		System.out.println("Set secure storage key: " + key);
+		SharedPreferences myprefs = Utils.getPrefs(1);
+		myprefs.edit().putString("secure_storage_" + key, value).apply();
 	}
 
 	@Override

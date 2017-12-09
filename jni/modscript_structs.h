@@ -64,27 +64,27 @@ enum EntityFlags {
 };
 class PlayerInventoryProxy;
 class EntityDamageSource;
-// last update: 1.2b11
+// last update: 1.2.6.1
 class Entity {
 public:
 	void** vtable; //0
-	char filler3[72-4]; // 4
-	float x; //72 - Entity::setPos(Vec3 const&)
-	float y; //76
-	float z; //80
-	char filler2[108-84]; // 84
-	float motionX; //108 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //112
-	float motionZ; //116
-	float pitch; //120 Entity::setRot
-	float yaw; //124
-	float prevPitch; //128
-	float prevYaw; //132
+	char filler3[136-4]; // 4
+	float x; //136 - Entity::setPos(Vec3 const&)
+	float y; //140
+	float z; //144
+	char filler2[172-148]; // 148
+	float motionX; //172 found in Entity::rideTick(); should be set to 0 there
+	float motionY; //176
+	float motionZ; //180
+	float pitch; //184 Entity::setRot
+	float yaw; //188
+	float prevPitch; //192
+	float prevYaw; //196
 
-	char filler4[248-136]; //136
-	int renderType; //248
-	char filler5[488-252]; // 252
-	std::vector<Entity*> riders; // 488
+	char filler4[312-200]; //200
+	int renderType; //312
+	char filler5[552-316]; // 316
+	std::vector<Entity*> riders; // 552
 
 	~Entity();
 	BlockSource* getRegion() const;
@@ -107,9 +107,9 @@ public:
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
 };
-static_assert(offsetof(Entity, renderType) == 248, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 312, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 488, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 552, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
@@ -399,14 +399,15 @@ typedef struct {
 #define HIT_RESULT_NONE 2
 
 typedef struct {
-	int type; //0
-	int side; //4
-	int x; //8
-	int y; //12
-	int z; //16
-	Vec3 hitVec; //20
-	Entity* entity; //32
-	unsigned char filler1; //36
+	char filler0[24-0];
+	int type; //24
+	int side; //28
+	int x; //32
+	int y; //36
+	int z; //40
+	Vec3 hitVec; //44
+	Entity* entity; //56
+	unsigned char filler1[89-60]; //60
 } HitResult;
 
 class Biome {

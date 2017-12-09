@@ -40,6 +40,8 @@ static void (*bl_Mesh_reset)(void*);
 
 static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer)(MobRenderer*, std::unique_ptr<HumanoidModel>,
 		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float);
+static void (*bl_HumanoidMobRenderer_HumanoidMobRenderer_new)(MobRenderer*, std::unique_ptr<HumanoidModel>,
+		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr);
 static void (*bl_ModelPart_reset)(ModelPart*);
 
 static std::vector<EntityRenderer*> bl_entityRenderers;
@@ -120,10 +122,19 @@ int bl_renderManager_createHumanoidRenderer() {
 	//	(MobRenderer*) bl_EntityRenderDispatcher_getRenderer(*bl_EntityRenderDispatcher_instance, 3 /* human */);
 
 	MobRenderer* renderer = (MobRenderer*) operator new(MOBRENDERER_SIZE);
-	bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
-		std::unique_ptr<HumanoidModel>(model2),
-		std::unique_ptr<HumanoidModel>(model3),
-		mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("textures/entity/chest/double_normal")), 0);
+
+	if (bl_HumanoidMobRenderer_HumanoidMobRenderer) {
+		bl_HumanoidMobRenderer_HumanoidMobRenderer(renderer, std::unique_ptr<HumanoidModel>(model),
+			std::unique_ptr<HumanoidModel>(model2),
+			std::unique_ptr<HumanoidModel>(model3),
+			mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("textures/entity/chest/double_normal")), 0);
+	} else {
+		bl_HumanoidMobRenderer_HumanoidMobRenderer_new(renderer, std::unique_ptr<HumanoidModel>(model),
+			std::unique_ptr<HumanoidModel>(model2),
+			std::unique_ptr<HumanoidModel>(model3),
+			mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation("textures/entity/chest/double_normal")));
+	}
+
 	BL_LOG("Adding renderer");
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	BL_LOG("Created renderer %d", retval);
@@ -338,6 +349,10 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr, float))
 		dlsym(mcpelibhandle,
 			"_ZN19HumanoidMobRendererC1ESt10unique_ptrI13HumanoidModelSt14default_deleteIS1_EES4_S4_N3mce10TexturePtrEf");
+	bl_HumanoidMobRenderer_HumanoidMobRenderer_new = (void (*)(MobRenderer*, std::unique_ptr<HumanoidModel>,
+		std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>, mce::TexturePtr))
+		dlsym(mcpelibhandle,
+			"_ZN19HumanoidMobRendererC2ESt10unique_ptrI13HumanoidModelSt14default_deleteIS1_EES4_S4_N3mce10TexturePtrE");
 /*
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
 	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
