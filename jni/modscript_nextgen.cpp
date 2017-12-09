@@ -243,7 +243,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int mobrenderer_get_skin_ptr;
 	int tile_on_redstone_update;
 	//int tile_is_redstone_block;
-	int tile_on_loaded;
+	int tile_setup_redstone_component;
 	int tile_on_place;
 	int mob_set_sneaking;
 	int blockitem_vtable_size;
@@ -290,8 +290,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK5Block16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
 	//vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 	//	"_ZNK5Block15isRedstoneBlockEv");
-	vtable_indexes.tile_on_loaded = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
-		"_ZNK5Block8onLoadedER11BlockSourceRK8BlockPos");
+	vtable_indexes.tile_setup_redstone_component = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
+		"_ZNK5Block22setupRedstoneComponentER11BlockSourceRK8BlockPos");
 	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV5Block",
 		"_ZNK5Block7onPlaceER11BlockSourceRK8BlockPos");
 	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -488,7 +488,7 @@ static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(Block*, std::string const&, int, void*, std::string const&, std::string const&);
 static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
-static void (*bl_TntBlock_onLoaded)(Block*, BlockSource&, BlockPos const&);
+static void (*bl_TntBlock_setupRedstoneComponent)(Block*, BlockSource&, BlockPos const&);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
@@ -729,17 +729,17 @@ void bl_CustomBlock_onRedstoneUpdate_hook(Block* block, BlockSource& source, Blo
 	}
 }
 
-void bl_CustomBlock_onLoaded_hook(Block* block, BlockSource& source, BlockPos const& pos) {
+void bl_CustomBlock_setupRedstoneComponent_hook(Block* block, BlockSource& source, BlockPos const& pos) {
 	if (source.getLevel()->isClientSide()) return;
 	if (bl_custom_block_redstone[block->id] & REDSTONE_CONSUMER) {
-		bl_TntBlock_onLoaded(block, source, pos);
+		bl_TntBlock_setupRedstoneComponent(block, source, pos);
 	}
 }
 
 void bl_CustomBlock_onPlace_hook(Block* block, BlockSource& source, BlockPos const& pos) {
 	bl_Block_onPlace(block, source, pos);
 	if (bl_custom_block_redstone[block->id]) {
-		bl_CustomBlock_onLoaded_hook(block, source, pos);
+		bl_CustomBlock_setupRedstoneComponent_hook(block, source, pos);
 	}
 }
 
@@ -1401,7 +1401,7 @@ static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_visual_shape] = (void*) &bl_CustomBlock_getVisualShape_hook;
 	//bl_CustomBlock_vtable[vtable_indexes.tile_is_redstone_block] = (void*) &bl_CustomBlock_isRedstoneBlock_hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
-	bl_CustomBlock_vtable[vtable_indexes.tile_on_loaded] = (void*) &bl_CustomBlock_onLoaded_hook;
+	bl_CustomBlock_vtable[vtable_indexes.tile_setup_redstone_component] = (void*) &bl_CustomBlock_setupRedstoneComponent_hook;
 }
 
 int bl_CustomBlockItem_getLevelDataForAuxValue_hook(Item* item, int value) {
@@ -4235,8 +4235,8 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Throwable_throwableHit_real);
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
 		(void**) &bl_Recipe_isAnyAuxValue_real);
-	bl_TntBlock_onLoaded = (void (*)(Block*, BlockSource&, BlockPos const&))
-		dlsym(mcpelibhandle, "_ZNK8TntBlock8onLoadedER11BlockSourceRK8BlockPos");
+	bl_TntBlock_setupRedstoneComponent = (void (*)(Block*, BlockSource&, BlockPos const&))
+		dlsym(mcpelibhandle, "_ZNK8TntBlock22setupRedstoneComponentER11BlockSourceRK8BlockPos");
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
