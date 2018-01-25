@@ -2325,6 +2325,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
   (JNIEnv *env, jclass clazz, jint axis) {
 	Level* level = bl_minecraft->getLevel();
 	if (!level) return -1;
+	if (!bl_localplayer) return -1;
 	HitResult const& objectMouseOver = level->getHitResult();
 	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "hit %d %d %d %d", objectMouseOver->type,
 	//	objectMouseOver->x, objectMouseOver->y, objectMouseOver->z);
@@ -2615,7 +2616,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
-
+	if (!bl_localplayer) return -1;
 	ItemInstance instance(id, count, damage);
 
 	Entity* entity = bl_level->getSpawner()->spawnItem(*bl_localplayer->getRegion(),
@@ -3460,11 +3461,13 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetExtraData
   (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jint data) {
+	if (!bl_localplayer) return;
 	bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
 }
 
 JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetExtraData
   (JNIEnv* env, jclass clazz, jint x, jint y, jint z) {
+	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getExtraData({x, y, z});
 }
 

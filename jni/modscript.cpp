@@ -334,7 +334,7 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, callback);
 }
 
-void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
+void bl_SurvivalMode_startDestroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -356,7 +356,7 @@ void bl_SurvivalMode_startDestroyBlock_hook(void* gamemode, BlockPos blockPos, s
 	if(!preventDefaultStatus) bl_SurvivalMode_startDestroyBlock_real(gamemode, blockPos, side, someBool);
 }
 
-void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
+void bl_CreativeMode_startDestroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -377,7 +377,7 @@ void bl_CreativeMode_startDestroyBlock_hook(void* gamemode, BlockPos blockPos, s
 	if(!preventDefaultStatus) bl_CreativeMode_startDestroyBlock_real(gamemode, blockPos, side, someBool);
 }
 
-void* bl_GameMode_continueDestroyBlock_hook(void* gamemode, BlockPos blockPos, signed char side, bool& abool) {
+void* bl_GameMode_continueDestroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side, bool& abool) {
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 
@@ -445,7 +445,7 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::stri
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
-	}
+	};
 	bl_cpp_selectLevel_hook();
 	//bl_minecraft = minecraft;
 	JNIEnv *env;
@@ -594,7 +594,13 @@ void bl_GameMode_initPlayer_hook(GameMode* gamemode, Player* player) {
 	bl_gamemode = gamemode;
 }
 
-void bl_GameMode_destroyBlock_hook(void* gamemode, BlockPos blockPos, signed char side){
+void bl_GameMode_destroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side){
+	Level* myLevel = gamemode->player->getLevel();
+
+	if (myLevel != bl_level) {
+		bl_GameMode_destroyBlock_real(gamemode, blockPos, side);
+		return;
+	}
 	JNIEnv *env;
 	preventDefaultStatus = FALSE;
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
@@ -799,6 +805,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint id, jint damage) {
+	if (!bl_localplayer) return;
 	FullBlock tile;
 	tile.id = id;
 	tile.data = damage;
@@ -828,6 +835,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getRawBrightness(x, y, z, true).value; //all observed uses of getRawBrightness pass true
 }
 
@@ -910,6 +918,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire, jboolean smoke, jfloat something) {
+	if (!bl_localplayer) return;
 	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire, smoke, something);
 }
 
@@ -954,11 +963,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getBlockID(x, y, z);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetData
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getData(x, y, z);
 }
 

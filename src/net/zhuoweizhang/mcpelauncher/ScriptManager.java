@@ -325,9 +325,9 @@ public class ScriptManager {
 	@CallbackName(name="continueDestroyBlock", args={"x", "y", "z", "side", "progress"}, prevent=true)
 	public static void continueDestroyBlockCallback(int x, int y, int z, int side, float progress) {
 		boolean samePlace = x == lastDestroyX && y == lastDestroyY && z == lastDestroyZ && side == lastDestroySide;
-		if (progress == 0 && (progress != lastDestroyProgress || !samePlace)) {
-			callScriptMethod("startDestroyBlock", x, y, z, side);
-		}
+		//if (progress == 0 && (progress != lastDestroyProgress || !samePlace)) {
+		//	callScriptMethod("startDestroyBlock", x, y, z, side);
+		//}
 		lastDestroyProgress = progress;
 		lastDestroyX = x;
 		lastDestroyY = y;

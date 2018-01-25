@@ -251,7 +251,8 @@ public class MainActivity extends NativeActivity {
 				mcPkgInfo.versionName.startsWith("1.2.2.") ||
 				mcPkgInfo.versionName.startsWith("1.2.3.") ||
 				mcPkgInfo.versionName.startsWith("1.2.4.") ||
-				mcPkgInfo.versionName.startsWith("1.2.5.");
+				mcPkgInfo.versionName.startsWith("1.2.5.") ||
+				mcPkgInfo.versionName.startsWith("1.2.6.");
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!isTooOldMinorVersion) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
@@ -260,7 +261,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.2.6");
+				intent.putExtra("supportedVersion", "1.2.7");
 				startActivity(intent);
 				finish();
 				try {
@@ -2213,6 +2214,14 @@ public class MainActivity extends NativeActivity {
 		System.out.println("Set secure storage key: " + key);
 		SharedPreferences myprefs = Utils.getPrefs(1);
 		myprefs.edit().putString("secure_storage_" + key, value).apply();
+	}
+
+	// 1.2.10
+	public long getMemoryLimit() {
+		return 0x100000000L; // 4GB
+	}
+	public long getFreeMemory() {
+		return 0x100000000L; // 4GB
 	}
 
 	@Override

@@ -13,7 +13,7 @@ public:
 	BlockID		getBlockID(int, int, int) const;
 	BlockID		getBlockID(BlockPos const&) const;
 	int		getData(int, int, int);
-	int		getData(BlockPos const&);
+	int		getData(BlockPos const&) const;
 	BlockBrightness	getRawBrightness(int, int, int, bool);
 	BlockEntity*	getBlockEntity(int, int, int);
 	int		getGrassColor(BlockPos const&) const;
