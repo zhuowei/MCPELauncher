@@ -43,12 +43,6 @@ typedef struct {
 #define MINECRAFT_VTABLE_OFFSET_SET_LEVEL 30
 */
 
-#ifdef __i386
-#define GAMERENDERER_GETFOV_SIZE 0x1ea
-#else
-#define GAMERENDERER_GETFOV_SIZE 0x178
-#endif
-
 #define LOG_TAG "BlockLauncher/ModScript"
 #define FALSE 0
 #define TRUE 1
@@ -135,8 +129,9 @@ Entity* bl_removedEntity = NULL;
 
 int bl_frameCallbackRequested = 0;
 
-static unsigned char getFovOriginal[GAMERENDERER_GETFOV_SIZE];
-static unsigned char getFovHooked[GAMERENDERER_GETFOV_SIZE];
+static unsigned char getFovOriginal[0x1000];
+static unsigned char getFovHooked[0x1000];
+static size_t getFovSize;
 
 extern bool bl_onLockDown;
 
@@ -1046,10 +1041,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_newfov = newfov;
 	if (override) {
 		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_LevelRenderer_getFov) & ~1),
-			getFovHooked, sizeof(getFovHooked));
+			getFovHooked, getFovSize);
 	} else {
 		memcpy((void*) ((uintptr_t) bl_marauder_translation_function((void*)bl_LevelRenderer_getFov) & ~1),
-			getFovOriginal, sizeof(getFovOriginal));
+			getFovOriginal, getFovSize);
 	}
 }
 
@@ -1159,6 +1154,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetInventorySlot
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
 	if (bl_localplayer == NULL) return;
+/*	FIXME 1.2.10
 	//we grab the inventory instance from the player
 	auto invPtr = bl_localplayer->getSupplies();
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
@@ -1177,6 +1173,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		}
 	}
 	delete itemStack;
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
@@ -1514,12 +1511,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void* startDestroyBlockCreative = dlsym(RTLD_DEFAULT, "_ZN12CreativeMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
-	void* getFov = dlsym(RTLD_DEFAULT, "_ZN19LevelRendererPlayer6getFovEfb");
-	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovOriginal));
+	void* getFov = dlsym(mcpelibhandle, "_ZN19LevelRendererPlayer6getFovEfb");
+	Elf_Sym* vtableSym = dobby_elfsym(mcpelibhandle, "_ZN19LevelRendererPlayer6getFovEfb");
+	getFovSize = vtableSym->st_size;
+	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), getFovSize);
 	mcpelauncher_hook(getFov, (void*) &bl_LevelRenderer_getFov_hook, (void**) &bl_LevelRenderer_getFov_real);
-	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), sizeof(getFovHooked));
+	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), getFovSize);
 	// start off with original FOV
-	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, sizeof(getFovOriginal));
+	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, getFovSize);
 	bl_LevelRenderer_getFov = (float (*)(void*, float, int)) getFov;
 
 	bl_Player_getCarriedItem = (ItemInstance* (*)(Player*))

@@ -59,6 +59,8 @@
 #include "mcpe/commandorigin.h"
 #include "mcpe/entityrenderdata.h"
 #include "mcpe/clientinstancescreenmodel.h"
+#include "mcpe/backgroundworker.h"
+#include "mcpe/playername.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -72,7 +74,8 @@ typedef void Font;
 
 // found in Player::Player
 // or look for Abilities::Abilities
-#define PLAYER_ABILITIES_OFFSET 4248
+// or search for Abilities::getBool
+#define PLAYER_ABILITIES_OFFSET 4256
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -88,11 +91,11 @@ const size_t kBlockItemSize = 116;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3488;
+const size_t kItemEntity_itemInstance_offset = 3496;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 460;
+const size_t kClientInstanceScreenModel_offset = 540;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -197,14 +200,16 @@ public:
 	int shouldBeOne; // 8
 	unsigned char sub; //12
 	unsigned char type; // 13
-	char filler2[16-13]; // 13
-	std::string username; // 16
-	std::string message; // 20
+	char filler2[16-14]; // 14
+	PlayerName username; // 16
+	std::string message; // 28
 	//std::vector<std::string> thevector; // 24
 	//char filler3[36-28]; // 28
-	char filler3[36-24]; // 24
+	//char filler3[36-24]; // 24
 	virtual ~TextPacket() override;
 };
+static_assert(offsetof(TextPacket, username) == 16, "textpacket username");
+static_assert(offsetof(TextPacket, message) == 28, "textpacket message");
 
 typedef struct {
 	void** vtable; //0
@@ -472,7 +477,6 @@ static Attribute* bl_Player_EXPERIENCE;
 static void (*bl_Player_addExperience_real)(Player*, int);
 static void (*bl_Player_addLevels_real)(Player*, int);
 static void (*bl_Item_setCategory)(Item*, int);
-static void (*bl_Item_initCreativeItems_real)();
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
@@ -657,7 +661,7 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 }
 
 static void bl_Item_initCreativeItems_hook() {
-	bl_Item_initCreativeItems_real();
+	Item::initCreativeItems();
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -763,10 +767,11 @@ void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddres
 
 		env->CallStaticVoidMethod(bl_scriptmanager_class, mid, messageJString);
 	} else if (packet->type == 1) {
-		if (packet->username.length() == 0 && packet->message == "\xc2" "\xa7" "0BlockLauncher, enable scripts") {
+		std::string const& playerName = packet->username.getPrimaryName();
+		if (playerName.length() == 0 && packet->message == "\xc2" "\xa7" "0BlockLauncher, enable scripts") {
 			bl_onLockDown = false;
 		}
-		jstring senderJString = env->NewStringUTF(packet->username.c_str());
+		jstring senderJString = env->NewStringUTF(playerName.c_str());
 		jstring messageJString = env->NewStringUTF(packet->message.c_str());
 		preventDefaultStatus = false;
 		//Call back across JNI into the ScriptManager
@@ -1281,7 +1286,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
-	te->setMessage(std::string(utfChars));
+	// FIXME 1.2.10 te->setMessage(std::string(utfChars));
 	te->setChanged();
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
@@ -1422,9 +1427,11 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 }
 
 static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data, int int2, bool bool1) {
+	/* FIXME 1.2.10
 	if (bl_extendedBlockGraphics[item->itemId]) {
 		return bl_extendedBlockGraphics[item->itemId]->getTexture(2, (data & 0xf), 0);
 	}
+	*/
 	return bl_Item_getIcon(item, data, int2, bool1);
 }
 class Container;
@@ -2207,6 +2214,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 }
 
 static const char* bl_getOriginalSkin(Entity* entity) {
+	return "pig";
+/* FIXME 1.2.10
 	const char* retval;
 	// get the entity renderer and ask it for the skin
 	EntityRenderer* renderer = bl_minecraft->getEntityRenderDispatcher().getRenderer(*entity);
@@ -2221,6 +2230,7 @@ static const char* bl_getOriginalSkin(Entity* entity) {
 		retval = "";
 	}
 	return retval;
+*/
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetMobSkin
@@ -3504,7 +3514,7 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, Tessella
 	blockInfo->blockData = 0;
 	blockInfo->blockExtraData = 0;
 }
-
+/* FIXME 1.2.10
 TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data, int extra) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
 		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
@@ -3525,6 +3535,7 @@ TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(Bl
 
 	return graphics->getTexture(pos, side, data);
 }
+*/
 
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(Block*, BlockSource&, BlockPos const&, AABB&, bool);
 static AABB& bl_StonecutterBlock_getVisualShape_hook(Block* self, BlockSource& blockSource, BlockPos const& pos,
@@ -3710,6 +3721,18 @@ void bl_ItemRenderer_render_hook(ItemRenderer* renderer, void* arg1, void* arg2)
 		bl_repopulateItemGraphics(renderer);
 	}
 	bl_ItemRenderer_render_real(renderer, arg1, arg2);
+}
+
+bool bl_BackgroundWorker__workerThread_hook(BackgroundWorker* worker) {
+	bool retval = worker->_workerThread();
+	if (!retval && !worker->runQueue) {
+		// if we return false, then BackgroundWorker schedules it on the runqueue
+		// but the client thread has no runqueue
+		// returning true seems to fix it; not sure why
+		//BL_LOG("We have no runqueue, we're supposed to return %s: returning true", retval? "yes" : "no");
+		return true;
+	}
+	return retval;
 }
 
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
@@ -4227,10 +4250,12 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_setCategory = (void (*)(Item*, int))
 		dlsym(mcpelibhandle, "_ZN4Item11setCategoryE20CreativeItemCategory");
-	void* initCreativeItems =
-		dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
-	mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
-		(void**) &bl_Item_initCreativeItems_real);
+	//void* initCreativeItems =
+	//	dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
+	//mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
+	//	(void**) &bl_Item_initCreativeItems_real);
+	bl_patch_got_wrap(mcpelibhandle, (void*) &Item::initCreativeItems,
+		(void*)&bl_Item_initCreativeItems_hook);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitERK9HitResult");
@@ -4259,6 +4284,9 @@ void bl_setuphooks_cppside() {
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	// custom blocks.
+
+	// FIXME 1.2.10
+/*
 	bl_patch_got_wrap(mcpelibhandle, (void*)
 		(TextureUVCoordinateSet const& (BlockGraphics::*)(signed char, int, int) const)
 		&BlockGraphics::getTexture,
@@ -4267,6 +4295,9 @@ void bl_setuphooks_cppside() {
 		(TextureUVCoordinateSet const& (BlockGraphics::*)(BlockPos const&, signed char, int) const)
 		&BlockGraphics::getTexture,
 		(void*)&bl_CustomBlockGraphics_getTexture_blockPos_hook);
+
+*/
+
 	// known to fail.
 	// fixme 1.1.0
 	mcpelauncher_hook((void*)&MinecraftGame::updateFoliageColors, (void*)bl_MinecraftGame_updateFoliageColors_hook, (void**)&bl_MinecraftGame_updateFoliageColors_real);
@@ -4274,8 +4305,10 @@ void bl_setuphooks_cppside() {
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
 	pthread_key_create(&bl_tessellateBlock_key, &bl_tessellateBlock_key_destructor);
+	/* FIXME 1.2.10
 	mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
 		(void**)&bl_BlockTessellator_tessellateInWorld_real);
+	*/
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
 		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);
@@ -4301,6 +4334,7 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_ItemRenderer_render_real);
 	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
 		(void**)&bl_FurnaceRecipes__init_real);
+	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 
 	bl_renderManager_init(mcpelibhandle);
 }
