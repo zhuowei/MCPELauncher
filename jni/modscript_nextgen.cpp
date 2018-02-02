@@ -1057,14 +1057,13 @@ void bl_sendIdentPacket() {
 	 * Currently a SetTimePacket sent from client to server. Vanilla servers *should* ignore it, as well as old PocketMine.
 	 * The magic time value is 0x1abe11ed, and the boolean sent is false.
 	 */
-	/* Disable in 1.6.8 pending crash investigation
 	SetTimePacket packet;
 	bl_Packet_Packet(&packet);
 	packet.vtable = (void**) (((uintptr_t) bl_SetTimePacket_vtable) + 8);
 	packet.time = 0x1abe11ed;
 	packet.started = false;
 	bl_sendPacket(&packet);
-	*/
+	
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSendChat
