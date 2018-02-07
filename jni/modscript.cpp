@@ -506,7 +506,10 @@ void bl_GameMode_tick_hook(GameMode* gamemode) {
 
 	Level* myLevel = gamemode->player->getLevel();
 
-	if (myLevel != bl_level) {
+	bool notMainPlayer = bl_minecraft->getLocalPlayer() != nullptr &&
+		gamemode->player->getUniqueID() != bl_minecraft->getLocalPlayer()->getUniqueID();
+
+	if (myLevel != bl_level || notMainPlayer) {
 		bl_GameMode_tick_real(gamemode);
 		return;
 	}
@@ -1154,17 +1157,18 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetInventorySlot
   (JNIEnv *env, jclass clazz, jint slot, jint id, jint count, jint damage) {
 	if (bl_localplayer == NULL) return;
-/*	FIXME 1.2.10
 	//we grab the inventory instance from the player
 	auto invPtr = bl_localplayer->getSupplies();
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
 	if (itemStack == NULL) return;
+/*	Looks like 1.2.10 removed explicit slot linking?
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
 	if (slot < linkedSlotsCount) {
 		//int oldslot = slot;
 		slot = invPtr->getLinkedSlot(slot);
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "slot old %d new %d slot %d", oldslot, slot, linkedSlotsCount);
 	}
+*/
 	if (slot >= 0) {
 		invPtr->setItem(slot, *itemStack);
 		if (!bl_level->isClientSide()) {
@@ -1173,7 +1177,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		}
 	}
 	delete itemStack;
-*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed

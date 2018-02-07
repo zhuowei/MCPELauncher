@@ -3499,8 +3499,9 @@ static void bl_tessellateBlock_key_destructor(void* value) {
 	pthread_setspecific(bl_tessellateBlock_key, nullptr);
 }
 
-static void (*bl_BlockTessellator_tessellateInWorld_real)(BlockTessellator*, Tessellator&, Block const&, BlockPos const&, unsigned char, bool);
-void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, Tessellator& tessellator, Block const& block, BlockPos const& pos, unsigned char data, bool something) {
+static void (*bl_BlockTessellator_tessellateInWorld_real)(BlockTessellator*, mce::RenderConfiguration const&, Tessellator&, Block const&, BlockPos const&, unsigned char, bool);
+void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::RenderConfiguration const& renderConfig,
+	Tessellator& tessellator, Block const& block, BlockPos const& pos, unsigned char data, bool something) {
 	BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
 	if (!blockInfo) {
 		blockInfo = new BLTessellateBlock();
@@ -3509,7 +3510,7 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, Tessella
 	blockInfo->blockId = block.id;
 	blockInfo->blockData = data;
 	blockInfo->blockExtraData = block.id == kStonecutterId? self->getRegion()->getExtraData(pos) : 0;
-	bl_BlockTessellator_tessellateInWorld_real(self, tessellator, block, pos, data, something);
+	bl_BlockTessellator_tessellateInWorld_real(self, renderConfig, tessellator, block, pos, data, something);
 	blockInfo->blockId = 0;
 	blockInfo->blockData = 0;
 	blockInfo->blockExtraData = 0;
@@ -4305,10 +4306,8 @@ void bl_setuphooks_cppside() {
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
 	pthread_key_create(&bl_tessellateBlock_key, &bl_tessellateBlock_key_destructor);
-	/* FIXME 1.2.10
 	mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
 		(void**)&bl_BlockTessellator_tessellateInWorld_real);
-	*/
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
 		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);

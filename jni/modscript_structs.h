@@ -129,10 +129,6 @@ public:
 	void removeResource(ItemInstance const&, bool, bool, int);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
 	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
-	/* FIXME 1.2.10
-	int getLinkedSlot(int) const;
-	int getLinkedSlotsCount() const;
-	*/
 	void setItem(int, ItemInstance const&, ContainerID=ContainerIDInventory);
 	PlayerInventorySlot getSelectedSlot() const;
 	void selectSlot(int, ContainerID=ContainerIDInventory);
