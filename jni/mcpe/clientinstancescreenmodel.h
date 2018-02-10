@@ -13,7 +13,7 @@ public:
 
 class ClientInstanceScreenModel : public MinecraftScreenModel{
 public:
-	char filler[60-4];
+	char filler[64-4];
 
 	ClientInstanceScreenModel(MinecraftGame&, ClientInstance&, SceneStack&, SceneFactory&);
 	virtual ~ClientInstanceScreenModel();
@@ -22,4 +22,4 @@ public:
 	void sendChatMessage(std::string const&);
 };
 // search for the constructor
-static_assert(sizeof(ClientInstanceScreenModel) == 60, "ClientInstanceScreenModel size");
+static_assert(sizeof(ClientInstanceScreenModel) == 64, "ClientInstanceScreenModel size");

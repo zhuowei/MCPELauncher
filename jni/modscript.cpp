@@ -1161,14 +1161,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	auto invPtr = bl_localplayer->getSupplies();
 	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
 	if (itemStack == NULL) return;
-/*	Looks like 1.2.10 removed explicit slot linking?
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
 	if (slot < linkedSlotsCount) {
 		//int oldslot = slot;
 		slot = invPtr->getLinkedSlot(slot);
 		//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "slot old %d new %d slot %d", oldslot, slot, linkedSlotsCount);
 	}
-*/
 	if (slot >= 0) {
 		invPtr->setItem(slot, *itemStack);
 		if (!bl_level->isClientSide()) {

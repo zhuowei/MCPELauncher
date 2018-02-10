@@ -8,7 +8,7 @@ namespace Json {
 class BlockGraphics {
 public:
 	void** vtable;
-	char filler[128-4]; // 4
+	char filler[372-4]; // 4
 	BlockGraphics(std::string const&);
 	~BlockGraphics();
 	void setTextures(BlockGraphics&, Json::Value const&);
@@ -26,4 +26,4 @@ public:
 	static std::vector<std::unique_ptr<BlockGraphics>> mOwnedBlocks;
 	static TextureAtlas* mTerrainTextureAtlas;
 };
-static_assert(sizeof(BlockGraphics) == 128, "blockgraphics size");
+static_assert(sizeof(BlockGraphics) == 372, "blockgraphics size");
