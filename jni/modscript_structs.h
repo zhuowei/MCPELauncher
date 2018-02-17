@@ -113,6 +113,7 @@ static_assert(offsetof(Entity, riders) == 552, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
+	ItemInstance* getOffhandSlot() const;
 };
 enum ContainerID : unsigned char {
 	ContainerIDInventory = 0,

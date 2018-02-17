@@ -272,6 +272,9 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int block_use;
 	int item_get_icon;
 	int appplatform_get_settings_path;
+	int mob_send_inventory;
+	int mob_get_offhand_slot;
+	int mob_set_offhand_slot;
 };
 
 static bl_vtable_indexes_nextgen_cpp vtable_indexes;
@@ -340,6 +343,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item7getIconEiib");
 	vtable_indexes.appplatform_get_settings_path = bl_vtableIndex(mcpelibhandle, "_ZTV11AppPlatform",
 		"_ZN11AppPlatform15getSettingsPathEv");
+	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
+		"_ZN3Mob13sendInventoryEb") - 2;
+	vtable_indexes.mob_set_offhand_slot = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
+		"_ZN3Mob14setOffhandSlotERK12ItemInstance") - 2;
 }
 
 template <typename T>
@@ -3716,6 +3723,38 @@ void bl_ItemRenderer_render_hook(ItemRenderer* renderer, void* arg1, void* arg2)
 		bl_repopulateItemGraphics(renderer);
 	}
 	bl_ItemRenderer_render_real(renderer, arg1, arg2);
+}
+
+JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetOffhandSlot
+  (JNIEnv *env, jclass clazz, jlong entityId, jint type) {
+	Mob* entity = (Mob*)bl_getEntityWrapper(bl_level, entityId);
+	if (entity == nullptr) return -1;
+	ItemInstance* item = entity->getOffhandSlot();
+	if (item == nullptr) return -1;
+	switch (type) {
+		case ITEMID:
+			return item->getId();
+		case DAMAGE:
+			return item->damage;
+		case AMOUNT:
+			return item->count;
+		default:
+			return -1;
+	}
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetOffhandSlot
+  (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
+	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
+	if (entity == nullptr) return;
+	void* vtableEntry = entity->vtable[vtable_indexes.mob_set_offhand_slot];
+	void (*fn)(Entity*, ItemInstance const&) = (void (*) (Entity*, ItemInstance const&)) vtableEntry;
+	fn(entity, ItemInstance(itemId, itemCount, itemDamage));
+	{
+		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
+		auto fn = (void (*)(Entity*, bool))vtableEntry;
+		fn(entity, true);
+	}
 }
 
 /*

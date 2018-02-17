@@ -1014,7 +1014,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	{
 		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
-		BL_LOG("calling the fn! %p", fn);
+		//BL_LOG("calling the fn! %p", fn);
 		fn(entity, true);
 	}
 }

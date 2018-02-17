@@ -1790,6 +1790,13 @@ public class ScriptManager {
 		NativeLevelApi.setTile(blockX, blockY, blockZ, itemId, itemDamage);
 	}
 
+	public static void ensureEntityIsMob(long entityId) {
+		int entityType = nativeGetEntityTypeId(entityId);
+		if (!(entityType >= 10 && entityType < 64)) {
+			throw new RuntimeException("entity is not a mob: entityType=" + entityType);
+		}
+	}
+
 	public static native float nativeGetPlayerLoc(int axis);
 
 	public static native long nativeGetPlayerEnt();
@@ -2114,6 +2121,8 @@ public class ScriptManager {
 	public static native boolean nativeItemIsExtendedBlock(int itemId);
 	public static native String nativeLevelExecuteCommand(String cmd, boolean silent);
 	public static native long[] nativeServerGetPlayers();
+	public static native int nativeEntityGetOffhandSlot(long id, int type);
+	public static native void nativeEntitySetOffhandSlot(long ent, int id, int count, int damage);
 
 	// setup
 	public static native void nativeSetupHooks(int versionCode);
@@ -3541,6 +3550,37 @@ public class ScriptManager {
 		public static int getCarriedItemCount(Object entity) {
 			long entityId = getEntityId(entity);
 			return nativeEntityGetCarriedItem(entityId, AMOUNT);
+		}
+
+		@JSStaticFunction
+		public static int getOffhandSlot(Object entity) {
+			long entityId = getEntityId(entity);
+			ensureEntityIsMob(entityId);
+			return nativeEntityGetOffhandSlot(entityId, ITEMID);
+		}
+
+		@JSStaticFunction
+		public static int getOffhandSlotData(Object entity) {
+			long entityId = getEntityId(entity);
+			ensureEntityIsMob(entityId);
+			return nativeEntityGetOffhandSlot(entityId, DAMAGE);
+		}
+
+		@JSStaticFunction
+		public static int getOffhandSlotCount(Object entity) {
+			long entityId = getEntityId(entity);
+			ensureEntityIsMob(entityId);
+			return nativeEntityGetOffhandSlot(entityId, AMOUNT);
+		}
+
+		@JSStaticFunction
+		public static void setOffhandSlot(Object ent, int id, int count, int damage) {
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("The item ID " + id + " is invalid.");
+			}
+			long entityId = getEntityId(ent);
+			ensureEntityIsMob(entityId);
+			nativeEntitySetOffhandSlot(entityId, id, count, damage);
 		}
 
 		@Override
