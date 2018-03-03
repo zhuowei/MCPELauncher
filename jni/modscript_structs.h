@@ -130,8 +130,6 @@ public:
 	void removeResource(ItemInstance const&, bool, bool, int);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
 	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
-	int getLinkedSlot(int) const;
-	int getLinkedSlotsCount() const;
 	void setItem(int, ItemInstance const&, ContainerID=ContainerIDInventory);
 	PlayerInventorySlot getSelectedSlot() const;
 	void selectSlot(int, ContainerID=ContainerIDInventory);
@@ -308,11 +306,11 @@ public:
 	MaterialPtr* material; //88 from ModelPart::draw
 	int textureOffsetX; // 92
 	int textureOffsetY; // 96
-	char filler2[220-100]; // 100
+	char filler2[232-100]; // 100
 
 	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
-}; // 220 bytes
-static_assert(sizeof(ModelPart) == 220, "modelpart size wrong");
+}; // 232 bytes
+static_assert(sizeof(ModelPart) == 232, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
@@ -333,23 +331,23 @@ public:
 	MaterialPtr materialStatic; // 72
 	MaterialPtr materialEmissive; // 84
 	ModelPart bipedHead;//96
-	ModelPart bipedHeadwear;//316
-	ModelPart bipedBody;//536
-	ModelPart bipedRightArm;//756
-	ModelPart bipedLeftArm;//976
-	ModelPart bipedRightLeg;//1196
-	ModelPart bipedLeftLeg;//1416
-	char filler3[4308-1636]; // 1636 - more model parts
+	ModelPart bipedHeadwear;//328
+	ModelPart bipedBody;//560
+	ModelPart bipedRightArm;//792
+	ModelPart bipedLeftArm;//1024
+	ModelPart bipedRightLeg;//1256
+	ModelPart bipedLeftLeg;//1488
+	char filler3[4536-1720]; // 1720 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 4308, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 4536, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
-static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1416, "HumanodModel bipedLeftLeg");
+static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1488, "HumanodModel bipedLeftLeg");
 
 typedef struct {
 	Item* item; //0
@@ -383,13 +381,13 @@ typedef void EntityRenderer;
 class MobRenderer {
 public:
 	void** vtable; //0
-	char filler[140-4]; //4
-	void* model; // 140 (from MobRenderer::MobRenderer)
-	char filler2[644-144]; // 144
+	char filler[168-4]; //4
+	void* model; // 168 (from MobRenderer::MobRenderer)
+	char filler2[672-172]; // 172
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(offsetof(MobRenderer, model) == 140, "mobrenderer model offset");
-static_assert(sizeof(MobRenderer) == 644, "mobrenderer");
+static_assert(offsetof(MobRenderer, model) == 168, "mobrenderer model offset");
+static_assert(sizeof(MobRenderer) == 672, "mobrenderer");
 
 typedef void Tag;
 
@@ -484,16 +482,16 @@ static_assert(sizeof(ArmorItem) == 152, "armor item size");
 
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 644
-	HumanoidModel* modelArmor; // 648
-	HumanoidModel* modelArmorChestplate; // 652
-	char hmr_filler1[672-656]; // 656
+	int something; // 672
+	HumanoidModel* modelArmor; // 676
+	HumanoidModel* modelArmorChestplate; // 680
+	char hmr_filler1[700-684]; // 684
 	HumanoidMobRenderer(std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>,
-		std::unique_ptr<HumanoidModel>, mce::TexturePtr);
+		std::unique_ptr<HumanoidModel>, mce::TexturePtr, Vec2 const&, Vec3 const&);
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 648, "armour model offset");
-static_assert(sizeof(HumanoidMobRenderer) == 672, "humanoid mob renderer size");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 676, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 700, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 
@@ -519,8 +517,8 @@ enum ParticleType {
 class Level {
 public:
 	void** vtable; // 0
-	char filler[36-4]; // 4
-	std::vector<Player*> allPlayers; // 36
+	char filler[28-4]; // 4
+	std::vector<Player*> allPlayers; // 28
 
 	Entity* fetchEntity(EntityUniqueID, bool) const;
 	void addEntity(BlockSource&, std::unique_ptr<Entity>);
@@ -541,7 +539,7 @@ public:
 	Abilities* getPlayerAbilities(EntityUniqueID const&);
 };
 // Level::getActivePlayerCount
-static_assert(offsetof(Level, allPlayers) == 36, "allPlayers vec");
+static_assert(offsetof(Level, allPlayers) == 28, "allPlayers vec");
 
 class MinecraftCommands;
 class ServerLevel : public Level {
