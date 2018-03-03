@@ -1735,7 +1735,7 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
-		if (!mcpeGreaterEqualThan(1, 0, 6)) {
+		if (mcpeGreaterEqualThan(1, 2, 13)) {
 			System.loadLibrary("mcpelauncher_new");
 		} else {
 			System.loadLibrary("mcpelauncher");

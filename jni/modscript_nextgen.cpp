@@ -1422,8 +1422,8 @@ int bl_CustomBlockItem_getLevelDataForAuxValue_hook(Item* item, int value) {
 }
 
 unsigned short bl_CustomItem_getEnchantSlot_hook(Item* item) {
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Get enchant slot %d %d", item->itemId,
-		bl_customItem_allowEnchantments[item->itemId]);
+	//__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Get enchant slot %d %d", item->itemId,
+	//	bl_customItem_allowEnchantments[item->itemId]);
 	return bl_customItem_allowEnchantments[item->itemId];
 }
 
