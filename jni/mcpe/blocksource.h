@@ -6,6 +6,7 @@ class BlockEntity;
 class Biome;
 class LevelChunk;
 class Dimension;
+class ChunkPos;
 
 class BlockSource {
 public:
@@ -26,5 +27,6 @@ public:
 	Level*		getLevel();
 	unsigned short	getExtraData(BlockPos const&);
 	void		setExtraData(BlockPos const&, unsigned short);
+	LevelChunk*	getChunk(ChunkPos const&) const;
 };
 #define TileSource BlockSource
