@@ -2,6 +2,10 @@
 class TextureUVCoordinateSet;
 class TextureAtlas;
 class BlockPos;
+
+class Block;
+typedef Block BlockAndData;
+
 namespace Json {
 	class Value;
 };
@@ -15,7 +19,7 @@ public:
 	void setBlockShape(BlockGraphics&, Json::Value const&);
 	void setCarriedTextures(BlockGraphics&, Json::Value const&);
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
-	Block* getBlock() const;
+	BlockAndData* getBlock() const;
 	TextureUVCoordinateSet const& getTexture(signed char, int, int) const;
 	TextureUVCoordinateSet const& getTexture(BlockPos const&, signed char, int) const;
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);

@@ -804,10 +804,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint id, jint damage) {
 	if (!bl_localplayer) return;
-	FullBlock tile;
-	tile.id = id;
-	tile.data = damage;
-	bl_localplayer->getRegion()->setBlockAndData(x, y, z, tile, 3); //3 = full block update
+	if (id < 0 || id > 255) return;
+	BlockLegacy* block = BlockLegacy::mBlocks[id];
+	if (!block) return;
+	BlockAndData* blockAndData = block->getBlockStateFromLegacyData(damage);
+	if (!blockAndData) return; // should never happen, but...
+	bl_localplayer->getRegion()->setBlock(x, y, z, *blockAndData, 3); //3 = full block update
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHurtTo

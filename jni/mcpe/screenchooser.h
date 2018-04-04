@@ -8,7 +8,7 @@ public:
 
 class SceneStack {
 public:
-	void _popScreen(bool);
+	void _popScreens(int&, bool);
 	void pushScreen(std::shared_ptr<AbstractScene>, bool);
 	std::string getScreenName() const;
 };

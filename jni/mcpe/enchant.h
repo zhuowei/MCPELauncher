@@ -10,11 +10,13 @@ public:
 	char filler[24-8]; // 8
 	std::string description; // 24
 	static std::vector<Enchant*> mEnchants;
+	enum Type {
+	};
 };
 
 class EnchantUtils {
 public:
-	static bool applyEnchant(ItemInstance&, int, int);
+	static bool applyEnchant(ItemInstance&, Enchant::Type, int);
 };
 
 class EnchantmentInstance {

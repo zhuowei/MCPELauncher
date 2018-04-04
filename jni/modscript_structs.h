@@ -5,8 +5,9 @@
 #endif
 class Entity;
 class Player;
+class BlockPos;
+class BlockSource;
 #include "mcpe/minecraft.h"
-#include "mcpe/blocksource.h"
 #include "mcpe/enchant.h"
 #include "mcpe/synchedentitydata.h"
 #include "mcpe/resourcelocation.h"
@@ -189,7 +190,7 @@ public:
 	void setMaxDamage(int);
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
-	static void initCreativeItems();
+	static void initCreativeItems(bool);
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
@@ -199,11 +200,11 @@ class CompoundTag {
 public:
 	~CompoundTag();
 };
-class Block;
+class BlockLegacy;
 class ItemInstance {
 public:
 	Item* item; // 0
-	Block* block; // 4
+	BlockLegacy* block; // 4
 	CompoundTag* tag; // 8
 	short damage; // 12
 	unsigned char count; //14
@@ -240,22 +241,25 @@ enum CreativeItemCategory {
 enum BlockProperty {
 	BlockPropertyOpaque = 32, // from _istransparent
 };
-
-// last updated 1.1.0.5 beta
-class Block {
+class Block;
+typedef Block BlockAndData;
+// last updated 1.2.13 / WIP!
+class BlockLegacy {
 public:
 	void** vtable; //0
-	unsigned char id; // 4
-	char filler0[8-5]; //5
-	std::string nameId; // 8
-	std::string mappingId; // 12
-	char filler1[20-16]; // 16
-	int renderLayer; //20
-	int blockProperties; // 24 - getProperties
-	char filler2[84-28]; //28
-	float destroyTime; //84
-	float explosionResistance; //88
-	char filler4[648-92]; // 92
+	std::string nameId; // 4
+	std::string mappingId; // 8
+	char filler1[16-12]; // 12
+	int renderLayer; //16
+	char filler2[88-20]; // 20
+	float destroyTime; //88
+	float explosionResistance; //92
+	char filler3[112-96]; // 96
+	unsigned char lightOpacity; // 112 from BlockLegacy::setLightBlock
+	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
+	char filler4[124-114]; // 114
+	unsigned short id; // 124
+	char filler5[736-126]; // 126
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -265,15 +269,19 @@ public:
 	std::string const& getDescriptionId() const;
 	int getRenderLayer() const;
 	void* getMaterial() const;
-	static std::unordered_map<std::string, Block*> mBlockLookupMap;
-	static Block* mBlocks[0x100];
+	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
+
+	static std::unordered_map<std::string, BlockLegacy*> mBlockLookupMap;
+	static BlockLegacy* mBlocks[0x100];
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(Block) == 648, "Block size is wrong");
-static_assert(offsetof(Block, renderLayer) == 20, "renderlayer is wrong");
-static_assert(offsetof(Block, explosionResistance) == 88, "explosionResistance is wrong");
-#define Tile Block
+static_assert(sizeof(BlockLegacy) == 736, "Block size is wrong");
+static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
+static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
+static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
+static_assert(offsetof(BlockLegacy, id) == 124, "blockId is wrong");
+#define Tile BlockLegacy
 
 typedef struct {
 	char filler0[176]; //0: from ModelPart::addBox
@@ -574,3 +582,4 @@ void addItem(Player&, ItemInstance&);
 #include "mcpe/blockentity/furnaceblockentity.h"
 #include "mcpe/blockentity/mobspawnerblockentity.h"
 #include "mcpe/blockentity/signblockentity.h"
+#include "mcpe/blocksource.h"

@@ -6,6 +6,6 @@ class BlockOccluder;
 class Tessellator;
 class BlockTessellator {
 public:
-	void tessellateInWorld(mce::RenderConfiguration const&, Tessellator&, Block const&, BlockPos const&, unsigned char, bool);
+	void tessellateInWorld(mce::RenderConfiguration const&, Tessellator&, Block const&, BlockPos const&, bool);
 	BlockSource* getRegion() const;
 };

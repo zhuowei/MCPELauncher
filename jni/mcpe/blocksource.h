@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mcpe/blockstructs.h"
+#include "mcpe/blockanddata.h"
 
 class BlockEntity;
 class Biome;
@@ -10,11 +11,24 @@ class ChunkPos;
 
 class BlockSource {
 public:
-	void		setBlockAndData(int, int, int, FullBlock, int);
-	BlockID		getBlockID(int, int, int) const;
-	BlockID		getBlockID(BlockPos const&) const;
-	int		getData(int, int, int);
-	int		getData(BlockPos const&) const;
+	void setBlock(int, int, int, BlockAndData const&, int);
+	int getBlockID(int x, int y, int z) const {
+		return getBlockID({x, y, z});
+	}
+	int getBlockID(BlockPos const& blockPos) const {
+		BlockAndData* state = getBlock(blockPos);
+		if (!state) return 0;
+		if (!state->blockBase) return 0;
+		return state->blockBase->id;
+	}
+	int getData(int x, int y, int z) {
+		return getData({x, y, z});
+	}
+	int getData(BlockPos const& blockPos) const {
+		BlockAndData* state = getBlock(blockPos);
+		if (!state) return 0;
+		return state->blockData;
+	}
 	BlockBrightness	getRawBrightness(int, int, int, bool);
 	BlockEntity*	getBlockEntity(int, int, int);
 	int		getGrassColor(BlockPos const&) const;
@@ -28,5 +42,6 @@ public:
 	unsigned short	getExtraData(BlockPos const&);
 	void		setExtraData(BlockPos const&, unsigned short);
 	LevelChunk*	getChunk(ChunkPos const&) const;
+	BlockAndData*	getBlock(BlockPos const&) const;
 };
 #define TileSource BlockSource
