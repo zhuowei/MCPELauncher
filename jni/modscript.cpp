@@ -82,7 +82,7 @@ extern jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
-void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, bool, void*);
+void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
@@ -436,7 +436,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 extern void bl_cpp_selectLevel_hook();
 
-void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, bool param4, void* levelSettings) {
+void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -462,7 +462,7 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::stri
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, param4, levelSettings);
+	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, levelSettings);
 	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
 	bl_localplayer = bl_minecraft->getLocalPlayer();
 	bl_onLockDown = false;
@@ -1493,7 +1493,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
-	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSsb13LevelSettings");
+	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSs13LevelSettings");
 	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftGame_startLocalServer_hook,
 		(void**) &bl_MinecraftGame_startLocalServer_real);
 

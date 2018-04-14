@@ -1552,13 +1552,14 @@ public class MainActivity extends NativeActivity {
 	}
 
 	// added in 0.8.0
-	// showKeyboard modified in 0.12.0b10
+	// showKeyboard modified in 0.12.0b10 and 1.2.13
 	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
-		this.showKeyboard(mystr, maxLength, mybool, false);
+		this.showKeyboard(mystr, maxLength, mybool, false, false);
 	}
-	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool, final boolean mybool2) {
+	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool, final boolean mybool2,
+		final boolean mybool3) {
 		if (BuildConfig.DEBUG)
-			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool + ":" + mybool2);
+			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool + ":" + mybool2 + ":" + mybool3);
 		if (useLegacyKeyboardInput()) {
 			showKeyboardView();
 			return;

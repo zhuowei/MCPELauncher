@@ -260,7 +260,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int appplatform_get_ui_scaling_rules;
 	int appplatform_get_platform_type;
 	int appplatform_get_edition;
-	int appplatform_use_centered_gui;
+//	int appplatform_use_centered_gui;
 //	int appplatform_use_metadata_driven_screens;
 //	int entity_hurt;
 	int mobrenderer_render;
@@ -285,11 +285,11 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV11BlockLegacy")->st_size;
 	vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
-		"_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPos");
+		"_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
-		"_ZNK11BlockLegacy8getColorEi");
+		"_ZNK11BlockLegacy8getColorERK5Block");
 	vtable_indexes.tile_get_visual_shape = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
-		"_ZNK11BlockLegacy14getVisualShapeEhR4AABBb");
+		"_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb");
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
 	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
@@ -319,9 +319,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.appplatform_get_platform_type = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 		"_ZNK19AppPlatform_android15getPlatformTypeEv");
 	vtable_indexes.appplatform_get_edition = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK11AppPlatform10getEditionEv");
-	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
-		"_ZNK11AppPlatform14useCenteredGUIEv");
+		"_ZNK19AppPlatform_android10getEditionEv");
+//	vtable_indexes.appplatform_use_centered_gui = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
+//		"_ZNK11AppPlatform14useCenteredGUIEv");
 //	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 //		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
 //	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
@@ -402,7 +402,6 @@ static Recipes* (*bl_Recipes_getInstance)();
 static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
 	std::vector<RecipesType> const&);
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
-static void (*bl_FurnaceRecipes_addFurnaceRecipe)(FurnaceRecipes*, int, ItemInstance const&);
 
 static void** bl_ShapelessRecipe_vtable;
 
@@ -454,8 +453,8 @@ static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, std::unique_ptr<Entity>&&, bool);
 static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool, bool, float);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
-static AABB* (*bl_Block_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
-static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, int, bool, int);
+static AABB* (*bl_Block_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
+static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
 
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
@@ -472,7 +471,6 @@ static int (*bl_Mob_getHealth)(Entity*);
 static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 static void (*bl_Player_eat_real)(Entity*, int, float);
 static int (*bl_Entity_getDimensionId)(Entity*);
-static AABB& (*bl_Tile_getVisualShape)(Tile*, unsigned char, AABB&, bool);
 static Attribute* bl_Player_HUNGER;
 static Attribute* bl_Player_EXHAUSTION;
 static Attribute* bl_Player_SATURATION;
@@ -488,7 +486,6 @@ static void* (*bl_MobRenderer_render_real)(MobRenderer*, BaseEntityRenderContext
 static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&);
 static void (*bl_Block_onPlace)(BlockLegacy*, BlockSource&, BlockPos const&);
 
-static bool* bl_Block_mSolid;
 static void** bl_LiquidBlockStatic_vtable;
 static void** bl_LiquidBlockDynamic_vtable;
 static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
@@ -682,10 +679,11 @@ bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
 	int blockId = tile->id;
 	return bl_custom_block_opaque[blockId];
 }
-AABB* bl_CustomBlock_getAABBHook(BlockLegacy* block, BlockSource& blockSource, BlockPos const& pos, AABB& aabb, int int1, bool bool1, int int2) {
+AABB* bl_CustomBlock_getAABBHook(BlockLegacy* block, BlockSource& blockSource, BlockPos const& pos,
+	BlockAndData const& blockState, AABB& aabb, bool bool1) {
 	int blockId = block->id;
-	if (bl_custom_block_collisionDisabled[blockId]) return bl_ReedBlock_getAABB(block, blockSource, pos, aabb, int1, bool1, int2);
-	return bl_Block_getAABB(block, blockSource, pos, aabb, int1, bool1, int2);
+	if (bl_custom_block_collisionDisabled[blockId]) return bl_ReedBlock_getAABB(block, blockSource, pos, blockState, aabb, bool1);
+	return bl_Block_getAABB(block, blockSource, pos, blockState, aabb, bool1);
 }
 
 int bl_CustomBlock_getColorHook(BlockLegacy* tile, BlockSource& blockSource, BlockPos const& pos) {
@@ -697,19 +695,21 @@ int bl_CustomBlock_getColorHook(BlockLegacy* tile, BlockSource& blockSource, Blo
 }
 
 // doesn't seem to be used but might as well hook it
-int bl_CustomBlock_getColor_data_Hook(Tile* tile, int data) {
+int bl_CustomBlock_getColor_data_Hook(Tile* tile, BlockAndData const& blockState) {
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[blockId];
 	if (myColours == NULL || bl_level == NULL) return -1; //I see your true colours shining through
-	return myColours[data];
+	return myColours[blockState.blockData];
 }
 
-AABB& bl_CustomBlock_getVisualShape_hook(Tile* tile, unsigned char data, AABB& aabb, bool someBool) {
-	if (data == 0) return bl_Tile_getVisualShape(tile, data, aabb, someBool);
+AABB& bl_CustomBlock_getVisualShape_hook(Tile* tile, BlockAndData const& blockState, AABB& aabb, bool someBool) {
+	if (blockState.blockData == 0) return tile->getVisualShape(blockState, aabb, someBool);
 	int blockId = tile->id;
 	AABB** aabbs = bl_custom_block_visualShapes[blockId];
 	AABB* aabbout;
-	if (aabbs == nullptr || (aabbout = aabbs[data-1]) == nullptr) return bl_Tile_getVisualShape(tile, data, aabb, someBool);
+	if (aabbs == nullptr || (aabbout = aabbs[blockState.blockData-1]) == nullptr) {
+		return tile->getVisualShape(blockState, aabb, someBool);
+	}
 	return *aabbout;
 }
 
@@ -2085,10 +2085,13 @@ static std::vector<BLFurnaceRecipeRequest> furnaceRecipes;
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
+	if (inputId < 0 || inputId >= bl_item_id_count) return;
+	Item* item = bl_Item_mItems[inputId];
+	if (item == nullptr) return;
 	// You don't need count, not sure how to omit it completely
   	ItemInstance outputStack(outputId, 1, outputDamage);
   	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-	bl_FurnaceRecipes_addFurnaceRecipe(recipes, inputId, outputStack);
+	recipes->addFurnaceRecipe(*item, outputStack);
 	furnaceRecipes.push_back({inputId, outputId, outputDamage});
 }
 
@@ -2096,7 +2099,9 @@ static void bl_readdFurnace() {
 	for (auto& f: furnaceRecipes) {
 		ItemInstance outputStack(f.outputId, 1, f.outputDamage);
 		FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-		bl_FurnaceRecipes_addFurnaceRecipe(recipes, f.inputId, outputStack);
+		Item* item = bl_Item_mItems[f.inputId];
+		if (item == nullptr) continue;
+		recipes->addFurnaceRecipe(*item, outputStack);
 	}
 }
 static void* (*bl_FurnaceRecipes__init_real)(FurnaceRecipes* recipes);
@@ -3098,7 +3103,7 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetUse
 	if (id < 0 || id >= bl_item_id_count) return -1;
 	Item* item = bl_Item_mItems[id];
 	if (!item) return -1;
-	return item->useAnimation;
+	return (jint) ItemInstance(id, 1, 0).getUseAnimation();
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUseAnimation
@@ -3106,7 +3111,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 	if (id < 0 || id >= bl_item_id_count) return;
 	Item* item = bl_Item_mItems[id];
 	if (!item) return;
-	item->useAnimation = animation;
+	item->setUseAnimation((UseAnimation)animation);
 }
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
@@ -3289,8 +3294,8 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetDe
 		(void*) &bl_AppPlatform_getPlatformType_hook: bl_AppPlatform_getPlatformType_real;
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition] = desktop?
 		(void*) &bl_AppPlatform_getEdition_hook: bl_AppPlatform_getEdition_real;
-	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
-		(void*) &bl_AppPlatform_useCenteredGui_hook: bl_AppPlatform_useCenteredGui_real;
+//	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui] = desktop?
+//		(void*) &bl_AppPlatform_useCenteredGui_hook: bl_AppPlatform_useCenteredGui_real;
 //	bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens] = desktop?
 //		(void*) &bl_AppPlatform_useMetadataDrivenScreens_hook: bl_AppPlatform_useMetadataDrivenScreens_real;
 }
@@ -3562,7 +3567,8 @@ static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSou
 	return bl_StonecutterBlock_getVisualShape_real(self, blockSource, pos, inaabb, something);
 }
 
-static int bl_StonecutterBlock_getColor_hook(BlockLegacy* tile, BlockSource& blockSource, BlockPos const& pos) {
+static int bl_StonecutterBlock_getColor_hook(BlockLegacy* tile, BlockSource& blockSource, BlockPos const& pos,
+	BlockAndData const& blockState) {
 	unsigned short extraData = blockSource.getExtraData(pos);
 	if (extraData == 0) return -1;
 	int blockId = tile->id;
@@ -4005,7 +4011,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) {
 		BL_LOG("Failed to patch constructors");
-		return;
+		//return;
 	}
 	if (!bl_patchReadItemInstance(mcpelibhandle)) {
 		BL_LOG("Failed to patch read");
@@ -4035,7 +4041,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	bl_AppPlatform_getUIScalingRules_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules];
 	bl_AppPlatform_getEdition_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_edition];
-	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
+//	bl_AppPlatform_useCenteredGui_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_centered_gui];
 	bl_AppPlatform_getPlatformType_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_platform_type];
 //	bl_AppPlatform_useMetadataDrivenScreens_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_use_metadata_driven_screens];
 	bl_AppPlatform_vtable[vtable_indexes.appplatform_get_settings_path] = dlsym(mcpelibhandle, "_ZN11AppPlatform15getSettingsPathEv");
@@ -4142,8 +4148,6 @@ void bl_setuphooks_cppside() {
 		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,
 		"_ZN7Recipes15addShapedRecipeERKSt6vectorI12ItemInstanceSaIS1_EERKS0_ISsSaISsEERKS0_INS_4TypeESaISA_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
-	bl_FurnaceRecipes_addFurnaceRecipe = (void (*)(FurnaceRecipes*, int, ItemInstance const&))
-		dlsym(mcpelibhandle, "_ZN14FurnaceRecipes16addFurnaceRecipeEiRK12ItemInstance");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
@@ -4214,11 +4218,10 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
 		(void**) &bl_BlockSource_fireBlockEvent_real);
 // known to work
-	bl_Block_mSolid = (bool*) dlsym(RTLD_DEFAULT, "_ZN11BlockLegacy6mSolidE");
-	bl_Block_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, int, bool, int))
-		dlsym(mcpelibhandle, "_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
-	bl_ReedBlock_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, int, bool, int))
-		dlsym(mcpelibhandle, "_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosR4AABBibi");
+	bl_Block_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool))
+		dlsym(mcpelibhandle, "_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb");
+	bl_ReedBlock_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool))
+		dlsym(mcpelibhandle, "_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb");
 
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
@@ -4266,8 +4269,6 @@ void bl_setuphooks_cppside() {
 		(void**) &bl_Player_eat_real);
 	bl_Entity_getDimensionId = (int (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
-	bl_Tile_getVisualShape = (AABB& (*)(Tile*, unsigned char, AABB&, bool))
-		dlsym(mcpelibhandle, "_ZNK11BlockLegacy14getVisualShapeEhR4AABBb");
 
 	bl_Player_HUNGER = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player6HUNGERE");

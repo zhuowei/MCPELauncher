@@ -82,10 +82,10 @@ public:
 	float prevPitch; //192
 	float prevYaw; //196
 
-	char filler4[312-200]; //200
-	int renderType; //312
-	char filler5[552-316]; // 316
-	std::vector<Entity*> riders; // 552
+	char filler4[324-200]; //200
+	int renderType; //324
+	char filler5[564-328]; // 328
+	std::vector<Entity*> riders; // 564
 
 	~Entity();
 	BlockSource* getRegion() const;
@@ -108,9 +108,9 @@ public:
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
 };
-static_assert(offsetof(Entity, renderType) == 312, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 324, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 552, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 564, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
@@ -165,9 +165,12 @@ namespace Json {
 	class Value;
 };
 class TextureAtlas;
+
+enum UseAnimation {
+};
+
 // Updated 1.2b11
 // see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
-// for useAnimation see setUseAnimation
 class Item {
 public:
 	//void** vtable; //0
@@ -175,9 +178,7 @@ public:
 	short itemId; //18
 	char filler1[33-20]; // 20
 	bool handEquipped; // 33
-	char filler[45-34]; //34
-	unsigned char useAnimation; // 45
-	char filler3[116-46]; // 46
+	char filler3[124-34]; // 34
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -190,11 +191,12 @@ public:
 	void setMaxDamage(int);
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
+	void setUseAnimation(UseAnimation);
 	static void initCreativeItems(bool);
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
-static_assert(sizeof(Item) == 116, "item size is wrong");
+static_assert(sizeof(Item) == 124, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -204,11 +206,10 @@ class BlockLegacy;
 class ItemInstance {
 public:
 	Item* item; // 0
-	BlockLegacy* block; // 4
-	CompoundTag* tag; // 8
-	short damage; // 12
-	unsigned char count; //14
-	char filler2[72-15]; // 15
+	CompoundTag* tag; // 4
+	short damage; // 8
+	unsigned char count; //10
+	char filler2[72-11]; // 11
 
 	ItemInstance();
 	ItemInstance(int, int, int);
@@ -228,10 +229,11 @@ public:
 	int getMaxStackSize() const;
 	void remove(int);
 	bool isArmorItem() const;
+	UseAnimation getUseAnimation() const;
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
-static_assert(offsetof(ItemInstance, tag) == 8, "tag offset wrong");
+static_assert(offsetof(ItemInstance, tag) == 4, "tag offset wrong");
 static_assert(offsetof(ItemInstance, item) == 0, "item offset wrong");
 static_assert(sizeof(ItemInstance) == 72, "ItemInstance wrong");
 
@@ -241,6 +243,7 @@ enum CreativeItemCategory {
 enum BlockProperty {
 	BlockPropertyOpaque = 32, // from _istransparent
 };
+class AABB;
 class Block;
 typedef Block BlockAndData;
 // last updated 1.2.13 / WIP!
@@ -270,6 +273,7 @@ public:
 	int getRenderLayer() const;
 	void* getMaterial() const;
 	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
+	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 
 	static std::unordered_map<std::string, BlockLegacy*> mBlockLookupMap;
 	static BlockLegacy* mBlocks[0x100];
@@ -345,13 +349,13 @@ public:
 	ModelPart bipedLeftArm;//1024
 	ModelPart bipedRightLeg;//1256
 	ModelPart bipedLeftLeg;//1488
-	char filler3[4536-1720]; // 1720 - more model parts
+	char filler3[4544-1720]; // 1720 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 4536, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 4544, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
@@ -376,8 +380,10 @@ static_assert(sizeof(RecipesType) == 88, "RecipesType size");
 static_assert(sizeof(RecipesType) == 84, "RecipesType size");
 #endif
 
-typedef struct {
-} FurnaceRecipes;
+class FurnaceRecipes {
+public:
+	void addFurnaceRecipe(Item const&, ItemInstance const&);
+};
 
 typedef struct {
 	char filler[16]; //0
@@ -424,13 +430,13 @@ typedef struct {
 class Biome {
 public:
 	void** vtable; //0
-	char filler[176-4]; //4
-	cppstr name; //176 from Biome::setName
-	char filler2[268-180]; //180
-	int id; //268 from Biome::Biome
+	char filler[184-4]; //4
+	cppstr name; //184 from Biome::setName
+	char filler2[280-188]; //188
+	int id; //280 from Biome::Biome
 };
-static_assert(offsetof(Biome, name) == 176, "Biome name");
-static_assert(offsetof(Biome, id) == 268, "Biome ID");
+static_assert(offsetof(Biome, name) == 184, "Biome name");
+static_assert(offsetof(Biome, id) == 280, "Biome ID");
 
 class Abilities {
 public:
@@ -454,7 +460,8 @@ typedef struct {
 	int wtf10; // 36
 } LevelSettings;
 
-typedef struct {
+class AABB {
+public:
 	float x1; // 0
 	float y1; // 4
 	float z1; // 8
@@ -462,7 +469,7 @@ typedef struct {
 	float y2; // 16
 	float z2; // 20
 	bool shouldBeFalse; // 24
-} AABB;
+};
 
 typedef struct {
 	unsigned char x;
@@ -476,15 +483,15 @@ typedef void ModelRenderer;
 
 #ifdef __cplusplus
 struct ArmorItem : public Item {
-	int armorType; // 116
-	int damageReduceAmount; // 120
-	int renderIndex; // 124
-	void* armorMaterial; // 128
-	char fillerendarmor[152-132]; // 132
+	int armorType; // 124
+	int damageReduceAmount; // 128
+	int renderIndex; // 132
+	void* armorMaterial; // 136
+	char fillerendarmor[160-140]; // 140
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 152, "armor item size");
+static_assert(sizeof(ArmorItem) == 160, "armor item size");
 #endif
 
 
