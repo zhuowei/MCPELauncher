@@ -61,6 +61,7 @@
 #include "mcpe/clientinstancescreenmodel.h"
 #include "mcpe/backgroundworker.h"
 #include "mcpe/playername.h"
+#include "mcpe/blockpalette.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -75,7 +76,8 @@ typedef void Font;
 // found in Player::Player
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
-#define PLAYER_ABILITIES_OFFSET 4256
+// or ClientInputHandler::updatePlayerState
+#define PLAYER_ABILITIES_OFFSET 4288
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -84,18 +86,20 @@ typedef void Font;
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = sizeof(BlockLegacy);
-const size_t kLiquidBlockDynamicSize = 648;
-const size_t kLiquidBlockStaticSize = 648;
+const size_t kLiquidBlockDynamicSize = 736;
+const size_t kLiquidBlockStaticSize = 744;
+static_assert(kLiquidBlockDynamicSize >= kTileSize, "kLiquidBlockDynamicSize");
 // found in registerBlock
-const size_t kBlockItemSize = 116;
+const size_t kBlockItemSize = 124;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
+static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3496;
+const size_t kItemEntity_itemInstance_offset = 3520;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 540;
+const size_t kClientInstanceScreenModel_offset = 536;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -1049,8 +1053,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
+	BL_LOG("Registered %d with %p", (int)item->itemId, item);
 	//std::string lowercaseStr = Util::toLower(name);
 	// FIXME 1.2.0: wrong thread?
+#if 0
+	// FIXME 1.2.13
 	auto& itemGraphics = bl_minecraft->getItemRenderer()->itemGraphics;
 	if (item->itemId > 0x200 && Item::mItemTextureAtlas != nullptr) {
 		bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
@@ -1060,6 +1067,7 @@ static void bl_registerItem(Item* item, std::string const& name) {
 		}
 		itemGraphics[item->itemId] = ItemGraphics(std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)));
 	}
+#endif
 	//Item::mItemLookupMap[lowercaseStr] = std::make_pair(lowercaseStr, std::unique_ptr<Item>(item));
 }
 
@@ -1067,16 +1075,15 @@ void bl_repopulateItemGraphics(ItemRenderer* renderer) {
 	renderer->_loadItemGraphics();
 	auto& itemGraphics = renderer->itemGraphics;
 	BL_LOG("Populating: size = %d", itemGraphics.size());
-	if (itemGraphics.size() == 0) {
+	if (itemGraphics.find(1) == itemGraphics.end()) {
 		return;
 	}
 	for (int i = 0x200; i < bl_item_id_count; i++) {
 		Item* item = bl_Item_mItems[i];
 		if (!item) continue;
 		bool needsSetting = false;
-		if ((size_t)item->itemId >= itemGraphics.size()) {
-			// outside the array, expand and populate
-			itemGraphics.resize(item->itemId + 1);
+		auto iter = itemGraphics.find(i);
+		if (iter == itemGraphics.end()) {
 			needsSetting = true;
 		} else if (itemGraphics[item->itemId].texturePtr.get() !=
 			itemGraphics[0x100].texturePtr.get() &&
@@ -1104,7 +1111,7 @@ void bl_cpp_selectLevel_hook() {
 }
 Item* bl_constructItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
-	bl_Item_Item(retval, name, id - 0x100);
+	bl_Item_Item(retval, name, id);
 	*((void***)retval) = bl_CustomItem_vtable + 2;
 	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
@@ -1113,7 +1120,7 @@ Item* bl_constructItem(std::string const& name, int id) {
 
 Item* bl_constructSnowballItem(std::string const& name, int id) {
 	Item* retval = (Item*) ::operator new(kItemSize);
-	bl_Item_Item(retval, name, id - 0x100);
+	bl_Item_Item(retval, name, id);
 	*((void***)retval) = bl_CustomSnowballItem_vtable + 2;
 	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
@@ -1151,7 +1158,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	std::string mystr = std::string(utfChars);
 
 	ArmorItem* item = new ArmorItem;
-	bl_ArmorItem_ArmorItem(item, mystr, id - 0x100, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
+	bl_ArmorItem_ArmorItem(item, mystr, id, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
 	bl_registerItem(item, mystr);
 	item->damageReduceAmount = damageReduceAmount;
 	bl_Item_setMaxDamage(item, maxDamage);
@@ -1806,12 +1813,21 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 	retval->setCategory((CreativeItemCategory) 2 /* Decoration */);
 	//now allocate the item
 	Item* tileItem = (Item*) ::operator new(kBlockItemSize);
-	bl_BlockItem_BlockItem(tileItem, nameStr, blockId - 0x100);
+	bl_BlockItem_BlockItem(tileItem, nameStr, blockId);
 	*((void***)tileItem) = bl_CustomBlockItem_vtable + 2;
 	tileItem->setMaxDamage(0);
 	tileItem->setStackedByData(true);
 	bl_registerItem(tileItem, nameStr);
 	bl_Item_setCategory(tileItem, 2 /* Decoration */);
+
+	// now allocate the BlockAndData
+	BlockPalette* palette = BlockPalette::getInstance();
+	palette->createLegacyBlockStates(*retval);
+	BlockAndData* blockAndData = nullptr;
+	palette->registerBlockLegacy((BlockAndData const**)&blockAndData, *retval);
+	BlockAndData::mBlocks[blockId] = blockAndData;
+	Block::mBlockLookupMap[bl_toLower(retval->mappingId)] = blockAndData;
+
 /*
 	if (BlockGraphics::mBlocks[blockId] == nullptr) {
 		__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "BlockGraphics is null for %d", blockId);
@@ -1850,7 +1866,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		env->ReleaseStringUTFChars(myString, myStringChars);
 	}
 	if (blockId < 0x100) {
-		bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
+		// FIXME 1.2.13
+		//bl_createBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
 	} else {
 		bl_createExtendedBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
 	}
@@ -2820,7 +2837,11 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidItem
   (JNIEnv *env, jclass clazz, jint itemId) {
 	if (itemId == 0) return true;
-	if (itemId < 0 || itemId >= bl_item_id_count) return false;
+	if (itemId < 0 || itemId >= bl_item_id_count) {
+		BL_LOG("Item ID %d out of bounds %d", itemId, bl_item_id_count);
+		return false;
+	}
+	BL_LOG("Item ID %d has %p", itemId, bl_Item_mItems[itemId]);
 	return bl_Item_mItems[itemId] != nullptr;
 }
 
@@ -3625,24 +3646,26 @@ static void bl_fireScreenChange(std::string const& s1) {
 	}
 }
 
-static void (*bl_SceneStack__popScreens_real)(SceneStack*, int&, bool);
-void bl_SceneStack__popScreens_hook(SceneStack* self, int& numPop, bool arg1) {
-	bl_SceneStack__popScreens_real(self, numPop, arg1);
+static void* (*bl_SceneStack__popScreens_real)(SceneStack*, int&, bool);
+void* bl_SceneStack__popScreens_hook(SceneStack* self, int& numPop, bool arg1) {
+	void* origRetval = bl_SceneStack__popScreens_real(self, numPop, arg1);
 	std::string retval = self->getScreenName();
 	if (retval.length() == 0) {
 		new (&retval) std::string();
 	}
 	bl_fireScreenChange(retval);
+	return origRetval;
 }
 
-static void (*bl_SceneStack_pushScreen_real)(SceneStack*, std::shared_ptr<AbstractScene>, bool);
-void bl_SceneStack_pushScreen_hook(SceneStack* self, std::shared_ptr<AbstractScene> screen, bool arg2) {
-	bl_SceneStack_pushScreen_real(self, screen, arg2);
+static void* (*bl_SceneStack_pushScreen_real)(SceneStack*, std::shared_ptr<AbstractScene>, bool);
+void* bl_SceneStack_pushScreen_hook(SceneStack* self, std::shared_ptr<AbstractScene> screen, bool arg2) {
+	void* origRetval = bl_SceneStack_pushScreen_real(self, screen, arg2);
 	std::string retval = self->getScreenName();
 	if (retval.length() == 0) {
 		new (&retval) std::string();
 	}
 	bl_fireScreenChange(retval);
+	return origRetval;
 }
 
 // initialization
@@ -3965,6 +3988,16 @@ nullptr
 	}
 	return false; // WHAT
 }
+static Item* bl_Item_getItem_hook(short itemId) {
+	if (itemId >= 0x200 && itemId < BL_ITEMS_EXPANDED_COUNT) {
+		return bl_Item_mItems[itemId];
+	}
+	return Item::getItem(itemId);
+}
+static bool bl_patchItemClass(soinfo2* mcpelibhandle) {
+	return bl_patch_got(mcpelibhandle, (void*) &Item::getItem,
+		(void*)&bl_Item_getItem_hook);
+}
 #if 0
 static uintptr_t mcpelibbase;
 
@@ -4021,6 +4054,9 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	}
 	if (!bl_patchInventoryItemRenderer(mcpelibhandle)) {
 		BL_LOG("Failed to patch hotbar");
+	}
+	if (!bl_patchItemClass(mcpelibhandle)) {
+		BL_LOG("Failed to patch item class");
 	}
 /*
 	if (!bl_patchItemRenderer(mcpelibhandle)) {
@@ -4373,6 +4409,11 @@ void bl_setuphooks_cppside() {
 	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 
 	bl_renderManager_init(mcpelibhandle);
+/*
+	void* blockCons = (void*)&BlockPalette::registerBlockLegacy;
+	unsigned char* crashit = (unsigned char*)(((uintptr_t)blockCons) & ~1);
+	crashit[0] = crashit[1] = 0xde;
+*/
 }
 
 } //extern

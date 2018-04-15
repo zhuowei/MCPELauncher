@@ -193,9 +193,11 @@ public:
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
 	static void initCreativeItems(bool);
+	static Item* getItem(short);
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
+static_assert(offsetof(Item, itemId) == 18, "Item ID offset");
 static_assert(sizeof(Item) == 124, "item size is wrong");
 
 class CompoundTag {

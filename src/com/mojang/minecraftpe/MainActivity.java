@@ -2284,6 +2284,9 @@ public class MainActivity extends NativeActivity {
 	public void leaveGameCallback() {
 		System.out.println("Leave game");
 		if (hasRecorder) clearRuntimeOptionsDialog();
+		if (BuildConfig.DEBUG) {
+			scriptPrintCallback("Leave game called", "bl");
+		}
 	}
 
 	public void scriptPrintCallback(final String message, final String scriptName) {

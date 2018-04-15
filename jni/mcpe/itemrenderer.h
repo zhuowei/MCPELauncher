@@ -17,7 +17,7 @@ static_assert(sizeof(ItemGraphics) == 24, "itemGraphics size");
 class ItemRenderer {
 public:
 	char filler[232];
-	std::vector<ItemGraphics> itemGraphics; // 232
+	std::unordered_map<short, ItemGraphics> itemGraphics; // 232
 	void _loadItemGraphics();
 	void* getAtlasPos(ItemInstance const&);
 	void render(BaseEntityRenderContext&, EntityRenderData&);

@@ -10,8 +10,12 @@ public:
 
 	Block(unsigned char, BlockLegacy const*);
 	virtual ~Block();
+
+	static Block* mBlocks[0x200];
+	static std::unordered_map<std::string, Block*> mBlockLookupMap;
+
 };
 typedef Block BlockAndData;
-
+static_assert(offsetof(Block, blockBase) == 8, "Block blockBase");
 // Block::setRuntimeId
 static_assert(sizeof(Block) == 44, "Block size");
