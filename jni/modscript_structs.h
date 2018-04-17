@@ -363,7 +363,13 @@ static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha 
 static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
 static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1488, "HumanodModel bipedLeftLeg");
 
-typedef struct {
+class Recipe;
+
+class Recipes {
+public:
+
+class Type {
+public:
 	Item* item; //0
 	Tile* tile; //4
 	ItemInstance itemInstance; //8
@@ -373,7 +379,12 @@ typedef struct {
 #else
 	char filler[3]; // 81
 #endif
-} RecipesType;
+};
+	std::vector<Recipe*> recipes;
+	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&);
+}; // class Recipes
+
+typedef Recipes::Type RecipesType;
 // std::vector<Recipes::Type, std::allocator<Recipes::Type> > definition<ItemInstance>(char, ItemInstance)
 static_assert(offsetof(RecipesType, letter) == 80, "RecipesType letter");
 #ifdef __arm__

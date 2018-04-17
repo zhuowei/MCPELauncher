@@ -48,6 +48,11 @@ public class ZipTexturePack implements TexturePack {
 		if (entry != null) return entry;
 		entry = fullNameEntries.get("assets/" + fileName);
 		if (entry != null) return entry;
+		if (fileName.startsWith("resource_packs/vanilla/")) {
+			String newName = fileName.substring("resource_packs/vanilla/".length());
+			entry = fullNameEntries.get(newName);
+			if (entry != null) return entry;
+		}
 		//String name = getFilenameOnly(fileName);
 		//return entries.get(name);
 		return null;

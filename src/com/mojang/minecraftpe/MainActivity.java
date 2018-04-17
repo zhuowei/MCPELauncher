@@ -1824,11 +1824,7 @@ public class MainActivity extends NativeActivity {
 				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
 			));
 		}
-		if (getMCPEVersion().startsWith("0.16")) {
-			addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resourcepacks/vanilla/");
-		} else {
-			addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
-		}
+		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
 		textureOverrides.add(addonOverrideTexturePackInstance);
 	}
 
@@ -2679,7 +2675,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-		final boolean dumpAtlas = BuildConfig.DEBUG;
+		final boolean dumpAtlas = BuildConfig.DEBUG && new File("/sdcard/bl_dump_atlas.txt").exists();
 		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("resource_packs/vanilla/textures/terrain_texture.json",
@@ -2689,27 +2685,19 @@ public class MainActivity extends NativeActivity {
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
 
-			TextureListProvider textureListProvider = new TextureListProvider("resource_packs/vanilla/textures/textures_list.json");
-			textureListProvider.init(this);
-
 			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resource_packs/vanilla/blocks.json");
 			blocksJsonProvider.init(this);
-			/*
 			if (dumpAtlas) {
 				terrainProvider.dumpAtlas();
 				itemsProvider.dumpAtlas();
-				textureListProvider.dumpAtlas();
 				blocksJsonProvider.dumpAtlas();
 			}
-			*/
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
-			//textureOverrides.add(2, textureListProvider);
 			textureOverrides.add(2, blocksJsonProvider);
 			ScriptManager.terrainMeta = terrainProvider;
 			ScriptManager.itemsMeta = itemsProvider;
 			ScriptManager.blocksJson = blocksJsonProvider;
-			ScriptManager.textureList = textureListProvider;
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);

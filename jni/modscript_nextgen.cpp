@@ -167,11 +167,6 @@ public:
 	static bool isAnyAuxValue(int);
 };
 
-class Recipes {
-public:
-	std::vector<Recipe*> recipes;
-};
-
 typedef struct {
 	void** vtable;//0
 	ItemPack itemPack; //4
@@ -2051,6 +2046,31 @@ bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int
 			bl_ItemInstance_getId(myitem), myitem->count, myitem->damage);
 	}
 	return false;
+}
+
+JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
+  (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
+	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
+	int ingredients[ingredientsElemsCount];
+	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
+
+	ItemInstance outStack(itemId, itemCount, itemDamage);
+
+	int ingredientsCount = ingredientsElemsCount / 3;
+	std::vector<RecipesType> ingredientsList;
+	for (int i = 0; i < ingredientsCount; i++) {
+		RecipesType recipeType;
+		memset(&recipeType, 0, sizeof(recipeType));
+		int inputId = ingredients[i * 3];
+		recipeType.tile = nullptr;
+		recipeType.item = nullptr;
+		new (&recipeType.itemInstance) ItemInstance(inputId, ingredients[i * 3 + 1], ingredients[i * 3 + 2]);
+		recipeType.letter = 'a' + i;
+		ingredientsList.push_back(recipeType);
+	}
+	Recipes* recipes = bl_Recipes_getInstance();
+	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
+	recipes->addShapelessRecipe(outStack, ingredientsList);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe

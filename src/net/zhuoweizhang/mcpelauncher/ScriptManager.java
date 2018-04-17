@@ -51,7 +51,6 @@ import net.zhuoweizhang.mcpelauncher.api.modpe.*;
 import net.zhuoweizhang.mcpelauncher.texture.AtlasProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ClientBlocksJsonProvider;
 import net.zhuoweizhang.mcpelauncher.texture.ModPkgTexturePack;
-import net.zhuoweizhang.mcpelauncher.texture.TextureListProvider;
 import net.zhuoweizhang.mcpelauncher.patch.PatchUtils;
 
 import static net.zhuoweizhang.mcpelauncher.PatchManager.join;
@@ -129,7 +128,6 @@ public class ScriptManager {
 	// initialized in MainActivity now
 	public static AtlasProvider terrainMeta, itemsMeta;
 	public static ClientBlocksJsonProvider blocksJson;
-	public static TextureListProvider textureList;
 	public static boolean hasLevel = false;
 	public static int requestLeaveGameCounter = 0;
 	public static boolean requestScreenshot = false;
@@ -1941,6 +1939,8 @@ public class ScriptManager {
 
 	public static native void nativeAddShapedRecipe(int id, int count, int damage, String[] shape,
 			int[] ingredients);
+
+	public static native void nativeAddShapelessRecipe(int id, int count, int damage, int[] ingredients);
 
 	public static native void nativeShowTipMessage(String msg);
 
@@ -3888,6 +3888,7 @@ public class ScriptManager {
 
 	private static class NativeItemApi extends ScriptableObject {
 		private static List<Object[]> activeRecipes = new ArrayList<Object[]>();
+		private static List<Object[]> activeShapelessRecipes = new ArrayList<Object[]>();
 		private static List<int[]> activeFurnaceRecipes = new ArrayList<int[]>();
 		private static Map<Integer, Integer> itemIdToRendererId = new HashMap<Integer, Integer>();
 		private static Map<Integer, Integer> rendererToItemId = new HashMap<Integer, Integer>();
@@ -3945,38 +3946,30 @@ public class ScriptManager {
 		@JSStaticFunction
 		public static void addCraftRecipe(int id, int count, int damage, Scriptable ingredientsScriptable) {
 			int[] expanded = expandShapelessRecipe(ingredientsScriptable);
-			StringBuilder temprow = new StringBuilder();
-			char nextchar = 'a';
-			int[] ingredients = new int[expanded.length];
-			for (int i = 0; i < expanded.length; i+=3) {
-				int inputid = expanded[i];
-				int inputcount = expanded[i + 1];
-				int inputdamage = expanded[i + 2];
-				char mychar = nextchar++;
-				for (int a = 0; a < inputcount; a++) {
-					temprow.append(mychar);
+			if (!nativeIsValidItem(id)) {
+				throw new RuntimeException("Invalid input in shapeless recipe: " + id + " is not a valid item. " +
+					"You must create the item before you can add it to a recipe.");
+			}
+			for (int i = 0; i < expanded.length; i += 3) {
+				if (!nativeIsValidItem(expanded[i])) {
+					throw new RuntimeException("Invalid output in shapeless recipe: " + expanded[i] +
+					" is not a valid item. You must create the item before you can add it to a" +
+					" recipe.");
 				}
-				ingredients[i] = mychar;
-				ingredients[i + 1] = inputid;
-				ingredients[i + 2] = inputdamage;
 			}
-			int temprowLength = temprow.length();
-			if (temprowLength > 9) {
-				scriptPrint("Too many ingredients in shapeless recipe: max of 9 slots" +
-					", the extra items have been ignored");
-				temprow.delete(9, temprow.length());
-				temprowLength = temprow.length();
+			for (Object[] r: activeShapelessRecipes) {
+				if (
+					((Integer) r[0]) == id &&
+					((Integer) r[1]) == count &&
+					((Integer) r[2]) == damage &&
+					Arrays.equals((int[]) r[3], expanded)
+				) {
+					System.out.println("Recipe already exists.");
+					return;
+				}
 			}
-			// if the temp row is <= 4, make a 2x2 recipe, otherwise, make a 3x3 recipe
-			int width = (temprowLength <= 4? 2: 3);
-			String[] shape = new String[temprowLength / width + (temprowLength % width != 0? 1: 0)];
-			for (int i = 0; i < shape.length; i++) {
-				int begin = i * width;
-				int end = begin + width;
-				if (end > temprowLength) end = temprowLength;
-				shape[i] = temprow.substring(begin, end);
-			}
-			verifyAndAddShapedRecipe(id, count, damage, shape, ingredients);
+			activeShapelessRecipes.add(new Object[]{id, count, damage, expanded});
+			nativeAddShapelessRecipe(id, count, damage, expanded);
 		}
 
 		@JSStaticFunction
@@ -4062,6 +4055,9 @@ public class ScriptManager {
 		public static void reregisterRecipes() {
 			for (Object[] r: activeRecipes) {
 				nativeAddShapedRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (String[]) r[3], (int[]) r[4]);
+			}
+			for (Object[] r: activeShapelessRecipes) {
+				nativeAddShapelessRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (int[]) r[3]);
 			}
 			for (int[] r: activeFurnaceRecipes) {
 				nativeAddFurnaceRecipe(r[0], r[1], r[2]);
