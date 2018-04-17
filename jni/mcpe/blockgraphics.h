@@ -20,9 +20,12 @@ public:
 	void setCarriedTextures(BlockGraphics&, Json::Value const&);
 	void setTextureIsotropic(BlockGraphics&, Json::Value const&);
 	BlockAndData* getBlock() const;
-	TextureUVCoordinateSet const& getTexture(signed char, int, int) const;
-	TextureUVCoordinateSet const& getTexture(BlockPos const&, signed char, int) const;
+	TextureUVCoordinateSet const& getTexture(BlockPos const&, unsigned int, Block const&) const;
+	TextureUVCoordinateSet const& getTexture(BlockPos const&, unsigned int, int) const;
+	TextureUVCoordinateSet const& getTexture(unsigned int, Block const&) const;
+	TextureUVCoordinateSet const& getTexture(unsigned int, int) const;
 	void setTextureItem(std::string const&, std::string const&, std::string const&, std::string const&, std::string const&, std::string const&);
+
 	static void initBlocks();
 	static TextureUVCoordinateSet getTextureUVCoordinateSet(std::string const&, int, int);
 	static BlockGraphics* mBlocks[0x100];

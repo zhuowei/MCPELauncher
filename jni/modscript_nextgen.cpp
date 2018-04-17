@@ -1431,11 +1431,9 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 }
 
 static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data, int int2, bool bool1) {
-	/* FIXME 1.2.10
 	if (bl_extendedBlockGraphics[item->itemId]) {
-		return bl_extendedBlockGraphics[item->itemId]->getTexture(2, (data & 0xf), 0);
+		return bl_extendedBlockGraphics[item->itemId]->getTexture({0, 0, 0}, 2, (data & 0xf));
 	}
-	*/
 	return bl_Item_getIcon(item, data, int2, bool1);
 }
 class Container;
@@ -3567,18 +3565,18 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::Ren
 	blockInfo->blockData = 0;
 	blockInfo->blockExtraData = 0;
 }
-/* FIXME 1.2.10
-TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, signed char side, int data, int extra) {
+
+TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, unsigned int side, Block const& blockState) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
 		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
 		if (blockInfo && blockInfo->blockExtraData && bl_extendedBlockGraphics[blockInfo->blockExtraData]) {
 			graphics = bl_extendedBlockGraphics[blockInfo->blockExtraData];
 		}
 	}
-	return graphics->getTexture(side, data, extra);
+	return graphics->getTexture(side, blockState);
 }
 
-TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(BlockGraphics* graphics, BlockPos const& pos, signed char side, int data) {
+TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(BlockGraphics* graphics, BlockPos const& pos, unsigned int side, int data) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
 		BLTessellateBlock* blockInfo = (BLTessellateBlock*) pthread_getspecific(bl_tessellateBlock_key);
 		if (blockInfo && blockInfo->blockExtraData && bl_extendedBlockGraphics[blockInfo->blockExtraData]) {
@@ -3588,7 +3586,6 @@ TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(Bl
 
 	return graphics->getTexture(pos, side, data);
 }
-*/
 
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, bool);
 static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSource& blockSource, BlockPos const& pos,
@@ -4394,17 +4391,14 @@ void bl_setuphooks_cppside() {
 	// custom blocks.
 
 	// FIXME 1.2.10
-/*
 	bl_patch_got_wrap(mcpelibhandle, (void*)
-		(TextureUVCoordinateSet const& (BlockGraphics::*)(signed char, int, int) const)
+		(TextureUVCoordinateSet const& (BlockGraphics::*)(unsigned int, Block const&) const)
 		&BlockGraphics::getTexture,
 		(void*)&bl_CustomBlockGraphics_getTextureHook);
 	bl_patch_got_wrap(mcpelibhandle, (void*)
-		(TextureUVCoordinateSet const& (BlockGraphics::*)(BlockPos const&, signed char, int) const)
+		(TextureUVCoordinateSet const& (BlockGraphics::*)(BlockPos const&, unsigned int, int) const)
 		&BlockGraphics::getTexture,
 		(void*)&bl_CustomBlockGraphics_getTexture_blockPos_hook);
-
-*/
 
 	// known to fail.
 	// fixme 1.1.0
