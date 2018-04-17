@@ -252,6 +252,10 @@ public class MainActivity extends NativeActivity {
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
+			if (mcpeGreaterEqualThan(1, 2, 20)) {
+				isSupportedVersion = false;
+			}
+
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
@@ -1733,7 +1737,7 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
-		if (!mcpeGreaterEqualThan(1, 0, 6)) {
+		if (mcpeGreaterEqualThan(1, 2, 20)) {
 			System.loadLibrary("mcpelauncher_new");
 		} else {
 			System.loadLibrary("mcpelauncher");
