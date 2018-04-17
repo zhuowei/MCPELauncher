@@ -1393,6 +1393,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
 	return true;
 */
+	return false;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerName
@@ -3288,7 +3289,7 @@ JNIEXPORT jlongArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeServ
 	}
 	auto const& players = bl_level->allPlayers;
 	jlong ids[players.size()];
-	for (int i = 0; i < players.size(); i++) {
+	for (unsigned int i = 0; i < players.size(); i++) {
 		ids[i] = (long long)players[i]->getUniqueID();
 	}
 	jlongArray ret = env->NewLongArray(players.size());
@@ -3299,7 +3300,7 @@ JNIEXPORT jlongArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeServ
 static void** bl_AppPlatform_vtable;
 static void* bl_AppPlatform_getUIScalingRules_real;
 static void* bl_AppPlatform_getEdition_real;
-static void* bl_AppPlatform_useCenteredGui_real;
+//static void* bl_AppPlatform_useCenteredGui_real;
 static void* bl_AppPlatform_getPlatformType_real;
 //static void* bl_AppPlatform_useMetadataDrivenScreens_real;
 
@@ -3311,9 +3312,11 @@ static int bl_AppPlatform_getUIScalingRules_hook(void* appPlatform) {
 	return 0;
 }
 
+/*
 static bool bl_AppPlatform_useCenteredGui_hook(void* appPlatform) {
 	return true;
 }
+*/
 
 static std::string bl_AppPlatform_getEdition_hook(void* appPlatform) {
 	return "win10";

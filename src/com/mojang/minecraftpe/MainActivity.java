@@ -2218,6 +2218,19 @@ public class MainActivity extends NativeActivity {
 		return 0x100000000L; // 4GB
 	}
 
+	// 1.2.20
+	public void setCachedDeviceId(String deviceId) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("Cached device ID: " + deviceId);
+		}
+	}
+
+	public void trackPurchaseEvent(String arg1, String arg2, String arg3, String arg4,
+		String arg5, String arg6, String arg7) {
+		System.out.println("Track purchase event: " + arg1 + ":" + arg2 + ":" + arg3 + ":" + arg4 + ":" +
+			arg5 + ":" + arg6 + ":" + arg7);
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
