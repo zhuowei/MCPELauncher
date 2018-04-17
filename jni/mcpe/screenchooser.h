@@ -11,4 +11,5 @@ public:
 	void _popScreens(int&, bool);
 	void pushScreen(std::shared_ptr<AbstractScene>, bool);
 	std::string getScreenName() const;
+	void* update();
 };

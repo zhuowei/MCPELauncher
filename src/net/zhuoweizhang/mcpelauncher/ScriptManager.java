@@ -144,6 +144,7 @@ public class ScriptManager {
 	private static WorldData worldData = null;
 	private static int worldDataSaveCounter = 1;
 	private static AndroidPrintStream scriptErrorStream = null;
+	private static List<String> nextClientMessages = new ArrayList<String>();
 
 	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
@@ -635,6 +636,12 @@ public class ScriptManager {
 			ScreenshotHelper.takeScreenshot(screenshotFileName);
 			requestScreenshot = false;
 		}
+		synchronized (nextClientMessages) {
+			for (String a : nextClientMessages) {
+				nativeClientMessage(a);
+			}
+			nextClientMessages.clear();
+		}
 	}
 
 	@CallbackName(name="serverMessageReceiveHook", args={"str"}, prevent=true)
@@ -1122,6 +1129,13 @@ public class ScriptManager {
 		return !invalidTexName(tex);
 	}
 
+	private static void clientMessageImpl(String msg) {
+		synchronized(nextClientMessages) {
+			nextClientMessages.add(msg);
+			nativeRequestFrameCallback();
+		}
+	}
+
 	private static void wordWrapClientMessage(String msg) {
 		String[] portions = msg.split("\n");
 		for (int i = 0; i < portions.length; i++) {
@@ -1129,18 +1143,18 @@ public class ScriptManager {
 
 			if (msg.indexOf(ChatColor.BEGIN) >= 0) {
 				// TODO: properly word wrap colour codes
-				nativeClientMessage(line);
+				clientMessageImpl(line);
 				continue;
 			}
 
 			while (line.length() > 40) {
 				String newStr = line.substring(0, 40);// colorCodeSubstring(line,
 														// 0, 40);
-				nativeClientMessage(newStr);
+				clientMessageImpl(newStr);
 				line = line.substring(newStr.length());
 			}
 			if (line.length() > 0) {
-				nativeClientMessage(line);
+				clientMessageImpl(line);
 			}
 		}
 	}
@@ -3801,8 +3815,17 @@ public class ScriptManager {
 			nativeForceCrash();
 		}*/
 
+		private static String trimTexturePackName(String name) {
+			// DesnoGuns calls getBytesFromTexturePack with a leading "/"; strip this
+			if (name.length() > 1 && name.charAt(0) == '/') {
+				return name.substring(1);
+			}
+			return name;
+		}
+
 		@JSStaticFunction
 		public static byte[] getBytesFromTexturePack(String name) {
+			name = trimTexturePackName(name);
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
 				if (main != null) {
@@ -3818,6 +3841,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static InputStream openInputStreamFromTexturePack(String name) {
+			name = trimTexturePackName(name);
 			if (MainActivity.currentMainActivity != null) {
 				MainActivity main = MainActivity.currentMainActivity.get();
 				if (main != null) {

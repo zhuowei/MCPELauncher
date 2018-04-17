@@ -2838,10 +2838,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
   (JNIEnv *env, jclass clazz, jint itemId) {
 	if (itemId == 0) return true;
 	if (itemId < 0 || itemId >= bl_item_id_count) {
-		BL_LOG("Item ID %d out of bounds %d", itemId, bl_item_id_count);
+		//BL_LOG("Item ID %d out of bounds %d", itemId, bl_item_id_count);
 		return false;
 	}
-	BL_LOG("Item ID %d has %p", itemId, bl_Item_mItems[itemId]);
+	//BL_LOG("Item ID %d has %p", itemId, bl_Item_mItems[itemId]);
 	return bl_Item_mItems[itemId] != nullptr;
 }
 
@@ -3624,8 +3624,8 @@ static std::string bl_lastScreen;
 static void bl_cpp_screenchange_handler(std::string const& s1, std::string const& lastScreen);
 
 static void bl_fireScreenChange(std::string const& s1) {
-	BL_LOG("Screen change: %s", s1.c_str());
 	if (s1 == bl_lastScreen) return;
+	BL_LOG("Screen change: %s", s1.c_str());
 	bl_cpp_screenchange_handler(s1, bl_lastScreen);
 	bl_lastScreen = s1;
 	JNIEnv *env;
@@ -3645,7 +3645,7 @@ static void bl_fireScreenChange(std::string const& s1) {
 		bl_JavaVM->DetachCurrentThread();
 	}
 }
-
+#if 0
 static void* (*bl_SceneStack__popScreens_real)(SceneStack*, int&, bool);
 void* bl_SceneStack__popScreens_hook(SceneStack* self, int& numPop, bool arg1) {
 	void* origRetval = bl_SceneStack__popScreens_real(self, numPop, arg1);
@@ -3663,6 +3663,23 @@ void* bl_SceneStack_pushScreen_hook(SceneStack* self, std::shared_ptr<AbstractSc
 	std::string retval = self->getScreenName();
 	if (retval.length() == 0) {
 		new (&retval) std::string();
+	}
+
+	bl_fireScreenChange(retval);
+	return origRetval;
+}
+#endif
+static void* (*bl_SceneStack_update_real)(SceneStack* self);
+void* bl_SceneStack_update_hook(SceneStack* self) {
+	void* origRetval = bl_SceneStack_update_real(self);
+	std::string retval = self->getScreenName();
+	if (retval.length() == 0) {
+		new (&retval) std::string();
+		return origRetval;
+	}
+	if (retval == "toast_screen") {
+		// there are two ScreenStacks in 1.2.13: out of game one stays on toast_screen while ingame one shows hud_screen
+		return origRetval;
 	}
 	bl_fireScreenChange(retval);
 	return origRetval;
@@ -4398,10 +4415,8 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_BlockGraphics_initBlocks_real);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
-	mcpelauncher_hook((void*)&SceneStack::_popScreens, (void*)&bl_SceneStack__popScreens_hook,
-		(void**)&bl_SceneStack__popScreens_real);
-	mcpelauncher_hook((void*)&SceneStack::pushScreen, (void*)&bl_SceneStack_pushScreen_hook,
-		(void**)&bl_SceneStack_pushScreen_real);
+	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
+		(void**)&bl_SceneStack_update_real);
 	mcpelauncher_hook((void*)&ItemRenderer::render, (void*)&bl_ItemRenderer_render_hook,
 		(void**)&bl_ItemRenderer_render_real);
 	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
