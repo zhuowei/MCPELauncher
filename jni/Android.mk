@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)  
 LOCAL_LDLIBS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog -lminecraftpe -landroid -lfmod
-LOCAL_MODULE    := mcpelauncher
+LOCAL_MODULE    := mcpelauncher_new
 
 #corkscrew
 corkscrew_generic_src_files := \

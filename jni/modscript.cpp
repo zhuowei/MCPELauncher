@@ -918,7 +918,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeExplode
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat power, jboolean fire, jboolean smoke, jfloat something) {
 	if (!bl_localplayer) return;
-	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire, smoke, something);
+	bl_level->explode(*bl_localplayer->getRegion(), NULL, Vec3(x, y, z), power, fire, smoke, something, false);
 }
 
 static void bl_dumpType(void* a) {

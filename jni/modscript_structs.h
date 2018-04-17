@@ -364,6 +364,8 @@ static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead
 static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1488, "HumanodModel bipedLeftLeg");
 
 class Recipe;
+class ShapelessRecipe;
+class ShapedRecipe;
 
 class Recipes {
 public:
@@ -381,7 +383,10 @@ public:
 #endif
 };
 	std::vector<Recipe*> recipes;
-	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&);
+	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&,
+		std::function<std::unique_ptr<ShapelessRecipe>(std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
+	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&,
+		std::function<std::unique_ptr<ShapedRecipe>(int, int, std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
 }; // class Recipes
 
 typedef Recipes::Type RecipesType;
@@ -551,7 +556,7 @@ public:
 	Entity* fetchEntity(EntityUniqueID, bool) const;
 	void addEntity(BlockSource&, std::unique_ptr<Entity>);
 	void addGlobalEntity(BlockSource&, std::unique_ptr<Entity>);
-	void explode(BlockSource&, Entity*, Vec3 const&, float, bool, bool, float);
+	void explode(BlockSource&, Entity*, Vec3 const&, float, bool, bool, float, bool);
 	void setNightMode(bool);
 	void setTime(int);
 	int getTime() const;

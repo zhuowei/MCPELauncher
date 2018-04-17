@@ -164,15 +164,16 @@ class Recipe {
 public:
 	void** vtable; //4
 	ItemPack itemPack; //4
-	static bool isAnyAuxValue(int);
+	static bool isAnyAuxValue(ItemInstance const&);
 };
 
-typedef struct {
+class ShapelessRecipe {
+public:
 	void** vtable;//0
 	ItemPack itemPack; //4
 	std::vector<ItemInstance> output; //28
 	int filler; //48
-} ShapelessRecipe; //52 bytes long
+}; //52 bytes long
 
 namespace mce {
 class UUID;
@@ -396,8 +397,6 @@ static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 static void (*bl_Item_setMaxDamage)(Item*, int);
 
 static Recipes* (*bl_Recipes_getInstance)();
-static void (*bl_Recipes_addShapedRecipe)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
-	std::vector<RecipesType> const&);
 static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 
 static void** bl_ShapelessRecipe_vtable;
@@ -448,7 +447,7 @@ static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::uni
 //static void* (*bl_MultiPlayerLevel_putEntity_real)(Level*, BlockSource&, EntityUniqueID, EntityRuntimeID, std::unique_ptr<Entity>);
 static bool (*bl_Level_addPlayer_real)(Level*, std::unique_ptr<Player>);
 static void (*bl_Level_removeEntity_real)(Level*, std::unique_ptr<Entity>&&, bool);
-static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool, bool, float);
+static void (*bl_Level_explode_real)(Level*, TileSource*, Entity*, Vec3 const&, float, bool, bool, float, bool);
 static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, int y, int z, int type, int data);
 static AABB* (*bl_Block_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
 static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
@@ -489,7 +488,7 @@ static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 	(BlockLegacy*, std::string const&, int, BlockID, void*, std::string const&, std::string const&);
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(BlockLegacy*, std::string const&, int, void*, std::string const&, std::string const&);
-static bool (*bl_Recipe_isAnyAuxValue_real)(int id);
+static bool (*bl_Recipe_isAnyAuxValue_real)(ItemInstance const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
@@ -942,9 +941,9 @@ static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& e
 	}
 }
 
-static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire, bool anotherBool, float something) {
+static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* entity, Vec3 const& p, float power, bool onFire, bool anotherBool, float something, bool somethingBool) {
 	if (level->isClientSide()) {
-		bl_Level_explode_real(level, tileSource, entity, p, power, onFire, anotherBool, something);
+		bl_Level_explode_real(level, tileSource, entity, p, power, onFire, anotherBool, something, somethingBool);
 		return;
 	}
 	JNIEnv *env;
@@ -966,7 +965,10 @@ static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* 
 	if (attachStatus == JNI_EDETACHED) {
 		bl_JavaVM->DetachCurrentThread();
 	}
-	if (!preventDefaultStatus) bl_Level_explode_real(level, tileSource, entity, p, power, onFire, anotherBool, something);
+	if (!preventDefaultStatus) {
+		bl_Level_explode_real(level, tileSource, entity, p, power, onFire,
+			anotherBool, something, somethingBool);
+	}
 }
 
 static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y, int z, int type, int data) {
@@ -2069,7 +2071,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	recipes->addShapelessRecipe(outStack, ingredientsList);
+	recipes->addShapelessRecipe(outStack, ingredientsList, nullptr);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
@@ -2105,7 +2107,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_Recipes_getInstance();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	bl_Recipes_addShapedRecipe(recipes, outStacks, shapeVector, ingredientsList);
+	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, nullptr);
 }
 
 class BLFurnaceRecipeRequest {
@@ -2399,11 +2401,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 		case BLOCK_ID: {
 			int id = bl_localplayer->getRegion()->getBlockID(
 				objectMouseOver.x, objectMouseOver.y, objectMouseOver.z);
+#if 0
+// FIXME 1.2.20 getExtraData
 			if (id == kStonecutterId) {
 				int extraData = bl_localplayer->getRegion()->getExtraData(
 					{objectMouseOver.x, objectMouseOver.y, objectMouseOver.z});
 				if (extraData != 0) return extraData;
 			}
+#endif
 			return id;
 		}
 		case BLOCK_DATA:
@@ -3254,10 +3259,11 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRecipeSetA
 	bl_anyAuxValue[id] = anyAux? 2: 1;
 }
 
-bool bl_Recipe_isAnyAuxValue_hook(int id) {
+bool bl_Recipe_isAnyAuxValue_hook(ItemInstance const& itemStack) {
+	int id = itemStack.getId();
 	auto b = bl_anyAuxValue[id];
 	if (b == 0) {
-		return bl_Recipe_isAnyAuxValue_real(id);
+		return bl_Recipe_isAnyAuxValue_real(itemStack);
 	}
 	return b == 2;
 }
@@ -3525,13 +3531,18 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetExtraData
   (JNIEnv* env, jclass clazz, jint x, jint y, jint z, jint data) {
 	if (!bl_localplayer) return;
-	bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
+// FIXME 1.2.20 getExtraData
+	// bl_localplayer->getRegion()->setExtraData({x, y, z}, (unsigned short) data);
 }
 
 JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetExtraData
   (JNIEnv* env, jclass clazz, jint x, jint y, jint z) {
 	if (!bl_localplayer) return 0;
+#if 0
+// FIXME 1.2.20 getExtraData
 	return bl_localplayer->getRegion()->getExtraData({x, y, z});
+#endif
+	return 0;
 }
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemIsExtendedBlock
@@ -3562,7 +3573,8 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::Ren
 	}
 	blockInfo->blockId = blockState.blockBase->id;
 	blockInfo->blockData = blockState.blockData;
-	blockInfo->blockExtraData = blockInfo->blockId == kStonecutterId? self->getRegion()->getExtraData(pos) : 0;
+	// FIXME 1.2.20 getExtraData
+	blockInfo->blockExtraData = 0; // blockInfo->blockId == kStonecutterId? self->getRegion()->getExtraData(pos) : 0;
 	bl_BlockTessellator_tessellateInWorld_real(self, renderConfig, tessellator, blockState, pos, something);
 	blockInfo->blockId = 0;
 	blockInfo->blockData = 0;
@@ -3593,7 +3605,8 @@ TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(Bl
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, bool);
 static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSource& blockSource, BlockPos const& pos,
 	AABB& inaabb, bool something) {
-	unsigned short extraData = blockSource.getExtraData(pos);
+	// FIXME 1.2.20 getExtraData
+	unsigned short extraData = 0; // blockSource.getExtraData(pos);
 	if (extraData != 0 && extraData < sizeof(bl_custom_block_visualShapes) && bl_custom_block_visualShapes[extraData]) {
 		int data = blockSource.getData(pos);
 		AABB* aabb = bl_custom_block_visualShapes[extraData][data]; // note: 0 is also handled here, not in the regular block obj.
@@ -3608,7 +3621,8 @@ static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSou
 
 static int bl_StonecutterBlock_getColor_hook(BlockLegacy* tile, BlockSource& blockSource, BlockPos const& pos,
 	BlockAndData const& blockState) {
-	unsigned short extraData = blockSource.getExtraData(pos);
+	// FIXME 1.2.20 getExtraData
+	unsigned short extraData = 0; // blockSource.getExtraData(pos);
 	if (extraData == 0) return -1;
 	int blockId = tile->id;
 	int* myColours = bl_custom_block_colors[extraData];
@@ -3619,7 +3633,8 @@ static int bl_StonecutterBlock_getColor_hook(BlockLegacy* tile, BlockSource& blo
 class ItemUseCallback;
 static bool (*bl_StonecutterBlock_use_real)(BlockLegacy* tile, Player& player, BlockPos const& pos, ItemUseCallback* callback);
 static bool bl_StonecutterBlock_use_hook(BlockLegacy* tile, Player& player, BlockPos const& pos, ItemUseCallback* callback) {
-	unsigned short extraData = player.getRegion()->getExtraData(pos);
+	// FIXME 1.2.20 getExtraData
+	unsigned short extraData = 0; // player.getRegion()->getExtraData(pos);
 	if (extraData == 0) return bl_StonecutterBlock_use_real(tile, player, pos, callback);
 	return false;
 }
@@ -4214,9 +4229,6 @@ void bl_setuphooks_cppside() {
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
 
 	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
-	bl_Recipes_addShapedRecipe = (void (*)(Recipes*, std::vector<ItemInstance> const&, std::vector<std::string> const&, 
-		std::vector<RecipesType> const&)) dlsym(mcpelibhandle,
-		"_ZN7Recipes15addShapedRecipeERKSt6vectorI12ItemInstanceSaIS1_EERKS0_ISsSaISsEERKS0_INS_4TypeESaISA_EE");
 	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
