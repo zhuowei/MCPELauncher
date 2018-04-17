@@ -100,9 +100,12 @@ void bl_armorInit_postLoad() {
 }
 
 void bl_cape_init(void* mcpelibinfo) {
+	// FIXME 1.2.13
+#if 0
 	void* prepareArmor = dlsym(mcpelibinfo, "_ZN19HumanoidMobRenderer12prepareArmorER13ScreenContextR3Mob9ArmorSlotf");
 	mcpelauncher_hook(prepareArmor, (void*) &bl_HumanoidMobRenderer_prepareArmor_hook,
 		(void**) &bl_HumanoidMobRenderer_prepareArmor_real);
+#endif
 }
 
 } // extern "C"

@@ -98,7 +98,6 @@ static void (*bl_Entity_remove)(Entity*);
 static void (*bl_GameMode_destroyBlock_real)(void*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
-static void (*bl_MinecraftClient_setGameMode)(MinecraftClient*, int);
 ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
@@ -1540,8 +1539,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
-	bl_MinecraftClient_setGameMode = (void (*)(MinecraftClient*, int))
-		dlsym(mcpelibhandle, "_ZN15MinecraftClient11setGameModeE8GameType");
 	bl_Mob_getArmor = (ItemInstance* (*)(Entity*, int))
 		dlsym(mcpelibhandle, "_ZNK3Mob8getArmorE9ArmorSlot");
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");

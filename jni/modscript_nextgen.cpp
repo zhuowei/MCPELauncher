@@ -375,8 +375,6 @@ static void** bl_CustomBlockItem_vtable;
 
 static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
-static void (*bl_Minecraft_setLeaveGame)(Minecraft*);
-
 //static void* (*bl_Level_getAllEntities)(Level*);
 
 //static void (*bl_Level_addListener)(Level*, LevelListener*);
@@ -1053,7 +1051,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
 	bl_Item_mItems[item->itemId] = item;
-	BL_LOG("Registered %d with %p", (int)item->itemId, item);
+	//BL_LOG("Registered %d with %p", (int)item->itemId, item);
 	//std::string lowercaseStr = Util::toLower(name);
 	// FIXME 1.2.0: wrong thread?
 #if 0
@@ -4126,7 +4124,6 @@ void bl_setuphooks_cppside() {
 	// FIXME 0.11
 	//bl_MinecraftClient_startLocalServer = (void (*) (MinecraftClient*, std::string const&, std::string const&, void*))
 	//	dlsym(mcpelibhandle, "_ZN15MinecraftClient16startLocalServerESsSs13LevelSettings");
-	bl_Minecraft_setLeaveGame = (void (*) (Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft12setLeaveGameEv");
 
 	//bl_Level_getAllEntities = (void* (*)(Level*))
 	//	dlsym(RTLD_DEFAULT, "_ZN5Level14getAllEntitiesEv");

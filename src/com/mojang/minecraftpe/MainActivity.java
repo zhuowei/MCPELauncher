@@ -246,13 +246,7 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isTooOldMinorVersion = mcPkgInfo.versionName.startsWith("1.2.0.") ||
-				mcPkgInfo.versionName.startsWith("1.2.1.") ||
-				mcPkgInfo.versionName.startsWith("1.2.2.") ||
-				mcPkgInfo.versionName.startsWith("1.2.3.") ||
-				mcPkgInfo.versionName.startsWith("1.2.4.") ||
-				mcPkgInfo.versionName.startsWith("1.2.5.") ||
-				mcPkgInfo.versionName.startsWith("1.2.6.");
+			boolean isTooOldMinorVersion = !mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!isTooOldMinorVersion) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
@@ -261,7 +255,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.2.7");
+				intent.putExtra("supportedVersion", "1.2.13");
 				startActivity(intent);
 				finish();
 				try {
@@ -1088,7 +1082,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private boolean mcpeGreaterEqualThan(int major, int minor, int rel) {
-		String[] parts = getMCPEVersion().split("\\.");
+		return mcpeGreaterEqualThan(getMCPEVersion(), major, minor, rel);
+	}
+	private static boolean mcpeGreaterEqualThan(String baseVersion, int major, int minor, int rel) {
+		String[] parts = baseVersion.split("\\.");
 		if (parts.length == 0) return true;
 		int theirMajor = Integer.parseInt(parts[0]);
 		int theirMinor = parts.length < 2? 0: Integer.parseInt(parts[1]);
