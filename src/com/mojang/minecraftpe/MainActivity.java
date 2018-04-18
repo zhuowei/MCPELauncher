@@ -252,10 +252,6 @@ public class MainActivity extends NativeActivity {
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
-			if (mcpeGreaterEqualThan(1, 2, 20)) {
-				isSupportedVersion = false;
-			}
-
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
