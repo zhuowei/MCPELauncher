@@ -33,4 +33,5 @@ public:
 	static std::vector<std::unique_ptr<BlockGraphics>> mOwnedBlocks;
 	static TextureAtlas* mTerrainTextureAtlas;
 };
+// BlockGraphics::registerBlockGraphics(Json::Value const&, std::string const&)
 static_assert(sizeof(BlockGraphics) == 124, "blockgraphics size");

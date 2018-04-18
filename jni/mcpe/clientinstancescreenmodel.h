@@ -22,4 +22,5 @@ public:
 	void sendChatMessage(std::string const&);
 };
 // search for the constructor
+// or std::__shared_ptr<ClientInstanceScreenModel
 static_assert(sizeof(ClientInstanceScreenModel) == 60, "ClientInstanceScreenModel size");

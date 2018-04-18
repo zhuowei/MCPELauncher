@@ -77,7 +77,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4288
+#define PLAYER_ABILITIES_OFFSET 4324
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -86,20 +86,20 @@ typedef void Font;
 
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = sizeof(BlockLegacy);
-const size_t kLiquidBlockDynamicSize = 736;
-const size_t kLiquidBlockStaticSize = 744;
-static_assert(kLiquidBlockDynamicSize >= kTileSize, "kLiquidBlockDynamicSize");
+//const size_t kLiquidBlockDynamicSize = 736;
+//const size_t kLiquidBlockStaticSize = 744;
+//static_assert(kLiquidBlockDynamicSize >= kTileSize, "kLiquidBlockDynamicSize");
 // found in registerBlock
 const size_t kBlockItemSize = 124;
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
 static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3520;
+const size_t kItemEntity_itemInstance_offset = 3544;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 536;
+const size_t kClientInstanceScreenModel_offset = 540;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -1780,6 +1780,8 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		//Block::mTranslucency[blockId] = opaque? 0: 1;
 		BlockLegacy::mBlockLookupMap[bl_toLower(retval->mappingId)] = retval;
 		// todo: graphics
+	}
+#if 0
 	} else if (customBlockType == 1 /* liquid */ ) {
 		// FIXME 0.15
 		retval = (BlockLegacy*) ::operator new(kLiquidBlockDynamicSize);
@@ -1795,6 +1797,7 @@ Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[
 		retval->vtable = bl_CustomLiquidBlockStatic_vtable + 2;
 		BlockLegacy::mBlockLookupMap[bl_toLower(retval->mappingId)] = retval;
 	}
+#endif
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "created block %s", retval->mappingId.c_str());
 	/*retGraphics = new BlockGraphics(retval->mappingId);
 	retGraphics->vtable = bl_CustomBlockGraphics_vtable + 2;

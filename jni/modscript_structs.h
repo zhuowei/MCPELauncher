@@ -65,7 +65,7 @@ enum EntityFlags {
 };
 class PlayerInventoryProxy;
 class EntityDamageSource;
-// last update: 1.2.6.1
+// last update: 1.2.20b1
 class Entity {
 public:
 	void** vtable; //0
@@ -82,10 +82,10 @@ public:
 	float prevPitch; //192
 	float prevYaw; //196
 
-	char filler4[324-200]; //200
-	int renderType; //324
-	char filler5[564-328]; // 328
-	std::vector<Entity*> riders; // 564
+	char filler4[340-200]; //200
+	int renderType; //340
+	char filler5[584-344]; // 328
+	std::vector<Entity*> riders; // 584
 
 	~Entity();
 	BlockSource* getRegion() const;
@@ -108,9 +108,9 @@ public:
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
 };
-static_assert(offsetof(Entity, renderType) == 324, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 340, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 564, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
@@ -264,7 +264,7 @@ public:
 	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
 	char filler4[124-114]; // 114
 	unsigned short id; // 124
-	char filler5[736-126]; // 126
+	char filler5[784-126]; // 126
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -282,7 +282,7 @@ public:
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(BlockLegacy) == 736, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 784, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
@@ -351,13 +351,13 @@ public:
 	ModelPart bipedLeftArm;//1024
 	ModelPart bipedRightLeg;//1256
 	ModelPart bipedLeftLeg;//1488
-	char filler3[4544-1720]; // 1720 - more model parts
+	char filler3[4552-1720]; // 1720 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 4544, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 4552, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
@@ -413,13 +413,13 @@ typedef void EntityRenderer;
 class MobRenderer {
 public:
 	void** vtable; //0
-	char filler[168-4]; //4
-	void* model; // 168 (from MobRenderer::MobRenderer)
-	char filler2[672-172]; // 172
+	char filler[164-4]; //4
+	void* model; // 164 (from MobRenderer::MobRenderer)
+	char filler2[668-168]; // 172
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(offsetof(MobRenderer, model) == 168, "mobrenderer model offset");
-static_assert(sizeof(MobRenderer) == 672, "mobrenderer");
+static_assert(offsetof(MobRenderer, model) == 164, "mobrenderer model offset");
+static_assert(sizeof(MobRenderer) == 668, "mobrenderer");
 
 typedef void Tag;
 
@@ -448,13 +448,13 @@ typedef struct {
 class Biome {
 public:
 	void** vtable; //0
-	char filler[184-4]; //4
-	cppstr name; //184 from Biome::setName
-	char filler2[280-188]; //188
-	int id; //280 from Biome::Biome
+	char filler[200-4]; //4
+	cppstr name; //200 from Biome::setName
+	char filler2[300-204]; //204
+	int id; //300 from Biome::Biome
 };
-static_assert(offsetof(Biome, name) == 184, "Biome name");
-static_assert(offsetof(Biome, id) == 280, "Biome ID");
+static_assert(offsetof(Biome, name) == 200, "Biome name");
+static_assert(offsetof(Biome, id) == 300, "Biome ID");
 
 class Abilities {
 public:
@@ -515,16 +515,16 @@ static_assert(sizeof(ArmorItem) == 160, "armor item size");
 
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 672
-	HumanoidModel* modelArmor; // 676
-	HumanoidModel* modelArmorChestplate; // 680
-	char hmr_filler1[700-684]; // 684
+	int something; // 668
+	HumanoidModel* modelArmor; // 672
+	HumanoidModel* modelArmorChestplate; // 676
+	char hmr_filler1[724-680]; // 680
 	HumanoidMobRenderer(std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>,
 		std::unique_ptr<HumanoidModel>, mce::TexturePtr, Vec2 const&, Vec3 const&);
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 676, "armour model offset");
-static_assert(sizeof(HumanoidMobRenderer) == 700, "humanoid mob renderer size");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 672, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 724, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 

@@ -16,8 +16,8 @@ public:
 static_assert(sizeof(ItemGraphics) == 24, "itemGraphics size");
 class ItemRenderer {
 public:
-	char filler[232];
-	std::unordered_map<short, ItemGraphics> itemGraphics; // 232
+	char filler[680];
+	std::unordered_map<short, ItemGraphics> itemGraphics; // 680
 	void _loadItemGraphics();
 	void* getAtlasPos(ItemInstance const&);
 	void render(BaseEntityRenderContext&, EntityRenderData&);
@@ -25,4 +25,4 @@ public:
 	static mce::TexturePtr const& getGraphics(ItemInstance const&);
 	static mce::TexturePtr const& getGraphics(Item const&);
 };
-static_assert(offsetof(ItemRenderer, itemGraphics) == 232, "itemrenderer offset wrong");
+static_assert(offsetof(ItemRenderer, itemGraphics) == 680, "itemrenderer offset wrong");
