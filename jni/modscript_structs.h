@@ -84,8 +84,8 @@ public:
 
 	char filler4[340-200]; //200
 	int renderType; //340
-	char filler5[584-344]; // 328
-	std::vector<Entity*> riders; // 584
+	char filler5[580-344]; // 328
+	std::vector<Entity*> riders; // 580
 
 	~Entity();
 	BlockSource* getRegion() const;
@@ -110,7 +110,7 @@ public:
 };
 static_assert(offsetof(Entity, renderType) == 340, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 580, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:

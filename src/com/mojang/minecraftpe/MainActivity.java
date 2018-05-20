@@ -80,7 +80,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.2";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.4";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -246,7 +246,7 @@ public class MainActivity extends NativeActivity {
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
 
-			boolean isTooOldMinorVersion = !mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
+			boolean isTooOldMinorVersion = false;//!mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!isTooOldMinorVersion) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
@@ -255,7 +255,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.2.13");
+				intent.putExtra("supportedVersion", "1.4.1");
 				startActivity(intent);
 				finish();
 				try {
