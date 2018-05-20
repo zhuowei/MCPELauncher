@@ -206,6 +206,7 @@ public class MainActivity extends NativeActivity {
 	private int mcpeArch = ScriptManager.ARCH_ARM;
 	public AddonOverrideTexturePack addonOverrideTexturePackInstance = null;
 	private boolean textureVerbose = false;
+	private PrintStream fileDataLog;
 
 	/** Called when the activity is first created. */
 
@@ -405,6 +406,14 @@ public class MainActivity extends NativeActivity {
 		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		initAtlasMeta();
+
+		if (BuildConfig.DEBUG && new File("/sdcard/bl_enablelog.txt").exists()) {
+			try {
+				fileDataLog = new PrintStream(new File("/sdcard/bl_filelog.txt"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 		displayMetrics = new DisplayMetrics();
 
@@ -1007,7 +1016,9 @@ public class MainActivity extends NativeActivity {
 
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
 		//if (BuildConfig.DEBUG) System.out.println("Get file data: " + name);
-
+		if (BuildConfig.DEBUG && fileDataLog != null) {
+			fileDataLog.println("Get file data: " + name);
+		}
 		try {
 			InputStream is = null;
 			if (name.charAt(0) == '/') {
@@ -2695,8 +2706,12 @@ public class MainActivity extends NativeActivity {
 				"images/terrain-atlas/", "block.bl_modpkg.");
 			AtlasProvider itemsProvider = new AtlasProvider("resource_packs/vanilla/textures/item_texture.json",
 				"images/items-opaque/", "item.bl_modpkg.");
+			PackContentsProvider packContentsProvider = new PackContentsProvider(
+				"resource_packs/vanilla/textures/textures_list.json",
+				"resource_packs/vanilla/contents.json");
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
+			packContentsProvider.init(this);
 
 			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resource_packs/vanilla/blocks.json");
 			blocksJsonProvider.init(this);
@@ -2704,10 +2719,12 @@ public class MainActivity extends NativeActivity {
 				terrainProvider.dumpAtlas();
 				itemsProvider.dumpAtlas();
 				blocksJsonProvider.dumpAtlas();
+				packContentsProvider.dumpAtlas();
 			}
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
 			textureOverrides.add(2, blocksJsonProvider);
+			textureOverrides.add(3, packContentsProvider);
 			ScriptManager.terrainMeta = terrainProvider;
 			ScriptManager.itemsMeta = itemsProvider;
 			ScriptManager.blocksJson = blocksJsonProvider;

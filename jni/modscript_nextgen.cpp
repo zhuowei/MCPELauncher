@@ -562,6 +562,7 @@ Entity* bl_getEntityWrapper(Level* level, long long entityId) {
 		return bl_removedEntity;
 	}
 	if (bl_onLockDown || level == nullptr) return nullptr;
+	if (bl_minecraft->getLocalPlayer() == nullptr) return nullptr;
 	return level->fetchEntity(entityId, false);
 }
 
