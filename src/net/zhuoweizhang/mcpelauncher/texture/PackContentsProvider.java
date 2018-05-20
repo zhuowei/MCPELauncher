@@ -23,11 +23,11 @@ public class PackContentsProvider implements TexturePack {
 	public InputStream getInputStream(String fileName) throws IOException {
 		if (!hasChanges) return null;
 		if (fileName.equals(manifestPath)) {
-			System.err.println("PackProvide MANIFEST!!!");
+			//System.err.println("PackProvide MANIFEST!!!");
 			return new ByteArrayInputStream(jsonArray.toString().getBytes("UTF-8"));
 		}
 		if (fileName.equals(contentsPath)) {
-			System.err.println("PackProvide CONTENTS!!!");
+			//System.err.println("PackProvide CONTENTS!!!");
 			return new ByteArrayInputStream(contentsObject.toString().getBytes("UTF-8"));
 		}
 		return null;
