@@ -9,6 +9,31 @@ public class HardwareInformation {
 	private static String cpuName = "unknown", cpuFeatures = "unknown";
 	private static int numCores = 1;
 
+	public String getSecureId() {
+		return "SecureId";
+	}
+
+	public static String getSerialNumber() {
+		// we can't do that; we don't have the phone permission
+		return "SerialNumber";
+	}
+
+	public static String getBoard() {
+		return Build.BOARD;
+	}
+
+	public String getInstallerPackageName() {
+		return "installer.package.name";
+	}
+
+	public int getSignaturesHashCode() {
+		return 0;
+	}
+
+	public boolean getIsRooted() {
+		return false;
+	}
+
 	public static String getDeviceModelName() {
 		return Build.MANUFACTURER.toUpperCase() + " " + Build.MODEL;
 	}

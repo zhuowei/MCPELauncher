@@ -1744,11 +1744,11 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
-		if (mcpeGreaterEqualThan(1, 2, 20)) {
-			System.loadLibrary("mcpelauncher_new");
-		} else {
+		//if (mcpeGreaterEqualThan(1, 2, 20)) {
+		//	System.loadLibrary("mcpelauncher_new");
+		//} else {
 			System.loadLibrary("mcpelauncher");
-		}
+		//}
 
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
@@ -2240,6 +2240,11 @@ public class MainActivity extends NativeActivity {
 		String arg5, String arg6, String arg7) {
 		System.out.println("Track purchase event: " + arg1 + ":" + arg2 + ":" + arg3 + ":" + arg4 + ":" +
 			arg5 + ":" + arg6 + ":" + arg7);
+	}
+
+	// 1.4.4
+	public HardwareInformation getHardwareInfo() {
+		return new HardwareInformation();
 	}
 
 	@Override
