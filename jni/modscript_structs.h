@@ -194,6 +194,7 @@ public:
 	void setUseAnimation(UseAnimation);
 	static void initCreativeItems(bool);
 	static Item* getItem(short);
+	static Item* mExtraItems[512];
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };

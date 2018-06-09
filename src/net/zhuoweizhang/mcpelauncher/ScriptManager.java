@@ -4023,8 +4023,8 @@ public class ScriptManager {
 
 		private static void verifyAndAddShapedRecipe(int id, int count, int damage, String[] shape,
 			int[] ingredients) {
-			if (id < 0 || id >= ITEM_ID_COUNT) {
-				throw new RuntimeException("Invalid result in recipe: " + id + ": must be between 0 and " + ITEM_ID_COUNT);
+			if (id < -512 || id >= ITEM_ID_COUNT) {
+				throw new RuntimeException("Invalid result in recipe: " + id + ": must be between -512 and " + ITEM_ID_COUNT);
 			}
 			if (!nativeIsValidItem(id)) {
 				throw new RuntimeException("Invalid result in recipe: " + id + " is not a valid item. " +
@@ -4237,8 +4237,8 @@ public class ScriptManager {
 
 		private static void defineBlockImpl(int blockId, String name, Object textures,
 				Object materialSourceIdSrc, Object opaqueSrc, Object renderTypeSrc, int customBlockType) {
-			if (blockId < 0 || blockId >= ITEM_ID_COUNT) {
-				throw new IllegalArgumentException("Block IDs must be >= 0 and < " + ITEM_ID_COUNT);
+			if (blockId < -256 || blockId >= ITEM_ID_COUNT) {
+				throw new IllegalArgumentException("Block IDs must be >= -256 and < " + ITEM_ID_COUNT);
 			}
 			int materialSourceId = 17; // wood
 			boolean opaque = true;

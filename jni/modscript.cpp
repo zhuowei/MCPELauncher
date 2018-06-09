@@ -22,6 +22,7 @@ typedef bool cppbool;
 #include "mcpe/inventory.h"
 #include "mcpe/gamemode.h"
 #include "mcpe/entitycomponent.h"
+#include "mcpe/blockidtoitemid.h"
 
 typedef Player LocalPlayer;
 
@@ -255,7 +256,7 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 		itemDamage = itemStack->damage;
 	}
 
-	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
+	int blockId = itemIdFromBlockId(bl_localplayer->getRegion()->getBlockID(x, y, z));
 	int blockDamage = bl_localplayer->getRegion()->getData(x, y, z);
 
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
@@ -306,7 +307,7 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 		itemDamage = itemStack->damage;
 	}
 
-	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
+	int blockId = itemIdFromBlockId(bl_localplayer->getRegion()->getBlockID(x, y, z));
 	int blockDamage = bl_localplayer->getRegion()->getData(x, y, z);
 
 	bl_JavaVM->AttachCurrentThread(&env, NULL);
@@ -803,8 +804,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint id, jint damage) {
 	if (!bl_localplayer) return;
-	if (id < 0 || id > 255) return;
-	BlockLegacy* block = BlockLegacy::mBlocks[id];
+	BlockLegacy* block = getBlockForItemId(id);
 	if (!block) return;
 	BlockAndData* blockAndData = block->getBlockStateFromLegacyData(damage);
 	if (!blockAndData) return; // should never happen, but...
@@ -963,7 +963,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTile
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
 	if (!bl_localplayer) return 0;
-	return bl_localplayer->getRegion()->getBlockID(x, y, z);
+	return itemIdFromBlockId(bl_localplayer->getRegion()->getBlockID(x, y, z));
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetData

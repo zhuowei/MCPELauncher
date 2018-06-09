@@ -62,6 +62,7 @@
 #include "mcpe/backgroundworker.h"
 #include "mcpe/playername.h"
 #include "mcpe/blockpalette.h"
+#include "mcpe/blockidtoitemid.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -426,7 +427,7 @@ std::vector<short*> bl_creativeItems;
 
 char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
 
-static Item** bl_Item_mItems;
+Item** bl_Item_mItems;
 #if 0
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
@@ -721,7 +722,7 @@ void bl_CustomBlock_onRedstoneUpdate_hook(BlockLegacy* block, BlockSource& sourc
 		bl_JavaVM->AttachCurrentThread(&env, NULL);
 	}
 
-	int blockId = source.getBlockID(pos);
+	int blockId = itemIdFromBlockId(source.getBlockID(pos));
 	int blockData = source.getData(pos);
 
 	//Call back across JNI into the ScriptManager
@@ -1048,7 +1049,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
-	bl_Item_mItems[item->itemId] = item;
+	setItemForId(item->itemId, item);
 	//BL_LOG("Registered %d with %p", (int)item->itemId, item);
 	//std::string lowercaseStr = Util::toLower(name);
 	// FIXME 1.2.0: wrong thread?
@@ -1198,16 +1199,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id, jint maxDamage) {
-	if (id <= 0 || id >= bl_item_id_count) return;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if(item == NULL) return;
 	bl_Item_setMaxDamage(item, maxDamage);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemMaxDamage
   (JNIEnv *env, jclass clazz, jint id) {
-	if (id <= 0 || id >= bl_item_id_count) return -1;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if(item == NULL) return -1;
 	return item->getMaxDamage();
 }
@@ -1334,8 +1333,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
-	if (itemId <= 0 || itemId >= bl_item_id_count) return nullptr;
-	if (!bl_Item_mItems[itemId]) return nullptr;
+	if (!getItemForId(itemId)) return nullptr;
 	ItemInstance myStack(itemId, 1, itemDamage);
 	if (myStack.getId() != itemId) return NULL;
 	switch(itemId) {
@@ -1529,7 +1527,7 @@ void bl_initCustomBlockVtable() {
 }
 
 void* bl_getMaterial(int materialType) {
-	Tile* baseTile = BlockLegacy::mBlocks[materialType];
+	Tile* baseTile = getBlockForItemId(materialType);
 	if (baseTile == NULL) {
 		baseTile = BlockLegacy::mBlocks[1];
 	}
@@ -1598,7 +1596,7 @@ public:
 };
 
 void BLItemSetIconRequest::setItem() {
-	Item* item = bl_Item_mItems[this->itemId];
+	Item* item = getItemForId(this->itemId);
 	if (!item) return;
 	bl_Item_setIcon(item, this->iconName, this->iconIndex);
 }
@@ -1610,7 +1608,7 @@ public:
 };
 
 void BLItemSetJsonRequest::setItem() {
-	Item* item = bl_Item_mItems[this->itemId];
+	Item* item = getItemForId(this->itemId);
 	if (!item) return;
 	BL_LOG("Setting icon for %d", this->itemId);
 	Json::Value jsonValue;
@@ -1874,8 +1872,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
   (JNIEnv *env, jclass clazz, jint blockId, jfloat time) {
-	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = BlockLegacy::mBlocks[blockId];
+	Tile* tile = getBlockForItemId(blockId);
 	if (tile == NULL) {
 		return;
 	}
@@ -1887,8 +1884,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetExplosionResistance
   (JNIEnv *env, jclass clazz, jint blockId, jfloat resistance) {
-	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = BlockLegacy::mBlocks[blockId];
+	Tile* tile = getBlockForItemId(blockId);
 	if (tile == NULL) {
 		return;
 	}
@@ -1914,8 +1910,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 		theAABB->z2 = v6;
 		return;
 	}
-	if (blockId < 0 || blockId > 255) return;
-	Tile* tile = BlockLegacy::mBlocks[blockId];
+	Tile* tile = getBlockForItemId(blockId);
 	if (tile == NULL) {
 		return;
 	}
@@ -1944,16 +1939,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightLevel
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
-	if (blockId < 0 || blockId > 255) return;
-	BlockLegacy* block = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return;
 	block->lightEmission = level;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetLightOpacity
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
-	if (blockId < 0 || blockId > 255) return;
-	BlockLegacy* block = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return;
 	block->lightOpacity = level;
 }
@@ -1971,16 +1964,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
   (JNIEnv *env, jclass clazz, jint blockId, jint level) {
-	if (blockId < 0 || blockId > 255) return;
-	BlockLegacy* tile = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* tile = getBlockForItemId(blockId);
 	if (!tile) return;
 	tile->renderLayer = level;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetRenderLayer
   (JNIEnv *env, jclass clazz, jint blockId) {
-	if (blockId < 0 || blockId > 255) return 0;
-	BlockLegacy* tile = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* tile = getBlockForItemId(blockId);
 	if (!tile) return 0;
 	return tile->getRenderLayer();
 }
@@ -2126,7 +2117,7 @@ static std::vector<BLFurnaceRecipeRequest> furnaceRecipes;
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddFurnaceRecipe
   (JNIEnv *env, jclass clazz, jint inputId, jint outputId, jint outputDamage) {
 	if (inputId < 0 || inputId >= bl_item_id_count) return;
-	Item* item = bl_Item_mItems[inputId];
+	Item* item = getItemForId(inputId);
 	if (item == nullptr) return;
 	// You don't need count, not sure how to omit it completely
   	ItemInstance outputStack(outputId, 1, outputDamage);
@@ -2139,7 +2130,7 @@ static void bl_readdFurnace() {
 	for (auto& f: furnaceRecipes) {
 		ItemInstance outputStack(f.outputId, 1, f.outputDamage);
 		FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
-		Item* item = bl_Item_mItems[f.inputId];
+		Item* item = getItemForId(f.inputId);
 		if (item == nullptr) continue;
 		recipes->addFurnaceRecipe(*item, outputStack);
 	}
@@ -2177,10 +2168,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemCategory
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
-	Item* myitem = bl_Item_mItems[itemId];
+	Item* myitem = getItemForId(itemId);
 	bl_Item_setCategory(myitem, category);
-	if (itemId < 256) {
-		BlockLegacy* myblock = BlockLegacy::mBlocks[itemId];
+	if (itemIdIsBlock(itemId)) {
+		BlockLegacy* myblock = getBlockForItemId(itemId);
 		myblock->setCategory((CreativeItemCategory)category);
 	}
 }
@@ -2413,7 +2404,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 				if (extraData != 0) return extraData;
 			}
 #endif
-			return id;
+			return itemIdFromBlockId(id);
 		}
 		case BLOCK_DATA:
 			return bl_localplayer->getRegion()->getData(
@@ -2563,7 +2554,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetHandEquipped
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if (item == nullptr) return;
 	item->handEquipped = handEquipped;
 }
@@ -2863,12 +2854,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidItem
   (JNIEnv *env, jclass clazz, jint itemId) {
 	if (itemId == 0) return true;
-	if (itemId < 0 || itemId >= bl_item_id_count) {
-		//BL_LOG("Item ID %d out of bounds %d", itemId, bl_item_id_count);
-		return false;
-	}
-	//BL_LOG("Item ID %d has %p", itemId, bl_Item_mItems[itemId]);
-	return bl_Item_mItems[itemId] != nullptr;
+	return getItemForId(itemId) != nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsValidCommand
@@ -3050,21 +3036,21 @@ static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, BaseEntityRe
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
   (JNIEnv *env, jclass clazz, jint blockId, jint damage) {
-	BlockLegacy* block = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return -1;
 	return block->getDestroySpeed();
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetFriction
   (JNIEnv *env, jclass clazz, jint blockId) {
-	BlockLegacy* block = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return -1;
 	return block->getFriction();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetFriction
   (JNIEnv *env, jclass clazz, jint blockId, jfloat friction) {
-	BlockLegacy* block = BlockLegacy::mBlocks[blockId];
+	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return;
 	block->setFriction(friction);
 }
@@ -3083,7 +3069,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
   (JNIEnv *env, jclass clazz, jint itemId, jstring text) {
-	Item* item = bl_Item_mItems[itemId];
+	Item* item = getItemForId(itemId);
 	if (!item) return false;
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
 	Json::Value jsonValue;
@@ -3148,7 +3134,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLang
 JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetUseAnimation
   (JNIEnv *env, jclass clazz, jint id) {
 	if (id < 0 || id >= bl_item_id_count) return -1;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if (!item) return -1;
 	return (jint) ItemInstance(id, 1, 0).getUseAnimation();
 }
@@ -3156,7 +3142,7 @@ JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetUse
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUseAnimation
   (JNIEnv *env, jclass clazz, jint id, jint animation) {
 	if (id < 0 || id >= bl_item_id_count) return;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if (!item) return;
 	item->setUseAnimation((UseAnimation)animation);
 }
@@ -3244,7 +3230,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmo
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetStackedByData
   (JNIEnv *env, jclass clazz, jint id, jboolean stacked) {
 	if (id < 0 || id >= bl_item_id_count) return;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if (!item) return;
 	item->setStackedByData(stacked);
 }
@@ -3252,7 +3238,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetSta
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetAllowOffhand
   (JNIEnv *env, jclass clazz, jint id, jboolean offhand) {
 	if (id < 0 || id >= bl_item_id_count) return;
-	Item* item = bl_Item_mItems[id];
+	Item* item = getItemForId(id);
 	if (!item) return;
 	item->setAllowOffhand(offhand);
 }
@@ -3481,7 +3467,7 @@ void bl_Player_addLevels_hook(Player* player, int experience) {
 
 JNIEXPORT jint Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemGetMaxStackSize
   (JNIEnv* env, jclass clazz, jint id) {
-	if (id < 0 || id >= bl_item_id_count || !bl_Item_mItems[id]) return -1;
+	if (!getItemForId(id)) return -1;
 	ItemInstance stack(id, 1, 0);
 	return stack.getMaxStackSize();
 }
