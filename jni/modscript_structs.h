@@ -84,8 +84,8 @@ public:
 
 	char filler4[340-200]; //200
 	int renderType; //340
-	char filler5[580-344]; // 328
-	std::vector<Entity*> riders; // 580
+	char filler5[584-344]; // 344
+	std::vector<Entity*> riders; // 584
 
 	~Entity();
 	BlockSource* getRegion() const;
@@ -110,7 +110,7 @@ public:
 };
 static_assert(offsetof(Entity, renderType) == 340, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 580, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
@@ -265,7 +265,7 @@ public:
 	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
 	char filler4[124-114]; // 114
 	unsigned short id; // 124
-	char filler5[784-126]; // 126
+	char filler5[824-126]; // 126
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -283,7 +283,7 @@ public:
 	static bool mSolid[0x100];
 	static float mTranslucency[0x100];
 };
-static_assert(sizeof(BlockLegacy) == 784, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 824, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
@@ -551,8 +551,8 @@ enum ParticleType {
 class Level {
 public:
 	void** vtable; // 0
-	char filler[28-4]; // 4
-	std::vector<Player*> allPlayers; // 28
+	char filler[40-4]; // 4
+	std::vector<Player*> allPlayers; // 40
 
 	Entity* fetchEntity(EntityUniqueID, bool) const;
 	void addEntity(BlockSource&, std::unique_ptr<Entity>);
@@ -573,7 +573,7 @@ public:
 	Abilities* getPlayerAbilities(EntityUniqueID const&);
 };
 // Level::getActivePlayerCount
-static_assert(offsetof(Level, allPlayers) == 28, "allPlayers vec");
+static_assert(offsetof(Level, allPlayers) == 40, "allPlayers vec");
 
 class MinecraftCommands;
 class ServerLevel : public Level {

@@ -893,8 +893,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 	if (rider == NULL) return;
 	if (mount == NULL) {
 		void* vtable = rider->vtable[vtable_indexes.entity_stop_riding];
-		auto fn = (void (*)(Entity*, bool, bool)) vtable;
-		fn(rider, true, true);
+		auto fn = (void (*)(Entity*, bool, bool, bool)) vtable;
+		fn(rider, true, true, true);
 	} else {
 		// horrible kludge: we hook and unhook canAddRider
 		void* oldCanAddRider = nullptr;
@@ -1359,7 +1359,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZN6Entity11startRidingERS_") - 2;
 	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity10stopRidingEbb") - 2;
+		"_ZN6Entity10stopRidingEbbb") - 2;
 	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 		"_ZNK6Entity11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",

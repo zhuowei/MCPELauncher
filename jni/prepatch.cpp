@@ -94,7 +94,7 @@ bool bl_patch_got(soinfo2* mcpelibhandle, void* original, void* newptr) {
 	}
 	bool got_success = false;
 	void** got_rw = (void**) bl_marauder_translation_function((void*) got);
-	for (int i = 0; i < 0x10000; i++) {
+	for (int i = 0; i < 0x40000; i++) {
 		if (got[i] == original) {
 			got_rw[i] = newptr;
 			got_success = true;
