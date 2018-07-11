@@ -3757,9 +3757,12 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCa
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackEnded
   (JNIEnv* env, jclass clazz) {
 	if (bl_customBlocksCreated) {
+// FIXME 1.5.0
+/*
 		// some derp created a custom block in newLevel
 		BlockGraphics::mTerrainTextureAtlas->loadMetaFile();
 		bl_BlockGraphics_initBlocks_new(bl_minecraft->getServerData()->getResourceLoader());
+*/
 	}
 	bl_needItemIconReload = true;
 }

@@ -80,7 +80,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.4";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.5";
 	public static final String HALF_SUPPORT_VERSION = "~~~~";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
@@ -256,7 +256,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.4.1");
+				intent.putExtra("supportedVersion", "1.5.0");
 				startActivity(intent);
 				finish();
 				try {
@@ -2245,6 +2245,22 @@ public class MainActivity extends NativeActivity {
 	// 1.4.4
 	public HardwareInformation getHardwareInfo() {
 		return new HardwareInformation();
+	}
+
+	public void setLastDeviceSessionId(String sessionId) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("Last device session ID: " + sessionId);
+		}
+		SharedPreferences myprefs = Utils.getPrefs(1);
+		myprefs.edit().putString("last_device_session_id", sessionId).apply();
+	}
+
+	public String getLastDeviceSessionId() {
+		if (BuildConfig.DEBUG) {
+			System.out.println("Get last device session ID");
+		}
+		SharedPreferences myprefs = Utils.getPrefs(1);
+		return myprefs.getString("last_device_session_id", "");
 	}
 
 	@Override
