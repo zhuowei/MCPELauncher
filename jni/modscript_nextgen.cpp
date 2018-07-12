@@ -3836,14 +3836,25 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	}
 }
 
-bool bl_BackgroundWorker__workerThread_hook(BackgroundWorker* worker) {
-	bool retval = worker->_workerThread();
-	if (!retval && !worker->runQueue) {
+void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTask task) {
+	bool workerThread = worker->_workerThread();
+	bool setOld = false;
+	pthread_t savedValue;
+	if (!workerThread && !worker->runQueue) {
 		// if we return false, then BackgroundWorker schedules it on the runqueue
 		// but the client thread has no runqueue
 		// returning true seems to fix it; not sure why
-		//BL_LOG("We have no runqueue, we're supposed to return %s: returning true", retval? "yes" : "no");
-		return true;
+		BL_LOG("We have no runqueue, we're supposed to return %s: returning true", workerThread? "yes" : "no");
+		savedValue = worker->myThread;
+		worker->myThread = pthread_self();
+		setOld = true;
+		if (!worker->_workerThread()) {
+			abort();
+		}
+	}
+	void* retval = worker->queue(task);
+	if (setOld) {
+		worker->myThread = savedValue;
 	}
 	return retval;
 }
@@ -4440,7 +4451,8 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_ItemRenderer_render_real);
 	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
 		(void**)&bl_FurnaceRecipes__init_real);
-	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
+	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
+	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
 
 	bl_renderManager_init(mcpelibhandle);
 /*
