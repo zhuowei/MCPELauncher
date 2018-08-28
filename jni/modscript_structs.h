@@ -3,10 +3,11 @@
 #include <memory>
 #include <unordered_map>
 #endif
-class Entity;
+class Actor;
 class Player;
 class BlockPos;
 class BlockSource;
+typedef Actor Entity;
 #include "mcpe/minecraft.h"
 #include "mcpe/enchant.h"
 #include "mcpe/synchedentitydata.h"
@@ -24,22 +25,18 @@ typedef struct {
 extern "C" {
 #endif
 
-#ifdef __cplusplus
-class EntityUniqueID {
+class ActorUniqueID {
 public:
 	long long id;
-	EntityUniqueID(long long id) : id(id) {
+	ActorUniqueID(long long id) : id(id) {
 	}
 
 	operator long long() const {
 		return this->id;
 	}
 };
-#else
-typedef struct {
-	long long id;
-} EntityUniqueID;
-#endif
+
+typedef ActorUniqueID EntityUniqueID;
 
 struct Vec3 {
 	float x;
@@ -60,13 +57,13 @@ struct Vec2 {
 
 class AgeableComponent;
 
-enum EntityFlags {
-	EntityFlagsImmobile = 16,
+enum ActorFlags {
+	ActorFlagsImmobile = 16,
 };
 class PlayerInventoryProxy;
-class EntityDamageSource;
+class ActorDamageSource;
 // last update: 1.2.20b1
-class Entity {
+class Actor {
 public:
 	void** vtable; //0
 	char filler3[136-4]; // 4
@@ -87,7 +84,7 @@ public:
 	char filler5[584-344]; // 344
 	std::vector<Entity*> riders; // 584
 
-	~Entity();
+	~Actor();
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;
@@ -95,10 +92,10 @@ public:
 	SynchedEntityData* getEntityData();
 	EntityUniqueID const& getTargetId();
 	void setTarget(Entity*);
-	void setStatusFlag(EntityFlags, bool);
+	void setStatusFlag(ActorFlags, bool);
 	Level* getLevel();
 	AgeableComponent* getAgeableComponent() const;
-	void hurt(EntityDamageSource const&, int, bool, bool);
+	void hurt(ActorDamageSource const&, int, bool, bool);
 	Entity* getRide() const;
 	void setNameTagVisible(bool);
 	void sendMotionPacketIfNeeded();
@@ -107,6 +104,7 @@ public:
 	void enableAutoSendPosRot(bool);
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
+	ItemInstance* getOffhandSlot() const;
 };
 static_assert(offsetof(Entity, renderType) == 340, "renderType offset wrong");
 // Entity::getRiderIndex
@@ -114,7 +112,6 @@ static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
 
 class Mob: public Entity {
 public:
-	ItemInstance* getOffhandSlot() const;
 };
 enum ContainerID : unsigned char {
 	ContainerIDInventory = 0,
@@ -192,9 +189,7 @@ public:
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
-	static void initCreativeItems(bool);
-	static Item* getItem(short);
-	static Item* mExtraItems[512];
+	static void initCreativeItems(bool, std::function<void ()>);
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
@@ -277,11 +272,6 @@ public:
 	void* getMaterial() const;
 	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
-
-	static std::unordered_map<std::string, BlockLegacy*> mBlockLookupMap;
-	static BlockLegacy* mBlocks[0x100];
-	static bool mSolid[0x100];
-	static float mTranslucency[0x100];
 };
 static_assert(sizeof(BlockLegacy) == 824, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
@@ -608,4 +598,9 @@ void addItem(Player&, ItemInstance&);
 #include "mcpe/blockentity/furnaceblockentity.h"
 #include "mcpe/blockentity/mobspawnerblockentity.h"
 #include "mcpe/blockentity/signblockentity.h"
+typedef BlockActor BlockEntity;
+typedef ChestBlockActor ChestBlockEntity;
+typedef FurnaceBlockActor FurnaceBlockEntity;
+typedef MobSpawnerBlockActor MobSpawnerBlockEntity;
+typedef SignBlockActor SignBlockEntity;
 #include "mcpe/blocksource.h"

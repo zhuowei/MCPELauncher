@@ -6,6 +6,7 @@ enum TextureLocation {
 };
 namespace mce {
 class TextureGroup;
+class TextureGroupBase;
 class TextureDescription;
 class Texture {
 public:
@@ -20,7 +21,7 @@ public:
 	std::string textureName; // 12
 	char filler2[24-16]; // 16
 	TexturePtr();
-	TexturePtr(TextureGroup&, ResourceLocation, bool a=false);
+	TexturePtr(TextureGroupBase&, ResourceLocation, bool a=false);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);
@@ -31,7 +32,10 @@ public:
 };
 
 static_assert(sizeof(TexturePtr) == 24, "textureptr size");
-class TextureGroup {
+class TextureGroupBase {
+public:
+};
+class TextureGroup : public TextureGroupBase {
 public:
 	TexturePtr getTexture(ResourceLocation, bool);
 	void loadTexture(ResourceLocation const&, bool);

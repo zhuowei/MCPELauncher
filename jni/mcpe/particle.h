@@ -1,2 +1,5 @@
 #pragma once
-int ParticleTypeFromString(std::string const&);
+class ParticleTypeMap {
+public:
+	static ParticleType getParticleTypeId(std::string const&);
+};

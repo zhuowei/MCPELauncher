@@ -1,5 +1,5 @@
 #pragma once
-class BlockEntity {
+class BlockActor {
 public:
 	void setChanged();
 };

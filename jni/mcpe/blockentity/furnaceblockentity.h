@@ -1,7 +1,7 @@
 #pragma once
 #include "blockentity.h"
 
-class FurnaceBlockEntity : public BlockEntity {
+class FurnaceBlockActor : public BlockActor {
 public:
 	void setItem(int, ItemInstance const&);
 	ItemInstance* getItem(int) const;

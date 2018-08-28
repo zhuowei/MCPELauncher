@@ -1,7 +1,6 @@
 #pragma once
+#include "itemregistry.h"
 extern "C" {
-extern Item** bl_Item_mItems;
-extern int bl_item_id_count;
 
 static inline int itemIdFromBlockId(int blockId) {
 	if (blockId > 255) return 255-blockId;
@@ -19,22 +18,15 @@ static inline bool itemIdIsBlock(int itemId) {
 
 static inline BlockLegacy* getBlockForItemId(int itemId) {
 	if (!itemIdIsBlock(itemId)) return nullptr;
-	return BlockLegacy::mBlocks[blockIdFromItemId(itemId)];
+	//if (!bl_level) return nullptr;
+	abort(); // fix this pls
 }
 
 static inline Item* getItemForId(int itemId) {
-	if (itemId < -512 || itemId >= bl_item_id_count) return nullptr;
-	if (itemId < 0) {
-		return Item::mExtraItems[-itemId];
-	}
-	return bl_Item_mItems[itemId];
+	return ItemRegistry::mItemRegistry->getItem((short)itemId);
 }
 
 static inline void setItemForId(int itemId, Item* item) {
-	if (itemId < -512 || itemId >= bl_item_id_count) return;
-	if (itemId < 0) {
-		Item::mExtraItems[-itemId] = item;
-	}
-	bl_Item_mItems[itemId] = item;
+	return ItemRegistry::mItemRegistry->_setItem((short)itemId, item);
 }
 } // extern "C"

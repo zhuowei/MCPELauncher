@@ -328,7 +328,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
 //		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZN11MobRenderer6renderER23BaseEntityRenderContextR16EntityRenderData");
+		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item3useER12ItemInstanceR6Player");
@@ -460,7 +460,7 @@ static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
-static void (*bl_Mob_die_real)(Entity*, EntityDamageSource const&);
+static void (*bl_Mob_die_real)(Entity*, ActorDamageSource const&);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_Item_addCreativeItem)(short, short);
 //static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
@@ -479,8 +479,8 @@ static void (*bl_Item_setCategory)(Item*, int);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
-static void* (*bl_MobRenderer_render_real)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&);
-static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&);
+static void* (*bl_MobRenderer_render_real)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&);
+static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&);
 static void (*bl_Block_onPlace)(BlockLegacy*, BlockSource&, BlockPos const&);
 
 static void** bl_LiquidBlockStatic_vtable;
@@ -659,8 +659,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
-static void bl_Item_initCreativeItems_hook(bool arg1) {
-	Item::initCreativeItems(arg1);
+static void bl_Item_initCreativeItems_hook(bool arg1, std::function<void ()> func) {
+	Item::initCreativeItems(arg1, func);
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -1529,7 +1529,8 @@ void bl_initCustomBlockVtable() {
 void* bl_getMaterial(int materialType) {
 	Tile* baseTile = getBlockForItemId(materialType);
 	if (baseTile == NULL) {
-		baseTile = BlockLegacy::mBlocks[1];
+		//baseTile = BlockLegacy::mBlocks[1];
+		abort(); // FIXME 1.6
 	}
 	return baseTile->getMaterial();
 }
@@ -1554,6 +1555,7 @@ static std::vector<BLBlockBuildTextureRequest> buildTextureRequests;
 
 static void bl_finishBlockBuildTextureRequests() {
 	BL_LOG("finishBlockBuildTextureRequests");
+/* FIXME 1.6: custom blocks need reimplementation
 	for (auto& request: buildTextureRequests) {
 		int blockId = request.blockId;
 		auto bg = blockId >= 0x100? bl_extendedBlockGraphics[blockId]: BlockGraphics::mBlocks[blockId];
@@ -1579,6 +1581,7 @@ static void bl_finishBlockBuildTextureRequests() {
 		//bl_buildTextureArray(bl_custom_block_textures[request.blockId], request.textureNames, request.textureCoords);
 	}
 	BL_LOG("end finishBlockBuildTextureRequests");
+*/
 }
 
 class BLItemSetRequest {
@@ -1664,6 +1667,8 @@ void bl_cpp_tick_hook() {
 }
 
 static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
+	return nullptr;
+#if 0 // FIXME 1.6: extended blocks are removed
 	if (bl_custom_block_visualShapes[blockId]) {
 		AABB** a = bl_custom_block_visualShapes[blockId];
 		for (int i = 0; i < 15; i++) {
@@ -1722,9 +1727,12 @@ static Tile* bl_createExtendedBlock(int blockId, std::string textureNames[], int
 	bl_set_i18n("item." + nameStr + ".name", realNameStr);
 	
 	return retval;
+#endif
 }
 
 Tile* bl_createBlock(int blockId, std::string textureNames[], int textureCoords[], int materialType, bool opaque, int renderShape, const char* name, int customBlockType) {
+	return nullptr;
+#if 0 // FIXME 1.6
 	if (blockId < 0 || blockId > 255) return NULL;
 	if (bl_custom_block_textures[blockId] != NULL) {
 		delete[] bl_custom_block_textures[blockId];
@@ -1868,6 +1876,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		bl_createExtendedBlock(blockId, myStringArray, myIntArray, materialBlockId, opaque, renderType, utfChars, customBlockType);
 	}
 	env->ReleaseStringUTFChars(name, utfChars);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetDestroyTime
@@ -2327,7 +2336,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	const char * typeChars = env->GetStringUTFChars(type, nullptr);
 	std::string typeStr(typeChars);
 	env->ReleaseStringUTFChars(type, typeChars);
-	int particleType = ParticleTypeFromString(typeStr);
+	int particleType = ParticleTypeMap::getParticleTypeId(typeStr);
 	if (particleType <= 0) return;
 	Vec3 pos {x, y, z};
 	Vec3 vel {xVel, yVel, zVel};
@@ -2347,20 +2356,6 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
   (JNIEnv *env, jclass clazz) {
-	for (int i = 1; i < 0x100; i++) {
-		//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "mBlocks[%d] = %p", i, Block::mBlocks[i]);
-		if (BlockLegacy::mBlocks[i] == NULL) {
-			char name[100];
-			snprintf(name, sizeof(name), "Missing block ID: %d", i);
-			std::string textureNames[16*6];
-			for (int a = 0; a < 16*6; a++) {
-				textureNames[a] = "cobblestone";
-			}
-			int textureCoords[16*6];
-			memset(textureCoords, 0, sizeof(textureCoords));
-			bl_createBlock(i, textureNames, textureCoords, 17 /* wood */, true, 0, (const char*) name, 0);
-		}
-	}
 }
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
@@ -2604,7 +2599,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 	*/
 }
 
-void bl_Mob_die_hook(Entity* entity1, EntityDamageSource const& damageSource) {
+void bl_Mob_die_hook(Entity* entity1, ActorDamageSource const& damageSource) {
 	if (!bl_isActiveLevel(entity1->getLevel())) {
 		bl_Mob_die_real(entity1, damageSource);
 		return;
@@ -2642,8 +2637,8 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	pos.y = y;
 	pos.z = z;
 	Vec2 rot {0, 0};
-	EntityDefinitionIdentifier identifier((EntityType)type);
-	std::unique_ptr<Entity> entity = EntityFactory::createSpawnedEntity(identifier, bl_localplayer, pos, rot);
+	ActorDefinitionIdentifier identifier((EntityType)type);
+	std::unique_ptr<Actor> entity = ActorFactory::createSpawnedEntity(identifier, bl_localplayer, pos, rot);
 
 	if (entity == nullptr) {
 		//WTF?
@@ -2875,7 +2870,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	if (!bl_localplayer) return -1;
 	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
 	if (blockId == 0) return -1;
-	Tile* tile = BlockLegacy::mBlocks[blockId];
+	Tile* tile = nullptr; // FIXME 1.6! BlockLegacy::mBlocks[blockId];
 	if (!tile) return -1;
 	void* methodPtr = tile->vtable[vtable_indexes.tile_get_second_part];
 	bool (*getSecondPart)(Tile*, TileSource&, TilePos const&, TilePos&) =
@@ -3026,7 +3021,7 @@ mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Ent
 	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
 }
 
-static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, BaseEntityRenderContext& context, EntityRenderData& renderdata) {
+static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, BaseActorRenderContext& context, ActorRenderData& renderdata) {
 	auto foundIter = bl_mobTexturesMap.find(renderdata.entity->getUniqueID());
 	if (foundIter != bl_mobTexturesMap.end()) {
 		return bl_MobRenderer_render_real(renderer, context, renderdata);
@@ -3346,7 +3341,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetI
 	if (synchedData == nullptr) return;
 	synchedData->thevalue = (char) immobile;
 */
-	entity->setStatusFlag(EntityFlagsImmobile, immobile);
+	entity->setStatusFlag(ActorFlagsImmobile, immobile);
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeModPESetRenderDebug
@@ -3384,9 +3379,9 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetT
 	}
 }
 
-void (*bl_Entity_hurt_real)(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b);
+void (*bl_Entity_hurt_real)(Entity* entity, ActorDamageSource const& damageSource, int hearts, bool a, bool b);
 
-void bl_Entity_hurt_hook(Entity* entity, EntityDamageSource const& damageSource, int hearts, bool a, bool b) {
+void bl_Entity_hurt_hook(Entity* entity, ActorDamageSource const& damageSource, int hearts, bool a, bool b) {
 	if (!bl_isActiveLevel(entity->getLevel())) {
 		bl_Entity_hurt_real(entity, damageSource, hearts, a, b);
 		return;
@@ -3552,7 +3547,7 @@ static void bl_tessellateBlock_key_destructor(void* value) {
 	if (value) delete (BLTessellateBlock*)value;
 	pthread_setspecific(bl_tessellateBlock_key, nullptr);
 }
-
+#if 0 // FIXME 1.6: extended blocks removed
 static void (*bl_BlockTessellator_tessellateInWorld_real)(BlockTessellator*, mce::RenderConfiguration const&, Tessellator&, Block const&, BlockPos const&, bool);
 void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::RenderConfiguration const& renderConfig,
 	Tessellator& tessellator, Block const& blockState, BlockPos const& pos, bool something) {
@@ -3570,6 +3565,7 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::Ren
 	blockInfo->blockData = 0;
 	blockInfo->blockExtraData = 0;
 }
+#endif
 
 TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, unsigned int side, Block const& blockState) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
@@ -3721,11 +3717,13 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 	//bl_repopulateItemGraphics();
 
 	//bl_armorInit_postLoad();
+/* FIXME 1.6: extended blocks removed
 	if (BlockLegacy::mBlocks[kStonecutterId]) {
 		BlockLegacy::mBlocks[kStonecutterId]->setSolid(false);
 		BlockLegacy::mBlocks[kStonecutterId]->renderLayer = 3;
 		bl_Block_setVisualShape(BlockLegacy::mBlocks[kStonecutterId], Vec3(0, 0, 0), Vec3(1, 0.999, 1));
 	}
+*/
 }
 
 static bool bl_needItemIconReload = false;
@@ -4042,6 +4040,7 @@ nullptr
 	}
 	return false; // WHAT
 }
+/*
 static Item* bl_Item_getItem_hook(short itemId) {
 	if (itemId >= 0x200 && itemId < BL_ITEMS_EXPANDED_COUNT) {
 		return bl_Item_mItems[itemId];
@@ -4052,6 +4051,7 @@ static bool bl_patchItemClass(soinfo2* mcpelibhandle) {
 	return bl_patch_got(mcpelibhandle, (void*) &Item::getItem,
 		(void*)&bl_Item_getItem_hook);
 }
+*/
 #if 0
 static uintptr_t mcpelibbase;
 
@@ -4068,6 +4068,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	//mcpelibbase = mcpelibhandle->base;
+/* 1.6 extended the items array natively
 	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item6mItemsE");
 	// Edit the dlsym for Item::items
 	Elf_Sym* itemsSym = (Elf_Sym*) bl_marauder_translation_function(
@@ -4096,10 +4097,12 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		return;
 	}
 
+	/* No longer needed: all these methods use Item::getItem(short)
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) {
 		BL_LOG("Failed to patch constructors");
 		//return;
 	}
+
 	if (!bl_patchReadItemInstance(mcpelibhandle)) {
 		BL_LOG("Failed to patch read");
 	};
@@ -4112,7 +4115,6 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	if (!bl_patchItemClass(mcpelibhandle)) {
 		BL_LOG("Failed to patch item class");
 	}
-/*
 	if (!bl_patchItemRenderer(mcpelibhandle)) {
 		BL_LOG("Failed to patch renderer");
 	}
@@ -4326,7 +4328,7 @@ void bl_setuphooks_cppside() {
 	//bl_Minecraft_hostMultiplayer = (void (*)(Minecraft*, int))
 	//	dlsym(mcpelibhandle, "_ZN9Minecraft15hostMultiplayerEi");
 	// known to fail.
-	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieERK18EntityDamageSource");
+	void* mobDie = dlsym(RTLD_DEFAULT, "_ZN3Mob3dieERK17ActorDamageSource");
 	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	bl_Entity_getNameTag = (std::string* (*)(Entity*))
@@ -4401,10 +4403,10 @@ void bl_setuphooks_cppside() {
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
 	void** skeletonRendererVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV16SkeletonRenderer");
-	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&))
+	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&))
 		skeletonRendererVtable[vtable_indexes.mobrenderer_render];
-	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, BaseEntityRenderContext&, EntityRenderData&))
-		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER23BaseEntityRenderContextR16EntityRenderData");
+	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&))
+		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
 	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	// custom blocks.
@@ -4426,8 +4428,9 @@ void bl_setuphooks_cppside() {
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
 	pthread_key_create(&bl_tessellateBlock_key, &bl_tessellateBlock_key_destructor);
-	mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
-		(void**)&bl_BlockTessellator_tessellateInWorld_real);
+	// FIXME 1.6: extended blocks removed
+	//mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
+	//	(void**)&bl_BlockTessellator_tessellateInWorld_real);
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
 		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);

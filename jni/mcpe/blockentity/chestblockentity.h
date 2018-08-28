@@ -1,7 +1,7 @@
 #pragma once
 #include "blockentity.h"
 
-class ChestBlockEntity : public BlockEntity {
+class ChestBlockActor : public BlockActor {
 public:
 	void setItem(int, ItemInstance const&);
 	ItemInstance* getItem(int) const;

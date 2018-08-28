@@ -3,7 +3,7 @@
 
 class BaseMobSpawner;
 
-class MobSpawnerBlockEntity : public BlockEntity {
+class MobSpawnerBlockActor : public BlockActor {
 public:
 	BaseMobSpawner* getSpawner();
 };

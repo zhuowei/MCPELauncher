@@ -1,10 +1,11 @@
 #pragma once
 #include <memory>
 
-enum EntityType {
+enum ActorType {
 };
+typedef ActorType EntityType;
 
-class EntityDefinitionIdentifier {
+class ActorDefinitionIdentifier {
 public:
 /*
 	std::string part1;
@@ -12,10 +13,10 @@ public:
 	std::string part3;
 */
 	char filler[12]; // FIXME 0.16: yes this will leak memory sigh
-	EntityDefinitionIdentifier(EntityType);
+	ActorDefinitionIdentifier(ActorType);
 };
 
-class EntityFactory {
+class ActorFactory {
 public:
-	static std::unique_ptr<Entity> createSpawnedEntity(EntityDefinitionIdentifier const&, Entity*, Vec3 const&, Vec2 const&);
+	static std::unique_ptr<Actor> createSpawnedEntity(ActorDefinitionIdentifier const&, Actor*, Vec3 const&, Vec2 const&);
 };

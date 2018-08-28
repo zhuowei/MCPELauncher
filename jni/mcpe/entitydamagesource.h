@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
-class EntityDamageSource {
+class ActorDamageSource {
 public:
 	int source;
-	virtual ~EntityDamageSource();
+	virtual ~ActorDamageSource();
 	virtual bool isEntitySource() const;
 	virtual bool isChildEntitySource() const;
 	virtual bool isBlockSource() const;
@@ -19,10 +19,10 @@ public:
 	virtual int getDamagingEntityCategories() const;
 };
 
-class EntityDamageByEntitySource : public EntityDamageSource {
+class ActorDamageByActorSource : public ActorDamageSource {
 public:
-	Entity* entity;
-	virtual ~EntityDamageByEntitySource();
+	Actor* entity;
+	virtual ~ActorDamageByActorSource();
 	virtual bool isEntitySource() const override;
 	virtual std::string getDeathMessage(std::string, Entity*) const override;
 	virtual bool isChildEntitySource() const override;

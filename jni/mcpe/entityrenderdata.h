@@ -1,7 +1,7 @@
 #pragma once
-class Entity;
-class EntityRenderData {
+class Actor;
+class ActorRenderData {
 public:
-	Entity* entity; // 0
+	Actor* entity; // 0
 };
-static_assert(offsetof(EntityRenderData, entity) == 0, "entity render data?");
+static_assert(offsetof(ActorRenderData, entity) == 0, "entity render data?");

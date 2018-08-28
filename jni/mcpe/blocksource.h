@@ -3,7 +3,7 @@
 #include "mcpe/blockstructs.h"
 #include "mcpe/blockanddata.h"
 
-class BlockEntity;
+class BlockActor;
 class Biome;
 class LevelChunk;
 class Dimension;
@@ -30,7 +30,7 @@ public:
 		return state->blockData;
 	}
 	BlockBrightness	getRawBrightness(int, int, int, bool);
-	BlockEntity*	getBlockEntity(int, int, int);
+	BlockActor*	getBlockEntity(int, int, int);
 	int		getGrassColor(BlockPos const&) const;
 	void		setGrassColor(int, BlockPos const&, int);
 	Biome*		getBiome(BlockPos const&);

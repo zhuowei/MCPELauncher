@@ -1,7 +1,7 @@
 #pragma once
-class Entity;
+class Actor;
 class ItemInstance;
 class ItemInHandRenderer {
 public:
-	void* renderItem(Entity&, ItemInstance const&, bool, float, bool, bool);
+	void* renderItem(Actor&, ItemInstance const&, bool, float, bool, bool);
 };
