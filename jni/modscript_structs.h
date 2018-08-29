@@ -66,23 +66,24 @@ class ActorDamageSource;
 class Actor {
 public:
 	void** vtable; //0
-	char filler3[136-4]; // 4
-	float x; //136 - Entity::setPos(Vec3 const&)
-	float y; //140
-	float z; //144
-	char filler2[172-148]; // 148
-	float motionX; //172 found in Entity::rideTick(); should be set to 0 there
-	float motionY; //176
-	float motionZ; //180
-	float pitch; //184 Entity::setRot
-	float yaw; //188
-	float prevPitch; //192
-	float prevYaw; //196
+	char filler2[136-4]; // 4
+	float motionX; //136 found in Entity::rideTick(); should be set to 0 there; or Actor::getVelocity
+	float motionY; //140
+	float motionZ; //144
+	float pitch; //148 Entity::setRot
+	float yaw; //152
+	float prevPitch; //156
+	float prevYaw; //160
 
-	char filler4[340-200]; //200
-	int renderType; //340
-	char filler5[584-344]; // 344
-	std::vector<Entity*> riders; // 584
+	char filler4[300-164]; //164
+	int renderType; //300
+	char filler5[516-304]; // 304
+	std::vector<Entity*> riders; // 516
+
+	char filler3[3376-528]; // 528
+	float x; //3376 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3380
+	float z; //3384
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -106,9 +107,11 @@ public:
 	bool hasTeleported() const;
 	ItemInstance* getOffhandSlot() const;
 };
-static_assert(offsetof(Entity, renderType) == 340, "renderType offset wrong");
+static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 516, "Entity rider offset wrong");
+static_assert(offsetof(Actor, pitch) == 148, "Actor pitch offset wrong");
+static_assert(offsetof(Actor, x) == 3376, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -258,9 +261,9 @@ public:
 	char filler3[112-96]; // 96
 	unsigned char lightOpacity; // 112 from BlockLegacy::setLightBlock
 	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
-	char filler4[124-114]; // 114
-	unsigned short id; // 124
-	char filler5[824-126]; // 126
+	char filler4[128-114]; // 114
+	unsigned short id; // 128
+	char filler5[2184-130]; // 130
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -273,11 +276,11 @@ public:
 	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
-static_assert(sizeof(BlockLegacy) == 824, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 2184, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
-static_assert(offsetof(BlockLegacy, id) == 124, "blockId is wrong");
+static_assert(offsetof(BlockLegacy, id) == 128, "blockId is wrong");
 #define Tile BlockLegacy
 
 typedef struct {
@@ -303,19 +306,20 @@ public:
 	float offsetZ; //8
 	float rotateAngleX; // 12
 	float rotateAngleY; // 16
-	char filler0[53-20]; // 20
-	bool showModel; // 53 from HumanoidMobRenderer::prepareArmor
-	char filler1[80-54]; //54
-	float textureWidth; //80
-	float textureHeight; //84
-	MaterialPtr* material; //88 from ModelPart::draw
-	int textureOffsetX; // 92
-	int textureOffsetY; // 96
-	char filler2[232-100]; // 100
+	char filler0[69-20]; // 20
+	bool showModel; // 69 from HumanoidMobRenderer::prepareArmor
+	char filler1[96-70]; //70
+	//MaterialPtr* material; //88 from ModelPart::draw
+	float textureWidth; //96
+	float textureHeight; //100
+	int filler3; // 104
+	int textureOffsetX; // 108
+	int textureOffsetY; // 112
+	char filler2[252-116]; // 116
 
 	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
-}; // 232 bytes
-static_assert(sizeof(ModelPart) == 232, "modelpart size wrong");
+}; // 252 bytes
+static_assert(sizeof(ModelPart) == 252, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
@@ -335,25 +339,26 @@ public:
 	MaterialPtr materialAlphaBlend; // 60
 	MaterialPtr materialStatic; // 72
 	MaterialPtr materialEmissive; // 84
-	ModelPart bipedHead;//96
-	ModelPart bipedHeadwear;//328
-	ModelPart bipedBody;//560
-	ModelPart bipedRightArm;//792
-	ModelPart bipedLeftArm;//1024
-	ModelPart bipedRightLeg;//1256
-	ModelPart bipedLeftLeg;//1488
-	char filler3[4552-1720]; // 1720 - more model parts
+	MaterialPtr material96; // 96
+	ModelPart bipedHead;//108
+	ModelPart bipedHeadwear;//360
+	ModelPart bipedBody;//612
+	ModelPart bipedRightArm;//864
+	ModelPart bipedLeftArm;//1116
+	ModelPart bipedRightLeg;//1368
+	ModelPart bipedLeftLeg;//1620
+	char filler3[4944-1872]; // 1872 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 4552, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 4944, "HumanoidModel size");
 static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
-static_assert(offsetof(HumanoidModel, bipedHead) == 96, "HumanoidModel bipedHead");
-static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1488, "HumanodModel bipedLeftLeg");
-
+static_assert(offsetof(HumanoidModel, bipedHead) == 108, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1620, "HumanodModel bipedLeftLeg");
+// aug28
 class Recipe;
 class ShapelessRecipe;
 class ShapedRecipe;
