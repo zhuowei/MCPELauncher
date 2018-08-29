@@ -19,14 +19,14 @@ static inline bool itemIdIsBlock(int itemId) {
 static inline BlockLegacy* getBlockForItemId(int itemId) {
 	if (!itemIdIsBlock(itemId)) return nullptr;
 	//if (!bl_level) return nullptr;
-	abort(); // fix this pls
+	return nullptr; // fix this pls
 }
 
 static inline Item* getItemForId(int itemId) {
-	return ItemRegistry::mItemRegistry->getItem((short)itemId);
+	return ItemRegistry::getItem((short)itemId);
 }
 
 static inline void setItemForId(int itemId, Item* item) {
-	return ItemRegistry::mItemRegistry->_setItem((short)itemId, item);
+	return ItemRegistry::_setItem((short)itemId, item);
 }
 } // extern "C"

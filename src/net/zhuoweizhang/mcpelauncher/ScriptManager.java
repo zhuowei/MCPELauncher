@@ -4262,8 +4262,8 @@ public class ScriptManager {
 			} catch (JSONException je) {
 				throw new RuntimeException(je);
 			}
-			nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
-					materialSourceId, opaque, renderType, customBlockType);
+			//nativeDefineBlock(blockId, name, finalTextures.names, finalTextures.coords,
+			//		materialSourceId, opaque, renderType, customBlockType);
 		}
 
 		@JSStaticFunction

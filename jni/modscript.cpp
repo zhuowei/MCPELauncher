@@ -1339,7 +1339,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode9useItemOnER12ItemInstanceRK8BlockPosaRK4Vec3P15ItemUseCallback");
 	vtable_indexes.gamemode_attack = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode6attackER6Entity");
+		"_ZN8GameMode6attackER5Actor");
 	vtable_indexes.gamemode_tick = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode4tickEv");
 	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV13MinecraftGame",
@@ -1352,16 +1352,16 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob8setArmorE9ArmorSlotRK12ItemInstance") - 2;
-	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity6setPosERK4Vec3") - 2;
+	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor6setPosERK4Vec3") - 2;
 	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZNK3Mob14getCarriedItemEv") - 2;
-	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity11startRidingERS_") - 2;
-	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZN6Entity10stopRidingEbbb") - 2;
-	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-		"_ZNK6Entity11canAddRiderERS_") - 2;
+	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor11startRidingERS_") - 2;
+	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor10stopRidingEbbb") - 2;
+	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZNK5Actor11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode20continueDestroyBlockERK8BlockPosaRb");
 	vtable_indexes.player_set_player_game_type = bl_vtableIndex(mcpelibhandle, "_ZTV6Player",
@@ -1469,7 +1469,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_SurvivalMode_useItemOn_hook;
 
 	bl_GameMode_attack_real = (void (*)(void*, Entity*))
-		dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackER6Entity");
+		dlsym(RTLD_DEFAULT, "_ZN8GameMode6attackER5Actor");
 	creativeVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
 	survivalVtable[vtable_indexes.gamemode_attack] = (void*) &bl_GameMode_attack_hook;
 
@@ -1531,8 +1531,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//bl_NinecraftApp_onGraphicsReset = dlsym(RTLD_DEFAULT, "_ZN12NinecraftApp15onGraphicsResetEv");
 	bl_LocalPlayer_hurtTo = (void (*)(Player*, int)) dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
-	bl_Entity_remove = (void (*)(Entity*)) dlsym(RTLD_DEFAULT, "_ZN6Entity6removeEv");
-	bl_Entity_setOnFire = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN6Entity9setOnFireEi");
+	bl_Entity_remove = (void (*)(Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Actor6removeEv");
+	bl_Entity_setOnFire = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN5Actor9setOnFireEi");
 	bl_FillingContainer_getItem = (ItemInstance* (*)(void*, int)) dlsym(RTLD_DEFAULT, "_ZNK16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen

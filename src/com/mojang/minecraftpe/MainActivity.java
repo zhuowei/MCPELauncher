@@ -216,7 +216,7 @@ public class MainActivity extends NativeActivity {
 
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
 		System.out.println("Current fails: " + safeModeCounter);
-		if (safeModeCounter == MAX_FAILS) {
+		if (safeModeCounter == MAX_FAILS && !new File("/sdcard/bl_nosafemode.txt").exists()) {
 			Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", true).apply();
 			safeModeCounter = 0;
 		}
@@ -256,7 +256,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.5.0");
+				intent.putExtra("supportedVersion", "1.6.0");
 				startActivity(intent);
 				finish();
 				try {

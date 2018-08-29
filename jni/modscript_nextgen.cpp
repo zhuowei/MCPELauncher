@@ -294,7 +294,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
 	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZNK11MobRenderer10getSkinPtrER6Entity");
+		"_ZNK11MobRenderer10getSkinPtrER5Actor");
 	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
 	//vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
@@ -325,8 +325,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //		"_ZNK11AppPlatform14useCenteredGUIEv");
 //	vtable_indexes.appplatform_use_metadata_driven_screens = bl_vtableIndex(mcpelibhandle, "_ZTV21AppPlatform_android23",
 //		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
-//	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV6Entity",
-//		"_ZN6Entity4hurtERK18EntityDamageSourceibb");
+//	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+//		"_ZN5Actor4hurtERK18EntityDamageSourceibb");
 	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
@@ -396,9 +396,6 @@ static void (*bl_Item_setIcon)(Item*, std::string const&, int);
 static void (*bl_Item_setMaxStackSize)(Item*, unsigned char);
 
 static void (*bl_Item_setMaxDamage)(Item*, int);
-
-static Recipes* (*bl_Recipes_getInstance)();
-static FurnaceRecipes* (*bl_FurnaceRecipes_getInstance)();
 
 static void** bl_ShapelessRecipe_vtable;
 
@@ -2055,6 +2052,7 @@ bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
+	if (!bl_level) return;
 	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
 	env->GetIntArrayRegion(ingredientsArray, 0, ingredientsElemsCount, ingredients);
@@ -2073,13 +2071,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		recipeType.letter = 'a' + i;
 		ingredientsList.push_back(recipeType);
 	}
-	Recipes* recipes = bl_Recipes_getInstance();
+	Recipes* recipes = bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	recipes->addShapelessRecipe(outStack, ingredientsList, nullptr);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jobjectArray shape, jintArray ingredientsArray) {
+	if (!bl_level) {
+		return;
+	}
 // FIXME 1.2
 	std::vector<std::string> shapeVector;
 	int shapeLength = env->GetArrayLength(shape);
@@ -2109,7 +2110,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		recipeType.letter = (char) ingredients[i * 3];
 		ingredientsList.push_back(recipeType);
 	}
-	Recipes* recipes = bl_Recipes_getInstance();
+	Recipes* recipes = bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, nullptr);
 }
@@ -2130,15 +2131,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (item == nullptr) return;
 	// You don't need count, not sure how to omit it completely
   	ItemInstance outputStack(outputId, 1, outputDamage);
-  	FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
+	if (!bl_level) return;
+	FurnaceRecipes* recipes = bl_level->getFurnaceRecipes();
 	recipes->addFurnaceRecipe(*item, outputStack);
 	furnaceRecipes.push_back({inputId, outputId, outputDamage});
 }
 
-static void bl_readdFurnace() {
+static void bl_readdFurnace(FurnaceRecipes* recipes) {
 	for (auto& f: furnaceRecipes) {
 		ItemInstance outputStack(f.outputId, 1, f.outputDamage);
-		FurnaceRecipes* recipes = bl_FurnaceRecipes_getInstance();
 		Item* item = getItemForId(f.inputId);
 		if (item == nullptr) continue;
 		recipes->addFurnaceRecipe(*item, outputStack);
@@ -2148,7 +2149,7 @@ static void* (*bl_FurnaceRecipes__init_real)(FurnaceRecipes* recipes);
 static void* bl_FurnaceRecipes__init_hook(FurnaceRecipes* recipes) {
 	BL_LOG("Init furnace recipes");
 	void* retval = bl_FurnaceRecipes__init_real(recipes);
-	bl_readdFurnace();
+	bl_readdFurnace(recipes);
 	return retval;
 }
 
@@ -3998,7 +3999,7 @@ static bool bl_patchItemRenderer(soinfo2* mcpelibhandle) {
 
 static bool bl_patchItemEntityChecks(soinfo2* mcpelibhandle) {
 	const char* const toPatch[] = {
-"_ZN10ItemEntity15reloadHardcodedEN6Entity20InitializationMethodERK20VariantParameterList",
+"_ZN10ItemEntity15reloadHardcodedEN5Actor20InitializationMethodERK20VariantParameterList",
 //"_ZN10ItemEntity22readAdditionalSaveDataERK11CompoundTag", FIXME 1.2
 nullptr
 	};
@@ -4097,7 +4098,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 		return;
 	}
 
-	/* No longer needed: all these methods use Item::getItem(short)
+	No longer needed: all these methods use Item::getItem(short)
 	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) {
 		BL_LOG("Failed to patch constructors");
 		//return;
@@ -4233,9 +4234,6 @@ void bl_setuphooks_cppside() {
 
 	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
 	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
-
-	bl_Recipes_getInstance = (Recipes* (*)()) dlsym(mcpelibhandle, "_ZN7Recipes11getInstanceEv");
-	bl_FurnaceRecipes_getInstance = (FurnaceRecipes* (*)()) dlsym(mcpelibhandle, "_ZN14FurnaceRecipes11getInstanceEv");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
@@ -4278,19 +4276,19 @@ void bl_setuphooks_cppside() {
 	bl_CompoundTag_get = (Tag* (*)(void*, std::string const&))
 		dobby_dlsym(mcpelibhandle, "_ZNK11CompoundTag3getERKSs");
 	*/
-	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN6Entity13saveWithoutIdER11CompoundTag");
+	void* entitySaveWithoutId = dlsym(mcpelibhandle, "_ZN5Actor13saveWithoutIdER11CompoundTag");
 	//mcpelauncher_hook(entitySaveWithoutId, (void*) &bl_Entity_saveWithoutId_hook, (void**) &bl_Entity_saveWithoutId_real);
-	void* entityLoad = dlsym(mcpelibhandle, "_ZN6Entity4loadER11CompoundTag");
+	void* entityLoad = dlsym(mcpelibhandle, "_ZN5Actor4loadER11CompoundTag");
 	//mcpelauncher_hook(entityLoad, (void*) &bl_Entity_load_hook, (void**) &bl_Entity_load_real);
 #endif
 	// known good.
 	//bl_MinecraftClient_setScreen = (void (*)(Minecraft*, void*)) dlsym(mcpelibhandle, "_ZN15MinecraftClient9setScreenEP6Screen");
 	//bl_ProgressScreen_ProgressScreen = (void (*)(void*)) dlsym(mcpelibhandle, "_ZN14ProgressScreenC1Ev");
 	//bl_Minecraft_locateMultiplayer = (void (*)(Minecraft*)) dlsym(mcpelibhandle, "_ZN9Minecraft17locateMultiplayerEv");
-	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI6EntitySt14default_deleteIS3_EE");
+	void* addEntity = dlsym(mcpelibhandle, "_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE");
 	mcpelauncher_hook(addEntity, (void*) &bl_Level_addEntity_hook, (void**) &bl_Level_addEntity_real);
 	void* mpAddEntity = dlsym(mcpelibhandle,
-		"_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI6EntitySt14default_deleteIS3_EE");
+		"_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE");
 	mcpelauncher_hook(mpAddEntity, (void*) &bl_MultiPlayerLevel_addEntity_hook, (void**) &bl_MultiPlayerLevel_addEntity_real);
 
 	//mcpelauncher_hook((void*)&MultiPlayerLevel::putEntity, (void*)&bl_MultiPlayerLevel_putEntity_hook,
@@ -4298,7 +4296,7 @@ void bl_setuphooks_cppside() {
 
 	void* addPlayer = dlsym(mcpelibhandle, "_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE");
 	mcpelauncher_hook(addPlayer, (void*) &bl_Level_addPlayer_hook, (void**) &bl_Level_addPlayer_real);
-	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level18queueEntityRemovalEOSt10unique_ptrI6EntitySt14default_deleteIS1_EEb");
+	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
 	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
@@ -4317,7 +4315,7 @@ void bl_setuphooks_cppside() {
 	bl_Biome_getBiome = (Biome* (*)(int))
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
-		dlsym(mcpelibhandle, "_ZN6Entity7setSizeEff");
+		dlsym(mcpelibhandle, "_ZN5Actor7setSizeEff");
 	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
 		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
@@ -4332,7 +4330,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook(mobDie, (void*) &bl_Mob_die_hook, (void**) &bl_Mob_die_real);
 
 	bl_Entity_getNameTag = (std::string* (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZNK6Entity10getNameTagEv");
+		dlsym(mcpelibhandle, "_ZNK5Actor10getNameTagEv");
 	bl_Mob_addEffect = (void (*)(Entity*, MobEffectInstance&))
 		dlsym(mcpelibhandle, "_ZN3Mob9addEffectERK17MobEffectInstance");
 	bl_Mob_removeEffect = (void (*)(Entity*, int))
@@ -4356,7 +4354,7 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook((void*) playerEat, (void*) &bl_Player_eat_hook,
 		(void**) &bl_Player_eat_real);
 	bl_Entity_getDimensionId = (int (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZNK6Entity14getDimensionIdEv");
+		dlsym(mcpelibhandle, "_ZNK5Actor14getDimensionIdEv");
 
 	bl_Player_HUNGER = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player6HUNGERE");
@@ -4383,7 +4381,7 @@ void bl_setuphooks_cppside() {
 	bl_patch_got_wrap(mcpelibhandle, (void*) &Item::initCreativeItems,
 		(void*)&bl_Item_initCreativeItems_hook);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
-		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER6Entity");
+		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER5Actor");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitERK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);

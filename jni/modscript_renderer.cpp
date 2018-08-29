@@ -46,8 +46,8 @@ static std::map<long long, int> bl_renderTypeMap;
 static std::unordered_map<int, int> bl_itemSpriteRendererTypeMap;
 
 static EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer_entity_real)(void*, Entity*);
-class BaseEntityRenderContext;
-static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, BaseEntityRenderContext&, Entity&, Vec3 const&, Vec2 const&);
+class BaseActorRenderContext;
+static void* (*bl_EntityRenderDispatcher_render_real)(void* renderDispatcher, BaseActorRenderContext&, Actor&, Vec3 const&, Vec2 const&);
 class GeometryGroup;
 class BlockTessellator;
 static void (*bl_EntityRenderDispatcher_initializeEntityRenderers_real)(void* self, GeometryGroup& geometryGroup,
@@ -132,12 +132,14 @@ int bl_renderManager_createHumanoidRenderer() {
 Item** bl_getItemsArray();
 
 int bl_renderManager_createItemSpriteRenderer(int itemId) {
+/* FIXME 1.6 Item array is gone
 	Item** mItems = bl_getItemsArray();
 	if (!mItems[itemId]) return -1;
 	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(bl_minecraft->getTextures(), mItems[itemId], false);
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	bl_itemSpriteRendererTypeMap[itemId] = retval;
 	return retval;
+*/
 }
 
 int bl_renderManager_renderTypeForItemSprite(int itemId) {
@@ -163,7 +165,7 @@ EntityRenderer* bl_EntityRenderDispatcher_getRenderer_EntityRendererId_hook(void
 //}
 static const int kTempRenderType = 16; // zombie
 
-void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseEntityRenderContext& context, Entity& entity,
+void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRenderContext& context, Actor& entity,
 	Vec3 const& pos, Vec2 const& rot) {
 	auto entityId = entity.getUniqueID();
 	int oldRenderType = entity.renderType;
@@ -328,19 +330,19 @@ void bl_EntityRenderDispatcher_initializeEntityRenderers_hook(void* self, Geomet
 
 void bl_renderManager_init(void* mcpelibhandle) {
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
-		dlsym(mcpelibhandle, "_ZNK22EntityRenderDispatcher11getRendererE16EntityRendererId");
+		dlsym(mcpelibhandle, "_ZNK21ActorRenderDispatcher11getRendererE15ActorRendererId");
 	bl_EntityRenderDispatcher_getRenderer_entity_real = (EntityRenderer* (*)(void*, Entity*))
-		dlsym(mcpelibhandle, "_ZNK22EntityRenderDispatcher11getRendererER6Entity");
+		dlsym(mcpelibhandle, "_ZNK21ActorRenderDispatcher11getRendererER5Actor");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
 /*
-	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER6Entity");
+	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER5Actor");
 	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
 		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
 */
 	// FIXME 1.2
-	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, BaseEntityRenderContext&, Entity&, Vec3 const&, Vec2 const&))
-		dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher6renderER23BaseEntityRenderContextR6EntityRK4Vec3RK4Vec2");
+	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, BaseActorRenderContext&, Actor&, Vec3 const&, Vec2 const&))
+		dlsym(mcpelibhandle, "_ZN21ActorRenderDispatcher6renderER22BaseActorRenderContextR5ActorRK4Vec3RK4Vec2");
 	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_render_real, (void*)&bl_EntityRenderDispatcher_render_hook)) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook render");
 		abort();

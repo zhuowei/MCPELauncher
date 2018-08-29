@@ -2,7 +2,7 @@
 class Item;
 class ItemRegistry {
 public:
-	Item* getItem(short);
-	void _setItem(short, Item const*);
+	static Item* getItem(short);
+	static void _setItem(short, Item const*);
 	static ItemRegistry* mItemRegistry;
 };

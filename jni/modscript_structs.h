@@ -166,16 +166,16 @@ class TextureAtlas;
 enum UseAnimation {
 };
 
-// Updated 1.2b11
-// see _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
+// Updated 1.6.0b30
+// see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
 class Item {
 public:
 	//void** vtable; //0
-	char filler0[18-4]; //4
-	short itemId; //18
-	char filler1[33-20]; // 20
-	bool handEquipped; // 33
-	char filler3[124-34]; // 34
+	char filler0[64-4]; //4
+	short itemId; //64
+	char filler1[83-66]; // 66
+	bool handEquipped; // 83
+	char filler3[124-84]; // 84
 	virtual ~Item();
 
 	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
@@ -193,7 +193,7 @@ public:
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
-static_assert(offsetof(Item, itemId) == 18, "Item ID offset");
+static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
 static_assert(sizeof(Item) == 124, "item size is wrong");
 
 class CompoundTag {
@@ -491,6 +491,7 @@ class LevelChunk;
 typedef void ModelRenderer;
 
 #ifdef __cplusplus
+// look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
 	int armorType; // 124
 	int damageReduceAmount; // 128
@@ -561,6 +562,8 @@ public:
 	Player* getPrimaryLocalPlayer() const;
 	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
 	Abilities* getPlayerAbilities(EntityUniqueID const&);
+	Recipes* getRecipes() const;
+	FurnaceRecipes* getFurnaceRecipes() const;
 };
 // Level::getActivePlayerCount
 static_assert(offsetof(Level, allPlayers) == 40, "allPlayers vec");
