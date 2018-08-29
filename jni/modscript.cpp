@@ -83,7 +83,7 @@ extern jclass bl_scriptmanager_class;
 static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
-void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, std::string, void*);
+void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
 static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
@@ -99,7 +99,6 @@ static void (*bl_Entity_remove)(Entity*);
 static void (*bl_GameMode_destroyBlock_real)(void*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
-ItemInstance* (*bl_Mob_getArmor)(Entity*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
@@ -436,7 +435,7 @@ void bl_MinecraftClient_onClientStartedLevel_hook(MinecraftClient* minecraft,
 
 extern void bl_cpp_selectLevel_hook();
 
-void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, std::string str3, void* levelSettings) {
+void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::string wDir, std::string wName, void* arg3, void* levelSettings) {
 	if (!bl_untampered) {
 		bl_panicTamper();
 		return NULL;
@@ -462,7 +461,7 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::stri
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, str3, levelSettings);
+	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, arg3, levelSettings);
 	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
 	bl_localplayer = bl_minecraft->getLocalPlayer();
 	bl_onLockDown = false;
@@ -549,7 +548,10 @@ void bl_SurvivalMode_tick_hook(GameMode* gamemode) {
 
 	Level* myLevel = gamemode->player->getLevel();
 
-	if (myLevel != bl_level) {
+	bool notMainPlayer = bl_minecraft->getLocalPlayer() != nullptr &&
+		gamemode->player->getUniqueID() != bl_minecraft->getLocalPlayer()->getUniqueID();
+
+	if (myLevel != bl_level || notMainPlayer) {
 		bl_SurvivalMode_tick_real(gamemode);
 		return;
 	}
@@ -1222,7 +1224,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	//Geting the item
-	ItemInstance* instance = bl_Mob_getArmor(entity, slot);
+	ItemInstance* instance = entity->getArmor((ArmorSlot)slot);
 	if(instance == NULL) return 0;
 	switch (type)
 	{
@@ -1350,12 +1352,12 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN8GameMode17startDestroyBlockERK8BlockPosaRb");
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
-	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob8setArmorE9ArmorSlotRK12ItemInstance") - 2;
+	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor8setArmorE9ArmorSlotRK12ItemInstance") - 2;
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 		"_ZN5Actor6setPosERK4Vec3") - 2;
-	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZNK3Mob14getCarriedItemEv") - 2;
+	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZNK5Actor14getCarriedItemEv") - 2;
 	vtable_indexes.entity_start_riding = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 		"_ZN5Actor11startRidingERS_") - 2;
 	vtable_indexes.entity_stop_riding = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
@@ -1492,7 +1494,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	//minecraftVtable[minecraftVtableOnClientStartedLevel] = (void*) &bl_MinecraftClient_onClientStartedLevel_hook;
 
-	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsSs13LevelSettings");
+	void* selectLevel = dlsym(mcpelibhandle, "_ZN13MinecraftGame16startLocalServerESsSsRK15ContentIdentity13LevelSettings");
 	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftGame_startLocalServer_hook,
 		(void**) &bl_MinecraftGame_startLocalServer_real);
 
@@ -1539,8 +1541,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
-	bl_Mob_getArmor = (ItemInstance* (*)(Entity*, int))
-		dlsym(mcpelibhandle, "_ZNK3Mob8getArmorE9ArmorSlot");
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
 	bl_Inventory_Inventory = (void (*)(void*, Player*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryC1EP6Player");
 	bl_Inventory_delete1_Inventory = (void (*)(void*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");

@@ -61,7 +61,7 @@ void bl_reload_armor_textures() {
 int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, ScreenContext& screenContext,
 		Mob* mob, int armorPart, float partialTicks) {
 	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, screenContext, mob, armorPart, partialTicks);
-	ItemInstance* armor = bl_Mob_getArmor(mob, armorPart);
+	ItemInstance* armor = mob->getArmor((ArmorSlot)armorPart);
 	if (!armor->isArmorItem()) return retval; // no armour
 
 	ArmorItem* armorItem = (ArmorItem*) armor->item;

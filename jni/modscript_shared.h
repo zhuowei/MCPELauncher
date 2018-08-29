@@ -48,7 +48,6 @@ void bl_renderManager_clearRenderTypes();
 extern void** bl_EntityRenderDispatcher_instance;
 extern EntityRenderer* (*bl_EntityRenderDispatcher_getRenderer)(void*, int);
 extern void bl_cape_init(void* mcpelibhandle);
-extern ItemInstance* (*bl_Mob_getArmor)(Actor*, int);
 
 void bl_dumpVtable(void** vtable, size_t size);
 

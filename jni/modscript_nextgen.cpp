@@ -78,7 +78,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4364
+#define PLAYER_ABILITIES_OFFSET 4388
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -91,16 +91,16 @@ const size_t kTileSize = sizeof(BlockLegacy);
 //const size_t kLiquidBlockStaticSize = 744;
 //static_assert(kLiquidBlockDynamicSize >= kTileSize, "kLiquidBlockDynamicSize");
 // found in registerBlock
-const size_t kBlockItemSize = 124;
+// const size_t kBlockItemSize = 124; FIXME 1.6
 // found in _Z12registerItemI4ItemIRA11_KciEERT_DpOT0_
 const size_t kItemSize = sizeof(Item);
-static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
+// static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3576;
+const size_t kItemEntity_itemInstance_offset = 3856;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 540;
+const size_t kClientInstanceScreenModel_offset = 608;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -269,7 +269,6 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_use;
 	int item_dispense;
 	int clientnetworkhandler_handle_text_packet;
-	int block_get_visual_shape_blocksource;
 	int block_use;
 	int item_get_icon;
 	int appplatform_get_settings_path;
@@ -336,8 +335,6 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
 		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
-	vtable_indexes.block_get_visual_shape_blocksource = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
-		"_ZNK11BlockLegacy14getVisualShapeER11BlockSourceRK8BlockPosR4AABBb");
 	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
@@ -346,8 +343,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN11AppPlatform15getSettingsPathEv");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob13sendInventoryEb") - 2;
-	vtable_indexes.mob_set_offhand_slot = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob14setOffhandSlotERK12ItemInstance") - 2;
+	vtable_indexes.mob_set_offhand_slot = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor14setOffhandSlotERK12ItemInstance") - 2;
 }
 
 template <typename T>
@@ -461,8 +458,6 @@ static void (*bl_Mob_die_real)(Entity*, ActorDamageSource const&);
 static std::string* (*bl_Entity_getNameTag)(Entity*);
 static void (*bl_Item_addCreativeItem)(short, short);
 //static PacketSender* (*bl_Minecraft_getPacketSender)(Minecraft*);
-static int (*bl_Mob_getHealth)(Entity*);
-static AttributeInstance* (*bl_Mob_getAttribute)(Entity*, Attribute const&);
 static void (*bl_Player_eat_real)(Entity*, int, float);
 static int (*bl_Entity_getDimensionId)(Entity*);
 static Attribute* bl_Player_HUNGER;
@@ -1072,6 +1067,7 @@ void bl_repopulateItemGraphics(ItemRenderer* renderer) {
 	if (itemGraphics.find(1) == itemGraphics.end()) {
 		return;
 	}
+	return; // FIXME 1.6 no mItems anymore
 	for (int i = 0x200; i < bl_item_id_count; i++) {
 		Item* item = bl_Item_mItems[i];
 		if (!item) continue;
@@ -1289,7 +1285,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	const char * utfChars = env->GetStringUTFChars(newText, NULL);
 
-	// FIXME 1.2.10 te->setMessage(std::string(utfChars));
+	te->setMessage(std::string(utfChars), std::string("InvalidXuid"));
 	te->setChanged();
 	env->ReleaseStringUTFChars(newText, utfChars);
 }
@@ -2751,14 +2747,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	return bl_Mob_getHealth(entity);
+	return entity->getHealth();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetMobHealth
   (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
 	if (attrib) attrib->value = halfhearts;
 }
 
@@ -2766,7 +2762,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
 	if (attrib) attrib->setMaxValue(halfhearts);
 }
 
@@ -2774,7 +2770,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(entity, SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
 	if (attrib) return attrib->getMaxValue();
 	return -1;
 }
@@ -2783,7 +2779,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(entity, *bl_Player_HUNGER);
+	AttributeInstance* attrib = entity->getAttribute(*bl_Player_HUNGER);
 	if (attrib) return attrib->value;
 	return -1;
 }
@@ -2792,7 +2788,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
   (JNIEnv *env, jclass clazz, jlong entityId, jfloat hunger) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(entity, *bl_Player_HUNGER);
+	AttributeInstance* attrib = entity->getAttribute(*bl_Player_HUNGER);
 	if (attrib) attrib->value = hunger;
 }
 
@@ -2928,7 +2924,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExhaustion
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXHAUSTION);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_EXHAUSTION);
 	if (attrib) return attrib->value;
 	return -1;
 }
@@ -2936,14 +2932,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExhaustion
   (JNIEnv *env, jclass clazz, jfloat value) {
 	if (!bl_localplayer) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXHAUSTION);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_EXHAUSTION);
 	if (attrib) attrib->value = value;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetSaturation
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_SATURATION);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_SATURATION);
 	if (attrib) return attrib->value;
 	return -1;
 }
@@ -2951,14 +2947,14 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetSaturation
   (JNIEnv *env, jclass clazz, jfloat value) {
 	if (!bl_localplayer) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_SATURATION);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_SATURATION);
 	if (attrib) attrib->value = value;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetLevel
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_LEVEL);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_LEVEL);
 	if (attrib) return attrib->value;
 	return -1;
 }
@@ -2966,14 +2962,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetLevel
   (JNIEnv *env, jclass clazz, jint value) {
 	if (!bl_localplayer) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_LEVEL);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_LEVEL);
 	if (attrib) attrib->value = value;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExperience
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return -1;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXPERIENCE);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_EXPERIENCE);
 	if (attrib) return attrib->value;
 	return -1;
 }
@@ -2981,7 +2977,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetExperience
   (JNIEnv *env, jclass clazz, jfloat value) {
 	if (!bl_localplayer) return;
-	AttributeInstance* attrib = bl_Mob_getAttribute(bl_localplayer, *bl_Player_EXPERIENCE);
+	AttributeInstance* attrib = bl_localplayer->getAttribute(*bl_Player_EXPERIENCE);
 	if (attrib) attrib->value = value;
 }
 
@@ -3204,7 +3200,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobGetA
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return nullptr;
 	//Geting the item
-	ItemInstance* itemInstance = bl_Mob_getArmor(entity, slot);
+	ItemInstance* itemInstance = entity->getArmor((ArmorSlot)slot);
 	if (itemInstance == nullptr) return nullptr;
 	if (!itemInstance->hasCustomHoverName()) return nullptr;
 	const char* name = itemInstance->getCustomName().c_str();
@@ -3216,7 +3212,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmo
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//Geting the item
-	ItemInstance* itemInstance = bl_Mob_getArmor(entity, slot);
+	ItemInstance* itemInstance = entity->getArmor((ArmorSlot)slot);
 	if (itemInstance == nullptr) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
 	itemInstance->setCustomName(std::string(nameUtf));
@@ -4346,10 +4342,6 @@ void bl_setuphooks_cppside() {
 	bl_Mob_getTexture = (std::string* (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZN3Mob10getTextureEv");
 */
-	bl_Mob_getHealth = (int (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZNK3Mob9getHealthEv");
-	bl_Mob_getAttribute = (AttributeInstance* (*)(Entity*, Attribute const&))
-		dlsym(mcpelibhandle, "_ZNK3Mob12getAttributeERK9Attribute");
 	void* playerEat = dlsym(mcpelibhandle, "_ZN6Player3eatEif");
 	mcpelauncher_hook((void*) playerEat, (void*) &bl_Player_eat_hook,
 		(void**) &bl_Player_eat_real);
@@ -4430,8 +4422,6 @@ void bl_setuphooks_cppside() {
 	//mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
 	//	(void**)&bl_BlockTessellator_tessellateInWorld_real);
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
-	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_get_visual_shape_blocksource,
-		(void*)&bl_StonecutterBlock_getVisualShape_hook, (void**)&bl_StonecutterBlock_getVisualShape_real);
 	stonecutterVtable[vtable_indexes.tile_get_color] = (void*)&bl_StonecutterBlock_getColor_hook;
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);

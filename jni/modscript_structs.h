@@ -60,8 +60,12 @@ class AgeableComponent;
 enum ActorFlags {
 	ActorFlagsImmobile = 16,
 };
+enum ArmorSlot {
+};
 class PlayerInventoryProxy;
 class ActorDamageSource;
+class AttributeInstance;
+class Attribute;
 // last update: 1.2.20b1
 class Actor {
 public:
@@ -106,6 +110,9 @@ public:
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
 	ItemInstance* getOffhandSlot() const;
+	int getHealth() const;
+	ItemInstance* getArmor(ArmorSlot) const;
+	AttributeInstance* getAttribute(Attribute const&) const;
 };
 static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
@@ -358,7 +365,7 @@ static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 108, "HumanoidModel bipedHead");
 static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1620, "HumanodModel bipedLeftLeg");
-// aug28
+
 class Recipe;
 class ShapelessRecipe;
 class ShapedRecipe;
@@ -410,7 +417,7 @@ class MobRenderer {
 public:
 	void** vtable; //0
 	char filler[164-4]; //4
-	void* model; // 164 (from MobRenderer::MobRenderer)
+	void* model; // 164 (from ActorRenderer::ActorRenderer)
 	char filler2[668-168]; // 172
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
@@ -444,13 +451,12 @@ typedef struct {
 class Biome {
 public:
 	void** vtable; //0
-	char filler[200-4]; //4
-	cppstr name; //200 from Biome::setName
-	char filler2[300-204]; //204
-	int id; //300 from Biome::Biome
+	cppstr name; //4 from Biome::setName
+	char filler2[96-8]; //8
+	int id; //96 from Biome::Biome
 };
-static_assert(offsetof(Biome, name) == 200, "Biome name");
-static_assert(offsetof(Biome, id) == 300, "Biome ID");
+static_assert(offsetof(Biome, name) == 4, "Biome name");
+static_assert(offsetof(Biome, id) == 96, "Biome ID");
 
 class Abilities {
 public:
@@ -579,10 +585,10 @@ public:
 	MinecraftCommands* getCommands();
 };
 
-class EntityRuntimeID {
+class ActorRuntimeID {
 public:
 	long long id;
-	EntityRuntimeID(long long id) : id(id) {
+	ActorRuntimeID(long long id) : id(id) {
 	}
 
 	operator long long() const {
@@ -592,12 +598,12 @@ public:
 
 class MultiPlayerLevel : public Level {
 public:
-	void* putEntity(BlockSource&, EntityUniqueID, EntityRuntimeID, std::unique_ptr<Entity>);
+	void* putEntity(BlockSource&, ActorUniqueID, ActorRuntimeID, std::unique_ptr<Actor>);
 };
 
-class EntityRenderDispatcher {
+class ActorRenderDispatcher {
 public:
-	EntityRenderer* getRenderer(Entity&);
+	EntityRenderer* getRenderer(Actor&);
 };
 
 void addItem(Player&, ItemInstance&);
