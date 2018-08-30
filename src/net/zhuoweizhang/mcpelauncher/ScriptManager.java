@@ -143,6 +143,7 @@ public class ScriptManager {
 	private static int worldDataSaveCounter = 1;
 	private static AndroidPrintStream scriptErrorStream = null;
 	private static List<String> nextClientMessages = new ArrayList<String>();
+	private static boolean needsReloadAfterHud = false;
 
 	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
@@ -376,6 +377,7 @@ public class ScriptManager {
 		}
 
 		nativeNewLevelCallbackEnded();
+		needsReloadAfterHud = true;
 	}
 
 	@CallbackName(name="selectLevelHook")
@@ -732,6 +734,11 @@ public class ScriptManager {
 			if (activity != null) {
 				activity.showStoreNotWorkingDialog();
 			}
+		}
+
+		if (needsReloadAfterHud && ("in_game_play_screen".equals(s1) || "hud_screen".equals(s1))) {
+			NativeItemApi.redefineThrowableRenderersAfterReload();
+			needsReloadAfterHud = false;
 		}
 		if ("in_game_play_screen".equals(s1)) {
 			// DesnoGuns r18 needs this
@@ -4209,6 +4216,18 @@ public class ScriptManager {
 			Integer i = rendererToItemId.get(itemId);
 			if (i == null) throw new RuntimeException("Not a custom throwable item ID: " + itemId);
 			return i;
+		}
+
+		protected static void redefineThrowableRenderersAfterReload() {
+			/* Not working yet. FIXME 1.6
+			Log.i("BlockLauncher", "Redefining throwables");
+			for (Map.Entry<Integer, Integer> entry : rendererToItemId.entrySet()) {
+				int id = entry.getKey();
+				int renderer = RendererManager.nativeCreateItemSpriteRenderer(id);
+				itemIdToRendererId.put(renderer, id);
+				entry.setValue(renderer);
+			}
+			*/
 		}
 
 		@Override

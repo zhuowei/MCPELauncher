@@ -15,6 +15,7 @@
 #include "mcpe/mce/textureptr.h"
 #include "mcpe/itemspriterenderer.h"
 #include "mcpe/guidata.h"
+#include "mcpe/itemregistry.h"
 #include "logutil.h"
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
@@ -132,14 +133,15 @@ int bl_renderManager_createHumanoidRenderer() {
 Item** bl_getItemsArray();
 
 int bl_renderManager_createItemSpriteRenderer(int itemId) {
-/* FIXME 1.6 Item array is gone
-	Item** mItems = bl_getItemsArray();
-	if (!mItems[itemId]) return -1;
-	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(bl_minecraft->getTextures(), mItems[itemId], false);
+	Item* item = ItemRegistry::getItem((short)itemId);
+	if (!item) {
+		BL_LOG("No item sprite item?");
+		return -1;
+	}
+	ItemSpriteRenderer* renderer = new ItemSpriteRenderer(bl_minecraft->getTextures(), item, false);
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	bl_itemSpriteRendererTypeMap[itemId] = retval;
 	return retval;
-*/
 }
 
 int bl_renderManager_renderTypeForItemSprite(int itemId) {
@@ -178,10 +180,14 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRen
 	renderers[kTempRenderType] = newRenderer;
 	entity.renderType = kTempRenderType; // steal Zombie's render type
 
-	auto savedMat = static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial;
+	MaterialPtr* savedMat = nullptr;
+	if (static_cast<HumanoidModel*>(newRenderer->model)) {
+		savedMat = static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial;
 
-	static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial =
-		static_cast<HumanoidModel*>(tntRenderer->model)->activeMaterial;
+		static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial =
+			static_cast<HumanoidModel*>(tntRenderer->model)->activeMaterial;
+	}
+	// FIXME 1.6: throwable items aren't rendering yet
 
 	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, context, entity, pos, rot);
 /*
@@ -192,7 +198,9 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRen
 	//memcpy(newRenderer, tmpBlob, sizeToBackup);
 	//tntRenderer->model = oldModel;
 	entity.renderType = oldRenderType;
-	static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial = savedMat;
+	if (static_cast<HumanoidModel*>(newRenderer->model)) {
+		static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial = savedMat;
+	}
 	return retval;
 }
 

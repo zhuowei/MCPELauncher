@@ -235,6 +235,7 @@ typedef struct {
 class BaseMobSpawner {
 public:
 	int getSpawnTypeId() const;
+	void setEntityId(ActorType);
 };
 
 struct bl_vtable_indexes_nextgen_cpp {
@@ -450,7 +451,6 @@ static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
-static void (*bl_BaseMobSpawner_setEntityId)(BaseMobSpawner*, int);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
@@ -2558,7 +2558,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	if (te == NULL) return;
 
 	BaseMobSpawner* spawner = te->getSpawner();
-	bl_BaseMobSpawner_setEntityId(spawner, entityTypeId);
+	spawner->setEntityId((ActorType)entityTypeId);
 	te->setChanged();
 }
 
@@ -2865,9 +2865,9 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetSecondPart
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint axis) {
 	if (!bl_localplayer) return -1;
-	int blockId = bl_localplayer->getRegion()->getBlockID(x, y, z);
-	if (blockId == 0) return -1;
-	Tile* tile = nullptr; // FIXME 1.6! BlockLegacy::mBlocks[blockId];
+	BlockAndData* blockAndData = bl_localplayer->getRegion()->getBlock({x, y, z});
+	if (!blockAndData) return -1;
+	Tile* tile = blockAndData->blockBase;
 	if (!tile) return -1;
 	void* methodPtr = tile->vtable[vtable_indexes.tile_get_second_part];
 	bool (*getSecondPart)(Tile*, TileSource&, TilePos const&, TilePos&) =
@@ -4065,67 +4065,7 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 	populate_vtable_indexes(mcpelibhandle_);
 	soinfo2* mcpelibhandle = (soinfo2*) mcpelibhandle_;
 	//mcpelibbase = mcpelibhandle->base;
-/* 1.6 extended the items array natively
-	void* originalItemsAddress = dlsym(mcpelibhandle, "_ZN4Item6mItemsE");
-	// Edit the dlsym for Item::items
-	Elf_Sym* itemsSym = (Elf_Sym*) bl_marauder_translation_function(
-		(void*) dobby_elfsym((void*) mcpelibhandle, "_ZN4Item6mItemsE"));
-	// since value + base = addr:
-	Elf_Addr oldValue = itemsSym->st_value;
-	itemsSym->st_value = ((uintptr_t) &bl_items) - mcpelibhandle->base;
-	Elf_Word oldSize = itemsSym->st_size;
-	itemsSym->st_size = sizeof(bl_items);
-	// now check if the address matches
-	void* newItemsAddress = dlsym(mcpelibhandle, "_ZN4Item6mItemsE");
-	if (newItemsAddress != &bl_items) {
-		// poor man's assert
-		// restore stuff
-		itemsSym->st_value = oldValue;
-		itemsSym->st_size = oldSize;
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: expected %p got %p original %p",
-			&bl_items, newItemsAddress, originalItemsAddress);
-		return;
-	}
-
-	if (!bl_patch_got(mcpelibhandle, originalItemsAddress, (void*) &bl_items)) {
-		itemsSym->st_value = oldValue;
-		itemsSym->st_size = oldSize;
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Failed to expand item array: can't find got");
-		return;
-	}
-
-	No longer needed: all these methods use Item::getItem(short)
-	if (!bl_patchAllItemInstanceConstructors(mcpelibhandle)) {
-		BL_LOG("Failed to patch constructors");
-		//return;
-	}
-
-	if (!bl_patchReadItemInstance(mcpelibhandle)) {
-		BL_LOG("Failed to patch read");
-	};
-	if (!bl_patchItemEntityChecks(mcpelibhandle)) {
-		BL_LOG("Failed to patch item entity");
-	}
-	if (!bl_patchInventoryItemRenderer(mcpelibhandle)) {
-		BL_LOG("Failed to patch hotbar");
-	}
-	if (!bl_patchItemClass(mcpelibhandle)) {
-		BL_LOG("Failed to patch item class");
-	}
-	if (!bl_patchItemRenderer(mcpelibhandle)) {
-		BL_LOG("Failed to patch renderer");
-	}
-*/
-
 	bl_item_id_count = BL_ITEMS_EXPANDED_COUNT;
-/*
-	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(ItemInstance const&)>(&ItemRenderer::getGraphics),
-		(void*) &bl_ItemRenderer_getGraphics_hook,
-		(void**) &bl_ItemRenderer_getGraphics_real);
-	mcpelauncher_hook((void*) static_cast<mce::TexturePtr const& (*)(Item const&)>(&ItemRenderer::getGraphics),
-		(void*) &bl_ItemRenderer_getGraphics_hook_item,
-		(void**) &bl_ItemRenderer_getGraphics_real_item);
-*/
 
 	bl_AppPlatform_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	bl_AppPlatform_getUIScalingRules_real = bl_AppPlatform_vtable[vtable_indexes.appplatform_get_ui_scaling_rules];
@@ -4312,8 +4252,6 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN5Actor7setSizeEff");
-	bl_BaseMobSpawner_setEntityId = (void (*)(BaseMobSpawner*, int))
-		dlsym(mcpelibhandle, "_ZN14BaseMobSpawner11setEntityIdE10EntityType");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
 		dlsym(mcpelibhandle, "_ZN9ArmorItemC1ERKSsiRKNS_13ArmorMaterialEi9ArmorSlot");
 	//bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
