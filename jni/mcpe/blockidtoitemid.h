@@ -1,6 +1,9 @@
 #pragma once
 #include "itemregistry.h"
+#include "blockpalette.h"
 extern "C" {
+
+extern Level* bl_level;
 
 static inline int itemIdFromBlockId(int blockId) {
 	if (blockId > 255) return 255-blockId;
@@ -18,8 +21,10 @@ static inline bool itemIdIsBlock(int itemId) {
 
 static inline BlockLegacy* getBlockForItemId(int itemId) {
 	if (!itemIdIsBlock(itemId)) return nullptr;
-	//if (!bl_level) return nullptr;
-	return nullptr; // fix this pls
+	if (!bl_level) return nullptr;
+	Block* block = bl_level->getGlobalBlockPalette()->getBlockFromLegacyData(NewBlockID {(short)blockIdFromItemId(itemId)}, 0);
+	if (!block) return nullptr;
+	return block->blockBase;
 }
 
 static inline Item* getItemForId(int itemId) {

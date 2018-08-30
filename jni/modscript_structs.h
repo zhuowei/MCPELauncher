@@ -549,7 +549,7 @@ public:
 
 enum ParticleType {
 };
-
+class BlockPalette;
 class Level {
 public:
 	void** vtable; // 0
@@ -575,6 +575,7 @@ public:
 	Abilities* getPlayerAbilities(EntityUniqueID const&);
 	Recipes* getRecipes() const;
 	FurnaceRecipes* getFurnaceRecipes() const;
+	BlockPalette* getGlobalBlockPalette() const;
 };
 // Level::getActivePlayerCount
 static_assert(offsetof(Level, allPlayers) == 40, "allPlayers vec");
