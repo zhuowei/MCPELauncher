@@ -32,6 +32,6 @@ static inline Item* getItemForId(int itemId) {
 }
 
 static inline void setItemForId(int itemId, Item* item) {
-	return ItemRegistry::_setItem((short)itemId, item);
+	ItemRegistry::registerItem(std::unique_ptr<Item>(item));
 }
 } // extern "C"

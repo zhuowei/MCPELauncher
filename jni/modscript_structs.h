@@ -113,6 +113,7 @@ public:
 	int getHealth() const;
 	ItemInstance* getArmor(ArmorSlot) const;
 	AttributeInstance* getAttribute(Attribute const&) const;
+	void setChanged();
 };
 static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
@@ -188,7 +189,6 @@ public:
 	char filler3[124-84]; // 84
 	virtual ~Item();
 
-	static std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<Item>>> mItemLookupMap;
 	// this one loads textures
 	void initClient(Json::Value&, Json::Value&);
 	// this one doesn't
