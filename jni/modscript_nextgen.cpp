@@ -3725,25 +3725,6 @@ void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
 
 static bool bl_needItemIconReload = false;
 
-void bl_ItemRenderer__loadItemGraphics_hook(ItemRenderer* renderer) {
-/*
-	size_t mysize = renderer->itemGraphics.size();
-	mce::Texture* oldtex = (mysize > 0x100? renderer->itemGraphics[0x100].texturePtr.get(): nullptr);
-*/
-	renderer->_loadItemGraphics();
-/*
-	size_t newsize = renderer->itemGraphics.size();
-	mce::Texture* newtex = (newsize > 0x100? renderer->itemGraphics[0x100].texturePtr.get(): nullptr);
-	bool needUpdate = mysize != newsize || oldtex != newtex;
-	if (needUpdate) {
-		bl_finishItemSetIconRequests(); // otherwise exit and returning to the world doesn't work
-		bl_repopulateItemGraphics();
-		bl_needItemIconReload = false;
-	}
-*/
-}
-
-
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
   (JNIEnv* env, jclass clazz) {
 	bl_customBlocksCreated = false;
@@ -3788,15 +3769,6 @@ std::string getNameHook(ItemInstance* itemStack) {
 void bl_BlockGraphics_initBlocks_hook(ResourcePackManager& resourceLoader) {
 	bl_BlockGraphics_initBlocks_real(resourceLoader);
 	bl_finishBlockBuildTextureRequests();
-}
-
-void (*bl_ItemRenderer_render_real)(ItemRenderer* renderer, void* arg1, void* arg2);
-void bl_ItemRenderer_render_hook(ItemRenderer* renderer, void* arg1, void* arg2) {
-	if (renderer->itemGraphics.size() < bl_minecraft->getItemRenderer()->itemGraphics.size()) {
-		BL_LOG("Repopulating an itemrenderer %p", renderer);
-		bl_repopulateItemGraphics(renderer);
-	}
-	bl_ItemRenderer_render_real(renderer, arg1, arg2);
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetOffhandSlot
@@ -4364,8 +4336,6 @@ void bl_setuphooks_cppside() {
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
 
-	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemRenderer::_loadItemGraphics, (void*)&bl_ItemRenderer__loadItemGraphics_hook);
-
 	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
 		(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
@@ -4376,8 +4346,6 @@ void bl_setuphooks_cppside() {
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
 		(void**)&bl_SceneStack_update_real);
-	mcpelauncher_hook((void*)&ItemRenderer::render, (void*)&bl_ItemRenderer_render_hook,
-		(void**)&bl_ItemRenderer_render_real);
 	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
 		(void**)&bl_FurnaceRecipes__init_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
