@@ -81,7 +81,7 @@ public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "1.6";
-	public static final String HALF_SUPPORT_VERSION = "~~~~";
+	public static final String HALF_SUPPORT_VERSION = "1.7";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -1743,12 +1743,12 @@ public class MainActivity extends NativeActivity {
 		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("mcpelauncher_tinysubstrate");
 		System.out.println("MCPE Version is " + getMCPEVersion());
-		//if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 		//if (mcpeGreaterEqualThan(1, 2, 20)) {
-		//	System.loadLibrary("mcpelauncher_new");
-		//} else {
+			System.loadLibrary("mcpelauncher_new");
+		} else {
 			System.loadLibrary("mcpelauncher");
-		//}
+		}
 
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
@@ -2261,6 +2261,17 @@ public class MainActivity extends NativeActivity {
 		}
 		SharedPreferences myprefs = Utils.getPrefs(1);
 		return myprefs.getString("last_device_session_id", "");
+	}
+
+	// 1.7.0
+	public void share(String shareText, String shareText2, String shareText3) {
+		System.out.println("Share: " + shareText + ":" + shareText2 + ":" + shareText3);
+	}
+
+	public void deviceIdCorrelationStart() {
+		if (BuildConfig.DEBUG) {
+			System.out.println("Device ID correlation start");
+		}
 	}
 
 	@Override
