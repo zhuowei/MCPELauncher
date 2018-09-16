@@ -462,7 +462,7 @@ void* bl_MinecraftGame_startLocalServer_hook(MinecraftGame* minecraft, std::stri
 	}
 
 	void* retval = bl_MinecraftGame_startLocalServer_real(minecraft, wDir, wName, arg3, levelSettings);
-	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	bl_level = minecraft->getLocalServerLevel();
 	bl_localplayer = bl_minecraft->getLocalPlayer();
 	bl_onLockDown = false;
 	return retval;
@@ -496,7 +496,8 @@ void bl_cpp_tick_hook();
 void bl_GameMode_tick_hook(GameMode* gamemode) {
 	JNIEnv *env;
 
-	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	bl_level = bl_minecraft->getLocalServerLevel();
+
 	if (bl_minecraft->getLocalPlayer()) {
 		bl_localplayer = bl_level->getPlayer(bl_minecraft->getLocalPlayer()->getUniqueID());
 	} else {
@@ -538,8 +539,8 @@ void bl_GameMode_tick_hook(GameMode* gamemode) {
 void bl_SurvivalMode_tick_hook(GameMode* gamemode) {
 	JNIEnv *env;
 
-	//bl_level = bl_minecraft->getMinecraftGame()->getLevel();
-	bl_level = bl_minecraft->getMinecraftGame()->getLocalServerLevel();
+	bl_level = bl_minecraft->getLocalServerLevel();
+
 	if (bl_minecraft->getLocalPlayer()) {
 		bl_localplayer = bl_level->getPlayer(bl_minecraft->getLocalPlayer()->getUniqueID());
 	} else {
@@ -1431,7 +1432,7 @@ void bl_dumpVtable(void** vtable, size_t size) {
 	}
 }
 
-void bl_patch_got(void*, void*, void*);
+bool bl_patch_got(void*, void*, void*);
 int bl_findVtable(void** vtable, void* needle) {
 	int i = 0;
 	while (vtable[i] != needle) i++;
@@ -1451,6 +1452,10 @@ int bl_vtableIndex(void* si, const char* vtablename, const char* name) {
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "cannot find vtable entry %s in %s", name, vtablename);
 	return 0;
 }
+
+#define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
+	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\
+}}while(false)
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetupHooks
   (JNIEnv *env, jclass clazz, jint versionCode) {
@@ -1559,7 +1564,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 #endif
 
-	minecraftGameVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
+	//minecraftGameVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
+	bl_patch_got_wrap(mcpelibhandle, (void*)bl_NinecraftApp_update_real, (void*)&bl_NinecraftApp_update_hook);
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 

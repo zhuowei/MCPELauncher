@@ -27,7 +27,7 @@ enum GameType {
 
 class Minecraft {
 public:
-	Level* getLevel();
+	Level* getLevel() const;
 	Timer* getTimer();
 	MinecraftCommands* getCommands();
 	ResourcePackManager* getResourceLoader();
@@ -44,6 +44,7 @@ public:
 	Level* getLocalServerLevel() const;
 	void updateFoliageColors();
 	ServerNetworkHandler* getServerNetworkHandler();
+	Minecraft* getServerInstance();
 };
 
 class IClientInstance {
@@ -72,5 +73,6 @@ public:
 	mce::Texture const& getUITexture();
 	SceneStack& getClientSceneStack() const;
 	SceneFactory& getSceneFactory() const;
+	Level* getLocalServerLevel();
 };
 #define MinecraftClient ClientInstance

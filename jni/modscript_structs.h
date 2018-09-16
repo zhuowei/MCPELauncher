@@ -295,7 +295,7 @@ static_assert(offsetof(BlockLegacy, id) == 128, "blockId is wrong");
 #define Tile BlockLegacy
 
 typedef struct {
-	char filler0[176]; //0: from ModelPart::addBox
+	char filler0[188]; //0: from ModelPart::addBox or std::vector<Cube, std::allocator<Cube> >::_M_emplace_back_aux
 } Cube;
 
 typedef struct {
@@ -319,7 +319,9 @@ public:
 	float rotateAngleY; // 16
 	char filler0[101-20]; // 20
 	bool showModel; // 101 from HumanoidMobRenderer::prepareArmor
-	char filler1[128-102]; //102
+	char filler1[104-102]; //102
+	std::vector<Cube> cubeVector; // 104 - from ModelPart::addBox
+	char filler3[128-116]; // 116
 	//MaterialPtr* material; //88 from ModelPart::draw
 	float textureWidth; //128
 	float textureHeight; //132
@@ -329,6 +331,8 @@ public:
 
 	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
 }; // 408 bytes
+static_assert(offsetof(ModelPart, cubeVector) == 104, "modelpart cubeVector");
+static_assert(offsetof(ModelPart, textureOffsetY) == 140, "modelpart textureOffsetY");
 static_assert(sizeof(ModelPart) == 408, "modelpart size wrong");
 
 namespace mce {

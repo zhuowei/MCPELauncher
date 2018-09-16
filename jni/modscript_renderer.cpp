@@ -20,10 +20,8 @@
 
 // search for HumanoidMobRenderer::HumanoidMobRenderer
 #define MOBRENDERER_SIZE (sizeof(HumanoidMobRenderer))
-// ModelPart::addBox
-#define MODELPART_CUBEVECTOR_OFFSET 56
 // ModelPart destructor
-#define MODELPART_MESHBUFFER_OFFSET 104
+#define MODELPART_MESHBUFFER_OFFSET 148
 static const int kEntityRenderDispatcher_renderersOffset = 4;
 
 extern "C" {
@@ -259,7 +257,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_RendererMana
   (JNIEnv *env, jclass clazz, jint rendererId, jstring modelPartName) {
 	const char * utfChars = env->GetStringUTFChars(modelPartName, NULL);
 	ModelPart* part = bl_renderManager_getModelPart(rendererId, utfChars);
-	std::vector<Cube*>* cubeVector = (std::vector<Cube*>*) ((uintptr_t) part + MODELPART_CUBEVECTOR_OFFSET);
+	std::vector<Cube>* cubeVector = &part->cubeVector;
 	cubeVector->clear();
 	bl_renderManager_invalidateModelPart(part);
 	env->ReleaseStringUTFChars(modelPartName, utfChars);

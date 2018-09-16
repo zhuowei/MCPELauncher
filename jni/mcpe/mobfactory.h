@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+class Level;
 
 enum ActorType {
 };
@@ -18,5 +19,8 @@ public:
 
 class ActorFactory {
 public:
-	static std::unique_ptr<Actor> createSpawnedEntity(ActorDefinitionIdentifier const&, Actor*, Vec3 const&, Vec2 const&);
+	Level* level; // 0
+	ActorFactory(Level&);
+	std::unique_ptr<Actor> createSpawnedEntity(ActorDefinitionIdentifier const&, Actor*, Vec3 const&, Vec2 const&);
 };
+static_assert(sizeof(ActorFactory) == 4, "ActorFactory size");

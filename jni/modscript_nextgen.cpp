@@ -2327,6 +2327,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedEntity
   (JNIEnv *env, jclass clazz) {
+	if (!bl_minecraft) {
+		BL_LOG("No minecraft?");
+		return -1;
+	}
 	Level* level = bl_minecraft->getLevel();
 	if (!level) return -1;
 	HitResult const& objectMouseOver = level->getHitResult();
@@ -2339,6 +2343,10 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeP
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedBlock
   (JNIEnv *env, jclass clazz, jint axis) {
+	if (!bl_minecraft) {
+		BL_LOG("No minecraft?");
+		return -1;
+	}
 	Level* level = bl_minecraft->getLevel();
 	if (!level) return -1;
 	if (!bl_localplayer) return -1;
@@ -2378,6 +2386,10 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT float JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetPointedVec
   (JNIEnv *env, jclass clazz, jint axis) {
+	if (!bl_minecraft) {
+		BL_LOG("No minecraft?");
+		return -1;
+	}
 	Level* level = bl_minecraft->getLevel();
 	if (!level) return -1;
 	HitResult const& objectMouseOver = level->getHitResult();
@@ -2605,7 +2617,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 	pos.z = z;
 	Vec2 rot {0, 0};
 	ActorDefinitionIdentifier identifier((EntityType)type);
-	std::unique_ptr<Actor> entity = ActorFactory::createSpawnedEntity(identifier, bl_localplayer, pos, rot);
+	std::unique_ptr<Actor> entity = ActorFactory(*bl_localplayer->getLevel()).createSpawnedEntity(identifier, bl_localplayer, pos, rot);
 
 	if (entity == nullptr) {
 		//WTF?
@@ -3769,7 +3781,7 @@ void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTask ta
 		// if we return false, then BackgroundWorker schedules it on the runqueue
 		// but the client thread has no runqueue
 		// returning true seems to fix it; not sure why
-		BL_LOG("We have no runqueue, we're supposed to return %s: returning true", workerThread? "yes" : "no");
+		//BL_LOG("We have no runqueue, we're supposed to return %s: returning true", workerThread? "yes" : "no");
 		savedValue = worker->myThread;
 		worker->myThread = pthread_self();
 		setOld = true;
