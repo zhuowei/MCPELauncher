@@ -15,6 +15,6 @@ public:
 	bool isAmbient; // 13
 	bool noCounter; // 14
 	bool something; // 15
-	MobEffectInstance(int potionId, int duration, int amplifier, bool isAmbient, bool alwaysTrue);
+	MobEffectInstance(unsigned int potionId, int duration, int amplifier, bool isAmbient, bool alwaysTrue);
 
 };

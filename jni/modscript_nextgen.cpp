@@ -60,7 +60,6 @@
 #include "mcpe/entityrenderdata.h"
 #include "mcpe/clientinstancescreenmodel.h"
 #include "mcpe/backgroundworker.h"
-#include "mcpe/playername.h"
 #include "mcpe/blockpalette.h"
 #include "mcpe/blockidtoitemid.h"
 
@@ -104,26 +103,27 @@ const size_t kClientInstanceScreenModel_offset = 608;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
-"_ZTV11BatRenderer",
 "_ZTV11MobRenderer",
 "_ZTV11NpcRenderer",
-"_ZTV11PigRenderer",
 "_ZTV11VexRenderer",
+"_ZTV12FishRenderer",
 "_ZTV12WolfRenderer",
-"_ZTV13BlazeRenderer",
 "_ZTV13GhastRenderer",
 "_ZTV13HorseRenderer",
 "_ZTV13LlamaRenderer",
-"_ZTV13SheepRenderer",
 "_ZTV13SlimeRenderer",
 "_ZTV13SquidRenderer",
 "_ZTV13StrayRenderer",
 "_ZTV13WitchRenderer",
 "_ZTV14OcelotRenderer",
+"_ZTV14ParrotRenderer",
 "_ZTV14RabbitRenderer",
-"_ZTV14SpiderRenderer",
-"_ZTV15ChickenRenderer",
+"_ZTV14SalmonRenderer",
+"_ZTV14TurtleRenderer",
 "_ZTV15CreeperRenderer",
+"_ZTV15DolphinRenderer",
+"_ZTV15HorseRendererV2",
+"_ZTV15PhantomRenderer",
 "_ZTV15ShulkerRenderer",
 "_ZTV16EnderManRenderer",
 "_ZTV16GuardianRenderer",
@@ -134,11 +134,13 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV17LavaSlimeRenderer",
 "_ZTV17PolarBearRenderer",
 "_ZTV17SnowGolemRenderer",
+"_ZTV18PufferfishRenderer",
 "_ZTV18SilverfishRenderer",
 "_ZTV18WitherBossRenderer",
 "_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
 "_ZTV19MushroomCowRenderer",
+"_ZTV20TropicalFishRenderer",
 "_ZTV22VillagerZombieRenderer",
 "_ZTV24EvocationIllagerRenderer",
 "_ZTV26VindicationIllagerRenderer",
@@ -202,15 +204,15 @@ public:
 	unsigned char sub; //12
 	unsigned char type; // 13
 	char filler2[16-14]; // 14
-	PlayerName username; // 16
-	std::string message; // 28
+	std::string username; // 16
+	std::string message; // 20
 	//std::vector<std::string> thevector; // 24
 	//char filler3[36-28]; // 28
 	//char filler3[36-24]; // 24
 	virtual ~TextPacket() override;
 };
 static_assert(offsetof(TextPacket, username) == 16, "textpacket username");
-static_assert(offsetof(TextPacket, message) == 28, "textpacket message");
+static_assert(offsetof(TextPacket, message) == 20, "textpacket message");
 
 typedef struct {
 	void** vtable; //0
@@ -422,7 +424,6 @@ std::vector<short*> bl_creativeItems;
 
 char bl_stonecutter_status[BL_ITEMS_EXPANDED_COUNT];
 
-Item** bl_Item_mItems;
 #if 0
 static void (*bl_CompoundTag_putString)(void*, std::string, std::string);
 static std::string (*bl_CompoundTag_getString)(void*, std::string);
@@ -761,7 +762,7 @@ void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddres
 
 		env->CallStaticVoidMethod(bl_scriptmanager_class, mid, messageJString);
 	} else if (packet->type == 1) {
-		std::string const& playerName = packet->username.getPrimaryName();
+		std::string const& playerName = packet->username;
 		if (playerName.length() == 0 && packet->message == "\xc2" "\xa7" "0BlockLauncher, enable scripts") {
 			bl_onLockDown = false;
 		}
@@ -1068,31 +1069,6 @@ void bl_repopulateItemGraphics(ItemRenderer* renderer) {
 		return;
 	}
 	return; // FIXME 1.6 no mItems anymore
-	for (int i = 0x200; i < bl_item_id_count; i++) {
-		Item* item = bl_Item_mItems[i];
-		if (!item) continue;
-		bool needsSetting = false;
-		auto iter = itemGraphics.find(i);
-		if (iter == itemGraphics.end()) {
-			needsSetting = true;
-		} else if (itemGraphics[item->itemId].texturePtr.get() !=
-			itemGraphics[0x100].texturePtr.get() &&
-			itemGraphics[item->itemId].texturePtr.get() !=
-			itemGraphics[0x1].texturePtr.get()) {
-			// inside but not set, populate
-			needsSetting = true;
-		}
-		if (needsSetting) {
-			__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "populating graphics %d (cur size = %d)", item->itemId, itemGraphics.size());
-			if (Item::mItemTextureAtlas == nullptr) {
-				BL_LOG("item texture atlas null when populating graphics?");
-			}
-			bool isExtendedBlock = bl_extendedBlockGraphics[item->itemId] != nullptr;
-			//ResourceLocation location(isExtendedBlock? "atlas.terrain": "atlas.items", 0);
-			int sourceId = isExtendedBlock? 0x1: 0x100;
-			itemGraphics[item->itemId] = ItemGraphics(/*std::move(mce::TexturePtr(bl_minecraft->getTextures(), location)*/itemGraphics[sourceId].texturePtr.clone());
-		}
-	}
 }
 
 void bl_cpp_selectLevel_hook() {
@@ -1148,7 +1124,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	std::string mystr = std::string(utfChars);
 
 	ArmorItem* item = new ArmorItem;
-	bl_ArmorItem_ArmorItem(item, mystr, id, ((ArmorItem*) bl_Item_mItems[310])->armorMaterial, 42, armorType);
+	bl_ArmorItem_ArmorItem(item, mystr, id, ((ArmorItem*) getItemForId(310))->armorMaterial, 42, armorType);
 	bl_registerItem(item, mystr);
 	item->damageReduceAmount = damageReduceAmount;
 	bl_Item_setMaxDamage(item, maxDamage);
@@ -1455,7 +1431,7 @@ int bl_renderManager_renderTypeForItemSprite(int itemId);
 int bl_getEntityTypeIdThroughVtable(Entity* entity);
 
 Item** bl_getItemsArray() {
-	return bl_Item_mItems;
+	abort();
 }
 
 static void bl_CustomSnowball_processAddEntity(Entity* entity) {
@@ -2700,30 +2676,26 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_MobEffect_na
 	return ret;
 }
 
-static void (*bl_Mob_addEffect)(Entity*, MobEffectInstance&);
-static void (*bl_Mob_removeEffect)(Entity*, int);
-static void (*bl_Mob_removeAllEffects)(Entity*);
-
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobAddEffect
   (JNIEnv* env, jclass clazz, jlong entityId, jint id, jint duration, jint amplifier, jboolean ambient, jboolean showParticles) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles);
-	bl_Mob_addEffect(entity, inst);
+	entity->addEffect(inst);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobRemoveEffect
   (JNIEnv* env, jclass clazz, jlong entityId, jint id) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_Mob_removeEffect(entity, id);
+	entity->removeEffect(id);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobRemoveAllEffects
   (JNIEnv* env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	bl_Mob_removeAllEffects(entity);
+	entity->removeAllEffects();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemEntityItem
@@ -3622,14 +3594,6 @@ static bool bl_StonecutterBlock_use_hook(BlockLegacy* tile, Player& player, Bloc
 	return false;
 }
 
-static void (*bl_InventoryItemRenderer_update_real)(InventoryItemRenderer* renderer, ClientInstance& client, UIControl& aUIControl);
-static void bl_InventoryItemRenderer_update_hook(InventoryItemRenderer* renderer, ClientInstance& client, UIControl& aUIControl) {
-	bl_InventoryItemRenderer_update_real(renderer, client, aUIControl);
-	if (renderer->itemId >= 0x100 && bl_extendedBlockGraphics[renderer->itemId]) {
-		renderer->atlasName = "atlas.terrain";
-	}
-}
-
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
 	return preventDefaultStatus;
@@ -3938,13 +3902,6 @@ static bool bl_patchReadItemInstance(soinfo2* mcpelibhandle) {
 	return bl_patchCompare510(code);
 }
 
-
-static bool bl_patchInventoryItemRenderer(soinfo2* mcpelibhandle) {
-	void* rendererUpdate = (void*)&InventoryItemRenderer::update;
-	uint8_t* code = (uint8_t*)bl_marauder_translation_function((void*)(((uintptr_t)rendererUpdate) & ~1));
-	return bl_patchCompare510(code);
-}
-
 #if 0
 static bool bl_patchItemRenderer(soinfo2* mcpelibhandle) {
 	void* getAtlasPos = (void*)&ItemRenderer::getAtlasPos;
@@ -4146,7 +4103,6 @@ void bl_setuphooks_cppside() {
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
 
-	bl_Item_mItems = (Item**) dlsym(RTLD_DEFAULT, "_ZN4Item6mItemsE");
 	// known good
 	// FIXME 0.11
 	//void* handleTextPacket = dlsym(mcpelibhandle, "_ZN20ClientNetworkHandler6handleERKN6RakNet10RakNetGUIDEP10TextPacket");
@@ -4237,12 +4193,6 @@ void bl_setuphooks_cppside() {
 
 	bl_Entity_getNameTag = (std::string* (*)(Entity*))
 		dlsym(mcpelibhandle, "_ZNK5Actor10getNameTagEv");
-	bl_Mob_addEffect = (void (*)(Entity*, MobEffectInstance&))
-		dlsym(mcpelibhandle, "_ZN3Mob9addEffectERK17MobEffectInstance");
-	bl_Mob_removeEffect = (void (*)(Entity*, int))
-		dlsym(mcpelibhandle, "_ZN3Mob12removeEffectEi");
-	bl_Mob_removeAllEffects = (void (*)(Entity*))
-		dlsym(mcpelibhandle, "_ZN3Mob16removeAllEffectsEv");
 
 	bl_Item_addCreativeItem = (void (*)(short, short))
 		dlsym(mcpelibhandle, "_ZN4Item15addCreativeItemEss");
@@ -4336,8 +4286,6 @@ void bl_setuphooks_cppside() {
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
 
-	mcpelauncher_hook((void*)&InventoryItemRenderer::update, (void*)&bl_InventoryItemRenderer_update_hook,
-		(void**)&bl_InventoryItemRenderer_update_real);
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
 	mcpelauncher_hook((void*)bl_BlockGraphics_initBlocks_new, (void*)&bl_BlockGraphics_initBlocks_hook,

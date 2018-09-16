@@ -4,6 +4,8 @@ class MinecraftGame;
 class ClientInstance;
 class SceneStack;
 class SceneFactory;
+class IClientInstance;
+class IMinecraftGame;
 
 class MinecraftScreenModel {
 public:
@@ -15,7 +17,7 @@ class ClientInstanceScreenModel : public MinecraftScreenModel{
 public:
 	char filler[60-4];
 
-	ClientInstanceScreenModel(MinecraftGame&, ClientInstance&, SceneStack&, SceneFactory&);
+	ClientInstanceScreenModel(IMinecraftGame&, IClientInstance&, SceneStack&, SceneFactory&);
 	virtual ~ClientInstanceScreenModel();
 
 	void executeCommand(std::string const&);

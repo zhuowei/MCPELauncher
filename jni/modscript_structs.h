@@ -66,6 +66,7 @@ class PlayerInventoryProxy;
 class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
+class MobEffectInstance;
 // last update: 1.2.20b1
 class Actor {
 public:
@@ -114,6 +115,9 @@ public:
 	ItemInstance* getArmor(ArmorSlot) const;
 	AttributeInstance* getAttribute(Attribute const&) const;
 	void setChanged();
+	void addEffect(MobEffectInstance const&);
+	void removeEffect(int);
+	void removeAllEffects();
 };
 static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex

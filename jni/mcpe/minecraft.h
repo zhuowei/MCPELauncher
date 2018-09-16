@@ -35,7 +35,10 @@ public:
 };
 
 // actually an App::App subclass. Technically equivalent to MinecraftClient <= 1.0, but most functions moved to ClientInstance
-class MinecraftGame {
+class IMinecraftGame {
+};
+
+class MinecraftGame : public IMinecraftGame {
 public:
 	ClientInstance* getPrimaryClientInstance();
 	Level* getLocalServerLevel() const;
@@ -43,7 +46,10 @@ public:
 	ServerNetworkHandler* getServerNetworkHandler();
 };
 
-class ClientInstance {
+class IClientInstance {
+};
+
+class ClientInstance : public IClientInstance {
 public:
 	MinecraftGame* getMinecraftGame() const;
 	Minecraft* getServerData();

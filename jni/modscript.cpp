@@ -80,8 +80,8 @@ void* bl_marauder_translation_function(void* input);
 
 extern jclass bl_scriptmanager_class;
 
-static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
-static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*);
+static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*);
+static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
 void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
@@ -227,12 +227,12 @@ void bl_forceLocationUpdate(Entity* entity) {
 }
 
 void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
-	TilePos* pos, signed char side, Vec3* vec3, ItemUseCallback* callback) {
+	TilePos* pos, signed char side, Vec3* vec3) {
 	//BL_LOG("Creative useItemOn");
 	Player* player = gamemode->player;
 	Level* myLevel = gamemode->player->getLevel();
 	if (myLevel != bl_level) {
-		bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, callback);
+		bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
 		return;
 	}
 
@@ -274,16 +274,16 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
-	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, callback);
+	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
 }
 
 void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
-	TilePos* pos, signed char side, Vec3* vec3, ItemUseCallback* callback) {
+	TilePos* pos, signed char side, Vec3* vec3) {
 	//BL_LOG("Survival useItemOn");
 	Player* player = gamemode->player;
 	Level* myLevel = gamemode->player->getLevel();
 	if (myLevel != bl_level) {
-		bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, callback);
+		bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
 		return;
 	}
 
@@ -325,7 +325,7 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
-	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, callback);
+	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
 }
 
 void bl_SurvivalMode_startDestroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
@@ -1339,7 +1339,7 @@ static void App_quit_hook(void* self) {
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode9useItemOnER12ItemInstanceRK8BlockPosaRK4Vec3P15ItemUseCallback");
+		"_ZN8GameMode9useItemOnER12ItemInstanceRK8BlockPosaRK4Vec3");
 	vtable_indexes.gamemode_attack = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode6attackER5Actor");
 	vtable_indexes.gamemode_tick = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
@@ -1462,11 +1462,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	// fixme 1.1
 	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV8GameMode");
-	bl_GameMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*))
+	bl_GameMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*))
 		creativeVtable[vtable_indexes.gamemode_use_item_on];
 	creativeVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
 	void** survivalVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12SurvivalMode");
-	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*, ItemUseCallback*))
+	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*))
 		survivalVtable[vtable_indexes.gamemode_use_item_on];
 	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_SurvivalMode_useItemOn_hook;
 
