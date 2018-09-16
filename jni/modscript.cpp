@@ -644,7 +644,11 @@ void bl_handleFrameCallback() {
 
 void bl_NinecraftApp_update_hook(MinecraftGame* minecraft) {
 	bl_NinecraftApp_update_real(minecraft);
+	ClientInstance* lastVal = bl_minecraft;
 	bl_minecraft = minecraft->getPrimaryClientInstance();
+	if (lastVal != bl_minecraft) {
+		BL_LOG("Minecraft instance changed in Update: %p to %p", lastVal, bl_minecraft);
+	}
 	if (bl_frameCallbackRequested) {
 		bl_frameCallbackRequested = 0;
 		bl_handleFrameCallback();

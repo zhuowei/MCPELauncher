@@ -180,6 +180,7 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRen
 	renderers[kTempRenderType] = newRenderer;
 	entity.renderType = kTempRenderType; // steal Zombie's render type
 
+	/* FIXME 1.7
 	MaterialPtr* savedMat = nullptr;
 	if (static_cast<HumanoidModel*>(newRenderer->model)) {
 		savedMat = static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial;
@@ -187,7 +188,7 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRen
 		static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial =
 			static_cast<HumanoidModel*>(tntRenderer->model)->activeMaterial;
 	}
-	// FIXME 1.6: throwable items aren't rendering yet
+	*/
 
 	void* retval = bl_EntityRenderDispatcher_render_real(renderDispatcher, context, entity, pos, rot);
 /*
@@ -198,9 +199,11 @@ void* bl_EntityRenderDispatcher_render_hook(void* renderDispatcher, BaseActorRen
 	//memcpy(newRenderer, tmpBlob, sizeToBackup);
 	//tntRenderer->model = oldModel;
 	entity.renderType = oldRenderType;
+	/* FIXME 1.7
 	if (static_cast<HumanoidModel*>(newRenderer->model)) {
 		static_cast<HumanoidModel*>(newRenderer->model)->activeMaterial = savedMat;
 	}
+	*/
 	return retval;
 }
 

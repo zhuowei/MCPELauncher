@@ -85,10 +85,10 @@ public:
 	char filler5[516-304]; // 304
 	std::vector<Entity*> riders; // 516
 
-	char filler3[3376-528]; // 528
-	float x; //3376 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3380
-	float z; //3384
+	char filler3[3384-528]; // 528
+	float x; //3384 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3388
+	float z; //3392
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -123,7 +123,7 @@ static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 516, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 148, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3376, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3384, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -190,7 +190,7 @@ public:
 	short itemId; //64
 	char filler1[83-66]; // 66
 	bool handEquipped; // 83
-	char filler3[124-84]; // 84
+	char filler3[136-84]; // 84
 	virtual ~Item();
 
 	// this one loads textures
@@ -208,7 +208,7 @@ public:
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
-static_assert(sizeof(Item) == 124, "item size is wrong");
+static_assert(sizeof(Item) == 136, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -317,20 +317,19 @@ public:
 	float offsetZ; //8
 	float rotateAngleX; // 12
 	float rotateAngleY; // 16
-	char filler0[69-20]; // 20
-	bool showModel; // 69 from HumanoidMobRenderer::prepareArmor
-	char filler1[96-70]; //70
+	char filler0[101-20]; // 20
+	bool showModel; // 101 from HumanoidMobRenderer::prepareArmor
+	char filler1[128-102]; //102
 	//MaterialPtr* material; //88 from ModelPart::draw
-	float textureWidth; //96
-	float textureHeight; //100
-	int filler3; // 104
-	int textureOffsetX; // 108
-	int textureOffsetY; // 112
-	char filler2[252-116]; // 116
+	float textureWidth; //128
+	float textureHeight; //132
+	int textureOffsetX; // 136
+	int textureOffsetY; // 140
+	char filler2[408-144]; // 144
 
 	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
-}; // 252 bytes
-static_assert(sizeof(ModelPart) == 252, "modelpart size wrong");
+}; // 408 bytes
+static_assert(sizeof(ModelPart) == 408, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
@@ -341,34 +340,35 @@ class GeometryPtr;
 class HumanoidModel {
 public:
 	char filler[25-4]; // 4
-	bool riding; // 25
-	char filler1[28-26]; // 26
+	bool riding; // 25, MobRenderer::renderModel
+	char filler1[184-26]; // 26
+/*
 	MaterialPtr* activeMaterial; // 28
-	mce::TexturePtr* activeTexture; // 32 from MobRenderer::renderModel
 	MaterialPtr materialNormal; // 36
 	MaterialPtr materialAlphaTest; // 48
 	MaterialPtr materialAlphaBlend; // 60
 	MaterialPtr materialStatic; // 72
 	MaterialPtr materialEmissive; // 84
 	MaterialPtr material96; // 96
-	ModelPart bipedHead;//108
-	ModelPart bipedHeadwear;//360
-	ModelPart bipedBody;//612
-	ModelPart bipedRightArm;//864
-	ModelPart bipedLeftArm;//1116
-	ModelPart bipedRightLeg;//1368
-	ModelPart bipedLeftLeg;//1620
-	char filler3[4944-1872]; // 1872 - more model parts
+*/
+	ModelPart bipedHead;//184
+	ModelPart bipedHeadwear;//592
+	ModelPart bipedBody;//1000
+	ModelPart bipedRightArm;//1408
+	ModelPart bipedLeftArm;//1816
+	ModelPart bipedRightLeg;//2224
+	ModelPart bipedLeftLeg;//2632
+	char filler3[7984-3040]; // 3040 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 4944, "HumanoidModel size");
-static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
-static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
-static_assert(offsetof(HumanoidModel, bipedHead) == 108, "HumanoidModel bipedHead");
-static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 1620, "HumanodModel bipedLeftLeg");
+static_assert(sizeof(HumanoidModel) == 7984, "HumanoidModel size");
+//static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
+//static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
+static_assert(offsetof(HumanoidModel, bipedHead) == 184, "HumanoidModel bipedHead");
+static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 2632, "HumanodModel bipedLeftLeg");
 
 class Recipe;
 class ShapelessRecipe;
@@ -420,13 +420,13 @@ typedef void EntityRenderer;
 class MobRenderer {
 public:
 	void** vtable; //0
-	char filler[164-4]; //4
-	void* model; // 164 (from ActorRenderer::ActorRenderer)
-	char filler2[668-168]; // 172
+	char filler[132-4]; //4
+	void* model; // 132 (from ActorRenderer::ActorRenderer)
+	char filler2[632-136]; // 136
 	mce::TexturePtr const& getSkinPtr(Entity&) const;
 };
-static_assert(offsetof(MobRenderer, model) == 164, "mobrenderer model offset");
-static_assert(sizeof(MobRenderer) == 668, "mobrenderer");
+static_assert(offsetof(MobRenderer, model) == 132, "mobrenderer model offset");
+static_assert(sizeof(MobRenderer) == 632, "mobrenderer");
 
 typedef void Tag;
 
@@ -508,30 +508,30 @@ typedef void ModelRenderer;
 #ifdef __cplusplus
 // look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
-	int armorType; // 124
-	int damageReduceAmount; // 128
-	int renderIndex; // 132
-	void* armorMaterial; // 136
-	char fillerendarmor[160-140]; // 140
+	int armorType; // 136
+	int damageReduceAmount; // 140
+	int renderIndex; // 144
+	void* armorMaterial; // 148
+	char fillerendarmor[172-152]; // 152
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 160, "armor item size");
+static_assert(sizeof(ArmorItem) == 172, "armor item size");
 #endif
 
 
 
 struct HumanoidMobRenderer : public MobRenderer {
-	int something; // 668
-	HumanoidModel* modelArmor; // 672
-	HumanoidModel* modelArmorChestplate; // 676
-	char hmr_filler1[724-680]; // 680
+	int something; // 632
+	HumanoidModel* modelArmor; // 636
+	HumanoidModel* modelArmorChestplate; // 640
+	char hmr_filler1[688-644]; // 644
 	HumanoidMobRenderer(std::unique_ptr<HumanoidModel>, std::unique_ptr<HumanoidModel>,
 		std::unique_ptr<HumanoidModel>, mce::TexturePtr, Vec2 const&, Vec3 const&);
 };
 #ifdef __arm__
-static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 672, "armour model offset");
-static_assert(sizeof(HumanoidMobRenderer) == 724, "humanoid mob renderer size");
+static_assert(offsetof(HumanoidMobRenderer, modelArmor) == 636, "armour model offset");
+static_assert(sizeof(HumanoidMobRenderer) == 688, "humanoid mob renderer size");
 #endif
 #endif // ifdef __cplusplus
 

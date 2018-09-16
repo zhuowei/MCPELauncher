@@ -9,5 +9,5 @@ public:
 	//std::string const& getMessage(UIProfanityContext const&);
 	void setMessage(std::string const&, std::string const&);
 };
-// SignBlockActor::setMessage
+// SignBlockActor::setMessage, argument 2. Be careful.
 static_assert(offsetof(SignBlockActor, message) == 140, "SignBlockActor message offset");

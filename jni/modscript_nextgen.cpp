@@ -55,7 +55,6 @@
 #include "mcpe/textureatlas.h"
 #include "mcpe/particle.h"
 #include "mcpe/blocktessellator.h"
-#include "mcpe/inventoryitemrenderer.h"
 #include "mcpe/commandorigin.h"
 #include "mcpe/entityrenderdata.h"
 #include "mcpe/clientinstancescreenmodel.h"
@@ -77,7 +76,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4388
+#define PLAYER_ABILITIES_OFFSET 4420
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -95,11 +94,11 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3856;
+const size_t kItemEntity_itemInstance_offset = 3912;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 608;
+const size_t kClientInstanceScreenModel_offset = 588;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -1063,11 +1062,6 @@ static void bl_registerItem(Item* item, std::string const& name) {
 
 void bl_repopulateItemGraphics(ItemRenderer* renderer) {
 	renderer->_loadItemGraphics();
-	auto& itemGraphics = renderer->itemGraphics;
-	BL_LOG("Populating: size = %d", itemGraphics.size());
-	if (itemGraphics.find(1) == itemGraphics.end()) {
-		return;
-	}
 	return; // FIXME 1.6 no mItems anymore
 }
 

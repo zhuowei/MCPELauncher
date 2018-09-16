@@ -58,6 +58,7 @@ void bl_reload_armor_textures() {
 	needsReload = true;
 }
 // armour
+#if 0
 int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, ScreenContext& screenContext,
 		Mob* mob, int armorPart, float partialTicks) {
 	int retval = bl_HumanoidMobRenderer_prepareArmor_real(self, screenContext, mob, armorPart, partialTicks);
@@ -78,6 +79,7 @@ int bl_HumanoidMobRenderer_prepareArmor_hook(HumanoidMobRenderer* self, ScreenCo
 
 	return retval;
 }
+#endif
 // end
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetCape
