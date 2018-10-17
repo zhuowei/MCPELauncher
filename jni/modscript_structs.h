@@ -71,21 +71,21 @@ class MobEffectInstance;
 class Actor {
 public:
 	void** vtable; //0
-	char filler2[136-4]; // 4
-	float motionX; //136 found in Entity::rideTick(); should be set to 0 there; or Actor::getVelocity
-	float motionY; //140
-	float motionZ; //144
-	float pitch; //148 Entity::setRot
-	float yaw; //152
-	float prevPitch; //156
-	float prevYaw; //160
+	char filler2[152-4]; // 4
+	float pitch; //152 Entity::setRot
+	float yaw; //156
+	float prevPitch; //160
+	float prevYaw; //164
 
-	char filler4[300-164]; //164
+	char filler4[300-168]; //168
 	int renderType; //300
 	char filler5[516-304]; // 304
 	std::vector<Entity*> riders; // 516
 
-	char filler3[3384-528]; // 528
+	char filler3[3372-528]; // 528
+	float motionX; // 3372 - Actor::push
+	float motionY; // 3376
+	float motionZ; // 3380
 	float x; //3384 - Entity::setPos(Vec3 const&) or Actor.getPos
 	float y; //3388
 	float z; //3392
@@ -122,7 +122,7 @@ public:
 static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 516, "Entity rider offset wrong");
-static_assert(offsetof(Actor, pitch) == 148, "Actor pitch offset wrong");
+static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
 static_assert(offsetof(Actor, x) == 3384, "Actor x offset wrong");
 
 class Mob: public Entity {
@@ -312,28 +312,30 @@ struct Color {
 // from ModelPart::setPos, ModelPart::setTexSize
 class ModelPart {
 public:
+/*
 	float offsetX; //0
 	float offsetY; //4
 	float offsetZ; //8
 	float rotateAngleX; // 12
 	float rotateAngleY; // 16
-	char filler0[101-20]; // 20
-	bool showModel; // 101 from HumanoidMobRenderer::prepareArmor
-	char filler1[104-102]; //102
-	std::vector<Cube> cubeVector; // 104 - from ModelPart::addBox
-	char filler3[128-116]; // 116
+*/
+	char filler0[105-0]; // 0
+	bool showModel; // 105 from HumanoidMobRenderer::prepareArmor or ModelPart::setVisible
+	char filler1[108-106]; //102
+	std::vector<Cube> cubeVector; // 108 - from ModelPart::addBox
+	char filler3[132-120]; // 120
 	//MaterialPtr* material; //88 from ModelPart::draw
-	float textureWidth; //128
-	float textureHeight; //132
-	int textureOffsetX; // 136
-	int textureOffsetY; // 140
-	char filler2[408-144]; // 144
+	float textureWidth; //132
+	float textureHeight; //136
+	int textureOffsetX; // 140
+	int textureOffsetY; // 144
+	char filler2[416-148]; // 148
 
 	void addBox(Vec3 const&, Vec3 const&, float, Color const& = Color{0, 0, 0, 0});
-}; // 408 bytes
-static_assert(offsetof(ModelPart, cubeVector) == 104, "modelpart cubeVector");
-static_assert(offsetof(ModelPart, textureOffsetY) == 140, "modelpart textureOffsetY");
-static_assert(sizeof(ModelPart) == 408, "modelpart size wrong");
+}; // 416 bytes
+static_assert(offsetof(ModelPart, cubeVector) == 108, "modelpart cubeVector");
+static_assert(offsetof(ModelPart, textureOffsetY) == 144, "modelpart textureOffsetY");
+static_assert(sizeof(ModelPart) == 416, "modelpart size wrong");
 
 namespace mce {
 	class TexturePtr;
@@ -356,23 +358,23 @@ public:
 	MaterialPtr material96; // 96
 */
 	ModelPart bipedHead;//184
-	ModelPart bipedHeadwear;//592
-	ModelPart bipedBody;//1000
-	ModelPart bipedRightArm;//1408
-	ModelPart bipedLeftArm;//1816
-	ModelPart bipedRightLeg;//2224
-	ModelPart bipedLeftLeg;//2632
-	char filler3[7984-3040]; // 3040 - more model parts
+	ModelPart bipedHeadwear;//600
+	ModelPart bipedBody;//1016
+	ModelPart bipedRightArm;//1432
+	ModelPart bipedLeftArm;//1848
+	ModelPart bipedRightLeg;//2264
+	ModelPart bipedLeftLeg;//2680
+	char filler3[8136-3096]; // 3096 - more model parts
 	HumanoidModel(float, float, int, int);
 	HumanoidModel(GeometryPtr const&);
 	virtual ~HumanoidModel();
 };
 
-static_assert(sizeof(HumanoidModel) == 7984, "HumanoidModel size");
+static_assert(sizeof(HumanoidModel) == 8136, "HumanoidModel size");
 //static_assert(offsetof(HumanoidModel, activeTexture) == 32, "active texture");
 //static_assert(offsetof(HumanoidModel, materialAlphaTest) == 48, "material alpha test");
 static_assert(offsetof(HumanoidModel, bipedHead) == 184, "HumanoidModel bipedHead");
-static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 2632, "HumanodModel bipedLeftLeg");
+static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 2680, "HumanodModel bipedLeftLeg");
 
 class Recipe;
 class ShapelessRecipe;
