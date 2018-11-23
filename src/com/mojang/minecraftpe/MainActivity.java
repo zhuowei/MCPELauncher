@@ -81,7 +81,7 @@ public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "1.7";
-	public static final String HALF_SUPPORT_VERSION = "~~~~";
+	public static final String HALF_SUPPORT_VERSION = "1.9";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -1745,7 +1745,8 @@ public class MainActivity extends NativeActivity {
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 		//if (mcpeGreaterEqualThan(1, 2, 20)) {
-			System.loadLibrary("mcpelauncher_new");
+			//System.loadLibrary("mcpelauncher_new");
+			System.loadLibrary("mcpelauncher_lite");
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
@@ -2274,6 +2275,37 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
+	// 1.9.0
+	public void sendBrazeEvent(String event) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("send braze event: " + event);
+		}
+	}
+
+	public void sendBrazeEventWithProperty(String event, String property, int number) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("send braze event with property: " + event + ": " + property + ": " + number);
+		}
+	}
+
+	public void sendBrazeEventWithStringProperty(String event, String property, String value) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("send braze event with string: " + event + ": " + property + ": " + value);
+		}
+	}
+
+	public void sendBrazeToastClick() {
+		if (BuildConfig.DEBUG) {
+			System.out.println("send braze toast click");
+		}
+	}
+
+	public void sendBrazeDialogButtonClick(int value) {
+		if (BuildConfig.DEBUG) {
+			System.out.println("send braze dialog button click " + value);
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
@@ -2780,7 +2812,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected boolean hasScriptSupport() {
-		return true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
+		return false; // 1.9.0 lite
+		//return true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	public String getMCPEVersion() {
 		return mcPkgInfo.versionName;

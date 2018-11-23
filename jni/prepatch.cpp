@@ -68,6 +68,40 @@ static void setupIsModded(void* mcpelibhandle) {
 #endif
 }
 
+static bool bl_AppPlatform_supportsScripting_hook(void* self) {
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "scripting hook");
+	return true;
+}
+
+static int bl_vtableIndexLocal(void* si, const char* vtablename, const char* name) {
+	void* needle = dobby_dlsym(si, name);
+	Elf_Sym* vtableSym = dobby_elfsym(si, vtablename);
+	void** vtable = (void**) dobby_dlsym(si, vtablename);
+	for (unsigned int i = 0; i < (vtableSym->st_size / sizeof(void*)); i++) {
+		if (vtable[i] == needle) {
+			return i;
+		}
+
+	}
+	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "cannot find vtable entry %s in %s", name, vtablename);
+	return 0;
+}
+
+static void setupMojangScripting(void* mcpelibhandle) {
+	void** vtable = (void**)dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
+	if (!vtable) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find appplatform vtable for scripting");
+		return;
+	}
+	int supportsScriptingIndex = bl_vtableIndexLocal(mcpelibhandle, "_ZTV21AppPlatform_android23",
+		"_ZNK11AppPlatform17supportsScriptingEv");
+	if (supportsScriptingIndex <= 0) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find method for scripting");
+		return;
+	}
+	vtable[supportsScriptingIndex] = (void*)&bl_AppPlatform_supportsScripting_hook;
+}
+
 /* FMOD */
 
 FMOD_RESULT bl_FMOD_System_init_hook(FMOD::System* system, int maxchannels, FMOD_INITFLAGS flags, void *extradriverdata);
@@ -136,6 +170,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
 
 	setupIsModded(mcpelibhandle);
+	setupMojangScripting(mcpelibhandle);
 
 	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
 
