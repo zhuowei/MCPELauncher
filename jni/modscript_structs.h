@@ -181,6 +181,8 @@ class TextureAtlas;
 enum UseAnimation {
 };
 
+class ActorInfoRegistry;
+
 // Updated 1.6.0b30
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
 class Item {
@@ -203,7 +205,7 @@ public:
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
-	static void initCreativeItems(bool, std::function<void ()>);
+	static void initCreativeItems(bool, ActorInfoRegistry&, std::function<void (ActorInfoRegistry&)>);
 
 	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
 };

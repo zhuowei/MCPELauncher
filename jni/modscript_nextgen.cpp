@@ -235,8 +235,8 @@ typedef struct {
 
 class BaseMobSpawner {
 public:
-	int getSpawnTypeId() const;
-	void setEntityId(ActorType);
+	ActorDefinitionIdentifier getSpawnTypeId() const;
+	void setEntityId(ActorDefinitionIdentifier);
 };
 
 struct bl_vtable_indexes_nextgen_cpp {
@@ -2540,7 +2540,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	if (te == NULL) return;
 
 	BaseMobSpawner* spawner = te->getSpawner();
-	spawner->setEntityId((ActorType)entityTypeId);
+	spawner->setEntityId(ActorDefinitionIdentifier((ActorType)entityTypeId));
 	te->setChanged();
 }
 
@@ -2552,7 +2552,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 	BaseMobSpawner* spawner = te->getSpawner();
 	if (!spawner) return 0;
-	return spawner->getSpawnTypeId();
+	return spawner->getSpawnTypeId()._getLegacyActorType();
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
