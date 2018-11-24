@@ -12,7 +12,7 @@ import android.text.TextUtils;
 
 public class HTTPRequest {
 
-	public static boolean debugNet = net.zhuoweizhang.mcpelauncher.BuildConfig.DEBUG;
+	public static boolean debugNet = net.zhuoweizhang.mcpelauncher.httpclient.BuildConfig.DEBUG;
 
 	public String url, requestBody, cookieData, contentType;
 

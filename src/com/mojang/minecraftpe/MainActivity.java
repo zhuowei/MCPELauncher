@@ -2817,8 +2817,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected boolean hasScriptSupport() {
-		return false; // 1.9.0 lite
-		//return true;//mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
+		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	public String getMCPEVersion() {
 		return mcPkgInfo.versionName;

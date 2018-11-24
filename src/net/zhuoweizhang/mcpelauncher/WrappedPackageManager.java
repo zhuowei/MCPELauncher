@@ -475,6 +475,11 @@ public class WrappedPackageManager extends PackageManager {
         return wrapped.getUserBadgedLabel(label, user);
     }
 
+    @Override
+    public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
+        return wrapped.isPermissionRevokedByPolicy(permName, pkgName);
+    }
+
     // Samsung Nougat ROMs use this
     public int getSystemFeatureLevel(String feature) {
         try {

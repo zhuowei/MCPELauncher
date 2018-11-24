@@ -538,7 +538,7 @@ public class Switch extends CompoundButton
 	private Layout makeLayout(CharSequence text)
 	{
 		final CharSequence transformed = (mSwitchTransformationMethod != null) ? mSwitchTransformationMethod.getTransformation(text, this) : text;
-		return new StaticLayout(transformed, mTextPaint, (int) FloatMath.ceil(Layout.getDesiredWidth(transformed, mTextPaint)), Layout.Alignment.ALIGN_NORMAL, 1.f, 0, true);
+		return new StaticLayout(transformed, mTextPaint, (int) Math.ceil(Layout.getDesiredWidth(transformed, mTextPaint)), Layout.Alignment.ALIGN_NORMAL, 1.f, 0, true);
 	}
 
 	/**
