@@ -12,6 +12,7 @@ import javax.net.ssl.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -210,10 +211,20 @@ public class MainActivity extends NativeActivity {
 	private boolean textureVerbose = false;
 	private PrintStream fileDataLog;
 
+	private int storedSdkTarget = -1;
+	private Class classVMRuntime;
+	private Method methodVMRuntimeGetRuntime;
+	private Method methodVMRuntimeGetTargetSdkVersion;
+	private Method methodVMRuntimeSetTargetSdkVersion;
+	private final boolean NATIVE_DEBUGGER_ENABLED = false;
+
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		if (BuildConfig.DEBUG && NATIVE_DEBUGGER_ENABLED && new File("/sdcard/bl_native_debugger.txt").exists()) {
+			startNativeDebugger();
+		}
 		currentMainActivity = new WeakReference<MainActivity>(this);
 
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
@@ -351,6 +362,11 @@ public class MainActivity extends NativeActivity {
 		}
 
 		//org.fmod.FMOD.assetManager = getAssets();
+		boolean shouldInitPatching = !isSafeMode() || requiresPatchingInSafeMode();
+
+		// between here and end init patching, we temporarily drop to Lollipop target SDK
+		// this is a danger zone: run as little code as possible in here.
+		lowerSdkTarget();
 
 		try {
 			//System.load(mcAppInfo.nativeLibraryDir + "/libgnustl_shared.so");
@@ -364,13 +380,25 @@ public class MainActivity extends NativeActivity {
 			//finish();
 		}
 
+		try {
+			if (shouldInitPatching) {
+				initPatching();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+
+		restoreSdkTarget();
+		// we should be back to regular target SDK.
+
 		org.fmod.FMOD.init(this);
 
 		libLoaded = true;
 
 		try {
-			if (!isSafeMode() || requiresPatchingInSafeMode()) {
-				initPatching();
+			if (shouldInitPatching) {
+				//initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
 					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport());
@@ -2882,6 +2910,49 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
+	private void startNativeDebugger() {
+		System.out.println("gdbserver: " + android.os.Process.myPid());
+		try {
+			Runtime.getRuntime().exec(new String[] {
+				new File(getFilesDir(), "gdbserver").getAbsolutePath(),
+				"--attach",
+				":3333",
+				"" + android.os.Process.myPid()
+			});
+				Thread.sleep(5000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void lowerSdkTarget() {
+		try {
+			// I'm so, so sorry.
+			classVMRuntime = Class.forName("dalvik.system.VMRuntime");
+			methodVMRuntimeGetRuntime = classVMRuntime.getMethod("getRuntime");
+			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
+			methodVMRuntimeGetTargetSdkVersion = classVMRuntime.getMethod("getTargetSdkVersion");
+			methodVMRuntimeSetTargetSdkVersion = classVMRuntime.getMethod("setTargetSdkVersion", Integer.TYPE);
+			storedSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
+			methodVMRuntimeSetTargetSdkVersion.invoke(runtime, Build.VERSION_CODES.LOLLIPOP);
+			int newSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
+			System.out.println("Temporarily setting SDK target to: " + newSdkTarget);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void restoreSdkTarget() {
+		if (storedSdkTarget == -1) return;
+		try {
+			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
+			methodVMRuntimeSetTargetSdkVersion.invoke(runtime, storedSdkTarget);
+			int newSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
+			System.out.println("Restored SDK target to: " + newSdkTarget);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {

@@ -5,7 +5,7 @@ public class ControllerManager {
 	public static native void init();
 
 	static {
-		System.loadLibrary("mcpelauncher");
+		//System.loadLibrary("mcpelauncher");
 	}
 
 }
