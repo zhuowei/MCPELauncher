@@ -191,11 +191,12 @@ extern void bl_prepatch_cside(void* mcpelibhandle, JNIEnv *env, jclass clazz,
 extern void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
 
 void bl_setmcpelibhandle(void* _mcpelibhandle);
+static void* hacked_dlopen(const char *filename, int flag);
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
 	if (bl_hasinit_prepatch) return;
-	void* mcpelibhandle = dlopen("libminecraftpe.so", RTLD_LAZY);
+	void* mcpelibhandle = hacked_dlopen("libminecraftpe.so", RTLD_LAZY);
 #ifndef MCPELAUNCHER_LITE
 	bl_setmcpelibhandle(mcpelibhandle);
 #endif
@@ -250,5 +251,58 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv* env, jclass clazz, jboolean p) {
 }
 #endif
+
+// Android Nougat and above uses a randomly generated handle for dlopen. We need the real address. I'm so, so sorry for this.
+static void* hacked_dlopen(const char *filename, int flag) {
+	// first try a regular dlopen.
+	void* handle = dlopen(filename, flag);
+	if (!handle) return nullptr;
+	// ok, is this Android Nougat or above?
+	bool needsHax = (((uintptr_t)handle) & 1) != 0;
+	if (!needsHax) return handle;
+	// terrible hax time
+	void* libchandle = dlopen("libc.so", RTLD_LAZY | RTLD_LOCAL);
+	if (!libchandle) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Impossible: can't open: %s", dlerror());
+		abort();
+	}
+	void (*android_set_application_target_sdk_version)(uint32_t) = (void (*)(uint32_t))
+		dlsym(libchandle, "android_set_application_target_sdk_version");
+	if (!android_set_application_target_sdk_version) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Impossible: can't get first needed: %s", dlerror());
+		abort();
+	}
+	uint32_t (*android_get_application_target_sdk_version)() = (uint32_t (*)())
+		dlsym(libchandle, "android_get_application_target_sdk_version");
+	if (!android_get_application_target_sdk_version) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Impossible: can't get second needed: %s", dlerror());
+		abort();
+	}
+	// grab our target SDK
+	uint32_t target = android_get_application_target_sdk_version();
+	// set it to 23 (Marshmallow MR1) temporarily
+	android_set_application_target_sdk_version(23);
+
+	if (android_get_application_target_sdk_version() != 23) {
+		abort();
+	}
+
+	void* newhandle = dlopen(filename, flag);
+
+	// restore as soon as possible
+	android_set_application_target_sdk_version(target);
+
+	if (android_get_application_target_sdk_version() != target) {
+		abort();
+	}
+
+	// did we get it?
+
+	if (!newhandle || (((uintptr_t)newhandle) & 1) != 0) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Impossible: thwarted: %s", dlerror());
+		abort();
+	}
+	return newhandle;
+}
 
 } // extern "C"

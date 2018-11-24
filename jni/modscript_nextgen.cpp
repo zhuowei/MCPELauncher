@@ -4024,9 +4024,9 @@ void bl_prepatch_cppside(void* mcpelibhandle_) {
 #define bl_patch_got_wrap(a, b, c) do{if (!bl_patch_got(a, b, c)) {\
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "can't patch GOT: " #b);\
 }}while(false)
-
+void* bl_getmcpelibhandle();
 void bl_setuphooks_cppside() {
-	soinfo2* mcpelibhandle = (soinfo2*) dlopen("libminecraftpe.so", RTLD_LAZY);
+	soinfo2* mcpelibhandle = (soinfo2*)bl_getmcpelibhandle();
 
 	bl_patch_got(mcpelibhandle, (void*)&ClientInstanceScreenModel::sendChatMessage, (void*)bl_ClientInstanceScreenModel_sendChatMessage_hook);
 

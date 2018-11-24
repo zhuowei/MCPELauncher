@@ -1396,6 +1396,10 @@ void bl_setmcpelibhandle(void* _mcpelibhandle) {
 	mcpelibhandle = (soinfo2*) _mcpelibhandle;
 }
 
+void* bl_getmcpelibhandle() {
+	return mcpelibhandle;
+}
+
 void bl_prepatch_cppside(void*);
 
 void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,

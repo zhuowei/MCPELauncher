@@ -13,6 +13,7 @@ import javax.net.ssl.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -191,6 +192,7 @@ public class MainActivity extends NativeActivity {
 	private static final int REQUEST_PICK_IMAGE = 415;
 	private static final int REQUEST_MANAGE_TEXTURES = 416;
 	private static final int REQUEST_MANAGE_SCRIPTS = 417;
+	private static final int REQUEST_STORAGE_PERMISSION = 418;
 
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
@@ -449,6 +451,8 @@ public class MainActivity extends NativeActivity {
 
 		// note that Kamcord works better with targetSdkVersion=19 than with 21
 		initKamcord();
+
+		grabPermissionsIfNeeded();
 
 		System.gc();
 
@@ -2124,10 +2128,11 @@ public class MainActivity extends NativeActivity {
 
 	public void requestStoragePermission(int requestId) {
 		System.out.println("Request storage: " + requestId);
+		grabPermissionsIfNeeded();
 	}
 
 	public boolean hasWriteExternalStoragePermission() {
-		return true;
+		return hasStoragePermissions();
 	}
 
 	public void trackPurchaseEvent(String a, String b, String c) {
@@ -2763,7 +2768,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private void initAtlasMeta() {
-		final boolean dumpAtlas = BuildConfig.DEBUG && new File("/sdcard/bl_dump_atlas.txt").exists();
+		final boolean dumpAtlas = BuildConfig.DEBUG && hasStoragePermissions() && new File("/sdcard/bl_dump_atlas.txt").exists();
 		if (isSafeMode()) return;
 		try {
 			AtlasProvider terrainProvider = new AtlasProvider("resource_packs/vanilla/textures/terrain_texture.json",
@@ -2842,6 +2847,42 @@ public class MainActivity extends NativeActivity {
 			}
 		});
 	}
+
+	private void grabPermissionsIfNeeded() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			grabPermissions();
+		}
+	}
+
+	private boolean hasStoragePermissions() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			return hasStoragePermissionsM();
+		}
+		return true;
+	}
+
+	private boolean hasStoragePermissionsM() {
+		return checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+	}
+
+	private boolean grabPermissions() {
+		if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+		if (requestCode == REQUEST_STORAGE_PERMISSION) {
+			if (permissions.length >= 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				// todo?
+			} else {
+			}
+		}
+	}
+
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
 		public void afterTextChanged(Editable e) {
