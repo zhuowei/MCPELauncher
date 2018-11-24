@@ -9,6 +9,8 @@
 #include "fmod_hdr.h"
 
 #include "modscript_shared.h"
+#include <stdlib.h>
+#include <fcntl.h>
 
 extern "C" {
 
@@ -72,6 +74,25 @@ static bool bl_AppPlatform_supportsScripting_hook(void* self) {
 	__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "scripting hook");
 	return true;
 }
+static bool (*bl_ScriptEngine_isScriptingEnabled_real)();
+static bool bl_ScriptEngine_isScriptingEnabled_hook() {
+	bool realret = bl_ScriptEngine_isScriptingEnabled_real();
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "script engine hook: overriding %s with true", realret? "true" : "false");
+	//v8Init();
+	return true;
+}
+static bool (*bl_FeatureToggles_isEnabled_real)(void* toggles, int id);
+static bool bl_FeatureToggles_isEnabled_hook(void* toggles, int id) {
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "feature enabled? %d", id);
+	if (id == 9) return true;
+	if (id == 7) return true;
+	return bl_FeatureToggles_isEnabled_real(toggles, id);
+}
+
+static bool bl_hbui_Feature_isEnabled_hook(void* feature) {
+	//__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "hbui feature enabled");
+	return true;
+}
 
 static int bl_vtableIndexLocal(void* si, const char* vtablename, const char* name) {
 	void* needle = dobby_dlsym(si, name);
@@ -87,6 +108,12 @@ static int bl_vtableIndexLocal(void* si, const char* vtablename, const char* nam
 	return 0;
 }
 
+static void outputExtraLog() {
+	int outputfd = open("/sdcard/bl_stdout_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	dup2(outputfd, 1);
+	dup2(outputfd, 2);
+}
+
 static void setupMojangScripting(void* mcpelibhandle) {
 	void** vtable = (void**)dlsym(mcpelibhandle, "_ZTV21AppPlatform_android23");
 	if (!vtable) {
@@ -100,6 +127,14 @@ static void setupMojangScripting(void* mcpelibhandle) {
 		return;
 	}
 	vtable[supportsScriptingIndex] = (void*)&bl_AppPlatform_supportsScripting_hook;
+	void* scriptingEngineOrig = dlsym(mcpelibhandle, "_ZN12ScriptEngine18isScriptingEnabledEv");
+	bl_ScriptEngine_isScriptingEnabled_real = (bool (*)())scriptingEngineOrig;
+	bl_patch_got((soinfo2*)mcpelibhandle, scriptingEngineOrig, (void*) &bl_ScriptEngine_isScriptingEnabled_hook);
+	outputExtraLog();
+	bl_FeatureToggles_isEnabled_real = (bool (*)(void*, int))dlsym(mcpelibhandle, "_ZNK14FeatureToggles9isEnabledE15FeatureOptionID");
+	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_FeatureToggles_isEnabled_real, (void*)&bl_FeatureToggles_isEnabled_hook);
+	void* hbui = dlsym(mcpelibhandle, "_ZNK4hbui7Feature9isEnabledEv");
+	bl_patch_got((soinfo2*)mcpelibhandle, (void*)hbui, (void*)&bl_hbui_Feature_isEnabled_hook);
 }
 
 /* FMOD */
@@ -170,7 +205,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
 
 	setupIsModded(mcpelibhandle);
+#ifdef MCPELAUNCHER_LITE
 	setupMojangScripting(mcpelibhandle);
+#endif
 
 	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
 
