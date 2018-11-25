@@ -487,6 +487,12 @@ public class MainActivity extends NativeActivity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		processIntentImport();
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		if (hasResetSafeModeCounter) {
@@ -2354,8 +2360,11 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private File copyContentStoreToTempFile(Uri content) {
+		return copyContentStoreToTempFile(content, "skintemp.png");
+	}
+	private File copyContentStoreToTempFile(Uri content, String targetName) {
 		try {
-			File tempFile = new File(this.getExternalFilesDir(null), "skintemp.png");
+			File tempFile = new File(this.getExternalFilesDir(null), targetName);
 			tempFile.getParentFile().mkdirs();
 			InputStream is = getContentResolver().openInputStream(content);
 			OutputStream os = new FileOutputStream(tempFile);
@@ -2951,6 +2960,29 @@ public class MainActivity extends NativeActivity {
 			System.out.println("Restored SDK target to: " + newSdkTarget);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void processIntentImport() {
+		try {
+			Intent intent = this.getIntent();
+			Uri uri = intent.getData();
+			System.out.println("Intent: " + intent.getAction() + ":" + uri);
+			if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+				if (uri == null) return;
+				String scheme = uri.getScheme();
+				String outputPath = uri.getPath();
+				if (outputPath.toLowerCase().endsWith(".mcworld")) {
+					if (!scheme.equals("file")) {
+						File tempFile = copyContentStoreToTempFile(intent.getData(), uri.getLastPathSegment());
+						outputPath = tempFile.getAbsolutePath();
+					}
+					nativeProcessIntentUriQuery("fileIntent", outputPath + "&" + outputPath);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
 		}
 	}
 
