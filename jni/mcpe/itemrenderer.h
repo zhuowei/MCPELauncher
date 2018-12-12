@@ -7,7 +7,7 @@ class ItemRenderer {
 public:
 	//char filler[680];
 	//std::unordered_map<short, ItemGraphics> itemGraphics; // 680
-	void _loadItemGraphics();
+	void forceGraphicsLoad();
 	void* getAtlasPos(ItemInstance const&);
 	void render(BaseActorRenderContext&, ActorRenderData&);
 

@@ -104,7 +104,6 @@ const size_t kClientInstanceScreenModel_offset = 588;
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11MobRenderer",
 "_ZTV11NpcRenderer",
-"_ZTV11VexRenderer",
 "_ZTV12FishRenderer",
 "_ZTV12WolfRenderer",
 "_ZTV13GhastRenderer",
@@ -449,7 +448,6 @@ static AABB* (*bl_Block_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, Bl
 static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
 
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
-static Biome* (*bl_Biome_getBiome)(int);
 static void (*bl_Entity_setSize)(Entity*, float, float);
 static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
@@ -651,8 +649,8 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
-static void bl_Item_initCreativeItems_hook(bool arg1, std::function<void ()> func) {
-	Item::initCreativeItems(arg1, func);
+static void bl_Item_initCreativeItems_hook(bool arg1, ActorInfoRegistry* actorInfoRegistry, std::function<void (ActorInfoRegistry*)> func) {
+	Item::initCreativeItems(arg1, actorInfoRegistry, func);
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -1061,12 +1059,13 @@ static void bl_registerItem(Item* item, std::string const& name) {
 }
 
 void bl_repopulateItemGraphics(ItemRenderer* renderer) {
-	renderer->_loadItemGraphics();
+	// 1.8: is this correct?
+	renderer->forceGraphicsLoad();
 	return; // FIXME 1.6 no mItems anymore
 }
 
 void bl_cpp_selectLevel_hook() {
-	if (Item::mItemTextureAtlas == nullptr) return;
+	//if (Item::mItemTextureAtlas == nullptr) return;
 	//bl_repopulateItemGraphics();
 }
 Item* bl_constructItem(std::string const& name, int id) {
@@ -1589,7 +1588,7 @@ void BLItemSetJsonRequest::setItem() {
 static std::vector<std::shared_ptr<BLItemSetRequest>> itemSetIconRequests;
 
 static void bl_finishItemSetIconRequests() {
-	BL_LOG("Setting item icons: %p", Item::mItemTextureAtlas.get());
+	BL_LOG("Setting item icons");
 	for (auto& request: itemSetIconRequests) {
 		request->setItem();
 	}
@@ -1598,7 +1597,7 @@ static void bl_finishItemSetIconRequests() {
 }
 
 static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int iconIndex) {
-	if (Item::mItemTextureAtlas) {
+	if (false /* Item::mItemTextureAtlas */) {
 		bl_Item_setIcon(item, iconName, iconIndex);
 	} else {
 		auto request = std::make_shared<BLItemSetIconRequest>();
@@ -1606,13 +1605,6 @@ static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int
 		request->iconName = iconName;
 		request->iconIndex = iconIndex;
 		itemSetIconRequests.push_back(request);
-	}
-}
-
-static void bl_Item_initServer_wrapper(Item* item, Json::Value& value) {
-	if (Item::mItemTextureAtlas) {
-		item->initServer(value);
-	} else {
 	}
 }
 
@@ -2039,7 +2031,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	recipes->addShapelessRecipe(outStack, ingredientsList, nullptr);
+	recipes->addShapelessRecipe(outStack, ingredientsList, 0, nullptr);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
@@ -2078,7 +2070,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
-	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, nullptr);
+	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, 0, nullptr);
 }
 
 class BLFurnaceRecipeRequest {
@@ -2490,28 +2482,16 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	bl_custom_block_collisionDisabled[blockId] = !collide;
 }
 
-JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetBiome
-  (JNIEnv *env, jclass clazz, jint x, jint z, jint id) {
-	if (bl_level == nullptr) return;
-	LevelChunk* chunk = bl_localplayer->getRegion()->getChunk(x >> 4, z >> 4);
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chunk: %p", chunk);
-	if (chunk == nullptr) return;
-	ChunkTilePos pos;
-	pos.x = x & 0xf;
-	pos.y = 64;
-	pos.z = z & 0xf;
-	Biome* biome = bl_Biome_getBiome(id);
-	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Biome: %p", biome);
-	if (biome == nullptr) return;
-	bl_LevelChunk_setBiome(chunk, *biome, pos);
-}
-
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBiomeIdToName
   (JNIEnv *env, jclass clazz, jint id) {
+	// FIXME 1.8: biome registry
+	return nullptr;
+/*
 	Biome* biome = bl_Biome_getBiome(id);
 	if (biome == nullptr) return nullptr;
 	jstring retval = env->NewStringUTF(biome->name.c_str());
 	return retval;
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeForceCrash
@@ -3048,7 +3028,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	if (jsonReader.parse(std::string(utfChars), jsonValue)) {
 		ret = true;
 		item->initServer(jsonValue);
-		if (Item::mItemTextureAtlas != nullptr) item->initClient(jsonValue, jsonValue);
+		//if (Item::mItemTextureAtlas != nullptr) item->initClient(jsonValue, jsonValue);
 		auto request = std::make_shared<BLItemSetJsonRequest>();
 		request->itemId = item->itemId;
 		request->value = std::string(utfChars);
@@ -3675,24 +3655,6 @@ void* bl_SceneStack_update_hook(SceneStack* self) {
 
 void bl_armorInit_postLoad();
 
-void (*bl_MinecraftGame_updateFoliageColors_real)(MinecraftGame*);
-void bl_MinecraftGame_updateFoliageColors_hook(MinecraftGame* client) {
-	bl_MinecraftGame_updateFoliageColors_real(client);
-	if (!Item::mItemTextureAtlas) return;
-	//bl_finishBlockBuildTextureRequests();
-	//bl_finishItemSetIconRequests();
-	//bl_repopulateItemGraphics();
-
-	//bl_armorInit_postLoad();
-/* FIXME 1.6: extended blocks removed
-	if (BlockLegacy::mBlocks[kStonecutterId]) {
-		BlockLegacy::mBlocks[kStonecutterId]->setSolid(false);
-		BlockLegacy::mBlocks[kStonecutterId]->renderLayer = 3;
-		bl_Block_setVisualShape(BlockLegacy::mBlocks[kStonecutterId], Vec3(0, 0, 0), Vec3(1, 0.999, 1));
-	}
-*/
-}
-
 static bool bl_needItemIconReload = false;
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeNewLevelCallbackStarted
@@ -4182,8 +4144,6 @@ void bl_setuphooks_cppside() {
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
 // known to work
-	bl_Biome_getBiome = (Biome* (*)(int))
-		dlsym(mcpelibhandle, "_ZN5Biome8getBiomeEi");
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN5Actor7setSizeEff");
 	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
@@ -4250,6 +4210,10 @@ void bl_setuphooks_cppside() {
 
 	for (unsigned int i = 0; i < sizeof(listOfRenderersToPatchTextures) / sizeof(const char*); i++) {
 		void** vtable = (void**) dobby_dlsym(mcpelibhandle, listOfRenderersToPatchTextures[i]);
+		if (!vtable) {
+			BL_LOG("Can't patch %s", listOfRenderersToPatchTextures[i]);
+			continue;
+		}
 #if 0
 		Dl_info info;
 		if (dladdr(vtable[vtable_indexes.mobrenderer_get_skin_ptr], &info)) {
@@ -4278,8 +4242,6 @@ void bl_setuphooks_cppside() {
 		(void*)&bl_CustomBlockGraphics_getTexture_blockPos_hook);
 
 	// known to fail.
-	// fixme 1.1.0
-	mcpelauncher_hook((void*)&MinecraftGame::updateFoliageColors, (void*)bl_MinecraftGame_updateFoliageColors_hook, (void**)&bl_MinecraftGame_updateFoliageColors_real);
 	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
@@ -4305,7 +4267,7 @@ void bl_setuphooks_cppside() {
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
 
-	bl_renderManager_init(mcpelibhandle);
+	//bl_renderManager_init(mcpelibhandle);
 /*
 	void* blockCons = (void*)&BlockPalette::registerBlockLegacy;
 	unsigned char* crashit = (unsigned char*)(((uintptr_t)blockCons) & ~1);

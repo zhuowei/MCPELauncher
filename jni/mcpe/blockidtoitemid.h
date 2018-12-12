@@ -28,10 +28,11 @@ static inline BlockLegacy* getBlockForItemId(int itemId) {
 }
 
 static inline Item* getItemForId(int itemId) {
-	return ItemRegistry::getItem((short)itemId);
+	return ItemRegistry::getItem((short)itemId).get();
 }
 
 static inline void setItemForId(int itemId, Item* item) {
-	ItemRegistry::registerItem(std::unique_ptr<Item>(item));
+	abort();
+	//ItemRegistry::registerItem(std::unique_ptr<Item>(item));
 }
 } // extern "C"

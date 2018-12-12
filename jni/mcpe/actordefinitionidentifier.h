@@ -10,8 +10,8 @@ public:
 	ActorDefinitionIdentifier(ActorDefinitionIdentifier const&);
 	ActorDefinitionIdentifier(std::string const&);
 
-	operator==(ActorDefinitionIdentifier const&) const;
-	operator=(ActorDefinitionIdentifier const&);
+	bool operator==(ActorDefinitionIdentifier const&) const;
+	ActorDefinitionIdentifier& operator=(ActorDefinitionIdentifier const&);
 
 	ActorType _getLegacyActorType() const;
 	std::string getCanonicalName() const;

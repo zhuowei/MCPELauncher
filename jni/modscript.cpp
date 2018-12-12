@@ -749,7 +749,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	tilePos.x = x;
 	tilePos.y = y;
 	tilePos.z = z;
-	levelData->setSpawn(tilePos);
+	levelData->setSpawnPos(tilePos);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameType

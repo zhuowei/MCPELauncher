@@ -1,9 +1,10 @@
 #pragma once
+#include "sharedptr.h"
 class Item;
 class ItemRegistry {
 public:
-	static Item* getItem(short);
-	static Item* getItem(std::string const&);
+	static SharedPtr<Item> getItem(short);
+	static SharedPtr<Item> getItem(std::string const&);
 	static void _setItem(short, Item const*);
 	static void registerItem(SharedPtr<Item>&&);
 	static ItemRegistry* mItemRegistry;

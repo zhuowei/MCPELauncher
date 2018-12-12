@@ -205,9 +205,7 @@ public:
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
-	static void initCreativeItems(bool, ActorInfoRegistry&, std::function<void (ActorInfoRegistry&)>);
-
-	static std::shared_ptr<TextureAtlas> mItemTextureAtlas;
+	static void initCreativeItems(bool, ActorInfoRegistry*, std::function<void (ActorInfoRegistry*)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
 static_assert(sizeof(Item) == 136, "item size is wrong");
@@ -398,10 +396,11 @@ public:
 #endif
 };
 	std::vector<Recipe*> recipes;
-	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&,
+	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&, int,
 		std::function<std::unique_ptr<ShapelessRecipe>(std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
-	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&,
+	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&, int,
 		std::function<std::unique_ptr<ShapedRecipe>(int, int, std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
+
 }; // class Recipes
 
 typedef Recipes::Type RecipesType;
@@ -549,7 +548,7 @@ static_assert(sizeof(HumanoidMobRenderer) == 688, "humanoid mob renderer size");
 
 class LevelData {
 public:
-	void setSpawn(BlockPos const&);
+	void setSpawnPos(BlockPos const&);
 	void setGameType(GameType);
 	GameType getGameType() const;
 };
