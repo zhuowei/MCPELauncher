@@ -316,7 +316,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
-		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
+		"_ZN20ClientNetworkHandler10handleTextERK17NetworkIdentifierRK10TextPacket");
 //	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 //		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
