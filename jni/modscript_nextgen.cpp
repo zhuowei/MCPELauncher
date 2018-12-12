@@ -251,7 +251,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int item_use;
 	int item_dispense;
 	int clientnetworkhandler_handle_text_packet;
-	int block_use;
+//	int block_use;
 	int item_get_icon;
 	int appplatform_get_settings_path;
 	int mob_send_inventory;
@@ -317,8 +317,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
 		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
-	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
-		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
+//	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
+//		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item7getIconEiib");
 	vtable_indexes.appplatform_get_settings_path = bl_vtableIndex(mcpelibhandle, "_ZTV11AppPlatform",
@@ -463,7 +463,7 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 static bool (*bl_Recipe_isAnyAuxValue_real)(ItemInstance const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
-static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
+//static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
 
@@ -903,7 +903,7 @@ static void bl_Level_removeEntity_hook(Level* level, std::unique_ptr<Entity>&& e
 
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "entityRemovedCallback", "(J)V");
-	BL_LOG("Entity removed: %lld", (long long) entity->getUniqueID());
+	//BL_LOG("Entity removed: %lld", (long long) entity->getUniqueID());
 
 	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID());
 	bl_removedEntity = nullptr;
@@ -1161,12 +1161,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 }
 
 static void bl_recreateItems() {
+	BL_LOG("Recreating items");
 	for (auto& request: bl_createItemRequests) {
 		int id = request.id;
 		if (getItemForId(id)) {
 			continue;
 		}
-		BL_LOG("Recreating item %d %s", id, request.name.c_str());
 		if (request.type == 0) {
 			bl_constructItem(request.name, id);
 		} else if (request.type == 1) {
@@ -3593,6 +3593,7 @@ static int bl_StonecutterBlock_getColor_hook(BlockLegacy* tile, BlockSource& blo
 	return myColours[data];
 }
 class ItemUseCallback;
+/*
 static bool (*bl_StonecutterBlock_use_real)(BlockLegacy* tile, Player& player, BlockPos const& pos, ItemUseCallback* callback);
 static bool bl_StonecutterBlock_use_hook(BlockLegacy* tile, Player& player, BlockPos const& pos, ItemUseCallback* callback) {
 	// FIXME 1.2.20 getExtraData
@@ -3600,6 +3601,7 @@ static bool bl_StonecutterBlock_use_hook(BlockLegacy* tile, Player& player, Bloc
 	if (extraData == 0) return bl_StonecutterBlock_use_real(tile, player, pos, callback);
 	return false;
 }
+*/
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
@@ -3707,11 +3709,12 @@ static void bl_cpp_screenchange_handler(std::string const& screen, std::string c
 		bl_needItemIconReload = false;
 	}
 }
-
+/*
 bool addHook(PlayerInventoryProxy* a, ItemInstance& b, bool c) {
 	BL_LOG("Add: %p %d", a, b.getId());
 	return a->add(b, c);
 }
+*/
 
 std::string getNameHook(ItemInstance* itemStack) {
 	if (!itemStack) return "HACK";
@@ -4278,18 +4281,21 @@ void bl_setuphooks_cppside() {
 	//	(void**)&bl_BlockTessellator_tessellateInWorld_real);
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	stonecutterVtable[vtable_indexes.tile_get_color] = (void*)&bl_StonecutterBlock_getColor_hook;
+/*
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
-
+*/
+	/* FIXME 1.8: no custom blocks yet!
 	bl_BlockGraphics_initBlocks_new = (void (*)(ResourcePackManager*)) dlsym(mcpelibhandle,
 			"_ZN13BlockGraphics10initBlocksER19ResourcePackManager");
 	mcpelauncher_hook((void*)bl_BlockGraphics_initBlocks_new, (void*)&bl_BlockGraphics_initBlocks_hook,
 		(void**)&bl_BlockGraphics_initBlocks_real);
-	bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
+	*/
+	//bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
 		(void**)&bl_SceneStack_update_real);
-	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes5_initEv"), (void*)&bl_FurnaceRecipes__init_hook,
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes4initEv"), (void*)&bl_FurnaceRecipes__init_hook,
 		(void**)&bl_FurnaceRecipes__init_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);

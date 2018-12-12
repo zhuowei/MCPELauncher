@@ -141,7 +141,7 @@ struct bl_vtable_indexes {
 	int gamemode_attack;
 	int gamemode_tick;
 	int minecraft_update;
-	int minecraft_quit;
+//	int minecraft_quit;
 	int gamemode_start_destroy_block;
 	int entity_get_entity_type_id;
 	int mob_set_armor;
@@ -1333,7 +1333,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv* env, jclass clazz, jboolean p) {
 	exitEnabled = p;
 }
-
+/*
 static void (*App_quit_real)(void*);
 static void App_quit_hook(void* self) {
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "app quit");
@@ -1341,6 +1341,7 @@ static void App_quit_hook(void* self) {
 		App_quit_real(self);
 	}
 }
+*/
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
@@ -1351,8 +1352,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN8GameMode4tickEv");
 	vtable_indexes.minecraft_update = bl_vtableIndex(mcpelibhandle, "_ZTV13MinecraftGame",
 		"_ZN13MinecraftGame6updateEv");
-	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV14ClientInstance",
-		"_ZN14ClientInstance4quitEv");
+//	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV14ClientInstance",
+//		"_ZN14ClientInstance4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode17startDestroyBlockERK8BlockPosaRb");
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
@@ -1412,11 +1413,13 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 
 	populate_vtable_indexes(mcpelibhandle);
 
+/*
 	if (!limitedPrepatch) {
 		void** minecraftVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV14ClientInstance");
 		App_quit_real = (void (*)(void*)) minecraftVtable[vtable_indexes.minecraft_quit];
 		minecraftVtable[vtable_indexes.minecraft_quit] = (void*) &App_quit_hook;
 	}
+*/
 	// needed for extended items' texture hook
 	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
