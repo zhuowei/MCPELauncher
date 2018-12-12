@@ -1430,6 +1430,7 @@ Item** bl_getItemsArray() {
 static void bl_CustomSnowball_processAddEntity(Entity* entity) {
 	if (bl_getEntityTypeIdThroughVtable(entity) != 81 /* snowball */) return;
 	if (!bl_activeSnowballId) return;
+	return; // 1.8
 	int renderType = bl_renderManager_renderTypeForItemSprite(bl_activeSnowballId);
 	if (!renderType) return;
 	bl_renderManager_setRenderType(entity, renderType);
@@ -2270,6 +2271,8 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntityGetRenderType
   (JNIEnv *env, jclass clazz, jlong entityId) {
+	return -1;
+	// FIXME 1.8
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	return bl_renderManager_getRenderType(entity);
@@ -2825,7 +2828,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	if (!bl_localplayer) return -1;
 	BlockAndData* blockAndData = bl_localplayer->getRegion()->getBlock({x, y, z});
 	if (!blockAndData) return -1;
-	Tile* tile = blockAndData->blockBase;
+	Tile* tile = blockAndData->blockBase.get();
 	if (!tile) return -1;
 	void* methodPtr = tile->vtable[vtable_indexes.tile_get_second_part];
 	bool (*getSecondPart)(Tile*, TileSource&, TilePos const&, TilePos&) =

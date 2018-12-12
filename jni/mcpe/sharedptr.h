@@ -8,8 +8,8 @@
 template<class T> class SharedPtrImpl {
 public:
 	T* ptr; // 0
-	std::atomic_uint referenceCount; // 4
-	void* destructor; // 8
+	void* destructor; // 4
+	std::atomic_uint referenceCount; // 8
 };
 
 template<class T> class SharedPtr {
@@ -30,5 +30,11 @@ static_assert(sizeof(SharedPtr<void>) == 4, "shared ptr size");
 template<class T> class WeakPtr {
 public:
 	SharedPtrImpl<T>* impl;
+	~WeakPtr() {
+	}
+	T* get() {
+		if (!impl) return nullptr;
+		return impl->ptr;
+	}
 };
 static_assert(sizeof(WeakPtr<void>) == 4, "weak ptr size");

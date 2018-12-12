@@ -67,7 +67,7 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.2.20b1
+// last update: 1.8
 class Actor {
 public:
 	void** vtable; //0
@@ -77,18 +77,16 @@ public:
 	float prevPitch; //160
 	float prevYaw; //164
 
-	char filler4[300-168]; //168
-	int renderType; //300
-	char filler5[516-304]; // 304
-	std::vector<Entity*> riders; // 516
+	char filler4[532-168]; //168
+	std::vector<Entity*> riders; // 532
 
-	char filler3[3372-528]; // 528
-	float motionX; // 3372 - Actor::push
-	float motionY; // 3376
-	float motionZ; // 3380
-	float x; //3384 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3388
-	float z; //3392
+	char filler3[3440-544]; // 544
+	float motionX; // 3440 - Actor::push
+	float motionY; // 3444
+	float motionZ; // 3448
+	float x; //3452 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3456
+	float z; //3460
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -119,11 +117,10 @@ public:
 	void removeEffect(int);
 	void removeAllEffects();
 };
-static_assert(offsetof(Entity, renderType) == 300, "renderType offset wrong");
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 516, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3384, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3452, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -166,12 +163,13 @@ struct TextureUVCoordinateSet {
 	float extra;
 	unsigned short size[2]; // 20
 	ResourceLocation location;
+	char filler[8]; // TextureUVCoordinateSet::TextureUVCoordinateSet
 	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
 };
 //static_assert(offsetof(TextureUVCoordinateSet, textureFile) == 24, "textureFile offset wrong");
-static_assert(sizeof(TextureUVCoordinateSet) == 32, "TextureUVCoordinateSet size wrong");
+static_assert(sizeof(TextureUVCoordinateSet) == 40, "TextureUVCoordinateSet size wrong");
 
 namespace Json {
 	class Value;
@@ -183,16 +181,17 @@ enum UseAnimation {
 
 class ActorInfoRegistry;
 
-// Updated 1.6.0b30
+// Updated 1.8
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
+// or  ItemRegistry::registerItemShared
 class Item {
 public:
 	//void** vtable; //0
 	char filler0[64-4]; //4
 	short itemId; //64
-	char filler1[83-66]; // 66
-	bool handEquipped; // 83
-	char filler3[136-84]; // 84
+	char filler1[99-66]; // 66
+	bool handEquipped; // 99
+	char filler3[152-100]; // 100
 	virtual ~Item();
 
 	// this one loads textures
@@ -208,7 +207,7 @@ public:
 	static void initCreativeItems(bool, ActorInfoRegistry*, std::function<void (ActorInfoRegistry*)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
-static_assert(sizeof(Item) == 136, "item size is wrong");
+static_assert(sizeof(Item) == 152, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -258,7 +257,7 @@ enum BlockProperty {
 class AABB;
 class Block;
 typedef Block BlockAndData;
-// last updated 1.2.13 / WIP!
+// last updated 1.8
 class BlockLegacy {
 public:
 	void** vtable; //0
@@ -274,7 +273,7 @@ public:
 	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
 	char filler4[128-114]; // 114
 	unsigned short id; // 128
-	char filler5[2184-130]; // 130
+	char filler5[2584-130]; // 130
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -287,7 +286,7 @@ public:
 	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
-static_assert(sizeof(BlockLegacy) == 2184, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 2584, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
@@ -343,6 +342,7 @@ namespace mce {
 class GeometryPtr;
 // from HumanoidModel::render
 // last updated 1.1.3.1
+// NOT updated 1.8
 class HumanoidModel {
 public:
 	char filler[25-4]; // 4
@@ -515,15 +515,15 @@ typedef void ModelRenderer;
 #ifdef __cplusplus
 // look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
-	int armorType; // 136
-	int damageReduceAmount; // 140
-	int renderIndex; // 144
-	void* armorMaterial; // 148
-	char fillerendarmor[172-152]; // 152
+	int armorType; // 152
+	int damageReduceAmount; // 156
+	int renderIndex; // 160
+	void* armorMaterial; // 164
+	char fillerendarmor[192-168]; // 168
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 172, "armor item size");
+static_assert(sizeof(ArmorItem) == 192, "armor item size");
 #endif
 
 

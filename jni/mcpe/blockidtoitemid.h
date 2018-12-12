@@ -24,7 +24,7 @@ static inline BlockLegacy* getBlockForItemId(int itemId) {
 	if (!bl_level) return nullptr;
 	Block* block = bl_level->getGlobalBlockPalette()->getBlockFromLegacyData(NewBlockID {(short)blockIdFromItemId(itemId)}, 0);
 	if (!block) return nullptr;
-	return block->blockBase;
+	return block->blockBase.get();
 }
 
 static inline Item* getItemForId(int itemId) {

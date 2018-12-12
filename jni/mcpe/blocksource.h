@@ -18,8 +18,8 @@ public:
 	int getBlockID(BlockPos const& blockPos) const {
 		BlockAndData* state = getBlock(blockPos);
 		if (!state) return 0;
-		if (!state->blockBase) return 0;
-		return state->blockBase->id;
+		if (!state->blockBase.get()) return 0;
+		return state->blockBase.get()->id;
 	}
 	int getData(int x, int y, int z) {
 		return getData({x, y, z});
