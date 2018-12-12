@@ -61,6 +61,7 @@
 #include "mcpe/backgroundworker.h"
 #include "mcpe/blockpalette.h"
 #include "mcpe/blockidtoitemid.h"
+#include "mcpe/vanillaitems.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -76,7 +77,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4420
+#define PLAYER_ABILITIES_OFFSET 4480
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -94,7 +95,7 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3912;
+const size_t kItemEntity_itemInstance_offset = 3984;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
@@ -368,7 +369,7 @@ static void** bl_BlockGraphics_vtable;
 static void** bl_BlockItem_vtable;
 static void** bl_CustomBlockItem_vtable;
 
-static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
+//static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
 //static void* (*bl_Level_getAllEntities)(Level*);
 
@@ -484,6 +485,7 @@ static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, Bl
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
+static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -1039,7 +1041,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 static void bl_registerItem(Item* item, std::string const& name) {
 	bl_Item_setCategory(item, 3 /* TOOL */);
-	setItemForId(item->itemId, item);
+	//setItemForId(item->itemId, item);
 	//BL_LOG("Registered %d with %p", (int)item->itemId, item);
 	//std::string lowercaseStr = Util::toLower(name);
 	// FIXME 1.2.0: wrong thread?
@@ -1069,8 +1071,10 @@ void bl_cpp_selectLevel_hook() {
 	//bl_repopulateItemGraphics();
 }
 Item* bl_constructItem(std::string const& name, int id) {
-	Item* retval = (Item*) ::operator new(kItemSize);
-	bl_Item_Item(retval, name, id);
+	short idTemp = id;
+	WeakPtr<Item> itemPtr = bl_ItemRegistry_registerItemShared(name, idTemp);
+	if (idTemp != id) abort();
+	Item* retval = itemPtr.get();
 	*((void***)retval) = bl_CustomItem_vtable + 2;
 	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
@@ -1078,8 +1082,10 @@ Item* bl_constructItem(std::string const& name, int id) {
 }
 
 Item* bl_constructSnowballItem(std::string const& name, int id) {
-	Item* retval = (Item*) ::operator new(kItemSize);
-	bl_Item_Item(retval, name, id);
+	short idTemp = id;
+	WeakPtr<Item> itemPtr = bl_ItemRegistry_registerItemShared(name, idTemp);
+	if (idTemp != id) abort();
+	Item* retval = itemPtr.get();
 	*((void***)retval) = bl_CustomSnowballItem_vtable + 2;
 	retval->setStackedByData(true);
 	bl_registerItem(retval, name);
@@ -1087,6 +1093,15 @@ Item* bl_constructSnowballItem(std::string const& name, int id) {
 }
 
 static void bl_Item_setIcon_wrapper(Item* item, std::string const& iconName, int iconIndex);
+
+class BLCreateItemRequest {
+public:
+	std::string name;
+	int id;
+	int type;
+};
+
+static std::vector<BLCreateItemRequest> bl_createItemRequests;
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
@@ -1106,6 +1121,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	}
 
 	bl_set_i18n("item." + mystr + ".name", mystr);
+
+	bl_createItemRequests.push_back({mystr, id, 0});
+
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
 }
@@ -1118,7 +1136,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	ArmorItem* item = new ArmorItem;
 	bl_ArmorItem_ArmorItem(item, mystr, id, ((ArmorItem*) getItemForId(310))->armorMaterial, 42, armorType);
-	bl_registerItem(item, mystr);
+	abort();
+	//bl_registerItem(item, mystr);
 	item->damageReduceAmount = damageReduceAmount;
 	bl_Item_setMaxDamage(item, maxDamage);
 
@@ -1154,9 +1173,28 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
 
+	bl_createItemRequests.push_back({mystr, id, 1});
+
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
+}
+
+static void bl_recreateItems() {
+	for (auto& request: bl_createItemRequests) {
+		int id = request.id;
+		if (getItemForId(id)) {
+			continue;
+		}
+		BL_LOG("Recreating item %d %s", id, request.name.c_str());
+		if (request.type == 0) {
+			bl_constructItem(request.name, id);
+		} else if (request.type == 1) {
+			bl_constructSnowballItem(request.name, id);
+		} else {
+			abort(); // WHAT
+		}
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetItemMaxDamage
@@ -3959,6 +3997,12 @@ int bl_pthread_kill_hook(pthread_t thread, int sig) {
 }
 #endif
 
+void* bl_VanillaItems_registerItems_hook(bool arg1) {
+	void* retval = VanillaItems::registerItems(arg1);
+	bl_recreateItems();
+	return retval;
+}
+
 void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
 
 void bl_prepatch_cppside(void* mcpelibhandle_) {
@@ -4269,6 +4313,9 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_FurnaceRecipes__init_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
+	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))
+		dlsym(mcpelibhandle, "_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_");
+	bl_patch_got_wrap(mcpelibhandle, (void*)&VanillaItems::registerItems, (void*)&bl_VanillaItems_registerItems_hook);
 
 	//bl_renderManager_init(mcpelibhandle);
 /*

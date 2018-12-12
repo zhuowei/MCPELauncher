@@ -3235,6 +3235,7 @@ public class ScriptManager {
 
 		@JSStaticFunction
 		public static void setRenderType(Object ent, Object renderType) {
+			/*
 			RendererManager.NativeRenderer theRenderer = null;
 			if (renderType instanceof NativeJavaObject) {
 				renderType = ((NativeJavaObject)renderType).unwrap();
@@ -3254,6 +3255,7 @@ public class ScriptManager {
 			}
 			if (!alreadySet) setRenderTypeImpl(ent, theRenderer.getRenderType());
 			setExtraData(ent, ENTITY_KEY_RENDERTYPE, theRenderer.getName());
+			*/
 		}
 
 		public static void setRenderTypeImpl(Object ent, int renderType) {

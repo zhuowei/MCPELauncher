@@ -23,6 +23,8 @@ public:
 		if (!impl) return nullptr;
 		return impl->ptr;
 	}
+	template <class... Args>
+	static SharedPtr<T> make(Args&&... args);
 };
 static_assert(sizeof(SharedPtrImpl<void>) == 12, "shared ptr impl size");
 static_assert(sizeof(SharedPtr<void>) == 4, "shared ptr size");

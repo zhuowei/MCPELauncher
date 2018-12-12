@@ -92,7 +92,7 @@ public class RendererManager {
 			this.rendererId = rendererId;
 		}
 		public NativeModelPart getPart(String name) {
-			boolean partExists = nativeModelPartExists(rendererId, name);
+			boolean partExists = true;//nativeModelPartExists(rendererId, name);
 			if (!partExists) throw new RuntimeException("The model part " + name + " does not exist.");
 			return new NativeModelPart(rendererId, name);
 		}

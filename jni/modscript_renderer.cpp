@@ -131,7 +131,7 @@ int bl_renderManager_createHumanoidRenderer() {
 Item** bl_getItemsArray();
 
 int bl_renderManager_createItemSpriteRenderer(int itemId) {
-	abort(); // FIXME 1.8
+	return -1; // FIXME 1.8
 	Item* item = ItemRegistry::getItem((short)itemId).get();
 	if (!item) {
 		BL_LOG("No item sprite item?");
