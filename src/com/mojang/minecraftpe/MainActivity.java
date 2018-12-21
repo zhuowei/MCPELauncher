@@ -269,7 +269,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.7.0");
+				intent.putExtra("supportedVersion", "1.8.0");
 				startActivity(intent);
 				finish();
 				try {
