@@ -1115,20 +1115,26 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAnimalAge
   (JNIEnv *env, jclass clazz, jlong entityId, jint age) {
+	return;
+/* FIXME 1.9
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	AgeableComponent* component = entity->getAgeableComponent();
 	if (component == nullptr) return;
 	component->setAge(age);
+*/
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetAnimalAge
   (JNIEnv *env, jclass clazz, jlong entityId) {
+	return 0;
+/* FIXME 1.9
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	AgeableComponent* component = entity->getAgeableComponent();
 	if (component == nullptr) return 0;
 	return component->getAge();
+*/
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeClearSlotInventory

@@ -98,7 +98,6 @@ public:
 	void setTarget(Entity*);
 	void setStatusFlag(ActorFlags, bool);
 	Level* getLevel();
-	AgeableComponent* getAgeableComponent() const;
 	void hurt(ActorDamageSource const&, int, bool, bool);
 	Entity* getRide() const;
 	void setNameTagVisible(bool);
@@ -223,7 +222,11 @@ public:
 	char filler2[72-11]; // 11
 
 	ItemInstance();
-	ItemInstance(int, int, int);
+
+	ItemInstance(int id, int count, int data) : ItemInstance() {
+		init(id, count, data);
+	}
+
 	ItemInstance(ItemInstance const&);
 	ItemInstance& operator=(ItemInstance const&);
 	~ItemInstance();

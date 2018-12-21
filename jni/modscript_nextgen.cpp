@@ -3489,7 +3489,9 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 		return env->NewStringUTF(outStr.c_str());
 	}
 	// fixme: command outputs?
-	DedicatedServerCommandOrigin* origin = new DedicatedServerCommandOrigin("ModPE Script", *minecraft);
+	ServerLevel* serverLevel = (ServerLevel*)bl_minecraft->getLocalServerLevel();
+	if (!serverLevel) return nullptr;
+	ServerCommandOrigin* origin = new ServerCommandOrigin("ModPE Script", *serverLevel);
 	std::string outStr = "<no result>";
 	BL_LOG("Executing nonsilent command %s!", mystr.c_str());
 	commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, CommandVersion::CurrentVersion, true);
