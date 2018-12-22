@@ -102,7 +102,6 @@ static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
-void (*bl_ItemInstance_setId)(ItemInstance*, int);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(MinecraftGame*);
 
@@ -191,7 +190,7 @@ void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
 	instance->count = count;
 	bl_ItemInstance_setUserData(instance, std::unique_ptr<CompoundTag>(nullptr));
-	bl_ItemInstance_setId(instance, id);
+	instance->_setItem(id);
 }
 
 ItemInstance* bl_newItemInstance(int id, int count, int damage) {
@@ -1430,8 +1429,6 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
 	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
 		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
-	bl_ItemInstance_setId = (void (*)(ItemInstance*, int))
-		dlsym(RTLD_DEFAULT, "_ZN12ItemInstance8_setItemEi"); //note the name change: consistent naming
 
 	bl_prepatch_cppside(mcpelibhandle);
 }

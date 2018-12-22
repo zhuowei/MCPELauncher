@@ -109,20 +109,15 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV13HorseRenderer",
 "_ZTV13SlimeRenderer",
 "_ZTV14ParrotRenderer",
-"_ZTV14RabbitRenderer",
 "_ZTV15CreeperRenderer",
 "_ZTV15HorseRendererV2",
 "_ZTV16EnderManRenderer",
 "_ZTV16GuardianRenderer",
-"_ZTV16SkeletonRenderer",
-"_ZTV17IronGolemRenderer",
 "_ZTV17LavaSlimeRenderer",
 "_ZTV17PolarBearRenderer",
-"_ZTV17SnowGolemRenderer",
 "_ZTV18WitherBossRenderer",
 "_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
-"_ZTV22VillagerZombieRenderer",
 };
 
 #define AXIS_X 0
@@ -450,8 +445,6 @@ static void (*bl_Item_setCategory)(Item*, int);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real)(ItemInstance const&);
 static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
-static void* (*bl_MobRenderer_render_real)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&);
-static void* (*bl_SkeletonRenderer_render_real)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&);
 static void (*bl_Block_onPlace)(BlockLegacy*, BlockSource&, BlockPos const&);
 
 static void** bl_LiquidBlockStatic_vtable;
@@ -2793,6 +2786,7 @@ static void generateBl(uint16_t* buffer, uintptr_t curpc, uintptr_t newpc) {
 }
 
 void bl_forceTextureLoad(std::string const& name) {
+	return; // FIXME 1.9
 	if (name.length() == 0) return;
 	BL_LOG("Forcing texture reload: %s canLoad: %s", name.c_str(), mce::TextureGroup::mCanLoadTextures? "yes": "no");
 	bool old = mce::TextureGroup::mCanLoadTextures;
@@ -3005,14 +2999,6 @@ mce::TexturePtr const& bl_MobRenderer_getSkinPtr_hook(MobRenderer* renderer, Ent
 		return foundIter->second;
 	}
 	return bl_MobRenderer_getSkinPtr_real(renderer, ent);
-}
-
-static void* bl_SkeletonRenderer_render_hook(MobRenderer* renderer, BaseActorRenderContext& context, ActorRenderData& renderdata) {
-	auto foundIter = bl_mobTexturesMap.find(renderdata.entity->getUniqueID());
-	if (foundIter != bl_mobTexturesMap.end()) {
-		return bl_MobRenderer_render_real(renderer, context, renderdata);
-	}
-	return bl_SkeletonRenderer_render_real(renderer, context, renderdata);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetDestroyTime
@@ -4290,12 +4276,6 @@ void bl_setuphooks_cppside() {
 #endif
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
-	void** skeletonRendererVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV16SkeletonRenderer");
-	bl_SkeletonRenderer_render_real = (void* (*)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&))
-		skeletonRendererVtable[vtable_indexes.mobrenderer_render];
-	bl_MobRenderer_render_real = (void* (*)(MobRenderer*, BaseActorRenderContext&, ActorRenderData&))
-		dlsym(mcpelibhandle, "_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
-	skeletonRendererVtable[vtable_indexes.mobrenderer_render] = (void*) &bl_SkeletonRenderer_render_hook;
 
 	// custom blocks.
 

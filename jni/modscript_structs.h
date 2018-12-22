@@ -216,15 +216,16 @@ class BlockLegacy;
 class ItemInstance {
 public:
 	Item* item; // 0
-	CompoundTag* tag; // 4
-	short damage; // 8
-	unsigned char count; //10
-	char filler2[72-11]; // 11
+	char filler1[12-4]; // 4
+	short damage; // 12
+	unsigned char count; //14
+	char filler2[72-15]; // 15
 
 	ItemInstance();
 
 	ItemInstance(int id, int count, int data) : ItemInstance() {
 		init(id, count, data);
+		_setItem(id);
 	}
 
 	ItemInstance(ItemInstance const&);
@@ -244,11 +245,12 @@ public:
 	void remove(int);
 	bool isArmorItem() const;
 	UseAnimation getUseAnimation() const;
+	void _setItem(int);
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
-static_assert(offsetof(ItemInstance, tag) == 4, "tag offset wrong");
 static_assert(offsetof(ItemInstance, item) == 0, "item offset wrong");
+static_assert(offsetof(ItemInstance, count) == 14, "count wrong");
 static_assert(sizeof(ItemInstance) == 72, "ItemInstance wrong");
 
 enum CreativeItemCategory {
