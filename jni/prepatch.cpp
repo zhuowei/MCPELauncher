@@ -206,9 +206,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
 
 	setupIsModded(mcpelibhandle);
-#ifdef MCPELAUNCHER_LITE
 	setupMojangScripting(mcpelibhandle);
-#endif
 
 	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
 

@@ -67,7 +67,7 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.8
+// last update: 1.9.0b3
 class Actor {
 public:
 	void** vtable; //0
@@ -80,13 +80,13 @@ public:
 	char filler4[532-168]; //168
 	std::vector<Entity*> riders; // 532
 
-	char filler3[3440-544]; // 544
-	float motionX; // 3440 - Actor::push
-	float motionY; // 3444
-	float motionZ; // 3448
-	float x; //3452 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3456
-	float z; //3460
+	char filler3[3432-544]; // 544
+	float motionX; // 3432 - Actor::push
+	float motionY; // 3436
+	float motionZ; // 3440
+	float x; //3444 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3448
+	float z; //3452
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -119,7 +119,7 @@ public:
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3452, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3444, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -162,7 +162,7 @@ struct TextureUVCoordinateSet {
 	float extra;
 	unsigned short size[2]; // 20
 	ResourceLocation location;
-	char filler[8]; // TextureUVCoordinateSet::TextureUVCoordinateSet
+	char filler[8]; // 32 TextureUVCoordinateSet::TextureUVCoordinateSet
 	TextureUVCoordinateSet(TextureUVCoordinateSet const& other) {
 		*this = other; // yeah I know, bad memory management habit. Deal with it
 	};
@@ -289,6 +289,7 @@ public:
 	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
+// SharedPtr<BlockLegacy>::make
 static_assert(sizeof(BlockLegacy) == 2584, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
