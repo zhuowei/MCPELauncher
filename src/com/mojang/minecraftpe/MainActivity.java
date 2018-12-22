@@ -84,6 +84,7 @@ public class MainActivity extends NativeActivity {
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "1.8";
 	public static final String HALF_SUPPORT_VERSION = "1.9";
+	private static final boolean HALF_VERSION_HAS_SCRIPTS = true;
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -1783,8 +1784,11 @@ public class MainActivity extends NativeActivity {
 		System.out.println("MCPE Version is " + getMCPEVersion());
 		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
 		//if (mcpeGreaterEqualThan(1, 2, 20)) {
-			//System.loadLibrary("mcpelauncher_new");
-			System.loadLibrary("mcpelauncher_lite");
+			if (HALF_VERSION_HAS_SCRIPTS) {
+				System.loadLibrary("mcpelauncher_new");
+			} else {
+				System.loadLibrary("mcpelauncher_lite");
+			}
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
@@ -2854,6 +2858,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected boolean hasScriptSupport() {
+		if (HALF_VERSION_HAS_SCRIPTS) return true;
 		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	public String getMCPEVersion() {
