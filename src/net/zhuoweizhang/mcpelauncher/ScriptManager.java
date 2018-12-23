@@ -152,6 +152,10 @@ public class ScriptManager {
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
 			return;
+		if (requestReloadAllScripts) {
+			Log.i("BlockLauncher", "Deferring load of " + sourceName);
+			return;
+		}
 		if (!scriptingEnabled)
 			throw new RuntimeException("Not available in multiplayer");
 		// Rhino needs lots of recursion depth to parse nested else ifs
@@ -3365,6 +3369,7 @@ public class ScriptManager {
 			boolean showParticles) {
 			long entityId = getEntityId(entity);
 			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId <= 0) return; // ignore remove effect on no mob.
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("addEffect only works for mobs");
 			}
@@ -3379,6 +3384,7 @@ public class ScriptManager {
 		public static void removeEffect(Object entity, int potionId) {
 			long entityId = getEntityId(entity);
 			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId <= 0) return; // ignore remove effect on no mob.
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("removeEffect only works for mobs");
 			}
@@ -3393,6 +3399,7 @@ public class ScriptManager {
 		public static void removeAllEffects(Object entity) {
 			long entityId = getEntityId(entity);
 			int typeId = nativeGetEntityTypeId(entityId);
+			if (typeId <= 0) return; // ignore remove effect on no mob.
 			if (!(typeId > 0 && typeId < 64)) {
 				throw new RuntimeException("removeAllEffects only works for mobs");
 			}
