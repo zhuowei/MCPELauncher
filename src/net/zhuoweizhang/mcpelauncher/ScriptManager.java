@@ -148,6 +148,7 @@ public class ScriptManager {
 	private static final String ENTITY_KEY_RENDERTYPE = "zhuowei.bl.rt";
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
 	private static final String ENTITY_KEY_IMMOBILE = "zhuowei.bl.im";
+	private static List<Object[]> deferredLoads = new ArrayList<Object[]>();
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -207,6 +208,19 @@ public class ScriptManager {
 	}
 
 	public static void loadScript(File file, boolean firstLoad) throws IOException {
+		if (needsToDeferScriptLoadForItem()) {
+			Log.i("BlockLauncher", "Deferring load of " + file + " until later.");
+			for (int i = deferredLoads.size() - 1; i >= 0; i--) {
+				Object[] deferredRequest = deferredLoads.get(i);
+				if (deferredRequest[0].equals(file)) {
+					deferredLoads.remove(i);
+					break;
+				}
+			}
+			deferredLoads.add(new Object[] {file, firstLoad});
+			nativeRequestFrameCallback();
+			return;
+		}
 		if (isClassGenMode()) {
 			if (!scriptingInitialized)
 				return;
@@ -619,6 +633,9 @@ public class ScriptManager {
 				reportScriptError(null, e);
 			}
 		}
+
+		tryDeferLoads();
+
 		if (requestSelectLevel != null && !requestLeaveGame) {
 			if (!requestSelectLevelHasSetScreen) {
 				nativeShowProgressScreen();
@@ -823,6 +840,15 @@ public class ScriptManager {
 		 * +scriptId+"Data", 0); SharedPreferences.Editor prefsEditor =
 		 * sPrefs.edit(); prefsEditor.clear(); prefsEditor.commit();
 		 */
+		// check if it's in the deferred loads
+		for (int i = deferredLoads.size() - 1; i >= 0; i--) {
+			Object[] deferredRequest = deferredLoads.get(i);
+			File file = (File)deferredRequest[0];
+			if (file.getName().equals(scriptId)) {
+				deferredLoads.remove(i);
+				break;
+			}
+		}
 
 		for (int i = scripts.size() - 1; i >= 0; i--) {
 			if (scripts.get(i).name.equals(scriptId)) {
@@ -1817,6 +1843,38 @@ public class ScriptManager {
 			throw new RuntimeException("entity is not a mob: entityType=" + entityType);
 		}
 	}
+
+	private static void tryDeferLoads() {
+		if (deferredLoads.size() == 0) return;
+		if (!nativeIsValidItem(256)) {
+			nativeRequestFrameCallback();
+			return;
+		}
+		for (Object[] deferredRequest: deferredLoads) {
+			try {
+				loadScript((File)deferredRequest[0], (Boolean)deferredRequest[1]);
+			} catch (Exception e) {
+				dumpScriptError(e);
+				reportScriptError(null, e);
+			}
+		}
+		deferredLoads.clear();
+	}
+
+	private static boolean needsToDeferScriptLoadForItem() {
+		// only defer if scripting engine is initialized and first load has happened
+		// but item has been removed.
+		if (!scriptingInitialized)
+			return false;
+		if (requestReloadAllScripts) {
+			return false;
+		}
+		if (!nativeIsValidItem(256)) {
+			return true;
+		}
+		return false;
+	}
+
 
 	public static native float nativeGetPlayerLoc(int axis);
 
