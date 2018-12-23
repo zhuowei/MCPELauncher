@@ -359,12 +359,6 @@ public class ScriptManager {
 		// I have no idea what to do now, so manually trigger the entity added listener for the local player
 		entityAddedCallback(nativeGetPlayerEnt());
 
-		// recipes must be re-registered after every set level
-		if (!isRemote) runOnMainThreadList.add(new Runnable() {
-			public void run() {
-				NativeItemApi.reregisterRecipes();
-			}
-		});
 		nativeNewLevelCallbackStarted();
 
 		callScriptMethod("newLevel", hasLevel);
@@ -746,6 +740,10 @@ public class ScriptManager {
 		}
 		currentScreen = s1;
 		callScriptMethod("screenChangeHook", s1);
+	}
+
+	private static void reregisterRecipesCallback() {
+		NativeItemApi.reregisterRecipes();
 	}
 
 	public static InputStream getSoundInputStream(String name, long[] lengthout) {
@@ -4062,14 +4060,12 @@ public class ScriptManager {
 		}
 
 		public static void reregisterRecipes() {
+			Log.i("BlockLauncher", "Reregister recipes");
 			for (Object[] r: activeRecipes) {
 				nativeAddShapedRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (String[]) r[3], (int[]) r[4]);
 			}
 			for (Object[] r: activeShapelessRecipes) {
 				nativeAddShapelessRecipe((Integer) r[0], (Integer) r[1], (Integer) r[2], (int[]) r[3]);
-			}
-			for (int[] r: activeFurnaceRecipes) {
-				nativeAddFurnaceRecipe(r[0], r[1], r[2]);
 			}
 		}
 
