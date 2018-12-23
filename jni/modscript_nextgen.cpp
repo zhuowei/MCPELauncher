@@ -1083,6 +1083,17 @@ public:
 
 static std::vector<BLCreateItemRequest> bl_createItemRequests;
 
+static void bl_addCreateItemRequest(BLCreateItemRequest request) {
+	// remove any existing item matching id
+	for (auto it = bl_createItemRequests.begin(); it != bl_createItemRequests.end(); ++it) {
+		if (it->id == request.id) {
+			bl_createItemRequests.erase(it);
+			break;
+		}
+	}
+	bl_createItemRequests.push_back(request);
+}
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineItem
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jint maxStackSize) {
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
@@ -1102,7 +1113,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 
 	bl_set_i18n("item." + mystr + ".name", mystr);
 
-	bl_createItemRequests.push_back({mystr, id, 0});
+	bl_addCreateItemRequest({mystr, id, 0});
 
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
@@ -1153,7 +1164,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 		bl_Item_setMaxStackSize(item, maxStackSize);
 	}
 
-	bl_createItemRequests.push_back({mystr, id, 1});
+	bl_addCreateItemRequest({mystr, id, 1});
 
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
@@ -1164,9 +1175,6 @@ static void bl_recreateItems() {
 	BL_LOG("Recreating items");
 	for (auto& request: bl_createItemRequests) {
 		int id = request.id;
-		if (getItemForId(id)) {
-			continue;
-		}
 		if (request.type == 0) {
 			bl_constructItem(request.name, id);
 		} else if (request.type == 1) {
