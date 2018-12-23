@@ -312,6 +312,30 @@ public class ScriptManager {
 		}
 	}
 
+	// same as above with a check on name
+	public static void callScriptMethodOneScript(String scriptName, String functionName, Object... args) {
+		if (!scriptingEnabled)
+			return; // No script loading/callbacks when in a remote world
+		Context ctx = Context.enter();
+		setupContext(ctx);
+		for (ScriptState state : scripts) {
+			if (state.errors >= MAX_NUM_ERRORS)
+				continue; // Too many errors, skip
+			if (state.name == null || !state.name.equals(scriptName)) continue;
+			currentScript = state.name;
+			Scriptable scope = state.scope;
+			Object obj = scope.get(functionName, scope);
+			if (obj != null && obj instanceof Function) {
+				try {
+					((Function) obj).call(ctx, scope, scope, args);
+				} catch (Exception e) {
+					dumpScriptError(e);
+					reportScriptError(state, e);
+				}
+			}
+		}
+	}
+
 	@CallbackName(name="useItem", args={"x", "y", "z", "itemid", "blockid", "side", "itemDamage", "blockDamage"}, prevent=true)
 	public static void useItemOnCallback(int x, int y, int z, int itemid, int blockid, int side,
 			int itemDamage, int blockDamage) {
@@ -627,6 +651,8 @@ public class ScriptManager {
 				}
 				MobEffect.initIds();
 				loadEnabledScripts();
+				// on 1.8/1.9 this only happens after selectLevelHook is hit
+				callScriptMethod("selectLevelHook");
 				//nativeArmorAddQueuedTextures();
 			} catch (Exception e) {
 				dumpScriptError(e);
@@ -1852,7 +1878,10 @@ public class ScriptManager {
 		}
 		for (Object[] deferredRequest: deferredLoads) {
 			try {
-				loadScript((File)deferredRequest[0], (Boolean)deferredRequest[1]);
+				File file = (File)deferredRequest[0];
+				loadScript(file, (Boolean)deferredRequest[1]);
+				// this is only hit when selectLevel anyways...
+				callScriptMethodOneScript(file.getName(), "selectLevelHook");
 			} catch (Exception e) {
 				dumpScriptError(e);
 				reportScriptError(null, e);
