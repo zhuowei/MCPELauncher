@@ -1,4 +1,0 @@
-<paths>
-    <!-- Note that Support library 23.1.1 uses external-path instead of external-files-path -->
-    <external-path name="scripts" path="scripts/" />
-</paths>

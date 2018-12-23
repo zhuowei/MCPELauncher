@@ -663,6 +663,7 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			Intent intent = new Intent(Intent.ACTION_VIEW);
 			Uri derp = getUriForFile(outFile);
 			intent.setDataAndType(derp, "text/plain");
+			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 			startActivity(intent);
 		} catch (Exception e) {
 			e.printStackTrace();
