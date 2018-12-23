@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -660,11 +661,12 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 			File outFile = new File(outDir, item.file.getName());
 			PatchUtils.copy(item.file, outFile);
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			Uri derp = Uri.fromFile(outFile);
+			Uri derp = getUriForFile(outFile);
 			intent.setDataAndType(derp, "text/plain");
 			startActivity(intent);
 		} catch (Exception e) {
 			e.printStackTrace();
+			reportError(e);
 			//on an Android device there is always an activity to handle plain text (HTMLViewer in stock Android)
 			//so this shouldn't be hit
 		}
@@ -912,4 +914,10 @@ public class ManageScriptsActivity extends ListActivity implements View.OnClickL
 		return ScriptManager.isEnabled(f);
 	}
 
+	private Uri getUriForFile(File file) throws Exception {
+		// because Pro and Lite uses different Play libraries, we need to use reflection
+		Class clazz = Class.forName("android.support.v4.content.FileProvider");
+		Method method = clazz.getMethod("getUriForFile", Context.class, String.class, File.class);
+		return (Uri)method.invoke(null, this, this.getPackageName() + ".fileprovider", file);
+	}
 }
