@@ -379,6 +379,7 @@ static_assert(offsetof(HumanoidModel, bipedLeftLeg) == 2680, "HumanodModel biped
 class Recipe;
 class ShapelessRecipe;
 class ShapedRecipe;
+class ResourcePackManager;
 
 class Recipes {
 public:
@@ -400,6 +401,7 @@ public:
 		std::function<std::unique_ptr<ShapelessRecipe>(std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
 	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&, int,
 		std::function<std::unique_ptr<ShapedRecipe>(int, int, std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
+	void* loadRecipes(ResourcePackManager&);
 
 }; // class Recipes
 

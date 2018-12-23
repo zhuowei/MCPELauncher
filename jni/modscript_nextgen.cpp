@@ -2027,6 +2027,8 @@ bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int
 	return false;
 }
 
+static Recipes* bl_recipesForJava;
+
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
 	if (!bl_level) return;
@@ -2048,7 +2050,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		recipeType.letter = 'a' + i;
 		ingredientsList.push_back(recipeType);
 	}
-	Recipes* recipes = bl_level->getRecipes();
+	Recipes* recipes = bl_recipesForJava? bl_recipesForJava: bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	recipes->addShapelessRecipe(outStack, ingredientsList, 0, nullptr);
 }
@@ -2087,7 +2089,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 		recipeType.letter = (char) ingredients[i * 3];
 		ingredientsList.push_back(recipeType);
 	}
-	Recipes* recipes = bl_level->getRecipes();
+	Recipes* recipes = bl_recipesForJava? bl_recipesForJava: bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, 0, nullptr);
 }
@@ -3782,6 +3784,32 @@ void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTask ta
 	return retval;
 }
 
+static void bl_reregisterRecipesFromJava(Recipes* recipes) {
+	bl_recipesForJava = recipes;
+	JNIEnv *env;
+	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "reregisterRecipesCallback", "()V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+	bl_recipesForJava = nullptr;
+}
+
+static void* bl_Recipes_loadRecipes_hook(Recipes* recipes, ResourcePackManager& manager) {
+	void* retval = recipes->loadRecipes(manager);
+	bl_reregisterRecipesFromJava(recipes);
+	return retval;
+}
+
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
 	*origFunc = vtable[index];
 	vtable[index] = newFunc;
@@ -4302,6 +4330,7 @@ void bl_setuphooks_cppside() {
 	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))
 		dlsym(mcpelibhandle, "_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_");
 	bl_patch_got_wrap(mcpelibhandle, (void*)&VanillaItems::registerItems, (void*)&bl_VanillaItems_registerItems_hook);
+	bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
 
 	//bl_renderManager_init(mcpelibhandle);
 /*
