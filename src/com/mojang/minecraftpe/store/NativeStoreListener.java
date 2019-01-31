@@ -1,9 +1,10 @@
 package com.mojang.minecraftpe.store;
 
 public class NativeStoreListener implements StoreListener {
-	private long callback;
+	public long callback;
 
 	public NativeStoreListener(long callback) {
 		this.callback = callback;
 	}
+	public native void onStoreInitialized(long callback, boolean success);
 }

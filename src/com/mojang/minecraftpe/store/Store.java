@@ -4,6 +4,8 @@ public class Store {
 	private StoreListener listener;
 	public Store(StoreListener listener) {
 		this.listener = listener;
+		NativeStoreListener nativeListener = (NativeStoreListener)listener;
+		nativeListener.onStoreInitialized(nativeListener.callback, false);
 	}
 
 	public String getStoreId() {
