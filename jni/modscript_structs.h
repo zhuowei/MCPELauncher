@@ -67,7 +67,7 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.9.0b3
+// last update: 1.9.0
 class Actor {
 public:
 	void** vtable; //0
@@ -80,13 +80,13 @@ public:
 	char filler4[532-168]; //168
 	std::vector<Entity*> riders; // 532
 
-	char filler3[3432-544]; // 544
-	float motionX; // 3432 - Actor::push
-	float motionY; // 3436
-	float motionZ; // 3440
-	float x; //3444 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3448
-	float z; //3452
+	char filler3[3444-544]; // 544
+	float motionX; // 3444 - Actor::push
+	float motionY; // 3448
+	float motionZ; // 3452
+	float x; //3456 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3460
+	float z; //3464
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -119,7 +119,7 @@ public:
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3444, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3456, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
