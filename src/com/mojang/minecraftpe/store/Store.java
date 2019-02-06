@@ -1,11 +1,14 @@
 package com.mojang.minecraftpe.store;
 
 public class Store {
+	public static boolean needsNativeListenerCallback = false;
 	private StoreListener listener;
 	public Store(StoreListener listener) {
 		this.listener = listener;
-		NativeStoreListener nativeListener = (NativeStoreListener)listener;
-		nativeListener.onStoreInitialized(nativeListener.callback, false);
+		if (needsNativeListenerCallback) {
+			NativeStoreListener nativeListener = (NativeStoreListener)listener;
+			nativeListener.onStoreInitialized(nativeListener.callback, false);
+		}
 	}
 
 	public String getStoreId() {

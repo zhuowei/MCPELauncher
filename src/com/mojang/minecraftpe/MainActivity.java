@@ -82,7 +82,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.8";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.9";
 	public static final String HALF_SUPPORT_VERSION = "1.10";
 	private static final boolean HALF_VERSION_HAS_SCRIPTS = false;
 
@@ -260,6 +260,8 @@ public class MainActivity extends NativeActivity {
 				Log.w(TAG, "OMG hipster version code found - breaking mod compat before it's cool");
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
+			com.mojang.minecraftpe.store.Store.needsNativeListenerCallback =
+				mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 10, 0);
 
 			boolean isTooOldMinorVersion = false;//!mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
@@ -270,7 +272,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.8.0");
+				intent.putExtra("supportedVersion", "1.9.0");
 				startActivity(intent);
 				finish();
 				try {
