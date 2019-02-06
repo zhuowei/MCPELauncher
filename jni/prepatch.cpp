@@ -120,7 +120,7 @@ static void setupMojangScripting(void* mcpelibhandle) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find appplatform vtable for scripting");
 		return;
 	}
-	int supportsScriptingIndex = bl_vtableIndexLocal(mcpelibhandle, "_ZTV21AppPlatform_android23",
+	int supportsScriptingIndex = bl_vtableIndexLocal(mcpelibhandle, "_ZTV11AppPlatform",
 		"_ZNK11AppPlatform17supportsScriptingEv");
 	if (supportsScriptingIndex <= 0) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't find method for scripting");
