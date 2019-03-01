@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 class ItemInstance;
+class ItemStack;
 
 class Enchant {
 public:
@@ -17,6 +18,7 @@ public:
 class EnchantUtils {
 public:
 	static bool applyEnchant(ItemInstance&, Enchant::Type, int);
+	static bool applyEnchant(ItemStack&, Enchant::Type, int);
 };
 
 class EnchantmentInstance {

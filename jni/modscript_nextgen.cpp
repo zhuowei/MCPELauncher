@@ -62,6 +62,7 @@
 #include "mcpe/blockpalette.h"
 #include "mcpe/blockidtoitemid.h"
 #include "mcpe/vanillaitems.h"
+#include "mcpe/itemstack.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -2658,7 +2659,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeS
 JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDropItem
   (JNIEnv *env, jclass clazz, jfloat x, jfloat y, jfloat z, jfloat range, jint id, jint count, jint damage) {
 	if (!bl_localplayer) return -1;
-	ItemInstance instance(id, count, damage);
+	ItemStack instance(id, count, damage);
 
 	Entity* entity = bl_level->getSpawner()->spawnItem(*bl_localplayer->getRegion(),
 		instance, bl_localplayer, Vec3(x, y + range, z), 10);
@@ -3123,7 +3124,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
   (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
 	auto inventory = bl_localplayer->getSupplies();
-	ItemInstance* itemInstance = inventory->getItem(slot);
+	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return false;
 	bool returnVal = EnchantUtils::applyEnchant(*itemInstance, (Enchant::Type)enchantmentId, enchantmentLevel);
 	if (!bl_level->isClientSide()) {
@@ -3137,7 +3138,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
   (JNIEnv *env, jclass clazz, jint slot) {
 	auto inventory = bl_localplayer->getSupplies();
-	ItemInstance* itemInstance = inventory->getItem(slot);
+	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	std::vector<EnchantmentInstance> enchantments = itemInstance->getEnchantsFromUserData().getAllEnchants();
 	int arrLen = enchantments.size() * 2;
@@ -3155,7 +3156,7 @@ JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlaye
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot) {
 	auto inventory = bl_localplayer->getSupplies();
-	ItemInstance* itemInstance = inventory->getItem(slot);
+	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return nullptr;
 	if (!itemInstance->hasCustomHoverName()) return nullptr;
 	const char* name = itemInstance->getCustomName().c_str();
@@ -3165,7 +3166,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerG
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetItemCustomName
   (JNIEnv *env, jclass clazz, jint slot, jstring name) {
 	auto inventory = bl_localplayer->getSupplies();
-	ItemInstance* itemInstance = inventory->getItem(slot);
+	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
 	itemInstance->setCustomName(std::string(nameUtf));

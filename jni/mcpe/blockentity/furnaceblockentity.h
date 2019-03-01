@@ -3,6 +3,6 @@
 
 class FurnaceBlockActor : public BlockActor {
 public:
-	void setItem(int, ItemInstance const&);
-	ItemInstance* getItem(int) const;
+	void setItem(int, ItemStack const&);
+	ItemStack* getItem(int) const;
 };

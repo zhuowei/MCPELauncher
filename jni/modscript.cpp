@@ -23,6 +23,7 @@ typedef bool cppbool;
 #include "mcpe/gamemode.h"
 #include "mcpe/entitycomponent.h"
 #include "mcpe/blockidtoitemid.h"
+#include "mcpe/itemstack.h"
 
 typedef Player LocalPlayer;
 
@@ -671,9 +672,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return -1;
-	ItemInstance* instance = te->getItem(slot);
+	ItemStack* instance = te->getItem(slot);
 	if (instance == NULL) return 0;
-	return bl_ItemInstance_getId(instance);
+	return instance->getId();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataChest
@@ -682,9 +683,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return -1;
-	ItemInstance* instance = te->getItem(slot);
+	ItemStack* instance = te->getItem(slot);
 	if (instance == NULL) return 0;
-	return instance->damage;
+	return instance->getDamageValue();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemCountChest
@@ -693,7 +694,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return -1;
-	ItemInstance* instance = te->getItem(slot);
+	ItemStack* instance = te->getItem(slot);
 	if (instance == NULL) return 0;
 	return instance->count;
 }
@@ -704,7 +705,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return nullptr;
-	ItemInstance* instance = te->getItem(slot);
+	ItemStack* instance = te->getItem(slot);
 	if (instance == NULL) return nullptr;
 	if (!instance->hasCustomHoverName()) return nullptr;
 	const char* name = instance->getCustomName().c_str();
@@ -717,7 +718,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
-	ItemInstance* instance = te->getItem(slot);
+	ItemStack* instance = te->getItem(slot);
 	if (instance == NULL) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
 	instance->setCustomName(std::string(nameUtf));
@@ -939,7 +940,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	if (bl_localplayer == NULL) return;
 	bool remove = amount < 0;
 	if (remove) amount *= -1;
-	ItemInstance instance(id, amount, damage);
+	ItemStack instance(id, amount, damage);
 	//we grab the inventory instance from the player
 	auto invPtr = bl_localplayer->getSupplies();
 	if (invPtr == nullptr) return;
@@ -1153,13 +1154,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	if (bl_localplayer == NULL) return 0;
 	//we grab the inventory instance from the player
 	auto invPtr = bl_localplayer->getSupplies();
-	ItemInstance* instance = invPtr->getItem(slot);
+	ItemStack* instance = invPtr->getItem(slot);
 	if (instance == NULL) return 0;
 	switch (type) {
 		case ITEMID:
-			return bl_ItemInstance_getId(instance);
+			return instance->getId();
 		case DAMAGE:
-			return instance->damage;
+			return instance->getDamageValue();
 		case AMOUNT:
 			return instance->count;
 		default:
@@ -1293,9 +1294,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return -1;
-	ItemInstance* instance = tileEnt->getItem(slot);
+	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
-	return bl_ItemInstance_getId(instance);
+	return instance->getId();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataFurnace
@@ -1304,9 +1305,9 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return -1;
-	ItemInstance* instance = tileEnt->getItem(slot);
+	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
-	return instance->damage;
+	return instance->getDamageValue();
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemCountFurnace
@@ -1315,7 +1316,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return -1;
-	ItemInstance* instance = tileEnt->getItem(slot);
+	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
 	return instance->count;
 }

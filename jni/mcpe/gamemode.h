@@ -8,9 +8,9 @@ class GameMode {
 public:
 	virtual ~GameMode();
 	Player* player; // 4
-	void _destroyBlockInternal(BlockPos const&, signed char);
+	void _destroyBlockInternal(BlockPos const&, unsigned char);
 	float getDestroyProgress();
 	void useItemOn(ItemInstance&, BlockPos const&, signed char, Vec3 const&, ItemUseCallback*);
-	void destroyBlock(BlockPos const&, signed char);
+	void destroyBlock(BlockPos const&, unsigned char);
 };
 static_assert(offsetof(GameMode, player) == 4, "GameMode player");

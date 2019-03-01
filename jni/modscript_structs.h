@@ -132,14 +132,14 @@ struct PlayerInventorySlot {
 	ContainerID containerID;
 	int slot;
 };
-
+class ItemStack;
 class PlayerInventoryProxy {
 public:
-	bool add(ItemInstance&, bool);
-	void removeResource(ItemInstance const&, bool, bool, int);
+	bool add(ItemStack&, bool);
+	void removeResource(ItemStack const&, bool, bool, int);
 	void clearSlot(int, ContainerID id=ContainerIDInventory);
-	ItemInstance* getItem(int, ContainerID id=ContainerIDInventory) const;
-	void setItem(int, ItemInstance const&, ContainerID=ContainerIDInventory);
+	ItemStack* getItem(int, ContainerID id=ContainerIDInventory) const;
+	void setItem(int, ItemStack const&, ContainerID=ContainerIDInventory);
 	PlayerInventorySlot getSelectedSlot() const;
 	void selectSlot(int, ContainerID=ContainerIDInventory);
 };
@@ -213,6 +213,7 @@ public:
 	~CompoundTag();
 };
 class BlockLegacy;
+class ItemStack;
 class ItemInstance {
 public:
 	Item* item; // 0
@@ -227,6 +228,7 @@ public:
 		init(id, count, data);
 		_setItem(id);
 	}
+	ItemInstance(ItemStack const&);
 
 	ItemInstance(ItemInstance const&);
 	ItemInstance& operator=(ItemInstance const&);
@@ -563,7 +565,7 @@ public:
 
 class Spawner {
 public:
-	Entity* spawnItem(BlockSource&, ItemInstance const&, Entity*, Vec3 const&, int);
+	Entity* spawnItem(BlockSource&, ItemStack const&, Entity*, Vec3 const&, int);
 };
 
 enum ParticleType {
