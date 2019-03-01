@@ -47,6 +47,12 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/libcorkscrew
 
 LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 
+ifeq ($(TARGET_ARCH_ABI),x86)
+# ignore undefined symbols.
+# workaround for method not found errors.
+TARGET_NO_UNDEFINED_LDFLAGS :=
+endif
+
 include $(BUILD_SHARED_LIBRARY)
 
 ifeq ("x","x")
