@@ -84,7 +84,8 @@ public class MainActivity extends NativeActivity {
 	public static final String TAG = "BlockLauncher/Main";
 	public static final String SCRIPT_SUPPORT_VERSION = "1.9";
 	public static final String HALF_SUPPORT_VERSION = "1.10";
-	private static final boolean HALF_VERSION_HAS_SCRIPTS = false;
+	private static final boolean HALF_VERSION_HAS_SCRIPTS = true;
+	public static final String LITE_SUPPORT_VERSION = "1.11";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -266,7 +267,8 @@ public class MainActivity extends NativeActivity {
 			boolean isTooOldMinorVersion = false;//!mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!isTooOldMinorVersion) ||
-				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION);
+				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION) ||
+				mcPkgInfo.versionName.startsWith(LITE_SUPPORT_VERSION);
 			// && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
@@ -356,7 +358,8 @@ public class MainActivity extends NativeActivity {
 
 		try {
 			if ((!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) ||
-				getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
+				getMCPEVersion().startsWith(HALF_SUPPORT_VERSION) ||
+				getMCPEVersion().startsWith(LITE_SUPPORT_VERSION)) {
 				prePatch();
 			}
 		} catch (Exception e) {
@@ -1783,14 +1786,16 @@ public class MainActivity extends NativeActivity {
 	public void initPatching() throws Exception {
 		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("mcpelauncher_tinysubstrate");
-		System.out.println("MCPE Version is " + getMCPEVersion());
-		if (getMCPEVersion().startsWith(HALF_SUPPORT_VERSION)) {
-		//if (mcpeGreaterEqualThan(1, 2, 20)) {
+		String mcpeVersion = getMCPEVersion();
+		System.out.println("MCPE Version is " + mcpeVersion);
+		if (mcpeVersion.startsWith(HALF_SUPPORT_VERSION)) {
 			if (HALF_VERSION_HAS_SCRIPTS) {
 				System.loadLibrary("mcpelauncher_new");
 			} else {
 				System.loadLibrary("mcpelauncher_lite");
 			}
+		} else if (mcpeVersion.startsWith(LITE_SUPPORT_VERSION)) {
+			System.loadLibrary("mcpelauncher_lite");
 		} else {
 			System.loadLibrary("mcpelauncher");
 		}
@@ -2866,8 +2871,9 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected boolean hasScriptSupport() {
-		if (HALF_VERSION_HAS_SCRIPTS) return true;
-		return mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION);
+		String mcpeVersion = mcPkgInfo.versionName;
+		if (HALF_VERSION_HAS_SCRIPTS && mcpeVersion.startsWith(HALF_SUPPORT_VERSION)) return true;
+		return mcpeVersion.startsWith(SCRIPT_SUPPORT_VERSION);
 	}
 	public String getMCPEVersion() {
 		return mcPkgInfo.versionName;
