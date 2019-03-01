@@ -99,7 +99,6 @@ static void (*bl_LocalPlayer_hurtTo)(Player*, int);
 static void (*bl_Entity_remove)(Entity*);
 static void (*bl_GameMode_destroyBlock_real)(void*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
-static ItemInstance* (*bl_FillingContainer_getItem)(void*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
 static void (*bl_Inventory_Inventory)(void*, Player*);
 static void (*bl_Inventory_delete1_Inventory)(void*);
@@ -1172,8 +1171,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (bl_localplayer == NULL) return;
 	//we grab the inventory instance from the player
 	auto invPtr = bl_localplayer->getSupplies();
-	ItemInstance* itemStack = bl_newItemInstance(id, count, damage);
-	if (itemStack == NULL) return;
+	ItemStack itemStack(id, count, damage);
 /*	Looks like 1.2.10 removed explicit slot linking?
 	int linkedSlotsCount = invPtr->getLinkedSlotsCount();
 	if (slot < linkedSlotsCount) {
@@ -1183,13 +1181,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	}
 */
 	if (slot >= 0) {
-		invPtr->setItem(slot, *itemStack);
+		invPtr->setItem(slot, itemStack);
 		if (!bl_level->isClientSide()) {
 			// then our player is a serverside player; send inventory.
 			((ServerPlayer*)bl_localplayer)->sendInventory(true);
 		}
 	}
-	delete itemStack;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameSpeed
@@ -1255,9 +1252,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//Geting the item
-	ItemInstance* instance = bl_newItemInstance(id, 1, damage);
-	void (*setArmor)(Entity*, int, ItemInstance* const) = 
-		(void (*)(Entity*, int, ItemInstance* const)) entity->vtable[vtable_indexes.mob_set_armor];
+	ItemStack instance(id, 1, damage);
+	void (*setArmor)(Entity*, int, ItemStack const&) = 
+		(void (*)(Entity*, int, ItemStack const&)) entity->vtable[vtable_indexes.mob_set_armor];
 	setArmor(entity, slot, instance);
 }
 
@@ -1280,7 +1277,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
-	ItemInstance instance(id, amount, damage);
+	ItemStack instance(id, amount, damage);
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return;
@@ -1364,7 +1361,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
 		"_ZNK3Pig15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
-		"_ZN5Actor8setArmorE9ArmorSlotRK12ItemInstance") - 2;
+		"_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack") - 2;
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 		"_ZN5Actor6setPosERK4Vec3") - 2;
 	vtable_indexes.mob_get_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
@@ -1556,7 +1553,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	bl_LocalPlayer_hurtTo = (void (*)(Player*, int)) dlsym(RTLD_DEFAULT, "_ZN11LocalPlayer6hurtToEi");
 	bl_Entity_remove = (void (*)(Entity*)) dlsym(RTLD_DEFAULT, "_ZN5Actor6removeEv");
 	bl_Entity_setOnFire = (void (*)(Entity*, int)) dlsym(RTLD_DEFAULT, "_ZN5Actor9setOnFireEi");
-	bl_FillingContainer_getItem = (ItemInstance* (*)(void*, int)) dlsym(RTLD_DEFAULT, "_ZNK16FillingContainer7getItemEi");
 
 	//replace the getTexture method for zombie pigmen
 	//void** pigZombieVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV9PigZombie");
