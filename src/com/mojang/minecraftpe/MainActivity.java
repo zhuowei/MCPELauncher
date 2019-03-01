@@ -2351,6 +2351,12 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
+	// 1.11.0
+
+	public boolean isTTSEnabled() {
+		return false;
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
