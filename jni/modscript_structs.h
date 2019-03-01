@@ -67,7 +67,7 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.9.0
+// last update: 1.10.0b3
 class Actor {
 public:
 	void** vtable; //0
@@ -80,13 +80,13 @@ public:
 	char filler4[532-168]; //168
 	std::vector<Entity*> riders; // 532
 
-	char filler3[3444-544]; // 544
-	float motionX; // 3444 - Actor::push
-	float motionY; // 3448
-	float motionZ; // 3452
-	float x; //3456 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3460
-	float z; //3464
+	char filler3[3436-544]; // 544
+	float motionX; // 3436 - Actor::push
+	float motionY; // 3440
+	float motionZ; // 3444
+	float x; //3448 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3452
+	float z; //3456
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -107,9 +107,9 @@ public:
 	void enableAutoSendPosRot(bool);
 	void teleportTo(Vec3 const&, int, int);
 	bool hasTeleported() const;
-	ItemInstance* getOffhandSlot() const;
+	ItemStack* getOffhandSlot() const;
 	int getHealth() const;
-	ItemInstance* getArmor(ArmorSlot) const;
+	ItemStack* getArmor(ArmorSlot) const;
 	AttributeInstance* getAttribute(Attribute const&) const;
 	void setChanged();
 	void addEffect(MobEffectInstance const&);
@@ -119,7 +119,7 @@ public:
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3456, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3448, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -214,13 +214,14 @@ public:
 };
 class BlockLegacy;
 class ItemStack;
+// 1.10b3
 class ItemInstance {
 public:
 	Item* item; // 0
 	char filler1[12-4]; // 4
 	short damage; // 12
 	unsigned char count; //14
-	char filler2[72-15]; // 15
+	char filler2[88-15]; // 15
 
 	ItemInstance();
 
@@ -253,7 +254,7 @@ public:
 // or look at ItemInstance::EMPTY_ITEM
 static_assert(offsetof(ItemInstance, item) == 0, "item offset wrong");
 static_assert(offsetof(ItemInstance, count) == 14, "count wrong");
-static_assert(sizeof(ItemInstance) == 72, "ItemInstance wrong");
+static_assert(sizeof(ItemInstance) == 88, "ItemInstance wrong");
 
 enum CreativeItemCategory {
 };
@@ -397,11 +398,11 @@ public:
 	Item* item; //0
 	Tile* tile; //4
 	ItemInstance itemInstance; //8
-	char letter; //80
+	char letter; //96
 #ifdef __arm__
-	char filler[7]; // 81
+	char filler[7]; // 97
 #else
-	char filler[3]; // 81
+	char filler[3]; // 97
 #endif
 };
 	std::vector<Recipe*> recipes;
@@ -415,11 +416,11 @@ public:
 
 typedef Recipes::Type RecipesType;
 // std::vector<Recipes::Type, std::allocator<Recipes::Type> > definition<ItemInstance>(char, ItemInstance)
-static_assert(offsetof(RecipesType, letter) == 80, "RecipesType letter");
+static_assert(offsetof(RecipesType, letter) == 96, "RecipesType letter");
 #ifdef __arm__
-static_assert(sizeof(RecipesType) == 88, "RecipesType size");
+static_assert(sizeof(RecipesType) == 104, "RecipesType size");
 #else
-static_assert(sizeof(RecipesType) == 84, "RecipesType size");
+static_assert(sizeof(RecipesType) == 100, "RecipesType size");
 #endif
 
 class FurnaceRecipes {

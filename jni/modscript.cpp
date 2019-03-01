@@ -81,12 +81,12 @@ void* bl_marauder_translation_function(void* input);
 
 extern jclass bl_scriptmanager_class;
 
-static void (*bl_GameMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*);
-static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemInstance*, TilePos*, signed char, Vec3*);
+static void (*bl_GameMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*);
+static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
 void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
-static ItemInstance* (*bl_Player_getCarriedItem)(Player*);
+static ItemStack* (*bl_Player_getCarriedItem)(Player*);
 static void (*bl_GameMode_tick_real)(void*);
 static void (*bl_SurvivalMode_tick_real)(void*);
 static void (*bl_GameMode_initPlayer_real)(void*, Player*);
@@ -153,6 +153,7 @@ struct bl_vtable_indexes {
 	int gamemode_continue_destroy_block;
 	int player_set_player_game_type;
 	int mob_send_inventory;
+	int actor_set_carried_item;
 };
 
 static struct bl_vtable_indexes vtable_indexes; // indices? whatever
@@ -226,7 +227,7 @@ void bl_forceLocationUpdate(Entity* entity) {
 	clientPlayer->motionZ = entity->motionZ;
 }
 
-void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
+void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
 	//BL_LOG("Creative useItemOn");
 	Player* player = gamemode->player;
@@ -251,8 +252,8 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 	int itemId = 0;
 	int itemDamage = 0;
 	if (itemStack != NULL) {
-		itemId = bl_ItemInstance_getId(itemStack);
-		itemDamage = itemStack->damage;
+		itemId = itemStack->getId();
+		itemDamage = itemStack->getDamageValue();
 	}
 
 	int blockId = itemIdFromBlockId(bl_localplayer->getRegion()->getBlockID(x, y, z));
@@ -269,15 +270,15 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 
 	{
 		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
-		ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
-		ItemInstance* item = fn(player);
+		ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
+		ItemStack* item = fn(player);
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
 	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
 }
 
-void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
+void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 	TilePos* pos, signed char side, Vec3* vec3) {
 	//BL_LOG("Survival useItemOn");
 	Player* player = gamemode->player;
@@ -302,8 +303,8 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 	int itemId = 0;
 	int itemDamage = 0;
 	if (itemStack != NULL) {
-		itemId = bl_ItemInstance_getId(itemStack);
-		itemDamage = itemStack->damage;
+		itemId = itemStack->getId();
+		itemDamage = itemStack->getDamageValue();
 	}
 
 	int blockId = itemIdFromBlockId(bl_localplayer->getRegion()->getBlockID(x, y, z));
@@ -320,8 +321,8 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemInstance* itemStack,
 
 	{
 		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
-		ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
-		ItemInstance* item = fn(player);
+		ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
+		ItemStack* item = fn(player);
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
@@ -659,7 +660,7 @@ void bl_NinecraftApp_update_hook(MinecraftGame* minecraft) {
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemChest
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
 	if (bl_level == NULL) return;
-	ItemInstance instance(id, amount, damage);
+	ItemStack instance(id, amount, damage);
 
 	ChestBlockEntity* te = static_cast<ChestBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
@@ -794,14 +795,14 @@ float bl_LevelRenderer_getFov_hook(void* levelRenderer, float datFloat, int datB
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetCarriedItem
   (JNIEnv *env, jclass clazz, jint type) {
 	if (bl_localplayer == NULL) return 0;
-	ItemInstance* instance = bl_Player_getCarriedItem(bl_localplayer);
+	ItemStack* instance = bl_Player_getCarriedItem(bl_localplayer);
 	if (instance == NULL) return 0;
 
 	switch (type) {
 		case ITEMID:
-			return bl_ItemInstance_getId(instance);
+			return instance->getId();
 		case DAMAGE:
-			return instance->damage;
+			return instance->getDamageValue();
 		case AMOUNT:
 			return instance->count;
 	}
@@ -1014,11 +1015,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	void* vtableEntry = entity->vtable[vtable_indexes.mob_get_carried_item];
-	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
-	ItemInstance* item = fn(entity);
-	if (item == NULL) return;
-	*item = ItemInstance(itemId, itemCount, itemDamage);
+	void* vtableEntry = entity->vtable[vtable_indexes.actor_set_carried_item];
+	void (*fn)(Entity*, ItemStack const&) = (void (*) (Entity*, ItemStack const&)) vtableEntry;
+	fn(entity, ItemStack(itemId, itemCount, itemDamage));
 	{
 		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
@@ -1032,14 +1031,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
 	void* vtableEntry = entity->vtable[vtable_indexes.mob_get_carried_item];
-	ItemInstance* (*fn)(Entity*) = (ItemInstance* (*) (Entity*)) vtableEntry;
-	ItemInstance* item = fn(entity);
+	ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
+	ItemStack* item = fn(entity);
 	if (item == NULL) return -1;
 	switch (type) {
 		case ITEMID:
 			return item->getId();
 		case DAMAGE:
-			return item->damage;
+			return item->getDamageValue();
 		case AMOUNT:
 			return item->count;
 		default:
@@ -1235,14 +1234,14 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
 	//Geting the item
-	ItemInstance* instance = entity->getArmor((ArmorSlot)slot);
+	ItemStack* instance = entity->getArmor((ArmorSlot)slot);
 	if(instance == NULL) return 0;
 	switch (type)
 	{
 		case ITEMID:
-			return bl_ItemInstance_getId(instance);
+			return instance->getId();
 		case DAMAGE:
-			return instance->damage;
+			return instance->getDamageValue();
 		case AMOUNT:
 			return instance->count;
 		default:
@@ -1351,7 +1350,7 @@ static void App_quit_hook(void* self) {
 
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.gamemode_use_item_on = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode9useItemOnER12ItemInstanceRK8BlockPosaRK4Vec3");
+		"_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block");
 	vtable_indexes.gamemode_attack = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
 		"_ZN8GameMode6attackER5Actor");
 	vtable_indexes.gamemode_tick = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
@@ -1382,6 +1381,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN6Player17setPlayerGameTypeE8GameType");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob13sendInventoryEb") - 2;
+	vtable_indexes.actor_set_carried_item = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZN5Actor14setCarriedItemERK9ItemStack") - 2;
 	Dl_info info;
 	if (dladdr((void*) &Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRequestFrameCallback, &info)) {
 		int hash = 0;
@@ -1482,11 +1483,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	// fixme 1.1
 	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV8GameMode");
-	bl_GameMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*))
+	bl_GameMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*))
 		creativeVtable[vtable_indexes.gamemode_use_item_on];
 	creativeVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
 	void** survivalVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12SurvivalMode");
-	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemInstance*, TilePos*, signed char, Vec3*))
+	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*))
 		survivalVtable[vtable_indexes.gamemode_use_item_on];
 	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_SurvivalMode_useItemOn_hook;
 
@@ -1547,7 +1548,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	memcpy((void*) ((uintptr_t) bl_marauder_translation_function(getFov) & ~1), getFovOriginal, getFovSize);
 	bl_LevelRenderer_getFov = (float (*)(void*, float, int)) getFov;
 
-	bl_Player_getCarriedItem = (ItemInstance* (*)(Player*))
+	bl_Player_getCarriedItem = (ItemStack* (*)(Player*))
 		dlsym(RTLD_DEFAULT, "_ZNK6Player14getCarriedItemEv");
 	//bl_MobFactory_getStaticTestMob = dlsym(RTLD_DEFAULT, "_ZN10MobFactory16getStaticTestMobEiP5Level");
 

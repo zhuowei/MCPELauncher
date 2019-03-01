@@ -78,7 +78,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4472
+#define PLAYER_ABILITIES_OFFSET 4504
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -96,7 +96,7 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3984;
+const size_t kItemEntity_itemInstance_offset = 4000;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
@@ -308,7 +308,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		"_ZNK4Item3useER12ItemInstanceR6Player");
+		"_ZNK4Item3useER9ItemStackR6Player");
 /*
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
@@ -324,7 +324,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN3Mob13sendInventoryEb") - 2;
 	vtable_indexes.mob_set_offhand_slot = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
-		"_ZN5Actor14setOffhandSlotERK12ItemInstance") - 2;
+		"_ZN5Actor14setOffhandSlotERK9ItemStack") - 2;
 }
 
 template <typename T>
@@ -1423,11 +1423,11 @@ static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data,
 	return bl_Item_getIcon(item, data, int2, bool1);
 }
 class Container;
-static void* (*bl_CustomSnowballItem_use_real)(Item*, ItemInstance&, Player&);
+static void* (*bl_CustomSnowballItem_use_real)(Item*, ItemStack&, Player&);
 static void* (*bl_CustomSnowballItem_dispense_real)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char);
 static int bl_activeSnowballId;
 
-static void* bl_CustomSnowballItem_use_hook(Item* item, ItemInstance& stack, Player& player) {
+static void* bl_CustomSnowballItem_use_hook(Item* item, ItemStack& stack, Player& player) {
 	bl_activeSnowballId = item->itemId;
 	void* retval = bl_CustomSnowballItem_use_real(item, stack, player);
 	bl_activeSnowballId = 0;
@@ -1501,7 +1501,7 @@ void bl_initCustomBlockVtable() {
 	bl_CustomItem_vtable[vtable_indexes.item_get_icon] = (void*)bl_CustomItem_getIcon;
 	bl_CustomSnowballItem_vtable = (void**) ::operator new(vtable_indexes.snowball_item_vtable_size);
 	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
-	bl_CustomSnowballItem_use_real = (void* (*)(Item*, ItemInstance&, Player&))
+	bl_CustomSnowballItem_use_real = (void* (*)(Item*, ItemStack&, Player&))
 		bl_SnowballItem_vtable[vtable_indexes.item_use];
 /*
 	bl_CustomSnowballItem_dispense_real = (void* (*)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char))
@@ -2719,12 +2719,12 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv* env, jclass clazz, jlong entityId, jint type) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	ItemInstance* instance = (ItemInstance*) (((uintptr_t) entity) + kItemEntity_itemInstance_offset);
+	ItemStack* instance = (ItemStack*) (((uintptr_t) entity) + kItemEntity_itemInstance_offset);
 	switch (type) {
 		case ITEMID:
-			return bl_ItemInstance_getId(instance);
+			return instance->getId();
 		case DAMAGE:
-			return instance->damage;
+			return instance->getDamageValue();
 		case AMOUNT:
 			return instance->count;
 		default:
@@ -3182,7 +3182,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobGetA
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return nullptr;
 	//Geting the item
-	ItemInstance* itemInstance = entity->getArmor((ArmorSlot)slot);
+	ItemStack* itemInstance = entity->getArmor((ArmorSlot)slot);
 	if (itemInstance == nullptr) return nullptr;
 	if (!itemInstance->hasCustomHoverName()) return nullptr;
 	const char* name = itemInstance->getCustomName().c_str();
@@ -3194,7 +3194,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMobSetArmo
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	//Geting the item
-	ItemInstance* itemInstance = entity->getArmor((ArmorSlot)slot);
+	ItemStack* itemInstance = entity->getArmor((ArmorSlot)slot);
 	if (itemInstance == nullptr) return;
 	const char* nameUtf = env->GetStringUTFChars(name, nullptr);
 	itemInstance->setCustomName(std::string(nameUtf));
@@ -3736,13 +3736,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jlong entityId, jint type) {
 	Mob* entity = (Mob*)bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return -1;
-	ItemInstance* item = entity->getOffhandSlot();
+	ItemStack* item = entity->getOffhandSlot();
 	if (item == nullptr) return -1;
 	switch (type) {
 		case ITEMID:
 			return item->getId();
 		case DAMAGE:
-			return item->damage;
+			return item->getDamageValue();
 		case AMOUNT:
 			return item->count;
 		default:
@@ -3755,8 +3755,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return;
 	void* vtableEntry = entity->vtable[vtable_indexes.mob_set_offhand_slot];
-	void (*fn)(Entity*, ItemInstance const&) = (void (*) (Entity*, ItemInstance const&)) vtableEntry;
-	fn(entity, ItemInstance(itemId, itemCount, itemDamage));
+	void (*fn)(Entity*, ItemStack const&) = (void (*) (Entity*, ItemStack const&)) vtableEntry;
+	fn(entity, ItemStack(itemId, itemCount, itemDamage));
 	{
 		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
