@@ -81,8 +81,8 @@ void* bl_marauder_translation_function(void* input);
 
 extern jclass bl_scriptmanager_class;
 
-static void (*bl_GameMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*);
-static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*);
+static void (*bl_GameMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*, Block const*);
+static void (*bl_SurvivalMode_useItemOn_real)(void*, ItemStack*, TilePos*, signed char, Vec3*, Block const*);
 static void (*bl_MinecraftClient_onClientStartedLevel_real)(MinecraftClient*, std::unique_ptr<Level>, std::unique_ptr<LocalPlayer>);
 void* (*bl_MinecraftGame_startLocalServer_real)(MinecraftGame*, std::string, std::string, void*, void*);
 static void (*bl_GameMode_attack_real)(void*, Entity*);
@@ -227,12 +227,12 @@ void bl_forceLocationUpdate(Entity* entity) {
 }
 
 void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
-	TilePos* pos, signed char side, Vec3* vec3) {
+	TilePos* pos, signed char side, Vec3* vec3, Block const* block) {
 	//BL_LOG("Creative useItemOn");
 	Player* player = gamemode->player;
 	Level* myLevel = gamemode->player->getLevel();
 	if (myLevel != bl_level) {
-		bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
+		bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, block);
 		return;
 	}
 
@@ -274,16 +274,16 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
-	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
+	if (!preventDefaultStatus) bl_GameMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, block);
 }
 
 void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
-	TilePos* pos, signed char side, Vec3* vec3) {
+	TilePos* pos, signed char side, Vec3* vec3, Block const* block) {
 	//BL_LOG("Survival useItemOn");
 	Player* player = gamemode->player;
 	Level* myLevel = gamemode->player->getLevel();
 	if (myLevel != bl_level) {
-		bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
+		bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, block);
 		return;
 	}
 
@@ -325,7 +325,7 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
 	}
 
-	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3);
+	if (!preventDefaultStatus) bl_SurvivalMode_useItemOn_real(gamemode, itemStack, pos, side, vec3, block);
 }
 
 void bl_SurvivalMode_startDestroyBlock_hook(GameMode* gamemode, BlockPos blockPos, signed char side, bool& someBool) {
@@ -1357,9 +1357,9 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //	vtable_indexes.minecraft_quit = bl_vtableIndex(mcpelibhandle, "_ZTV14ClientInstance",
 //		"_ZN14ClientInstance4quitEv");
 	vtable_indexes.gamemode_start_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode17startDestroyBlockERK8BlockPosaRb");
-	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV3Pig",
-		"_ZNK3Pig15getEntityTypeIdEv") - 2;
+		"_ZN8GameMode17startDestroyBlockERK8BlockPoshRb");
+	vtable_indexes.entity_get_entity_type_id = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
+		"_ZNK5Actor15getEntityTypeIdEv") - 2;
 	vtable_indexes.mob_set_armor = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 		"_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack") - 2;
 	vtable_indexes.entity_set_pos = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
@@ -1373,7 +1373,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.entity_can_add_rider = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 		"_ZNK5Actor11canAddRiderERS_") - 2;
 	vtable_indexes.gamemode_continue_destroy_block = bl_vtableIndex(mcpelibhandle, "_ZTV8GameMode",
-		"_ZN8GameMode20continueDestroyBlockERK8BlockPosaRb");
+		"_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb");
 	vtable_indexes.player_set_player_game_type = bl_vtableIndex(mcpelibhandle, "_ZTV6Player",
 		"_ZN6Player17setPlayerGameTypeE8GameType");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -1480,11 +1480,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 	// fixme 1.1
 	void** creativeVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV8GameMode");
-	bl_GameMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*))
+	bl_GameMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*, Block const*))
 		creativeVtable[vtable_indexes.gamemode_use_item_on];
 	creativeVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_GameMode_useItemOn_hook;
 	void** survivalVtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV12SurvivalMode");
-	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*))
+	bl_SurvivalMode_useItemOn_real = (void (*)(void*, ItemStack*, TilePos*, signed char, Vec3*, Block const*))
 		survivalVtable[vtable_indexes.gamemode_use_item_on];
 	survivalVtable[vtable_indexes.gamemode_use_item_on] = (void*) &bl_SurvivalMode_useItemOn_hook;
 
