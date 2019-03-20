@@ -244,7 +244,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 	int mobrenderer_render;
 	int snowball_item_vtable_size;
 	int item_use;
-	int item_dispense;
+//	int item_dispense;
 	int clientnetworkhandler_handle_text_packet;
 //	int block_use;
 	int item_get_icon;
@@ -308,8 +308,10 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item3useER12ItemInstanceR6Player");
+/*
 	vtable_indexes.item_dispense = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
+*/
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
 		"_ZN20ClientNetworkHandler10handleTextERK17NetworkIdentifierRK10TextPacket");
 //	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
@@ -1500,12 +1502,16 @@ void bl_initCustomBlockVtable() {
 	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
 	bl_CustomSnowballItem_use_real = (void* (*)(Item*, ItemInstance&, Player&))
 		bl_SnowballItem_vtable[vtable_indexes.item_use];
+/*
 	bl_CustomSnowballItem_dispense_real = (void* (*)(Item*, BlockSource&, Container&, int, Vec3 const&, signed char))
 		bl_SnowballItem_vtable[vtable_indexes.item_dispense];
+*/
 	bl_CustomSnowballItem_vtable[vtable_indexes.item_use] =
 		(void*) &bl_CustomSnowballItem_use_hook;
+/*
 	bl_CustomSnowballItem_vtable[vtable_indexes.item_dispense] =
 		(void*) &bl_CustomSnowballItem_dispense_hook;
+*/
 }
 
 void* bl_getMaterial(int materialType) {
