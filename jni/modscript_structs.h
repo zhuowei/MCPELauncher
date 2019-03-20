@@ -67,7 +67,7 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.10.0b3
+// last update: 1.10.0
 class Actor {
 public:
 	void** vtable; //0
@@ -80,13 +80,13 @@ public:
 	char filler4[532-168]; //168
 	std::vector<Entity*> riders; // 532
 
-	char filler3[3436-544]; // 544
-	float motionX; // 3436 - Actor::push
-	float motionY; // 3440
-	float motionZ; // 3444
-	float x; //3448 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3452
-	float z; //3456
+	char filler3[3428-544]; // 544
+	float motionX; // 3428 - Actor::push
+	float motionY; // 3432
+	float motionZ; // 3436
+	float x; //3440 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3444
+	float z; //3448
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -119,7 +119,7 @@ public:
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3448, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3440, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -575,8 +575,8 @@ class BlockPalette;
 class Level {
 public:
 	void** vtable; // 0
-	char filler[40-4]; // 4
-	std::vector<Player*> allPlayers; // 40
+	char filler[44-4]; // 4
+	std::vector<Player*> allPlayers; // 44
 
 	Entity* fetchEntity(EntityUniqueID, bool) const;
 	void addEntity(BlockSource&, std::unique_ptr<Entity>);
@@ -600,7 +600,7 @@ public:
 	BlockPalette* getGlobalBlockPalette() const;
 };
 // Level::getActivePlayerCount
-static_assert(offsetof(Level, allPlayers) == 40, "allPlayers vec");
+static_assert(offsetof(Level, allPlayers) == 44, "allPlayers vec");
 
 class MinecraftCommands;
 class ServerLevel : public Level {
