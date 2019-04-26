@@ -12,7 +12,7 @@ class ServerCommandOrigin : public CommandOrigin {
 public:
 	ServerCommandOrigin(std::string const&, ServerLevel&);
 	virtual ~ServerCommandOrigin();
-	char filler[32-4]; // 4 from DedicatedServerCommandOrigin::clone()
+	char filler[32-4]; // 4 from ServerCommandOrigin::clone()
 };
 static_assert(sizeof(ServerCommandOrigin) == 32, "dedicated server command size");
 

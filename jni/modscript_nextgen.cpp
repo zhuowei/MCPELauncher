@@ -78,7 +78,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4504
+#define PLAYER_ABILITIES_OFFSET 4580
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -96,11 +96,11 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 4000;
+const size_t kItemEntity_itemInstance_offset = 4072;
 // ProjectileComponent::ProjectileComponent
 const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 588;
+const size_t kClientInstanceScreenModel_offset = 596;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
@@ -108,15 +108,8 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11NpcRenderer",
 "_ZTV12WolfRenderer",
 "_ZTV13HorseRenderer",
-"_ZTV13SlimeRenderer",
-"_ZTV14ParrotRenderer",
-"_ZTV15CreeperRenderer",
 "_ZTV15HorseRendererV2",
-"_ZTV16EnderManRenderer",
 "_ZTV16GuardianRenderer",
-"_ZTV17LavaSlimeRenderer",
-"_ZTV17PolarBearRenderer",
-"_ZTV18WitherBossRenderer",
 "_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
 };

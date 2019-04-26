@@ -3,7 +3,7 @@ class ActorDefinitionIdentifier {
 public:
 
 	// FIXME 0.16: yes this will leak memory sigh
-	char filler[12]; // 0 from ActorDefinitionIdentifier constructor
+	char filler[36]; // 0 from ActorDefinitionIdentifier constructor
 
 	ActorDefinitionIdentifier();
 	ActorDefinitionIdentifier(ActorType);
@@ -16,4 +16,4 @@ public:
 	ActorType _getLegacyActorType() const;
 	std::string getCanonicalName() const;
 };
-static_assert(sizeof(ActorDefinitionIdentifier) == 12, "ActorDefinitionIdentifier size");
+static_assert(sizeof(ActorDefinitionIdentifier) == 36, "ActorDefinitionIdentifier size");

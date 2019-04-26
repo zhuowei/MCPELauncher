@@ -78,16 +78,16 @@ public:
 	float prevPitch; //160
 	float prevYaw; //164
 
-	char filler4[532-168]; //168
-	std::vector<Entity*> riders; // 532
+	char filler4[540-168]; //168
+	std::vector<Entity*> riders; // 540
 
-	char filler3[3428-544]; // 544
-	float motionX; // 3428 - Actor::push
-	float motionY; // 3432
-	float motionZ; // 3436
-	float x; //3440 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3444
-	float z; //3448
+	char filler3[3492-552]; // 552
+	float motionX; // 3492 - Actor::push
+	float motionY; // 3496
+	float motionZ; // 3500
+	float x; //3504 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3508
+	float z; //3512
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -118,9 +118,9 @@ public:
 	void removeAllEffects();
 };
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 532, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 540, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3440, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3504, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -181,7 +181,7 @@ enum UseAnimation {
 
 class ActorInfoRegistry;
 
-// Updated 1.8
+// Updated 1.11
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
 // or  ItemRegistry::registerItemShared
 class Item {
@@ -189,9 +189,9 @@ public:
 	//void** vtable; //0
 	char filler0[64-4]; //4
 	short itemId; //64
-	char filler1[99-66]; // 66
-	bool handEquipped; // 99
-	char filler3[152-100]; // 100
+	char filler1[107-66]; // 66
+	bool handEquipped; // 107
+	char filler3[160-108]; // 108
 	virtual ~Item();
 
 	// this one loads textures
@@ -207,7 +207,7 @@ public:
 	static void initCreativeItems(bool, ActorInfoRegistry*, std::function<void (ActorInfoRegistry*)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
-static_assert(sizeof(Item) == 152, "item size is wrong");
+static_assert(sizeof(Item) == 160, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -526,15 +526,15 @@ typedef void ModelRenderer;
 #ifdef __cplusplus
 // look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
-	int armorType; // 152
-	int damageReduceAmount; // 156
-	int renderIndex; // 160
-	void* armorMaterial; // 164
-	char fillerendarmor[192-168]; // 168
+	int armorType; // 160
+	int damageReduceAmount; // 164
+	int renderIndex; // 168
+	void* armorMaterial; // 172
+	char fillerendarmor[200-176]; // 176
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 192, "armor item size");
+static_assert(sizeof(ArmorItem) == 200, "armor item size");
 #endif
 
 
