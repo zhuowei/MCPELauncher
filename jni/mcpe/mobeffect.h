@@ -9,12 +9,9 @@ public:
 
 class MobEffectInstance {
 public:
-	int potionId; //0
-	int duration; // 4
-	int amplifier; // 8
-	bool isAmbient; // 13
-	bool noCounter; // 14
-	bool something; // 15
-	MobEffectInstance(unsigned int potionId, int duration, int amplifier, bool isAmbient, bool alwaysTrue);
+	char filler[28];
+	MobEffectInstance(unsigned int potionId, int duration, int amplifier, bool isAmbient, bool alwaysTrue, bool textureSomething);
 
 };
+
+static_assert(sizeof(MobEffectInstance) == 28, "MobEffectInstance size");

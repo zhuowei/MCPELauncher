@@ -1,6 +1,5 @@
 #pragma once
 //#include <gsl/string_span>
-class Util {
-public:
+namespace Util {
 	//static gsl::string_span<> toLower(gsl::string_span<> const&);
-};
+}; // namespace util

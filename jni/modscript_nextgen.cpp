@@ -2060,7 +2060,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_recipesForJava? bl_recipesForJava: bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
+#if 0 // FIXME 1.11
 	recipes->addShapelessRecipe(outStack, ingredientsList, 0, nullptr);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
@@ -2099,7 +2101,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	}
 	Recipes* recipes = bl_recipesForJava? bl_recipesForJava: bl_level->getRecipes();
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
+#if 0 // FIXME 1.11
 	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, 0, nullptr);
+#endif
 }
 
 class BLFurnaceRecipeRequest {
@@ -2119,11 +2123,13 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	// You don't need count, not sure how to omit it completely
   	ItemInstance outputStack(outputId, 1, outputDamage);
 	if (!bl_level) return;
+#if 0 // FIXME 1.11
 	FurnaceRecipes* recipes = bl_level->getFurnaceRecipes();
 	recipes->addFurnaceRecipe(*item, outputStack);
 	furnaceRecipes.push_back({inputId, outputId, outputDamage});
+#endif
 }
-
+#if 0 // FIXME 1.11
 static void bl_readdFurnace(FurnaceRecipes* recipes) {
 	for (auto& f: furnaceRecipes) {
 		ItemInstance outputStack(f.outputId, 1, f.outputDamage);
@@ -2139,6 +2145,7 @@ static void* bl_FurnaceRecipes__init_hook(FurnaceRecipes* recipes) {
 	bl_readdFurnace(recipes);
 	return retval;
 }
+#endif
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeShowTipMessage
   (JNIEnv *env, jclass clazz, jstring text) {
@@ -2697,7 +2704,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
   (JNIEnv* env, jclass clazz, jlong entityId, jint id, jint duration, jint amplifier, jboolean ambient, jboolean showParticles) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles);
+	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles, true);
 	entity->addEffect(inst);
 }
 
@@ -4320,8 +4327,6 @@ void bl_setuphooks_cppside() {
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
 	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
 		(void**)&bl_SceneStack_update_real);
-	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN14FurnaceRecipes4initEv"), (void*)&bl_FurnaceRecipes__init_hook,
-		(void**)&bl_FurnaceRecipes__init_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
 	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))

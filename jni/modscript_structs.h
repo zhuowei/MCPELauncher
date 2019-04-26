@@ -12,6 +12,7 @@ typedef Actor Entity;
 #include "mcpe/enchant.h"
 #include "mcpe/synchedentitydata.h"
 #include "mcpe/resourcelocation.h"
+#include "mcpe/hashstring.h"
 
 #ifdef __cplusplus
 #define cppstr std::string
@@ -406,10 +407,14 @@ public:
 #endif
 };
 	std::vector<Recipe*> recipes;
-	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&, int,
-		std::function<std::unique_ptr<ShapelessRecipe>(std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
-	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&, int,
-		std::function<std::unique_ptr<ShapedRecipe>(int, int, std::vector<ItemInstance> const&, std::vector<ItemInstance> const&)>);
+	void addShapelessRecipe(ItemInstance const&, std::vector<Type> const&, std::vector<Util::HashString> const&, int,
+		std::function<std::unique_ptr<ShapelessRecipe>(std::vector<ItemInstance> const&, std::vector<ItemInstance> const&,
+		Util::HashString)>);
+	void addShapedRecipe(std::vector<ItemInstance> const&, std::vector<std::string> const&, std::vector<Type> const&,
+		std::vector<Util::HashString> const&, int,
+		std::function<std::unique_ptr<ShapedRecipe>(int, int, std::vector<ItemInstance> const&, std::vector<ItemInstance> const&,
+		Util::HashString)>);
+	void addFurnaceRecipeAuxData(short, short, ItemInstance const&, std::vector<Util::HashString> const&);
 	void* loadRecipes(ResourcePackManager&);
 
 }; // class Recipes
@@ -422,11 +427,6 @@ static_assert(sizeof(RecipesType) == 104, "RecipesType size");
 #else
 static_assert(sizeof(RecipesType) == 100, "RecipesType size");
 #endif
-
-class FurnaceRecipes {
-public:
-	void addFurnaceRecipe(Item const&, ItemInstance const&);
-};
 
 typedef struct {
 	char filler[16]; //0
@@ -596,7 +596,6 @@ public:
 	void addParticle(ParticleType, Vec3 const&, Vec3 const&, int, CompoundTag const*, bool);
 	Abilities* getPlayerAbilities(EntityUniqueID const&);
 	Recipes* getRecipes() const;
-	FurnaceRecipes* getFurnaceRecipes() const;
 	BlockPalette* getGlobalBlockPalette() const;
 };
 // Level::getActivePlayerCount
