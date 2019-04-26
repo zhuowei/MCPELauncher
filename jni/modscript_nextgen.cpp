@@ -85,6 +85,8 @@ typedef void Font;
 // FIXME 0.14
 //#define MINECRAFT_SCREENCHOOSER_OFFSET 252
 
+// don't forget to change TextPacket below
+
 // found in _Z13registerBlockI5BlockIRA8_KciS3_RK8MaterialEERT_DpOT0_; tile id 4
 const size_t kTileSize = sizeof(BlockLegacy);
 //const size_t kLiquidBlockDynamicSize = 736;
@@ -167,20 +169,23 @@ public:
 
 class TextPacket : public Packet {
 public:
-	char filler[8-4]; // 4
-	int shouldBeOne; // 8
-	unsigned char sub; //12
-	unsigned char type; // 13
-	char filler2[16-14]; // 14
-	std::string username; // 16
-	std::string message; // 20
+	char filler[20-4]; // 4
+	unsigned char type; // 20
+	char filler2[24-21]; // 14
+	std::string username; // 24
+	std::string message; // 28
 	//std::vector<std::string> thevector; // 24
 	//char filler3[36-28]; // 28
 	//char filler3[36-24]; // 24
 	virtual ~TextPacket() override;
 };
-static_assert(offsetof(TextPacket, username) == 16, "textpacket username");
-static_assert(offsetof(TextPacket, message) == 20, "textpacket message");
+// TextPacket::createChat:
+// TextPacket(1, arg1, arg2, {}, false, arg3, arg4);
+// TextPacket::createRaw:
+// TextPacket(0, ?, rawMessage, etc)
+static_assert(offsetof(TextPacket, type) == 20, "TextPacket type");
+static_assert(offsetof(TextPacket, username) == 24, "textpacket username");
+static_assert(offsetof(TextPacket, message) == 28, "textpacket message");
 
 typedef struct {
 	void** vtable; //0
@@ -307,7 +312,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK4Item8dispenseER11BlockSourceR9ContaineriRK4Vec3a");
 */
 	vtable_indexes.clientnetworkhandler_handle_text_packet = bl_vtableIndex(mcpelibhandle, "_ZTV20ClientNetworkHandler",
-		"_ZN20ClientNetworkHandler10handleTextERK17NetworkIdentifierRK10TextPacket");
+		"_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket");
 //	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 //		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
