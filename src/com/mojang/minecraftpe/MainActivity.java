@@ -2362,6 +2362,11 @@ public class MainActivity extends NativeActivity {
 		return false;
 	}
 
+	// 1.12.0
+	public boolean hasHardwareKeyboard() {
+		return getResources().getConfiguration().keyboard == android.content.res.Configuration.KEYBOARD_QWERTY;
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();
