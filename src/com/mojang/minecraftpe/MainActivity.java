@@ -86,6 +86,7 @@ public class MainActivity extends NativeActivity {
 	public static final String HALF_SUPPORT_VERSION = "1.12";
 	private static final boolean HALF_VERSION_HAS_SCRIPTS = false;
 	public static final String LITE_SUPPORT_VERSION = "~~~";
+	private static final String SUPPORTED_VERSION_READABLE = "1.11.1";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -264,7 +265,7 @@ public class MainActivity extends NativeActivity {
 			com.mojang.minecraftpe.store.Store.needsNativeListenerCallback =
 				mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 10, 0);
 
-			boolean isTooOldMinorVersion = false;//!mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 2, 13);
+			boolean isTooOldMinorVersion = !mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 11, 1);
 			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
 				!isTooOldMinorVersion) ||
 				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION) ||
@@ -274,7 +275,7 @@ public class MainActivity extends NativeActivity {
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", "1.9.0");
+				intent.putExtra("supportedVersion", SUPPORTED_VERSION_READABLE);
 				startActivity(intent);
 				finish();
 				try {

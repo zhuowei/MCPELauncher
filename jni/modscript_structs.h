@@ -68,26 +68,26 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.10.0
+// last update: 1.11.1
 class Actor {
 public:
 	void** vtable; //0
-	char filler2[152-4]; // 4
-	float pitch; //152 Entity::setRot
-	float yaw; //156
-	float prevPitch; //160
-	float prevYaw; //164
+	char filler2[160-4]; // 4
+	float pitch; //160 Entity::setRot
+	float yaw; //164
+	float prevPitch; //168
+	float prevYaw; //172
 
-	char filler4[540-168]; //168
-	std::vector<Entity*> riders; // 540
+	char filler4[548-176]; //176
+	std::vector<Entity*> riders; // 548
 
-	char filler3[3492-552]; // 552
-	float motionX; // 3492 - Actor::push
-	float motionY; // 3496
-	float motionZ; // 3500
-	float x; //3504 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3508
-	float z; //3512
+	char filler3[3500-560]; // 560
+	float motionX; // 3500 - Actor::push
+	float motionY; // 3504
+	float motionZ; // 3508
+	float x; //3512 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3516
+	float z; //3520
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -118,9 +118,9 @@ public:
 	void removeAllEffects();
 };
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 540, "Entity rider offset wrong");
-static_assert(offsetof(Actor, pitch) == 152, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3504, "Actor x offset wrong");
+static_assert(offsetof(Entity, riders) == 548, "Entity rider offset wrong");
+static_assert(offsetof(Actor, pitch) == 160, "Actor pitch offset wrong");
+static_assert(offsetof(Actor, x) == 3512, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
