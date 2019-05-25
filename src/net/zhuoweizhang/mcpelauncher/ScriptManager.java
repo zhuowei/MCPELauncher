@@ -2259,6 +2259,7 @@ public class ScriptManager {
 	public static native void nativeNewLevelCallbackEnded();
 	public static native boolean nativeHasPreventedDefault();
 	public static native void nativeItemSetAllowOffhand(int id, boolean yep);
+	public static native Method nativeGrabMethod(Class javaClass, String methodName, String methodSignature, boolean isStatic);
 
 	public static class ScriptState {
 		public Script script;

@@ -363,6 +363,7 @@ public class MainActivity extends NativeActivity {
 				getMCPEVersion().startsWith(LITE_SUPPORT_VERSION)) {
 				prePatch();
 			}
+			System.loadLibrary("mcpelauncher_early");
 		} catch (Exception e) {
 			e.printStackTrace();
 			// showDialog(DIALOG_UNABLE_TO_PATCH);
@@ -2967,10 +2968,15 @@ public class MainActivity extends NativeActivity {
 		try {
 			// I'm so, so sorry.
 			classVMRuntime = Class.forName("dalvik.system.VMRuntime");
+
 			methodVMRuntimeGetRuntime = classVMRuntime.getMethod("getRuntime");
 			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
 			methodVMRuntimeGetTargetSdkVersion = classVMRuntime.getMethod("getTargetSdkVersion");
-			methodVMRuntimeSetTargetSdkVersion = classVMRuntime.getMethod("setTargetSdkVersion", Integer.TYPE);
+			if (Build.VERSION.SDK_INT > 28) { // higher than Pie
+				methodVMRuntimeSetTargetSdkVersion = ScriptManager.nativeGrabMethod(classVMRuntime, "", "", false);
+			} else {
+				methodVMRuntimeSetTargetSdkVersion = classVMRuntime.getMethod("setTargetSdkVersion", Integer.TYPE);
+			}
 			storedSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
 			methodVMRuntimeSetTargetSdkVersion.invoke(runtime, Build.VERSION_CODES.LOLLIPOP);
 			int newSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);

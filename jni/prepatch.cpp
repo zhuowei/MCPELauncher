@@ -250,6 +250,23 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 }
 #endif
 
+void bl_set_target_sdk_version(uint32_t version) {
+	JNIEnv *env;
+	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->AttachCurrentThread(&env, NULL);
+	}
+
+	//Call back across JNI into the ScriptManager
+	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "setTargetSdkVersion", "(I)V");
+
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, version);
+
+	if (attachStatus == JNI_EDETACHED) {
+		bl_JavaVM->DetachCurrentThread();
+	}
+}
+
 // Android Nougat and above uses a randomly generated handle for dlopen. We need the real address. I'm so, so sorry for this.
 static void* hacked_dlopen(const char *filename, int flag) {
 	// first try a regular dlopen.
@@ -267,8 +284,8 @@ static void* hacked_dlopen(const char *filename, int flag) {
 	void (*android_set_application_target_sdk_version)(uint32_t) = (void (*)(uint32_t))
 		dlsym(libchandle, "android_set_application_target_sdk_version");
 	if (!android_set_application_target_sdk_version) {
-		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Impossible: can't get first needed: %s", dlerror());
-		abort();
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "We're on Android Q: can't get first needed: %s", dlerror());
+		android_set_application_target_sdk_version = bl_set_target_sdk_version;
 	}
 	uint32_t (*android_get_application_target_sdk_version)() = (uint32_t (*)())
 		dlsym(libchandle, "android_get_application_target_sdk_version");

@@ -69,6 +69,13 @@ include $(BUILD_SHARED_LIBRARY)
 
 endif
 
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := mcpelauncher_early
+LOCAL_SRC_FILES := early_workaround.c
+LOCAL_LDLIBS := -llog -landroid
+
+include $(BUILD_SHARED_LIBRARY)
 
 $(call import-add-path, prebuilts)
 
