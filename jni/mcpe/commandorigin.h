@@ -8,9 +8,15 @@ public:
 	CommandOrigin();
 	virtual ~CommandOrigin();
 };
+
+enum CommandPermissionLevel {
+	CommandPermissionLevelDefault = 0,
+	CommandPermissionLevelHigher = 1, // does this seem right?
+};
+
 class ServerCommandOrigin : public CommandOrigin {
 public:
-	ServerCommandOrigin(std::string const&, ServerLevel&);
+	ServerCommandOrigin(std::string const&, ServerLevel&, CommandPermissionLevel);
 	virtual ~ServerCommandOrigin();
 	char filler[32-4]; // 4 from ServerCommandOrigin::clone()
 };

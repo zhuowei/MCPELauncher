@@ -17,8 +17,8 @@ public:
 
 class EnchantUtils {
 public:
-	static bool applyEnchant(ItemInstance&, Enchant::Type, int);
-	static bool applyEnchant(ItemStack&, Enchant::Type, int);
+	static bool applyEnchant(ItemInstance&, Enchant::Type, int, bool);
+	static bool applyEnchant(ItemStack&, Enchant::Type, int, bool);
 };
 
 class EnchantmentInstance {

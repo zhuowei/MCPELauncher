@@ -106,6 +106,8 @@ int bl_renderManager_addRenderer(EntityRenderer* renderer) {
 }
 
 int bl_renderManager_createHumanoidRenderer() {
+	return -1;
+#if 0
 	BL_LOG("Create renderer");
 	HumanoidModel* model = new HumanoidModel(0, 0, 64, 64);
 
@@ -126,6 +128,7 @@ int bl_renderManager_createHumanoidRenderer() {
 	int retval = bl_renderManager_addRenderer((EntityRenderer*) renderer);
 	BL_LOG("Created renderer %d", retval);
 	return retval;
+#endif
 }
 
 Item** bl_getItemsArray();

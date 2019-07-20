@@ -180,6 +180,7 @@ enum UseAnimation {
 };
 
 class ActorInfoRegistry;
+class BlockDefinitionGroup;
 
 // Updated 1.11
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
@@ -204,7 +205,7 @@ public:
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
-	static void initCreativeItems(bool, ActorInfoRegistry*, std::function<void (ActorInfoRegistry*)>);
+	static void initCreativeItems(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
 static_assert(sizeof(Item) == 160, "item size is wrong");
@@ -292,7 +293,7 @@ public:
 	std::string const& getDescriptionId() const;
 	int getRenderLayer() const;
 	void* getMaterial() const;
-	BlockAndData* getBlockStateFromLegacyData(unsigned char) const;
+	BlockAndData* getStateFromLegacyData(unsigned short) const;
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
 // SharedPtr<BlockLegacy>::make

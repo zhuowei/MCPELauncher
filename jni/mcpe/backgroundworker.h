@@ -1,6 +1,6 @@
 #pragma once
 
-class BackgroundTask {
+class BackgroundTaskHandle {
 public:
 	void* task; // 0
 };
@@ -12,7 +12,7 @@ public:
 	char filler[48-20]; // 20
 	void* runQueue; // 48
 	bool _workerThread() const;
-	void* queue(BackgroundTask);
+	void* queue(BackgroundTaskHandle);
 };
 // BackgroundWorker::queue, look at when _workerThread returns false
 static_assert(offsetof(BackgroundWorker, myThread) == 16, "myThread");

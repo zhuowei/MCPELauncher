@@ -63,6 +63,7 @@
 #include "mcpe/blockidtoitemid.h"
 #include "mcpe/vanillaitems.h"
 #include "mcpe/itemstack.h"
+#include "mcpe/itemdescriptor.h"
 
 typedef void RakNetInstance;
 typedef void Font;
@@ -137,7 +138,7 @@ class Recipe {
 public:
 	void** vtable; //4
 	ItemPack itemPack; //4
-	static bool isAnyAuxValue(ItemInstance const&);
+	static bool isAnyAuxValue(ItemDescriptor const&);
 };
 
 class ShapelessRecipe {
@@ -454,7 +455,7 @@ static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 	(BlockLegacy*, std::string const&, int, BlockID, void*, std::string const&, std::string const&);
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(BlockLegacy*, std::string const&, int, void*, std::string const&, std::string const&);
-static bool (*bl_Recipe_isAnyAuxValue_real)(ItemInstance const&);
+static bool (*bl_Recipe_isAnyAuxValue_real)(ItemDescriptor const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
 //static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
@@ -625,8 +626,9 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
-static void bl_Item_initCreativeItems_hook(bool arg1, ActorInfoRegistry* actorInfoRegistry, std::function<void (ActorInfoRegistry*)> func) {
-	Item::initCreativeItems(arg1, actorInfoRegistry, func);
+static void bl_Item_initCreativeItems_hook(bool arg1, ActorInfoRegistry* actorInfoRegistry,
+	BlockDefinitionGroup* definitionGroup, bool arg4, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)> func) {
+	Item::initCreativeItems(arg1, actorInfoRegistry, definitionGroup, arg4, func);
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -2484,32 +2486,40 @@ static Abilities* bl_getAbilities(Player* player) {
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerIsFlying
   (JNIEnv *env, jclass clazz) {
+#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return false;
 	return bl_getAbilities(localplayer)->getBool(Abilities::FLYING);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetFlying
   (JNIEnv *env, jclass clazz, jboolean val) {
+#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
 	bl_getAbilities(localplayer)->setAbility(Abilities::FLYING, val);
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerCanFly
   (JNIEnv *env, jclass clazz) {
+#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return false;
 	return bl_getAbilities(localplayer)->getBool(Abilities::MAYFLY);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetCanFly
   (JNIEnv *env, jclass clazz, jboolean val) {
+#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
 	bl_getAbilities(localplayer)->setAbility(Abilities::MAYFLY, val);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetCollisionEnabled
@@ -2702,7 +2712,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
   (JNIEnv* env, jclass clazz, jlong entityId, jint id, jint duration, jint amplifier, jboolean ambient, jboolean showParticles) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles, true);
+	// Yes, it took me two months to add a 5 character change. I am a bad programmer.
+	MobEffectInstance inst(id, duration, amplifier, ambient, showParticles, false);
 	entity->addEffect(inst);
 }
 
@@ -3131,7 +3142,7 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 	auto inventory = bl_localplayer->getSupplies();
 	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return false;
-	bool returnVal = EnchantUtils::applyEnchant(*itemInstance, (Enchant::Type)enchantmentId, enchantmentLevel);
+	bool returnVal = EnchantUtils::applyEnchant(*itemInstance, (Enchant::Type)enchantmentId, enchantmentLevel, false);
 	if (!bl_level->isClientSide()) {
 		// then our player is a serverside player; send inventory.
 		BL_LOG("Calling serverPlayer send: %p", (void*)&ServerPlayer::sendInventory);
@@ -3228,11 +3239,11 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRecipeSetA
 	bl_anyAuxValue[id] = anyAux? 2: 1;
 }
 
-bool bl_Recipe_isAnyAuxValue_hook(ItemInstance const& itemStack) {
-	int id = itemStack.getId();
+bool bl_Recipe_isAnyAuxValue_hook(ItemDescriptor const& itemDescriptor) {
+	int id = itemDescriptor.getId();
 	auto b = bl_anyAuxValue[id];
 	if (b == 0) {
-		return bl_Recipe_isAnyAuxValue_real(itemStack);
+		return bl_Recipe_isAnyAuxValue_real(itemDescriptor);
 	}
 	return b == 2;
 }
@@ -3489,7 +3500,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 	// fixme: command outputs?
 	ServerLevel* serverLevel = (ServerLevel*)bl_minecraft->getLocalServerLevel();
 	if (!serverLevel) return nullptr;
-	ServerCommandOrigin* origin = new ServerCommandOrigin("ModPE Script", *serverLevel);
+	ServerCommandOrigin* origin = new ServerCommandOrigin("ModPE Script", *serverLevel, CommandPermissionLevelHigher);
 	std::string outStr = "<no result>";
 	BL_LOG("Executing nonsilent command %s!", mystr.c_str());
 	commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, CommandVersion::CurrentVersion, true);
@@ -3769,7 +3780,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 	}
 }
 
-void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTask task) {
+void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTaskHandle task) {
+	// TODO 1.12.0
 	bool workerThread = worker->_workerThread();
 	bool setOld = false;
 	pthread_t savedValue;

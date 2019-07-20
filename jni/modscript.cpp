@@ -813,7 +813,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	if (!bl_localplayer) return;
 	BlockLegacy* block = getBlockForItemId(id);
 	if (!block) return;
-	BlockAndData* blockAndData = block->getBlockStateFromLegacyData(damage);
+	BlockAndData* blockAndData = block->getStateFromLegacyData(damage);
 	if (!blockAndData) return; // should never happen, but...
 	bl_localplayer->getRegion()->setBlock(x, y, z, *blockAndData, 3); //3 = full block update
 }
