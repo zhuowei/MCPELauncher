@@ -200,12 +200,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 #ifndef MCPELAUNCHER_LITE
 	bl_setmcpelibhandle(mcpelibhandle);
 #endif
-	void* readAssetFile = (void*) dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKSs");
-	void* readAssetFileToHook = (void*) dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKSs");
-	if (readAssetFile == nullptr) {
-		readAssetFile = (void*)dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKN4Core4PathE");
-		readAssetFileToHook = (void*)dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKN4Core4PathE");
-	}
+	readAssetFile = (void*)dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKN4Core4PathE");
+	readAssetFileToHook = (void*)dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKN4Core4PathE");
 	void* tempPtr;
 	mcpelauncher_hook(readAssetFileToHook, readAssetFile, &tempPtr);
 

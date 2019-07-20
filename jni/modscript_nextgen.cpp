@@ -109,7 +109,6 @@ const size_t kClientInstanceScreenModel_offset = 596;
 static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV11MobRenderer",
 "_ZTV11NpcRenderer",
-"_ZTV12WolfRenderer",
 "_ZTV13HorseRenderer",
 "_ZTV15HorseRendererV2",
 "_ZTV16GuardianRenderer",
@@ -3078,11 +3077,11 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	return ret;
 }
 
-static void* (*bl_Throwable_throwableHit_real)(void* component, HitResult const& hitResult);
+static void* (*bl_Throwable_throwableHit_real)(void* component, Actor&, HitResult const& hitResult);
 
-void* bl_Throwable_throwableHit_hook(void* projectileComponent, HitResult const& hitResult) {
+void* bl_Throwable_throwableHit_hook(void* projectileComponent, Actor& actor, HitResult const& hitResult) {
 	Entity* entity = *((Entity**)(((uintptr_t)projectileComponent) + kProjectileComponent_entity_offset));
-	if (!bl_isActiveLevel(entity->getLevel())) return bl_Throwable_throwableHit_real(projectileComponent, hitResult);
+	if (!bl_isActiveLevel(entity->getLevel())) return bl_Throwable_throwableHit_real(projectileComponent, actor, hitResult);
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -4278,7 +4277,7 @@ void bl_setuphooks_cppside() {
 		(void*)&bl_Item_initCreativeItems_hook);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER5Actor");
-	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitERK9HitResult");
+	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitER5ActorRK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
