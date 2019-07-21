@@ -78,16 +78,16 @@ public:
 	float prevPitch; //168
 	float prevYaw; //172
 
-	char filler4[548-176]; //176
-	std::vector<Entity*> riders; // 548
+	char filler4[556-176]; //176
+	std::vector<Entity*> riders; // 556
 
-	char filler3[3500-560]; // 560
-	float motionX; // 3500 - Actor::push
-	float motionY; // 3504
-	float motionZ; // 3508
-	float x; //3512 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3516
-	float z; //3520
+	char filler3[3272-568]; // 568
+	float motionX; // 3272 - Actor::push
+	float motionY; // 3276
+	float motionZ; // 3280
+	float x; //3284 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3288
+	float z; //3292
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -118,9 +118,9 @@ public:
 	void removeAllEffects();
 };
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 548, "Entity rider offset wrong");
+static_assert(offsetof(Entity, riders) == 556, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 160, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3512, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 3284, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -190,9 +190,9 @@ public:
 	//void** vtable; //0
 	char filler0[64-4]; //4
 	short itemId; //64
-	char filler1[107-66]; // 66
-	bool handEquipped; // 107
-	char filler3[160-108]; // 108
+	char filler1[98-66]; // 66
+	short flags; // 98
+	char filler3[144-100]; // 100
 	virtual ~Item();
 
 	// this one loads textures
@@ -208,7 +208,7 @@ public:
 	static void initCreativeItems(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
-static_assert(sizeof(Item) == 160, "item size is wrong");
+static_assert(sizeof(Item) == 144, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -267,23 +267,23 @@ enum BlockProperty {
 class AABB;
 class Block;
 typedef Block BlockAndData;
-// last updated 1.8
+// last updated 1.12
 class BlockLegacy {
 public:
 	void** vtable; //0
 	std::string nameId; // 4
 	std::string mappingId; // 8
-	char filler1[16-12]; // 12
-	int renderLayer; //16
-	char filler2[88-20]; // 20
-	float destroyTime; //88
-	float explosionResistance; //92
-	char filler3[112-96]; // 96
-	unsigned char lightOpacity; // 112 from BlockLegacy::setLightBlock
-	unsigned char lightEmission; // 113 from BlockLegacy::setLightEmission
-	char filler4[128-114]; // 114
-	unsigned short id; // 128
-	char filler5[2584-130]; // 130
+	char filler1[24-12]; // 12
+	int renderLayer; //24
+	char filler2[96-28]; // 28
+	float destroyTime; //96
+	float explosionResistance; //100
+	char filler3[120-104]; // 104
+	unsigned char lightOpacity; // 120 from BlockLegacy::setLightBlock
+	unsigned char lightEmission; // 121 from BlockLegacy::setLightEmission
+	char filler4[136-122]; // 122
+	unsigned short id; // 136
+	char filler5[3024-138]; // 138
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -297,11 +297,11 @@ public:
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
 // SharedPtr<BlockLegacy>::make
-static_assert(sizeof(BlockLegacy) == 2584, "Block size is wrong");
-static_assert(offsetof(BlockLegacy, renderLayer) == 16, "renderlayer is wrong");
-static_assert(offsetof(BlockLegacy, explosionResistance) == 92, "explosionResistance is wrong");
-static_assert(offsetof(BlockLegacy, lightEmission) == 113, "lightEmission is wrong");
-static_assert(offsetof(BlockLegacy, id) == 128, "blockId is wrong");
+static_assert(sizeof(BlockLegacy) == 3024, "Block size is wrong");
+static_assert(offsetof(BlockLegacy, renderLayer) == 24, "renderlayer is wrong");
+static_assert(offsetof(BlockLegacy, explosionResistance) == 100, "explosionResistance is wrong");
+static_assert(offsetof(BlockLegacy, lightEmission) == 121, "lightEmission is wrong");
+static_assert(offsetof(BlockLegacy, id) == 136, "blockId is wrong");
 #define Tile BlockLegacy
 
 typedef struct {
@@ -481,12 +481,14 @@ public:
 static_assert(offsetof(Biome, name) == 4, "Biome name");
 static_assert(offsetof(Biome, id) == 96, "Biome ID");
 
+enum AbilitiesIndex {
+};
+
 class Abilities {
 public:
-	bool getBool(std::string const& name) const;
-	void setAbility(std::string const&, bool);
-	static std::string FLYING;
-	static std::string MAYFLY;
+	bool getBool(AbilitiesIndex) const;
+	void setAbility(AbilitiesIndex, bool);
+	static AbilitiesIndex nameToAbilityIndex(std::string const&);
 };
 
 // from LocalServerListItemElement::serverMainPressed 25c7d4
@@ -527,15 +529,15 @@ typedef void ModelRenderer;
 #ifdef __cplusplus
 // look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
-	int armorType; // 160
-	int damageReduceAmount; // 164
-	int renderIndex; // 168
-	void* armorMaterial; // 172
-	char fillerendarmor[200-176]; // 176
+	int armorType; // 144
+	int damageReduceAmount; // 148
+	int renderIndex; // 152
+	void* armorMaterial; // 156
+	char fillerendarmor[176-160]; // 160
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 200, "armor item size");
+static_assert(sizeof(ArmorItem) == 176, "armor item size");
 #endif
 
 

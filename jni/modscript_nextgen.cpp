@@ -2555,7 +2555,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint id, jboolean handEquipped) {
 	Item* item = getItemForId(id);
 	if (item == nullptr) return;
-	item->handEquipped = handEquipped;
+	const unsigned int handEquippedBit = 1 << 1;
+	if (handEquipped) {
+		item->flags |= handEquippedBit;
+	} else {
+		item->flags &= ~handEquippedBit;
+	}
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
@@ -3100,7 +3105,7 @@ void* bl_Throwable_throwableHit_hook(void* projectileComponent, Actor& actor, Hi
 		bl_JavaVM->DetachCurrentThread();
 	}
 
-	return bl_Throwable_throwableHit_real(projectileComponent, hitResult);
+	return bl_Throwable_throwableHit_real(projectileComponent, actor, hitResult);
 }
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18NString
