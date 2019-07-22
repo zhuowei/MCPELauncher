@@ -5,8 +5,8 @@ namespace mce {
 }
 class ItemSpriteRenderer {
 public:
-	char filler[736];
+	char filler[720];
 	ItemSpriteRenderer(mce::TextureGroup&, Item*, bool);
 };
 // search for ItemSpriteRenderer::ItemSpriteRenderer
-static_assert(sizeof(ItemSpriteRenderer) == 736, "item sprite renderer size");
+static_assert(sizeof(ItemSpriteRenderer) == 720, "item sprite renderer size");

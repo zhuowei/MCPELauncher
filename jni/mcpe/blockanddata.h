@@ -8,6 +8,7 @@ public:
 	unsigned char blockData; // 4 from Block::Block
 	WeakPtr<BlockLegacy> blockBase; // 8 from Block::Block
 	char filler[72-12]; // 12 from Block::Block
+	char unknown1; // 72
 
 	Block(unsigned char, BlockLegacy const*);
 	virtual ~Block();
@@ -15,4 +16,4 @@ public:
 typedef Block BlockAndData;
 static_assert(offsetof(Block, blockBase) == 8, "Block blockBase");
 // Block::setRuntimeId
-static_assert(sizeof(Block) == 72, "Block size");
+static_assert(sizeof(Block) == 76, "Block size");
