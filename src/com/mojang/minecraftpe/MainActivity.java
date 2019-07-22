@@ -997,7 +997,7 @@ public class MainActivity extends NativeActivity {
 			@Override
 			public void onClick(View v) {
 				try {
-					nativeTypeCharacter("" + ((char) 0x08)); // is this the
+					//nativeTypeCharacter("" + ((char) 0x08)); // is this the
 																// correct
 																// method of
 																// backspace?
@@ -1010,6 +1010,7 @@ public class MainActivity extends NativeActivity {
 		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_insert_text).setView(ll)
 				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogI, int button) {
+						/*
 						try {
 							String[] lines = editText.getText().toString().split("\n");
 							for (int line = 0; line < lines.length; line++) {
@@ -1023,6 +1024,7 @@ public class MainActivity extends NativeActivity {
 						} catch (UnsatisfiedLinkError e) {
 							showDialog(DIALOG_NOT_SUPPORTED);
 						}
+						*/
 					}
 				}).setNegativeButton(android.R.string.cancel, null).create();
 	}
@@ -1534,6 +1536,7 @@ public class MainActivity extends NativeActivity {
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, event.toString());
+/*
 		if (event.getAction() == KeyEvent.ACTION_MULTIPLE
 				&& event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
 			try {
@@ -1543,6 +1546,7 @@ public class MainActivity extends NativeActivity {
 				// Do nothing
 			}
 		}
+*/
 		return super.dispatchKeyEvent(event);
 	}
 
@@ -3036,8 +3040,8 @@ public class MainActivity extends NativeActivity {
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Editor action: " + actionId);
-			//nativeReturnKeyPressed();
-			nativeTypeCharacter("\n");
+			nativeReturnKeyPressed();
+			//nativeTypeCharacter("\n");
 			return true;
 		}
 	}

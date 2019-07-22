@@ -1288,9 +1288,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 std::unordered_map<long long, mce::TexturePtr> bl_mobTexturesMap;
 
 void bl_changeEntitySkin(Entity* entity, const char* newSkin) {
+#if 0 // FIXME 1.12
 	if (strlen(newSkin) == 0) return; // WHAT
 	bl_mobTexturesMap[entity->getUniqueID()] = mce::TexturePtr(bl_minecraft->getTextures(), ResourceLocation(newSkin));
 	bl_forceTextureLoad(newSkin);
+#endif
 }
 void bl_clearMobTextures() {
 	bl_mobTexturesMap.clear();
@@ -2485,40 +2487,36 @@ static Abilities* bl_getAbilities(Player* player) {
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerIsFlying
   (JNIEnv *env, jclass clazz) {
-#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return false;
-	return bl_getAbilities(localplayer)->getBool(Abilities::FLYING);
-#endif
+	auto index = Abilities::nameToAbilityIndex("flying");
+	return bl_getAbilities(localplayer)->getBool(index);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetFlying
   (JNIEnv *env, jclass clazz, jboolean val) {
-#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
-	bl_getAbilities(localplayer)->setAbility(Abilities::FLYING, val);
-#endif
+	auto index = Abilities::nameToAbilityIndex("flying");
+	bl_getAbilities(localplayer)->setAbility(index, val);
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerCanFly
   (JNIEnv *env, jclass clazz) {
-#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return false;
-	return bl_getAbilities(localplayer)->getBool(Abilities::MAYFLY);
-#endif
+	auto index = Abilities::nameToAbilityIndex("mayfly");
+	return bl_getAbilities(localplayer)->getBool(index);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerSetCanFly
   (JNIEnv *env, jclass clazz, jboolean val) {
-#if 0 // FIXME 1.12.0
 	auto localplayer = bl_minecraft->getLocalPlayer();
 	if (localplayer == nullptr) return;
 	if (bl_onLockDown) return;
-	bl_getAbilities(localplayer)->setAbility(Abilities::MAYFLY, val);
-#endif
+	auto index = Abilities::nameToAbilityIndex("mayfly");
+	bl_getAbilities(localplayer)->setAbility(index, val);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetCollisionEnabled
