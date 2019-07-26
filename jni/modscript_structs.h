@@ -462,7 +462,7 @@ typedef struct {
 typedef struct {
 	char filler0[24-0];
 	int type; //24
-	int side; //28
+	unsigned char side; //28
 	int x; //32
 	int y; //36
 	int z; //40

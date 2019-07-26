@@ -100,8 +100,6 @@ const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
 const size_t kItemEntity_itemInstance_offset = 3856;
-// ProjectileComponent::ProjectileComponent
-const size_t kProjectileComponent_entity_offset = 16;
 // ChatScreenController::_sendChatMessage
 const size_t kClientInstanceScreenModel_offset = 620;
 
@@ -3083,8 +3081,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 static void* (*bl_Throwable_throwableHit_real)(void* component, Actor&, HitResult const& hitResult);
 
 void* bl_Throwable_throwableHit_hook(void* projectileComponent, Actor& actor, HitResult const& hitResult) {
-	Entity* entity = *((Entity**)(((uintptr_t)projectileComponent) + kProjectileComponent_entity_offset));
-	if (!bl_isActiveLevel(entity->getLevel())) return bl_Throwable_throwableHit_real(projectileComponent, actor, hitResult);
+	if (!bl_isActiveLevel(actor.getLevel())) return bl_Throwable_throwableHit_real(projectileComponent, actor, hitResult);
 	JNIEnv *env;
 	int attachStatus = bl_JavaVM->GetEnv((void**) &env, JNI_VERSION_1_2);
 	if (attachStatus == JNI_EDETACHED) {
@@ -3094,7 +3091,7 @@ void* bl_Throwable_throwableHit_hook(void* projectileComponent, Actor& actor, Hi
 	//Call back across JNI into the ScriptManager
 	jmethodID mid = env->GetStaticMethodID(bl_scriptmanager_class, "throwableHitCallback", "(JIIIIIFFFJ)V");
 
-	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, entity->getUniqueID(),
+	env->CallStaticVoidMethod(bl_scriptmanager_class, mid, actor.getUniqueID(),
 		hitResult.type, hitResult.side, hitResult.x, hitResult.y, hitResult.z,
 		hitResult.hitVec.x, hitResult.hitVec.y, hitResult.hitVec.z,
 		hitResult.type == HIT_RESULT_ENTITY? (jlong)hitResult.entity->getUniqueID(): (jlong)0);
