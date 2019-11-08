@@ -2373,6 +2373,12 @@ public class MainActivity extends NativeActivity {
 		return getResources().getConfiguration().keyboard == android.content.res.Configuration.KEYBOARD_QWERTY;
 	}
 
+	public void trackPurchaseEvent(String arg1, String arg2, String arg3, String arg4, String arg5, String arg6, String arg7, String arg8) {
+		if (BuildConfig.DEBUG) {
+			System.out.println(arg1 + ":" + arg2 + ":" + arg3 + ":" + arg4 + ":" + arg5 + ":" + arg6 + ":" + arg7 + ":" + arg8);
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
 		nativeBackPressed();

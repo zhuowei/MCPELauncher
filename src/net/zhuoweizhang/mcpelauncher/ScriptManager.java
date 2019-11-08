@@ -149,6 +149,8 @@ public class ScriptManager {
 	private static final String ENTITY_KEY_SKIN = "zhuowei.bl.s";
 	private static final String ENTITY_KEY_IMMOBILE = "zhuowei.bl.im";
 	private static List<Object[]> deferredLoads = new ArrayList<Object[]>();
+	private static Object vmRuntime_singleton = null;
+	private static Method vmRuntime_setTargetSdkVersion = null;
 
 	public static void loadScript(Reader in, String sourceName) throws IOException {
 		if (!scriptingInitialized)
@@ -1904,6 +1906,19 @@ public class ScriptManager {
 		return false;
 	}
 
+	private static void setTargetSdkVersion(int version) {
+		try {
+			if (vmRuntime_setTargetSdkVersion == null) {
+				Class vmRuntimeClass = Class.forName("dalvik.system.VMRuntime");
+				vmRuntime_setTargetSdkVersion = nativeGrabMethod(vmRuntimeClass, "setTargetSdkVersion", "(I)V", false);
+				//System.err.println("Method: " + vmRuntime_setTargetSdkVersion);
+				vmRuntime_singleton = vmRuntimeClass.getMethod("getRuntime").invoke(null);
+			}
+			vmRuntime_setTargetSdkVersion.invoke(vmRuntime_singleton, version);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public static native float nativeGetPlayerLoc(int axis);
 

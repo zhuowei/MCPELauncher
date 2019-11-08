@@ -196,6 +196,11 @@ static void* hacked_dlopen(const char *filename, int flag);
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
   (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
 	if (bl_hasinit_prepatch) return;
+
+	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
+
+	bl_scriptmanager_class = (jclass) env->NewGlobalRef(clz);
+
 	void* mcpelibhandle = hacked_dlopen("libminecraftpe.so", RTLD_LAZY);
 #ifndef MCPELAUNCHER_LITE
 	bl_setmcpelibhandle(mcpelibhandle);
@@ -208,9 +213,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	setupIsModded(mcpelibhandle);
 	setupMojangScripting(mcpelibhandle);
 
-	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
-
-	bl_scriptmanager_class = (jclass) env->NewGlobalRef(clz);
 	//get a callback when the level is exited
 	//void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
 	//mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
@@ -299,6 +301,7 @@ static void* hacked_dlopen(const char *filename, int flag) {
 	android_set_application_target_sdk_version(23);
 
 	if (android_get_application_target_sdk_version() != 23) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "set sdk failed");
 		abort();
 	}
 
