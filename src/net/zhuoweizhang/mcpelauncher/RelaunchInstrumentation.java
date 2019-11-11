@@ -9,7 +9,7 @@ public class RelaunchInstrumentation extends Instrumentation {
 	@Override
 	public void onCreate(Bundle arguments) {
 		super.onCreate(arguments);
-		if (arguments.getByte("skiplaunch") == 0) {
+		if (arguments.getByte("skipLaunch") == 0) {
 			reLaunch(arguments);
 		}
 	}

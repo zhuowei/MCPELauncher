@@ -368,7 +368,7 @@ public class MainActivity extends NativeActivity {
 		try {
 			loadLibrary("mcpelauncher_early");
 		} catch (UnsatisfiedLinkError e) {
-			e.printStackTrace();
+			System.err.println(e);
 			forceLaunchedIntoDifferentAbi = true;
 			// for now, always re-extract the libs on every load.
 			extractNativeLibs = true;

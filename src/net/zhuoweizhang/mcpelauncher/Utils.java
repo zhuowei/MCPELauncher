@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
@@ -260,7 +261,7 @@ public class Utils {
 	public static void popStayInForegroundTasks(Activity activity) {
 		Intent trampolineIntent = new Intent(activity, TrampolineActivity.class);
 		activity.startActivity(trampolineIntent);
-        	Intent chooserIntent = Intent.createChooser(new Intent("net.zhuoweizhang.mcpelauncher.action.INVALID"), "Loading...");
+		Intent chooserIntent = Intent.createChooser(new Intent(activity.getPackageName() + ".action.TRAMPOLINE"), "Loading...");
         	activity.startActivity(chooserIntent);
 		try {
 			Thread.sleep(1000);
@@ -272,7 +273,7 @@ public class Utils {
 	public static void forceRestartIntoDifferentAbi(Activity activity, Intent targetIntent) {
 		final Intent theIntent = targetIntent != null? targetIntent:
 			activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
-		boolean needsToStayInForeground = true;
+		boolean needsToStayInForeground = Build.VERSION.SDK_INT >= 29; // Android 10 requires alarm
 		if (needsToStayInForeground) {
 			popStayInForegroundTasks(activity);
 		}
@@ -291,7 +292,7 @@ public class Utils {
 	}
 
 	private static void rebootIntoInstrumentation(Activity activity, Intent targetIntent) {
-		boolean launchViaAlarm = true;
+		boolean launchViaAlarm = Build.VERSION.SDK_INT >= 29; // Android 10 requires alarm
 		if (launchViaAlarm) {
 			setupAlarm(activity, targetIntent);
 		}
