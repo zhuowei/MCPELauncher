@@ -55,6 +55,7 @@ void bl_Minecraft_stopGame_hook(Minecraft* minecraft, bool localServer) {
 }
 
 static void setupIsModded(void* mcpelibhandle) {
+#if 0 // 1.13
 #ifdef __arm__
 	uintptr_t isModdedAddr = ((uintptr_t) bl_marauder_translation_function(
 		dobby_dlsym(mcpelibhandle, "_ZN9Minecraft8isModdedEv"))) & ~1;
@@ -67,6 +68,7 @@ static void setupIsModded(void* mcpelibhandle) {
 	unsigned char* isModdedArray = (unsigned char*) isModdedAddr;
 	isModdedArray[6] = 0xb0;
 	isModdedArray[7] = 0x01;
+#endif
 #endif
 }
 

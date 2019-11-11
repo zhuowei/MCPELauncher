@@ -2979,7 +2979,8 @@ public class MainActivity extends NativeActivity {
 			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
 			methodVMRuntimeGetTargetSdkVersion = classVMRuntime.getMethod("getTargetSdkVersion");
 			if (Build.VERSION.SDK_INT > 28) { // higher than Pie
-				methodVMRuntimeSetTargetSdkVersion = ScriptManager.nativeGrabMethod(classVMRuntime, "", "", false);
+				methodVMRuntimeSetTargetSdkVersion = ScriptManager.nativeGrabMethod(classVMRuntime,
+					"setTargetSdkVersion", "(I)V", false);
 			} else {
 				methodVMRuntimeSetTargetSdkVersion = classVMRuntime.getMethod("setTargetSdkVersion", Integer.TYPE);
 			}
