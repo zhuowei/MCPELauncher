@@ -12,9 +12,12 @@ import android.util.DisplayMetrics;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 
 import com.mojang.minecraftpe.MainActivity;
 
@@ -205,6 +208,43 @@ public class Utils {
 		boolean darkTheme = getPrefs(0).getBoolean("zz_theme_dark", false);
 		if (darkTheme) {
 			context.setTheme(fullscreen? R.style.FullscreenDarkTheme: R.style.BlockLauncherDarkTheme);
+		}
+	}
+
+	public static void extractFromZip(File zipFilePath, File outputDir, String pathMatching) throws IOException {
+		ZipFile zipFile = null;
+		try {
+			zipFile = new ZipFile(zipFilePath);
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				if (entry.isDirectory()) continue;
+				if (!entry.getName().startsWith(pathMatching)) continue;
+				extractZipEntry(zipFile, outputDir, entry);
+			}
+		} finally {
+			if (zipFile != null) {
+				zipFile.close();
+			}
+		}
+	}
+
+	private static void extractZipEntry(ZipFile zipFile, File outputDir, ZipEntry entry) throws IOException {
+		BufferedInputStream is = null;
+		FileOutputStream fos = null;
+		try {
+			byte[] bytes = new byte[(int)entry.getSize()];
+			is = new BufferedInputStream(zipFile.getInputStream(entry));
+			is.read(bytes);
+			// yes, this is vulnerable to zip traversal.
+			// if this ever gets used for non-apk, you'll have a bad time
+			File targetFile = new File(outputDir, entry.getName());
+			targetFile.getParentFile().mkdirs();
+			fos = new FileOutputStream(targetFile);
+			fos.write(bytes);
+		} finally {
+			if (is != null) is.close();
+			if (fos != null) fos.close();
 		}
 	}
 

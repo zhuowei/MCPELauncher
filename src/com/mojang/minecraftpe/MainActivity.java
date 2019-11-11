@@ -220,6 +220,8 @@ public class MainActivity extends NativeActivity {
 	private Method methodVMRuntimeGetTargetSdkVersion;
 	private Method methodVMRuntimeSetTargetSdkVersion;
 	private final boolean NATIVE_DEBUGGER_ENABLED = false;
+	private boolean extractNativeLibs = false;
+	private File extractNativeLibsDir = null;
 
 	/** Called when the activity is first created. */
 
@@ -357,13 +359,30 @@ public class MainActivity extends NativeActivity {
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
+		extractNativeLibs = false;
+
+		try {
+			loadLibrary("mcpelauncher_early");
+		} catch (UnsatisfiedLinkError e) {
+			e.printStackTrace();
+			extractNativeLibs = true;
+		}
+
+		if (extractNativeLibs) {
+			try {
+				extractNativeLibsIfNeeded();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+			loadLibrary("mcpelauncher_early");
+		}
+
 		try {
 			if ((!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) ||
 				getMCPEVersion().startsWith(HALF_SUPPORT_VERSION) ||
 				getMCPEVersion().startsWith(LITE_SUPPORT_VERSION)) {
 				prePatch();
 			}
-			System.loadLibrary("mcpelauncher_early");
 		} catch (Exception e) {
 			e.printStackTrace();
 			// showDialog(DIALOG_UNABLE_TO_PATCH);
@@ -1790,20 +1809,20 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void initPatching() throws Exception {
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("mcpelauncher_tinysubstrate");
+		loadLibrary("gnustl_shared");
+		loadLibrary("mcpelauncher_tinysubstrate");
 		String mcpeVersion = getMCPEVersion();
 		System.out.println("MCPE Version is " + mcpeVersion);
 		if (mcpeVersion.startsWith(HALF_SUPPORT_VERSION)) {
 			if (HALF_VERSION_HAS_SCRIPTS) {
-				System.loadLibrary("mcpelauncher_new");
+				loadLibrary("mcpelauncher_new");
 			} else {
-				System.loadLibrary("mcpelauncher_lite");
+				loadLibrary("mcpelauncher_lite");
 			}
 		} else if (mcpeVersion.startsWith(LITE_SUPPORT_VERSION)) {
-			System.loadLibrary("mcpelauncher_lite");
+			loadLibrary("mcpelauncher_lite");
 		} else {
-			System.loadLibrary("mcpelauncher");
+			loadLibrary("mcpelauncher");
 		}
 
 		long minecraftLibLength = findMinecraftLibLength();
@@ -3026,6 +3045,33 @@ public class MainActivity extends NativeActivity {
 			e.printStackTrace();
 			reportError(e);
 		}
+	}
+
+	private void loadLibrary(String libraryName) {
+		if (!extractNativeLibs) {
+			System.loadLibrary(libraryName);
+			return;
+		}
+		System.load(new File(extractNativeLibsDir, "lib" + libraryName + ".so").getAbsolutePath());
+	}
+
+	private void extractNativeLibsIfNeeded() throws Exception {
+		// figure out which arch we need in this VM
+		String arch = System.getProperty("os.arch");
+		String targetAbi = "armeabi-v7a";
+		if (arch.startsWith("armv") || arch.startsWith("aarch")) {
+			// already arm
+		} else if (arch.equals("x86") || arch.equals("i686") || arch.equals("x86_64")) {
+			targetAbi = "x86";
+		}
+
+		ApplicationInfo appInfo = getApplicationInfo();
+		File apkFile = new File(appInfo.sourceDir);
+		File outputDir = getDir("nativelibs", 0);
+
+		Utils.extractFromZip(apkFile, outputDir, "lib/" + targetAbi + "/");
+
+		extractNativeLibsDir = new File(outputDir, "lib/" + targetAbi);
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

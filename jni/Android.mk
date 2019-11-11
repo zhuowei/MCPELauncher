@@ -47,13 +47,20 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/libcorkscrew
 
 LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 
+# Build only on x86 and ARM.
+
 ifeq ($(TARGET_ARCH_ABI),x86)
 # ignore undefined symbols.
 # workaround for method not found errors.
 TARGET_NO_UNDEFINED_LDFLAGS :=
+include $(BUILD_SHARED_LIBRARY)
 endif
 
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 include $(BUILD_SHARED_LIBRARY)
+endif
+
+# end building main library.
 
 ifeq ("x","x")
 
@@ -65,7 +72,15 @@ LOCAL_LDLIBS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI) -llog -landroid -lfmod -Wl,-s
 LOCAL_SHARED_LIBRARIES := tinysubstrate-bin
 LOCAL_CFLAGS += -DMCPELAUNCHER_LITE
 
+# only build lite on armeabi-v7a and x86.
+
+ifeq ($(TARGET_ARCH_ABI),x86)
 include $(BUILD_SHARED_LIBRARY)
+endif
+
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+include $(BUILD_SHARED_LIBRARY)
+endif
 
 endif
 
@@ -74,9 +89,15 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := mcpelauncher_early
 LOCAL_SRC_FILES := early_workaround.c
 LOCAL_LDLIBS := -llog -landroid
-
+# the early workaround is always built.
 include $(BUILD_SHARED_LIBRARY)
 
 $(call import-add-path, prebuilts)
 
+# only import on armeabi-v7a and x86
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 $(call import-module, tinysubstrate-bin)
+endif
+ifeq ($(TARGET_ARCH_ABI),x86)
+$(call import-module, tinysubstrate-bin)
+endif
