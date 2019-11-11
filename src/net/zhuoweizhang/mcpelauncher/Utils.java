@@ -2,13 +2,22 @@ package net.zhuoweizhang.mcpelauncher;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.os.Bundle;
+import android.os.SystemClock;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +29,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 
 import com.mojang.minecraftpe.MainActivity;
+import net.zhuoweizhang.mcpelauncher.ui.TrampolineActivity;
 
 public class Utils {
 	protected static Context mContext = null;
@@ -246,6 +256,84 @@ public class Utils {
 			if (is != null) is.close();
 			if (fos != null) fos.close();
 		}
+	}
+	public static void popStayInForegroundTasks(Activity activity) {
+		Intent trampolineIntent = new Intent(activity, TrampolineActivity.class);
+		activity.startActivity(trampolineIntent);
+        	Intent chooserIntent = Intent.createChooser(new Intent("net.zhuoweizhang.mcpelauncher.action.INVALID"), "Loading...");
+        	activity.startActivity(chooserIntent);
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void forceRestartIntoDifferentAbi(Activity activity, Intent targetIntent) {
+		final Intent theIntent = targetIntent != null? targetIntent:
+			activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
+		boolean needsToStayInForeground = true;
+		if (needsToStayInForeground) {
+			popStayInForegroundTasks(activity);
+		}
+		rebootIntoInstrumentation(activity, theIntent);
+	}
+
+	private static String getOverriddenNativeAbi() {
+		String arch = System.getProperty("os.arch");
+		String targetAbi = "armeabi-v7a";
+		if (arch.startsWith("armv") || arch.startsWith("aarch")) {
+			// already arm
+		} else if (arch.equals("x86") || arch.equals("i686") || arch.equals("x86_64")) {
+			targetAbi = "x86";
+		}
+		return targetAbi;
+	}
+
+	private static void rebootIntoInstrumentation(Activity activity, Intent targetIntent) {
+		boolean launchViaAlarm = true;
+		if (launchViaAlarm) {
+			setupAlarm(activity, targetIntent);
+		}
+		String abiOverride = getOverriddenNativeAbi();
+		Bundle bundle = new Bundle();
+		if (launchViaAlarm) {
+			bundle.putByte("skipLaunch", (byte)1);
+		} else {
+			bundle.putParcelable("launchIntent", targetIntent);
+		}
+		ComponentName componentName = new ComponentName(activity, RelaunchInstrumentation.class);
+		try {
+			Method ActivityManager_getService = ActivityManager.class.getMethod("getService");
+			Object iActivityManager = ActivityManager_getService.invoke(null);
+			Method IActivityManager_startInstrumentation = iActivityManager.getClass().getMethod("startInstrumentation",
+					ComponentName.class, String.class, Integer.TYPE, Bundle.class,
+					Class.forName("android.app.IInstrumentationWatcher"),
+					Class.forName("android.app.IUiAutomationConnection"),
+					Integer.TYPE, String.class);
+			IActivityManager_startInstrumentation.invoke(iActivityManager,
+					/* className= */ componentName,
+					/* profileFile= */ null, /* flags= */ 0, /* arguments= */ bundle,
+					/* watcher= */ null, /* connection= */ null, /* userId= */ 0,
+					/* abiOverride= */ abiOverride);
+			// this call will force-close the process momentarily.
+			while (true) {
+				Thread.sleep(10000);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static void setupAlarm(Activity activity, Intent targetIntent) {
+		// borrowed from the existing restart code
+		int delay = 1000;
+		AlarmManager alarmMgr = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+		long timeMillis = SystemClock.elapsedRealtime() + delay;
+		Intent intent = new Intent(targetIntent);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis,
+				PendingIntent.getActivity(activity, 0, intent, 0));
 	}
 
 	/**

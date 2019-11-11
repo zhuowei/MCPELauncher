@@ -220,6 +220,7 @@ public class MainActivity extends NativeActivity {
 	private Method methodVMRuntimeGetTargetSdkVersion;
 	private Method methodVMRuntimeSetTargetSdkVersion;
 	private final boolean NATIVE_DEBUGGER_ENABLED = false;
+	public static boolean forceLaunchedIntoDifferentAbi = false;
 	private boolean extractNativeLibs = false;
 	private File extractNativeLibsDir = null;
 
@@ -227,6 +228,9 @@ public class MainActivity extends NativeActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		if (needsRelaunchIntoCorrectAbi()) {
+			relaunchIntoCorrectAbi();
+		}
 		if (BuildConfig.DEBUG && NATIVE_DEBUGGER_ENABLED && new File("/sdcard/bl_native_debugger.txt").exists()) {
 			startNativeDebugger();
 		}
@@ -365,6 +369,8 @@ public class MainActivity extends NativeActivity {
 			loadLibrary("mcpelauncher_early");
 		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
+			forceLaunchedIntoDifferentAbi = true;
+			// for now, always re-extract the libs on every load.
 			extractNativeLibs = true;
 		}
 
@@ -3072,6 +3078,32 @@ public class MainActivity extends NativeActivity {
 		Utils.extractFromZip(apkFile, outputDir, "lib/" + targetAbi + "/");
 
 		extractNativeLibsDir = new File(outputDir, "lib/" + targetAbi);
+	}
+
+	private boolean needsRelaunchIntoCorrectAbi() {
+		try {
+			PackageInfo mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
+			ApplicationInfo mcAppInfo = mcPkgInfo.applicationInfo;
+			String mcNativeLibraryDir = mcAppInfo.nativeLibraryDir;
+			String minecraftArch = new File(mcNativeLibraryDir).getName();
+			boolean minecraftIs64 = minecraftArch.startsWith("arm64-") || minecraftArch.startsWith("x86_64");
+			boolean thisProcessIs64 = thisProcessIs64();
+			return minecraftIs64 != thisProcessIs64;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	private static boolean thisProcessIs64() {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
+		List<String> abi64s = Arrays.asList(Build.SUPPORTED_64_BIT_ABIS);
+		return abi64s.contains(Build.CPU_ABI) || abi64s.contains(Build.CPU_ABI2);
+	}
+		
+
+	private void relaunchIntoCorrectAbi() {
+		Utils.forceRestartIntoDifferentAbi(this, getIntent());
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {

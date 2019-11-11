@@ -87,10 +87,15 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 	 * home screen intent 1 second later.
 	 */
 	public static void forceRestart(Activity activity) {
+		if (com.mojang.minecraftpe.MainActivity.forceLaunchedIntoDifferentAbi) {
+			// directly restart into the correct abi
+			Utils.forceRestartIntoDifferentAbi(activity, null);
+			return;
+		}
 		forceRestart(activity, 1000, true);
 	}
 
-	public static void forceRestart(Activity activity, int delay, boolean exit) {
+	private static void forceRestart(Activity activity, int delay, boolean exit) {
 
 		AlarmManager alarmMgr = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
 		long timeMillis = SystemClock.elapsedRealtime() + delay;
