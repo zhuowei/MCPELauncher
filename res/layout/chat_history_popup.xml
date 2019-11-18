@@ -3,7 +3,7 @@
     android:layout_height="wrap_content">
     <!-- the width/height stuff above is ignored - see http://www.doubleencore.com/2013/05/layout-inflation-as-intended/ -->
     <EditText android:id="@+id/hidden_text_view"
-        android:layout_width="0dip"
+        android:layout_width="1dip"
         android:layout_height="wrap_content"/>
     <Button android:id="@+id/command_history_previous"
         android:layout_width="wrap_content"
