@@ -332,7 +332,8 @@ public class Utils {
 		AlarmManager alarmMgr = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
 		long timeMillis = SystemClock.elapsedRealtime() + delay;
 		Intent intent = new Intent(targetIntent);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+		// trying to close the stupid chooser activity...
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 		alarmMgr.set(AlarmManager.ELAPSED_REALTIME, timeMillis,
 				PendingIntent.getActivity(activity, 0, intent, 0));
 	}
