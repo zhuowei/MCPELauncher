@@ -82,11 +82,11 @@ import net.zhuoweizhang.pokerface.PokerFace;
 public class MainActivity extends NativeActivity {
 
 	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.12";
-	public static final String HALF_SUPPORT_VERSION = "1.13";
+	public static final String SCRIPT_SUPPORT_VERSION = "1.13";
+	public static final String HALF_SUPPORT_VERSION = "1.14";
 	private static final boolean HALF_VERSION_HAS_SCRIPTS = false;
-	public static final String LITE_SUPPORT_VERSION = "1.14";
-	private static final String SUPPORTED_VERSION_READABLE = "1.12.0";
+	public static final String LITE_SUPPORT_VERSION = "~~~";
+	private static final String SUPPORTED_VERSION_READABLE = "1.13.0.6 beta";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 

@@ -68,26 +68,26 @@ class ActorDamageSource;
 class AttributeInstance;
 class Attribute;
 class MobEffectInstance;
-// last update: 1.11.1
+// last update: 1.13.0b6
 class Actor {
 public:
 	void** vtable; //0
-	char filler2[160-4]; // 4
-	float pitch; //160 Entity::setRot
-	float yaw; //164
-	float prevPitch; //168
-	float prevYaw; //172
+	char filler2[176-4]; // 4
+	float pitch; //176 Entity::setRot
+	float yaw; //180
+	float prevPitch; //184
+	float prevYaw; //188
 
-	char filler4[556-176]; //176
-	std::vector<Entity*> riders; // 556
+	char filler4[584-192]; //192
+	std::vector<Entity*> riders; // 584
 
-	char filler3[3272-568]; // 568
-	float motionX; // 3272 - Actor::push
-	float motionY; // 3276
-	float motionZ; // 3280
-	float x; //3284 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3288
-	float z; //3292
+	char filler3[3296-596]; // 596
+	float motionX; // 3296 - Actor::push or PushableComponent::push
+	float motionY; // 3300
+	float motionZ; // 3304
+	float x; //3308 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //3312
+	float z; //3316
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -118,9 +118,9 @@ public:
 	void removeAllEffects();
 };
 // Entity::getRiderIndex
-static_assert(offsetof(Entity, riders) == 556, "Entity rider offset wrong");
-static_assert(offsetof(Actor, pitch) == 160, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3284, "Actor x offset wrong");
+static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
+static_assert(offsetof(Actor, pitch) == 176, "Actor pitch offset wrong");
+static_assert(offsetof(Actor, x) == 3308, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -283,7 +283,7 @@ public:
 	unsigned char lightEmission; // 121 from BlockLegacy::setLightEmission
 	char filler4[136-122]; // 122
 	unsigned short id; // 136
-	char filler5[3024-138]; // 138
+	char filler5[3112-138]; // 138
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -297,7 +297,7 @@ public:
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
 // SharedPtr<BlockLegacy>::make
-static_assert(sizeof(BlockLegacy) == 3024, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 3112, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 24, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 100, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 121, "lightEmission is wrong");
@@ -475,11 +475,11 @@ class Biome {
 public:
 	void** vtable; //0
 	cppstr name; //4 from Biome::setName
-	char filler2[96-8]; //8
-	int id; //96 from Biome::Biome
+	char filler2[88-8]; //8
+	int id; //88 from Biome::Biome
 };
 static_assert(offsetof(Biome, name) == 4, "Biome name");
-static_assert(offsetof(Biome, id) == 96, "Biome ID");
+static_assert(offsetof(Biome, id) == 88, "Biome ID");
 
 enum AbilitiesIndex {
 };

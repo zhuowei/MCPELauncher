@@ -79,7 +79,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4364
+#define PLAYER_ABILITIES_OFFSET 4340
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -99,7 +99,7 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3856;
+const size_t kItemEntity_itemInstance_offset = 3880;
 // ChatScreenController::_sendChatMessage
 const size_t kClientInstanceScreenModel_offset = 620;
 
@@ -267,7 +267,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
 	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZNK11MobRenderer10getSkinPtrER5Actor");
+		"_ZNK11MobRenderer10getSkinPtrERK5Actor");
 	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
 	//vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
@@ -277,7 +277,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_on_place = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos");
 	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
-		"_ZN3Mob11setSneakingEb") - 2;
+		"_ZN5Actor11setSneakingEb") - 2;
 	vtable_indexes.blockitem_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV9BlockItem")->st_size;
 	vtable_indexes.blockitem_get_level_data_for_aux_value = bl_vtableIndex(mcpelibhandle, "_ZTV9BlockItem",
 		"_ZNK4Item23getLevelDataForAuxValueEi");
@@ -314,7 +314,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 //		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		"_ZNK4Item7getIconEiib");
+		"_ZNK4Item7getIconERK9ItemStackib");
 	vtable_indexes.appplatform_get_settings_path = bl_vtableIndex(mcpelibhandle, "_ZTV11AppPlatform",
 		"_ZN11AppPlatform15getSettingsPathEv");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -454,7 +454,7 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(BlockLegacy*, std::string const&, int, void*, std::string const&, std::string const&);
 static bool (*bl_Recipe_isAnyAuxValue_real)(ItemDescriptor const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
-static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, int, int, bool);
+static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStack const&, int, bool);
 //static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
@@ -1415,9 +1415,9 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 	return bl_customItem_enchantValue[item->itemId];
 }
 
-static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, int data, int int2, bool bool1) {
+static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, ItemStack const& data, int int2, bool bool1) {
 	if (bl_extendedBlockGraphics[item->itemId]) {
-		return bl_extendedBlockGraphics[item->itemId]->getTexture({0, 0, 0}, 2, (data & 0xf));
+		return bl_extendedBlockGraphics[item->itemId]->getTexture({0, 0, 0}, 2, (data.getDamageValue() & 0xf));
 	}
 	return bl_Item_getIcon(item, data, int2, bool1);
 }
@@ -1496,7 +1496,7 @@ void bl_initCustomBlockVtable() {
 		(void*) &bl_CustomItem_getEnchantSlot_hook;
 	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_value] =
 		(void*) &bl_CustomItem_getEnchantValue_hook;
-	bl_Item_getIcon = (TextureUVCoordinateSet const& (*)(Item*, int, int, bool)) bl_CustomItem_vtable[vtable_indexes.item_get_icon];
+	bl_Item_getIcon = (TextureUVCoordinateSet const& (*)(Item*, ItemStack const&, int, bool)) bl_CustomItem_vtable[vtable_indexes.item_get_icon];
 	bl_CustomItem_vtable[vtable_indexes.item_get_icon] = (void*)bl_CustomItem_getIcon;
 	bl_CustomSnowballItem_vtable = (void**) ::operator new(vtable_indexes.snowball_item_vtable_size);
 	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
@@ -3778,7 +3778,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
 		fn(entity, true);
 	}
 }
-
+#if 0 // TODO 1.13.0
 void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTaskHandle task) {
 	// TODO 1.12.0
 	bool workerThread = worker->_workerThread();
@@ -3802,6 +3802,7 @@ void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTaskHan
 	}
 	return retval;
 }
+#endif
 
 static void bl_reregisterRecipesFromJava(Recipes* recipes) {
 	bl_recipesForJava = recipes;
@@ -4142,8 +4143,8 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_setIcon = (void (*)(Item*, std::string const&, int)) dlsym(mcpelibhandle, "_ZN4Item7setIconERKSsi");
 
-	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN3Mob11setSneakingEb");
-	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK3Mob10isSneakingEv");
+	bl_Mob_setSneaking = (void (*)(Entity*, bool)) dlsym(mcpelibhandle, "_ZN5Actor11setSneakingEb");
+	bl_Mob_isSneaking = (bool (*)(Entity*)) dlsym(mcpelibhandle, "_ZNK5Actor10isSneakingEv");
 	
 	bl_Item_setMaxStackSize = (void (*)(Item*, unsigned char)) dlsym(mcpelibhandle, "_ZN4Item15setMaxStackSizeEh");
 	bl_Item_setMaxDamage = (void (*)(Item*, int)) dlsym(mcpelibhandle, "_ZN4Item12setMaxDamageEi");
@@ -4276,7 +4277,7 @@ void bl_setuphooks_cppside() {
 	bl_patch_got_wrap(mcpelibhandle, (void*) &Item::initCreativeItems,
 		(void*)&bl_Item_initCreativeItems_hook);
 	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
-		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrER5Actor");
+		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrERK5Actor");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitER5ActorRK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
@@ -4337,7 +4338,8 @@ void bl_setuphooks_cppside() {
 	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
 		(void**)&bl_SceneStack_update_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
-	bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
+	// TODO 1.13
+	// bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
 	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))
 		dlsym(mcpelibhandle, "_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_");
 	bl_patch_got_wrap(mcpelibhandle, (void*)&VanillaItems::registerItems, (void*)&bl_VanillaItems_registerItems_hook);
