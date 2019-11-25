@@ -23,6 +23,7 @@
 #include "dobby_public.h"
 #include "simpleuuid.h"
 #include "logutil.h"
+#include "get_vtable.h"
 
 #define cppbool bool
 
@@ -1307,7 +1308,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jboolean doIt) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	void (*setSneaking)(Entity*, bool) = (void (*)(Entity*, bool)) entity->vtable[vtable_indexes.mob_set_sneaking];
+	void (*setSneaking)(Entity*, bool) = (void (*)(Entity*, bool)) getVtable(entity)[vtable_indexes.mob_set_sneaking];
 	setSneaking(entity, doIt);
 }
 
@@ -3808,11 +3809,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == nullptr) return;
-	void* vtableEntry = entity->vtable[vtable_indexes.mob_set_offhand_slot];
+	void* vtableEntry = getVtable(entity)[vtable_indexes.mob_set_offhand_slot];
 	void (*fn)(Entity*, ItemStack const&) = (void (*) (Entity*, ItemStack const&)) vtableEntry;
 	fn(entity, ItemStack(itemId, itemCount, itemDamage));
 	{
-		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
+		void* vtableEntry = getVtable(entity)[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
 		fn(entity, true);
 	}

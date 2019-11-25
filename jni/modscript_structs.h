@@ -71,7 +71,6 @@ class MobEffectInstance;
 // last update: 1.13.0b6
 class Actor {
 public:
-	void** vtable; //0
 	char filler2[176-4]; // 4
 	float pitch; //176 Entity::setRot
 	float yaw; //180
@@ -89,7 +88,7 @@ public:
 	float y; //784
 	float z; //788
 
-	~Actor();
+	virtual ~Actor();
 	BlockSource* getRegion() const;
 	void setRot(Vec2 const&);
 	EntityUniqueID const& getUniqueID() const;

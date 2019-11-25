@@ -13,6 +13,7 @@
 #include "modscript.h"
 #include "dobby_public.h"
 #include "logutil.h"
+#include "get_vtable.h"
 
 #define DLSYM_DEBUG
 
@@ -200,7 +201,7 @@ ItemInstance* bl_newItemInstance(int id, int count, int damage) {
 
 void bl_Entity_setPos_helper(Entity* entity, float x, float y, float z) {
 	void (*setPos)(Entity*, Vec3 const&);
-	setPos = (void (*)(Entity*, Vec3 const&)) entity->vtable[vtable_indexes.entity_set_pos];
+	setPos = (void (*)(Entity*, Vec3 const&)) getVtable(entity)[vtable_indexes.entity_set_pos];
 	setPos(entity, Vec3(x, y, z));
 }
 
@@ -268,7 +269,7 @@ void bl_GameMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 	bl_JavaVM->DetachCurrentThread();
 
 	{
-		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
+		void* vtableEntry = getVtable(player)[vtable_indexes.mob_get_carried_item];
 		ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
 		ItemStack* item = fn(player);
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
@@ -319,7 +320,7 @@ void bl_SurvivalMode_useItemOn_hook(GameMode* gamemode, ItemStack* itemStack,
 	bl_JavaVM->DetachCurrentThread();
 
 	{
-		void* vtableEntry = player->vtable[vtable_indexes.mob_get_carried_item];
+		void* vtableEntry = getVtable(player)[vtable_indexes.mob_get_carried_item];
 		ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
 		ItemStack* item = fn(player);
 		if (item == nullptr) itemStack = nullptr; // user is no longer holding anything; did the stack get deleted?
@@ -899,25 +900,25 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRi
 	Entity* mount = bl_getEntityWrapper(bl_level, mountId);
 	if (rider == NULL) return;
 	if (mount == NULL) {
-		void* vtable = rider->vtable[vtable_indexes.entity_stop_riding];
+		void* vtable = getVtable(rider)[vtable_indexes.entity_stop_riding];
 		auto fn = (void (*)(Entity*, bool, bool, bool)) vtable;
 		fn(rider, true, true, true);
 	} else {
 		// horrible kludge: we hook and unhook canAddRider
 		void* oldCanAddRider = nullptr;
 		{
-			void* vtable = mount->vtable[vtable_indexes.entity_can_add_rider];
+			void* vtable = getVtable(mount)[vtable_indexes.entity_can_add_rider];
 			bool (*fn)(Entity*, Entity*) = (bool (*) (Entity*, Entity*)) vtable;
 			if (!fn(mount, rider)) {
 				oldCanAddRider = vtable;
-				mount->vtable[vtable_indexes.entity_can_add_rider] = (void*) &alwaysReturnTrue;
+				getVtable(mount)[vtable_indexes.entity_can_add_rider] = (void*) &alwaysReturnTrue;
 			}
 		}
-		void* vtable = rider->vtable[vtable_indexes.entity_start_riding];
+		void* vtable = getVtable(rider)[vtable_indexes.entity_start_riding];
 		void (*fn)(Entity*, Entity*) = (void (*) (Entity*, Entity*)) vtable;
 		fn(rider, mount);
 		if (oldCanAddRider) {
-			mount->vtable[vtable_indexes.entity_can_add_rider] = oldCanAddRider;
+			getVtable(mount)[vtable_indexes.entity_can_add_rider] = oldCanAddRider;
 		}
 	}
 }
@@ -1014,11 +1015,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint itemId, jint itemCount, jint itemDamage) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	void* vtableEntry = entity->vtable[vtable_indexes.actor_set_carried_item];
+	void* vtableEntry = getVtable(entity)[vtable_indexes.actor_set_carried_item];
 	void (*fn)(Entity*, ItemStack const&) = (void (*) (Entity*, ItemStack const&)) vtableEntry;
 	fn(entity, ItemStack(itemId, itemCount, itemDamage));
 	{
-		void* vtableEntry = entity->vtable[vtable_indexes.mob_send_inventory];
+		void* vtableEntry = getVtable(entity)[vtable_indexes.mob_send_inventory];
 		auto fn = (void (*)(Entity*, bool))vtableEntry;
 		//BL_LOG("calling the fn! %p", fn);
 		fn(entity, true);
@@ -1029,7 +1030,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEn
   (JNIEnv *env, jclass clazz, jlong entityId, jint type) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	void* vtableEntry = entity->vtable[vtable_indexes.mob_get_carried_item];
+	void* vtableEntry = getVtable(entity)[vtable_indexes.mob_get_carried_item];
 	ItemStack* (*fn)(Entity*) = (ItemStack* (*) (Entity*)) vtableEntry;
 	ItemStack* item = fn(entity);
 	if (item == NULL) return -1;
@@ -1097,7 +1098,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRe
 
 int bl_getEntityTypeIdThroughVtable(Entity* entity) {
 	if (!entity) return 0;
-	void* vtable = entity->vtable[vtable_indexes.entity_get_entity_type_id];
+	void* vtable = getVtable(entity)[vtable_indexes.entity_get_entity_type_id];
 	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
 	return fn(entity) & 0xff;
 }
@@ -1106,7 +1107,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return 0;
-	void* vtable = entity->vtable[vtable_indexes.entity_get_entity_type_id];
+	void* vtable = getVtable(entity)[vtable_indexes.entity_get_entity_type_id];
 	int (*fn)(Entity*) = (int (*) (Entity*)) vtable;
 	return fn(entity) & 0xff;
 }
@@ -1254,7 +1255,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeMo
 	//Geting the item
 	ItemStack instance(id, 1, damage);
 	void (*setArmor)(Entity*, int, ItemStack const&) = 
-		(void (*)(Entity*, int, ItemStack const&)) entity->vtable[vtable_indexes.mob_set_armor];
+		(void (*)(Entity*, int, ItemStack const&)) getVtable(entity)[vtable_indexes.mob_set_armor];
 	setArmor(entity, slot, instance);
 }
 
