@@ -79,7 +79,7 @@ typedef void Font;
 // or look for Abilities::Abilities
 // or search for Abilities::getBool
 // or ClientInputHandler::updatePlayerState
-#define PLAYER_ABILITIES_OFFSET 4340
+#define PLAYER_ABILITIES_OFFSET 1812
 // FIXME 0.11
 //#define RAKNET_INSTANCE_VTABLE_OFFSET_SEND 15
 // MinecraftClient::handleBack
@@ -99,7 +99,7 @@ const size_t kTileSize = sizeof(BlockLegacy);
 const size_t kItemSize = sizeof(Item);
 // static_assert(kBlockItemSize >= kItemSize, "kBlockItemSize");
 // found in ItemEntity::_validateItem
-const size_t kItemEntity_itemInstance_offset = 3880;
+const size_t kItemEntity_itemInstance_offset = 1360;
 // ChatScreenController::_sendChatMessage
 const size_t kClientInstanceScreenModel_offset = 620;
 

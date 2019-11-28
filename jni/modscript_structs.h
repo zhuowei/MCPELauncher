@@ -81,13 +81,13 @@ public:
 	char filler4[584-192]; //192
 	std::vector<Entity*> riders; // 584
 
-	char filler3[3296-596]; // 596
-	float motionX; // 3296 - Actor::push or PushableComponent::push
-	float motionY; // 3300
-	float motionZ; // 3304
-	float x; //3308 - Entity::setPos(Vec3 const&) or Actor.getPos
-	float y; //3312
-	float z; //3316
+	char filler3[768-596]; // 596
+	float motionX; // 768 - Actor::push or PushableComponent::push
+	float motionY; // 772
+	float motionZ; // 776
+	float x; //780 - Entity::setPos(Vec3 const&) or Actor.getPos
+	float y; //784
+	float z; //788
 
 	~Actor();
 	BlockSource* getRegion() const;
@@ -120,7 +120,7 @@ public:
 // Entity::getRiderIndex
 static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 176, "Actor pitch offset wrong");
-static_assert(offsetof(Actor, x) == 3308, "Actor x offset wrong");
+static_assert(offsetof(Actor, x) == 780, "Actor x offset wrong");
 
 class Mob: public Entity {
 public:
@@ -283,7 +283,7 @@ public:
 	unsigned char lightEmission; // 121 from BlockLegacy::setLightEmission
 	char filler4[136-122]; // 122
 	unsigned short id; // 136
-	char filler5[3112-138]; // 138
+	char filler5[3240-138]; // 138
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -297,7 +297,7 @@ public:
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
 // SharedPtr<BlockLegacy>::make
-static_assert(sizeof(BlockLegacy) == 3112, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 3240, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 24, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 100, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 121, "lightEmission is wrong");
