@@ -7,7 +7,7 @@ def u64(a, i):
 def portTable(tableStart, sourceTableSize, sourceBytes, sourceRSyms, destBytes, destTableStart):
     destTableFileOffset = -0x1000
     sourceTableFileOffset = -0x200000
-    print("//", hex(tableStart), hex(sourceTableSize))
+    #print("//", hex(tableStart), hex(sourceTableSize))
     for tableIndex in range(0, sourceTableSize // 8):
         sourceVtableAddress = u64(sourceBytes, tableStart + sourceTableFileOffset + tableIndex*8)
         if not sourceVtableAddress in sourceRSyms:
@@ -15,10 +15,11 @@ def portTable(tableStart, sourceTableSize, sourceBytes, sourceRSyms, destBytes, 
         destAddress = destTableStart + destTableFileOffset + tableIndex * 4
         sourceSymName = sourceRSyms[sourceVtableAddress]
         destSymAddress = u32(destBytes, destAddress)
-        print("//", tableIndex, sourceSymName, hex(destAddress), hex(destSymAddress))
+        #print("//", tableIndex, sourceSymName, hex(destAddress), hex(destSymAddress))
         if destSymAddress == 0:
             continue
-        print("MakeNameEx({}, \"{}\", SN_NOWARN|SN_NOCHECK);".format(hex(destSymAddress & ~1), sourceSymName))
+        #print("MakeNameEx({}, \"{}\", SN_NOWARN|SN_NOCHECK);".format(hex(destSymAddress & ~1), sourceSymName))
+        print(sourceSymName, hex(destSymAddress), sep=",")
 
 def readSyms(filepath):
     if os.path.exists("syms.pickle"):
@@ -44,14 +45,19 @@ with open("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/bedrock_server", "rb
 with open("/Users/zhuowei/mcpe1131/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
     destData = infile.read()
 tables = {
-    #"_ZTV12ServerPlayer": 0x04e2d774
+    "_ZTV12ServerPlayer": 0x04e2d774,
     # NO "_ZTV11LocalPlayer": 0x4e08d98
-    #"_ZTV4Item": 0x4e57b88
-    # "_ZTV11BlockLegacy": 0x4e5e5bc,
-    "_ZTV5Level": 0x4e2d618
+    "_ZTV4Item": 0x4e57b88,
+    "_ZTV11BlockLegacy": 0x4e5e5bc,
+    "_ZTV11ServerLevel": 0x4e2d618,
+    # "_ZTV5Level": 0x4e6cc04
+    "_ZTV19ServerCommandOrigin": 0x4e2cc5c,
+    #"_ZTV18ItemSpriteRenderer": 0x4e40518,
 }
+ida = False
 
-print("""
+if ida:
+    print("""
 #include <idc.idc>
 
 static main(void)
@@ -60,7 +66,8 @@ static main(void)
 
 for tableName in tables:
     portTable(sourceSyms[tableName][0], sourceSyms[tableName][1], sourceData, sourceRsyms, destData, tables[tableName])
-print("}")
+if ida:
+    print("}")
 # hex editor: 0x540B2D8
 # Ghidra: 541b2d8
 # hex editor: 0x4AE1E83

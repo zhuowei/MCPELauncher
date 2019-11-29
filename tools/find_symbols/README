@@ -1,0 +1,4 @@
+python3 hopeless.py|sort|uniq >hopeless_out.csv
+python3 export_mangled_syms_diaphora.py |sort|uniq >diaphora_outsyms.csv
+cat diaphora_outsyms.csv hopeless_out.csv |sort|uniq >combined.csv
+python3 combined_check.py
