@@ -2572,6 +2572,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerGetEntityType
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+#if 0
 	if (bl_level == NULL) return 0;
 	MobSpawnerBlockEntity* te = static_cast<MobSpawnerBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return 0;
@@ -2579,6 +2580,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	BaseMobSpawner* spawner = te->getSpawner();
 	if (!spawner) return 0;
 	return spawner->getSpawnTypeId()._getLegacyActorType();
+#endif
+	return 0; // FIXME 1.13
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeScreenChooserSetScreen
@@ -2823,7 +2826,7 @@ void bl_cppNewLevelInit() {
 	bl_reload_armor_textures();
 }
 static void bl_set_i18n_real(std::string const& key, std::string const& value) {
-	(I18n::mCurrentLanguage->_getStrings())[key] = value;
+	(I18n::mCurrentLanguage->strings)[key] = value;
 }
 
 static std::vector<std::pair<std::string, std::string>> bl_i18nOverrides;
@@ -2918,13 +2921,15 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetRainLevel
   (JNIEnv *env, jclass clazz) {
 	if (!bl_localplayer) return 0;
-	return bl_localplayer->getRegion()->getDimension()->getWeather()->getRainLevel(0);
+	// FIXME 1.13
+	//return bl_localplayer->getRegion()->getDimension()->getWeather()->getRainLevel(0);
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetRainLevel
   (JNIEnv *env, jclass clazz, float amount) {
 	if (!bl_localplayer) return;
-	return bl_localplayer->getRegion()->getDimension()->getWeather()->setRainLevel(amount);
+	// FIXME 1.13
+	//return bl_localplayer->getRegion()->getDimension()->getWeather()->setRainLevel(amount);
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetExhaustion
@@ -3107,7 +3112,7 @@ void* bl_Throwable_throwableHit_hook(void* projectileComponent, Actor& actor, Hi
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18NString
   (JNIEnv *env, jclass clazz, jstring text) {
 	const char * utfChars = env->GetStringUTFChars(text, NULL);
-	std::string const& returnVal = (I18n::getCurrentLanguage()->_getStrings())[utfChars];
+	std::string const& returnVal = (I18n::getCurrentLanguage()->strings)[utfChars];
 	env->ReleaseStringUTFChars(text, utfChars);
 
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
@@ -3116,7 +3121,7 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetI18N
 
 JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetLanguageName
   (JNIEnv *env, jclass clazz) {
-	std::string returnVal = I18n::getCurrentLanguage()->getFullLanguageCode();
+	std::string returnVal = I18n::getCurrentLanguage()->fullLanguageCode;
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
 }
