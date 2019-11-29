@@ -53,6 +53,9 @@ tables = {
     # "_ZTV5Level": 0x4e6cc04
     "_ZTV19ServerCommandOrigin": 0x4e2cc5c,
     #"_ZTV18ItemSpriteRenderer": 0x4e40518,
+    "_ZTV10WitherBoss": 0x4e3d504,
+    "_ZTV8GameMode": 0x4e551a8,
+    "_ZTV12ShapedRecipe": 0x4e56c24,
 }
 ida = False
 

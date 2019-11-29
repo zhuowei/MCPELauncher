@@ -19,9 +19,9 @@ public:
 	Texture* texture; // 4
 	void* something8; // 8
 	std::string textureName; // 12
-	char filler2[20-16]; // 16
+	char filler2[32-16]; // 16
 	TexturePtr();
-	TexturePtr(TextureGroupBase&, ResourceLocation const&, bool a=false);
+	TexturePtr(TextureGroupBase&, ResourceLocation const&);
 	TexturePtr(TexturePtr&&);
 	~TexturePtr();
 	TexturePtr& operator=(TexturePtr&&);
@@ -30,8 +30,8 @@ public:
 	Texture* get() const;
 	static TexturePtr NONE;
 };
-
-static_assert(sizeof(TexturePtr) == 20, "textureptr size");
+// TexturePtr::NONE
+static_assert(sizeof(TexturePtr) == 32, "textureptr size");
 class TextureGroupBase {
 public:
 };

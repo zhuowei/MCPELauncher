@@ -1523,7 +1523,7 @@ void* bl_getMaterial(int materialType) {
 	}
 	return baseTile->getMaterial();
 }
-
+#if 0
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(BlockGraphics::getTextureUVCoordinateSet(
@@ -1532,6 +1532,7 @@ void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureN
 		output[i] = mySet;
 	}
 }
+#endif
 
 struct BLBlockBuildTextureRequest {
 	int blockId;
@@ -2348,7 +2349,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeIsBlockTextureAtlasLoaded
   (JNIEnv *env, jclass clazz) {
-	return BlockGraphics::mTerrainTextureAtlas != nullptr;
+	return true; //BlockGraphics::mTerrainTextureAtlas != nullptr;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefinePlaceholderBlocks
@@ -2562,6 +2563,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerSetEntityType
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint entityTypeId) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return;
 	MobSpawnerBlockEntity* te = static_cast<MobSpawnerBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (te == NULL) return;
@@ -2569,6 +2571,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSp
 	BaseMobSpawner* spawner = te->getSpawner();
 	spawner->setEntityId(ActorDefinitionIdentifier((ActorType)entityTypeId));
 	te->setChanged();
+#endif
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSpawnerGetEntityType
@@ -3568,7 +3571,6 @@ void bl_BlockTessellator_tessellateInWorld_hook(BlockTessellator* self, mce::Ren
 	blockInfo->blockData = 0;
 	blockInfo->blockExtraData = 0;
 }
-#endif
 
 TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTextureHook(BlockGraphics* graphics, unsigned int side, Block const& blockState) {
 	if (graphics == BlockGraphics::mBlocks[kStonecutterId]) {
@@ -3590,6 +3592,7 @@ TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(Bl
 
 	return graphics->getTexture(pos, side, data);
 }
+#endif
 
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, bool);
 static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSource& blockSource, BlockPos const& pos,
@@ -4311,7 +4314,7 @@ void bl_setuphooks_cppside() {
 	}
 
 	// custom blocks.
-
+#if 0
 	// FIXME 1.2.10
 	bl_patch_got_wrap(mcpelibhandle, (void*)
 		(TextureUVCoordinateSet const& (BlockGraphics::*)(unsigned int, Block const&) const)
@@ -4321,6 +4324,7 @@ void bl_setuphooks_cppside() {
 		(TextureUVCoordinateSet const& (BlockGraphics::*)(BlockPos const&, unsigned int, int) const)
 		&BlockGraphics::getTexture,
 		(void*)&bl_CustomBlockGraphics_getTexture_blockPos_hook);
+#endif
 
 	// known to fail.
 	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
