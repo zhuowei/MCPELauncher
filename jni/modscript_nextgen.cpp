@@ -937,7 +937,7 @@ static void bl_Level_explode_hook(Level* level, TileSource* tileSource, Entity* 
 			anotherBool, something, somethingBool);
 	}
 }
-
+#if 0 // FIXME 1.13
 static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y, int z, int type, int data) {
 	JNIEnv *env;
 	//This hook can be triggered by ModPE scripts, so don't attach/detach when already executing in Java thread
@@ -957,6 +957,7 @@ static void bl_BlockSource_fireBlockEvent_hook(BlockSource* source, int x, int y
 
 	bl_BlockSource_fireBlockEvent_real(source, x, y, z, type, data);
 }
+#endif
 
 static void bl_Player_eat_hook(Entity* player, int hearts, float notHearts) {
 	if (!bl_isActiveLevel(player->getLevel())) {
@@ -4217,8 +4218,10 @@ void bl_setuphooks_cppside() {
 
 	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
+#if 0 // FIXME 1.13
 	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
 		(void**) &bl_BlockSource_fireBlockEvent_real);
+#endif
 // known to work
 	bl_Block_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool))
 		dlsym(mcpelibhandle, "_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb");

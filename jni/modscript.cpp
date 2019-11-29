@@ -842,7 +842,7 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
 	if (!bl_localplayer) return 0;
-	return bl_localplayer->getRegion()->getRawBrightness(x, y, z, true).value; //all observed uses of getRawBrightness pass true
+	return bl_localplayer->getRegion()->getRawBrightness({x, y, z}, true, true).value; //all observed uses of getRawBrightness pass true
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
