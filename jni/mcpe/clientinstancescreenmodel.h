@@ -15,7 +15,7 @@ public:
 
 class ClientInstanceScreenModel : public MinecraftScreenModel{
 public:
-	char filler[88-4];
+	char filler[116-4];
 
 	ClientInstanceScreenModel(IMinecraftGame&, IClientInstance&, SceneStack&, SceneFactory&);
 	virtual ~ClientInstanceScreenModel();
@@ -25,4 +25,4 @@ public:
 };
 // search for the constructor
 // or std::__shared_ptr<ClientInstanceScreenModel
-static_assert(sizeof(ClientInstanceScreenModel) == 88, "ClientInstanceScreenModel size");
+static_assert(sizeof(ClientInstanceScreenModel) == 116, "ClientInstanceScreenModel size");
