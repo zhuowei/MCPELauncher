@@ -2702,7 +2702,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_api_modpe_MobEffect_na
 	void* effect = dlsym(RTLD_DEFAULT, messageUtfChars);
 	jint ret = -1;
 	if (effect != nullptr) {
-		ret = (*((MobEffect**) effect))->getId();
+		ret = (*((MobEffect**) effect))->effectId;
 	}
 	env->ReleaseStringUTFChars(message, messageUtfChars);
 	return ret;
@@ -2995,8 +2995,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetScore
   (JNIEnv *env, jclass clazz) {
-	if (!bl_localplayer) return 0;
-	return bl_localplayer->getScore();
+	//if (!bl_localplayer) return 0;
+	//return bl_localplayer->getScore();
+	return 0;
 }
 
 /*ItemGraphics const& bl_ItemRenderer_getGraphics_hook(ItemInstance const& itemStack) {

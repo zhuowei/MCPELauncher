@@ -4,8 +4,12 @@
 class MobEffect {
 public:
 	static MobEffect** mobEffects;
-	int getId() const;
+
+	char filler[4]; // 0
+	int effectId; // 4
+	//int getId() const;
 };
+static_assert(offsetof(MobEffect, effectId) == 4, "MobEffect effectId");
 
 class MobEffectInstance {
 public:
