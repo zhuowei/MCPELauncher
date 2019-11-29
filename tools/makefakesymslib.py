@@ -10,7 +10,7 @@ asm_header = """
         .eabi_attribute 30, 4
         .eabi_attribute 34, 0
         .eabi_attribute 18, 4
-        .file   "test.c"
+        .file   "fakesymstubs_arm32.c"
         .text
         .align  2
 """
@@ -38,7 +38,27 @@ asm_footer = """
 def makeFakeSymLibArm(fakeSyms, outfile):
 	print(asm_header, file=outfile)
 	for sym in fakeSyms:
-		print(asm_perfunc_template.format(name=sym, varname="bl_addr_" + sym), file=outfile)
+		print(asm_perfunc_template.format(name=sym[0], varname="bl_addr_" + sym[0]), file=outfile)
 	print(asm_footer, file=outfile)
+
+def makeFakeSymPtrs(fakeSyms, outfile):
+        print("#include <stdint.h>", file=outfile)
+        for sym in fakeSyms:
+                print("void* bl_addr_{};".format(sym[0]), file=outfile)
+        print("void bl_fakeSyms_initStubs(uintptr_t baseAddr) {", file=outfile)
+        for sym in fakeSyms:
+                print("bl_fakeSyms_initOneAddress(&bl_addr_{}, baseAddr, {});".format(sym[0], hex(sym[1])), file=outfile)
+        print("}", file=outfile)
 import sys
-makeFakeSymLibArm(["aaa", "bbb"], sys.stdout)
+def readFakeSymInput(filename):
+        fakesyms = []
+        with open(filename, "r") as infile:
+                for l in infile:
+                        parts = l.strip().split(",")
+                        fakesyms.append((parts[0], int(parts[1], 16)))
+        return fakesyms
+fakesyms = readFakeSymInput("combined_check2_out.csv")
+with open("fakesymstubs_arm32.s", "w") as outfile:
+        makeFakeSymLibArm(fakesyms, outfile)
+with open("fakesym_ptrs.c", "w") as outfile:
+        makeFakeSymPtrs(fakesyms, outfile)
