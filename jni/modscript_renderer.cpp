@@ -53,6 +53,7 @@ static void (*bl_EntityRenderDispatcher_initializeEntityRenderers_real)(void* se
 	mce::TextureGroup& textureGroup, BlockTessellator& blockTessellator);
 
 static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char* modelPartName, HumanoidModel** modelPtr) {
+#if 0
 	MobRenderer* renderer;
 	if (rendererId < 0x1000) {
 		renderer = (MobRenderer*) bl_EntityRenderDispatcher_getRenderer(&bl_minecraft->getEntityRenderDispatcher(), rendererId);
@@ -78,6 +79,7 @@ static ModelPart* bl_renderManager_getModelPart_impl(int rendererId, const char*
 	} else {
 		return NULL;
 	}
+#endif
 	return NULL;
 }
 
