@@ -639,7 +639,7 @@ const char* bl_getCharArr(void* str){
 	const char* cs = mystr2.c_str();
 	return cs;
 }
-
+#if 0
 bool bl_CustomBlock_isCubeShapedHook(Tile* tile) {
 	int blockId = tile->id;
 	return bl_custom_block_opaque[blockId];
@@ -715,6 +715,7 @@ void bl_CustomBlock_onPlace_hook(BlockLegacy* block, BlockSource& source, BlockP
 		bl_CustomBlock_setupRedstoneComponent_hook(block, source, pos);
 	}
 }
+#endif
 
 void bl_ClientNetworkHandler_handleTextPacket_hook(void* handler, void* ipaddress, TextPacket* packet) {
 	if (!(packet->type == 0 || packet->type == 1)) { // text or client message
@@ -1892,6 +1893,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetShape
   (JNIEnv *env, jclass clazz, jint blockId, jfloat v1, jfloat v2, jfloat v3, jfloat v4, jfloat v5, jfloat v6, jint damage) {
 	if (blockId >= 256 && blockId < BL_ITEMS_EXPANDED_COUNT) {
+#if 0
 		// expanded blocks?
 		AABB** aabbs = bl_custom_block_visualShapes[blockId];
 		if (!aabbs) {
@@ -1907,6 +1909,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 		theAABB->y2 = v5;
 		theAABB->z2 = v6;
 		return;
+#endif
 	}
 	Tile* tile = getBlockForItemId(blockId);
 	if (tile == NULL) {
@@ -1915,6 +1918,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 	if (damage == 0) {
 		bl_Block_setVisualShape(tile, Vec3(v1, v2, v3), Vec3(v4, v5, v6));
 	} else {
+#if 0
 		AABB** aabbs = bl_custom_block_visualShapes[blockId];
 		if (!aabbs) {
 			bl_custom_block_visualShapes[blockId] = aabbs = new AABB*[15]();
@@ -1928,6 +1932,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 		theAABB->x2 = v4;
 		theAABB->y2 = v5;
 		theAABB->z2 = v6;
+#endif
 	}
 }
 
@@ -1952,12 +1957,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetColor
   (JNIEnv *env, jclass clazz, jint blockId, jintArray colours) {
 	if (blockId < 0 || blockId >= BL_ITEMS_EXPANDED_COUNT) return;
+#if 0
 	int* myIntArray = bl_custom_block_colors[blockId];
 	if (myIntArray == NULL) {
 		myIntArray = new int[16];
 		bl_custom_block_colors[blockId] = myIntArray;
 	}
 	env->GetIntArrayRegion(colours, 0, 16, myIntArray);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRenderLayer
@@ -2528,7 +2535,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetCollisionEnabled
   (JNIEnv *env, jclass clazz, jint blockId, jboolean collide) {
 	if (blockId < 0 || blockId > 255) return;
-	bl_custom_block_collisionDisabled[blockId] = !collide;
+	//bl_custom_block_collisionDisabled[blockId] = !collide;
 }
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBiomeIdToName
@@ -2931,7 +2938,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	if (!bl_localplayer) return;
 	return bl_localplayer->getRegion()->getDimension()->getWeather()->setLightningLevel(amount);
 #endif
-	return 0; // FIXME 1.13
+	return; // FIXME 1.13
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetRainLevel
@@ -2939,6 +2946,7 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 	if (!bl_localplayer) return 0;
 	// FIXME 1.13
 	//return bl_localplayer->getRegion()->getDimension()->getWeather()->getRainLevel(0);
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetRainLevel
@@ -3075,8 +3083,10 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetRedstoneConsumer
   (JNIEnv *env, jclass clazz, jint blockId, jboolean enabled) {
+#if 0
 	if (enabled) bl_custom_block_redstone[blockId] |= REDSTONE_CONSUMER;
 	else bl_custom_block_redstone[blockId] &= ~REDSTONE_CONSUMER;
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetProperties
@@ -3605,7 +3615,7 @@ TextureUVCoordinateSet const& bl_CustomBlockGraphics_getTexture_blockPos_hook(Bl
 	return graphics->getTexture(pos, side, data);
 }
 #endif
-
+#if 0
 static AABB& (*bl_StonecutterBlock_getVisualShape_real)(BlockLegacy*, BlockSource&, BlockPos const&, AABB&, bool);
 static AABB& bl_StonecutterBlock_getVisualShape_hook(BlockLegacy* self, BlockSource& blockSource, BlockPos const& pos,
 	AABB& inaabb, bool something) {
@@ -3644,6 +3654,7 @@ static bool bl_StonecutterBlock_use_hook(BlockLegacy* tile, Player& player, Bloc
 	return false;
 }
 */
+#endif
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeHasPreventedDefault
 	(JNIEnv* env, jclass clazz) {
@@ -4346,8 +4357,10 @@ void bl_setuphooks_cppside() {
 	// FIXME 1.6: extended blocks removed
 	//mcpelauncher_hook((void*)&BlockTessellator::tessellateInWorld, (void*)&bl_BlockTessellator_tessellateInWorld_hook,
 	//	(void**)&bl_BlockTessellator_tessellateInWorld_real);
+/*
 	void** stonecutterVtable = (void**)dlsym(mcpelibhandle, "_ZTV16StonecutterBlock");
 	stonecutterVtable[vtable_indexes.tile_get_color] = (void*)&bl_StonecutterBlock_getColor_hook;
+*/
 /*
 	bl_vtableSwap(stonecutterVtable, vtable_indexes.block_use, (void*)&bl_StonecutterBlock_use_hook,
 		(void**)&bl_StonecutterBlock_use_real);
