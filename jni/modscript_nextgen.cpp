@@ -380,6 +380,7 @@ static void (*bl_ClientNetworkHandler_handleTextPacket_real)(void*, void*, TextP
 
 //bool bl_text_parse_color_codes = true;
 
+#if 0
 //custom blocks
 void** bl_CustomBlock_vtable;
 void** bl_CustomBlockGraphics_vtable;
@@ -392,6 +393,7 @@ int* bl_custom_block_colors[BL_ITEMS_EXPANDED_COUNT];
 AABB** bl_custom_block_visualShapes[BL_ITEMS_EXPANDED_COUNT];
 //end custom blocks
 unsigned char bl_custom_block_redstone[256];
+#endif
 
 std::vector<short*> bl_creativeItems;
 
@@ -411,7 +413,7 @@ static int (*bl_Entity_load_real)(Entity*, void*);
 
 //static void (*bl_MinecraftClient_setScreen)(Minecraft*, void*);
 //static void (*bl_ProgressScreen_ProgressScreen)(void*);
-static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
+//static void (*bl_Minecraft_locateMultiplayer)(Minecraft*);
 static bool (*bl_Level_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 static bool (*bl_MultiPlayerLevel_addEntity_real)(Level*, BlockSource&, std::unique_ptr<Entity>);
 //static void* (*bl_MultiPlayerLevel_putEntity_real)(Level*, BlockSource&, EntityUniqueID, EntityRuntimeID, std::unique_ptr<Entity>);
@@ -1390,6 +1392,7 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	return returnValString;
 }
 
+#if 0
 static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color] = (void*) &bl_CustomBlock_getColorHook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_get_color_data] = (void*) &bl_CustomBlock_getColor_data_Hook;
@@ -1398,6 +1401,7 @@ static void bl_setBlockVtable(void** bl_CustomBlock_vtable) {
 	bl_CustomBlock_vtable[vtable_indexes.tile_on_redstone_update] = (void*) &bl_CustomBlock_onRedstoneUpdate_hook;
 	bl_CustomBlock_vtable[vtable_indexes.tile_setup_redstone_component] = (void*) &bl_CustomBlock_setupRedstoneComponent_hook;
 }
+#endif
 
 int bl_CustomBlockItem_getLevelDataForAuxValue_hook(Item* item, int value) {
 	if (item->isStackedByData()) return value;
@@ -1459,6 +1463,7 @@ static void bl_CustomSnowball_processAddEntity(Entity* entity) {
 }
 
 void bl_initCustomBlockVtable() {
+#if 0
 	//copy existing vtable
 	bl_CustomBlock_vtable = (void**) ::operator new(vtable_indexes.tile_vtable_size);
 	memcpy(bl_CustomBlock_vtable, bl_Tile_vtable, vtable_indexes.tile_vtable_size);
@@ -1490,6 +1495,7 @@ void bl_initCustomBlockVtable() {
 		(void*) &bl_CustomItem_getEnchantSlot_hook;
 	bl_CustomBlockItem_vtable[vtable_indexes.item_get_enchant_value] =
 		(void*) &bl_CustomItem_getEnchantValue_hook;
+#endif
 
 	bl_CustomItem_vtable = (void**) ::operator new(vtable_indexes.item_vtable_size);
 	memcpy(bl_CustomItem_vtable, bl_Item_vtable, vtable_indexes.item_vtable_size);
@@ -2912,14 +2918,20 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePl
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetLightningLevel
   (JNIEnv *env, jclass clazz) {
+#if 0
 	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getDimension()->getWeather()->getLightningLevel(0);
+#endif
+	return 0; // FIXME 1.13
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetLightningLevel
   (JNIEnv *env, jclass clazz, float amount) {
+#if 0
 	if (!bl_localplayer) return;
 	return bl_localplayer->getRegion()->getDimension()->getWeather()->setLightningLevel(amount);
+#endif
+	return 0; // FIXME 1.13
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetRainLevel
