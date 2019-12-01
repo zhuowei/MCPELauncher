@@ -29,7 +29,7 @@ public:
 		if (!state) return 0;
 		return state->blockData;
 	}
-	BlockBrightness	getRawBrightness(BlockPos const&, bool, bool);
+	BlockBrightness	getRawBrightness(BlockPos const&, bool, bool) const;
 	BlockActor*	getBlockEntity(int, int, int);
 	int		getGrassColor(BlockPos const&) const;
 	void		setGrassColor(int, BlockPos const&, int);

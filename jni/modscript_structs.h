@@ -211,7 +211,7 @@ static_assert(sizeof(Item) == 144, "item size is wrong");
 
 class CompoundTag {
 public:
-	~CompoundTag();
+	virtual ~CompoundTag();
 };
 class BlockLegacy;
 class ItemStack;
