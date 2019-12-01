@@ -1,9 +1,9 @@
 #pragma once
 #include "blockidtoitemid.h"
-class ItemStack {
+class ItemStack : public ItemInstance {
 public:
 	// this is actually the same layout as ItemInstance
-	char filler1[14-0]; // 0
+	char filler1[14-4]; // 0
 	unsigned char count; // 14
 	char filler2[88-15]; // 15
 	ItemStack();
@@ -21,16 +21,7 @@ public:
 			setBlock(blockAndData);
 		}
 	}
-	ItemStack& operator=(ItemStack const&);
-	~ItemStack();
-	void init(int, int, int);
-	ItemEnchants getEnchantsFromUserData() const;
-	int getId() const;
-	void _setItem(int);
-	int getDamageValue() const;
-	bool hasCustomHoverName() const;
-	std::string getCustomName() const;
-	void setCustomName(std::string const&);
+	virtual ~ItemStack();
 	void setBlock(BlockAndData const*);
 };
 static_assert(sizeof(ItemStack) == 88, "ItemStack size");

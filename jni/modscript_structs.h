@@ -216,16 +216,16 @@ public:
 };
 class BlockLegacy;
 class ItemStack;
-// 1.10b3
+// 1.13.1
 class ItemInstance {
 public:
-	Item* item; // 0
-	char filler1[12-4]; // 4
-	short damage; // 12
-	unsigned char count; //14
-	char filler2[88-15]; // 15
+	char filler1[16-4]; // 4
+	short damage; // 16
+	unsigned char count; //18
+	char filler2[84-19]; // 19
 
 	ItemInstance();
+	virtual ~ItemInstance;
 
 	ItemInstance(int id, int count, int data) : ItemInstance() {
 		init(id, count, data);

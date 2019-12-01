@@ -3289,7 +3289,8 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetAllowEn
 JNIEXPORT int Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetDifficulty
   (JNIEnv* env, jclass clazz) {
 	if (bl_level == nullptr) return 0;
-	return bl_level->getDifficulty();
+	// return bl_level->getDifficulty(); FIXME 1.13
+	return 0;
 }
 
 JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetDifficulty
