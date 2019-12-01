@@ -225,7 +225,6 @@ public:
 	char filler2[84-19]; // 19
 
 	ItemInstance();
-	virtual ~ItemInstance;
 
 	ItemInstance(int id, int count, int data) : ItemInstance() {
 		init(id, count, data);
@@ -235,7 +234,7 @@ public:
 
 	ItemInstance(ItemInstance const&);
 	ItemInstance& operator=(ItemInstance const&);
-	~ItemInstance();
+	virtual ~ItemInstance();
 	bool operator==(ItemInstance const&) const;
 	bool operator!=(ItemInstance const&) const;
 	ItemEnchants getEnchantsFromUserData() const;
@@ -251,12 +250,12 @@ public:
 	bool isArmorItem() const;
 	UseAnimation getUseAnimation() const;
 	void _setItem(int);
+	int getDamageValue() const;
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
-static_assert(offsetof(ItemInstance, item) == 0, "item offset wrong");
-static_assert(offsetof(ItemInstance, count) == 14, "count wrong");
-static_assert(sizeof(ItemInstance) == 88, "ItemInstance wrong");
+static_assert(offsetof(ItemInstance, count) == 18, "count wrong");
+static_assert(sizeof(ItemInstance) == 84, "ItemInstance wrong");
 
 enum CreativeItemCategory {
 };
@@ -392,6 +391,9 @@ class ShapelessRecipe;
 class ShapedRecipe;
 class ResourcePackManager;
 
+class Recipes;
+#if 0
+// FIXME 1.13.1: Recipes::Type is now 28 bytes in 1.13.0.6 and probably 1.13.1
 class Recipes {
 public:
 
@@ -428,6 +430,7 @@ static_assert(sizeof(RecipesType) == 104, "RecipesType size");
 #else
 static_assert(sizeof(RecipesType) == 100, "RecipesType size");
 #endif
+#endif // if 0
 
 typedef struct {
 	char filler[16]; //0

@@ -2008,7 +2008,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	env->ReleaseStringUTFChars(key, keyUTFChars);
 	env->ReleaseStringUTFChars(value, valueUTFChars);
 }
-
+#if 0
 bool bl_tryRemoveExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int itemDamage, int ingredients[], int ingredientsCount) {
 	std::vector<Recipe*>* recipesList = &recipeMgr->recipes;
 	int recipesSize = recipesList->size();
@@ -2050,9 +2050,11 @@ bool bl_lookForExistingRecipe(Recipes* recipeMgr, int itemId, int itemCount, int
 }
 
 static Recipes* bl_recipesForJava;
+#endif
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapelessRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jintArray ingredientsArray) {
+#if 0
 	if (!bl_level) return;
 	int ingredientsElemsCount = env->GetArrayLength(ingredientsArray);
 	int ingredients[ingredientsElemsCount];
@@ -2077,10 +2079,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 #if 0 // FIXME 1.11
 	recipes->addShapelessRecipe(outStack, ingredientsList, 0, nullptr);
 #endif
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddShapedRecipe
   (JNIEnv *env, jclass clazz, jint itemId, jint itemCount, jint itemDamage, jobjectArray shape, jintArray ingredientsArray) {
+#if 0
 	if (!bl_level) {
 		return;
 	}
@@ -2117,6 +2121,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAd
 	//bl_tryRemoveExistingRecipe(recipes, itemId, itemCount, itemDamage, ingredients, ingredientsCount);
 #if 0 // FIXME 1.11
 	recipes->addShapedRecipe(outStacks, shapeVector, ingredientsList, 0, nullptr);
+#endif
 #endif
 }
 
@@ -3837,7 +3842,7 @@ void* bl_BackgroundWorker_queue_hook(BackgroundWorker* worker, BackgroundTaskHan
 	return retval;
 }
 #endif
-
+#if 0
 static void bl_reregisterRecipesFromJava(Recipes* recipes) {
 	bl_recipesForJava = recipes;
 	JNIEnv *env;
@@ -3863,6 +3868,7 @@ static void* bl_Recipes_loadRecipes_hook(Recipes* recipes, ResourcePackManager& 
 	bl_reregisterRecipesFromJava(recipes);
 	return retval;
 }
+#endif
 
 static void bl_vtableSwap(void** vtable, int index, void* newFunc, void** origFunc) {
 	*origFunc = vtable[index];
@@ -4382,7 +4388,7 @@ void bl_setuphooks_cppside() {
 	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))
 		dlsym(mcpelibhandle, "_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_");
 	bl_patch_got_wrap(mcpelibhandle, (void*)&VanillaItems::registerItems, (void*)&bl_VanillaItems_registerItems_hook);
-	bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
+	//bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
 
 	//bl_renderManager_init(mcpelibhandle);
 /*
