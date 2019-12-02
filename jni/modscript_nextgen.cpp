@@ -1523,6 +1523,7 @@ void bl_initCustomBlockVtable() {
 */
 }
 
+#if 0
 void* bl_getMaterial(int materialType) {
 	Tile* baseTile = getBlockForItemId(materialType);
 	if (baseTile == NULL) {
@@ -1531,7 +1532,7 @@ void* bl_getMaterial(int materialType) {
 	}
 	return baseTile->getMaterial();
 }
-#if 0
+
 void bl_buildTextureArray(TextureUVCoordinateSet* output[], std::string textureNames[], int textureCoords[]) {
 	for (int i = 0; i < 16*6; i++) {
 		TextureUVCoordinateSet* mySet = new TextureUVCoordinateSet(BlockGraphics::getTextureUVCoordinateSet(
@@ -3064,14 +3065,16 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
   (JNIEnv *env, jclass clazz, jint blockId, jint damage) {
 	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return -1;
-	return block->getDestroySpeed();
+	// return block->getDestroySpeed();
+	return -1; // FIXME 1.13
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockGetFriction
   (JNIEnv *env, jclass clazz, jint blockId) {
 	BlockLegacy* block = getBlockForItemId(blockId);
 	if (!block) return -1;
-	return block->getFriction();
+	// return block->getFriction();
+	return -1; // FIXME 1.13
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeBlockSetFriction

@@ -56,6 +56,11 @@ tables = {
     "_ZTV10WitherBoss": 0x4e3d504,
     "_ZTV8GameMode": 0x4e551a8,
     "_ZTV12ShapedRecipe": 0x4e56c24,
+    "_ZTV11BannerBlock": 0x4e89cb4,
+    "_ZTV12EmptyMapItem": 0x4e56ed8,
+    "_ZTV9ArmorItem": 0x4e555c4,
+    "_ZTV3Mob": 0x4e42ef4,
+    "_ZTV5Actor": 0x4e2e8f0,
 }
 ida = False
 
