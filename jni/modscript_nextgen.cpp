@@ -106,6 +106,7 @@ const size_t kClientInstanceScreenModel_offset = 620;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
+#if 0
 "_ZTV11MobRenderer",
 "_ZTV11NpcRenderer",
 "_ZTV13HorseRenderer",
@@ -113,6 +114,7 @@ static const char* const listOfRenderersToPatchTextures[] = {
 "_ZTV16GuardianRenderer",
 "_ZTV19EnderDragonRenderer",
 "_ZTV19HumanoidMobRenderer",
+#endif
 };
 
 #define AXIS_X 0
@@ -279,9 +281,11 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos");
 	vtable_indexes.mob_set_sneaking = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
 		"_ZN5Actor11setSneakingEb") - 2;
+#if 0
 	vtable_indexes.blockitem_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV9BlockItem")->st_size;
 	vtable_indexes.blockitem_get_level_data_for_aux_value = bl_vtableIndex(mcpelibhandle, "_ZTV9BlockItem",
 		"_ZNK4Item23getLevelDataForAuxValueEi");
+#endif
 	vtable_indexes.item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV4Item")->st_size;
 	vtable_indexes.item_get_enchant_slot = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item14getEnchantSlotEv");
@@ -339,10 +343,12 @@ extern "C" {
 static void (*bl_Item_Item)(Item*, std::string const&, short);
 
 static void** bl_Item_vtable;
+#if 0
 static void** bl_Tile_vtable;
 static void** bl_BlockGraphics_vtable;
 static void** bl_BlockItem_vtable;
 static void** bl_CustomBlockItem_vtable;
+#endif
 
 //static void (*bl_MinecraftClient_startLocalServer)(MinecraftClient*, std::string const&, std::string const&, void*);
 
@@ -373,8 +379,10 @@ static void (*bl_Item_setMaxDamage)(Item*, int);
 
 static void** bl_ShapelessRecipe_vtable;
 
+#if 0
 static void (*bl_RakNetInstance_send)(void*, void*);
 static void** bl_SetTimePacket_vtable;
+#endif
 //static void (*bl_Packet_Packet)(void*);
 static void (*bl_ClientNetworkHandler_handleTextPacket_real)(void*, void*, TextPacket*);
 //static void** bl_MessagePacket_vtable;
@@ -427,7 +435,7 @@ static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&
 
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static void (*bl_Entity_setSize)(Entity*, float, float);
-static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
+//static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
 static void (*bl_Mob_die_real)(Entity*, ActorDamageSource const&);
@@ -449,12 +457,14 @@ static mce::TexturePtr const& (*bl_ItemRenderer_getGraphics_real_item)(Item*);
 static mce::TexturePtr const& (*bl_MobRenderer_getSkinPtr_real)(MobRenderer* renderer, Entity& ent);
 static void (*bl_Block_onPlace)(BlockLegacy*, BlockSource&, BlockPos const&);
 
+#if 0
 static void** bl_LiquidBlockStatic_vtable;
 static void** bl_LiquidBlockDynamic_vtable;
 static void (*bl_LiquidBlockStatic_LiquidBlockStatic)
 	(BlockLegacy*, std::string const&, int, BlockID, void*, std::string const&, std::string const&);
 static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 	(BlockLegacy*, std::string const&, int, void*, std::string const&, std::string const&);
+#endif
 static bool (*bl_Recipe_isAnyAuxValue_real)(ItemDescriptor const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
 static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStack const&, int, bool);
@@ -1120,6 +1130,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineArmor
   (JNIEnv *env, jclass clazz, jint id, jstring iconName, jint iconIndex, jstring name, jstring texture,
 		jint damageReduceAmount, jint maxDamage, jint armorType) {
+#if 0
 	const char * utfChars = env->GetStringUTFChars(name, NULL);
 	std::string mystr = std::string(utfChars);
 
@@ -1143,6 +1154,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDe
 	bl_set_i18n("item." + mystr + ".name", mystr);
 	env->ReleaseStringUTFChars(name, utfChars);
 	env->ReleaseStringUTFChars(iconName, iconUTFChars);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDefineSnowballItem
@@ -4158,12 +4170,13 @@ void bl_setuphooks_cppside() {
 		dlsym(RTLD_DEFAULT, "_ZN4Font5widthERKSs");
 
 #endif
-
+#if 0
 	bl_Tile_vtable = (void**) ((uintptr_t) dobby_dlsym((void*) mcpelibhandle, "_ZTV11BlockLegacy"));
 	bl_BlockGraphics_vtable = (void**) dobby_dlsym((void*) mcpelibhandle, "_ZTV13BlockGraphics");
 	//bl_dumpVtable(bl_Tile_vtable, 0x100);
 	bl_Block_Block = (void (*)(BlockLegacy*, std::string const&, int, void*)) dlsym(RTLD_DEFAULT, "_ZN11BlockLegacyC1ERKSsiRK8Material");
 	bl_BlockItem_BlockItem = (void (*)(Item*, std::string const&, short)) dobby_dlsym(mcpelibhandle, "_ZN9BlockItemC1ERKSsi");
+#endif
 	bl_Block_setVisualShape = (void (*)(BlockLegacy*, Vec3 const&, Vec3 const&))
 		dlsym(RTLD_DEFAULT, "_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_");
 
@@ -4184,8 +4197,10 @@ void bl_setuphooks_cppside() {
 	}
 #endif
 
+#if 0
 	bl_LiquidBlockStatic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV17LiquidBlockStatic");
 	bl_LiquidBlockDynamic_vtable = (void**) dlsym(mcpelibhandle, "_ZTV18LiquidBlockDynamic");
+#endif
 	// FIXME 0.15
 	//bl_LiquidBlockStatic_LiquidBlockStatic = (void (*)(Block*, std::string const&, int, BlockID, void*,
 	//	std::string const&, std::string const&))
@@ -4193,7 +4208,9 @@ void bl_setuphooks_cppside() {
 	//bl_LiquidBlockDynamic_LiquidBlockDynamic = (void (*)(Block*, std::string const&, int, void*,
 	//	std::string const&, std::string const&))
 	//	dlsym(mcpelibhandle, "_ZN18LiquidBlockDynamicC1ERKSsiRK8MaterialS1_S1_");
+#if 0
 	bl_BlockItem_vtable = (void**) dlsym(mcpelibhandle, "_ZTV9BlockItem");
+#endif
 
 	bl_initCustomBlockVtable();
 
@@ -4219,7 +4236,7 @@ void bl_setuphooks_cppside() {
 	void** legacyClientNetworkHandlerVtable = (void**) dlsym(mcpelibhandle, "_ZTV26LegacyClientNetworkHandler");
 	legacyClientNetworkHandlerVtable[vtable_indexes.clientnetworkhandler_handle_text_packet] =
 		(void*) &bl_ClientNetworkHandler_handleTextPacket_hook;
-	bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
+	// bl_SetTimePacket_vtable = (void**) dobby_dlsym(mcpelibhandle, "_ZTV13SetTimePacket");
 	// FIXME 0.11
 	//bl_RakNetInstance_send = (void (*) (void*, void*)) dlsym(mcpelibhandle, "_ZN14RakNetInstance4sendER6Packet");
 	//bl_Packet_Packet = (void (*) (void*)) dlsym(mcpelibhandle, "_ZN6PacketC2Ev");
@@ -4282,8 +4299,8 @@ void bl_setuphooks_cppside() {
 // known to work
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN5Actor7setSizeEff");
-	bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
-		dlsym(mcpelibhandle, "_ZN9ArmorItemC1ERKSsiRKNS_13ArmorMaterialEi9ArmorSlot");
+	// bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
+	//	dlsym(mcpelibhandle, "_ZN9ArmorItemC1ERKSsiRKNS_13ArmorMaterialEi9ArmorSlot");
 	//bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
 	//	dlsym(mcpelibhandle, "_ZN13ScreenChooser9setScreenE8ScreenId");
 	// FIXME 0.11
@@ -4321,9 +4338,9 @@ void bl_setuphooks_cppside() {
 	bl_Player_EXPERIENCE = (Attribute*)
 		dlsym(mcpelibhandle, "_ZN6Player10EXPERIENCEE");
 
-	mcpelauncher_hook((void*) &Player::addExperience, (void*) &bl_Player_addExperience_hook,
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN6Player13addExperienceEi"), (void*) &bl_Player_addExperience_hook,
 		(void**) &bl_Player_addExperience_real);
-	mcpelauncher_hook((void*) &Player::addLevels, (void*) &bl_Player_addLevels_hook,
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN6Player9addLevelsEi"), (void*) &bl_Player_addLevels_hook,
 		(void**) &bl_Player_addLevels_real);
 
 	bl_Item_setCategory = (void (*)(Item*, int))
@@ -4339,6 +4356,7 @@ void bl_setuphooks_cppside() {
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitER5ActorRK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
+#if 0 // FIXME 1.13
 	mcpelauncher_hook((void*)&Recipe::isAnyAuxValue, (void*)&bl_Recipe_isAnyAuxValue_hook,
 		(void**) &bl_Recipe_isAnyAuxValue_real);
 	bl_TntBlock_setupRedstoneComponent = (void (*)(BlockLegacy*, BlockSource&, BlockPos const&))
@@ -4358,6 +4376,7 @@ void bl_setuphooks_cppside() {
 #endif
 		vtable[vtable_indexes.mobrenderer_get_skin_ptr] = (void*) &bl_MobRenderer_getSkinPtr_hook;
 	}
+#endif
 
 	// custom blocks.
 #if 0
@@ -4373,7 +4392,8 @@ void bl_setuphooks_cppside() {
 #endif
 
 	// known to fail.
-	mcpelauncher_hook((void*)&Entity::hurt, (void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN5Actor4hurtERK17ActorDamageSourceibb"),
+		(void*)bl_Entity_hurt_hook, (void**)&bl_Entity_hurt_real);
 
 	//bl_entity_hurt_hook_init(mcpelibhandle);
 	pthread_key_create(&bl_tessellateBlock_key, &bl_tessellateBlock_key_destructor);
