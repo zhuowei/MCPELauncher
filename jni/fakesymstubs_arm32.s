@@ -351,6 +351,22 @@ _ZNK5Level12isClientSideEv:
         .hidden bl_addr__ZNK5Level12isClientSideEv
 
 
+        .global _ZN5ActorD2Ev 
+        .type   _ZN5ActorD2Ev, %function
+_ZN5ActorD2Ev:
+        ldr     ip, .L_ZN5ActorD2Ev2
+.L_ZN5ActorD2EvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5ActorD2Ev3:
+        .align  2
+.L_ZN5ActorD2Ev2:
+        .word   bl_addr__ZN5ActorD2Ev-(.L_ZN5ActorD2EvPIC0+8)
+        .size   _ZN5ActorD2Ev, .-_ZN5ActorD2Ev
+        .hidden bl_addr__ZN5ActorD2Ev
+
+
         .global _ZNK14ClientInstance16getMinecraftGameEv 
         .type   _ZNK14ClientInstance16getMinecraftGameEv, %function
 _ZNK14ClientInstance16getMinecraftGameEv:
@@ -2173,6 +2189,1030 @@ _ZN9ItemStackD2Ev:
         .word   bl_addr__ZN9ItemStackD2Ev-(.L_ZN9ItemStackD2EvPIC0+8)
         .size   _ZN9ItemStackD2Ev, .-_ZN9ItemStackD2Ev
         .hidden bl_addr__ZN9ItemStackD2Ev
+
+
+        .global _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_ 
+        .type   _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_, %function
+_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_:
+        ldr     ip, .L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_2
+.L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_3:
+        .align  2
+.L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_2:
+        .word   bl_addr__ZN11BlockLegacy14setVisualShapeERK4Vec3S2_-(.L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_PIC0+8)
+        .size   _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_, .-_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_
+        .hidden bl_addr__ZN11BlockLegacy14setVisualShapeERK4Vec3S2_
+
+
+        .global _ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData 
+        .type   _ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData, %function
+_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData:
+        ldr     ip, .L_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData2
+.L_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderDataPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData3:
+        .align  2
+.L_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData2:
+        .word   bl_addr__ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData-(.L_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderDataPIC0+8)
+        .size   _ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData, .-_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData
+        .hidden bl_addr__ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData
+
+
+        .global _ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE 
+        .type   _ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE, %function
+_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE:
+        ldr     ip, .L_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE2
+.L_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE3:
+        .align  2
+.L_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE2:
+        .word   bl_addr__ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE-(.L_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EEPIC0+8)
+        .size   _ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE, .-_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE
+        .hidden bl_addr__ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE
+
+
+        .global _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent 
+        .type   _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent, %function
+_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent:
+        ldr     ip, .L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent2
+.L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntentPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent3:
+        .align  2
+.L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent2:
+        .word   bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent-(.L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntentPIC0+8)
+        .size   _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent, .-_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent
+        .hidden bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent
+
+
+        .global _ZN13MinecraftGame6updateEv 
+        .type   _ZN13MinecraftGame6updateEv, %function
+_ZN13MinecraftGame6updateEv:
+        ldr     ip, .L_ZN13MinecraftGame6updateEv2
+.L_ZN13MinecraftGame6updateEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN13MinecraftGame6updateEv3:
+        .align  2
+.L_ZN13MinecraftGame6updateEv2:
+        .word   bl_addr__ZN13MinecraftGame6updateEv-(.L_ZN13MinecraftGame6updateEvPIC0+8)
+        .size   _ZN13MinecraftGame6updateEv, .-_ZN13MinecraftGame6updateEv
+        .hidden bl_addr__ZN13MinecraftGame6updateEv
+
+
+        .global _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_ 
+        .type   _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_, %function
+_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_:
+        ldr     ip, .L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_2
+.L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_3:
+        .align  2
+.L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_2:
+        .word   bl_addr__ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_-(.L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_PIC0+8)
+        .size   _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_, .-_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_
+        .hidden bl_addr__ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_
+
+
+        .global _ZN19LevelRendererPlayer6getFovEfb 
+        .type   _ZN19LevelRendererPlayer6getFovEfb, %function
+_ZN19LevelRendererPlayer6getFovEfb:
+        ldr     ip, .L_ZN19LevelRendererPlayer6getFovEfb2
+.L_ZN19LevelRendererPlayer6getFovEfbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN19LevelRendererPlayer6getFovEfb3:
+        .align  2
+.L_ZN19LevelRendererPlayer6getFovEfb2:
+        .word   bl_addr__ZN19LevelRendererPlayer6getFovEfb-(.L_ZN19LevelRendererPlayer6getFovEfbPIC0+8)
+        .size   _ZN19LevelRendererPlayer6getFovEfb, .-_ZN19LevelRendererPlayer6getFovEfb
+        .hidden bl_addr__ZN19LevelRendererPlayer6getFovEfb
+
+
+        .global _ZN19ProjectileComponent5onHitER5ActorRK9HitResult 
+        .type   _ZN19ProjectileComponent5onHitER5ActorRK9HitResult, %function
+_ZN19ProjectileComponent5onHitER5ActorRK9HitResult:
+        ldr     ip, .L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult2
+.L_ZN19ProjectileComponent5onHitER5ActorRK9HitResultPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult3:
+        .align  2
+.L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult2:
+        .word   bl_addr__ZN19ProjectileComponent5onHitER5ActorRK9HitResult-(.L_ZN19ProjectileComponent5onHitER5ActorRK9HitResultPIC0+8)
+        .size   _ZN19ProjectileComponent5onHitER5ActorRK9HitResult, .-_ZN19ProjectileComponent5onHitER5ActorRK9HitResult
+        .hidden bl_addr__ZN19ProjectileComponent5onHitER5ActorRK9HitResult
+
+
+        .global _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket 
+        .type   _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket, %function
+_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket:
+        ldr     ip, .L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket2
+.L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacketPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket3:
+        .align  2
+.L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket2:
+        .word   bl_addr__ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket-(.L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacketPIC0+8)
+        .size   _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket, .-_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket
+        .hidden bl_addr__ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket
+
+
+        .global _ZN3Mob13sendInventoryEb 
+        .type   _ZN3Mob13sendInventoryEb, %function
+_ZN3Mob13sendInventoryEb:
+        ldr     ip, .L_ZN3Mob13sendInventoryEb2
+.L_ZN3Mob13sendInventoryEbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN3Mob13sendInventoryEb3:
+        .align  2
+.L_ZN3Mob13sendInventoryEb2:
+        .word   bl_addr__ZN3Mob13sendInventoryEb-(.L_ZN3Mob13sendInventoryEbPIC0+8)
+        .size   _ZN3Mob13sendInventoryEb, .-_ZN3Mob13sendInventoryEb
+        .hidden bl_addr__ZN3Mob13sendInventoryEb
+
+
+        .global _ZN3Mob3dieERK17ActorDamageSource 
+        .type   _ZN3Mob3dieERK17ActorDamageSource, %function
+_ZN3Mob3dieERK17ActorDamageSource:
+        ldr     ip, .L_ZN3Mob3dieERK17ActorDamageSource2
+.L_ZN3Mob3dieERK17ActorDamageSourcePIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN3Mob3dieERK17ActorDamageSource3:
+        .align  2
+.L_ZN3Mob3dieERK17ActorDamageSource2:
+        .word   bl_addr__ZN3Mob3dieERK17ActorDamageSource-(.L_ZN3Mob3dieERK17ActorDamageSourcePIC0+8)
+        .size   _ZN3Mob3dieERK17ActorDamageSource, .-_ZN3Mob3dieERK17ActorDamageSource
+        .hidden bl_addr__ZN3Mob3dieERK17ActorDamageSource
+
+
+        .global _ZN4Item11setCategoryE20CreativeItemCategory 
+        .type   _ZN4Item11setCategoryE20CreativeItemCategory, %function
+_ZN4Item11setCategoryE20CreativeItemCategory:
+        ldr     ip, .L_ZN4Item11setCategoryE20CreativeItemCategory2
+.L_ZN4Item11setCategoryE20CreativeItemCategoryPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN4Item11setCategoryE20CreativeItemCategory3:
+        .align  2
+.L_ZN4Item11setCategoryE20CreativeItemCategory2:
+        .word   bl_addr__ZN4Item11setCategoryE20CreativeItemCategory-(.L_ZN4Item11setCategoryE20CreativeItemCategoryPIC0+8)
+        .size   _ZN4Item11setCategoryE20CreativeItemCategory, .-_ZN4Item11setCategoryE20CreativeItemCategory
+        .hidden bl_addr__ZN4Item11setCategoryE20CreativeItemCategory
+
+
+        .global _ZN4Item12setMaxDamageEi 
+        .type   _ZN4Item12setMaxDamageEi, %function
+_ZN4Item12setMaxDamageEi:
+        ldr     ip, .L_ZN4Item12setMaxDamageEi2
+.L_ZN4Item12setMaxDamageEiPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN4Item12setMaxDamageEi3:
+        .align  2
+.L_ZN4Item12setMaxDamageEi2:
+        .word   bl_addr__ZN4Item12setMaxDamageEi-(.L_ZN4Item12setMaxDamageEiPIC0+8)
+        .size   _ZN4Item12setMaxDamageEi, .-_ZN4Item12setMaxDamageEi
+        .hidden bl_addr__ZN4Item12setMaxDamageEi
+
+
+        .global _ZN4Item15setMaxStackSizeEh 
+        .type   _ZN4Item15setMaxStackSizeEh, %function
+_ZN4Item15setMaxStackSizeEh:
+        ldr     ip, .L_ZN4Item15setMaxStackSizeEh2
+.L_ZN4Item15setMaxStackSizeEhPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN4Item15setMaxStackSizeEh3:
+        .align  2
+.L_ZN4Item15setMaxStackSizeEh2:
+        .word   bl_addr__ZN4Item15setMaxStackSizeEh-(.L_ZN4Item15setMaxStackSizeEhPIC0+8)
+        .size   _ZN4Item15setMaxStackSizeEh, .-_ZN4Item15setMaxStackSizeEh
+        .hidden bl_addr__ZN4Item15setMaxStackSizeEh
+
+
+        .global _ZN4ItemC1ERKSss 
+        .type   _ZN4ItemC1ERKSss, %function
+_ZN4ItemC1ERKSss:
+        ldr     ip, .L_ZN4ItemC1ERKSss2
+.L_ZN4ItemC1ERKSssPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN4ItemC1ERKSss3:
+        .align  2
+.L_ZN4ItemC1ERKSss2:
+        .word   bl_addr__ZN4ItemC1ERKSss-(.L_ZN4ItemC1ERKSssPIC0+8)
+        .size   _ZN4ItemC1ERKSss, .-_ZN4ItemC1ERKSss
+        .hidden bl_addr__ZN4ItemC1ERKSss
+
+
+        .global _ZN5Actor10stopRidingEbbb 
+        .type   _ZN5Actor10stopRidingEbbb, %function
+_ZN5Actor10stopRidingEbbb:
+        ldr     ip, .L_ZN5Actor10stopRidingEbbb2
+.L_ZN5Actor10stopRidingEbbbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor10stopRidingEbbb3:
+        .align  2
+.L_ZN5Actor10stopRidingEbbb2:
+        .word   bl_addr__ZN5Actor10stopRidingEbbb-(.L_ZN5Actor10stopRidingEbbbPIC0+8)
+        .size   _ZN5Actor10stopRidingEbbb, .-_ZN5Actor10stopRidingEbbb
+        .hidden bl_addr__ZN5Actor10stopRidingEbbb
+
+
+        .global _ZN5Actor11setSneakingEb 
+        .type   _ZN5Actor11setSneakingEb, %function
+_ZN5Actor11setSneakingEb:
+        ldr     ip, .L_ZN5Actor11setSneakingEb2
+.L_ZN5Actor11setSneakingEbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor11setSneakingEb3:
+        .align  2
+.L_ZN5Actor11setSneakingEb2:
+        .word   bl_addr__ZN5Actor11setSneakingEb-(.L_ZN5Actor11setSneakingEbPIC0+8)
+        .size   _ZN5Actor11setSneakingEb, .-_ZN5Actor11setSneakingEb
+        .hidden bl_addr__ZN5Actor11setSneakingEb
+
+
+        .global _ZN5Actor11startRidingERS_ 
+        .type   _ZN5Actor11startRidingERS_, %function
+_ZN5Actor11startRidingERS_:
+        ldr     ip, .L_ZN5Actor11startRidingERS_2
+.L_ZN5Actor11startRidingERS_PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor11startRidingERS_3:
+        .align  2
+.L_ZN5Actor11startRidingERS_2:
+        .word   bl_addr__ZN5Actor11startRidingERS_-(.L_ZN5Actor11startRidingERS_PIC0+8)
+        .size   _ZN5Actor11startRidingERS_, .-_ZN5Actor11startRidingERS_
+        .hidden bl_addr__ZN5Actor11startRidingERS_
+
+
+        .global _ZN5Actor14setCarriedItemERK9ItemStack 
+        .type   _ZN5Actor14setCarriedItemERK9ItemStack, %function
+_ZN5Actor14setCarriedItemERK9ItemStack:
+        ldr     ip, .L_ZN5Actor14setCarriedItemERK9ItemStack2
+.L_ZN5Actor14setCarriedItemERK9ItemStackPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor14setCarriedItemERK9ItemStack3:
+        .align  2
+.L_ZN5Actor14setCarriedItemERK9ItemStack2:
+        .word   bl_addr__ZN5Actor14setCarriedItemERK9ItemStack-(.L_ZN5Actor14setCarriedItemERK9ItemStackPIC0+8)
+        .size   _ZN5Actor14setCarriedItemERK9ItemStack, .-_ZN5Actor14setCarriedItemERK9ItemStack
+        .hidden bl_addr__ZN5Actor14setCarriedItemERK9ItemStack
+
+
+        .global _ZN5Actor14setOffhandSlotERK9ItemStack 
+        .type   _ZN5Actor14setOffhandSlotERK9ItemStack, %function
+_ZN5Actor14setOffhandSlotERK9ItemStack:
+        ldr     ip, .L_ZN5Actor14setOffhandSlotERK9ItemStack2
+.L_ZN5Actor14setOffhandSlotERK9ItemStackPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor14setOffhandSlotERK9ItemStack3:
+        .align  2
+.L_ZN5Actor14setOffhandSlotERK9ItemStack2:
+        .word   bl_addr__ZN5Actor14setOffhandSlotERK9ItemStack-(.L_ZN5Actor14setOffhandSlotERK9ItemStackPIC0+8)
+        .size   _ZN5Actor14setOffhandSlotERK9ItemStack, .-_ZN5Actor14setOffhandSlotERK9ItemStack
+        .hidden bl_addr__ZN5Actor14setOffhandSlotERK9ItemStack
+
+
+        .global _ZN5Actor6removeEv 
+        .type   _ZN5Actor6removeEv, %function
+_ZN5Actor6removeEv:
+        ldr     ip, .L_ZN5Actor6removeEv2
+.L_ZN5Actor6removeEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor6removeEv3:
+        .align  2
+.L_ZN5Actor6removeEv2:
+        .word   bl_addr__ZN5Actor6removeEv-(.L_ZN5Actor6removeEvPIC0+8)
+        .size   _ZN5Actor6removeEv, .-_ZN5Actor6removeEv
+        .hidden bl_addr__ZN5Actor6removeEv
+
+
+        .global _ZN5Actor6setPosERK4Vec3 
+        .type   _ZN5Actor6setPosERK4Vec3, %function
+_ZN5Actor6setPosERK4Vec3:
+        ldr     ip, .L_ZN5Actor6setPosERK4Vec32
+.L_ZN5Actor6setPosERK4Vec3PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor6setPosERK4Vec33:
+        .align  2
+.L_ZN5Actor6setPosERK4Vec32:
+        .word   bl_addr__ZN5Actor6setPosERK4Vec3-(.L_ZN5Actor6setPosERK4Vec3PIC0+8)
+        .size   _ZN5Actor6setPosERK4Vec3, .-_ZN5Actor6setPosERK4Vec3
+        .hidden bl_addr__ZN5Actor6setPosERK4Vec3
+
+
+        .global _ZN5Actor7setSizeEff 
+        .type   _ZN5Actor7setSizeEff, %function
+_ZN5Actor7setSizeEff:
+        ldr     ip, .L_ZN5Actor7setSizeEff2
+.L_ZN5Actor7setSizeEffPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor7setSizeEff3:
+        .align  2
+.L_ZN5Actor7setSizeEff2:
+        .word   bl_addr__ZN5Actor7setSizeEff-(.L_ZN5Actor7setSizeEffPIC0+8)
+        .size   _ZN5Actor7setSizeEff, .-_ZN5Actor7setSizeEff
+        .hidden bl_addr__ZN5Actor7setSizeEff
+
+
+        .global _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack 
+        .type   _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack, %function
+_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack:
+        ldr     ip, .L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack2
+.L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStackPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack3:
+        .align  2
+.L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack2:
+        .word   bl_addr__ZN5Actor8setArmorE9ArmorSlotRK9ItemStack-(.L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStackPIC0+8)
+        .size   _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack, .-_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack
+        .hidden bl_addr__ZN5Actor8setArmorE9ArmorSlotRK9ItemStack
+
+
+        .global _ZN5Actor9setOnFireEi 
+        .type   _ZN5Actor9setOnFireEi, %function
+_ZN5Actor9setOnFireEi:
+        ldr     ip, .L_ZN5Actor9setOnFireEi2
+.L_ZN5Actor9setOnFireEiPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Actor9setOnFireEi3:
+        .align  2
+.L_ZN5Actor9setOnFireEi2:
+        .word   bl_addr__ZN5Actor9setOnFireEi-(.L_ZN5Actor9setOnFireEiPIC0+8)
+        .size   _ZN5Actor9setOnFireEi, .-_ZN5Actor9setOnFireEi
+        .hidden bl_addr__ZN5Actor9setOnFireEi
+
+
+        .global _ZN5Level13setDifficultyE10Difficulty 
+        .type   _ZN5Level13setDifficultyE10Difficulty, %function
+_ZN5Level13setDifficultyE10Difficulty:
+        ldr     ip, .L_ZN5Level13setDifficultyE10Difficulty2
+.L_ZN5Level13setDifficultyE10DifficultyPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Level13setDifficultyE10Difficulty3:
+        .align  2
+.L_ZN5Level13setDifficultyE10Difficulty2:
+        .word   bl_addr__ZN5Level13setDifficultyE10Difficulty-(.L_ZN5Level13setDifficultyE10DifficultyPIC0+8)
+        .size   _ZN5Level13setDifficultyE10Difficulty, .-_ZN5Level13setDifficultyE10Difficulty
+        .hidden bl_addr__ZN5Level13setDifficultyE10Difficulty
+
+
+        .global _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb 
+        .type   _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb, %function
+_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb:
+        ldr     ip, .L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb2
+.L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb3:
+        .align  2
+.L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb2:
+        .word   bl_addr__ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb-(.L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEbPIC0+8)
+        .size   _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb, .-_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb
+        .hidden bl_addr__ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb
+
+
+        .global _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE 
+        .type   _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE, %function
+_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE:
+        ldr     ip, .L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE2
+.L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE3:
+        .align  2
+.L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE2:
+        .word   bl_addr__ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE-(.L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EEPIC0+8)
+        .size   _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE, .-_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE
+        .hidden bl_addr__ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE
+
+
+        .global _ZN6Player10EXHAUSTIONE 
+        .type   _ZN6Player10EXHAUSTIONE, %function
+_ZN6Player10EXHAUSTIONE:
+        ldr     ip, .L_ZN6Player10EXHAUSTIONE2
+.L_ZN6Player10EXHAUSTIONEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player10EXHAUSTIONE3:
+        .align  2
+.L_ZN6Player10EXHAUSTIONE2:
+        .word   bl_addr__ZN6Player10EXHAUSTIONE-(.L_ZN6Player10EXHAUSTIONEPIC0+8)
+        .size   _ZN6Player10EXHAUSTIONE, .-_ZN6Player10EXHAUSTIONE
+        .hidden bl_addr__ZN6Player10EXHAUSTIONE
+
+
+        .global _ZN6Player10EXPERIENCEE 
+        .type   _ZN6Player10EXPERIENCEE, %function
+_ZN6Player10EXPERIENCEE:
+        ldr     ip, .L_ZN6Player10EXPERIENCEE2
+.L_ZN6Player10EXPERIENCEEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player10EXPERIENCEE3:
+        .align  2
+.L_ZN6Player10EXPERIENCEE2:
+        .word   bl_addr__ZN6Player10EXPERIENCEE-(.L_ZN6Player10EXPERIENCEEPIC0+8)
+        .size   _ZN6Player10EXPERIENCEE, .-_ZN6Player10EXPERIENCEE
+        .hidden bl_addr__ZN6Player10EXPERIENCEE
+
+
+        .global _ZN6Player10SATURATIONE 
+        .type   _ZN6Player10SATURATIONE, %function
+_ZN6Player10SATURATIONE:
+        ldr     ip, .L_ZN6Player10SATURATIONE2
+.L_ZN6Player10SATURATIONEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player10SATURATIONE3:
+        .align  2
+.L_ZN6Player10SATURATIONE2:
+        .word   bl_addr__ZN6Player10SATURATIONE-(.L_ZN6Player10SATURATIONEPIC0+8)
+        .size   _ZN6Player10SATURATIONE, .-_ZN6Player10SATURATIONE
+        .hidden bl_addr__ZN6Player10SATURATIONE
+
+
+        .global _ZN6Player17setPlayerGameTypeE8GameType 
+        .type   _ZN6Player17setPlayerGameTypeE8GameType, %function
+_ZN6Player17setPlayerGameTypeE8GameType:
+        ldr     ip, .L_ZN6Player17setPlayerGameTypeE8GameType2
+.L_ZN6Player17setPlayerGameTypeE8GameTypePIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player17setPlayerGameTypeE8GameType3:
+        .align  2
+.L_ZN6Player17setPlayerGameTypeE8GameType2:
+        .word   bl_addr__ZN6Player17setPlayerGameTypeE8GameType-(.L_ZN6Player17setPlayerGameTypeE8GameTypePIC0+8)
+        .size   _ZN6Player17setPlayerGameTypeE8GameType, .-_ZN6Player17setPlayerGameTypeE8GameType
+        .hidden bl_addr__ZN6Player17setPlayerGameTypeE8GameType
+
+
+        .global _ZN6Player5LEVELE 
+        .type   _ZN6Player5LEVELE, %function
+_ZN6Player5LEVELE:
+        ldr     ip, .L_ZN6Player5LEVELE2
+.L_ZN6Player5LEVELEPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player5LEVELE3:
+        .align  2
+.L_ZN6Player5LEVELE2:
+        .word   bl_addr__ZN6Player5LEVELE-(.L_ZN6Player5LEVELEPIC0+8)
+        .size   _ZN6Player5LEVELE, .-_ZN6Player5LEVELE
+        .hidden bl_addr__ZN6Player5LEVELE
+
+
+        .global _ZN6Player6HUNGERE 
+        .type   _ZN6Player6HUNGERE, %function
+_ZN6Player6HUNGERE:
+        ldr     ip, .L_ZN6Player6HUNGERE2
+.L_ZN6Player6HUNGEREPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN6Player6HUNGERE3:
+        .align  2
+.L_ZN6Player6HUNGERE2:
+        .word   bl_addr__ZN6Player6HUNGERE-(.L_ZN6Player6HUNGEREPIC0+8)
+        .size   _ZN6Player6HUNGERE, .-_ZN6Player6HUNGERE
+        .hidden bl_addr__ZN6Player6HUNGERE
+
+
+        .global _ZN8GameMode17startDestroyBlockERK8BlockPoshRb 
+        .type   _ZN8GameMode17startDestroyBlockERK8BlockPoshRb, %function
+_ZN8GameMode17startDestroyBlockERK8BlockPoshRb:
+        ldr     ip, .L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb2
+.L_ZN8GameMode17startDestroyBlockERK8BlockPoshRbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb3:
+        .align  2
+.L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb2:
+        .word   bl_addr__ZN8GameMode17startDestroyBlockERK8BlockPoshRb-(.L_ZN8GameMode17startDestroyBlockERK8BlockPoshRbPIC0+8)
+        .size   _ZN8GameMode17startDestroyBlockERK8BlockPoshRb, .-_ZN8GameMode17startDestroyBlockERK8BlockPoshRb
+        .hidden bl_addr__ZN8GameMode17startDestroyBlockERK8BlockPoshRb
+
+
+        .global _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb 
+        .type   _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb, %function
+_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb:
+        ldr     ip, .L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb2
+.L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb3:
+        .align  2
+.L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb2:
+        .word   bl_addr__ZN8GameMode20continueDestroyBlockERK8BlockPoshRb-(.L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRbPIC0+8)
+        .size   _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb, .-_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb
+        .hidden bl_addr__ZN8GameMode20continueDestroyBlockERK8BlockPoshRb
+
+
+        .global _ZN8GameMode4tickEv 
+        .type   _ZN8GameMode4tickEv, %function
+_ZN8GameMode4tickEv:
+        ldr     ip, .L_ZN8GameMode4tickEv2
+.L_ZN8GameMode4tickEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode4tickEv3:
+        .align  2
+.L_ZN8GameMode4tickEv2:
+        .word   bl_addr__ZN8GameMode4tickEv-(.L_ZN8GameMode4tickEvPIC0+8)
+        .size   _ZN8GameMode4tickEv, .-_ZN8GameMode4tickEv
+        .hidden bl_addr__ZN8GameMode4tickEv
+
+
+        .global _ZN8GameMode6attackER5Actor 
+        .type   _ZN8GameMode6attackER5Actor, %function
+_ZN8GameMode6attackER5Actor:
+        ldr     ip, .L_ZN8GameMode6attackER5Actor2
+.L_ZN8GameMode6attackER5ActorPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode6attackER5Actor3:
+        .align  2
+.L_ZN8GameMode6attackER5Actor2:
+        .word   bl_addr__ZN8GameMode6attackER5Actor-(.L_ZN8GameMode6attackER5ActorPIC0+8)
+        .size   _ZN8GameMode6attackER5Actor, .-_ZN8GameMode6attackER5Actor
+        .hidden bl_addr__ZN8GameMode6attackER5Actor
+
+
+        .global _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block 
+        .type   _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block, %function
+_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block:
+        ldr     ip, .L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block2
+.L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5BlockPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block3:
+        .align  2
+.L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block2:
+        .word   bl_addr__ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block-(.L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5BlockPIC0+8)
+        .size   _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block, .-_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block
+        .hidden bl_addr__ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block
+
+
+        .global _ZN9Minecraft23getServerNetworkHandlerEv 
+        .type   _ZN9Minecraft23getServerNetworkHandlerEv, %function
+_ZN9Minecraft23getServerNetworkHandlerEv:
+        ldr     ip, .L_ZN9Minecraft23getServerNetworkHandlerEv2
+.L_ZN9Minecraft23getServerNetworkHandlerEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN9Minecraft23getServerNetworkHandlerEv3:
+        .align  2
+.L_ZN9Minecraft23getServerNetworkHandlerEv2:
+        .word   bl_addr__ZN9Minecraft23getServerNetworkHandlerEv-(.L_ZN9Minecraft23getServerNetworkHandlerEvPIC0+8)
+        .size   _ZN9Minecraft23getServerNetworkHandlerEv, .-_ZN9Minecraft23getServerNetworkHandlerEv
+        .hidden bl_addr__ZN9Minecraft23getServerNetworkHandlerEv
+
+
+        .global _ZN9ModelPart5resetEv 
+        .type   _ZN9ModelPart5resetEv, %function
+_ZN9ModelPart5resetEv:
+        ldr     ip, .L_ZN9ModelPart5resetEv2
+.L_ZN9ModelPart5resetEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN9ModelPart5resetEv3:
+        .align  2
+.L_ZN9ModelPart5resetEv2:
+        .word   bl_addr__ZN9ModelPart5resetEv-(.L_ZN9ModelPart5resetEvPIC0+8)
+        .size   _ZN9ModelPart5resetEv, .-_ZN9ModelPart5resetEv
+        .hidden bl_addr__ZN9ModelPart5resetEv
+
+
+        .global _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_ 
+        .type   _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_, %function
+_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_:
+        ldr     ip, .L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_2
+.L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_3:
+        .align  2
+.L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_2:
+        .word   bl_addr__ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_-(.L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_PIC0+8)
+        .size   _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_, .-_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_
+        .hidden bl_addr__ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_
+
+
+        .global _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb 
+        .type   _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb, %function
+_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb:
+        ldr     ip, .L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb2
+.L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb3:
+        .align  2
+.L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb2:
+        .word   bl_addr__ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb-(.L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBbPIC0+8)
+        .size   _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb, .-_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb
+        .hidden bl_addr__ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb
+
+
+        .global _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib 
+        .type   _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib, %function
+_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib:
+        ldr     ip, .L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib2
+.L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosibPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib3:
+        .align  2
+.L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib2:
+        .word   bl_addr__ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib-(.L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosibPIC0+8)
+        .size   _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib, .-_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib
+        .hidden bl_addr__ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib
+
+
+        .global _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos 
+        .type   _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos, %function
+_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos:
+        ldr     ip, .L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos2
+.L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPosPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos3:
+        .align  2
+.L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos2:
+        .word   bl_addr__ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos-(.L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPosPIC0+8)
+        .size   _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos, .-_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos
+        .hidden bl_addr__ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos
+
+
+        .global _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb 
+        .type   _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb, %function
+_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb:
+        ldr     ip, .L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2
+.L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb3:
+        .align  2
+.L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2:
+        .word   bl_addr__ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb-(.L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0+8)
+        .size   _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb, .-_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
+        .hidden bl_addr__ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
+
+
+        .global _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos 
+        .type   _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos, %function
+_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos:
+        ldr     ip, .L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos2
+.L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPosPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos3:
+        .align  2
+.L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos2:
+        .word   bl_addr__ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos-(.L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPosPIC0+8)
+        .size   _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos, .-_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos
+        .hidden bl_addr__ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos
+
+
+        .global _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block 
+        .type   _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block, %function
+_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block:
+        ldr     ip, .L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block2
+.L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5BlockPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block3:
+        .align  2
+.L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block2:
+        .word   bl_addr__ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block-(.L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5BlockPIC0+8)
+        .size   _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block, .-_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block
+        .hidden bl_addr__ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block
+
+
+        .global _ZNK11BlockLegacy8getColorERK5Block 
+        .type   _ZNK11BlockLegacy8getColorERK5Block, %function
+_ZNK11BlockLegacy8getColorERK5Block:
+        ldr     ip, .L_ZNK11BlockLegacy8getColorERK5Block2
+.L_ZNK11BlockLegacy8getColorERK5BlockPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK11BlockLegacy8getColorERK5Block3:
+        .align  2
+.L_ZNK11BlockLegacy8getColorERK5Block2:
+        .word   bl_addr__ZNK11BlockLegacy8getColorERK5Block-(.L_ZNK11BlockLegacy8getColorERK5BlockPIC0+8)
+        .size   _ZNK11BlockLegacy8getColorERK5Block, .-_ZNK11BlockLegacy8getColorERK5Block
+        .hidden bl_addr__ZNK11BlockLegacy8getColorERK5Block
+
+
+        .global _ZNK14FeatureToggles9isEnabledE15FeatureOptionID 
+        .type   _ZNK14FeatureToggles9isEnabledE15FeatureOptionID, %function
+_ZNK14FeatureToggles9isEnabledE15FeatureOptionID:
+        ldr     ip, .L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID2
+.L_ZNK14FeatureToggles9isEnabledE15FeatureOptionIDPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID3:
+        .align  2
+.L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID2:
+        .word   bl_addr__ZNK14FeatureToggles9isEnabledE15FeatureOptionID-(.L_ZNK14FeatureToggles9isEnabledE15FeatureOptionIDPIC0+8)
+        .size   _ZNK14FeatureToggles9isEnabledE15FeatureOptionID, .-_ZNK14FeatureToggles9isEnabledE15FeatureOptionID
+        .hidden bl_addr__ZNK14FeatureToggles9isEnabledE15FeatureOptionID
+
+
+        .global _ZNK4Item14getEnchantSlotEv 
+        .type   _ZNK4Item14getEnchantSlotEv, %function
+_ZNK4Item14getEnchantSlotEv:
+        ldr     ip, .L_ZNK4Item14getEnchantSlotEv2
+.L_ZNK4Item14getEnchantSlotEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK4Item14getEnchantSlotEv3:
+        .align  2
+.L_ZNK4Item14getEnchantSlotEv2:
+        .word   bl_addr__ZNK4Item14getEnchantSlotEv-(.L_ZNK4Item14getEnchantSlotEvPIC0+8)
+        .size   _ZNK4Item14getEnchantSlotEv, .-_ZNK4Item14getEnchantSlotEv
+        .hidden bl_addr__ZNK4Item14getEnchantSlotEv
+
+
+        .global _ZNK4Item15getEnchantValueEv 
+        .type   _ZNK4Item15getEnchantValueEv, %function
+_ZNK4Item15getEnchantValueEv:
+        ldr     ip, .L_ZNK4Item15getEnchantValueEv2
+.L_ZNK4Item15getEnchantValueEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK4Item15getEnchantValueEv3:
+        .align  2
+.L_ZNK4Item15getEnchantValueEv2:
+        .word   bl_addr__ZNK4Item15getEnchantValueEv-(.L_ZNK4Item15getEnchantValueEvPIC0+8)
+        .size   _ZNK4Item15getEnchantValueEv, .-_ZNK4Item15getEnchantValueEv
+        .hidden bl_addr__ZNK4Item15getEnchantValueEv
+
+
+        .global _ZNK4Item3useER9ItemStackR6Player 
+        .type   _ZNK4Item3useER9ItemStackR6Player, %function
+_ZNK4Item3useER9ItemStackR6Player:
+        ldr     ip, .L_ZNK4Item3useER9ItemStackR6Player2
+.L_ZNK4Item3useER9ItemStackR6PlayerPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK4Item3useER9ItemStackR6Player3:
+        .align  2
+.L_ZNK4Item3useER9ItemStackR6Player2:
+        .word   bl_addr__ZNK4Item3useER9ItemStackR6Player-(.L_ZNK4Item3useER9ItemStackR6PlayerPIC0+8)
+        .size   _ZNK4Item3useER9ItemStackR6Player, .-_ZNK4Item3useER9ItemStackR6Player
+        .hidden bl_addr__ZNK4Item3useER9ItemStackR6Player
+
+
+        .global _ZNK5Actor10isSneakingEv 
+        .type   _ZNK5Actor10isSneakingEv, %function
+_ZNK5Actor10isSneakingEv:
+        ldr     ip, .L_ZNK5Actor10isSneakingEv2
+.L_ZNK5Actor10isSneakingEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK5Actor10isSneakingEv3:
+        .align  2
+.L_ZNK5Actor10isSneakingEv2:
+        .word   bl_addr__ZNK5Actor10isSneakingEv-(.L_ZNK5Actor10isSneakingEvPIC0+8)
+        .size   _ZNK5Actor10isSneakingEv, .-_ZNK5Actor10isSneakingEv
+        .hidden bl_addr__ZNK5Actor10isSneakingEv
+
+
+        .global _ZNK5Actor11canAddRiderERS_ 
+        .type   _ZNK5Actor11canAddRiderERS_, %function
+_ZNK5Actor11canAddRiderERS_:
+        ldr     ip, .L_ZNK5Actor11canAddRiderERS_2
+.L_ZNK5Actor11canAddRiderERS_PIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK5Actor11canAddRiderERS_3:
+        .align  2
+.L_ZNK5Actor11canAddRiderERS_2:
+        .word   bl_addr__ZNK5Actor11canAddRiderERS_-(.L_ZNK5Actor11canAddRiderERS_PIC0+8)
+        .size   _ZNK5Actor11canAddRiderERS_, .-_ZNK5Actor11canAddRiderERS_
+        .hidden bl_addr__ZNK5Actor11canAddRiderERS_
+
+
+        .global _ZNK5Actor14getCarriedItemEv 
+        .type   _ZNK5Actor14getCarriedItemEv, %function
+_ZNK5Actor14getCarriedItemEv:
+        ldr     ip, .L_ZNK5Actor14getCarriedItemEv2
+.L_ZNK5Actor14getCarriedItemEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK5Actor14getCarriedItemEv3:
+        .align  2
+.L_ZNK5Actor14getCarriedItemEv2:
+        .word   bl_addr__ZNK5Actor14getCarriedItemEv-(.L_ZNK5Actor14getCarriedItemEvPIC0+8)
+        .size   _ZNK5Actor14getCarriedItemEv, .-_ZNK5Actor14getCarriedItemEv
+        .hidden bl_addr__ZNK5Actor14getCarriedItemEv
+
+
+        .global _ZNK5Actor14getDimensionIdEv 
+        .type   _ZNK5Actor14getDimensionIdEv, %function
+_ZNK5Actor14getDimensionIdEv:
+        ldr     ip, .L_ZNK5Actor14getDimensionIdEv2
+.L_ZNK5Actor14getDimensionIdEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK5Actor14getDimensionIdEv3:
+        .align  2
+.L_ZNK5Actor14getDimensionIdEv2:
+        .word   bl_addr__ZNK5Actor14getDimensionIdEv-(.L_ZNK5Actor14getDimensionIdEvPIC0+8)
+        .size   _ZNK5Actor14getDimensionIdEv, .-_ZNK5Actor14getDimensionIdEv
+        .hidden bl_addr__ZNK5Actor14getDimensionIdEv
+
+
+        .global _ZNK5Actor15getEntityTypeIdEv 
+        .type   _ZNK5Actor15getEntityTypeIdEv, %function
+_ZNK5Actor15getEntityTypeIdEv:
+        ldr     ip, .L_ZNK5Actor15getEntityTypeIdEv2
+.L_ZNK5Actor15getEntityTypeIdEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK5Actor15getEntityTypeIdEv3:
+        .align  2
+.L_ZNK5Actor15getEntityTypeIdEv2:
+        .word   bl_addr__ZNK5Actor15getEntityTypeIdEv-(.L_ZNK5Actor15getEntityTypeIdEvPIC0+8)
+        .size   _ZNK5Actor15getEntityTypeIdEv, .-_ZNK5Actor15getEntityTypeIdEv
+        .hidden bl_addr__ZNK5Actor15getEntityTypeIdEv
+
+
+        .global _ZNK6Player14getCarriedItemEv 
+        .type   _ZNK6Player14getCarriedItemEv, %function
+_ZNK6Player14getCarriedItemEv:
+        ldr     ip, .L_ZNK6Player14getCarriedItemEv2
+.L_ZNK6Player14getCarriedItemEvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZNK6Player14getCarriedItemEv3:
+        .align  2
+.L_ZNK6Player14getCarriedItemEv2:
+        .word   bl_addr__ZNK6Player14getCarriedItemEv-(.L_ZNK6Player14getCarriedItemEvPIC0+8)
+        .size   _ZNK6Player14getCarriedItemEv, .-_ZNK6Player14getCarriedItemEv
+        .hidden bl_addr__ZNK6Player14getCarriedItemEv
+
+
+        .global _ZTV11BlockLegacy 
+        .type   _ZTV11BlockLegacy, %function
+_ZTV11BlockLegacy:
+        ldr     ip, .L_ZTV11BlockLegacy2
+.L_ZTV11BlockLegacyPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZTV11BlockLegacy3:
+        .align  2
+.L_ZTV11BlockLegacy2:
+        .word   bl_addr__ZTV11BlockLegacy-(.L_ZTV11BlockLegacyPIC0+8)
+        .size   _ZTV11BlockLegacy, .-_ZTV11BlockLegacy
+        .hidden bl_addr__ZTV11BlockLegacy
+
+
+        .global _ZTV3Mob 
+        .type   _ZTV3Mob, %function
+_ZTV3Mob:
+        ldr     ip, .L_ZTV3Mob2
+.L_ZTV3MobPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZTV3Mob3:
+        .align  2
+.L_ZTV3Mob2:
+        .word   bl_addr__ZTV3Mob-(.L_ZTV3MobPIC0+8)
+        .size   _ZTV3Mob, .-_ZTV3Mob
+        .hidden bl_addr__ZTV3Mob
+
+
+        .global _ZTV4Item 
+        .type   _ZTV4Item, %function
+_ZTV4Item:
+        ldr     ip, .L_ZTV4Item2
+.L_ZTV4ItemPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZTV4Item3:
+        .align  2
+.L_ZTV4Item2:
+        .word   bl_addr__ZTV4Item-(.L_ZTV4ItemPIC0+8)
+        .size   _ZTV4Item, .-_ZTV4Item
+        .hidden bl_addr__ZTV4Item
+
+
+        .global _ZTV5Actor 
+        .type   _ZTV5Actor, %function
+_ZTV5Actor:
+        ldr     ip, .L_ZTV5Actor2
+.L_ZTV5ActorPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZTV5Actor3:
+        .align  2
+.L_ZTV5Actor2:
+        .word   bl_addr__ZTV5Actor-(.L_ZTV5ActorPIC0+8)
+        .size   _ZTV5Actor, .-_ZTV5Actor
+        .hidden bl_addr__ZTV5Actor
+
+
+        .global _ZTV8GameMode 
+        .type   _ZTV8GameMode, %function
+_ZTV8GameMode:
+        ldr     ip, .L_ZTV8GameMode2
+.L_ZTV8GameModePIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZTV8GameMode3:
+        .align  2
+.L_ZTV8GameMode2:
+        .word   bl_addr__ZTV8GameMode-(.L_ZTV8GameModePIC0+8)
+        .size   _ZTV8GameMode, .-_ZTV8GameMode
+        .hidden bl_addr__ZTV8GameMode
 
 
         .ident  "GCC: (GNU) 4.8"
