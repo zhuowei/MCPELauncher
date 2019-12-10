@@ -207,6 +207,38 @@ _ZN9ItemStackC1Ev:
         .hidden bl_addr__ZN9ItemStackC1Ev
 
 
+        .global _ZN12ItemInstance4initEiii 
+        .type   _ZN12ItemInstance4initEiii, %function
+_ZN12ItemInstance4initEiii:
+        ldr     ip, .L_ZN12ItemInstance4initEiii2
+.L_ZN12ItemInstance4initEiiiPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN12ItemInstance4initEiii3:
+        .align  2
+.L_ZN12ItemInstance4initEiii2:
+        .word   bl_addr__ZN12ItemInstance4initEiii-(.L_ZN12ItemInstance4initEiiiPIC0+8)
+        .size   _ZN12ItemInstance4initEiii, .-_ZN12ItemInstance4initEiii
+        .hidden bl_addr__ZN12ItemInstance4initEiii
+
+
+        .global _ZN12ItemInstance8_setItemEi 
+        .type   _ZN12ItemInstance8_setItemEi, %function
+_ZN12ItemInstance8_setItemEi:
+        ldr     ip, .L_ZN12ItemInstance8_setItemEi2
+.L_ZN12ItemInstance8_setItemEiPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN12ItemInstance8_setItemEi3:
+        .align  2
+.L_ZN12ItemInstance8_setItemEi2:
+        .word   bl_addr__ZN12ItemInstance8_setItemEi-(.L_ZN12ItemInstance8_setItemEiPIC0+8)
+        .size   _ZN12ItemInstance8_setItemEi, .-_ZN12ItemInstance8_setItemEi
+        .hidden bl_addr__ZN12ItemInstance8_setItemEi
+
+
         .global _ZNK5Level21getGlobalBlockPaletteEv 
         .type   _ZNK5Level21getGlobalBlockPaletteEv, %function
 _ZNK5Level21getGlobalBlockPaletteEv:
@@ -269,6 +301,22 @@ _ZN9ItemStack8setBlockEPK5Block:
         .word   bl_addr__ZN9ItemStack8setBlockEPK5Block-(.L_ZN9ItemStack8setBlockEPK5BlockPIC0+8)
         .size   _ZN9ItemStack8setBlockEPK5Block, .-_ZN9ItemStack8setBlockEPK5Block
         .hidden bl_addr__ZN9ItemStack8setBlockEPK5Block
+
+
+        .global _ZN12ItemInstanceC1Ev 
+        .type   _ZN12ItemInstanceC1Ev, %function
+_ZN12ItemInstanceC1Ev:
+        ldr     ip, .L_ZN12ItemInstanceC1Ev2
+.L_ZN12ItemInstanceC1EvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN12ItemInstanceC1Ev3:
+        .align  2
+.L_ZN12ItemInstanceC1Ev2:
+        .word   bl_addr__ZN12ItemInstanceC1Ev-(.L_ZN12ItemInstanceC1EvPIC0+8)
+        .size   _ZN12ItemInstanceC1Ev, .-_ZN12ItemInstanceC1Ev
+        .hidden bl_addr__ZN12ItemInstanceC1Ev
 
 
         .global _ZN5Actor6setRotERK4Vec2 
@@ -493,6 +541,22 @@ _ZN9LevelData11setSpawnPosERK8BlockPos:
         .word   bl_addr__ZN9LevelData11setSpawnPosERK8BlockPos-(.L_ZN9LevelData11setSpawnPosERK8BlockPosPIC0+8)
         .size   _ZN9LevelData11setSpawnPosERK8BlockPos, .-_ZN9LevelData11setSpawnPosERK8BlockPos
         .hidden bl_addr__ZN9LevelData11setSpawnPosERK8BlockPos
+
+
+        .global _ZN8GameMode21_destroyBlockInternalERK8BlockPosh 
+        .type   _ZN8GameMode21_destroyBlockInternalERK8BlockPosh, %function
+_ZN8GameMode21_destroyBlockInternalERK8BlockPosh:
+        ldr     ip, .L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh2
+.L_ZN8GameMode21_destroyBlockInternalERK8BlockPoshPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh3:
+        .align  2
+.L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh2:
+        .word   bl_addr__ZN8GameMode21_destroyBlockInternalERK8BlockPosh-(.L_ZN8GameMode21_destroyBlockInternalERK8BlockPoshPIC0+8)
+        .size   _ZN8GameMode21_destroyBlockInternalERK8BlockPosh, .-_ZN8GameMode21_destroyBlockInternalERK8BlockPosh
+        .hidden bl_addr__ZN8GameMode21_destroyBlockInternalERK8BlockPosh
 
 
         .global _ZN11BlockSource8setBlockEiiiRK5Blocki 
@@ -2093,6 +2157,22 @@ _ZN12ItemInstanceD2Ev:
         .word   bl_addr__ZN12ItemInstanceD2Ev-(.L_ZN12ItemInstanceD2EvPIC0+8)
         .size   _ZN12ItemInstanceD2Ev, .-_ZN12ItemInstanceD2Ev
         .hidden bl_addr__ZN12ItemInstanceD2Ev
+
+
+        .global _ZN9ItemStackD2Ev 
+        .type   _ZN9ItemStackD2Ev, %function
+_ZN9ItemStackD2Ev:
+        ldr     ip, .L_ZN9ItemStackD2Ev2
+.L_ZN9ItemStackD2EvPIC0:
+        add     ip, pc, ip 
+        ldr     ip, [ip]
+        blx     ip 
+.L_ZN9ItemStackD2Ev3:
+        .align  2
+.L_ZN9ItemStackD2Ev2:
+        .word   bl_addr__ZN9ItemStackD2Ev-(.L_ZN9ItemStackD2EvPIC0+8)
+        .size   _ZN9ItemStackD2Ev, .-_ZN9ItemStackD2Ev
+        .hidden bl_addr__ZN9ItemStackD2Ev
 
 
         .ident  "GCC: (GNU) 4.8"
