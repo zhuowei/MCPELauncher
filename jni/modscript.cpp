@@ -101,8 +101,6 @@ static void (*bl_Entity_remove)(Entity*);
 static void (*bl_GameMode_destroyBlock_real)(void*, BlockPos, signed char);
 static void (*bl_Entity_setOnFire)(Entity*, int);
 //static void (*bl_Inventory_clearInventoryWithDefault)(void*);
-static void (*bl_Inventory_Inventory)(void*, Player*);
-static void (*bl_Inventory_delete1_Inventory)(void*);
 int (*bl_ItemInstance_getId)(ItemInstance*);
 static void (*bl_NinecraftApp_update_real)(MinecraftGame*);
 
@@ -1579,8 +1577,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
-	bl_Inventory_Inventory = (void (*)(void*, Player*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryC1EP6Player");
-	bl_Inventory_delete1_Inventory = (void (*)(void*)) dlsym(RTLD_DEFAULT, "_ZN9InventoryD1Ev");
 	void** minecraftGameVtable = (void**)dlsym(mcpelibhandle, "_ZTV13MinecraftGame");
 	//replace the update method in Minecraft with our own
 	bl_NinecraftApp_update_real = (void (*)(MinecraftGame*)) minecraftGameVtable[vtable_indexes.minecraft_update];

@@ -220,18 +220,21 @@ public:
 };
 
 void bl_renderManager_init(void* mcpelibhandle) {
+#if 0
 	bl_EntityRenderDispatcher_getRenderer = (EntityRenderer* (*) (void*, int))
 		dlsym(mcpelibhandle, "_ZNK21ActorRenderDispatcher11getRendererE15ActorRendererId");
 	bl_EntityRenderDispatcher_getRenderer_entity_real = (EntityRenderer* (*)(void*, Entity*))
 		dlsym(mcpelibhandle, "_ZNK21ActorRenderDispatcher11getRendererER5Actor");
 	bl_Mesh_reset = (void (*)(void*))
 		dlsym(mcpelibhandle, "_ZN3mce4Mesh5resetEv");
+#endif
 /*
 	void* getRenderer = dlsym(mcpelibhandle, "_ZN22EntityRenderDispatcher11getRendererER5Actor");
 	mcpelauncher_hook(getRenderer, (void*) bl_EntityRenderDispatcher_getRenderer_hook,
 		(void**) &bl_EntityRenderDispatcher_getRenderer_real);
 */
 	// FIXME 1.2
+#if 0
 	bl_EntityRenderDispatcher_render_real = (void* (*)(void*, BaseActorRenderContext&, Actor&, Vec3 const&, Vec2 const&))
 		dlsym(mcpelibhandle, "_ZN21ActorRenderDispatcher6renderER22BaseActorRenderContextR5ActorRK4Vec3RK4Vec2");
 	if (!bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_render_real, (void*)&bl_EntityRenderDispatcher_render_hook)) {
@@ -245,6 +248,7 @@ void bl_renderManager_init(void* mcpelibhandle) {
 		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "can't hook getRenderer");
 		abort();
 	}
+#endif
 	/* Crashes on Intel!
 	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_EntityRenderDispatcher_getRenderer_entity_real,
 		(void*)&bl_EntityRenderDispatcher_getRenderer_hook);
