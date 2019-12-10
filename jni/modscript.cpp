@@ -755,6 +755,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetGameType
   (JNIEnv *env, jclass clazz, jint type) {
+#if 0
 	if (bl_level == NULL) return;
 	LevelData* levelData = bl_level->getLevelData();
 	levelData->setGameType((GameType) type);
@@ -762,14 +763,18 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	void (*setPlayerGameType)(Player* player, GameType gameType) = 
 		(void (*)(Player*, GameType)) (*((void***)bl_localplayer))[vtable_indexes.player_set_player_game_type];
 	setPlayerGameType(bl_localplayer, (GameType)type);
+#endif
 }
 
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetGameType
   (JNIEnv *env, jclass clazz) {
+#if 0
 	if (bl_level == NULL) return 0;
 	LevelData* levelData = bl_level->getLevelData();
 	return levelData->getGameType();
+#endif
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeDestroyBlock
@@ -842,8 +847,11 @@ JNIEXPORT jlong JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeG
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetBrightness
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z) {
+#if 0 // FIXME 1.13
 	if (!bl_localplayer) return 0;
 	return bl_localplayer->getRegion()->getRawBrightness({x, y, z}, true, true).value; //all observed uses of getRawBrightness pass true
+#endif
+	return 0;
 }
 
 JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetPlayerLoc
@@ -1277,16 +1285,19 @@ JNIEXPORT jfloat JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_native
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeAddItemFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot, jint id, jint damage, jint amount) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return;
 	ItemStack instance(id, amount, damage);
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
 	if (tileEnt == NULL) return;
 	tileEnt->setItem(slot, instance);
+#endif
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return -1;
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
@@ -1294,10 +1305,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
 	return instance->getId();
+#endif
+	return 0;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemDataFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return -1;
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
@@ -1305,10 +1319,13 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
 	return instance->getDamageValue();
+#endif
+	return 0;
 }
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemCountFurnace
   (JNIEnv *env, jclass clazz, jint x, jint y, jint z, jint slot) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return -1;
 
 	FurnaceBlockEntity* tileEnt = static_cast<FurnaceBlockEntity*>(bl_localplayer->getRegion()->getBlockEntity(x, y, z));
@@ -1316,6 +1333,8 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
 	ItemStack* instance = tileEnt->getItem(slot);
 	if (!instance) return -1;
 	return instance->count;
+#endif
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeRemoveItemBackground

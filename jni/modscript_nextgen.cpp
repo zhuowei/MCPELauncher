@@ -1321,6 +1321,7 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 
 JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetItemName
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jboolean raw) {
+#if 0 // FIXME 1.13
 	if (!getItemForId(itemId)) return nullptr;
 	ItemInstance myStack(itemId, 1, itemDamage);
 	if (myStack.getId() != itemId) return NULL;
@@ -1350,10 +1351,13 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 	std::string returnVal = descriptionId;
 	jstring returnValString = env->NewStringUTF(returnVal.c_str());
 	return returnValString;
+#endif
+	return nullptr;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForItem
   (JNIEnv *env, jclass clazz, jint itemId, jint itemDamage, jfloatArray outputArray) {
+#if 0 // FIXME 1.13
 	if (itemId <= 0 || itemId >= bl_item_id_count) return false;
 	ItemInstance myStack(itemId, 1, itemDamage);
 	if (myStack.getId() != itemId) return false;
@@ -1363,6 +1367,8 @@ JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nati
 	env->SetFloatArrayRegion(outputArray, 0, 4, set->bounds);
 	env->SetFloatArrayRegion(outputArray, 4, 2, lasttwo);
 	return true;
+#endif
+	return false;
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGetTextureCoordinatesForBlock
@@ -2178,12 +2184,14 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSh
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetNameTag
   (JNIEnv *env, jclass clazz, jlong entityId, jstring name) {
+#if 0 // FIXME 1.13
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	const char * nameUtfChars = env->GetStringUTFChars(name, NULL);
 	entity->setNameTagVisible(true);
 	entity->setNameTag(std::string(nameUtfChars));
 	env->ReleaseStringUTFChars(name, nameUtfChars);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetStonecutterItem
@@ -2195,10 +2203,12 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jint itemId, jint category, jint mystery1) {
 	Item* myitem = getItemForId(itemId);
 	bl_Item_setCategory(myitem, category);
+#if 0 // FIXME 1.13
 	if (itemIdIsBlock(itemId)) {
 		BlockLegacy* myblock = getBlockForItemId(itemId);
 		myblock->setCategory((CreativeItemCategory)category);
 	}
+#endif
 }
 
 void bl_sendPacket(Packet* packet) {
@@ -2350,6 +2360,7 @@ JNIEXPORT jlongArray JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_na
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelAddParticle
   (JNIEnv *env, jclass clazz, jstring type, jfloat x, jfloat y, jfloat z, jfloat xVel, jfloat yVel, jfloat zVel, jint data) {
+#if 0 // FIXME 1.13
 	if (!type) return;
 	const char * typeChars = env->GetStringUTFChars(type, nullptr);
 	std::string typeStr(typeChars);
@@ -2359,6 +2370,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLe
 	Vec3 pos {x, y, z};
 	Vec3 vel {xVel, yVel, zVel};
 	bl_minecraft->getLevel()->addParticle((ParticleType)particleType, pos, vel, data, nullptr, false);
+#endif
 }
 
 JNIEXPORT jboolean JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelIsRemote
@@ -2483,12 +2495,15 @@ JNIEXPORT jstring JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativ
 
 JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelGetGrassColor
   (JNIEnv *env, jclass clazz, jint x, jint z) {
+#if 0 // FIXME 1.13
 	if (bl_level == NULL) return 0;
 	BlockPos pos;
 	pos.x = x;
 	pos.y = 64;
 	pos.z = z;
 	return bl_localplayer->getRegion()->getGrassColor(pos);
+#endif
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelSetGrassColor
@@ -3179,6 +3194,7 @@ JNIEXPORT void Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeItemSetUse
 
 JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerEnchant
   (JNIEnv *env, jclass clazz, jint slot, jint enchantmentId, jint enchantmentLevel) {
+#if 0 // FIXME 1.13
 	auto inventory = bl_localplayer->getSupplies();
 	ItemStack* itemInstance = inventory->getItem(slot);
 	if (itemInstance == nullptr) return false;
@@ -3189,6 +3205,8 @@ JNIEXPORT jboolean Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayer
 		((ServerPlayer*)bl_localplayer)->sendInventory(true);
 	}
 	return returnVal;
+#endif
+	return false;
 }
 
 JNIEXPORT jintArray Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePlayerGetEnchantments
@@ -3778,12 +3796,6 @@ bool addHook(PlayerInventoryProxy* a, ItemInstance& b, bool c) {
 	return a->add(b, c);
 }
 */
-
-std::string getNameHook(ItemInstance* itemStack) {
-	if (!itemStack) return "HACK";
-	BL_LOG("Getting name: %d", itemStack->getId());
-	return itemStack->getName();
-}
 
 void bl_BlockGraphics_initBlocks_hook(ResourcePackManager& resourceLoader) {
 	bl_BlockGraphics_initBlocks_real(resourceLoader);
