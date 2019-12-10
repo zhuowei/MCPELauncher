@@ -269,8 +269,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 		"_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb");
 	//vtable_indexes.raknet_instance_connect = bl_vtableIndex(mcpelibhandle, "_ZTV14RakNetInstance",
 	//	"_ZN14RakNetInstance7connectEPKci");
-	vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZNK11MobRenderer10getSkinPtrERK5Actor");
+	//vtable_indexes.mobrenderer_get_skin_ptr = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
+	//	"_ZNK11MobRenderer10getSkinPtrERK5Actor");
 	vtable_indexes.tile_on_redstone_update = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib");
 	//vtable_indexes.tile_is_redstone_block = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
@@ -433,8 +433,10 @@ static void (*bl_BlockSource_fireBlockEvent_real)(BlockSource* source, int x, in
 static AABB* (*bl_Block_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
 static AABB* (*bl_ReedBlock_getAABB)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool);
 
+#if 0 // FIXME 1.13
 static void (*bl_LevelChunk_setBiome)(LevelChunk*, Biome const&, ChunkTilePos const&);
 static void (*bl_Entity_setSize)(Entity*, float, float);
+#endif
 //static void (*bl_ArmorItem_ArmorItem)(ArmorItem*, std::string const&, int, void*, int, int);
 static void (*bl_ScreenChooser_setScreen)(ScreenChooser*, int);
 static void (*bl_Minecraft_hostMultiplayer)(Minecraft* minecraft, int port);
@@ -2591,9 +2593,11 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeFo
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeEntitySetSize
   (JNIEnv *env, jclass clazz, jlong entityId, jfloat a, jfloat b) {
+#if 0 // FIXME 1.13
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
 	bl_Entity_setSize(entity, a, b);
+#endif
 }
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSetHandEquipped
@@ -4293,12 +4297,13 @@ void bl_setuphooks_cppside() {
 		dlsym(mcpelibhandle, "_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb");
 	bl_ReedBlock_getAABB = (AABB* (*)(BlockLegacy*, BlockSource&, BlockPos const&, BlockAndData const&, AABB&, bool))
 		dlsym(mcpelibhandle, "_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb");
-
+#if 0 // FIXME 1.13
 	bl_LevelChunk_setBiome = (void (*)(LevelChunk*, Biome const&, ChunkTilePos const&))
 		dlsym(mcpelibhandle, "_ZN10LevelChunk8setBiomeERK5BiomeRK13ChunkBlockPos");
 // known to work
 	bl_Entity_setSize = (void (*)(Entity*, float, float))
 		dlsym(mcpelibhandle, "_ZN5Actor7setSizeEff");
+#endif
 	// bl_ArmorItem_ArmorItem = (void (*)(ArmorItem*, std::string const&, int, void*, int, int))
 	//	dlsym(mcpelibhandle, "_ZN9ArmorItemC1ERKSsiRKNS_13ArmorMaterialEi9ArmorSlot");
 	//bl_ScreenChooser_setScreen = (void (*)(ScreenChooser*, int))
@@ -4351,8 +4356,8 @@ void bl_setuphooks_cppside() {
 	//	(void**) &bl_Item_initCreativeItems_real);
 	bl_patch_got_wrap(mcpelibhandle, (void*) &Item::initCreativeItems,
 		(void*)&bl_Item_initCreativeItems_hook);
-	bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
-		dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrERK5Actor");
+	//bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
+	//	dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrERK5Actor");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitER5ActorRK9HitResult");
 	mcpelauncher_hook(throwableHit, (void*) &bl_Throwable_throwableHit_hook,
 		(void**) &bl_Throwable_throwableHit_real);
