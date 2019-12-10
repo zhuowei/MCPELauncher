@@ -45,6 +45,12 @@ def makeFakeSymPtrs(fakeSyms, outfile):
         print("#include <stdint.h>", file=outfile)
         for sym in fakeSyms:
                 print("void* bl_addr_{};".format(sym[0]), file=outfile)
+        print("struct bl_sym_pair { const char* name; uintptr_t offset; };", file=outfile);
+        print("struct bl_sym_pair bl_sym_pairs[] = {", file=outfile)
+        for sym in fakeSyms:
+            print("{\"" + sym[0] + "\", " + hex(sym[1]) + "},", file=outfile)
+        print("};", file=outfile);
+        print("void bl_fakeSyms_initOneAddress(void**, uintptr_t, uintptr_t);", file=outfile);
         print("void bl_fakeSyms_initStubs(uintptr_t baseAddr) {", file=outfile)
         for sym in fakeSyms:
                 print("bl_fakeSyms_initOneAddress(&bl_addr_{}, baseAddr, {});".format(sym[0], hex(sym[1])), file=outfile)
