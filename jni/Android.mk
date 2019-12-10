@@ -21,7 +21,8 @@ corkscrew_x86_src_files := \
 	libcorkscrew/arch-x86/ptrace-x86.c
 
 LOCAL_SRC_FILES := nativepatch.c modscript.cpp modscript_nextgen.cpp utf8proc_slim.c dobby.cpp marauders_map.c \
-	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp kamcord_fixer.cpp fmod_filesystem.cpp prepatch.cpp link_stubs.c fakeassets.cpp $(corkscrew_generic_src_files)
+	modscript_renderer.cpp simpleuuid.c signalhandler.cpp modscript_cape.cpp controller_jni.cpp kamcord_fixer.cpp fmod_filesystem.cpp prepatch.cpp link_stubs.c fakeassets.cpp $(corkscrew_generic_src_files) \
+	fakesymstubs_arm32.s fakesym_ptrs.c fakesym_lookup.c
 
 ifneq (,$(wildcard $(LOCAL_PATH)/scriptscramble.c))
     LOCAL_SRC_FILES += scriptscramble.c
@@ -57,6 +58,8 @@ include $(BUILD_SHARED_LIBRARY)
 endif
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+# Uncomment for finding out which symbols we need
+# TARGET_NO_UNDEFINED_LDFLAGS :=
 include $(BUILD_SHARED_LIBRARY)
 endif
 
