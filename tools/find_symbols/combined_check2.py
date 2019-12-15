@@ -37,17 +37,28 @@ def readSymsOnlyUndef(filepath):
             symtab[l[4]] = int(l[0], 16)
     return symtab
 
+def getDlsymedSyms(filepath):
+    symtab = {}
+    with open(filepath, "r") as infile:
+        for line in infile:
+            l = line.strip()
+            if len(l) == 0:
+                continue
+            symtab[l] = "00000000"
+    return symtab
+
 mapping = {}
 addSymsFromFile("diaphora_outsyms.csv", mapping)
 addSymsFromFile("hopeless_out.csv", mapping)
 addSymsFromFile("manually_found_syms.csv", mapping)
 
 mcpeSyms = {}
-mcpeSyms.update(readSyms("mcpe1131_ownsyms.txt"))
-mcpeSyms.update(readSyms("fmod1131_ownsyms.txt"))
+mcpeSyms.update(readSyms("mcpe1140_ownsyms.txt"))
+mcpeSyms.update(readSyms("fmod1140_ownsyms.txt"))
 mcpeSyms.update(readSyms("stdc++_ownsyms.txt"))
 
 blSyms = readSymsOnlyUndef("bl_syms.txt") # todo: hand-grabbed syms
+blSyms.update(getDlsymedSyms("syms_in_strings.txt"))
 with open("combined_check2_out.csv", "w") as outfile:
     for sym in blSyms:
         if sym in mcpeSyms:

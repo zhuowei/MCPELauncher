@@ -1,5 +1,8 @@
 import os
 import pickle
+
+ida = True
+
 def u32(a, i):
     return a[i] | (a[i+1] << 8) | (a[i+2] << 16) | (a[i+3] << 24)
 def u64(a, i):
@@ -7,7 +10,8 @@ def u64(a, i):
 def portTable(tableStart, sourceTableSize, sourceBytes, sourceRSyms, destBytes, destTableStart):
     destTableFileOffset = -0x1000
     sourceTableFileOffset = -0x200000
-    #print("//", hex(tableStart), hex(sourceTableSize))
+    if ida:
+        print("//", hex(tableStart), hex(sourceTableSize))
     for tableIndex in range(0, sourceTableSize // 8):
         sourceVtableAddress = u64(sourceBytes, tableStart + sourceTableFileOffset + tableIndex*8)
         if not sourceVtableAddress in sourceRSyms:
@@ -15,11 +19,14 @@ def portTable(tableStart, sourceTableSize, sourceBytes, sourceRSyms, destBytes, 
         destAddress = destTableStart + destTableFileOffset + tableIndex * 4
         sourceSymName = sourceRSyms[sourceVtableAddress]
         destSymAddress = u32(destBytes, destAddress)
-        #print("//", tableIndex, sourceSymName, hex(destAddress), hex(destSymAddress))
+        if ida:
+            print("//", tableIndex, sourceSymName, hex(destAddress), hex(destSymAddress))
         if destSymAddress == 0:
             continue
-        #print("MakeNameEx({}, \"{}\", SN_NOWARN|SN_NOCHECK);".format(hex(destSymAddress & ~1), sourceSymName))
-        print(sourceSymName, hex(destSymAddress), sep=",")
+        if ida:
+            print("MakeNameEx({}, \"{}\", SN_NOWARN|SN_NOCHECK);".format(hex(destSymAddress & ~1), sourceSymName))
+        else:
+            print(sourceSymName, hex(destSymAddress), sep=",")
 
 def readSyms(filepath):
     if os.path.exists("syms.pickle"):
@@ -39,30 +46,30 @@ def readSyms(filepath):
         pickle.dump(output, outfile)
     return output
 #print(readSyms("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/syms.txt"))
-sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/syms2.txt")
-with open("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/bedrock_server", "rb") as infile:
+sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/syms.txt")
+with open("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/bedrock_server", "rb") as infile:
     sourceData = infile.read()
-with open("/Users/zhuowei/mcpe1131/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
+with open("/Users/zhuowei/mcpe1140/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
     destData = infile.read()
 tables = {
-    "_ZTV12ServerPlayer": 0x04e2d774,
-    # NO "_ZTV11LocalPlayer": 0x4e08d98
-    "_ZTV4Item": 0x4e57b88,
-    "_ZTV11BlockLegacy": 0x4e5e5bc,
-    "_ZTV11ServerLevel": 0x4e2d618,
-    # "_ZTV5Level": 0x4e6cc04
-    "_ZTV19ServerCommandOrigin": 0x4e2cc5c,
-    #"_ZTV18ItemSpriteRenderer": 0x4e40518,
-    "_ZTV10WitherBoss": 0x4e3d504,
-    "_ZTV8GameMode": 0x4e551a8,
-    "_ZTV12ShapedRecipe": 0x4e56c24,
-    "_ZTV11BannerBlock": 0x4e89cb4,
-    "_ZTV12EmptyMapItem": 0x4e56ed8,
-    "_ZTV9ArmorItem": 0x4e555c4,
-    "_ZTV3Mob": 0x4e42ef4,
-    "_ZTV5Actor": 0x4e2e8f0,
+    "_ZTV12ServerPlayer": 0x04ecfdf8,
+    ## NO "_ZTV11LocalPlayer": 0x4e08d98
+    "_ZTV4Item": 0x4efa268,
+    "_ZTV11BlockLegacy": 0x4f00fd4,
+    "_ZTV11ServerLevel": 0x4ecfc9c,
+    ## "_ZTV5Level": 0x4f0f9dc,
+    "_ZTV19ServerCommandOrigin": 0x4ecf2e0,
+    ## "_ZTV18ItemSpriteRenderer": 0x4e40518,
+    #"_ZTV10WitherBoss": 0x4e3d504,
+    "_ZTV8GameMode": 0x4ef7888,
+    #"_ZTV12ShapedRecipe": 0x4e56c24,
+    #"_ZTV11BannerBlock": 0x4e89cb4,
+    #"_ZTV12EmptyMapItem": 0x4e56ed8,
+    #"_ZTV9ArmorItem": 0x4e555c4,
+    "_ZTV3Mob": 0x4ee55d8,
+    "_ZTV5Actor": 0x4ed0fc0,
+    "_ZTV20ServerNetworkHandler": 0x4ece2f0,
 }
-ida = False
 
 if ida:
     print("""
@@ -74,6 +81,8 @@ static main(void)
 
 for tableName in tables:
     portTable(sourceSyms[tableName][0], sourceSyms[tableName][1], sourceData, sourceRsyms, destData, tables[tableName])
+    if not ida:
+        print(tableName, hex(tables[tableName]), sep=",")
 if ida:
     print("}")
 # hex editor: 0x540B2D8

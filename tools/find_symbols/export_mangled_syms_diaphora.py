@@ -19,6 +19,6 @@ def readSyms(filepath):
         pickle.dump(output, outfile)
     return output
 sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/mcpe1130b6/lib/armeabi-v7a/syms2.txt")
-conn = sqlite3.connect("diffout_2.diaphora")
+conn = sqlite3.connect("diffout_1140.diaphora")
 for a in conn.execute("select address, address2, name2 from results where ratio >= 0.8 and not description like '%same name%' and not name2 like 'sub_%'"):
     print(sourceRsyms[int(a[1], 16)] + "," + hex(int(a[0], 16) | 1))
