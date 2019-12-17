@@ -184,6 +184,7 @@ class BlockDefinitionGroup;
 // Updated 1.11
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
 // or  ItemRegistry::registerItemShared
+class BaseGameVersion;
 class Item {
 public:
 	//void** vtable; //0
@@ -204,7 +205,7 @@ public:
 	int getMaxDamage() const;
 	void setAllowOffhand(bool);
 	void setUseAnimation(UseAnimation);
-	static void initCreativeItems(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
+	static void initCreativeItems(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, BaseGameVersion const&, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
 static_assert(sizeof(Item) == 144, "item size is wrong");
