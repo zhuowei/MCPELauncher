@@ -217,7 +217,7 @@ public:
 struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
 	int tile_vtable_size;
-	int blockgraphics_vtable_size;
+	//int blockgraphics_vtable_size;
 	//int blockgraphics_get_carried_texture;
 	int tile_get_color;
 	int tile_get_color_data;
@@ -241,7 +241,7 @@ struct bl_vtable_indexes_nextgen_cpp {
 //	int appplatform_use_centered_gui;
 //	int appplatform_use_metadata_driven_screens;
 //	int entity_hurt;
-	int mobrenderer_render;
+//	int mobrenderer_render;
 	int snowball_item_vtable_size;
 	int item_use;
 //	int item_dispense;
@@ -260,7 +260,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_");
 	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV11BlockLegacy")->st_size;
-	vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
+	//vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block");
 	vtable_indexes.tile_get_color_data = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
@@ -305,8 +305,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //		"_ZNK19AppPlatform_android24useMetadataDrivenScreensEv");
 //	vtable_indexes.entity_hurt = bl_vtableIndex(mcpelibhandle, "_ZTV5Actor",
 //		"_ZN5Actor4hurtERK18EntityDamageSourceibb");
-	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
-		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
+//	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
+//		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
 	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item3useER9ItemStackR6Player");
