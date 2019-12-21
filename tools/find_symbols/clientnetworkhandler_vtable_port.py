@@ -65,15 +65,15 @@ def readSyms(filepath):
         pickle.dump(output, outfile)
     return output
 #print(readSyms("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/syms.txt"))
-sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/syms.txt")
-with open("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/bedrock_server", "rb") as infile:
+sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.14.1.4/syms.txt")
+with open("/Users/zhuowei/Downloads/bedrock-server-1.14.1.4/bedrock_server", "rb") as infile:
     sourceData = infile.read()
-with open("/Users/zhuowei/mcpe1140/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
+with open("/Users/zhuowei/mcpe1141/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
     destData = infile.read()
 tables = {
-    "_ZTV27ClassroomModeNetworkHandler": 0x4f1f970,
-    "_ZTV26LegacyClientNetworkHandler": 0x4ea96b8,
-    "_ZTV20ClientNetworkHandler": 0x4ec43cc,
+    "_ZTV27ClassroomModeNetworkHandler": 0x4f9e758,
+    "_ZTV26LegacyClientNetworkHandler": 0x4f28488,
+    "_ZTV20ClientNetworkHandler": 0x4f4319c,
 }
 
 if ida:

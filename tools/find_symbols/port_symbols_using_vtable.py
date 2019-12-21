@@ -1,7 +1,7 @@
 import os
 import pickle
 
-ida = True
+ida = False
 
 def u32(a, i):
     return a[i] | (a[i+1] << 8) | (a[i+2] << 16) | (a[i+3] << 24)
@@ -46,29 +46,29 @@ def readSyms(filepath):
         pickle.dump(output, outfile)
     return output
 #print(readSyms("/Users/zhuowei/Downloads/bedrock-server-1.13.3.0/syms.txt"))
-sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/syms.txt")
-with open("/Users/zhuowei/Downloads/bedrock-server-1.14.0.9/bedrock_server", "rb") as infile:
+sourceSyms, sourceRsyms = readSyms("/Users/zhuowei/Downloads/bedrock-server-1.14.1.4/syms.txt")
+with open("/Users/zhuowei/Downloads/bedrock-server-1.14.1.4/bedrock_server", "rb") as infile:
     sourceData = infile.read()
-with open("/Users/zhuowei/mcpe1140/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
+with open("/Users/zhuowei/mcpe1141/lib/armeabi-v7a/libminecraftpe.so", "rb") as infile:
     destData = infile.read()
 tables = {
-    "_ZTV12ServerPlayer": 0x04ecfdf8,
+    "_ZTV12ServerPlayer": 0x4f4ebc8,
     ## NO "_ZTV11LocalPlayer": 0x4e08d98
-    "_ZTV4Item": 0x4efa268,
-    "_ZTV11BlockLegacy": 0x4f00fd4,
-    "_ZTV11ServerLevel": 0x4ecfc9c,
+    "_ZTV4Item": 0x4f79038,
+    "_ZTV11BlockLegacy": 0x4f7fda4,
+    "_ZTV11ServerLevel": 0x4f4ea6c,
     ## "_ZTV5Level": 0x4f0f9dc,
-    "_ZTV19ServerCommandOrigin": 0x4ecf2e0,
+    "_ZTV19ServerCommandOrigin": 0x4f4e0b0,
     ## "_ZTV18ItemSpriteRenderer": 0x4e40518,
-    #"_ZTV10WitherBoss": 0x4e3d504,
-    "_ZTV8GameMode": 0x4ef7888,
-    #"_ZTV12ShapedRecipe": 0x4e56c24,
-    #"_ZTV11BannerBlock": 0x4e89cb4,
-    #"_ZTV12EmptyMapItem": 0x4e56ed8,
-    #"_ZTV9ArmorItem": 0x4e555c4,
-    "_ZTV3Mob": 0x4ee55d8,
-    "_ZTV5Actor": 0x4ed0fc0,
-    "_ZTV20ServerNetworkHandler": 0x4ece2f0,
+    ##"_ZTV10WitherBoss": 0x4e3d504,
+    "_ZTV8GameMode": 0x4f76658,
+    ##"_ZTV12ShapedRecipe": 0x4e56c24,
+    ##"_ZTV11BannerBlock": 0x4e89cb4,
+    ##"_ZTV12EmptyMapItem": 0x4e56ed8,
+    ##"_ZTV9ArmorItem": 0x4e555c4,
+    "_ZTV3Mob": 0x4f643a8,
+    "_ZTV5Actor": 0x4f4fd90,
+    "_ZTV20ServerNetworkHandler": 0x4f4d0c0,
 }
 
 if ida:
