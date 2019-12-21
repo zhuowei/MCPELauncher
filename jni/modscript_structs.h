@@ -217,26 +217,14 @@ public:
 class BlockLegacy;
 class ItemStack;
 // 1.13.1
-class ItemInstance {
+class ItemStackBase {
 public:
 	char filler1[16-4]; // 4
 	short damage; // 16
 	unsigned char count; //18
 	char filler2[84-19]; // 19
 
-	ItemInstance();
-
-	ItemInstance(int id, int count, int data) : ItemInstance() {
-		init(id, count, data);
-		_setItem(id);
-	}
-	ItemInstance(ItemStack const&);
-
-	ItemInstance(ItemInstance const&);
-	ItemInstance& operator=(ItemInstance const&);
-	virtual ~ItemInstance();
-	bool operator==(ItemInstance const&) const;
-	bool operator!=(ItemInstance const&) const;
+	virtual ~ItemStackBase();
 	ItemEnchants getEnchantsFromUserData() const;
 	bool hasCustomHoverName() const;
 	std::string getCustomName() const;
@@ -254,6 +242,24 @@ public:
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
+
+class ItemInstance: public ItemStackBase {
+public:
+	ItemInstance();
+
+	ItemInstance(int id, int count, int data) : ItemInstance() {
+		init(id, count, data);
+		_setItem(id);
+	}
+	ItemInstance(ItemStack const&);
+
+	ItemInstance(ItemInstance const&);
+	ItemInstance& operator=(ItemInstance const&);
+	virtual ~ItemInstance();
+	bool operator==(ItemInstance const&) const;
+	bool operator!=(ItemInstance const&) const;
+}
+
 static_assert(offsetof(ItemInstance, count) == 18, "count wrong");
 static_assert(sizeof(ItemInstance) == 84, "ItemInstance wrong");
 

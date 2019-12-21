@@ -1,6 +1,6 @@
 #pragma once
 #include "blockidtoitemid.h"
-class ItemStack : public ItemInstance {
+class ItemStack : public ItemStackBase {
 public:
 	// this is actually the same layout as ItemInstance
 	ItemStack();
