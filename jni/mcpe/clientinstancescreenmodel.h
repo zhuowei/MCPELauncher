@@ -25,4 +25,4 @@ public:
 };
 // search for the constructor
 // or std::__shared_ptr<ClientInstanceScreenModel
-static_assert(sizeof(ClientInstanceScreenModel) == 116, "ClientInstanceScreenModel size");
+static_assert(sizeof(ClientInstanceScreenModel) == 108, "ClientInstanceScreenModel size");

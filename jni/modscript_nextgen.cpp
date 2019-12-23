@@ -102,7 +102,7 @@ const size_t kItemSize = sizeof(Item);
 // found in ItemEntity::_validateItem
 const size_t kItemEntity_itemInstance_offset = 1360;
 // ChatScreenController::_sendChatMessage
-const size_t kClientInstanceScreenModel_offset = 620;
+const size_t kClientInstanceScreenModel_offset = 652;
 
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {

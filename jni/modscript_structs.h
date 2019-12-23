@@ -181,7 +181,7 @@ enum UseAnimation {
 class ActorInfoRegistry;
 class BlockDefinitionGroup;
 
-// Updated 1.11
+// Updated 1.14.1
 // see VanillaItems::initClientData; search for r2, #318 near it (is above it in b30)
 // or  ItemRegistry::registerItemShared
 class BaseGameVersion;
@@ -192,7 +192,7 @@ public:
 	short itemId; //64
 	char filler1[98-66]; // 66
 	short flags; // 98
-	char filler3[144-100]; // 100
+	char filler3[168-100]; // 100
 	virtual ~Item();
 
 	// this one loads textures
@@ -208,7 +208,7 @@ public:
 	static void initCreativeItems(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, BaseGameVersion const&, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 };
 static_assert(offsetof(Item, itemId) == 64, "Item ID offset");
-static_assert(sizeof(Item) == 144, "item size is wrong");
+static_assert(sizeof(Item) == 168, "item size is wrong");
 
 class CompoundTag {
 public:
@@ -272,7 +272,7 @@ enum BlockProperty {
 class AABB;
 class Block;
 typedef Block BlockAndData;
-// last updated 1.12
+// last updated 1.14.1
 class BlockLegacy {
 public:
 	void** vtable; //0
@@ -288,7 +288,7 @@ public:
 	unsigned char lightEmission; // 121 from BlockLegacy::setLightEmission
 	char filler4[136-122]; // 122
 	unsigned short id; // 136
-	char filler5[3240-138]; // 138
+	char filler5[3192-138]; // 138
 
 	float getDestroySpeed() const;
 	float getFriction() const;
@@ -538,15 +538,15 @@ typedef void ModelRenderer;
 #ifdef __cplusplus
 // look for id #298 above VanillaItems::initClientData
 struct ArmorItem : public Item {
-	int armorType; // 144
-	int damageReduceAmount; // 148
-	int renderIndex; // 152
-	void* armorMaterial; // 156
-	char fillerendarmor[176-160]; // 160
+	int armorType; // 168
+	int damageReduceAmount; // 172
+	int renderIndex; // 176
+	void* armorMaterial; // 180
+	char fillerendarmor[200-184]; // 184
 };
 
 #ifdef __arm__
-static_assert(sizeof(ArmorItem) == 176, "armor item size");
+static_assert(sizeof(ArmorItem) == 200, "armor item size");
 #endif
 
 
