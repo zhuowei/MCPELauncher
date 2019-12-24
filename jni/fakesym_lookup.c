@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include "logutil.h"
 
 struct bl_sym_pair { const char* name; uintptr_t offset; };
 extern struct bl_sym_pair bl_sym_pairs[];
@@ -16,15 +17,24 @@ static int bl_fakeSyms_bsearch_compare(const struct bl_sym_pair* key, const stru
 }
 
 void* bl_fakeSyms_dlsym(const char* symbolName) {
-	if (!bl_mcpe_base) return NULL;
+	BL_LOG("FakeLog: symbol name %s", symbolName);
+	if (!bl_mcpe_base) {
+		BL_LOG("MCPE Base not initialized");
+		return NULL;
+	}
 	struct bl_sym_pair key = {
 		.name = symbolName,
 		.offset = 0,
 	};
 	// expecting a hand-coded optimized hashtable? Too bad: I'm not as smart as McMrARM.
 	struct bl_sym_pair* value = bsearch(&key, bl_sym_pairs, bl_sym_pairs_count, sizeof(key), bl_fakeSyms_bsearch_compare);
-	if (!value) return NULL;
-	return (void*)(bl_mcpe_base + value->offset);
+	if (!value) {
+		BL_LOG("Symbol %s not found", symbolName);
+		return NULL;
+	}
+	void* retval = (void*)(bl_mcpe_base + value->offset);
+	BL_LOG("Returning symbol at %p (base %p)", retval, bl_mcpe_base);
+	return retval;
 }
 
 void bl_fakeSyms_initStubs(uintptr_t mcpe_base);
