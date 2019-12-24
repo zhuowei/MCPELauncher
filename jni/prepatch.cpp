@@ -112,9 +112,9 @@ static bool bl_hbui_Feature_isEnabled_hook(void* feature) {
 
 static int bl_vtableIndexLocal(void* si, const char* vtablename, const char* name) {
 	void* needle = dobby_dlsym(si, name);
-	Elf_Sym* vtableSym = dobby_elfsym(si, vtablename);
+	//Elf_Sym* vtableSym = dobby_elfsym(si, vtablename);
 	void** vtable = (void**) dobby_dlsym(si, vtablename);
-	for (unsigned int i = 0; i < (vtableSym->st_size / sizeof(void*)); i++) {
+	for (unsigned int i = 0; i < 512 /*(vtableSym->st_size / sizeof(void*))*/; i++) {
 		if (vtable[i] == needle) {
 			return i;
 		}

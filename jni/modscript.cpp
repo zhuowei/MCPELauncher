@@ -1469,9 +1469,9 @@ int bl_findVtable(void** vtable, void* needle) {
 
 int bl_vtableIndex(void* si, const char* vtablename, const char* name) {
 	void* needle = dobby_dlsym(si, name);
-	Elf_Sym* vtableSym = dobby_elfsym(si, vtablename);
+	//Elf_Sym* vtableSym = dobby_elfsym(si, vtablename);
 	void** vtable = (void**) dobby_dlsym(si, vtablename);
-	for (unsigned int i = 0; i < (vtableSym->st_size / sizeof(void*)); i++) {
+	for (unsigned int i = 0; i < 512 /*(vtableSym->st_size / sizeof(void*))*/; i++) {
 		if (vtable[i] == needle) {
 			return i;
 		}
@@ -1555,8 +1555,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//mcpelauncher_hook(startDestroyBlockCreative, &bl_CreativeMode_startDestroyBlock_hook, (void**) &bl_CreativeMode_startDestroyBlock_real);
 
 	void* getFov = dlsym(mcpelibhandle, "_ZN19LevelRendererPlayer6getFovEfb");
-	Elf_Sym* vtableSym = dobby_elfsym(mcpelibhandle, "_ZN19LevelRendererPlayer6getFovEfb");
-	getFovSize = vtableSym->st_size;
+	//Elf_Sym* vtableSym = dobby_elfsym(mcpelibhandle, "_ZN19LevelRendererPlayer6getFovEfb");
+	getFovSize = 0x20;//vtableSym->st_size;
 	memcpy(getFovOriginal, (void*) ((uintptr_t) getFov & ~1), getFovSize);
 	mcpelauncher_hook(getFov, (void*) &bl_LevelRenderer_getFov_hook, (void**) &bl_LevelRenderer_getFov_real);
 	memcpy(getFovHooked, (void*) ((uintptr_t) getFov & ~1), getFovSize);
