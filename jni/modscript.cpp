@@ -1577,9 +1577,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	//pigZombieVtable[MOB_VTABLE_OFFSET_GET_TEXTURE] = (void*) bl_Mob_getTexture;
 
 	//bl_Inventory_clearInventoryWithDefault = dlsym(RTLD_DEFAULT, "_ZN9Inventory25clearInventoryWithDefaultEv");
-	void** minecraftGameVtable = (void**)dlsym(mcpelibhandle, "_ZTV13MinecraftGame");
+	//void** minecraftGameVtable = (void**)dlsym(mcpelibhandle, "_ZTV13MinecraftGame");
 	//replace the update method in Minecraft with our own
-	bl_NinecraftApp_update_real = (void (*)(MinecraftGame*)) minecraftGameVtable[vtable_indexes.minecraft_update];
+	//bl_NinecraftApp_update_real = (void (*)(MinecraftGame*)) minecraftGameVtable[vtable_indexes.minecraft_update];
 #if 0
 	for (int i = 0; i < 40; i++) {
 		if (minecraftVtable[i] == (int) bl_NinecraftApp_update_real) {
@@ -1589,7 +1589,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 #endif
 
 	//minecraftGameVtable[vtable_indexes.minecraft_update] = (void*) &bl_NinecraftApp_update_hook;
-	bl_patch_got_wrap(mcpelibhandle, (void*)bl_NinecraftApp_update_real, (void*)&bl_NinecraftApp_update_hook);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN13MinecraftGame6updateEv"),
+		(void*)&bl_NinecraftApp_update_hook,
+		(void**)&bl_NinecraftApp_update_real);
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 

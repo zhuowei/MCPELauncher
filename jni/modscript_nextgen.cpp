@@ -559,7 +559,7 @@ Entity* bl_getEntityWrapperWithLocalHack(Level* level, long long entityId) {
 bool bl_isActiveLevel(Level* level) {
 	return level == bl_level;
 }
-
+static void (*bl_ClientInstanceScreenModel_sendChatMessage_real)(ClientInstanceScreenModel* chatScreen, std::string const& message);
 void bl_ClientInstanceScreenModel_sendChatMessage_hook(ClientInstanceScreenModel* chatScreen, std::string const& message) {
 	const char* chatMessageChars = message.c_str();
 
@@ -578,13 +578,14 @@ void bl_ClientInstanceScreenModel_sendChatMessage_hook(ClientInstanceScreenModel
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Chat message: %s preventDefault %d\n", chatMessageChars,
 		(int) preventDefaultStatus);
 	if (!preventDefaultStatus) {
-		chatScreen->sendChatMessage(message);
+		bl_ClientInstanceScreenModel_sendChatMessage_real(chatScreen, message);
 	} else {
 		//clear the chat string
 		chatScreen->updateTextBoxText("");
 	}
 }
 
+static void (*bl_ClientInstanceScreenModel_executeCommand_real)(ClientInstanceScreenModel* chatScreen, std::string const& message);
 void bl_ClientInstanceScreenModel_executeCommand_hook(ClientInstanceScreenModel* chatScreen, std::string const& message) {
 	const char* chatMessageChars = message.c_str();
 
@@ -603,7 +604,7 @@ void bl_ClientInstanceScreenModel_executeCommand_hook(ClientInstanceScreenModel*
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Command message: %s preventDefault %d\n", chatMessageChars,
 		(int) preventDefaultStatus);
 	if (!preventDefaultStatus) {
-		chatScreen->executeCommand(message);
+		bl_ClientInstanceScreenModel_executeCommand_hook(chatScreen, message);
 	} else {
 		//clear the chat string
 		chatScreen->updateTextBoxText("");
@@ -638,9 +639,10 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 	bl_RakNetInstance_connect_real(rakNetInstance, remoteInfo, myInfo);
 }
 
+static void (*bl_Item_initCreativeItems_real)(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, BaseGameVersion const&, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 static void bl_Item_initCreativeItems_hook(bool arg1, ActorInfoRegistry* actorInfoRegistry,
-	BlockDefinitionGroup* definitionGroup, bool arg4, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)> func) {
-	Item::initCreativeItems(arg1, actorInfoRegistry, definitionGroup, arg4, func);
+	BlockDefinitionGroup* definitionGroup, bool arg4, BaseGameVersion const& arg5, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)> func) {
+	Item::initCreativeItems(arg1, actorInfoRegistry, definitionGroup, arg4, arg5, func);
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -4100,6 +4102,7 @@ int bl_pthread_kill_hook(pthread_t thread, int sig) {
 }
 #endif
 
+void* (*bl_VanillaItems_registerItems_real)(bool arg1);
 void* bl_VanillaItems_registerItems_hook(bool arg1) {
 	void* retval = VanillaItems::registerItems(arg1);
 	bl_recreateItems();
@@ -4140,9 +4143,13 @@ void* bl_getmcpelibhandle();
 void bl_setuphooks_cppside() {
 	soinfo2* mcpelibhandle = (soinfo2*)bl_getmcpelibhandle();
 
-	bl_patch_got(mcpelibhandle, (void*)&ClientInstanceScreenModel::sendChatMessage, (void*)bl_ClientInstanceScreenModel_sendChatMessage_hook);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN25ClientInstanceScreenModel15sendChatMessageERKSs"),
+		(void*)&bl_ClientInstanceScreenModel_sendChatMessage_hook,
+		(void**)&bl_ClientInstanceScreenModel_sendChatMessage_real);
 
-	bl_patch_got(mcpelibhandle, (void*)&ClientInstanceScreenModel::executeCommand, (void*)bl_ClientInstanceScreenModel_executeCommand_hook);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN25ClientInstanceScreenModel14executeCommandERKSs"),
+		(void*)&bl_ClientInstanceScreenModel_executeCommand_hook,
+		(void**)&bl_ClientInstanceScreenModel_executeCommand_real);
 
 	bl_Item_Item = (void (*)(Item*, std::string const&, short)) dlsym(RTLD_DEFAULT, "_ZN4ItemC1ERKSss");
 
@@ -4350,12 +4357,11 @@ void bl_setuphooks_cppside() {
 
 	bl_Item_setCategory = (void (*)(Item*, int))
 		dlsym(mcpelibhandle, "_ZN4Item11setCategoryE20CreativeItemCategory");
-	//void* initCreativeItems =
-	//	dlsym(mcpelibhandle, "_ZN4Item17initCreativeItemsEv");
-	//mcpelauncher_hook(initCreativeItems, (void*) &bl_Item_initCreativeItems_hook,
-	//	(void**) &bl_Item_initCreativeItems_real);
-	bl_patch_got_wrap(mcpelibhandle, (void*) &Item::initCreativeItems,
-		(void*)&bl_Item_initCreativeItems_hook);
+	void* initCreativeItems =
+		dlsym(mcpelibhandle,
+		"_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE");
+	mcpelauncher_hook(initCreativeItems, (void*)&bl_Item_initCreativeItems_hook,
+		(void**) &bl_Item_initCreativeItems_real);
 	//bl_MobRenderer_getSkinPtr_real = (mce::TexturePtr const& (*)(MobRenderer*, Entity&))
 	//	dlsym(mcpelibhandle, "_ZNK11MobRenderer10getSkinPtrERK5Actor");
 	void* throwableHit = dlsym(mcpelibhandle, "_ZN19ProjectileComponent5onHitER5ActorRK9HitResult");
@@ -4428,7 +4434,9 @@ void bl_setuphooks_cppside() {
 	// bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::queue, (void*)&bl_BackgroundWorker_queue_hook);
 	bl_ItemRegistry_registerItemShared = (WeakPtr<Item> (*)(std::string const&, short&))
 		dlsym(mcpelibhandle, "_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_");
-	bl_patch_got_wrap(mcpelibhandle, (void*)&VanillaItems::registerItems, (void*)&bl_VanillaItems_registerItems_hook);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN12VanillaItems13registerItemsEb"),
+		(void*)&bl_VanillaItems_registerItems_hook,
+		(void**)&bl_VanillaItems_registerItems_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
 
 	//bl_renderManager_init(mcpelibhandle);
