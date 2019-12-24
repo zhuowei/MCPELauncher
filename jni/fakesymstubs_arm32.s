@@ -22,7 +22,7 @@ _ZN10BlockActor10setChangedEv:
 .L_ZN10BlockActor10setChangedEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN10BlockActor10setChangedEv3:
         .align  2
 .L_ZN10BlockActor10setChangedEv2:
@@ -38,7 +38,7 @@ _ZN10SceneStack6updateEv:
 .L_ZN10SceneStack6updateEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN10SceneStack6updateEv3:
         .align  2
 .L_ZN10SceneStack6updateEv2:
@@ -54,7 +54,7 @@ _ZN10ScreenView17setDebugRenderingEb:
 .L_ZN10ScreenView17setDebugRenderingEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN10ScreenView17setDebugRenderingEb3:
         .align  2
 .L_ZN10ScreenView17setDebugRenderingEb2:
@@ -70,7 +70,7 @@ _ZN11BlockLegacy11setFrictionEf:
 .L_ZN11BlockLegacy11setFrictionEfPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockLegacy11setFrictionEf3:
         .align  2
 .L_ZN11BlockLegacy11setFrictionEf2:
@@ -86,7 +86,7 @@ _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_:
 .L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_3:
         .align  2
 .L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_2:
@@ -102,7 +102,7 @@ _ZN11BlockSource13setGrassColorEiRK8BlockPosi:
 .L_ZN11BlockSource13setGrassColorEiRK8BlockPosiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockSource13setGrassColorEiRK8BlockPosi3:
         .align  2
 .L_ZN11BlockSource13setGrassColorEiRK8BlockPosi2:
@@ -118,7 +118,7 @@ _ZN11BlockSource14getBlockEntityERK8BlockPos:
 .L_ZN11BlockSource14getBlockEntityERK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockSource14getBlockEntityERK8BlockPos3:
         .align  2
 .L_ZN11BlockSource14getBlockEntityERK8BlockPos2:
@@ -134,7 +134,7 @@ _ZN11BlockSource8getBiomeERK8BlockPos:
 .L_ZN11BlockSource8getBiomeERK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockSource8getBiomeERK8BlockPos3:
         .align  2
 .L_ZN11BlockSource8getBiomeERK8BlockPos2:
@@ -150,7 +150,7 @@ _ZN11BlockSource8setBlockEiiiRK5Blocki:
 .L_ZN11BlockSource8setBlockEiiiRK5BlockiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11BlockSource8setBlockEiiiRK5Blocki3:
         .align  2
 .L_ZN11BlockSource8setBlockEiiiRK5Blocki2:
@@ -166,7 +166,7 @@ _ZN11LocalPlayer6hurtToEi:
 .L_ZN11LocalPlayer6hurtToEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11LocalPlayer6hurtToEi3:
         .align  2
 .L_ZN11LocalPlayer6hurtToEi2:
@@ -182,7 +182,7 @@ _ZN11ServerLevel11getCommandsEv:
 .L_ZN11ServerLevel11getCommandsEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN11ServerLevel11getCommandsEv3:
         .align  2
 .L_ZN11ServerLevel11getCommandsEv2:
@@ -198,7 +198,7 @@ _ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Ve
 .L_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec23:
         .align  2
 .L_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec22:
@@ -214,7 +214,7 @@ _ZN12ActorFactoryC1ER5Level:
 .L_ZN12ActorFactoryC1ER5LevelPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ActorFactoryC1ER5Level3:
         .align  2
 .L_ZN12ActorFactoryC1ER5Level2:
@@ -230,7 +230,7 @@ _ZN12ItemInstanceC1Ev:
 .L_ZN12ItemInstanceC1EvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ItemInstanceC1Ev3:
         .align  2
 .L_ZN12ItemInstanceC1Ev2:
@@ -246,7 +246,7 @@ _ZN12ItemInstanceD2Ev:
 .L_ZN12ItemInstanceD2EvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ItemInstanceD2Ev3:
         .align  2
 .L_ZN12ItemInstanceD2Ev2:
@@ -262,7 +262,7 @@ _ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_:
 .L_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_3:
         .align  2
 .L_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_2:
@@ -278,7 +278,7 @@ _ZN12ItemRegistry7getItemEs:
 .L_ZN12ItemRegistry7getItemEsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ItemRegistry7getItemEs3:
         .align  2
 .L_ZN12ItemRegistry7getItemEs2:
@@ -294,7 +294,7 @@ _ZN12ItemRenderer17forceGraphicsLoadEv:
 .L_ZN12ItemRenderer17forceGraphicsLoadEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ItemRenderer17forceGraphicsLoadEv3:
         .align  2
 .L_ZN12ItemRenderer17forceGraphicsLoadEv2:
@@ -310,7 +310,7 @@ _ZN12ServerPlayer13sendInventoryEb:
 .L_ZN12ServerPlayer13sendInventoryEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12ServerPlayer13sendInventoryEb3:
         .align  2
 .L_ZN12ServerPlayer13sendInventoryEb2:
@@ -326,7 +326,7 @@ _ZN12VanillaItems13registerItemsEb:
 .L_ZN12VanillaItems13registerItemsEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN12VanillaItems13registerItemsEb3:
         .align  2
 .L_ZN12VanillaItems13registerItemsEb2:
@@ -342,7 +342,7 @@ _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS
 .L_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE3:
         .align  2
 .L_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE2:
@@ -358,7 +358,7 @@ _ZN13ItemStackBase13setCustomNameERKSs:
 .L_ZN13ItemStackBase13setCustomNameERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13ItemStackBase13setCustomNameERKSs3:
         .align  2
 .L_ZN13ItemStackBase13setCustomNameERKSs2:
@@ -374,7 +374,7 @@ _ZN13ItemStackBase4initEiii:
 .L_ZN13ItemStackBase4initEiiiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13ItemStackBase4initEiii3:
         .align  2
 .L_ZN13ItemStackBase4initEiii2:
@@ -390,7 +390,7 @@ _ZN13ItemStackBase8_setItemEi:
 .L_ZN13ItemStackBase8_setItemEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13ItemStackBase8_setItemEi3:
         .align  2
 .L_ZN13ItemStackBase8_setItemEi2:
@@ -406,7 +406,7 @@ _ZN13ItemStackBase8setBlockEPK5Block:
 .L_ZN13ItemStackBase8setBlockEPK5BlockPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13ItemStackBase8setBlockEPK5Block3:
         .align  2
 .L_ZN13ItemStackBase8setBlockEPK5Block2:
@@ -422,7 +422,7 @@ _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11
 .L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntentPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent3:
         .align  2
 .L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent2:
@@ -438,7 +438,7 @@ _ZN13MinecraftGame24getPrimaryClientInstanceEv:
 .L_ZN13MinecraftGame24getPrimaryClientInstanceEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13MinecraftGame24getPrimaryClientInstanceEv3:
         .align  2
 .L_ZN13MinecraftGame24getPrimaryClientInstanceEv2:
@@ -454,7 +454,7 @@ _ZN13MinecraftGame6updateEv:
 .L_ZN13MinecraftGame6updateEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN13MinecraftGame6updateEv3:
         .align  2
 .L_ZN13MinecraftGame6updateEv2:
@@ -470,7 +470,7 @@ _ZN14ClientInstance10getGuiDataEv:
 .L_ZN14ClientInstance10getGuiDataEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance10getGuiDataEv3:
         .align  2
 .L_ZN14ClientInstance10getGuiDataEv2:
@@ -486,7 +486,7 @@ _ZN14ClientInstance13getServerDataEv:
 .L_ZN14ClientInstance13getServerDataEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance13getServerDataEv3:
         .align  2
 .L_ZN14ClientInstance13getServerDataEv2:
@@ -502,7 +502,7 @@ _ZN14ClientInstance14getLocalPlayerEv:
 .L_ZN14ClientInstance14getLocalPlayerEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance14getLocalPlayerEv3:
         .align  2
 .L_ZN14ClientInstance14getLocalPlayerEv2:
@@ -518,7 +518,7 @@ _ZN14ClientInstance15_startLeaveGameEv:
 .L_ZN14ClientInstance15_startLeaveGameEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance15_startLeaveGameEv3:
         .align  2
 .L_ZN14ClientInstance15_startLeaveGameEv2:
@@ -534,7 +534,7 @@ _ZN14ClientInstance15getItemRendererEv:
 .L_ZN14ClientInstance15getItemRendererEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance15getItemRendererEv3:
         .align  2
 .L_ZN14ClientInstance15getItemRendererEv2:
@@ -550,7 +550,7 @@ _ZN14ClientInstance15setCameraEntityEP5Actor:
 .L_ZN14ClientInstance15setCameraEntityEP5ActorPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance15setCameraEntityEP5Actor3:
         .align  2
 .L_ZN14ClientInstance15setCameraEntityEP5Actor2:
@@ -566,7 +566,7 @@ _ZN14ClientInstance19getLocalServerLevelEv:
 .L_ZN14ClientInstance19getLocalServerLevelEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance19getLocalServerLevelEv3:
         .align  2
 .L_ZN14ClientInstance19getLocalServerLevelEv2:
@@ -582,7 +582,7 @@ _ZN14ClientInstance4playERKSsRK4Vec3ff:
 .L_ZN14ClientInstance4playERKSsRK4Vec3ffPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance4playERKSsRK4Vec3ff3:
         .align  2
 .L_ZN14ClientInstance4playERKSsRK4Vec3ff2:
@@ -598,7 +598,7 @@ _ZN14ClientInstance8getLevelEv:
 .L_ZN14ClientInstance8getLevelEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14ClientInstance8getLevelEv3:
         .align  2
 .L_ZN14ClientInstance8getLevelEv2:
@@ -614,7 +614,7 @@ _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_:
 .L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_3:
         .align  2
 .L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_2:
@@ -630,7 +630,7 @@ _ZN14SignBlockActor10setMessageESsSs:
 .L_ZN14SignBlockActor10setMessageESsSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN14SignBlockActor10setMessageESsSs3:
         .align  2
 .L_ZN14SignBlockActor10setMessageESsSs2:
@@ -646,7 +646,7 @@ _ZN15ChestBlockActor7setItemEiRK9ItemStack:
 .L_ZN15ChestBlockActor7setItemEiRK9ItemStackPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN15ChestBlockActor7setItemEiRK9ItemStack3:
         .align  2
 .L_ZN15ChestBlockActor7setItemEiRK9ItemStack2:
@@ -662,7 +662,7 @@ _ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_d
 .L_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE3:
         .align  2
 .L_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
@@ -678,7 +678,7 @@ _ZN16ResourceLocationD2Ev:
 .L_ZN16ResourceLocationD2EvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN16ResourceLocationD2Ev3:
         .align  2
 .L_ZN16ResourceLocationD2Ev2:
@@ -694,7 +694,7 @@ _ZN17AttributeInstance11setMaxValueEf:
 .L_ZN17AttributeInstance11setMaxValueEfPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN17AttributeInstance11setMaxValueEf3:
         .align  2
 .L_ZN17AttributeInstance11setMaxValueEf2:
@@ -710,7 +710,7 @@ _ZN17MinecraftCommands11getRegistryEv:
 .L_ZN17MinecraftCommands11getRegistryEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN17MinecraftCommands11getRegistryEv3:
         .align  2
 .L_ZN17MinecraftCommands11getRegistryEv2:
@@ -726,7 +726,7 @@ _ZN17MobEffectInstanceC1Ejiibbb:
 .L_ZN17MobEffectInstanceC1EjiibbbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN17MobEffectInstanceC1Ejiibbb3:
         .align  2
 .L_ZN17MobEffectInstanceC1Ejiibbb2:
@@ -742,7 +742,7 @@ _ZN19LevelRendererPlayer6getFovEfb:
 .L_ZN19LevelRendererPlayer6getFovEfbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN19LevelRendererPlayer6getFovEfb3:
         .align  2
 .L_ZN19LevelRendererPlayer6getFovEfb2:
@@ -758,7 +758,7 @@ _ZN19ProjectileComponent5onHitER5ActorRK9HitResult:
 .L_ZN19ProjectileComponent5onHitER5ActorRK9HitResultPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult3:
         .align  2
 .L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult2:
@@ -774,7 +774,7 @@ _ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel:
 .L_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevelPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel3:
         .align  2
 .L_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel2:
@@ -790,7 +790,7 @@ _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket:
 .L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacketPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket3:
         .align  2
 .L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket2:
@@ -806,7 +806,7 @@ _ZN20MinecraftScreenModel17updateTextBoxTextERKSs:
 .L_ZN20MinecraftScreenModel17updateTextBoxTextERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20MinecraftScreenModel17updateTextBoxTextERKSs3:
         .align  2
 .L_ZN20MinecraftScreenModel17updateTextBoxTextERKSs2:
@@ -822,7 +822,7 @@ _ZN20PlayerInventoryProxy10selectSlotEi11ContainerID:
 .L_ZN20PlayerInventoryProxy10selectSlotEi11ContainerIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20PlayerInventoryProxy10selectSlotEi11ContainerID3:
         .align  2
 .L_ZN20PlayerInventoryProxy10selectSlotEi11ContainerID2:
@@ -838,7 +838,7 @@ _ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi:
 .L_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi3:
         .align  2
 .L_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi2:
@@ -854,7 +854,7 @@ _ZN20PlayerInventoryProxy3addER9ItemStackb:
 .L_ZN20PlayerInventoryProxy3addER9ItemStackbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20PlayerInventoryProxy3addER9ItemStackb3:
         .align  2
 .L_ZN20PlayerInventoryProxy3addER9ItemStackb2:
@@ -870,7 +870,7 @@ _ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID:
 .L_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID3:
         .align  2
 .L_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID2:
@@ -886,7 +886,7 @@ _ZN20PlayerInventoryProxy9clearSlotEi11ContainerID:
 .L_ZN20PlayerInventoryProxy9clearSlotEi11ContainerIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN20PlayerInventoryProxy9clearSlotEi11ContainerID3:
         .align  2
 .L_ZN20PlayerInventoryProxy9clearSlotEi11ContainerID2:
@@ -902,7 +902,7 @@ _ZN25ActorDefinitionIdentifierC1E9ActorType:
 .L_ZN25ActorDefinitionIdentifierC1E9ActorTypePIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN25ActorDefinitionIdentifierC1E9ActorType3:
         .align  2
 .L_ZN25ActorDefinitionIdentifierC1E9ActorType2:
@@ -918,7 +918,7 @@ _ZN25ClientInstanceScreenModel14executeCommandERKSs:
 .L_ZN25ClientInstanceScreenModel14executeCommandERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN25ClientInstanceScreenModel14executeCommandERKSs3:
         .align  2
 .L_ZN25ClientInstanceScreenModel14executeCommandERKSs2:
@@ -934,7 +934,7 @@ _ZN25ClientInstanceScreenModel15sendChatMessageERKSs:
 .L_ZN25ClientInstanceScreenModel15sendChatMessageERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN25ClientInstanceScreenModel15sendChatMessageERKSs3:
         .align  2
 .L_ZN25ClientInstanceScreenModel15sendChatMessageERKSs2:
@@ -950,7 +950,7 @@ _ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStac
 .L_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactoryPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory3:
         .align  2
 .L_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory2:
@@ -966,7 +966,7 @@ _ZN3Mob13sendInventoryEb:
 .L_ZN3Mob13sendInventoryEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN3Mob13sendInventoryEb3:
         .align  2
 .L_ZN3Mob13sendInventoryEb2:
@@ -982,7 +982,7 @@ _ZN3Mob3dieERK17ActorDamageSource:
 .L_ZN3Mob3dieERK17ActorDamageSourcePIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN3Mob3dieERK17ActorDamageSource3:
         .align  2
 .L_ZN3Mob3dieERK17ActorDamageSource2:
@@ -998,7 +998,7 @@ _ZN4I18n18getCurrentLanguageEv:
 .L_ZN4I18n18getCurrentLanguageEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4I18n18getCurrentLanguageEv3:
         .align  2
 .L_ZN4I18n18getCurrentLanguageEv2:
@@ -1014,7 +1014,7 @@ _ZN4Item10initClientERN4Json5ValueES2_:
 .L_ZN4Item10initClientERN4Json5ValueES2_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item10initClientERN4Json5ValueES2_3:
         .align  2
 .L_ZN4Item10initClientERN4Json5ValueES2_2:
@@ -1030,7 +1030,7 @@ _ZN4Item10initServerERN4Json5ValueE:
 .L_ZN4Item10initServerERN4Json5ValueEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item10initServerERN4Json5ValueE3:
         .align  2
 .L_ZN4Item10initServerERN4Json5ValueE2:
@@ -1046,7 +1046,7 @@ _ZN4Item11setCategoryE20CreativeItemCategory:
 .L_ZN4Item11setCategoryE20CreativeItemCategoryPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item11setCategoryE20CreativeItemCategory3:
         .align  2
 .L_ZN4Item11setCategoryE20CreativeItemCategory2:
@@ -1062,7 +1062,7 @@ _ZN4Item12setMaxDamageEi:
 .L_ZN4Item12setMaxDamageEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item12setMaxDamageEi3:
         .align  2
 .L_ZN4Item12setMaxDamageEi2:
@@ -1078,7 +1078,7 @@ _ZN4Item15addCreativeItemEss:
 .L_ZN4Item15addCreativeItemEssPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item15addCreativeItemEss3:
         .align  2
 .L_ZN4Item15addCreativeItemEss2:
@@ -1094,7 +1094,7 @@ _ZN4Item15setAllowOffhandEb:
 .L_ZN4Item15setAllowOffhandEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item15setAllowOffhandEb3:
         .align  2
 .L_ZN4Item15setAllowOffhandEb2:
@@ -1110,7 +1110,7 @@ _ZN4Item15setMaxStackSizeEh:
 .L_ZN4Item15setMaxStackSizeEhPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item15setMaxStackSizeEh3:
         .align  2
 .L_ZN4Item15setMaxStackSizeEh2:
@@ -1126,7 +1126,7 @@ _ZN4Item15setUseAnimationE12UseAnimation:
 .L_ZN4Item15setUseAnimationE12UseAnimationPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item15setUseAnimationE12UseAnimation3:
         .align  2
 .L_ZN4Item15setUseAnimationE12UseAnimation2:
@@ -1142,7 +1142,7 @@ _ZN4Item16setStackedByDataEb:
 .L_ZN4Item16setStackedByDataEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item16setStackedByDataEb3:
         .align  2
 .L_ZN4Item16setStackedByDataEb2:
@@ -1158,7 +1158,7 @@ _ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15Bas
 .L_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE3:
         .align  2
 .L_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE2:
@@ -1174,7 +1174,7 @@ _ZN4Item7setIconERKSsi:
 .L_ZN4Item7setIconERKSsiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4Item7setIconERKSsi3:
         .align  2
 .L_ZN4Item7setIconERKSsi2:
@@ -1190,7 +1190,7 @@ _ZN4ItemC1ERKSss:
 .L_ZN4ItemC1ERKSssPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN4ItemC1ERKSss3:
         .align  2
 .L_ZN4ItemC1ERKSss2:
@@ -1206,7 +1206,7 @@ _ZN5Actor10stopRidingEbbb:
 .L_ZN5Actor10stopRidingEbbbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor10stopRidingEbbb3:
         .align  2
 .L_ZN5Actor10stopRidingEbbb2:
@@ -1222,7 +1222,7 @@ _ZN5Actor11getTargetIdEv:
 .L_ZN5Actor11getTargetIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor11getTargetIdEv3:
         .align  2
 .L_ZN5Actor11getTargetIdEv2:
@@ -1238,7 +1238,7 @@ _ZN5Actor11setSneakingEb:
 .L_ZN5Actor11setSneakingEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor11setSneakingEb3:
         .align  2
 .L_ZN5Actor11setSneakingEb2:
@@ -1254,7 +1254,7 @@ _ZN5Actor11startRidingERS_:
 .L_ZN5Actor11startRidingERS_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor11startRidingERS_3:
         .align  2
 .L_ZN5Actor11startRidingERS_2:
@@ -1270,7 +1270,7 @@ _ZN5Actor12removeEffectEi:
 .L_ZN5Actor12removeEffectEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor12removeEffectEi3:
         .align  2
 .L_ZN5Actor12removeEffectEi2:
@@ -1286,7 +1286,7 @@ _ZN5Actor13setStatusFlagE10ActorFlagsb:
 .L_ZN5Actor13setStatusFlagE10ActorFlagsbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor13setStatusFlagE10ActorFlagsb3:
         .align  2
 .L_ZN5Actor13setStatusFlagE10ActorFlagsb2:
@@ -1302,7 +1302,7 @@ _ZN5Actor14setCarriedItemERK9ItemStack:
 .L_ZN5Actor14setCarriedItemERK9ItemStackPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor14setCarriedItemERK9ItemStack3:
         .align  2
 .L_ZN5Actor14setCarriedItemERK9ItemStack2:
@@ -1318,7 +1318,7 @@ _ZN5Actor14setOffhandSlotERK9ItemStack:
 .L_ZN5Actor14setOffhandSlotERK9ItemStackPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor14setOffhandSlotERK9ItemStack3:
         .align  2
 .L_ZN5Actor14setOffhandSlotERK9ItemStack2:
@@ -1334,7 +1334,7 @@ _ZN5Actor16removeAllEffectsEv:
 .L_ZN5Actor16removeAllEffectsEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor16removeAllEffectsEv3:
         .align  2
 .L_ZN5Actor16removeAllEffectsEv2:
@@ -1350,7 +1350,7 @@ _ZN5Actor4hurtERK17ActorDamageSourceibb:
 .L_ZN5Actor4hurtERK17ActorDamageSourceibbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor4hurtERK17ActorDamageSourceibb3:
         .align  2
 .L_ZN5Actor4hurtERK17ActorDamageSourceibb2:
@@ -1366,7 +1366,7 @@ _ZN5Actor6removeEv:
 .L_ZN5Actor6removeEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor6removeEv3:
         .align  2
 .L_ZN5Actor6removeEv2:
@@ -1382,7 +1382,7 @@ _ZN5Actor6setPosERK4Vec3:
 .L_ZN5Actor6setPosERK4Vec3PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor6setPosERK4Vec33:
         .align  2
 .L_ZN5Actor6setPosERK4Vec32:
@@ -1398,7 +1398,7 @@ _ZN5Actor6setRotERK4Vec2:
 .L_ZN5Actor6setRotERK4Vec2PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor6setRotERK4Vec23:
         .align  2
 .L_ZN5Actor6setRotERK4Vec22:
@@ -1414,7 +1414,7 @@ _ZN5Actor8getLevelEv:
 .L_ZN5Actor8getLevelEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor8getLevelEv3:
         .align  2
 .L_ZN5Actor8getLevelEv2:
@@ -1430,7 +1430,7 @@ _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack:
 .L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStackPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack3:
         .align  2
 .L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack2:
@@ -1446,7 +1446,7 @@ _ZN5Actor9addEffectERK17MobEffectInstance:
 .L_ZN5Actor9addEffectERK17MobEffectInstancePIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor9addEffectERK17MobEffectInstance3:
         .align  2
 .L_ZN5Actor9addEffectERK17MobEffectInstance2:
@@ -1462,7 +1462,7 @@ _ZN5Actor9setOnFireEi:
 .L_ZN5Actor9setOnFireEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor9setOnFireEi3:
         .align  2
 .L_ZN5Actor9setOnFireEi2:
@@ -1478,7 +1478,7 @@ _ZN5Actor9setTargetEPS_:
 .L_ZN5Actor9setTargetEPS_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Actor9setTargetEPS_3:
         .align  2
 .L_ZN5Actor9setTargetEPS_2:
@@ -1494,7 +1494,7 @@ _ZN5Level12getHitResultEv:
 .L_ZN5Level12getHitResultEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level12getHitResultEv3:
         .align  2
 .L_ZN5Level12getHitResultEv2:
@@ -1510,7 +1510,7 @@ _ZN5Level12getLevelDataEv:
 .L_ZN5Level12getLevelDataEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level12getLevelDataEv3:
         .align  2
 .L_ZN5Level12getLevelDataEv2:
@@ -1526,7 +1526,7 @@ _ZN5Level13setDifficultyE10Difficulty:
 .L_ZN5Level13setDifficultyE10DifficultyPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level13setDifficultyE10Difficulty3:
         .align  2
 .L_ZN5Level13setDifficultyE10Difficulty2:
@@ -1542,7 +1542,7 @@ _ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_delete
 .L_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE3:
         .align  2
 .L_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
@@ -1558,7 +1558,7 @@ _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb:
 .L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb3:
         .align  2
 .L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb2:
@@ -1574,7 +1574,7 @@ _ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb:
 .L_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb3:
         .align  2
 .L_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb2:
@@ -1590,7 +1590,7 @@ _ZN5Level7setTimeEi:
 .L_ZN5Level7setTimeEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level7setTimeEi3:
         .align  2
 .L_ZN5Level7setTimeEi2:
@@ -1606,7 +1606,7 @@ _ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE:
 .L_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE3:
         .align  2
 .L_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
@@ -1622,7 +1622,7 @@ _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE:
 .L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EEPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE3:
         .align  2
 .L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE2:
@@ -1638,7 +1638,7 @@ _ZN6Player13addExperienceEi:
 .L_ZN6Player13addExperienceEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN6Player13addExperienceEi3:
         .align  2
 .L_ZN6Player13addExperienceEi2:
@@ -1654,7 +1654,7 @@ _ZN6Player17setPlayerGameTypeE8GameType:
 .L_ZN6Player17setPlayerGameTypeE8GameTypePIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN6Player17setPlayerGameTypeE8GameType3:
         .align  2
 .L_ZN6Player17setPlayerGameTypeE8GameType2:
@@ -1670,7 +1670,7 @@ _ZN6Player3eatEif:
 .L_ZN6Player3eatEifPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN6Player3eatEif3:
         .align  2
 .L_ZN6Player3eatEif2:
@@ -1686,7 +1686,7 @@ _ZN6Player9addLevelsEi:
 .L_ZN6Player9addLevelsEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN6Player9addLevelsEi3:
         .align  2
 .L_ZN6Player9addLevelsEi2:
@@ -1702,7 +1702,7 @@ _ZN7GuiData14showTipMessageERKSs:
 .L_ZN7GuiData14showTipMessageERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN7GuiData14showTipMessageERKSs3:
         .align  2
 .L_ZN7GuiData14showTipMessageERKSs2:
@@ -1718,7 +1718,7 @@ _ZN7GuiData20displayClientMessageERKSs:
 .L_ZN7GuiData20displayClientMessageERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN7GuiData20displayClientMessageERKSs3:
         .align  2
 .L_ZN7GuiData20displayClientMessageERKSs2:
@@ -1734,7 +1734,7 @@ _ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i:
 .L_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3iPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i3:
         .align  2
 .L_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i2:
@@ -1750,7 +1750,7 @@ _ZN8GameMode12destroyBlockERK8BlockPosh:
 .L_ZN8GameMode12destroyBlockERK8BlockPoshPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode12destroyBlockERK8BlockPosh3:
         .align  2
 .L_ZN8GameMode12destroyBlockERK8BlockPosh2:
@@ -1766,7 +1766,7 @@ _ZN8GameMode17startDestroyBlockERK8BlockPoshRb:
 .L_ZN8GameMode17startDestroyBlockERK8BlockPoshRbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb3:
         .align  2
 .L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb2:
@@ -1782,7 +1782,7 @@ _ZN8GameMode18getDestroyProgressEv:
 .L_ZN8GameMode18getDestroyProgressEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode18getDestroyProgressEv3:
         .align  2
 .L_ZN8GameMode18getDestroyProgressEv2:
@@ -1798,7 +1798,7 @@ _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb:
 .L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb3:
         .align  2
 .L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb2:
@@ -1814,7 +1814,7 @@ _ZN8GameMode21_destroyBlockInternalERK8BlockPosh:
 .L_ZN8GameMode21_destroyBlockInternalERK8BlockPoshPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh3:
         .align  2
 .L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh2:
@@ -1830,7 +1830,7 @@ _ZN8GameMode4tickEv:
 .L_ZN8GameMode4tickEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode4tickEv3:
         .align  2
 .L_ZN8GameMode4tickEv2:
@@ -1846,7 +1846,7 @@ _ZN8GameMode6attackER5Actor:
 .L_ZN8GameMode6attackER5ActorPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode6attackER5Actor3:
         .align  2
 .L_ZN8GameMode6attackER5Actor2:
@@ -1862,7 +1862,7 @@ _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block:
 .L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5BlockPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block3:
         .align  2
 .L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block2:
@@ -1878,7 +1878,7 @@ _ZN9Abilities10setAbilityE14AbilitiesIndexb:
 .L_ZN9Abilities10setAbilityE14AbilitiesIndexbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Abilities10setAbilityE14AbilitiesIndexb3:
         .align  2
 .L_ZN9Abilities10setAbilityE14AbilitiesIndexb2:
@@ -1894,7 +1894,7 @@ _ZN9Abilities18nameToAbilityIndexERKSs:
 .L_ZN9Abilities18nameToAbilityIndexERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Abilities18nameToAbilityIndexERKSs3:
         .align  2
 .L_ZN9Abilities18nameToAbilityIndexERKSs2:
@@ -1910,7 +1910,7 @@ _ZN9ItemStackC1Ev:
 .L_ZN9ItemStackC1EvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9ItemStackC1Ev3:
         .align  2
 .L_ZN9ItemStackC1Ev2:
@@ -1926,7 +1926,7 @@ _ZN9ItemStackD1Ev:
 .L_ZN9ItemStackD1EvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9ItemStackD1Ev3:
         .align  2
 .L_ZN9ItemStackD1Ev2:
@@ -1942,7 +1942,7 @@ _ZN9LevelData11setSpawnPosERK8BlockPos:
 .L_ZN9LevelData11setSpawnPosERK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9LevelData11setSpawnPosERK8BlockPos3:
         .align  2
 .L_ZN9LevelData11setSpawnPosERK8BlockPos2:
@@ -1958,7 +1958,7 @@ _ZN9Minecraft11getCommandsEv:
 .L_ZN9Minecraft11getCommandsEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Minecraft11getCommandsEv3:
         .align  2
 .L_ZN9Minecraft11getCommandsEv2:
@@ -1974,7 +1974,7 @@ _ZN9Minecraft14startLeaveGameEb:
 .L_ZN9Minecraft14startLeaveGameEbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Minecraft14startLeaveGameEb3:
         .align  2
 .L_ZN9Minecraft14startLeaveGameEb2:
@@ -1990,7 +1990,7 @@ _ZN9Minecraft23getServerNetworkHandlerEv:
 .L_ZN9Minecraft23getServerNetworkHandlerEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Minecraft23getServerNetworkHandlerEv3:
         .align  2
 .L_ZN9Minecraft23getServerNetworkHandlerEv2:
@@ -2006,7 +2006,7 @@ _ZN9Minecraft8getTimerEv:
 .L_ZN9Minecraft8getTimerEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZN9Minecraft8getTimerEv3:
         .align  2
 .L_ZN9Minecraft8getTimerEv2:
@@ -2022,7 +2022,7 @@ _ZNK10SceneStack13getScreenNameEv:
 .L_ZNK10SceneStack13getScreenNameEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK10SceneStack13getScreenNameEv3:
         .align  2
 .L_ZNK10SceneStack13getScreenNameEv2:
@@ -2038,7 +2038,7 @@ _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_:
 .L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_3:
         .align  2
 .L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_2:
@@ -2054,7 +2054,7 @@ _ZNK11BlockLegacy14getRenderLayerEv:
 .L_ZNK11BlockLegacy14getRenderLayerEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy14getRenderLayerEv3:
         .align  2
 .L_ZNK11BlockLegacy14getRenderLayerEv2:
@@ -2070,7 +2070,7 @@ _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb:
 .L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb3:
         .align  2
 .L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb2:
@@ -2086,7 +2086,7 @@ _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib:
 .L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosibPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib3:
         .align  2
 .L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib2:
@@ -2102,7 +2102,7 @@ _ZNK11BlockLegacy22getStateFromLegacyDataEt:
 .L_ZNK11BlockLegacy22getStateFromLegacyDataEtPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy22getStateFromLegacyDataEt3:
         .align  2
 .L_ZNK11BlockLegacy22getStateFromLegacyDataEt2:
@@ -2118,7 +2118,7 @@ _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos:
 .L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos3:
         .align  2
 .L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos2:
@@ -2134,7 +2134,7 @@ _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb:
 .L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb3:
         .align  2
 .L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2:
@@ -2150,7 +2150,7 @@ _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos:
 .L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos3:
         .align  2
 .L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos2:
@@ -2166,7 +2166,7 @@ _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block:
 .L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5BlockPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block3:
         .align  2
 .L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block2:
@@ -2182,7 +2182,7 @@ _ZNK11BlockLegacy8getColorERK5Block:
 .L_ZNK11BlockLegacy8getColorERK5BlockPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockLegacy8getColorERK5Block3:
         .align  2
 .L_ZNK11BlockLegacy8getColorERK5Block2:
@@ -2198,7 +2198,7 @@ _ZNK11BlockSource8getBlockERK8BlockPos:
 .L_ZNK11BlockSource8getBlockERK8BlockPosPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockSource8getBlockERK8BlockPos3:
         .align  2
 .L_ZNK11BlockSource8getBlockERK8BlockPos2:
@@ -2214,7 +2214,7 @@ _ZNK11BlockSource9canSeeSkyEiii:
 .L_ZNK11BlockSource9canSeeSkyEiiiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK11BlockSource9canSeeSkyEiii3:
         .align  2
 .L_ZNK11BlockSource9canSeeSkyEiii2:
@@ -2230,7 +2230,7 @@ _ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj:
 .L_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDjPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj3:
         .align  2
 .L_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj2:
@@ -2246,7 +2246,7 @@ _ZNK12ItemEnchants14getAllEnchantsEv:
 .L_ZNK12ItemEnchants14getAllEnchantsEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK12ItemEnchants14getAllEnchantsEv3:
         .align  2
 .L_ZNK12ItemEnchants14getAllEnchantsEv2:
@@ -2262,7 +2262,7 @@ _ZNK12ItemInstance5getIdEv:
 .L_ZNK12ItemInstance5getIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK12ItemInstance5getIdEv3:
         .align  2
 .L_ZNK12ItemInstance5getIdEv2:
@@ -2278,7 +2278,7 @@ _ZNK13ItemStackBase13getCustomNameEv:
 .L_ZNK13ItemStackBase13getCustomNameEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase13getCustomNameEv3:
         .align  2
 .L_ZNK13ItemStackBase13getCustomNameEv2:
@@ -2294,7 +2294,7 @@ _ZNK13ItemStackBase14getDamageValueEv:
 .L_ZNK13ItemStackBase14getDamageValueEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase14getDamageValueEv3:
         .align  2
 .L_ZNK13ItemStackBase14getDamageValueEv2:
@@ -2310,7 +2310,7 @@ _ZNK13ItemStackBase15getMaxStackSizeEv:
 .L_ZNK13ItemStackBase15getMaxStackSizeEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase15getMaxStackSizeEv3:
         .align  2
 .L_ZNK13ItemStackBase15getMaxStackSizeEv2:
@@ -2326,7 +2326,7 @@ _ZNK13ItemStackBase15getUseAnimationEv:
 .L_ZNK13ItemStackBase15getUseAnimationEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase15getUseAnimationEv3:
         .align  2
 .L_ZNK13ItemStackBase15getUseAnimationEv2:
@@ -2342,7 +2342,7 @@ _ZNK13ItemStackBase18hasCustomHoverNameEv:
 .L_ZNK13ItemStackBase18hasCustomHoverNameEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase18hasCustomHoverNameEv3:
         .align  2
 .L_ZNK13ItemStackBase18hasCustomHoverNameEv2:
@@ -2358,7 +2358,7 @@ _ZNK13ItemStackBase23getEnchantsFromUserDataEv:
 .L_ZNK13ItemStackBase23getEnchantsFromUserDataEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase23getEnchantsFromUserDataEv3:
         .align  2
 .L_ZNK13ItemStackBase23getEnchantsFromUserDataEv2:
@@ -2374,7 +2374,7 @@ _ZNK13ItemStackBase5getIdEv:
 .L_ZNK13ItemStackBase5getIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13ItemStackBase5getIdEv3:
         .align  2
 .L_ZNK13ItemStackBase5getIdEv2:
@@ -2390,7 +2390,7 @@ _ZNK13MinecraftGame19getLocalServerLevelEv:
 .L_ZNK13MinecraftGame19getLocalServerLevelEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK13MinecraftGame19getLocalServerLevelEv3:
         .align  2
 .L_ZNK13MinecraftGame19getLocalServerLevelEv2:
@@ -2406,7 +2406,7 @@ _ZNK14ClientInstance11getTexturesEv:
 .L_ZNK14ClientInstance11getTexturesEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14ClientInstance11getTexturesEv3:
         .align  2
 .L_ZNK14ClientInstance11getTexturesEv2:
@@ -2422,7 +2422,7 @@ _ZNK14ClientInstance15getSceneFactoryEv:
 .L_ZNK14ClientInstance15getSceneFactoryEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14ClientInstance15getSceneFactoryEv3:
         .align  2
 .L_ZNK14ClientInstance15getSceneFactoryEv2:
@@ -2438,7 +2438,7 @@ _ZNK14ClientInstance16getMinecraftGameEv:
 .L_ZNK14ClientInstance16getMinecraftGameEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14ClientInstance16getMinecraftGameEv3:
         .align  2
 .L_ZNK14ClientInstance16getMinecraftGameEv2:
@@ -2454,7 +2454,7 @@ _ZNK14ClientInstance19getClientSceneStackEv:
 .L_ZNK14ClientInstance19getClientSceneStackEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14ClientInstance19getClientSceneStackEv3:
         .align  2
 .L_ZNK14ClientInstance19getClientSceneStackEv2:
@@ -2470,7 +2470,7 @@ _ZNK14FeatureToggles9isEnabledE15FeatureOptionID:
 .L_ZNK14FeatureToggles9isEnabledE15FeatureOptionIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID3:
         .align  2
 .L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID2:
@@ -2486,7 +2486,7 @@ _ZNK14ItemDescriptor5getIdEv:
 .L_ZNK14ItemDescriptor5getIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK14ItemDescriptor5getIdEv3:
         .align  2
 .L_ZNK14ItemDescriptor5getIdEv2:
@@ -2502,7 +2502,7 @@ _ZNK15ChestBlockActor7getItemEi:
 .L_ZNK15ChestBlockActor7getItemEiPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK15ChestBlockActor7getItemEi3:
         .align  2
 .L_ZNK15ChestBlockActor7getItemEi2:
@@ -2518,7 +2518,7 @@ _ZNK15CommandRegistry11findCommandERKSs:
 .L_ZNK15CommandRegistry11findCommandERKSsPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK15CommandRegistry11findCommandERKSs3:
         .align  2
 .L_ZNK15CommandRegistry11findCommandERKSs2:
@@ -2534,7 +2534,7 @@ _ZNK17AttributeInstance11getMaxValueEv:
 .L_ZNK17AttributeInstance11getMaxValueEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK17AttributeInstance11getMaxValueEv3:
         .align  2
 .L_ZNK17AttributeInstance11getMaxValueEv2:
@@ -2550,7 +2550,7 @@ _ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginS
 .L_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsibPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib3:
         .align  2
 .L_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib2:
@@ -2566,7 +2566,7 @@ _ZNK20PlayerInventoryProxy15getSelectedSlotEv:
 .L_ZNK20PlayerInventoryProxy15getSelectedSlotEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK20PlayerInventoryProxy15getSelectedSlotEv3:
         .align  2
 .L_ZNK20PlayerInventoryProxy15getSelectedSlotEv2:
@@ -2582,7 +2582,7 @@ _ZNK20PlayerInventoryProxy7getItemEi11ContainerID:
 .L_ZNK20PlayerInventoryProxy7getItemEi11ContainerIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK20PlayerInventoryProxy7getItemEi11ContainerID3:
         .align  2
 .L_ZNK20PlayerInventoryProxy7getItemEi11ContainerID2:
@@ -2598,7 +2598,7 @@ _ZNK4Item12getMaxDamageEv:
 .L_ZNK4Item12getMaxDamageEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item12getMaxDamageEv3:
         .align  2
 .L_ZNK4Item12getMaxDamageEv2:
@@ -2614,7 +2614,7 @@ _ZNK4Item14getEnchantSlotEv:
 .L_ZNK4Item14getEnchantSlotEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item14getEnchantSlotEv3:
         .align  2
 .L_ZNK4Item14getEnchantSlotEv2:
@@ -2630,7 +2630,7 @@ _ZNK4Item15getEnchantValueEv:
 .L_ZNK4Item15getEnchantValueEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item15getEnchantValueEv3:
         .align  2
 .L_ZNK4Item15getEnchantValueEv2:
@@ -2646,7 +2646,7 @@ _ZNK4Item15isStackedByDataEv:
 .L_ZNK4Item15isStackedByDataEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item15isStackedByDataEv3:
         .align  2
 .L_ZNK4Item15isStackedByDataEv2:
@@ -2662,7 +2662,7 @@ _ZNK4Item3useER9ItemStackR6Player:
 .L_ZNK4Item3useER9ItemStackR6PlayerPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item3useER9ItemStackR6Player3:
         .align  2
 .L_ZNK4Item3useER9ItemStackR6Player2:
@@ -2678,7 +2678,7 @@ _ZNK4Item7getIconERK13ItemStackBaseib:
 .L_ZNK4Item7getIconERK13ItemStackBaseibPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK4Item7getIconERK13ItemStackBaseib3:
         .align  2
 .L_ZNK4Item7getIconERK13ItemStackBaseib2:
@@ -2694,7 +2694,7 @@ _ZNK5Actor10getNameTagEv:
 .L_ZNK5Actor10getNameTagEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor10getNameTagEv3:
         .align  2
 .L_ZNK5Actor10getNameTagEv2:
@@ -2710,7 +2710,7 @@ _ZNK5Actor10isSneakingEv:
 .L_ZNK5Actor10isSneakingEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor10isSneakingEv3:
         .align  2
 .L_ZNK5Actor10isSneakingEv2:
@@ -2726,7 +2726,7 @@ _ZNK5Actor11canAddRiderERS_:
 .L_ZNK5Actor11canAddRiderERS_PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor11canAddRiderERS_3:
         .align  2
 .L_ZNK5Actor11canAddRiderERS_2:
@@ -2742,7 +2742,7 @@ _ZNK5Actor11getUniqueIDEv:
 .L_ZNK5Actor11getUniqueIDEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor11getUniqueIDEv3:
         .align  2
 .L_ZNK5Actor11getUniqueIDEv2:
@@ -2758,7 +2758,7 @@ _ZNK5Actor12getAttributeERK9Attribute:
 .L_ZNK5Actor12getAttributeERK9AttributePIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor12getAttributeERK9Attribute3:
         .align  2
 .L_ZNK5Actor12getAttributeERK9Attribute2:
@@ -2774,7 +2774,7 @@ _ZNK5Actor14getCarriedItemEv:
 .L_ZNK5Actor14getCarriedItemEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor14getCarriedItemEv3:
         .align  2
 .L_ZNK5Actor14getCarriedItemEv2:
@@ -2790,7 +2790,7 @@ _ZNK5Actor14getDimensionIdEv:
 .L_ZNK5Actor14getDimensionIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor14getDimensionIdEv3:
         .align  2
 .L_ZNK5Actor14getDimensionIdEv2:
@@ -2806,7 +2806,7 @@ _ZNK5Actor14getOffhandSlotEv:
 .L_ZNK5Actor14getOffhandSlotEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor14getOffhandSlotEv3:
         .align  2
 .L_ZNK5Actor14getOffhandSlotEv2:
@@ -2822,7 +2822,7 @@ _ZNK5Actor15getEntityTypeIdEv:
 .L_ZNK5Actor15getEntityTypeIdEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor15getEntityTypeIdEv3:
         .align  2
 .L_ZNK5Actor15getEntityTypeIdEv2:
@@ -2838,7 +2838,7 @@ _ZNK5Actor7getRideEv:
 .L_ZNK5Actor7getRideEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor7getRideEv3:
         .align  2
 .L_ZNK5Actor7getRideEv2:
@@ -2854,7 +2854,7 @@ _ZNK5Actor8getArmorE9ArmorSlot:
 .L_ZNK5Actor8getArmorE9ArmorSlotPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor8getArmorE9ArmorSlot3:
         .align  2
 .L_ZNK5Actor8getArmorE9ArmorSlot2:
@@ -2870,7 +2870,7 @@ _ZNK5Actor9getHealthEv:
 .L_ZNK5Actor9getHealthEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor9getHealthEv3:
         .align  2
 .L_ZNK5Actor9getHealthEv2:
@@ -2886,7 +2886,7 @@ _ZNK5Actor9getRegionEv:
 .L_ZNK5Actor9getRegionEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Actor9getRegionEv3:
         .align  2
 .L_ZNK5Actor9getRegionEv2:
@@ -2902,7 +2902,7 @@ _ZNK5Level10getSpawnerEv:
 .L_ZNK5Level10getSpawnerEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level10getSpawnerEv3:
         .align  2
 .L_ZNK5Level10getSpawnerEv2:
@@ -2918,7 +2918,7 @@ _ZNK5Level11fetchEntityE13ActorUniqueIDb:
 .L_ZNK5Level11fetchEntityE13ActorUniqueIDbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level11fetchEntityE13ActorUniqueIDb3:
         .align  2
 .L_ZNK5Level11fetchEntityE13ActorUniqueIDb2:
@@ -2934,7 +2934,7 @@ _ZNK5Level12isClientSideEv:
 .L_ZNK5Level12isClientSideEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level12isClientSideEv3:
         .align  2
 .L_ZNK5Level12isClientSideEv2:
@@ -2950,7 +2950,7 @@ _ZNK5Level21getGlobalBlockPaletteEv:
 .L_ZNK5Level21getGlobalBlockPaletteEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level21getGlobalBlockPaletteEv3:
         .align  2
 .L_ZNK5Level21getGlobalBlockPaletteEv2:
@@ -2966,7 +2966,7 @@ _ZNK5Level7getTimeEv:
 .L_ZNK5Level7getTimeEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level7getTimeEv3:
         .align  2
 .L_ZNK5Level7getTimeEv2:
@@ -2982,7 +2982,7 @@ _ZNK5Level9getPlayerE13ActorUniqueID:
 .L_ZNK5Level9getPlayerE13ActorUniqueIDPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK5Level9getPlayerE13ActorUniqueID3:
         .align  2
 .L_ZNK5Level9getPlayerE13ActorUniqueID2:
@@ -2998,7 +2998,7 @@ _ZNK6Player11getSuppliesEv:
 .L_ZNK6Player11getSuppliesEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK6Player11getSuppliesEv3:
         .align  2
 .L_ZNK6Player11getSuppliesEv2:
@@ -3014,7 +3014,7 @@ _ZNK6Player14getCarriedItemEv:
 .L_ZNK6Player14getCarriedItemEvPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK6Player14getCarriedItemEv3:
         .align  2
 .L_ZNK6Player14getCarriedItemEv2:
@@ -3030,7 +3030,7 @@ _ZNK9Abilities7getBoolE14AbilitiesIndex:
 .L_ZNK9Abilities7getBoolE14AbilitiesIndexPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK9Abilities7getBoolE14AbilitiesIndex3:
         .align  2
 .L_ZNK9Abilities7getBoolE14AbilitiesIndex2:
@@ -3046,7 +3046,7 @@ _ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb:
 .L_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb3:
         .align  2
 .L_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2:

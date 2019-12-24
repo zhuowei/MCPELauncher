@@ -22,7 +22,7 @@ asm_perfunc_template = """
 .L{name}PIC0:
         add     ip, pc, ip 
         ldr     ip, [ip]
-        blx     ip 
+        bx      ip 
 .L{name}3:
         .align  2
 .L{name}2:
