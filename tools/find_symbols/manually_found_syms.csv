@@ -103,5 +103,7 @@ _ZNK13ItemStackBase13getCustomNameEv,0x24581b5
 _ZNK13ItemStackBase5getIdEv,0x2455f09
 _ZN11BlockSource14getBlockEntityERK8BlockPos,0x26a3459
 _ZN9ItemStackD1Ev,0x98fc01
-# also rename
+# also renames
 _ZNK13ItemStackBase23getEnchantsFromUserDataEv,0x24577e9
+_ZNK13ItemStackBase15getUseAnimationEv,0x245b361
+_ZNK13ItemStackBase15getMaxStackSizeEv,0x24565f9
