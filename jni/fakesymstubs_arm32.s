@@ -28,7 +28,7 @@ _ZN10BlockActor10setChangedEv:
 .L_ZN10BlockActor10setChangedEv2:
         .word   bl_addr__ZN10BlockActor10setChangedEv-(.L_ZN10BlockActor10setChangedEvPIC0+8)
         .size   _ZN10BlockActor10setChangedEv, .-_ZN10BlockActor10setChangedEv
-        .hidden bl_addr__ZN10BlockActor10setChangedEv
+        .hidden _ZN10BlockActor10setChangedEv
 
 
         .global _ZN10SceneStack6updateEv 
@@ -44,7 +44,7 @@ _ZN10SceneStack6updateEv:
 .L_ZN10SceneStack6updateEv2:
         .word   bl_addr__ZN10SceneStack6updateEv-(.L_ZN10SceneStack6updateEvPIC0+8)
         .size   _ZN10SceneStack6updateEv, .-_ZN10SceneStack6updateEv
-        .hidden bl_addr__ZN10SceneStack6updateEv
+        .hidden _ZN10SceneStack6updateEv
 
 
         .global _ZN10ScreenView17setDebugRenderingEb 
@@ -60,7 +60,7 @@ _ZN10ScreenView17setDebugRenderingEb:
 .L_ZN10ScreenView17setDebugRenderingEb2:
         .word   bl_addr__ZN10ScreenView17setDebugRenderingEb-(.L_ZN10ScreenView17setDebugRenderingEbPIC0+8)
         .size   _ZN10ScreenView17setDebugRenderingEb, .-_ZN10ScreenView17setDebugRenderingEb
-        .hidden bl_addr__ZN10ScreenView17setDebugRenderingEb
+        .hidden _ZN10ScreenView17setDebugRenderingEb
 
 
         .global _ZN11BlockLegacy11setFrictionEf 
@@ -76,7 +76,7 @@ _ZN11BlockLegacy11setFrictionEf:
 .L_ZN11BlockLegacy11setFrictionEf2:
         .word   bl_addr__ZN11BlockLegacy11setFrictionEf-(.L_ZN11BlockLegacy11setFrictionEfPIC0+8)
         .size   _ZN11BlockLegacy11setFrictionEf, .-_ZN11BlockLegacy11setFrictionEf
-        .hidden bl_addr__ZN11BlockLegacy11setFrictionEf
+        .hidden _ZN11BlockLegacy11setFrictionEf
 
 
         .global _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_ 
@@ -92,7 +92,7 @@ _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_:
 .L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_2:
         .word   bl_addr__ZN11BlockLegacy14setVisualShapeERK4Vec3S2_-(.L_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_PIC0+8)
         .size   _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_, .-_ZN11BlockLegacy14setVisualShapeERK4Vec3S2_
-        .hidden bl_addr__ZN11BlockLegacy14setVisualShapeERK4Vec3S2_
+        .hidden _ZN11BlockLegacy14setVisualShapeERK4Vec3S2_
 
 
         .global _ZN11BlockSource13setGrassColorEiRK8BlockPosi 
@@ -108,7 +108,7 @@ _ZN11BlockSource13setGrassColorEiRK8BlockPosi:
 .L_ZN11BlockSource13setGrassColorEiRK8BlockPosi2:
         .word   bl_addr__ZN11BlockSource13setGrassColorEiRK8BlockPosi-(.L_ZN11BlockSource13setGrassColorEiRK8BlockPosiPIC0+8)
         .size   _ZN11BlockSource13setGrassColorEiRK8BlockPosi, .-_ZN11BlockSource13setGrassColorEiRK8BlockPosi
-        .hidden bl_addr__ZN11BlockSource13setGrassColorEiRK8BlockPosi
+        .hidden _ZN11BlockSource13setGrassColorEiRK8BlockPosi
 
 
         .global _ZN11BlockSource14getBlockEntityERK8BlockPos 
@@ -124,7 +124,7 @@ _ZN11BlockSource14getBlockEntityERK8BlockPos:
 .L_ZN11BlockSource14getBlockEntityERK8BlockPos2:
         .word   bl_addr__ZN11BlockSource14getBlockEntityERK8BlockPos-(.L_ZN11BlockSource14getBlockEntityERK8BlockPosPIC0+8)
         .size   _ZN11BlockSource14getBlockEntityERK8BlockPos, .-_ZN11BlockSource14getBlockEntityERK8BlockPos
-        .hidden bl_addr__ZN11BlockSource14getBlockEntityERK8BlockPos
+        .hidden _ZN11BlockSource14getBlockEntityERK8BlockPos
 
 
         .global _ZN11BlockSource8getBiomeERK8BlockPos 
@@ -140,7 +140,7 @@ _ZN11BlockSource8getBiomeERK8BlockPos:
 .L_ZN11BlockSource8getBiomeERK8BlockPos2:
         .word   bl_addr__ZN11BlockSource8getBiomeERK8BlockPos-(.L_ZN11BlockSource8getBiomeERK8BlockPosPIC0+8)
         .size   _ZN11BlockSource8getBiomeERK8BlockPos, .-_ZN11BlockSource8getBiomeERK8BlockPos
-        .hidden bl_addr__ZN11BlockSource8getBiomeERK8BlockPos
+        .hidden _ZN11BlockSource8getBiomeERK8BlockPos
 
 
         .global _ZN11BlockSource8setBlockEiiiRK5Blocki 
@@ -156,7 +156,7 @@ _ZN11BlockSource8setBlockEiiiRK5Blocki:
 .L_ZN11BlockSource8setBlockEiiiRK5Blocki2:
         .word   bl_addr__ZN11BlockSource8setBlockEiiiRK5Blocki-(.L_ZN11BlockSource8setBlockEiiiRK5BlockiPIC0+8)
         .size   _ZN11BlockSource8setBlockEiiiRK5Blocki, .-_ZN11BlockSource8setBlockEiiiRK5Blocki
-        .hidden bl_addr__ZN11BlockSource8setBlockEiiiRK5Blocki
+        .hidden _ZN11BlockSource8setBlockEiiiRK5Blocki
 
 
         .global _ZN11LocalPlayer6hurtToEi 
@@ -172,7 +172,7 @@ _ZN11LocalPlayer6hurtToEi:
 .L_ZN11LocalPlayer6hurtToEi2:
         .word   bl_addr__ZN11LocalPlayer6hurtToEi-(.L_ZN11LocalPlayer6hurtToEiPIC0+8)
         .size   _ZN11LocalPlayer6hurtToEi, .-_ZN11LocalPlayer6hurtToEi
-        .hidden bl_addr__ZN11LocalPlayer6hurtToEi
+        .hidden _ZN11LocalPlayer6hurtToEi
 
 
         .global _ZN11ServerLevel11getCommandsEv 
@@ -188,7 +188,7 @@ _ZN11ServerLevel11getCommandsEv:
 .L_ZN11ServerLevel11getCommandsEv2:
         .word   bl_addr__ZN11ServerLevel11getCommandsEv-(.L_ZN11ServerLevel11getCommandsEvPIC0+8)
         .size   _ZN11ServerLevel11getCommandsEv, .-_ZN11ServerLevel11getCommandsEv
-        .hidden bl_addr__ZN11ServerLevel11getCommandsEv
+        .hidden _ZN11ServerLevel11getCommandsEv
 
 
         .global _ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2 
@@ -204,7 +204,7 @@ _ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Ve
 .L_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec22:
         .word   bl_addr__ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2-(.L_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2PIC0+8)
         .size   _ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2, .-_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2
-        .hidden bl_addr__ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2
+        .hidden _ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2
 
 
         .global _ZN12ActorFactoryC1ER5Level 
@@ -220,7 +220,7 @@ _ZN12ActorFactoryC1ER5Level:
 .L_ZN12ActorFactoryC1ER5Level2:
         .word   bl_addr__ZN12ActorFactoryC1ER5Level-(.L_ZN12ActorFactoryC1ER5LevelPIC0+8)
         .size   _ZN12ActorFactoryC1ER5Level, .-_ZN12ActorFactoryC1ER5Level
-        .hidden bl_addr__ZN12ActorFactoryC1ER5Level
+        .hidden _ZN12ActorFactoryC1ER5Level
 
 
         .global _ZN12ItemInstanceC1Ev 
@@ -236,7 +236,7 @@ _ZN12ItemInstanceC1Ev:
 .L_ZN12ItemInstanceC1Ev2:
         .word   bl_addr__ZN12ItemInstanceC1Ev-(.L_ZN12ItemInstanceC1EvPIC0+8)
         .size   _ZN12ItemInstanceC1Ev, .-_ZN12ItemInstanceC1Ev
-        .hidden bl_addr__ZN12ItemInstanceC1Ev
+        .hidden _ZN12ItemInstanceC1Ev
 
 
         .global _ZN12ItemInstanceD2Ev 
@@ -252,7 +252,7 @@ _ZN12ItemInstanceD2Ev:
 .L_ZN12ItemInstanceD2Ev2:
         .word   bl_addr__ZN12ItemInstanceD2Ev-(.L_ZN12ItemInstanceD2EvPIC0+8)
         .size   _ZN12ItemInstanceD2Ev, .-_ZN12ItemInstanceD2Ev
-        .hidden bl_addr__ZN12ItemInstanceD2Ev
+        .hidden _ZN12ItemInstanceD2Ev
 
 
         .global _ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_ 
@@ -268,7 +268,7 @@ _ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_:
 .L_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_2:
         .word   bl_addr__ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_-(.L_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_PIC0+8)
         .size   _ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_, .-_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_
-        .hidden bl_addr__ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_
+        .hidden _ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_
 
 
         .global _ZN12ItemRegistry7getItemEs 
@@ -284,7 +284,7 @@ _ZN12ItemRegistry7getItemEs:
 .L_ZN12ItemRegistry7getItemEs2:
         .word   bl_addr__ZN12ItemRegistry7getItemEs-(.L_ZN12ItemRegistry7getItemEsPIC0+8)
         .size   _ZN12ItemRegistry7getItemEs, .-_ZN12ItemRegistry7getItemEs
-        .hidden bl_addr__ZN12ItemRegistry7getItemEs
+        .hidden _ZN12ItemRegistry7getItemEs
 
 
         .global _ZN12ItemRenderer17forceGraphicsLoadEv 
@@ -300,7 +300,7 @@ _ZN12ItemRenderer17forceGraphicsLoadEv:
 .L_ZN12ItemRenderer17forceGraphicsLoadEv2:
         .word   bl_addr__ZN12ItemRenderer17forceGraphicsLoadEv-(.L_ZN12ItemRenderer17forceGraphicsLoadEvPIC0+8)
         .size   _ZN12ItemRenderer17forceGraphicsLoadEv, .-_ZN12ItemRenderer17forceGraphicsLoadEv
-        .hidden bl_addr__ZN12ItemRenderer17forceGraphicsLoadEv
+        .hidden _ZN12ItemRenderer17forceGraphicsLoadEv
 
 
         .global _ZN12ServerPlayer13sendInventoryEb 
@@ -316,7 +316,7 @@ _ZN12ServerPlayer13sendInventoryEb:
 .L_ZN12ServerPlayer13sendInventoryEb2:
         .word   bl_addr__ZN12ServerPlayer13sendInventoryEb-(.L_ZN12ServerPlayer13sendInventoryEbPIC0+8)
         .size   _ZN12ServerPlayer13sendInventoryEb, .-_ZN12ServerPlayer13sendInventoryEb
-        .hidden bl_addr__ZN12ServerPlayer13sendInventoryEb
+        .hidden _ZN12ServerPlayer13sendInventoryEb
 
 
         .global _ZN12VanillaItems13registerItemsEb 
@@ -332,7 +332,7 @@ _ZN12VanillaItems13registerItemsEb:
 .L_ZN12VanillaItems13registerItemsEb2:
         .word   bl_addr__ZN12VanillaItems13registerItemsEb-(.L_ZN12VanillaItems13registerItemsEbPIC0+8)
         .size   _ZN12VanillaItems13registerItemsEb, .-_ZN12VanillaItems13registerItemsEb
-        .hidden bl_addr__ZN12VanillaItems13registerItemsEb
+        .hidden _ZN12VanillaItems13registerItemsEb
 
 
         .global _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE 
@@ -348,7 +348,7 @@ _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS
 .L_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE2:
         .word   bl_addr__ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE-(.L_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EEPIC0+8)
         .size   _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE, .-_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE
-        .hidden bl_addr__ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE
+        .hidden _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE
 
 
         .global _ZN13ItemStackBase13setCustomNameERKSs 
@@ -364,7 +364,7 @@ _ZN13ItemStackBase13setCustomNameERKSs:
 .L_ZN13ItemStackBase13setCustomNameERKSs2:
         .word   bl_addr__ZN13ItemStackBase13setCustomNameERKSs-(.L_ZN13ItemStackBase13setCustomNameERKSsPIC0+8)
         .size   _ZN13ItemStackBase13setCustomNameERKSs, .-_ZN13ItemStackBase13setCustomNameERKSs
-        .hidden bl_addr__ZN13ItemStackBase13setCustomNameERKSs
+        .hidden _ZN13ItemStackBase13setCustomNameERKSs
 
 
         .global _ZN13ItemStackBase4initEiii 
@@ -380,7 +380,7 @@ _ZN13ItemStackBase4initEiii:
 .L_ZN13ItemStackBase4initEiii2:
         .word   bl_addr__ZN13ItemStackBase4initEiii-(.L_ZN13ItemStackBase4initEiiiPIC0+8)
         .size   _ZN13ItemStackBase4initEiii, .-_ZN13ItemStackBase4initEiii
-        .hidden bl_addr__ZN13ItemStackBase4initEiii
+        .hidden _ZN13ItemStackBase4initEiii
 
 
         .global _ZN13ItemStackBase8_setItemEi 
@@ -396,7 +396,7 @@ _ZN13ItemStackBase8_setItemEi:
 .L_ZN13ItemStackBase8_setItemEi2:
         .word   bl_addr__ZN13ItemStackBase8_setItemEi-(.L_ZN13ItemStackBase8_setItemEiPIC0+8)
         .size   _ZN13ItemStackBase8_setItemEi, .-_ZN13ItemStackBase8_setItemEi
-        .hidden bl_addr__ZN13ItemStackBase8_setItemEi
+        .hidden _ZN13ItemStackBase8_setItemEi
 
 
         .global _ZN13ItemStackBase8setBlockEPK5Block 
@@ -412,7 +412,7 @@ _ZN13ItemStackBase8setBlockEPK5Block:
 .L_ZN13ItemStackBase8setBlockEPK5Block2:
         .word   bl_addr__ZN13ItemStackBase8setBlockEPK5Block-(.L_ZN13ItemStackBase8setBlockEPK5BlockPIC0+8)
         .size   _ZN13ItemStackBase8setBlockEPK5Block, .-_ZN13ItemStackBase8setBlockEPK5Block
-        .hidden bl_addr__ZN13ItemStackBase8setBlockEPK5Block
+        .hidden _ZN13ItemStackBase8setBlockEPK5Block
 
 
         .global _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent 
@@ -428,7 +428,7 @@ _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11
 .L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent2:
         .word   bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent-(.L_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntentPIC0+8)
         .size   _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent, .-_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent
-        .hidden bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent
+        .hidden _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent
 
 
         .global _ZN13MinecraftGame24getPrimaryClientInstanceEv 
@@ -444,7 +444,7 @@ _ZN13MinecraftGame24getPrimaryClientInstanceEv:
 .L_ZN13MinecraftGame24getPrimaryClientInstanceEv2:
         .word   bl_addr__ZN13MinecraftGame24getPrimaryClientInstanceEv-(.L_ZN13MinecraftGame24getPrimaryClientInstanceEvPIC0+8)
         .size   _ZN13MinecraftGame24getPrimaryClientInstanceEv, .-_ZN13MinecraftGame24getPrimaryClientInstanceEv
-        .hidden bl_addr__ZN13MinecraftGame24getPrimaryClientInstanceEv
+        .hidden _ZN13MinecraftGame24getPrimaryClientInstanceEv
 
 
         .global _ZN13MinecraftGame6updateEv 
@@ -460,7 +460,7 @@ _ZN13MinecraftGame6updateEv:
 .L_ZN13MinecraftGame6updateEv2:
         .word   bl_addr__ZN13MinecraftGame6updateEv-(.L_ZN13MinecraftGame6updateEvPIC0+8)
         .size   _ZN13MinecraftGame6updateEv, .-_ZN13MinecraftGame6updateEv
-        .hidden bl_addr__ZN13MinecraftGame6updateEv
+        .hidden _ZN13MinecraftGame6updateEv
 
 
         .global _ZN14ClientInstance10getGuiDataEv 
@@ -476,7 +476,7 @@ _ZN14ClientInstance10getGuiDataEv:
 .L_ZN14ClientInstance10getGuiDataEv2:
         .word   bl_addr__ZN14ClientInstance10getGuiDataEv-(.L_ZN14ClientInstance10getGuiDataEvPIC0+8)
         .size   _ZN14ClientInstance10getGuiDataEv, .-_ZN14ClientInstance10getGuiDataEv
-        .hidden bl_addr__ZN14ClientInstance10getGuiDataEv
+        .hidden _ZN14ClientInstance10getGuiDataEv
 
 
         .global _ZN14ClientInstance13getServerDataEv 
@@ -492,7 +492,7 @@ _ZN14ClientInstance13getServerDataEv:
 .L_ZN14ClientInstance13getServerDataEv2:
         .word   bl_addr__ZN14ClientInstance13getServerDataEv-(.L_ZN14ClientInstance13getServerDataEvPIC0+8)
         .size   _ZN14ClientInstance13getServerDataEv, .-_ZN14ClientInstance13getServerDataEv
-        .hidden bl_addr__ZN14ClientInstance13getServerDataEv
+        .hidden _ZN14ClientInstance13getServerDataEv
 
 
         .global _ZN14ClientInstance14getLocalPlayerEv 
@@ -508,7 +508,7 @@ _ZN14ClientInstance14getLocalPlayerEv:
 .L_ZN14ClientInstance14getLocalPlayerEv2:
         .word   bl_addr__ZN14ClientInstance14getLocalPlayerEv-(.L_ZN14ClientInstance14getLocalPlayerEvPIC0+8)
         .size   _ZN14ClientInstance14getLocalPlayerEv, .-_ZN14ClientInstance14getLocalPlayerEv
-        .hidden bl_addr__ZN14ClientInstance14getLocalPlayerEv
+        .hidden _ZN14ClientInstance14getLocalPlayerEv
 
 
         .global _ZN14ClientInstance15_startLeaveGameEv 
@@ -524,7 +524,7 @@ _ZN14ClientInstance15_startLeaveGameEv:
 .L_ZN14ClientInstance15_startLeaveGameEv2:
         .word   bl_addr__ZN14ClientInstance15_startLeaveGameEv-(.L_ZN14ClientInstance15_startLeaveGameEvPIC0+8)
         .size   _ZN14ClientInstance15_startLeaveGameEv, .-_ZN14ClientInstance15_startLeaveGameEv
-        .hidden bl_addr__ZN14ClientInstance15_startLeaveGameEv
+        .hidden _ZN14ClientInstance15_startLeaveGameEv
 
 
         .global _ZN14ClientInstance15getItemRendererEv 
@@ -540,7 +540,7 @@ _ZN14ClientInstance15getItemRendererEv:
 .L_ZN14ClientInstance15getItemRendererEv2:
         .word   bl_addr__ZN14ClientInstance15getItemRendererEv-(.L_ZN14ClientInstance15getItemRendererEvPIC0+8)
         .size   _ZN14ClientInstance15getItemRendererEv, .-_ZN14ClientInstance15getItemRendererEv
-        .hidden bl_addr__ZN14ClientInstance15getItemRendererEv
+        .hidden _ZN14ClientInstance15getItemRendererEv
 
 
         .global _ZN14ClientInstance15setCameraEntityEP5Actor 
@@ -556,7 +556,7 @@ _ZN14ClientInstance15setCameraEntityEP5Actor:
 .L_ZN14ClientInstance15setCameraEntityEP5Actor2:
         .word   bl_addr__ZN14ClientInstance15setCameraEntityEP5Actor-(.L_ZN14ClientInstance15setCameraEntityEP5ActorPIC0+8)
         .size   _ZN14ClientInstance15setCameraEntityEP5Actor, .-_ZN14ClientInstance15setCameraEntityEP5Actor
-        .hidden bl_addr__ZN14ClientInstance15setCameraEntityEP5Actor
+        .hidden _ZN14ClientInstance15setCameraEntityEP5Actor
 
 
         .global _ZN14ClientInstance19getLocalServerLevelEv 
@@ -572,7 +572,7 @@ _ZN14ClientInstance19getLocalServerLevelEv:
 .L_ZN14ClientInstance19getLocalServerLevelEv2:
         .word   bl_addr__ZN14ClientInstance19getLocalServerLevelEv-(.L_ZN14ClientInstance19getLocalServerLevelEvPIC0+8)
         .size   _ZN14ClientInstance19getLocalServerLevelEv, .-_ZN14ClientInstance19getLocalServerLevelEv
-        .hidden bl_addr__ZN14ClientInstance19getLocalServerLevelEv
+        .hidden _ZN14ClientInstance19getLocalServerLevelEv
 
 
         .global _ZN14ClientInstance4playERKSsRK4Vec3ff 
@@ -588,7 +588,7 @@ _ZN14ClientInstance4playERKSsRK4Vec3ff:
 .L_ZN14ClientInstance4playERKSsRK4Vec3ff2:
         .word   bl_addr__ZN14ClientInstance4playERKSsRK4Vec3ff-(.L_ZN14ClientInstance4playERKSsRK4Vec3ffPIC0+8)
         .size   _ZN14ClientInstance4playERKSsRK4Vec3ff, .-_ZN14ClientInstance4playERKSsRK4Vec3ff
-        .hidden bl_addr__ZN14ClientInstance4playERKSsRK4Vec3ff
+        .hidden _ZN14ClientInstance4playERKSsRK4Vec3ff
 
 
         .global _ZN14ClientInstance8getLevelEv 
@@ -604,7 +604,7 @@ _ZN14ClientInstance8getLevelEv:
 .L_ZN14ClientInstance8getLevelEv2:
         .word   bl_addr__ZN14ClientInstance8getLevelEv-(.L_ZN14ClientInstance8getLevelEvPIC0+8)
         .size   _ZN14ClientInstance8getLevelEv, .-_ZN14ClientInstance8getLevelEv
-        .hidden bl_addr__ZN14ClientInstance8getLevelEv
+        .hidden _ZN14ClientInstance8getLevelEv
 
 
         .global _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_ 
@@ -620,7 +620,7 @@ _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_:
 .L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_2:
         .word   bl_addr__ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_-(.L_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_PIC0+8)
         .size   _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_, .-_ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_
-        .hidden bl_addr__ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_
+        .hidden _ZN14RakNetInstance7connectEN6Social18GameConnectionInfoES1_
 
 
         .global _ZN14SignBlockActor10setMessageESsSs 
@@ -636,7 +636,7 @@ _ZN14SignBlockActor10setMessageESsSs:
 .L_ZN14SignBlockActor10setMessageESsSs2:
         .word   bl_addr__ZN14SignBlockActor10setMessageESsSs-(.L_ZN14SignBlockActor10setMessageESsSsPIC0+8)
         .size   _ZN14SignBlockActor10setMessageESsSs, .-_ZN14SignBlockActor10setMessageESsSs
-        .hidden bl_addr__ZN14SignBlockActor10setMessageESsSs
+        .hidden _ZN14SignBlockActor10setMessageESsSs
 
 
         .global _ZN15ChestBlockActor7setItemEiRK9ItemStack 
@@ -652,7 +652,7 @@ _ZN15ChestBlockActor7setItemEiRK9ItemStack:
 .L_ZN15ChestBlockActor7setItemEiRK9ItemStack2:
         .word   bl_addr__ZN15ChestBlockActor7setItemEiRK9ItemStack-(.L_ZN15ChestBlockActor7setItemEiRK9ItemStackPIC0+8)
         .size   _ZN15ChestBlockActor7setItemEiRK9ItemStack, .-_ZN15ChestBlockActor7setItemEiRK9ItemStack
-        .hidden bl_addr__ZN15ChestBlockActor7setItemEiRK9ItemStack
+        .hidden _ZN15ChestBlockActor7setItemEiRK9ItemStack
 
 
         .global _ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE 
@@ -668,7 +668,7 @@ _ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_d
 .L_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
         .word   bl_addr__ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE-(.L_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0+8)
         .size   _ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE, .-_ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
-        .hidden bl_addr__ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
+        .hidden _ZN16MultiPlayerLevel9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
 
 
         .global _ZN16ResourceLocationD2Ev 
@@ -684,7 +684,7 @@ _ZN16ResourceLocationD2Ev:
 .L_ZN16ResourceLocationD2Ev2:
         .word   bl_addr__ZN16ResourceLocationD2Ev-(.L_ZN16ResourceLocationD2EvPIC0+8)
         .size   _ZN16ResourceLocationD2Ev, .-_ZN16ResourceLocationD2Ev
-        .hidden bl_addr__ZN16ResourceLocationD2Ev
+        .hidden _ZN16ResourceLocationD2Ev
 
 
         .global _ZN17AttributeInstance11setMaxValueEf 
@@ -700,7 +700,7 @@ _ZN17AttributeInstance11setMaxValueEf:
 .L_ZN17AttributeInstance11setMaxValueEf2:
         .word   bl_addr__ZN17AttributeInstance11setMaxValueEf-(.L_ZN17AttributeInstance11setMaxValueEfPIC0+8)
         .size   _ZN17AttributeInstance11setMaxValueEf, .-_ZN17AttributeInstance11setMaxValueEf
-        .hidden bl_addr__ZN17AttributeInstance11setMaxValueEf
+        .hidden _ZN17AttributeInstance11setMaxValueEf
 
 
         .global _ZN17MinecraftCommands11getRegistryEv 
@@ -716,7 +716,7 @@ _ZN17MinecraftCommands11getRegistryEv:
 .L_ZN17MinecraftCommands11getRegistryEv2:
         .word   bl_addr__ZN17MinecraftCommands11getRegistryEv-(.L_ZN17MinecraftCommands11getRegistryEvPIC0+8)
         .size   _ZN17MinecraftCommands11getRegistryEv, .-_ZN17MinecraftCommands11getRegistryEv
-        .hidden bl_addr__ZN17MinecraftCommands11getRegistryEv
+        .hidden _ZN17MinecraftCommands11getRegistryEv
 
 
         .global _ZN17MobEffectInstanceC1Ejiibbb 
@@ -732,7 +732,7 @@ _ZN17MobEffectInstanceC1Ejiibbb:
 .L_ZN17MobEffectInstanceC1Ejiibbb2:
         .word   bl_addr__ZN17MobEffectInstanceC1Ejiibbb-(.L_ZN17MobEffectInstanceC1EjiibbbPIC0+8)
         .size   _ZN17MobEffectInstanceC1Ejiibbb, .-_ZN17MobEffectInstanceC1Ejiibbb
-        .hidden bl_addr__ZN17MobEffectInstanceC1Ejiibbb
+        .hidden _ZN17MobEffectInstanceC1Ejiibbb
 
 
         .global _ZN19LevelRendererPlayer6getFovEfb 
@@ -748,7 +748,7 @@ _ZN19LevelRendererPlayer6getFovEfb:
 .L_ZN19LevelRendererPlayer6getFovEfb2:
         .word   bl_addr__ZN19LevelRendererPlayer6getFovEfb-(.L_ZN19LevelRendererPlayer6getFovEfbPIC0+8)
         .size   _ZN19LevelRendererPlayer6getFovEfb, .-_ZN19LevelRendererPlayer6getFovEfb
-        .hidden bl_addr__ZN19LevelRendererPlayer6getFovEfb
+        .hidden _ZN19LevelRendererPlayer6getFovEfb
 
 
         .global _ZN19ProjectileComponent5onHitER5ActorRK9HitResult 
@@ -764,7 +764,7 @@ _ZN19ProjectileComponent5onHitER5ActorRK9HitResult:
 .L_ZN19ProjectileComponent5onHitER5ActorRK9HitResult2:
         .word   bl_addr__ZN19ProjectileComponent5onHitER5ActorRK9HitResult-(.L_ZN19ProjectileComponent5onHitER5ActorRK9HitResultPIC0+8)
         .size   _ZN19ProjectileComponent5onHitER5ActorRK9HitResult, .-_ZN19ProjectileComponent5onHitER5ActorRK9HitResult
-        .hidden bl_addr__ZN19ProjectileComponent5onHitER5ActorRK9HitResult
+        .hidden _ZN19ProjectileComponent5onHitER5ActorRK9HitResult
 
 
         .global _ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel 
@@ -780,7 +780,7 @@ _ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel:
 .L_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel2:
         .word   bl_addr__ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel-(.L_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevelPIC0+8)
         .size   _ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel, .-_ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel
-        .hidden bl_addr__ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel
+        .hidden _ZN19ServerCommandOriginC1ERKSsR11ServerLevel22CommandPermissionLevel
 
 
         .global _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket 
@@ -796,7 +796,7 @@ _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket:
 .L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket2:
         .word   bl_addr__ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket-(.L_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacketPIC0+8)
         .size   _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket, .-_ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket
-        .hidden bl_addr__ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket
+        .hidden _ZN20ClientNetworkHandler6handleERK17NetworkIdentifierRK10TextPacket
 
 
         .global _ZN20MinecraftScreenModel17updateTextBoxTextERKSs 
@@ -812,7 +812,7 @@ _ZN20MinecraftScreenModel17updateTextBoxTextERKSs:
 .L_ZN20MinecraftScreenModel17updateTextBoxTextERKSs2:
         .word   bl_addr__ZN20MinecraftScreenModel17updateTextBoxTextERKSs-(.L_ZN20MinecraftScreenModel17updateTextBoxTextERKSsPIC0+8)
         .size   _ZN20MinecraftScreenModel17updateTextBoxTextERKSs, .-_ZN20MinecraftScreenModel17updateTextBoxTextERKSs
-        .hidden bl_addr__ZN20MinecraftScreenModel17updateTextBoxTextERKSs
+        .hidden _ZN20MinecraftScreenModel17updateTextBoxTextERKSs
 
 
         .global _ZN20PlayerInventoryProxy10selectSlotEi11ContainerID 
@@ -828,7 +828,7 @@ _ZN20PlayerInventoryProxy10selectSlotEi11ContainerID:
 .L_ZN20PlayerInventoryProxy10selectSlotEi11ContainerID2:
         .word   bl_addr__ZN20PlayerInventoryProxy10selectSlotEi11ContainerID-(.L_ZN20PlayerInventoryProxy10selectSlotEi11ContainerIDPIC0+8)
         .size   _ZN20PlayerInventoryProxy10selectSlotEi11ContainerID, .-_ZN20PlayerInventoryProxy10selectSlotEi11ContainerID
-        .hidden bl_addr__ZN20PlayerInventoryProxy10selectSlotEi11ContainerID
+        .hidden _ZN20PlayerInventoryProxy10selectSlotEi11ContainerID
 
 
         .global _ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi 
@@ -844,7 +844,7 @@ _ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi:
 .L_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi2:
         .word   bl_addr__ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi-(.L_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbiPIC0+8)
         .size   _ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi, .-_ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi
-        .hidden bl_addr__ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi
+        .hidden _ZN20PlayerInventoryProxy14removeResourceERK9ItemStackbbi
 
 
         .global _ZN20PlayerInventoryProxy3addER9ItemStackb 
@@ -860,7 +860,7 @@ _ZN20PlayerInventoryProxy3addER9ItemStackb:
 .L_ZN20PlayerInventoryProxy3addER9ItemStackb2:
         .word   bl_addr__ZN20PlayerInventoryProxy3addER9ItemStackb-(.L_ZN20PlayerInventoryProxy3addER9ItemStackbPIC0+8)
         .size   _ZN20PlayerInventoryProxy3addER9ItemStackb, .-_ZN20PlayerInventoryProxy3addER9ItemStackb
-        .hidden bl_addr__ZN20PlayerInventoryProxy3addER9ItemStackb
+        .hidden _ZN20PlayerInventoryProxy3addER9ItemStackb
 
 
         .global _ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID 
@@ -876,7 +876,7 @@ _ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID:
 .L_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID2:
         .word   bl_addr__ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID-(.L_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerIDPIC0+8)
         .size   _ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID, .-_ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID
-        .hidden bl_addr__ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID
+        .hidden _ZN20PlayerInventoryProxy7setItemEiRK9ItemStack11ContainerID
 
 
         .global _ZN20PlayerInventoryProxy9clearSlotEi11ContainerID 
@@ -892,7 +892,7 @@ _ZN20PlayerInventoryProxy9clearSlotEi11ContainerID:
 .L_ZN20PlayerInventoryProxy9clearSlotEi11ContainerID2:
         .word   bl_addr__ZN20PlayerInventoryProxy9clearSlotEi11ContainerID-(.L_ZN20PlayerInventoryProxy9clearSlotEi11ContainerIDPIC0+8)
         .size   _ZN20PlayerInventoryProxy9clearSlotEi11ContainerID, .-_ZN20PlayerInventoryProxy9clearSlotEi11ContainerID
-        .hidden bl_addr__ZN20PlayerInventoryProxy9clearSlotEi11ContainerID
+        .hidden _ZN20PlayerInventoryProxy9clearSlotEi11ContainerID
 
 
         .global _ZN25ActorDefinitionIdentifierC1E9ActorType 
@@ -908,7 +908,7 @@ _ZN25ActorDefinitionIdentifierC1E9ActorType:
 .L_ZN25ActorDefinitionIdentifierC1E9ActorType2:
         .word   bl_addr__ZN25ActorDefinitionIdentifierC1E9ActorType-(.L_ZN25ActorDefinitionIdentifierC1E9ActorTypePIC0+8)
         .size   _ZN25ActorDefinitionIdentifierC1E9ActorType, .-_ZN25ActorDefinitionIdentifierC1E9ActorType
-        .hidden bl_addr__ZN25ActorDefinitionIdentifierC1E9ActorType
+        .hidden _ZN25ActorDefinitionIdentifierC1E9ActorType
 
 
         .global _ZN25ClientInstanceScreenModel14executeCommandERKSs 
@@ -924,7 +924,7 @@ _ZN25ClientInstanceScreenModel14executeCommandERKSs:
 .L_ZN25ClientInstanceScreenModel14executeCommandERKSs2:
         .word   bl_addr__ZN25ClientInstanceScreenModel14executeCommandERKSs-(.L_ZN25ClientInstanceScreenModel14executeCommandERKSsPIC0+8)
         .size   _ZN25ClientInstanceScreenModel14executeCommandERKSs, .-_ZN25ClientInstanceScreenModel14executeCommandERKSs
-        .hidden bl_addr__ZN25ClientInstanceScreenModel14executeCommandERKSs
+        .hidden _ZN25ClientInstanceScreenModel14executeCommandERKSs
 
 
         .global _ZN25ClientInstanceScreenModel15sendChatMessageERKSs 
@@ -940,7 +940,7 @@ _ZN25ClientInstanceScreenModel15sendChatMessageERKSs:
 .L_ZN25ClientInstanceScreenModel15sendChatMessageERKSs2:
         .word   bl_addr__ZN25ClientInstanceScreenModel15sendChatMessageERKSs-(.L_ZN25ClientInstanceScreenModel15sendChatMessageERKSsPIC0+8)
         .size   _ZN25ClientInstanceScreenModel15sendChatMessageERKSs, .-_ZN25ClientInstanceScreenModel15sendChatMessageERKSs
-        .hidden bl_addr__ZN25ClientInstanceScreenModel15sendChatMessageERKSs
+        .hidden _ZN25ClientInstanceScreenModel15sendChatMessageERKSs
 
 
         .global _ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory 
@@ -956,7 +956,7 @@ _ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStac
 .L_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory2:
         .word   bl_addr__ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory-(.L_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactoryPIC0+8)
         .size   _ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory, .-_ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory
-        .hidden bl_addr__ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory
+        .hidden _ZN25ClientInstanceScreenModelC1ER14IMinecraftGameR15IClientInstanceR10SceneStackR12SceneFactory
 
 
         .global _ZN3Mob13sendInventoryEb 
@@ -972,7 +972,7 @@ _ZN3Mob13sendInventoryEb:
 .L_ZN3Mob13sendInventoryEb2:
         .word   bl_addr__ZN3Mob13sendInventoryEb-(.L_ZN3Mob13sendInventoryEbPIC0+8)
         .size   _ZN3Mob13sendInventoryEb, .-_ZN3Mob13sendInventoryEb
-        .hidden bl_addr__ZN3Mob13sendInventoryEb
+        .hidden _ZN3Mob13sendInventoryEb
 
 
         .global _ZN3Mob3dieERK17ActorDamageSource 
@@ -988,7 +988,7 @@ _ZN3Mob3dieERK17ActorDamageSource:
 .L_ZN3Mob3dieERK17ActorDamageSource2:
         .word   bl_addr__ZN3Mob3dieERK17ActorDamageSource-(.L_ZN3Mob3dieERK17ActorDamageSourcePIC0+8)
         .size   _ZN3Mob3dieERK17ActorDamageSource, .-_ZN3Mob3dieERK17ActorDamageSource
-        .hidden bl_addr__ZN3Mob3dieERK17ActorDamageSource
+        .hidden _ZN3Mob3dieERK17ActorDamageSource
 
 
         .global _ZN4I18n18getCurrentLanguageEv 
@@ -1004,7 +1004,7 @@ _ZN4I18n18getCurrentLanguageEv:
 .L_ZN4I18n18getCurrentLanguageEv2:
         .word   bl_addr__ZN4I18n18getCurrentLanguageEv-(.L_ZN4I18n18getCurrentLanguageEvPIC0+8)
         .size   _ZN4I18n18getCurrentLanguageEv, .-_ZN4I18n18getCurrentLanguageEv
-        .hidden bl_addr__ZN4I18n18getCurrentLanguageEv
+        .hidden _ZN4I18n18getCurrentLanguageEv
 
 
         .global _ZN4Item10initClientERN4Json5ValueES2_ 
@@ -1020,7 +1020,7 @@ _ZN4Item10initClientERN4Json5ValueES2_:
 .L_ZN4Item10initClientERN4Json5ValueES2_2:
         .word   bl_addr__ZN4Item10initClientERN4Json5ValueES2_-(.L_ZN4Item10initClientERN4Json5ValueES2_PIC0+8)
         .size   _ZN4Item10initClientERN4Json5ValueES2_, .-_ZN4Item10initClientERN4Json5ValueES2_
-        .hidden bl_addr__ZN4Item10initClientERN4Json5ValueES2_
+        .hidden _ZN4Item10initClientERN4Json5ValueES2_
 
 
         .global _ZN4Item10initServerERN4Json5ValueE 
@@ -1036,7 +1036,7 @@ _ZN4Item10initServerERN4Json5ValueE:
 .L_ZN4Item10initServerERN4Json5ValueE2:
         .word   bl_addr__ZN4Item10initServerERN4Json5ValueE-(.L_ZN4Item10initServerERN4Json5ValueEPIC0+8)
         .size   _ZN4Item10initServerERN4Json5ValueE, .-_ZN4Item10initServerERN4Json5ValueE
-        .hidden bl_addr__ZN4Item10initServerERN4Json5ValueE
+        .hidden _ZN4Item10initServerERN4Json5ValueE
 
 
         .global _ZN4Item11setCategoryE20CreativeItemCategory 
@@ -1052,7 +1052,7 @@ _ZN4Item11setCategoryE20CreativeItemCategory:
 .L_ZN4Item11setCategoryE20CreativeItemCategory2:
         .word   bl_addr__ZN4Item11setCategoryE20CreativeItemCategory-(.L_ZN4Item11setCategoryE20CreativeItemCategoryPIC0+8)
         .size   _ZN4Item11setCategoryE20CreativeItemCategory, .-_ZN4Item11setCategoryE20CreativeItemCategory
-        .hidden bl_addr__ZN4Item11setCategoryE20CreativeItemCategory
+        .hidden _ZN4Item11setCategoryE20CreativeItemCategory
 
 
         .global _ZN4Item12setMaxDamageEi 
@@ -1068,7 +1068,7 @@ _ZN4Item12setMaxDamageEi:
 .L_ZN4Item12setMaxDamageEi2:
         .word   bl_addr__ZN4Item12setMaxDamageEi-(.L_ZN4Item12setMaxDamageEiPIC0+8)
         .size   _ZN4Item12setMaxDamageEi, .-_ZN4Item12setMaxDamageEi
-        .hidden bl_addr__ZN4Item12setMaxDamageEi
+        .hidden _ZN4Item12setMaxDamageEi
 
 
         .global _ZN4Item15addCreativeItemEss 
@@ -1084,7 +1084,7 @@ _ZN4Item15addCreativeItemEss:
 .L_ZN4Item15addCreativeItemEss2:
         .word   bl_addr__ZN4Item15addCreativeItemEss-(.L_ZN4Item15addCreativeItemEssPIC0+8)
         .size   _ZN4Item15addCreativeItemEss, .-_ZN4Item15addCreativeItemEss
-        .hidden bl_addr__ZN4Item15addCreativeItemEss
+        .hidden _ZN4Item15addCreativeItemEss
 
 
         .global _ZN4Item15setAllowOffhandEb 
@@ -1100,7 +1100,7 @@ _ZN4Item15setAllowOffhandEb:
 .L_ZN4Item15setAllowOffhandEb2:
         .word   bl_addr__ZN4Item15setAllowOffhandEb-(.L_ZN4Item15setAllowOffhandEbPIC0+8)
         .size   _ZN4Item15setAllowOffhandEb, .-_ZN4Item15setAllowOffhandEb
-        .hidden bl_addr__ZN4Item15setAllowOffhandEb
+        .hidden _ZN4Item15setAllowOffhandEb
 
 
         .global _ZN4Item15setMaxStackSizeEh 
@@ -1116,7 +1116,7 @@ _ZN4Item15setMaxStackSizeEh:
 .L_ZN4Item15setMaxStackSizeEh2:
         .word   bl_addr__ZN4Item15setMaxStackSizeEh-(.L_ZN4Item15setMaxStackSizeEhPIC0+8)
         .size   _ZN4Item15setMaxStackSizeEh, .-_ZN4Item15setMaxStackSizeEh
-        .hidden bl_addr__ZN4Item15setMaxStackSizeEh
+        .hidden _ZN4Item15setMaxStackSizeEh
 
 
         .global _ZN4Item15setUseAnimationE12UseAnimation 
@@ -1132,7 +1132,7 @@ _ZN4Item15setUseAnimationE12UseAnimation:
 .L_ZN4Item15setUseAnimationE12UseAnimation2:
         .word   bl_addr__ZN4Item15setUseAnimationE12UseAnimation-(.L_ZN4Item15setUseAnimationE12UseAnimationPIC0+8)
         .size   _ZN4Item15setUseAnimationE12UseAnimation, .-_ZN4Item15setUseAnimationE12UseAnimation
-        .hidden bl_addr__ZN4Item15setUseAnimationE12UseAnimation
+        .hidden _ZN4Item15setUseAnimationE12UseAnimation
 
 
         .global _ZN4Item16setStackedByDataEb 
@@ -1148,7 +1148,7 @@ _ZN4Item16setStackedByDataEb:
 .L_ZN4Item16setStackedByDataEb2:
         .word   bl_addr__ZN4Item16setStackedByDataEb-(.L_ZN4Item16setStackedByDataEbPIC0+8)
         .size   _ZN4Item16setStackedByDataEb, .-_ZN4Item16setStackedByDataEb
-        .hidden bl_addr__ZN4Item16setStackedByDataEb
+        .hidden _ZN4Item16setStackedByDataEb
 
 
         .global _ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE 
@@ -1164,7 +1164,7 @@ _ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15Bas
 .L_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE2:
         .word   bl_addr__ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE-(.L_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEEPIC0+8)
         .size   _ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE, .-_ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE
-        .hidden bl_addr__ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE
+        .hidden _ZN4Item17initCreativeItemsEbP17ActorInfoRegistryP20BlockDefinitionGroupbRK15BaseGameVersionSt8functionIFvS1_S3_bEE
 
 
         .global _ZN4Item7setIconERKSsi 
@@ -1180,7 +1180,7 @@ _ZN4Item7setIconERKSsi:
 .L_ZN4Item7setIconERKSsi2:
         .word   bl_addr__ZN4Item7setIconERKSsi-(.L_ZN4Item7setIconERKSsiPIC0+8)
         .size   _ZN4Item7setIconERKSsi, .-_ZN4Item7setIconERKSsi
-        .hidden bl_addr__ZN4Item7setIconERKSsi
+        .hidden _ZN4Item7setIconERKSsi
 
 
         .global _ZN4ItemC1ERKSss 
@@ -1196,7 +1196,7 @@ _ZN4ItemC1ERKSss:
 .L_ZN4ItemC1ERKSss2:
         .word   bl_addr__ZN4ItemC1ERKSss-(.L_ZN4ItemC1ERKSssPIC0+8)
         .size   _ZN4ItemC1ERKSss, .-_ZN4ItemC1ERKSss
-        .hidden bl_addr__ZN4ItemC1ERKSss
+        .hidden _ZN4ItemC1ERKSss
 
 
         .global _ZN5Actor10stopRidingEbbb 
@@ -1212,7 +1212,7 @@ _ZN5Actor10stopRidingEbbb:
 .L_ZN5Actor10stopRidingEbbb2:
         .word   bl_addr__ZN5Actor10stopRidingEbbb-(.L_ZN5Actor10stopRidingEbbbPIC0+8)
         .size   _ZN5Actor10stopRidingEbbb, .-_ZN5Actor10stopRidingEbbb
-        .hidden bl_addr__ZN5Actor10stopRidingEbbb
+        .hidden _ZN5Actor10stopRidingEbbb
 
 
         .global _ZN5Actor11getTargetIdEv 
@@ -1228,7 +1228,7 @@ _ZN5Actor11getTargetIdEv:
 .L_ZN5Actor11getTargetIdEv2:
         .word   bl_addr__ZN5Actor11getTargetIdEv-(.L_ZN5Actor11getTargetIdEvPIC0+8)
         .size   _ZN5Actor11getTargetIdEv, .-_ZN5Actor11getTargetIdEv
-        .hidden bl_addr__ZN5Actor11getTargetIdEv
+        .hidden _ZN5Actor11getTargetIdEv
 
 
         .global _ZN5Actor11setSneakingEb 
@@ -1244,7 +1244,7 @@ _ZN5Actor11setSneakingEb:
 .L_ZN5Actor11setSneakingEb2:
         .word   bl_addr__ZN5Actor11setSneakingEb-(.L_ZN5Actor11setSneakingEbPIC0+8)
         .size   _ZN5Actor11setSneakingEb, .-_ZN5Actor11setSneakingEb
-        .hidden bl_addr__ZN5Actor11setSneakingEb
+        .hidden _ZN5Actor11setSneakingEb
 
 
         .global _ZN5Actor11startRidingERS_ 
@@ -1260,7 +1260,7 @@ _ZN5Actor11startRidingERS_:
 .L_ZN5Actor11startRidingERS_2:
         .word   bl_addr__ZN5Actor11startRidingERS_-(.L_ZN5Actor11startRidingERS_PIC0+8)
         .size   _ZN5Actor11startRidingERS_, .-_ZN5Actor11startRidingERS_
-        .hidden bl_addr__ZN5Actor11startRidingERS_
+        .hidden _ZN5Actor11startRidingERS_
 
 
         .global _ZN5Actor12removeEffectEi 
@@ -1276,7 +1276,7 @@ _ZN5Actor12removeEffectEi:
 .L_ZN5Actor12removeEffectEi2:
         .word   bl_addr__ZN5Actor12removeEffectEi-(.L_ZN5Actor12removeEffectEiPIC0+8)
         .size   _ZN5Actor12removeEffectEi, .-_ZN5Actor12removeEffectEi
-        .hidden bl_addr__ZN5Actor12removeEffectEi
+        .hidden _ZN5Actor12removeEffectEi
 
 
         .global _ZN5Actor13setStatusFlagE10ActorFlagsb 
@@ -1292,7 +1292,7 @@ _ZN5Actor13setStatusFlagE10ActorFlagsb:
 .L_ZN5Actor13setStatusFlagE10ActorFlagsb2:
         .word   bl_addr__ZN5Actor13setStatusFlagE10ActorFlagsb-(.L_ZN5Actor13setStatusFlagE10ActorFlagsbPIC0+8)
         .size   _ZN5Actor13setStatusFlagE10ActorFlagsb, .-_ZN5Actor13setStatusFlagE10ActorFlagsb
-        .hidden bl_addr__ZN5Actor13setStatusFlagE10ActorFlagsb
+        .hidden _ZN5Actor13setStatusFlagE10ActorFlagsb
 
 
         .global _ZN5Actor14setCarriedItemERK9ItemStack 
@@ -1308,7 +1308,7 @@ _ZN5Actor14setCarriedItemERK9ItemStack:
 .L_ZN5Actor14setCarriedItemERK9ItemStack2:
         .word   bl_addr__ZN5Actor14setCarriedItemERK9ItemStack-(.L_ZN5Actor14setCarriedItemERK9ItemStackPIC0+8)
         .size   _ZN5Actor14setCarriedItemERK9ItemStack, .-_ZN5Actor14setCarriedItemERK9ItemStack
-        .hidden bl_addr__ZN5Actor14setCarriedItemERK9ItemStack
+        .hidden _ZN5Actor14setCarriedItemERK9ItemStack
 
 
         .global _ZN5Actor14setOffhandSlotERK9ItemStack 
@@ -1324,7 +1324,7 @@ _ZN5Actor14setOffhandSlotERK9ItemStack:
 .L_ZN5Actor14setOffhandSlotERK9ItemStack2:
         .word   bl_addr__ZN5Actor14setOffhandSlotERK9ItemStack-(.L_ZN5Actor14setOffhandSlotERK9ItemStackPIC0+8)
         .size   _ZN5Actor14setOffhandSlotERK9ItemStack, .-_ZN5Actor14setOffhandSlotERK9ItemStack
-        .hidden bl_addr__ZN5Actor14setOffhandSlotERK9ItemStack
+        .hidden _ZN5Actor14setOffhandSlotERK9ItemStack
 
 
         .global _ZN5Actor16removeAllEffectsEv 
@@ -1340,7 +1340,7 @@ _ZN5Actor16removeAllEffectsEv:
 .L_ZN5Actor16removeAllEffectsEv2:
         .word   bl_addr__ZN5Actor16removeAllEffectsEv-(.L_ZN5Actor16removeAllEffectsEvPIC0+8)
         .size   _ZN5Actor16removeAllEffectsEv, .-_ZN5Actor16removeAllEffectsEv
-        .hidden bl_addr__ZN5Actor16removeAllEffectsEv
+        .hidden _ZN5Actor16removeAllEffectsEv
 
 
         .global _ZN5Actor4hurtERK17ActorDamageSourceibb 
@@ -1356,7 +1356,7 @@ _ZN5Actor4hurtERK17ActorDamageSourceibb:
 .L_ZN5Actor4hurtERK17ActorDamageSourceibb2:
         .word   bl_addr__ZN5Actor4hurtERK17ActorDamageSourceibb-(.L_ZN5Actor4hurtERK17ActorDamageSourceibbPIC0+8)
         .size   _ZN5Actor4hurtERK17ActorDamageSourceibb, .-_ZN5Actor4hurtERK17ActorDamageSourceibb
-        .hidden bl_addr__ZN5Actor4hurtERK17ActorDamageSourceibb
+        .hidden _ZN5Actor4hurtERK17ActorDamageSourceibb
 
 
         .global _ZN5Actor6removeEv 
@@ -1372,7 +1372,7 @@ _ZN5Actor6removeEv:
 .L_ZN5Actor6removeEv2:
         .word   bl_addr__ZN5Actor6removeEv-(.L_ZN5Actor6removeEvPIC0+8)
         .size   _ZN5Actor6removeEv, .-_ZN5Actor6removeEv
-        .hidden bl_addr__ZN5Actor6removeEv
+        .hidden _ZN5Actor6removeEv
 
 
         .global _ZN5Actor6setPosERK4Vec3 
@@ -1388,7 +1388,7 @@ _ZN5Actor6setPosERK4Vec3:
 .L_ZN5Actor6setPosERK4Vec32:
         .word   bl_addr__ZN5Actor6setPosERK4Vec3-(.L_ZN5Actor6setPosERK4Vec3PIC0+8)
         .size   _ZN5Actor6setPosERK4Vec3, .-_ZN5Actor6setPosERK4Vec3
-        .hidden bl_addr__ZN5Actor6setPosERK4Vec3
+        .hidden _ZN5Actor6setPosERK4Vec3
 
 
         .global _ZN5Actor6setRotERK4Vec2 
@@ -1404,7 +1404,7 @@ _ZN5Actor6setRotERK4Vec2:
 .L_ZN5Actor6setRotERK4Vec22:
         .word   bl_addr__ZN5Actor6setRotERK4Vec2-(.L_ZN5Actor6setRotERK4Vec2PIC0+8)
         .size   _ZN5Actor6setRotERK4Vec2, .-_ZN5Actor6setRotERK4Vec2
-        .hidden bl_addr__ZN5Actor6setRotERK4Vec2
+        .hidden _ZN5Actor6setRotERK4Vec2
 
 
         .global _ZN5Actor8getLevelEv 
@@ -1420,7 +1420,7 @@ _ZN5Actor8getLevelEv:
 .L_ZN5Actor8getLevelEv2:
         .word   bl_addr__ZN5Actor8getLevelEv-(.L_ZN5Actor8getLevelEvPIC0+8)
         .size   _ZN5Actor8getLevelEv, .-_ZN5Actor8getLevelEv
-        .hidden bl_addr__ZN5Actor8getLevelEv
+        .hidden _ZN5Actor8getLevelEv
 
 
         .global _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack 
@@ -1436,7 +1436,7 @@ _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack:
 .L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack2:
         .word   bl_addr__ZN5Actor8setArmorE9ArmorSlotRK9ItemStack-(.L_ZN5Actor8setArmorE9ArmorSlotRK9ItemStackPIC0+8)
         .size   _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack, .-_ZN5Actor8setArmorE9ArmorSlotRK9ItemStack
-        .hidden bl_addr__ZN5Actor8setArmorE9ArmorSlotRK9ItemStack
+        .hidden _ZN5Actor8setArmorE9ArmorSlotRK9ItemStack
 
 
         .global _ZN5Actor9addEffectERK17MobEffectInstance 
@@ -1452,7 +1452,7 @@ _ZN5Actor9addEffectERK17MobEffectInstance:
 .L_ZN5Actor9addEffectERK17MobEffectInstance2:
         .word   bl_addr__ZN5Actor9addEffectERK17MobEffectInstance-(.L_ZN5Actor9addEffectERK17MobEffectInstancePIC0+8)
         .size   _ZN5Actor9addEffectERK17MobEffectInstance, .-_ZN5Actor9addEffectERK17MobEffectInstance
-        .hidden bl_addr__ZN5Actor9addEffectERK17MobEffectInstance
+        .hidden _ZN5Actor9addEffectERK17MobEffectInstance
 
 
         .global _ZN5Actor9setOnFireEi 
@@ -1468,7 +1468,7 @@ _ZN5Actor9setOnFireEi:
 .L_ZN5Actor9setOnFireEi2:
         .word   bl_addr__ZN5Actor9setOnFireEi-(.L_ZN5Actor9setOnFireEiPIC0+8)
         .size   _ZN5Actor9setOnFireEi, .-_ZN5Actor9setOnFireEi
-        .hidden bl_addr__ZN5Actor9setOnFireEi
+        .hidden _ZN5Actor9setOnFireEi
 
 
         .global _ZN5Actor9setTargetEPS_ 
@@ -1484,7 +1484,7 @@ _ZN5Actor9setTargetEPS_:
 .L_ZN5Actor9setTargetEPS_2:
         .word   bl_addr__ZN5Actor9setTargetEPS_-(.L_ZN5Actor9setTargetEPS_PIC0+8)
         .size   _ZN5Actor9setTargetEPS_, .-_ZN5Actor9setTargetEPS_
-        .hidden bl_addr__ZN5Actor9setTargetEPS_
+        .hidden _ZN5Actor9setTargetEPS_
 
 
         .global _ZN5Level12getHitResultEv 
@@ -1500,7 +1500,7 @@ _ZN5Level12getHitResultEv:
 .L_ZN5Level12getHitResultEv2:
         .word   bl_addr__ZN5Level12getHitResultEv-(.L_ZN5Level12getHitResultEvPIC0+8)
         .size   _ZN5Level12getHitResultEv, .-_ZN5Level12getHitResultEv
-        .hidden bl_addr__ZN5Level12getHitResultEv
+        .hidden _ZN5Level12getHitResultEv
 
 
         .global _ZN5Level12getLevelDataEv 
@@ -1516,7 +1516,7 @@ _ZN5Level12getLevelDataEv:
 .L_ZN5Level12getLevelDataEv2:
         .word   bl_addr__ZN5Level12getLevelDataEv-(.L_ZN5Level12getLevelDataEvPIC0+8)
         .size   _ZN5Level12getLevelDataEv, .-_ZN5Level12getLevelDataEv
-        .hidden bl_addr__ZN5Level12getLevelDataEv
+        .hidden _ZN5Level12getLevelDataEv
 
 
         .global _ZN5Level13setDifficultyE10Difficulty 
@@ -1532,7 +1532,7 @@ _ZN5Level13setDifficultyE10Difficulty:
 .L_ZN5Level13setDifficultyE10Difficulty2:
         .word   bl_addr__ZN5Level13setDifficultyE10Difficulty-(.L_ZN5Level13setDifficultyE10DifficultyPIC0+8)
         .size   _ZN5Level13setDifficultyE10Difficulty, .-_ZN5Level13setDifficultyE10Difficulty
-        .hidden bl_addr__ZN5Level13setDifficultyE10Difficulty
+        .hidden _ZN5Level13setDifficultyE10Difficulty
 
 
         .global _ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE 
@@ -1548,7 +1548,7 @@ _ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_delete
 .L_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
         .word   bl_addr__ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE-(.L_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0+8)
         .size   _ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE, .-_ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
-        .hidden bl_addr__ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
+        .hidden _ZN5Level15addGlobalEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
 
 
         .global _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb 
@@ -1564,7 +1564,7 @@ _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb:
 .L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb2:
         .word   bl_addr__ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb-(.L_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEbPIC0+8)
         .size   _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb, .-_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb
-        .hidden bl_addr__ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb
+        .hidden _ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb
 
 
         .global _ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb 
@@ -1580,7 +1580,7 @@ _ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb:
 .L_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb2:
         .word   bl_addr__ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb-(.L_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfbPIC0+8)
         .size   _ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb, .-_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb
-        .hidden bl_addr__ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb
+        .hidden _ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb
 
 
         .global _ZN5Level7setTimeEi 
@@ -1596,7 +1596,7 @@ _ZN5Level7setTimeEi:
 .L_ZN5Level7setTimeEi2:
         .word   bl_addr__ZN5Level7setTimeEi-(.L_ZN5Level7setTimeEiPIC0+8)
         .size   _ZN5Level7setTimeEi, .-_ZN5Level7setTimeEi
-        .hidden bl_addr__ZN5Level7setTimeEi
+        .hidden _ZN5Level7setTimeEi
 
 
         .global _ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE 
@@ -1612,7 +1612,7 @@ _ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE:
 .L_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE2:
         .word   bl_addr__ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE-(.L_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EEPIC0+8)
         .size   _ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE, .-_ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
-        .hidden bl_addr__ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
+        .hidden _ZN5Level9addEntityER11BlockSourceSt10unique_ptrI5ActorSt14default_deleteIS3_EE
 
 
         .global _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE 
@@ -1628,7 +1628,7 @@ _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE:
 .L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE2:
         .word   bl_addr__ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE-(.L_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EEPIC0+8)
         .size   _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE, .-_ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE
-        .hidden bl_addr__ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE
+        .hidden _ZN5Level9addPlayerESt10unique_ptrI6PlayerSt14default_deleteIS1_EE
 
 
         .global _ZN6Player13addExperienceEi 
@@ -1644,7 +1644,7 @@ _ZN6Player13addExperienceEi:
 .L_ZN6Player13addExperienceEi2:
         .word   bl_addr__ZN6Player13addExperienceEi-(.L_ZN6Player13addExperienceEiPIC0+8)
         .size   _ZN6Player13addExperienceEi, .-_ZN6Player13addExperienceEi
-        .hidden bl_addr__ZN6Player13addExperienceEi
+        .hidden _ZN6Player13addExperienceEi
 
 
         .global _ZN6Player17setPlayerGameTypeE8GameType 
@@ -1660,7 +1660,7 @@ _ZN6Player17setPlayerGameTypeE8GameType:
 .L_ZN6Player17setPlayerGameTypeE8GameType2:
         .word   bl_addr__ZN6Player17setPlayerGameTypeE8GameType-(.L_ZN6Player17setPlayerGameTypeE8GameTypePIC0+8)
         .size   _ZN6Player17setPlayerGameTypeE8GameType, .-_ZN6Player17setPlayerGameTypeE8GameType
-        .hidden bl_addr__ZN6Player17setPlayerGameTypeE8GameType
+        .hidden _ZN6Player17setPlayerGameTypeE8GameType
 
 
         .global _ZN6Player3eatEif 
@@ -1676,7 +1676,7 @@ _ZN6Player3eatEif:
 .L_ZN6Player3eatEif2:
         .word   bl_addr__ZN6Player3eatEif-(.L_ZN6Player3eatEifPIC0+8)
         .size   _ZN6Player3eatEif, .-_ZN6Player3eatEif
-        .hidden bl_addr__ZN6Player3eatEif
+        .hidden _ZN6Player3eatEif
 
 
         .global _ZN6Player9addLevelsEi 
@@ -1692,7 +1692,7 @@ _ZN6Player9addLevelsEi:
 .L_ZN6Player9addLevelsEi2:
         .word   bl_addr__ZN6Player9addLevelsEi-(.L_ZN6Player9addLevelsEiPIC0+8)
         .size   _ZN6Player9addLevelsEi, .-_ZN6Player9addLevelsEi
-        .hidden bl_addr__ZN6Player9addLevelsEi
+        .hidden _ZN6Player9addLevelsEi
 
 
         .global _ZN7GuiData14showTipMessageERKSs 
@@ -1708,7 +1708,7 @@ _ZN7GuiData14showTipMessageERKSs:
 .L_ZN7GuiData14showTipMessageERKSs2:
         .word   bl_addr__ZN7GuiData14showTipMessageERKSs-(.L_ZN7GuiData14showTipMessageERKSsPIC0+8)
         .size   _ZN7GuiData14showTipMessageERKSs, .-_ZN7GuiData14showTipMessageERKSs
-        .hidden bl_addr__ZN7GuiData14showTipMessageERKSs
+        .hidden _ZN7GuiData14showTipMessageERKSs
 
 
         .global _ZN7GuiData20displayClientMessageERKSs 
@@ -1724,7 +1724,7 @@ _ZN7GuiData20displayClientMessageERKSs:
 .L_ZN7GuiData20displayClientMessageERKSs2:
         .word   bl_addr__ZN7GuiData20displayClientMessageERKSs-(.L_ZN7GuiData20displayClientMessageERKSsPIC0+8)
         .size   _ZN7GuiData20displayClientMessageERKSs, .-_ZN7GuiData20displayClientMessageERKSs
-        .hidden bl_addr__ZN7GuiData20displayClientMessageERKSs
+        .hidden _ZN7GuiData20displayClientMessageERKSs
 
 
         .global _ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i 
@@ -1740,7 +1740,7 @@ _ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i:
 .L_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i2:
         .word   bl_addr__ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i-(.L_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3iPIC0+8)
         .size   _ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i, .-_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i
-        .hidden bl_addr__ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i
+        .hidden _ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i
 
 
         .global _ZN8GameMode12destroyBlockERK8BlockPosh 
@@ -1756,7 +1756,7 @@ _ZN8GameMode12destroyBlockERK8BlockPosh:
 .L_ZN8GameMode12destroyBlockERK8BlockPosh2:
         .word   bl_addr__ZN8GameMode12destroyBlockERK8BlockPosh-(.L_ZN8GameMode12destroyBlockERK8BlockPoshPIC0+8)
         .size   _ZN8GameMode12destroyBlockERK8BlockPosh, .-_ZN8GameMode12destroyBlockERK8BlockPosh
-        .hidden bl_addr__ZN8GameMode12destroyBlockERK8BlockPosh
+        .hidden _ZN8GameMode12destroyBlockERK8BlockPosh
 
 
         .global _ZN8GameMode17startDestroyBlockERK8BlockPoshRb 
@@ -1772,7 +1772,7 @@ _ZN8GameMode17startDestroyBlockERK8BlockPoshRb:
 .L_ZN8GameMode17startDestroyBlockERK8BlockPoshRb2:
         .word   bl_addr__ZN8GameMode17startDestroyBlockERK8BlockPoshRb-(.L_ZN8GameMode17startDestroyBlockERK8BlockPoshRbPIC0+8)
         .size   _ZN8GameMode17startDestroyBlockERK8BlockPoshRb, .-_ZN8GameMode17startDestroyBlockERK8BlockPoshRb
-        .hidden bl_addr__ZN8GameMode17startDestroyBlockERK8BlockPoshRb
+        .hidden _ZN8GameMode17startDestroyBlockERK8BlockPoshRb
 
 
         .global _ZN8GameMode18getDestroyProgressEv 
@@ -1788,7 +1788,7 @@ _ZN8GameMode18getDestroyProgressEv:
 .L_ZN8GameMode18getDestroyProgressEv2:
         .word   bl_addr__ZN8GameMode18getDestroyProgressEv-(.L_ZN8GameMode18getDestroyProgressEvPIC0+8)
         .size   _ZN8GameMode18getDestroyProgressEv, .-_ZN8GameMode18getDestroyProgressEv
-        .hidden bl_addr__ZN8GameMode18getDestroyProgressEv
+        .hidden _ZN8GameMode18getDestroyProgressEv
 
 
         .global _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb 
@@ -1804,7 +1804,7 @@ _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb:
 .L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb2:
         .word   bl_addr__ZN8GameMode20continueDestroyBlockERK8BlockPoshRb-(.L_ZN8GameMode20continueDestroyBlockERK8BlockPoshRbPIC0+8)
         .size   _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb, .-_ZN8GameMode20continueDestroyBlockERK8BlockPoshRb
-        .hidden bl_addr__ZN8GameMode20continueDestroyBlockERK8BlockPoshRb
+        .hidden _ZN8GameMode20continueDestroyBlockERK8BlockPoshRb
 
 
         .global _ZN8GameMode21_destroyBlockInternalERK8BlockPosh 
@@ -1820,7 +1820,7 @@ _ZN8GameMode21_destroyBlockInternalERK8BlockPosh:
 .L_ZN8GameMode21_destroyBlockInternalERK8BlockPosh2:
         .word   bl_addr__ZN8GameMode21_destroyBlockInternalERK8BlockPosh-(.L_ZN8GameMode21_destroyBlockInternalERK8BlockPoshPIC0+8)
         .size   _ZN8GameMode21_destroyBlockInternalERK8BlockPosh, .-_ZN8GameMode21_destroyBlockInternalERK8BlockPosh
-        .hidden bl_addr__ZN8GameMode21_destroyBlockInternalERK8BlockPosh
+        .hidden _ZN8GameMode21_destroyBlockInternalERK8BlockPosh
 
 
         .global _ZN8GameMode4tickEv 
@@ -1836,7 +1836,7 @@ _ZN8GameMode4tickEv:
 .L_ZN8GameMode4tickEv2:
         .word   bl_addr__ZN8GameMode4tickEv-(.L_ZN8GameMode4tickEvPIC0+8)
         .size   _ZN8GameMode4tickEv, .-_ZN8GameMode4tickEv
-        .hidden bl_addr__ZN8GameMode4tickEv
+        .hidden _ZN8GameMode4tickEv
 
 
         .global _ZN8GameMode6attackER5Actor 
@@ -1852,7 +1852,7 @@ _ZN8GameMode6attackER5Actor:
 .L_ZN8GameMode6attackER5Actor2:
         .word   bl_addr__ZN8GameMode6attackER5Actor-(.L_ZN8GameMode6attackER5ActorPIC0+8)
         .size   _ZN8GameMode6attackER5Actor, .-_ZN8GameMode6attackER5Actor
-        .hidden bl_addr__ZN8GameMode6attackER5Actor
+        .hidden _ZN8GameMode6attackER5Actor
 
 
         .global _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block 
@@ -1868,7 +1868,7 @@ _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block:
 .L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block2:
         .word   bl_addr__ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block-(.L_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5BlockPIC0+8)
         .size   _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block, .-_ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block
-        .hidden bl_addr__ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block
+        .hidden _ZN8GameMode9useItemOnER9ItemStackRK8BlockPoshRK4Vec3PK5Block
 
 
         .global _ZN9Abilities10setAbilityE14AbilitiesIndexb 
@@ -1884,7 +1884,7 @@ _ZN9Abilities10setAbilityE14AbilitiesIndexb:
 .L_ZN9Abilities10setAbilityE14AbilitiesIndexb2:
         .word   bl_addr__ZN9Abilities10setAbilityE14AbilitiesIndexb-(.L_ZN9Abilities10setAbilityE14AbilitiesIndexbPIC0+8)
         .size   _ZN9Abilities10setAbilityE14AbilitiesIndexb, .-_ZN9Abilities10setAbilityE14AbilitiesIndexb
-        .hidden bl_addr__ZN9Abilities10setAbilityE14AbilitiesIndexb
+        .hidden _ZN9Abilities10setAbilityE14AbilitiesIndexb
 
 
         .global _ZN9Abilities18nameToAbilityIndexERKSs 
@@ -1900,7 +1900,7 @@ _ZN9Abilities18nameToAbilityIndexERKSs:
 .L_ZN9Abilities18nameToAbilityIndexERKSs2:
         .word   bl_addr__ZN9Abilities18nameToAbilityIndexERKSs-(.L_ZN9Abilities18nameToAbilityIndexERKSsPIC0+8)
         .size   _ZN9Abilities18nameToAbilityIndexERKSs, .-_ZN9Abilities18nameToAbilityIndexERKSs
-        .hidden bl_addr__ZN9Abilities18nameToAbilityIndexERKSs
+        .hidden _ZN9Abilities18nameToAbilityIndexERKSs
 
 
         .global _ZN9ItemStackC1Ev 
@@ -1916,7 +1916,7 @@ _ZN9ItemStackC1Ev:
 .L_ZN9ItemStackC1Ev2:
         .word   bl_addr__ZN9ItemStackC1Ev-(.L_ZN9ItemStackC1EvPIC0+8)
         .size   _ZN9ItemStackC1Ev, .-_ZN9ItemStackC1Ev
-        .hidden bl_addr__ZN9ItemStackC1Ev
+        .hidden _ZN9ItemStackC1Ev
 
 
         .global _ZN9ItemStackD1Ev 
@@ -1932,7 +1932,7 @@ _ZN9ItemStackD1Ev:
 .L_ZN9ItemStackD1Ev2:
         .word   bl_addr__ZN9ItemStackD1Ev-(.L_ZN9ItemStackD1EvPIC0+8)
         .size   _ZN9ItemStackD1Ev, .-_ZN9ItemStackD1Ev
-        .hidden bl_addr__ZN9ItemStackD1Ev
+        .hidden _ZN9ItemStackD1Ev
 
 
         .global _ZN9LevelData11setSpawnPosERK8BlockPos 
@@ -1948,7 +1948,7 @@ _ZN9LevelData11setSpawnPosERK8BlockPos:
 .L_ZN9LevelData11setSpawnPosERK8BlockPos2:
         .word   bl_addr__ZN9LevelData11setSpawnPosERK8BlockPos-(.L_ZN9LevelData11setSpawnPosERK8BlockPosPIC0+8)
         .size   _ZN9LevelData11setSpawnPosERK8BlockPos, .-_ZN9LevelData11setSpawnPosERK8BlockPos
-        .hidden bl_addr__ZN9LevelData11setSpawnPosERK8BlockPos
+        .hidden _ZN9LevelData11setSpawnPosERK8BlockPos
 
 
         .global _ZN9Minecraft11getCommandsEv 
@@ -1964,7 +1964,7 @@ _ZN9Minecraft11getCommandsEv:
 .L_ZN9Minecraft11getCommandsEv2:
         .word   bl_addr__ZN9Minecraft11getCommandsEv-(.L_ZN9Minecraft11getCommandsEvPIC0+8)
         .size   _ZN9Minecraft11getCommandsEv, .-_ZN9Minecraft11getCommandsEv
-        .hidden bl_addr__ZN9Minecraft11getCommandsEv
+        .hidden _ZN9Minecraft11getCommandsEv
 
 
         .global _ZN9Minecraft14startLeaveGameEb 
@@ -1980,7 +1980,7 @@ _ZN9Minecraft14startLeaveGameEb:
 .L_ZN9Minecraft14startLeaveGameEb2:
         .word   bl_addr__ZN9Minecraft14startLeaveGameEb-(.L_ZN9Minecraft14startLeaveGameEbPIC0+8)
         .size   _ZN9Minecraft14startLeaveGameEb, .-_ZN9Minecraft14startLeaveGameEb
-        .hidden bl_addr__ZN9Minecraft14startLeaveGameEb
+        .hidden _ZN9Minecraft14startLeaveGameEb
 
 
         .global _ZN9Minecraft23getServerNetworkHandlerEv 
@@ -1996,7 +1996,7 @@ _ZN9Minecraft23getServerNetworkHandlerEv:
 .L_ZN9Minecraft23getServerNetworkHandlerEv2:
         .word   bl_addr__ZN9Minecraft23getServerNetworkHandlerEv-(.L_ZN9Minecraft23getServerNetworkHandlerEvPIC0+8)
         .size   _ZN9Minecraft23getServerNetworkHandlerEv, .-_ZN9Minecraft23getServerNetworkHandlerEv
-        .hidden bl_addr__ZN9Minecraft23getServerNetworkHandlerEv
+        .hidden _ZN9Minecraft23getServerNetworkHandlerEv
 
 
         .global _ZN9Minecraft8getTimerEv 
@@ -2012,7 +2012,7 @@ _ZN9Minecraft8getTimerEv:
 .L_ZN9Minecraft8getTimerEv2:
         .word   bl_addr__ZN9Minecraft8getTimerEv-(.L_ZN9Minecraft8getTimerEvPIC0+8)
         .size   _ZN9Minecraft8getTimerEv, .-_ZN9Minecraft8getTimerEv
-        .hidden bl_addr__ZN9Minecraft8getTimerEv
+        .hidden _ZN9Minecraft8getTimerEv
 
 
         .global _ZNK10SceneStack13getScreenNameEv 
@@ -2028,7 +2028,7 @@ _ZNK10SceneStack13getScreenNameEv:
 .L_ZNK10SceneStack13getScreenNameEv2:
         .word   bl_addr__ZNK10SceneStack13getScreenNameEv-(.L_ZNK10SceneStack13getScreenNameEvPIC0+8)
         .size   _ZNK10SceneStack13getScreenNameEv, .-_ZNK10SceneStack13getScreenNameEv
-        .hidden bl_addr__ZNK10SceneStack13getScreenNameEv
+        .hidden _ZNK10SceneStack13getScreenNameEv
 
 
         .global _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_ 
@@ -2044,7 +2044,7 @@ _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_:
 .L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_2:
         .word   bl_addr__ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_-(.L_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_PIC0+8)
         .size   _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_, .-_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_
-        .hidden bl_addr__ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_
+        .hidden _ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_
 
 
         .global _ZNK11BlockLegacy14getRenderLayerEv 
@@ -2060,7 +2060,7 @@ _ZNK11BlockLegacy14getRenderLayerEv:
 .L_ZNK11BlockLegacy14getRenderLayerEv2:
         .word   bl_addr__ZNK11BlockLegacy14getRenderLayerEv-(.L_ZNK11BlockLegacy14getRenderLayerEvPIC0+8)
         .size   _ZNK11BlockLegacy14getRenderLayerEv, .-_ZNK11BlockLegacy14getRenderLayerEv
-        .hidden bl_addr__ZNK11BlockLegacy14getRenderLayerEv
+        .hidden _ZNK11BlockLegacy14getRenderLayerEv
 
 
         .global _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb 
@@ -2076,7 +2076,7 @@ _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb:
 .L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb2:
         .word   bl_addr__ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb-(.L_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBbPIC0+8)
         .size   _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb, .-_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb
-        .hidden bl_addr__ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb
+        .hidden _ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb
 
 
         .global _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib 
@@ -2092,7 +2092,7 @@ _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib:
 .L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib2:
         .word   bl_addr__ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib-(.L_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosibPIC0+8)
         .size   _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib, .-_ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib
-        .hidden bl_addr__ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib
+        .hidden _ZNK11BlockLegacy16onRedstoneUpdateER11BlockSourceRK8BlockPosib
 
 
         .global _ZNK11BlockLegacy22getStateFromLegacyDataEt 
@@ -2108,7 +2108,7 @@ _ZNK11BlockLegacy22getStateFromLegacyDataEt:
 .L_ZNK11BlockLegacy22getStateFromLegacyDataEt2:
         .word   bl_addr__ZNK11BlockLegacy22getStateFromLegacyDataEt-(.L_ZNK11BlockLegacy22getStateFromLegacyDataEtPIC0+8)
         .size   _ZNK11BlockLegacy22getStateFromLegacyDataEt, .-_ZNK11BlockLegacy22getStateFromLegacyDataEt
-        .hidden bl_addr__ZNK11BlockLegacy22getStateFromLegacyDataEt
+        .hidden _ZNK11BlockLegacy22getStateFromLegacyDataEt
 
 
         .global _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos 
@@ -2124,7 +2124,7 @@ _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos:
 .L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos2:
         .word   bl_addr__ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos-(.L_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPosPIC0+8)
         .size   _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos, .-_ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos
-        .hidden bl_addr__ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos
+        .hidden _ZNK11BlockLegacy22setupRedstoneComponentER11BlockSourceRK8BlockPos
 
 
         .global _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb 
@@ -2140,7 +2140,7 @@ _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb:
 .L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2:
         .word   bl_addr__ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb-(.L_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0+8)
         .size   _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb, .-_ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
-        .hidden bl_addr__ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
+        .hidden _ZNK11BlockLegacy7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
 
 
         .global _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos 
@@ -2156,7 +2156,7 @@ _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos:
 .L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos2:
         .word   bl_addr__ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos-(.L_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPosPIC0+8)
         .size   _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos, .-_ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos
-        .hidden bl_addr__ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos
+        .hidden _ZNK11BlockLegacy7onPlaceER11BlockSourceRK8BlockPos
 
 
         .global _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block 
@@ -2172,7 +2172,7 @@ _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block:
 .L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block2:
         .word   bl_addr__ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block-(.L_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5BlockPIC0+8)
         .size   _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block, .-_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block
-        .hidden bl_addr__ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block
+        .hidden _ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block
 
 
         .global _ZNK11BlockLegacy8getColorERK5Block 
@@ -2188,7 +2188,7 @@ _ZNK11BlockLegacy8getColorERK5Block:
 .L_ZNK11BlockLegacy8getColorERK5Block2:
         .word   bl_addr__ZNK11BlockLegacy8getColorERK5Block-(.L_ZNK11BlockLegacy8getColorERK5BlockPIC0+8)
         .size   _ZNK11BlockLegacy8getColorERK5Block, .-_ZNK11BlockLegacy8getColorERK5Block
-        .hidden bl_addr__ZNK11BlockLegacy8getColorERK5Block
+        .hidden _ZNK11BlockLegacy8getColorERK5Block
 
 
         .global _ZNK11BlockSource8getBlockERK8BlockPos 
@@ -2204,7 +2204,7 @@ _ZNK11BlockSource8getBlockERK8BlockPos:
 .L_ZNK11BlockSource8getBlockERK8BlockPos2:
         .word   bl_addr__ZNK11BlockSource8getBlockERK8BlockPos-(.L_ZNK11BlockSource8getBlockERK8BlockPosPIC0+8)
         .size   _ZNK11BlockSource8getBlockERK8BlockPos, .-_ZNK11BlockSource8getBlockERK8BlockPos
-        .hidden bl_addr__ZNK11BlockSource8getBlockERK8BlockPos
+        .hidden _ZNK11BlockSource8getBlockERK8BlockPos
 
 
         .global _ZNK11BlockSource9canSeeSkyEiii 
@@ -2220,7 +2220,7 @@ _ZNK11BlockSource9canSeeSkyEiii:
 .L_ZNK11BlockSource9canSeeSkyEiii2:
         .word   bl_addr__ZNK11BlockSource9canSeeSkyEiii-(.L_ZNK11BlockSource9canSeeSkyEiiiPIC0+8)
         .size   _ZNK11BlockSource9canSeeSkyEiii, .-_ZNK11BlockSource9canSeeSkyEiii
-        .hidden bl_addr__ZNK11BlockSource9canSeeSkyEiii
+        .hidden _ZNK11BlockSource9canSeeSkyEiii
 
 
         .global _ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj 
@@ -2236,7 +2236,7 @@ _ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj:
 .L_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj2:
         .word   bl_addr__ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj-(.L_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDjPIC0+8)
         .size   _ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj, .-_ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj
-        .hidden bl_addr__ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj
+        .hidden _ZNK12BlockPalette22getBlockFromLegacyDataE10NewBlockIDj
 
 
         .global _ZNK12ItemEnchants14getAllEnchantsEv 
@@ -2252,7 +2252,7 @@ _ZNK12ItemEnchants14getAllEnchantsEv:
 .L_ZNK12ItemEnchants14getAllEnchantsEv2:
         .word   bl_addr__ZNK12ItemEnchants14getAllEnchantsEv-(.L_ZNK12ItemEnchants14getAllEnchantsEvPIC0+8)
         .size   _ZNK12ItemEnchants14getAllEnchantsEv, .-_ZNK12ItemEnchants14getAllEnchantsEv
-        .hidden bl_addr__ZNK12ItemEnchants14getAllEnchantsEv
+        .hidden _ZNK12ItemEnchants14getAllEnchantsEv
 
 
         .global _ZNK12ItemInstance5getIdEv 
@@ -2268,7 +2268,7 @@ _ZNK12ItemInstance5getIdEv:
 .L_ZNK12ItemInstance5getIdEv2:
         .word   bl_addr__ZNK12ItemInstance5getIdEv-(.L_ZNK12ItemInstance5getIdEvPIC0+8)
         .size   _ZNK12ItemInstance5getIdEv, .-_ZNK12ItemInstance5getIdEv
-        .hidden bl_addr__ZNK12ItemInstance5getIdEv
+        .hidden _ZNK12ItemInstance5getIdEv
 
 
         .global _ZNK13ItemStackBase13getCustomNameEv 
@@ -2284,7 +2284,7 @@ _ZNK13ItemStackBase13getCustomNameEv:
 .L_ZNK13ItemStackBase13getCustomNameEv2:
         .word   bl_addr__ZNK13ItemStackBase13getCustomNameEv-(.L_ZNK13ItemStackBase13getCustomNameEvPIC0+8)
         .size   _ZNK13ItemStackBase13getCustomNameEv, .-_ZNK13ItemStackBase13getCustomNameEv
-        .hidden bl_addr__ZNK13ItemStackBase13getCustomNameEv
+        .hidden _ZNK13ItemStackBase13getCustomNameEv
 
 
         .global _ZNK13ItemStackBase14getDamageValueEv 
@@ -2300,7 +2300,7 @@ _ZNK13ItemStackBase14getDamageValueEv:
 .L_ZNK13ItemStackBase14getDamageValueEv2:
         .word   bl_addr__ZNK13ItemStackBase14getDamageValueEv-(.L_ZNK13ItemStackBase14getDamageValueEvPIC0+8)
         .size   _ZNK13ItemStackBase14getDamageValueEv, .-_ZNK13ItemStackBase14getDamageValueEv
-        .hidden bl_addr__ZNK13ItemStackBase14getDamageValueEv
+        .hidden _ZNK13ItemStackBase14getDamageValueEv
 
 
         .global _ZNK13ItemStackBase15getMaxStackSizeEv 
@@ -2316,7 +2316,7 @@ _ZNK13ItemStackBase15getMaxStackSizeEv:
 .L_ZNK13ItemStackBase15getMaxStackSizeEv2:
         .word   bl_addr__ZNK13ItemStackBase15getMaxStackSizeEv-(.L_ZNK13ItemStackBase15getMaxStackSizeEvPIC0+8)
         .size   _ZNK13ItemStackBase15getMaxStackSizeEv, .-_ZNK13ItemStackBase15getMaxStackSizeEv
-        .hidden bl_addr__ZNK13ItemStackBase15getMaxStackSizeEv
+        .hidden _ZNK13ItemStackBase15getMaxStackSizeEv
 
 
         .global _ZNK13ItemStackBase15getUseAnimationEv 
@@ -2332,7 +2332,7 @@ _ZNK13ItemStackBase15getUseAnimationEv:
 .L_ZNK13ItemStackBase15getUseAnimationEv2:
         .word   bl_addr__ZNK13ItemStackBase15getUseAnimationEv-(.L_ZNK13ItemStackBase15getUseAnimationEvPIC0+8)
         .size   _ZNK13ItemStackBase15getUseAnimationEv, .-_ZNK13ItemStackBase15getUseAnimationEv
-        .hidden bl_addr__ZNK13ItemStackBase15getUseAnimationEv
+        .hidden _ZNK13ItemStackBase15getUseAnimationEv
 
 
         .global _ZNK13ItemStackBase18hasCustomHoverNameEv 
@@ -2348,7 +2348,7 @@ _ZNK13ItemStackBase18hasCustomHoverNameEv:
 .L_ZNK13ItemStackBase18hasCustomHoverNameEv2:
         .word   bl_addr__ZNK13ItemStackBase18hasCustomHoverNameEv-(.L_ZNK13ItemStackBase18hasCustomHoverNameEvPIC0+8)
         .size   _ZNK13ItemStackBase18hasCustomHoverNameEv, .-_ZNK13ItemStackBase18hasCustomHoverNameEv
-        .hidden bl_addr__ZNK13ItemStackBase18hasCustomHoverNameEv
+        .hidden _ZNK13ItemStackBase18hasCustomHoverNameEv
 
 
         .global _ZNK13ItemStackBase23getEnchantsFromUserDataEv 
@@ -2364,7 +2364,7 @@ _ZNK13ItemStackBase23getEnchantsFromUserDataEv:
 .L_ZNK13ItemStackBase23getEnchantsFromUserDataEv2:
         .word   bl_addr__ZNK13ItemStackBase23getEnchantsFromUserDataEv-(.L_ZNK13ItemStackBase23getEnchantsFromUserDataEvPIC0+8)
         .size   _ZNK13ItemStackBase23getEnchantsFromUserDataEv, .-_ZNK13ItemStackBase23getEnchantsFromUserDataEv
-        .hidden bl_addr__ZNK13ItemStackBase23getEnchantsFromUserDataEv
+        .hidden _ZNK13ItemStackBase23getEnchantsFromUserDataEv
 
 
         .global _ZNK13ItemStackBase5getIdEv 
@@ -2380,7 +2380,7 @@ _ZNK13ItemStackBase5getIdEv:
 .L_ZNK13ItemStackBase5getIdEv2:
         .word   bl_addr__ZNK13ItemStackBase5getIdEv-(.L_ZNK13ItemStackBase5getIdEvPIC0+8)
         .size   _ZNK13ItemStackBase5getIdEv, .-_ZNK13ItemStackBase5getIdEv
-        .hidden bl_addr__ZNK13ItemStackBase5getIdEv
+        .hidden _ZNK13ItemStackBase5getIdEv
 
 
         .global _ZNK13MinecraftGame19getLocalServerLevelEv 
@@ -2396,7 +2396,7 @@ _ZNK13MinecraftGame19getLocalServerLevelEv:
 .L_ZNK13MinecraftGame19getLocalServerLevelEv2:
         .word   bl_addr__ZNK13MinecraftGame19getLocalServerLevelEv-(.L_ZNK13MinecraftGame19getLocalServerLevelEvPIC0+8)
         .size   _ZNK13MinecraftGame19getLocalServerLevelEv, .-_ZNK13MinecraftGame19getLocalServerLevelEv
-        .hidden bl_addr__ZNK13MinecraftGame19getLocalServerLevelEv
+        .hidden _ZNK13MinecraftGame19getLocalServerLevelEv
 
 
         .global _ZNK14ClientInstance11getTexturesEv 
@@ -2412,7 +2412,7 @@ _ZNK14ClientInstance11getTexturesEv:
 .L_ZNK14ClientInstance11getTexturesEv2:
         .word   bl_addr__ZNK14ClientInstance11getTexturesEv-(.L_ZNK14ClientInstance11getTexturesEvPIC0+8)
         .size   _ZNK14ClientInstance11getTexturesEv, .-_ZNK14ClientInstance11getTexturesEv
-        .hidden bl_addr__ZNK14ClientInstance11getTexturesEv
+        .hidden _ZNK14ClientInstance11getTexturesEv
 
 
         .global _ZNK14ClientInstance15getSceneFactoryEv 
@@ -2428,7 +2428,7 @@ _ZNK14ClientInstance15getSceneFactoryEv:
 .L_ZNK14ClientInstance15getSceneFactoryEv2:
         .word   bl_addr__ZNK14ClientInstance15getSceneFactoryEv-(.L_ZNK14ClientInstance15getSceneFactoryEvPIC0+8)
         .size   _ZNK14ClientInstance15getSceneFactoryEv, .-_ZNK14ClientInstance15getSceneFactoryEv
-        .hidden bl_addr__ZNK14ClientInstance15getSceneFactoryEv
+        .hidden _ZNK14ClientInstance15getSceneFactoryEv
 
 
         .global _ZNK14ClientInstance16getMinecraftGameEv 
@@ -2444,7 +2444,7 @@ _ZNK14ClientInstance16getMinecraftGameEv:
 .L_ZNK14ClientInstance16getMinecraftGameEv2:
         .word   bl_addr__ZNK14ClientInstance16getMinecraftGameEv-(.L_ZNK14ClientInstance16getMinecraftGameEvPIC0+8)
         .size   _ZNK14ClientInstance16getMinecraftGameEv, .-_ZNK14ClientInstance16getMinecraftGameEv
-        .hidden bl_addr__ZNK14ClientInstance16getMinecraftGameEv
+        .hidden _ZNK14ClientInstance16getMinecraftGameEv
 
 
         .global _ZNK14ClientInstance19getClientSceneStackEv 
@@ -2460,7 +2460,7 @@ _ZNK14ClientInstance19getClientSceneStackEv:
 .L_ZNK14ClientInstance19getClientSceneStackEv2:
         .word   bl_addr__ZNK14ClientInstance19getClientSceneStackEv-(.L_ZNK14ClientInstance19getClientSceneStackEvPIC0+8)
         .size   _ZNK14ClientInstance19getClientSceneStackEv, .-_ZNK14ClientInstance19getClientSceneStackEv
-        .hidden bl_addr__ZNK14ClientInstance19getClientSceneStackEv
+        .hidden _ZNK14ClientInstance19getClientSceneStackEv
 
 
         .global _ZNK14FeatureToggles9isEnabledE15FeatureOptionID 
@@ -2476,7 +2476,7 @@ _ZNK14FeatureToggles9isEnabledE15FeatureOptionID:
 .L_ZNK14FeatureToggles9isEnabledE15FeatureOptionID2:
         .word   bl_addr__ZNK14FeatureToggles9isEnabledE15FeatureOptionID-(.L_ZNK14FeatureToggles9isEnabledE15FeatureOptionIDPIC0+8)
         .size   _ZNK14FeatureToggles9isEnabledE15FeatureOptionID, .-_ZNK14FeatureToggles9isEnabledE15FeatureOptionID
-        .hidden bl_addr__ZNK14FeatureToggles9isEnabledE15FeatureOptionID
+        .hidden _ZNK14FeatureToggles9isEnabledE15FeatureOptionID
 
 
         .global _ZNK14ItemDescriptor5getIdEv 
@@ -2492,7 +2492,7 @@ _ZNK14ItemDescriptor5getIdEv:
 .L_ZNK14ItemDescriptor5getIdEv2:
         .word   bl_addr__ZNK14ItemDescriptor5getIdEv-(.L_ZNK14ItemDescriptor5getIdEvPIC0+8)
         .size   _ZNK14ItemDescriptor5getIdEv, .-_ZNK14ItemDescriptor5getIdEv
-        .hidden bl_addr__ZNK14ItemDescriptor5getIdEv
+        .hidden _ZNK14ItemDescriptor5getIdEv
 
 
         .global _ZNK15ChestBlockActor7getItemEi 
@@ -2508,7 +2508,7 @@ _ZNK15ChestBlockActor7getItemEi:
 .L_ZNK15ChestBlockActor7getItemEi2:
         .word   bl_addr__ZNK15ChestBlockActor7getItemEi-(.L_ZNK15ChestBlockActor7getItemEiPIC0+8)
         .size   _ZNK15ChestBlockActor7getItemEi, .-_ZNK15ChestBlockActor7getItemEi
-        .hidden bl_addr__ZNK15ChestBlockActor7getItemEi
+        .hidden _ZNK15ChestBlockActor7getItemEi
 
 
         .global _ZNK15CommandRegistry11findCommandERKSs 
@@ -2524,7 +2524,7 @@ _ZNK15CommandRegistry11findCommandERKSs:
 .L_ZNK15CommandRegistry11findCommandERKSs2:
         .word   bl_addr__ZNK15CommandRegistry11findCommandERKSs-(.L_ZNK15CommandRegistry11findCommandERKSsPIC0+8)
         .size   _ZNK15CommandRegistry11findCommandERKSs, .-_ZNK15CommandRegistry11findCommandERKSs
-        .hidden bl_addr__ZNK15CommandRegistry11findCommandERKSs
+        .hidden _ZNK15CommandRegistry11findCommandERKSs
 
 
         .global _ZNK17AttributeInstance11getMaxValueEv 
@@ -2540,7 +2540,7 @@ _ZNK17AttributeInstance11getMaxValueEv:
 .L_ZNK17AttributeInstance11getMaxValueEv2:
         .word   bl_addr__ZNK17AttributeInstance11getMaxValueEv-(.L_ZNK17AttributeInstance11getMaxValueEvPIC0+8)
         .size   _ZNK17AttributeInstance11getMaxValueEv, .-_ZNK17AttributeInstance11getMaxValueEv
-        .hidden bl_addr__ZNK17AttributeInstance11getMaxValueEv
+        .hidden _ZNK17AttributeInstance11getMaxValueEv
 
 
         .global _ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib 
@@ -2556,7 +2556,7 @@ _ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginS
 .L_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib2:
         .word   bl_addr__ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib-(.L_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsibPIC0+8)
         .size   _ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib, .-_ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib
-        .hidden bl_addr__ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib
+        .hidden _ZNK17MinecraftCommands23requestCommandExecutionESt10unique_ptrI13CommandOriginSt14default_deleteIS1_EERKSsib
 
 
         .global _ZNK20PlayerInventoryProxy15getSelectedSlotEv 
@@ -2572,7 +2572,7 @@ _ZNK20PlayerInventoryProxy15getSelectedSlotEv:
 .L_ZNK20PlayerInventoryProxy15getSelectedSlotEv2:
         .word   bl_addr__ZNK20PlayerInventoryProxy15getSelectedSlotEv-(.L_ZNK20PlayerInventoryProxy15getSelectedSlotEvPIC0+8)
         .size   _ZNK20PlayerInventoryProxy15getSelectedSlotEv, .-_ZNK20PlayerInventoryProxy15getSelectedSlotEv
-        .hidden bl_addr__ZNK20PlayerInventoryProxy15getSelectedSlotEv
+        .hidden _ZNK20PlayerInventoryProxy15getSelectedSlotEv
 
 
         .global _ZNK20PlayerInventoryProxy7getItemEi11ContainerID 
@@ -2588,7 +2588,7 @@ _ZNK20PlayerInventoryProxy7getItemEi11ContainerID:
 .L_ZNK20PlayerInventoryProxy7getItemEi11ContainerID2:
         .word   bl_addr__ZNK20PlayerInventoryProxy7getItemEi11ContainerID-(.L_ZNK20PlayerInventoryProxy7getItemEi11ContainerIDPIC0+8)
         .size   _ZNK20PlayerInventoryProxy7getItemEi11ContainerID, .-_ZNK20PlayerInventoryProxy7getItemEi11ContainerID
-        .hidden bl_addr__ZNK20PlayerInventoryProxy7getItemEi11ContainerID
+        .hidden _ZNK20PlayerInventoryProxy7getItemEi11ContainerID
 
 
         .global _ZNK4Item12getMaxDamageEv 
@@ -2604,7 +2604,7 @@ _ZNK4Item12getMaxDamageEv:
 .L_ZNK4Item12getMaxDamageEv2:
         .word   bl_addr__ZNK4Item12getMaxDamageEv-(.L_ZNK4Item12getMaxDamageEvPIC0+8)
         .size   _ZNK4Item12getMaxDamageEv, .-_ZNK4Item12getMaxDamageEv
-        .hidden bl_addr__ZNK4Item12getMaxDamageEv
+        .hidden _ZNK4Item12getMaxDamageEv
 
 
         .global _ZNK4Item14getEnchantSlotEv 
@@ -2620,7 +2620,7 @@ _ZNK4Item14getEnchantSlotEv:
 .L_ZNK4Item14getEnchantSlotEv2:
         .word   bl_addr__ZNK4Item14getEnchantSlotEv-(.L_ZNK4Item14getEnchantSlotEvPIC0+8)
         .size   _ZNK4Item14getEnchantSlotEv, .-_ZNK4Item14getEnchantSlotEv
-        .hidden bl_addr__ZNK4Item14getEnchantSlotEv
+        .hidden _ZNK4Item14getEnchantSlotEv
 
 
         .global _ZNK4Item15getEnchantValueEv 
@@ -2636,7 +2636,7 @@ _ZNK4Item15getEnchantValueEv:
 .L_ZNK4Item15getEnchantValueEv2:
         .word   bl_addr__ZNK4Item15getEnchantValueEv-(.L_ZNK4Item15getEnchantValueEvPIC0+8)
         .size   _ZNK4Item15getEnchantValueEv, .-_ZNK4Item15getEnchantValueEv
-        .hidden bl_addr__ZNK4Item15getEnchantValueEv
+        .hidden _ZNK4Item15getEnchantValueEv
 
 
         .global _ZNK4Item15isStackedByDataEv 
@@ -2652,7 +2652,7 @@ _ZNK4Item15isStackedByDataEv:
 .L_ZNK4Item15isStackedByDataEv2:
         .word   bl_addr__ZNK4Item15isStackedByDataEv-(.L_ZNK4Item15isStackedByDataEvPIC0+8)
         .size   _ZNK4Item15isStackedByDataEv, .-_ZNK4Item15isStackedByDataEv
-        .hidden bl_addr__ZNK4Item15isStackedByDataEv
+        .hidden _ZNK4Item15isStackedByDataEv
 
 
         .global _ZNK4Item3useER9ItemStackR6Player 
@@ -2668,7 +2668,7 @@ _ZNK4Item3useER9ItemStackR6Player:
 .L_ZNK4Item3useER9ItemStackR6Player2:
         .word   bl_addr__ZNK4Item3useER9ItemStackR6Player-(.L_ZNK4Item3useER9ItemStackR6PlayerPIC0+8)
         .size   _ZNK4Item3useER9ItemStackR6Player, .-_ZNK4Item3useER9ItemStackR6Player
-        .hidden bl_addr__ZNK4Item3useER9ItemStackR6Player
+        .hidden _ZNK4Item3useER9ItemStackR6Player
 
 
         .global _ZNK4Item7getIconERK13ItemStackBaseib 
@@ -2684,7 +2684,7 @@ _ZNK4Item7getIconERK13ItemStackBaseib:
 .L_ZNK4Item7getIconERK13ItemStackBaseib2:
         .word   bl_addr__ZNK4Item7getIconERK13ItemStackBaseib-(.L_ZNK4Item7getIconERK13ItemStackBaseibPIC0+8)
         .size   _ZNK4Item7getIconERK13ItemStackBaseib, .-_ZNK4Item7getIconERK13ItemStackBaseib
-        .hidden bl_addr__ZNK4Item7getIconERK13ItemStackBaseib
+        .hidden _ZNK4Item7getIconERK13ItemStackBaseib
 
 
         .global _ZNK5Actor10getNameTagEv 
@@ -2700,7 +2700,7 @@ _ZNK5Actor10getNameTagEv:
 .L_ZNK5Actor10getNameTagEv2:
         .word   bl_addr__ZNK5Actor10getNameTagEv-(.L_ZNK5Actor10getNameTagEvPIC0+8)
         .size   _ZNK5Actor10getNameTagEv, .-_ZNK5Actor10getNameTagEv
-        .hidden bl_addr__ZNK5Actor10getNameTagEv
+        .hidden _ZNK5Actor10getNameTagEv
 
 
         .global _ZNK5Actor10isSneakingEv 
@@ -2716,7 +2716,7 @@ _ZNK5Actor10isSneakingEv:
 .L_ZNK5Actor10isSneakingEv2:
         .word   bl_addr__ZNK5Actor10isSneakingEv-(.L_ZNK5Actor10isSneakingEvPIC0+8)
         .size   _ZNK5Actor10isSneakingEv, .-_ZNK5Actor10isSneakingEv
-        .hidden bl_addr__ZNK5Actor10isSneakingEv
+        .hidden _ZNK5Actor10isSneakingEv
 
 
         .global _ZNK5Actor11canAddRiderERS_ 
@@ -2732,7 +2732,7 @@ _ZNK5Actor11canAddRiderERS_:
 .L_ZNK5Actor11canAddRiderERS_2:
         .word   bl_addr__ZNK5Actor11canAddRiderERS_-(.L_ZNK5Actor11canAddRiderERS_PIC0+8)
         .size   _ZNK5Actor11canAddRiderERS_, .-_ZNK5Actor11canAddRiderERS_
-        .hidden bl_addr__ZNK5Actor11canAddRiderERS_
+        .hidden _ZNK5Actor11canAddRiderERS_
 
 
         .global _ZNK5Actor11getUniqueIDEv 
@@ -2748,7 +2748,7 @@ _ZNK5Actor11getUniqueIDEv:
 .L_ZNK5Actor11getUniqueIDEv2:
         .word   bl_addr__ZNK5Actor11getUniqueIDEv-(.L_ZNK5Actor11getUniqueIDEvPIC0+8)
         .size   _ZNK5Actor11getUniqueIDEv, .-_ZNK5Actor11getUniqueIDEv
-        .hidden bl_addr__ZNK5Actor11getUniqueIDEv
+        .hidden _ZNK5Actor11getUniqueIDEv
 
 
         .global _ZNK5Actor12getAttributeERK9Attribute 
@@ -2764,7 +2764,7 @@ _ZNK5Actor12getAttributeERK9Attribute:
 .L_ZNK5Actor12getAttributeERK9Attribute2:
         .word   bl_addr__ZNK5Actor12getAttributeERK9Attribute-(.L_ZNK5Actor12getAttributeERK9AttributePIC0+8)
         .size   _ZNK5Actor12getAttributeERK9Attribute, .-_ZNK5Actor12getAttributeERK9Attribute
-        .hidden bl_addr__ZNK5Actor12getAttributeERK9Attribute
+        .hidden _ZNK5Actor12getAttributeERK9Attribute
 
 
         .global _ZNK5Actor14getCarriedItemEv 
@@ -2780,7 +2780,7 @@ _ZNK5Actor14getCarriedItemEv:
 .L_ZNK5Actor14getCarriedItemEv2:
         .word   bl_addr__ZNK5Actor14getCarriedItemEv-(.L_ZNK5Actor14getCarriedItemEvPIC0+8)
         .size   _ZNK5Actor14getCarriedItemEv, .-_ZNK5Actor14getCarriedItemEv
-        .hidden bl_addr__ZNK5Actor14getCarriedItemEv
+        .hidden _ZNK5Actor14getCarriedItemEv
 
 
         .global _ZNK5Actor14getDimensionIdEv 
@@ -2796,7 +2796,7 @@ _ZNK5Actor14getDimensionIdEv:
 .L_ZNK5Actor14getDimensionIdEv2:
         .word   bl_addr__ZNK5Actor14getDimensionIdEv-(.L_ZNK5Actor14getDimensionIdEvPIC0+8)
         .size   _ZNK5Actor14getDimensionIdEv, .-_ZNK5Actor14getDimensionIdEv
-        .hidden bl_addr__ZNK5Actor14getDimensionIdEv
+        .hidden _ZNK5Actor14getDimensionIdEv
 
 
         .global _ZNK5Actor14getOffhandSlotEv 
@@ -2812,7 +2812,7 @@ _ZNK5Actor14getOffhandSlotEv:
 .L_ZNK5Actor14getOffhandSlotEv2:
         .word   bl_addr__ZNK5Actor14getOffhandSlotEv-(.L_ZNK5Actor14getOffhandSlotEvPIC0+8)
         .size   _ZNK5Actor14getOffhandSlotEv, .-_ZNK5Actor14getOffhandSlotEv
-        .hidden bl_addr__ZNK5Actor14getOffhandSlotEv
+        .hidden _ZNK5Actor14getOffhandSlotEv
 
 
         .global _ZNK5Actor15getEntityTypeIdEv 
@@ -2828,7 +2828,7 @@ _ZNK5Actor15getEntityTypeIdEv:
 .L_ZNK5Actor15getEntityTypeIdEv2:
         .word   bl_addr__ZNK5Actor15getEntityTypeIdEv-(.L_ZNK5Actor15getEntityTypeIdEvPIC0+8)
         .size   _ZNK5Actor15getEntityTypeIdEv, .-_ZNK5Actor15getEntityTypeIdEv
-        .hidden bl_addr__ZNK5Actor15getEntityTypeIdEv
+        .hidden _ZNK5Actor15getEntityTypeIdEv
 
 
         .global _ZNK5Actor7getRideEv 
@@ -2844,7 +2844,7 @@ _ZNK5Actor7getRideEv:
 .L_ZNK5Actor7getRideEv2:
         .word   bl_addr__ZNK5Actor7getRideEv-(.L_ZNK5Actor7getRideEvPIC0+8)
         .size   _ZNK5Actor7getRideEv, .-_ZNK5Actor7getRideEv
-        .hidden bl_addr__ZNK5Actor7getRideEv
+        .hidden _ZNK5Actor7getRideEv
 
 
         .global _ZNK5Actor8getArmorE9ArmorSlot 
@@ -2860,7 +2860,7 @@ _ZNK5Actor8getArmorE9ArmorSlot:
 .L_ZNK5Actor8getArmorE9ArmorSlot2:
         .word   bl_addr__ZNK5Actor8getArmorE9ArmorSlot-(.L_ZNK5Actor8getArmorE9ArmorSlotPIC0+8)
         .size   _ZNK5Actor8getArmorE9ArmorSlot, .-_ZNK5Actor8getArmorE9ArmorSlot
-        .hidden bl_addr__ZNK5Actor8getArmorE9ArmorSlot
+        .hidden _ZNK5Actor8getArmorE9ArmorSlot
 
 
         .global _ZNK5Actor9getHealthEv 
@@ -2876,7 +2876,7 @@ _ZNK5Actor9getHealthEv:
 .L_ZNK5Actor9getHealthEv2:
         .word   bl_addr__ZNK5Actor9getHealthEv-(.L_ZNK5Actor9getHealthEvPIC0+8)
         .size   _ZNK5Actor9getHealthEv, .-_ZNK5Actor9getHealthEv
-        .hidden bl_addr__ZNK5Actor9getHealthEv
+        .hidden _ZNK5Actor9getHealthEv
 
 
         .global _ZNK5Actor9getRegionEv 
@@ -2892,7 +2892,7 @@ _ZNK5Actor9getRegionEv:
 .L_ZNK5Actor9getRegionEv2:
         .word   bl_addr__ZNK5Actor9getRegionEv-(.L_ZNK5Actor9getRegionEvPIC0+8)
         .size   _ZNK5Actor9getRegionEv, .-_ZNK5Actor9getRegionEv
-        .hidden bl_addr__ZNK5Actor9getRegionEv
+        .hidden _ZNK5Actor9getRegionEv
 
 
         .global _ZNK5Level10getSpawnerEv 
@@ -2908,7 +2908,7 @@ _ZNK5Level10getSpawnerEv:
 .L_ZNK5Level10getSpawnerEv2:
         .word   bl_addr__ZNK5Level10getSpawnerEv-(.L_ZNK5Level10getSpawnerEvPIC0+8)
         .size   _ZNK5Level10getSpawnerEv, .-_ZNK5Level10getSpawnerEv
-        .hidden bl_addr__ZNK5Level10getSpawnerEv
+        .hidden _ZNK5Level10getSpawnerEv
 
 
         .global _ZNK5Level11fetchEntityE13ActorUniqueIDb 
@@ -2924,7 +2924,7 @@ _ZNK5Level11fetchEntityE13ActorUniqueIDb:
 .L_ZNK5Level11fetchEntityE13ActorUniqueIDb2:
         .word   bl_addr__ZNK5Level11fetchEntityE13ActorUniqueIDb-(.L_ZNK5Level11fetchEntityE13ActorUniqueIDbPIC0+8)
         .size   _ZNK5Level11fetchEntityE13ActorUniqueIDb, .-_ZNK5Level11fetchEntityE13ActorUniqueIDb
-        .hidden bl_addr__ZNK5Level11fetchEntityE13ActorUniqueIDb
+        .hidden _ZNK5Level11fetchEntityE13ActorUniqueIDb
 
 
         .global _ZNK5Level12isClientSideEv 
@@ -2940,7 +2940,7 @@ _ZNK5Level12isClientSideEv:
 .L_ZNK5Level12isClientSideEv2:
         .word   bl_addr__ZNK5Level12isClientSideEv-(.L_ZNK5Level12isClientSideEvPIC0+8)
         .size   _ZNK5Level12isClientSideEv, .-_ZNK5Level12isClientSideEv
-        .hidden bl_addr__ZNK5Level12isClientSideEv
+        .hidden _ZNK5Level12isClientSideEv
 
 
         .global _ZNK5Level21getGlobalBlockPaletteEv 
@@ -2956,7 +2956,7 @@ _ZNK5Level21getGlobalBlockPaletteEv:
 .L_ZNK5Level21getGlobalBlockPaletteEv2:
         .word   bl_addr__ZNK5Level21getGlobalBlockPaletteEv-(.L_ZNK5Level21getGlobalBlockPaletteEvPIC0+8)
         .size   _ZNK5Level21getGlobalBlockPaletteEv, .-_ZNK5Level21getGlobalBlockPaletteEv
-        .hidden bl_addr__ZNK5Level21getGlobalBlockPaletteEv
+        .hidden _ZNK5Level21getGlobalBlockPaletteEv
 
 
         .global _ZNK5Level7getTimeEv 
@@ -2972,7 +2972,7 @@ _ZNK5Level7getTimeEv:
 .L_ZNK5Level7getTimeEv2:
         .word   bl_addr__ZNK5Level7getTimeEv-(.L_ZNK5Level7getTimeEvPIC0+8)
         .size   _ZNK5Level7getTimeEv, .-_ZNK5Level7getTimeEv
-        .hidden bl_addr__ZNK5Level7getTimeEv
+        .hidden _ZNK5Level7getTimeEv
 
 
         .global _ZNK5Level9getPlayerE13ActorUniqueID 
@@ -2988,7 +2988,7 @@ _ZNK5Level9getPlayerE13ActorUniqueID:
 .L_ZNK5Level9getPlayerE13ActorUniqueID2:
         .word   bl_addr__ZNK5Level9getPlayerE13ActorUniqueID-(.L_ZNK5Level9getPlayerE13ActorUniqueIDPIC0+8)
         .size   _ZNK5Level9getPlayerE13ActorUniqueID, .-_ZNK5Level9getPlayerE13ActorUniqueID
-        .hidden bl_addr__ZNK5Level9getPlayerE13ActorUniqueID
+        .hidden _ZNK5Level9getPlayerE13ActorUniqueID
 
 
         .global _ZNK6Player11getSuppliesEv 
@@ -3004,7 +3004,7 @@ _ZNK6Player11getSuppliesEv:
 .L_ZNK6Player11getSuppliesEv2:
         .word   bl_addr__ZNK6Player11getSuppliesEv-(.L_ZNK6Player11getSuppliesEvPIC0+8)
         .size   _ZNK6Player11getSuppliesEv, .-_ZNK6Player11getSuppliesEv
-        .hidden bl_addr__ZNK6Player11getSuppliesEv
+        .hidden _ZNK6Player11getSuppliesEv
 
 
         .global _ZNK6Player14getCarriedItemEv 
@@ -3020,7 +3020,7 @@ _ZNK6Player14getCarriedItemEv:
 .L_ZNK6Player14getCarriedItemEv2:
         .word   bl_addr__ZNK6Player14getCarriedItemEv-(.L_ZNK6Player14getCarriedItemEvPIC0+8)
         .size   _ZNK6Player14getCarriedItemEv, .-_ZNK6Player14getCarriedItemEv
-        .hidden bl_addr__ZNK6Player14getCarriedItemEv
+        .hidden _ZNK6Player14getCarriedItemEv
 
 
         .global _ZNK9Abilities7getBoolE14AbilitiesIndex 
@@ -3036,7 +3036,7 @@ _ZNK9Abilities7getBoolE14AbilitiesIndex:
 .L_ZNK9Abilities7getBoolE14AbilitiesIndex2:
         .word   bl_addr__ZNK9Abilities7getBoolE14AbilitiesIndex-(.L_ZNK9Abilities7getBoolE14AbilitiesIndexPIC0+8)
         .size   _ZNK9Abilities7getBoolE14AbilitiesIndex, .-_ZNK9Abilities7getBoolE14AbilitiesIndex
-        .hidden bl_addr__ZNK9Abilities7getBoolE14AbilitiesIndex
+        .hidden _ZNK9Abilities7getBoolE14AbilitiesIndex
 
 
         .global _ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb 
@@ -3052,7 +3052,7 @@ _ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb:
 .L_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb2:
         .word   bl_addr__ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb-(.L_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBbPIC0+8)
         .size   _ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb, .-_ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
-        .hidden bl_addr__ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
+        .hidden _ZNK9ReedBlock7getAABBER11BlockSourceRK8BlockPosRK5BlockR4AABBb
 
 
         .ident  "GCC: (GNU) 4.8"

@@ -28,7 +28,7 @@ asm_perfunc_template = """
 .L{name}2:
         .word   {varname}-(.L{name}PIC0+8)
         .size   {name}, .-{name}
-        .hidden {varname}
+        .hidden {name}
 """
 
 asm_footer = """
