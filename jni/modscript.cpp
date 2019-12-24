@@ -1535,7 +1535,8 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	mcpelauncher_hook(selectLevel, (void*) &bl_MinecraftGame_startLocalServer_hook,
 		(void**) &bl_MinecraftGame_startLocalServer_real);
 
-	mcpelauncher_hook((void*)&GameMode::destroyBlock, (void*) &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN8GameMode12destroyBlockERK8BlockPosh"),
+		(void*) &bl_GameMode_destroyBlock_hook, (void**) &bl_GameMode_destroyBlock_real);
 	
 	//void* startDestroyBlockSurvival = dlsym(RTLD_DEFAULT, "_ZN12SurvivalMode17startDestroyBlockEP6Playeriiia");
 	//mcpelauncher_hook(startDestroyBlockSurvival, &bl_SurvivalMode_startDestroyBlock_hook, (void**) &bl_SurvivalMode_startDestroyBlock_real);
@@ -1593,6 +1594,10 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN13MinecraftGame6updateEv"),
 		(void*)&bl_NinecraftApp_update_hook,
 		(void**)&bl_NinecraftApp_update_real);
+
+	FILE* f = fopen("/sdcard/dump.bin", "w");
+	fwrite((void*)(((uintptr_t)bl_NinecraftApp_update_real) & ~1ull), 0x100, 1, f);
+	fclose(f);
 
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 

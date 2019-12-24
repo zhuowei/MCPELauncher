@@ -104,6 +104,9 @@ const size_t kItemEntity_itemInstance_offset = 1360;
 // ChatScreenController::_sendChatMessage
 const size_t kClientInstanceScreenModel_offset = 652;
 
+const size_t kItem_vtable_size = 404;
+const size_t kSnowballItem_vtable_size = 404;
+
 // todo 1.2.0
 static const char* const listOfRenderersToPatchTextures[] = {
 #if 0
@@ -216,7 +219,7 @@ public:
 
 struct bl_vtable_indexes_nextgen_cpp {
 	int tile_get_second_part;
-	int tile_vtable_size;
+	//int tile_vtable_size;
 	//int blockgraphics_vtable_size;
 	//int blockgraphics_get_carried_texture;
 	int tile_get_color;
@@ -259,7 +262,7 @@ static bl_vtable_indexes_nextgen_cpp vtable_indexes;
 static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.tile_get_second_part = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_");
-	vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV11BlockLegacy")->st_size;
+	//vtable_indexes.tile_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV11BlockLegacy")->st_size;
 	//vtable_indexes.blockgraphics_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV13BlockGraphics")->st_size;
 	vtable_indexes.tile_get_color = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 		"_ZNK11BlockLegacy8getColorER11BlockSourceRK8BlockPosRK5Block");
@@ -286,7 +289,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 	vtable_indexes.blockitem_get_level_data_for_aux_value = bl_vtableIndex(mcpelibhandle, "_ZTV9BlockItem",
 		"_ZNK4Item23getLevelDataForAuxValueEi");
 #endif
-	vtable_indexes.item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV4Item")->st_size;
+	vtable_indexes.item_vtable_size = kItem_vtable_size;
+		//dobby_elfsym(mcpelibhandle, "_ZTV4Item")->st_size;
 	vtable_indexes.item_get_enchant_slot = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item14getEnchantSlotEv");
 	vtable_indexes.item_get_enchant_value = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
@@ -307,7 +311,8 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //		"_ZN5Actor4hurtERK18EntityDamageSourceibb");
 //	vtable_indexes.mobrenderer_render = bl_vtableIndex(mcpelibhandle, "_ZTV11MobRenderer",
 //		"_ZN11MobRenderer6renderER22BaseActorRenderContextR15ActorRenderData");
-	vtable_indexes.snowball_item_vtable_size = dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
+	vtable_indexes.snowball_item_vtable_size = kSnowballItem_vtable_size;
+		//dobby_elfsym(mcpelibhandle, "_ZTV12SnowballItem")->st_size;
 	vtable_indexes.item_use = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
 		"_ZNK4Item3useER9ItemStackR6Player");
 /*
@@ -4310,7 +4315,8 @@ void bl_setuphooks_cppside() {
 	void* onEntityRemoved = dlsym(mcpelibhandle, "_ZN5Level18queueEntityRemovalEOSt10unique_ptrI5ActorSt14default_deleteIS1_EEb");
 	mcpelauncher_hook(onEntityRemoved, (void*) &bl_Level_removeEntity_hook, (void**) &bl_Level_removeEntity_real);
 
-	mcpelauncher_hook((void*) &Level::explode, (void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN5Level7explodeER11BlockSourceP5ActorRK4Vec3fbbfb"),
+		(void*) &bl_Level_explode_hook, (void**) &bl_Level_explode_real);
 
 #if 0 // FIXME 1.13
 	mcpelauncher_hook((void*) &BlockSource::fireBlockEvent, (void*) &bl_BlockSource_fireBlockEvent_hook,
@@ -4444,7 +4450,8 @@ void bl_setuphooks_cppside() {
 	*/
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&PlayerInventoryProxy::add, (void*)&addHook);	
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&ItemInstance::getName, (void*)&getNameHook);
-	mcpelauncher_hook((void*)&SceneStack::update, (void*)&bl_SceneStack_update_hook,
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZN10SceneStack6updateEv"),
+		(void*)&bl_SceneStack_update_hook,
 		(void**)&bl_SceneStack_update_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&BackgroundWorker::_workerThread, (void*)&bl_BackgroundWorker__workerThread_hook);
 	// TODO 1.13
