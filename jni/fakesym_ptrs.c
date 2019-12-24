@@ -216,7 +216,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN13ItemStackBase4initEiii", 0x2455461},
 {"_ZN13ItemStackBase8_setItemEi", 0x245628b},
 {"_ZN13ItemStackBase8setBlockEPK5Block", 0x245952d},
-{"_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent", 0xb200f1},
+{"_ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent", 0xb2465d},
 {"_ZN13MinecraftGame24getPrimaryClientInstanceEv", 0xafd92f},
 {"_ZN13MinecraftGame6updateEv", 0xb15749},
 {"_ZN14ClientInstance10getGuiDataEv", 0xae235d},
@@ -429,7 +429,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase13setCustomNameERKSs, base
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase4initEiii, baseAddr, 0x2455461);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase8_setItemEi, baseAddr, 0x245628b);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase8setBlockEPK5Block, baseAddr, 0x245952d);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent, baseAddr, 0xb200f1);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent, baseAddr, 0xb2465d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13MinecraftGame24getPrimaryClientInstanceEv, baseAddr, 0xafd92f);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13MinecraftGame6updateEv, baseAddr, 0xb15749);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance10getGuiDataEv, baseAddr, 0xae235d);
