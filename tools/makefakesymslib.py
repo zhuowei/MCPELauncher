@@ -38,12 +38,16 @@ asm_footer = """
 def makeFakeSymLibArm(fakeSyms, outfile):
 	print(asm_header, file=outfile)
 	for sym in fakeSyms:
+		if (sym[1] & 1) == 0:
+			continue
 		print(asm_perfunc_template.format(name=sym[0], varname="bl_addr_" + sym[0]), file=outfile)
 	print(asm_footer, file=outfile)
 
 def makeFakeSymPtrs(fakeSyms, outfile):
         print("#include <stdint.h>", file=outfile)
         for sym in fakeSyms:
+                if (sym[1] & 1) == 0:
+                        continue
                 print("void* bl_addr_{};".format(sym[0]), file=outfile)
         print("struct bl_sym_pair { const char* name; uintptr_t offset; };", file=outfile);
         print("struct bl_sym_pair bl_sym_pairs[] = {", file=outfile)
@@ -54,6 +58,8 @@ def makeFakeSymPtrs(fakeSyms, outfile):
         print("void bl_fakeSyms_initOneAddress(void**, uintptr_t, uintptr_t);", file=outfile);
         print("void bl_fakeSyms_initStubs(uintptr_t baseAddr) {", file=outfile)
         for sym in fakeSyms:
+                if (sym[1] & 1) == 0:
+                        continue
                 print("bl_fakeSyms_initOneAddress(&bl_addr_{}, baseAddr, {});".format(sym[0], hex(sym[1])), file=outfile)
         print("}", file=outfile)
 import sys
@@ -65,7 +71,6 @@ def readFakeSymInput(filename):
                         fakesyms.append((parts[0], int(parts[1], 16)))
         return fakesyms
 fakesyms = readFakeSymInput("find_symbols/combined_check2_out.csv")
-fakesyms = [s for s in fakesyms if (s[1] & 1) != 0]
 fakesyms.sort(key=lambda a:a[0])
 with open("fakesymstubs_arm32.s", "w") as outfile:
         makeFakeSymLibArm(fakesyms, outfile)

@@ -147,8 +147,10 @@ static void setupMojangScripting(void* mcpelibhandle) {
 	bl_ScriptEngine_isScriptingEnabled_real = (bool (*)())scriptingEngineOrig;
 	bl_patch_got((soinfo2*)mcpelibhandle, scriptingEngineOrig, (void*) &bl_ScriptEngine_isScriptingEnabled_hook);
 	outputExtraLog();
-	bl_FeatureToggles_isEnabled_real = (bool (*)(void*, int))dlsym(mcpelibhandle, "_ZNK14FeatureToggles9isEnabledE15FeatureOptionID");
-	bl_patch_got((soinfo2*)mcpelibhandle, (void*)bl_FeatureToggles_isEnabled_real, (void*)&bl_FeatureToggles_isEnabled_hook);
+
+	mcpelauncher_hook(dlsym(mcpelibhandle, "_ZNK14FeatureToggles9isEnabledE15FeatureOptionID"),
+		(void*)&bl_FeatureToggles_isEnabled_hook,
+		(void**)&bl_FeatureToggles_isEnabled_real);
 	void* hbui = dlsym(mcpelibhandle, "_ZNK4hbui7Feature9isEnabledEv");
 	bl_patch_got((soinfo2*)mcpelibhandle, (void*)hbui, (void*)&bl_hbui_Feature_isEnabled_hook);
 }
@@ -251,9 +253,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	//void* leaveGame = dlsym(RTLD_DEFAULT, "_ZN15MinecraftClient9leaveGameEb");
 	//mcpelauncher_hook(leaveGame, (void*) &bl_Minecraft_leaveGame_hook, (void**) &bl_Minecraft_leaveGame_real);
 	void* stopGame = dlsym(mcpelibhandle, "_ZN9Minecraft14startLeaveGameEb");
-	//mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
-	bl_patch_got((soinfo2*)mcpelibhandle, stopGame, (void*)bl_Minecraft_stopGame_hook);
-	bl_Minecraft_stopGame_real = (void (*)(Minecraft*, bool)) stopGame;
+	mcpelauncher_hook(stopGame, (void*) &bl_Minecraft_stopGame_hook, (void**) &bl_Minecraft_stopGame_real);
 	bl_Minecraft_getServerNetworkHandler = (ServerNetworkHandler* (*)(Minecraft*))
 		dlsym(mcpelibhandle, "_ZN9Minecraft23getServerNetworkHandlerEv");
 
