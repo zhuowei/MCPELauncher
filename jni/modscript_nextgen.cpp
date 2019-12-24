@@ -319,7 +319,7 @@ static void populate_vtable_indexes(void* mcpelibhandle) {
 //	vtable_indexes.block_use = bl_vtableIndex(mcpelibhandle, "_ZTV11BlockLegacy",
 //		"_ZNK11BlockLegacy3useER6PlayerRK8BlockPosP15ItemUseCallback");
 	vtable_indexes.item_get_icon = bl_vtableIndex(mcpelibhandle, "_ZTV4Item",
-		"_ZNK4Item7getIconERK9ItemStackib");
+		"_ZNK4Item7getIconERK13ItemStackBaseib");
 	vtable_indexes.appplatform_get_settings_path = bl_vtableIndex(mcpelibhandle, "_ZTV11AppPlatform",
 		"_ZN11AppPlatform15getSettingsPathEv");
 	vtable_indexes.mob_send_inventory = bl_vtableIndex(mcpelibhandle, "_ZTV3Mob",
@@ -469,7 +469,7 @@ static void (*bl_LiquidBlockDynamic_LiquidBlockDynamic)
 #endif
 static bool (*bl_Recipe_isAnyAuxValue_real)(ItemDescriptor const&);
 static void (*bl_TntBlock_setupRedstoneComponent)(BlockLegacy*, BlockSource&, BlockPos const&);
-static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStack const&, int, bool);
+static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStackBase const&, int, bool);
 //static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
@@ -1442,7 +1442,7 @@ int bl_CustomItem_getEnchantValue_hook(Item* item) {
 	return bl_customItem_enchantValue[item->itemId];
 }
 
-static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, ItemStack const& data, int int2, bool bool1) {
+static TextureUVCoordinateSet const& bl_CustomItem_getIcon(Item* item, ItemStackBase const& data, int int2, bool bool1) {
 	if (bl_extendedBlockGraphics[item->itemId]) {
 		return bl_extendedBlockGraphics[item->itemId]->getTexture({0, 0, 0}, 2, (data.getDamageValue() & 0xf));
 	}
@@ -1525,7 +1525,7 @@ void bl_initCustomBlockVtable() {
 		(void*) &bl_CustomItem_getEnchantSlot_hook;
 	bl_CustomItem_vtable[vtable_indexes.item_get_enchant_value] =
 		(void*) &bl_CustomItem_getEnchantValue_hook;
-	bl_Item_getIcon = (TextureUVCoordinateSet const& (*)(Item*, ItemStack const&, int, bool)) bl_CustomItem_vtable[vtable_indexes.item_get_icon];
+	bl_Item_getIcon = (TextureUVCoordinateSet const& (*)(Item*, ItemStackBase const&, int, bool)) bl_CustomItem_vtable[vtable_indexes.item_get_icon];
 	bl_CustomItem_vtable[vtable_indexes.item_get_icon] = (void*)bl_CustomItem_getIcon;
 	bl_CustomSnowballItem_vtable = (void**) ::operator new(vtable_indexes.snowball_item_vtable_size);
 	memcpy(bl_CustomSnowballItem_vtable, bl_SnowballItem_vtable, vtable_indexes.snowball_item_vtable_size);
