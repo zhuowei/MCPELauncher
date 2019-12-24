@@ -64,7 +64,7 @@ def readFakeSymInput(filename):
                         parts = l.strip().split(",")
                         fakesyms.append((parts[0], int(parts[1], 16)))
         return fakesyms
-fakesyms = readFakeSymInput("combined_check2_out.csv")
+fakesyms = readFakeSymInput("find_symbols/combined_check2_out.csv")
 fakesyms = [s for s in fakesyms if (s[1] & 1) != 0]
 with open("fakesymstubs_arm32.s", "w") as outfile:
         makeFakeSymLibArm(fakesyms, outfile)
