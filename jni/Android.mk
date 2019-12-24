@@ -59,7 +59,8 @@ ifeq ($(TARGET_ARCH_ABI),x86)
 # ignore undefined symbols.
 # workaround for method not found errors.
 TARGET_NO_UNDEFINED_LDFLAGS :=
-include $(BUILD_SHARED_LIBRARY)
+# HACK: don't build full lib on x86
+# include $(BUILD_SHARED_LIBRARY)
 endif
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
