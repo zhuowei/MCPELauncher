@@ -96,4 +96,12 @@ _ZN13ItemStackBase8_setItemEi,0x245628b
 _ZN13ItemStackBase8setBlockEPK5Block,0x245952d
 _ZN12ItemInstanceC1Ev,0x24508dd
 _ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE,0x2456d5d
-# the ItemStackBase renames (Diaphora found these but they need a rename)
+_ZN13ItemStackBase13setCustomNameERKSs,0x245b959
+_ZNK13ItemStackBase18hasCustomHoverNameEv,0x2458175
+_ZNK13ItemStackBase13getCustomNameEv,0x24581b5
+# Diaphora found this, but there's a rename
+_ZNK13ItemStackBase5getIdEv,0x2455f09
+_ZN11BlockSource14getBlockEntityERK8BlockPos,0x26a3459
+_ZN9ItemStackD1Ev,0x98fc01
+# also rename
+_ZNK13ItemStackBase23getEnchantsFromUserDataEv,0x24577e9

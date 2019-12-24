@@ -110,8 +110,6 @@ static void* (*bl_GameMode_continueDestroyBlock_real)(void*, BlockPos, signed ch
 
 //static void (*bl_LevelRenderer_allChanged)(void*);
 
-static void (*bl_ItemInstance_setUserData)(ItemInstance*, std::unique_ptr<CompoundTag>);
-
 static soinfo2* mcpelibhandle = NULL;
 
 Level* bl_level;
@@ -194,7 +192,7 @@ int bl_getEntityTypeIdThroughVtable(Entity* entity);
 void bl_setItemInstance(ItemInstance* instance, int id, int count, int damage) {
 	instance->damage = damage;
 	instance->count = count;
-	bl_ItemInstance_setUserData(instance, std::unique_ptr<CompoundTag>(nullptr));
+	instance->setUserData(nullptr);
 	instance->_setItem(id);
 }
 
@@ -1449,8 +1447,6 @@ void bl_prepatch_cside(void* _mcpelibhandle, JNIEnv *env, jclass clazz,
 */
 	// needed for extended items' texture hook
 	bl_ItemInstance_getId = (int (*)(ItemInstance*)) dlsym(RTLD_DEFAULT, "_ZNK12ItemInstance5getIdEv");
-	bl_ItemInstance_setUserData = (void (*)(ItemInstance*, std::unique_ptr<CompoundTag>)) dlsym(mcpelibhandle,
-		"_ZN12ItemInstance11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE");
 
 	bl_prepatch_cppside(mcpelibhandle);
 }

@@ -241,6 +241,7 @@ public:
 	void _setItem(int);
 	int getDamageValue() const;
 	void setBlock(Block const*);
+	void setUserData(std::unique_ptr<CompoundTag> tag);
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
