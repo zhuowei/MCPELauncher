@@ -30,7 +30,10 @@ public:
 		return state->blockData;
 	}
 	BlockBrightness	getRawBrightness(BlockPos const&, bool, bool) const;
-	BlockActor*	getBlockEntity(int, int, int);
+	BlockActor*	getBlockEntity(int x, int y, int z) {
+		return getBlockEntity({x, y, z});
+	}
+	BlockActor*	getBlockEntity(BlockPos const&);
 	int		getGrassColor(BlockPos const&) const;
 	void		setGrassColor(int, BlockPos const&, int);
 	Biome*		getBiome(BlockPos const&);
