@@ -323,7 +323,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN9Minecraft14startLeaveGameEb", 0x289b4e5},
 {"_ZN9Minecraft23getServerNetworkHandlerEv", 0x289bf81},
 {"_ZN9Minecraft8getTimerEv", 0x289c5cf},
-{"_ZNK10SceneStack13getScreenNameEv", 0x7d0941},
+{"_ZNK10SceneStack13getScreenNameEv", 0xd16a79},
 {"_ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_", 0x257c95d},
 {"_ZNK11BlockLegacy14getRenderLayerEv", 0x257ccf5},
 {"_ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb", 0x257cd1b},
@@ -529,7 +529,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft11getCommandsEv, baseAddr, 0x1a
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft14startLeaveGameEb, baseAddr, 0x289b4e5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft23getServerNetworkHandlerEv, baseAddr, 0x289bf81);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft8getTimerEv, baseAddr, 0x289c5cf);
-bl_fakeSyms_initOneAddress(&bl_addr__ZNK10SceneStack13getScreenNameEv, baseAddr, 0x7d0941);
+bl_fakeSyms_initOneAddress(&bl_addr__ZNK10SceneStack13getScreenNameEv, baseAddr, 0xd16a79);
 bl_fakeSyms_initOneAddress(&bl_addr__ZNK11BlockLegacy13getSecondPartER11BlockSourceRK8BlockPosRS2_, baseAddr, 0x257c95d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZNK11BlockLegacy14getRenderLayerEv, baseAddr, 0x257ccf5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZNK11BlockLegacy14getVisualShapeERK5BlockR4AABBb, baseAddr, 0x257cd1b);

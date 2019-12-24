@@ -110,3 +110,4 @@ _ZNK13ItemStackBase15getMaxStackSizeEv,0x24565f9
 # Diaphora got this wrong
 _ZN13MinecraftGame6updateEv,0xb15749
 _ZN13MinecraftGame16startLocalServerERKSsS1_RK15ContentIdentity13LevelSettings11StartIntent,0xb2465d
+_ZNK10SceneStack13getScreenNameEv,0xd16a79
