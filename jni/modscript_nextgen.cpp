@@ -560,6 +560,19 @@ Entity* bl_getEntityWrapperWithLocalHack(Level* level, long long entityId) {
 bool bl_isActiveLevel(Level* level) {
 	return level == bl_level;
 }
+
+void ItemInstance::_bl_fixBlock(int id, int count, int data) {
+	bool isBlock = itemIdIsBlock(id);
+	// for a block, init it with a BlockAndData
+	if (isBlock) {
+		BlockLegacy* block = getBlockForItemId(id);
+		if (!block) return;
+		BlockAndData* blockAndData = block->getStateFromLegacyData(data);
+		if (!blockAndData) return; // should never happen, but...
+		setBlock(blockAndData);
+	}
+}
+
 static void (*bl_ClientInstanceScreenModel_sendChatMessage_real)(ClientInstanceScreenModel* chatScreen, std::string const& message);
 void bl_ClientInstanceScreenModel_sendChatMessage_hook(ClientInstanceScreenModel* chatScreen, std::string const& message) {
 	const char* chatMessageChars = message.c_str();
@@ -4441,7 +4454,7 @@ void bl_setuphooks_cppside() {
 		(void*)&bl_VanillaItems_registerItems_hook,
 		(void**)&bl_VanillaItems_registerItems_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
-	bl_CommandVersion_CurrentVersion = dlsym(mcpelibhandle, "_ZN14CommandVersion14CurrentVersionE");
+	bl_CommandVersion_CurrentVersion = (int*)dlsym(mcpelibhandle, "_ZN14CommandVersion14CurrentVersionE");
 
 	//bl_renderManager_init(mcpelibhandle);
 /*

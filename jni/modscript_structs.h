@@ -216,6 +216,7 @@ public:
 };
 class BlockLegacy;
 class ItemStack;
+class Block;
 // 1.13.1
 class ItemStackBase {
 public:
@@ -239,6 +240,7 @@ public:
 	UseAnimation getUseAnimation() const;
 	void _setItem(int);
 	int getDamageValue() const;
+	void setBlock(Block const*);
 }; // see ItemInstance::fromTag for size
 // or just use the shared_ptr constructor
 // or look at ItemInstance::EMPTY_ITEM
@@ -250,15 +252,7 @@ public:
 	ItemInstance(int id, int count, int data) : ItemInstance() {
 		init(id, count, data);
 		_setItem(id);
-		bool isBlock = itemIdIsBlock(id);
-		// for a block, init it with a BlockAndData
-		if (isBlock) {
-			BlockLegacy* block = getBlockForItemId(id);
-			if (!block) return;
-			BlockAndData* blockAndData = block->getStateFromLegacyData(data);
-			if (!blockAndData) return; // should never happen, but...
-			setBlock(blockAndData);
-		}
+		_bl_fixBlock(id, count, data);
 	}
 	ItemInstance(ItemStack const&);
 
@@ -267,7 +261,8 @@ public:
 	virtual ~ItemInstance();
 	bool operator==(ItemInstance const&) const;
 	bool operator!=(ItemInstance const&) const;
-}
+	void _bl_fixBlock(int id, int count, int data);
+};
 
 static_assert(offsetof(ItemInstance, count) == 18, "count wrong");
 static_assert(sizeof(ItemInstance) == 84, "ItemInstance wrong");
@@ -311,7 +306,7 @@ public:
 	AABB& getVisualShape(BlockAndData const&, AABB&, bool) const;
 };
 // SharedPtr<BlockLegacy>::make
-static_assert(sizeof(BlockLegacy) == 3240, "Block size is wrong");
+static_assert(sizeof(BlockLegacy) == 3192, "Block size is wrong");
 static_assert(offsetof(BlockLegacy, renderLayer) == 24, "renderlayer is wrong");
 static_assert(offsetof(BlockLegacy, explosionResistance) == 100, "explosionResistance is wrong");
 static_assert(offsetof(BlockLegacy, lightEmission) == 121, "lightEmission is wrong");

@@ -161,7 +161,7 @@ static struct bl_vtable_indexes vtable_indexes; // indices? whatever
 
 void* bl_fakeSyms_dlsym(const char* symbolName);
 void* debug_dlsym(void* handle, const char* symbol) {
-	void* fakeSyms = bl_fakeSyms_dlsym(symbolName);
+	void* fakeSyms = bl_fakeSyms_dlsym(symbol);
 	if (fakeSyms) {
 		return fakeSyms;
 	}

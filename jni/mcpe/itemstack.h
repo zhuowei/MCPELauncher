@@ -19,6 +19,5 @@ public:
 		}
 	}
 	virtual ~ItemStack();
-	void setBlock(BlockAndData const*);
 };
 static_assert(sizeof(ItemStack) == 84, "ItemStack size");

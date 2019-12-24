@@ -85,7 +85,7 @@ extern "C" {
 void* bl_fakeSyms_dlsym(const char* symbolName);
 }
 void* dobby_dlsym(void* handle, const char* symbol) {
-  void* fakeSyms = bl_fakeSyms_dlsym(symbolName);
+  void* fakeSyms = bl_fakeSyms_dlsym(symbol);
   if (fakeSyms) {
     return fakeSyms;
  }

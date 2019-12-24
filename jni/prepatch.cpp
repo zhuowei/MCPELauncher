@@ -26,15 +26,17 @@ static int bl_hasinit_prepatch = 0;
 static void (*bl_Minecraft_stopGame_real)(Minecraft*, bool);
 static ServerNetworkHandler* (*bl_Minecraft_getServerNetworkHandler)(Minecraft*);
 
+#ifndef DLSYM_DEBUG
 void* bl_fakeSyms_dlsym(const char* symbolName);
 void* prepatch_dlsym(void* handle, const char* symbolName) {
 	void* fakeSyms = bl_fakeSyms_dlsym(symbolName);
 	if (fakeSyms) {
 		return fakeSyms;
 	}
-	return dlsym(handle, name);
+	return dlsym(handle, symbolName);
 }
 #define dlsym prepatch_dlsym
+#endif
 
 //void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 void bl_Minecraft_stopGame_hook(Minecraft* minecraft, bool localServer) {
