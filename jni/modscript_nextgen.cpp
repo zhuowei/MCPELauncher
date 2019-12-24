@@ -662,7 +662,7 @@ void bl_RakNetInstance_connect_hook(RakNetInstance* rakNetInstance, Social::Game
 static void (*bl_Item_initCreativeItems_real)(bool, ActorInfoRegistry*, BlockDefinitionGroup*, bool, BaseGameVersion const&, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)>);
 static void bl_Item_initCreativeItems_hook(bool arg1, ActorInfoRegistry* actorInfoRegistry,
 	BlockDefinitionGroup* definitionGroup, bool arg4, BaseGameVersion const& arg5, std::function<void (ActorInfoRegistry*, BlockDefinitionGroup*, bool)> func) {
-	Item::initCreativeItems(arg1, actorInfoRegistry, definitionGroup, arg4, arg5, func);
+	bl_Item_initCreativeItems_real(arg1, actorInfoRegistry, definitionGroup, arg4, arg5, func);
 	for (short*& pair: bl_creativeItems) {
 		bl_Item_addCreativeItem(pair[0], pair[1]);
 	}
@@ -4126,7 +4126,7 @@ int bl_pthread_kill_hook(pthread_t thread, int sig) {
 
 void* (*bl_VanillaItems_registerItems_real)(bool arg1);
 void* bl_VanillaItems_registerItems_hook(bool arg1) {
-	void* retval = VanillaItems::registerItems(arg1);
+	void* retval = bl_VanillaItems_registerItems_real(arg1);
 	bl_recreateItems();
 	return retval;
 }

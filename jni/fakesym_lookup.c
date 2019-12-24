@@ -17,7 +17,7 @@ static int bl_fakeSyms_bsearch_compare(const struct bl_sym_pair* key, const stru
 }
 
 void* bl_fakeSyms_dlsym(const char* symbolName) {
-	BL_LOG("FakeLog: symbol name %s", symbolName);
+	//BL_LOG("FakeLog: symbol name %s", symbolName);
 	if (!bl_mcpe_base) {
 		BL_LOG("MCPE Base not initialized");
 		return NULL;
@@ -33,7 +33,7 @@ void* bl_fakeSyms_dlsym(const char* symbolName) {
 		return NULL;
 	}
 	void* retval = (void*)(bl_mcpe_base + value->offset);
-	BL_LOG("Returning symbol at %p (base %p)", retval, bl_mcpe_base);
+	//BL_LOG("Returning symbol at %p (base %p)", retval, bl_mcpe_base);
 	return retval;
 }
 

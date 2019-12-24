@@ -1595,10 +1595,6 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 		(void*)&bl_NinecraftApp_update_hook,
 		(void**)&bl_NinecraftApp_update_real);
 
-	FILE* f = fopen("/sdcard/dump.bin", "w");
-	fwrite((void*)(((uintptr_t)bl_NinecraftApp_update_real) & ~1ull), 0x100, 1, f);
-	fclose(f);
-
 	//bl_LevelRenderer_allChanged = dlsym(mcpelibhandle, "_ZN13LevelRenderer10allChangedEv");
 
 	bl_setuphooks_cppside();
