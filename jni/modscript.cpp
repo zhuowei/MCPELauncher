@@ -159,7 +159,12 @@ static struct bl_vtable_indexes vtable_indexes; // indices? whatever
 #ifdef DLSYM_DEBUG
 #ifndef __i386
 
+void* bl_fakeSyms_dlsym(const char* symbolName);
 void* debug_dlsym(void* handle, const char* symbol) {
+	void* fakeSyms = bl_fakeSyms_dlsym(symbolName);
+	if (fakeSyms) {
+		return fakeSyms;
+	}
 	dlerror();
 	void* retval = dlsym(handle, symbol);
 	const char* err = dlerror();

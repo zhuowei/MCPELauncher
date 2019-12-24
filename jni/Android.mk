@@ -82,6 +82,7 @@ include $(BUILD_SHARED_LIBRARY)
 endif
 
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+LOCAL_SRC_FILES += fakesymstubs_arm32.s fakesym_ptrs.c fakesym_lookup.c
 include $(BUILD_SHARED_LIBRARY)
 endif
 

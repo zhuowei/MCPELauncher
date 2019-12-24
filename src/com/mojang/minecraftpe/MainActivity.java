@@ -434,7 +434,7 @@ public class MainActivity extends NativeActivity {
 				//initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport());
+					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport(), minecraftVersionCode);
 					if (hasScriptSupport() && Utils.getPrefs(0).getBoolean("zz_desktop_gui", false)) {
 						ScriptManager.nativeModPESetDesktopGui(true);
 					}

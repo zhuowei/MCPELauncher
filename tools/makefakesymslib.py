@@ -49,7 +49,8 @@ def makeFakeSymPtrs(fakeSyms, outfile):
         print("struct bl_sym_pair bl_sym_pairs[] = {", file=outfile)
         for sym in fakeSyms:
             print("{\"" + sym[0] + "\", " + hex(sym[1]) + "},", file=outfile)
-        print("};", file=outfile);
+        print("};", file=outfile)
+        print("int bl_sym_pairs_count = " + str(len(fakeSyms)) + ";", file=outfile)
         print("void bl_fakeSyms_initOneAddress(void**, uintptr_t, uintptr_t);", file=outfile);
         print("void bl_fakeSyms_initStubs(uintptr_t baseAddr) {", file=outfile)
         for sym in fakeSyms:

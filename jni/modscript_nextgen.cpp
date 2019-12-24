@@ -473,6 +473,7 @@ static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStackBase con
 //static void (*bl_BlockGraphics_initBlocks_new)(ResourcePackManager*);
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
+static int* bl_CommandVersion_CurrentVersion;
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -3570,7 +3571,8 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 		DevConsoleCommandOrigin* origin = new DevConsoleCommandOrigin(*bl_minecraft->getLocalPlayer());
 		std::string outStr = "<no result>";
 		BL_LOG("Executing command %s!", mystr.c_str());
-		commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, CommandVersion::CurrentVersion, true);
+		commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr,
+			*bl_CommandVersion_CurrentVersion, true);
 		BL_LOG("Executed command! %s", outStr.c_str());
 		return env->NewStringUTF(outStr.c_str());
 	}
@@ -3580,7 +3582,8 @@ JNIEXPORT jstring Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeLevelEx
 	ServerCommandOrigin* origin = new ServerCommandOrigin("ModPE Script", *serverLevel, CommandPermissionLevelHigher);
 	std::string outStr = "<no result>";
 	BL_LOG("Executing nonsilent command %s!", mystr.c_str());
-	commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr, CommandVersion::CurrentVersion, true);
+	commands->requestCommandExecution(std::unique_ptr<CommandOrigin>(origin), mystr,
+		*bl_CommandVersion_CurrentVersion, true);
 	BL_LOG("Executed command! %s", outStr.c_str());
 	return env->NewStringUTF(outStr.c_str());
 }
@@ -4438,6 +4441,7 @@ void bl_setuphooks_cppside() {
 		(void*)&bl_VanillaItems_registerItems_hook,
 		(void**)&bl_VanillaItems_registerItems_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
+	bl_CommandVersion_CurrentVersion = dlsym(mcpelibhandle, "_ZN14CommandVersion14CurrentVersionE");
 
 	//bl_renderManager_init(mcpelibhandle);
 /*

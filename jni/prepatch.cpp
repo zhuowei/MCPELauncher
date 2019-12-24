@@ -14,6 +14,8 @@
 
 extern "C" {
 
+const int kSupportedVersionCode = 941140105; // 1.14.1.5
+
 jclass bl_scriptmanager_class;
 
 void* bl_marauder_translation_function(void* input);
@@ -23,6 +25,16 @@ static int bl_hasinit_prepatch = 0;
 //static void (*bl_Minecraft_leaveGame_real)(Minecraft*, int);
 static void (*bl_Minecraft_stopGame_real)(Minecraft*, bool);
 static ServerNetworkHandler* (*bl_Minecraft_getServerNetworkHandler)(Minecraft*);
+
+void* bl_fakeSyms_dlsym(const char* symbolName);
+void* prepatch_dlsym(void* handle, const char* symbolName) {
+	void* fakeSyms = bl_fakeSyms_dlsym(symbolName);
+	if (fakeSyms) {
+		return fakeSyms;
+	}
+	return dlsym(handle, name);
+}
+#define dlsym prepatch_dlsym
 
 //void bl_Minecraft_leaveGame_hook(Minecraft* minecraft, int thatotherboolean) {
 void bl_Minecraft_stopGame_hook(Minecraft* minecraft, bool localServer) {
@@ -188,6 +200,21 @@ static void bl_prepatch_fmod(soinfo2* mcpelibhandle) {
 
 /* end FMOD */
 
+#ifdef __arm__
+void bl_fakeSyms_init(uintptr_t mcpe_base);
+static void setupFakesym(uintptr_t mcpe_base, int versionCode) {
+	if (versionCode != kSupportedVersionCode) {
+		__android_log_print(ANDROID_LOG_ERROR, "BlockLauncher", "Wrong version: expected %d, got %d", kSupportedVersionCode, versionCode);
+		return;
+	}
+	bl_fakeSyms_init(mcpe_base);
+}
+#else
+// stub out fakeSyms
+void* bl_fakeSyms_dlsym(const char* symbolName) {
+}
+#endif
+
 extern void bl_prepatch_cside(void* mcpelibhandle, JNIEnv *env, jclass clazz,
 	jboolean signalhandler, jobject activity, jboolean limitedPrepatch);
 extern void bl_prepatch_fakeassets(soinfo2* mcpelibhandle);
@@ -196,7 +223,7 @@ void bl_setmcpelibhandle(void* _mcpelibhandle);
 static void* hacked_dlopen(const char *filename, int flag);
 
 JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePrePatch
-  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch) {
+  (JNIEnv *env, jclass clazz, jboolean signalhandler, jobject activity, jboolean limitedPrepatch, jint versionCode) {
 	if (bl_hasinit_prepatch) return;
 
 	jclass clz = env->FindClass("net/zhuoweizhang/mcpelauncher/ScriptManager");
@@ -206,6 +233,9 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativePr
 	void* mcpelibhandle = hacked_dlopen("libminecraftpe.so", RTLD_LAZY);
 #ifndef MCPELAUNCHER_LITE
 	bl_setmcpelibhandle(mcpelibhandle);
+#endif
+#ifdef __arm__
+	setupFakesym(((soinfo2*)mcpelibhandle)->base, versionCode);
 #endif
 	void* readAssetFile = (void*)dobby_dlsym(mcpelibhandle, "_ZN19AppPlatform_android13readAssetFileERKN4Core4PathE");
 	void* readAssetFileToHook = (void*)dobby_dlsym(mcpelibhandle, "_ZN21AppPlatform_android2313readAssetFileERKN4Core4PathE");
