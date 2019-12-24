@@ -107,3 +107,5 @@ _ZN9ItemStackD1Ev,0x98fc01
 _ZNK13ItemStackBase23getEnchantsFromUserDataEv,0x24577e9
 _ZNK13ItemStackBase15getUseAnimationEv,0x245b361
 _ZNK13ItemStackBase15getMaxStackSizeEv,0x24565f9
+# Diaphora got this wrong
+_ZN13MinecraftGame6updateEv,0xb15749
