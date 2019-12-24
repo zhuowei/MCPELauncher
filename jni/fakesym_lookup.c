@@ -3,7 +3,7 @@
 
 struct bl_sym_pair { const char* name; uintptr_t offset; };
 extern struct bl_sym_pair bl_sym_pairs[];
-extern int bl_sym_pair_count;
+extern int bl_sym_pairs_count;
 
 static uintptr_t bl_mcpe_base;
 
@@ -22,7 +22,7 @@ void* bl_fakeSyms_dlsym(const char* symbolName) {
 		.offset = 0,
 	};
 	// expecting a hand-coded optimized hashtable? Too bad: I'm not as smart as McMrARM.
-	struct bl_sym_pair* value = bsearch(&key, bl_sym_pairs, bl_sym_pair_count, sizeof(key), bl_fakeSyms_bsearch_compare);
+	struct bl_sym_pair* value = bsearch(&key, bl_sym_pairs, bl_sym_pairs_count, sizeof(key), bl_fakeSyms_bsearch_compare);
 	if (!value) return NULL;
 	return (void*)(bl_mcpe_base + value->offset);
 }

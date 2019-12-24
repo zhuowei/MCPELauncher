@@ -474,6 +474,7 @@ static TextureUVCoordinateSet const& (*bl_Item_getIcon)(Item*, ItemStackBase con
 static void (*bl_BlockGraphics_initBlocks_real)(ResourcePackManager&);
 static WeakPtr<Item> (*bl_ItemRegistry_registerItemShared)(std::string const&, short&);
 static int* bl_CommandVersion_CurrentVersion;
+static Attribute* bl_SharedAttributes_HEALTH;
 
 #define STONECUTTER_STATUS_DEFAULT 0
 #define STONECUTTER_STATUS_FORCE_FALSE 1
@@ -2833,7 +2834,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(*bl_SharedAttributes_HEALTH);
 	if (attrib) attrib->value = halfhearts;
 }
 
@@ -2841,7 +2842,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
   (JNIEnv *env, jclass clazz, jlong entityId, jint halfhearts) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return;
-	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(*bl_SharedAttributes_HEALTH);
 	if (attrib) attrib->setMaxValue(halfhearts);
 }
 
@@ -2849,7 +2850,7 @@ JNIEXPORT jint JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeGe
   (JNIEnv *env, jclass clazz, jlong entityId) {
 	Entity* entity = bl_getEntityWrapper(bl_level, entityId);
 	if (entity == NULL) return -1;
-	AttributeInstance* attrib = entity->getAttribute(SharedAttributes::HEALTH);
+	AttributeInstance* attrib = entity->getAttribute(*bl_SharedAttributes_HEALTH);
 	if (attrib) return attrib->getMaxValue();
 	return -1;
 }
@@ -4455,6 +4456,7 @@ void bl_setuphooks_cppside() {
 		(void**)&bl_VanillaItems_registerItems_real);
 	//bl_patch_got_wrap(mcpelibhandle, (void*)&Recipes::loadRecipes, (void*)&bl_Recipes_loadRecipes_hook);
 	bl_CommandVersion_CurrentVersion = (int*)dlsym(mcpelibhandle, "_ZN14CommandVersion14CurrentVersionE");
+	bl_SharedAttributes_HEALTH = (Attribute*)dlsym(mcpelibhandle, "_ZN16SharedAttributes6HEALTHE");
 
 	//bl_renderManager_init(mcpelibhandle);
 /*
