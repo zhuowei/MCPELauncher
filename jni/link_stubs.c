@@ -15,7 +15,9 @@ void* _ZN12ItemInstanceD1Ev(void* a) {
 	return _ZN12ItemInstanceD2Ev(a);
 }
 
+/*
 extern void* _ZN9ItemStackD2Ev(void* a);
 void* _ZN9ItemStackD1Ev(void* a) {
 	return _ZN9ItemStackD2Ev(a);
 }
+*/

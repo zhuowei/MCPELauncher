@@ -250,6 +250,15 @@ public:
 	ItemInstance(int id, int count, int data) : ItemInstance() {
 		init(id, count, data);
 		_setItem(id);
+		bool isBlock = itemIdIsBlock(id);
+		// for a block, init it with a BlockAndData
+		if (isBlock) {
+			BlockLegacy* block = getBlockForItemId(id);
+			if (!block) return;
+			BlockAndData* blockAndData = block->getStateFromLegacyData(data);
+			if (!blockAndData) return; // should never happen, but...
+			setBlock(blockAndData);
+		}
 	}
 	ItemInstance(ItemStack const&);
 
