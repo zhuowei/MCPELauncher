@@ -223,7 +223,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN14ClientInstance13getServerDataEv", 0xae10af},
 {"_ZN14ClientInstance14getLocalPlayerEv", 0xada0b5},
 {"_ZN14ClientInstance15_startLeaveGameEv", 0xad6f99},
-{"_ZN14ClientInstance15getItemRendererEv", 0xaed30b},
+{"_ZN14ClientInstance15getItemRendererEv", 0xade30b},
 {"_ZN14ClientInstance15setCameraEntityEP5Actor", 0xade4e1},
 {"_ZN14ClientInstance19getLocalServerLevelEv", 0xadf07d},
 {"_ZN14ClientInstance4playERKSsRK4Vec3ff", 0xae67d9},
@@ -436,7 +436,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance10getGuiDataEv, baseAddr,
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance13getServerDataEv, baseAddr, 0xae10af);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance14getLocalPlayerEv, baseAddr, 0xada0b5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance15_startLeaveGameEv, baseAddr, 0xad6f99);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance15getItemRendererEv, baseAddr, 0xaed30b);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance15getItemRendererEv, baseAddr, 0xade30b);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance15setCameraEntityEP5Actor, baseAddr, 0xade4e1);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance19getLocalServerLevelEv, baseAddr, 0xadf07d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN14ClientInstance4playERKSsRK4Vec3ff, baseAddr, 0xae67d9);
