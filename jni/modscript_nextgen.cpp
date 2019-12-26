@@ -2281,7 +2281,7 @@ JNIEXPORT void JNICALL Java_net_zhuoweizhang_mcpelauncher_ScriptManager_nativeSe
 	ClientInstanceScreenModel* screenModel = new ClientInstanceScreenModel(
 		*bl_minecraft->getMinecraftGame(), *bl_minecraft,
 		bl_minecraft->getClientSceneStack(), bl_minecraft->getSceneFactory());
-	screenModel->sendChatMessage(std::string(messageUtfChars));
+	bl_ClientInstanceScreenModel_sendChatMessage_real(screenModel, std::string(messageUtfChars));
 	delete screenModel;
 	env->ReleaseStringUTFChars(message, messageUtfChars);
 #if 0
