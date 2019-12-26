@@ -319,7 +319,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN9ItemStackC1Ev", 0x24546ed},
 {"_ZN9ItemStackD1Ev", 0x98fc01},
 {"_ZN9LevelData11setSpawnPosERK8BlockPos", 0x2872541},
-{"_ZN9Minecraft11getCommandsEv", 0x1acfc15},
+{"_ZN9Minecraft11getCommandsEv", 0x289c55d},
 {"_ZN9Minecraft14startLeaveGameEb", 0x289b4e5},
 {"_ZN9Minecraft23getServerNetworkHandlerEv", 0x289bf81},
 {"_ZN9Minecraft8getTimerEv", 0x289c5cf},
@@ -525,7 +525,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN9Abilities18nameToAbilityIndexERKSs, base
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9ItemStackC1Ev, baseAddr, 0x24546ed);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9ItemStackD1Ev, baseAddr, 0x98fc01);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9LevelData11setSpawnPosERK8BlockPos, baseAddr, 0x2872541);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft11getCommandsEv, baseAddr, 0x1acfc15);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft11getCommandsEv, baseAddr, 0x289c55d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft14startLeaveGameEb, baseAddr, 0x289b4e5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft23getServerNetworkHandlerEv, baseAddr, 0x289bf81);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN9Minecraft8getTimerEv, baseAddr, 0x289c5cf);
