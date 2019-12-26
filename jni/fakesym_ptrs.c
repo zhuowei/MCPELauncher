@@ -202,7 +202,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN11BlockSource8setBlockEiiiRK5Blocki", 0x26a1da5},
 {"_ZN11LocalPlayer6hurtToEi", 0xf872c1},
 {"_ZN11ServerLevel11getCommandsEv", 0x1f74a25},
-{"_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2", 0x20c9f29},
+{"_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2", 0x20c9a79},
 {"_ZN12ActorFactoryC1ER5Level", 0x20c79d9},
 {"_ZN12ItemInstanceC1Ev", 0x24508dd},
 {"_ZN12ItemInstanceD2Ev", 0xf54565},
@@ -210,7 +210,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN12ItemRegistry7getItemEs", 0x2450e69},
 {"_ZN12ItemRenderer17forceGraphicsLoadEv", 0x105b299},
 {"_ZN12ServerPlayer13sendInventoryEb", 0x1f78b19},
-{"_ZN12VanillaItems13registerItemsEb", 0xe215a9},
+{"_ZN12VanillaItems13registerItemsEb", 0x2472899},
 {"_ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE", 0x2456d5d},
 {"_ZN13ItemStackBase13setCustomNameERKSs", 0x245b959},
 {"_ZN13ItemStackBase4initEiii", 0x2455461},
@@ -303,9 +303,9 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN6Player5LEVELE", 0x50a67a0},
 {"_ZN6Player6HUNGERE", 0x50a6758},
 {"_ZN6Player9addLevelsEi", 0x22d8729},
-{"_ZN7GuiData14showTipMessageERKSs", 0xc251b9},
+{"_ZN7GuiData14showTipMessageERKSs", 0xb768e7},
 {"_ZN7GuiData20displayClientMessageERKSs", 0xb75349},
-{"_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i", 0x13b13ed},
+{"_ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i", 0x2850d19},
 {"_ZN8GameMode12destroyBlockERK8BlockPosh", 0x23d444d},
 {"_ZN8GameMode17startDestroyBlockERK8BlockPoshRb", 0x23d4171},
 {"_ZN8GameMode18getDestroyProgressEv", 0x23d5beb},
@@ -415,7 +415,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN11BlockSource8getBiomeERK8BlockPos, baseA
 bl_fakeSyms_initOneAddress(&bl_addr__ZN11BlockSource8setBlockEiiiRK5Blocki, baseAddr, 0x26a1da5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN11LocalPlayer6hurtToEi, baseAddr, 0xf872c1);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN11ServerLevel11getCommandsEv, baseAddr, 0x1f74a25);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2, baseAddr, 0x20c9f29);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2, baseAddr, 0x20c9a79);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ActorFactoryC1ER5Level, baseAddr, 0x20c79d9);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemInstanceC1Ev, baseAddr, 0x24508dd);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemInstanceD2Ev, baseAddr, 0xf54565);
@@ -423,7 +423,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRegistry18registerItemSharedI4ItemJ
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRegistry7getItemEs, baseAddr, 0x2450e69);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRenderer17forceGraphicsLoadEv, baseAddr, 0x105b299);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ServerPlayer13sendInventoryEb, baseAddr, 0x1f78b19);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN12VanillaItems13registerItemsEb, baseAddr, 0xe215a9);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN12VanillaItems13registerItemsEb, baseAddr, 0x2472899);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase11setUserDataESt10unique_ptrI11CompoundTagSt14default_deleteIS1_EE, baseAddr, 0x2456d5d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase13setCustomNameERKSs, baseAddr, 0x245b959);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN13ItemStackBase4initEiii, baseAddr, 0x2455461);
@@ -509,9 +509,9 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN6Player13addExperienceEi, baseAddr, 0x22d
 bl_fakeSyms_initOneAddress(&bl_addr__ZN6Player17setPlayerGameTypeE8GameType, baseAddr, 0x22d7ae5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN6Player3eatEif, baseAddr, 0x22d7dc9);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN6Player9addLevelsEi, baseAddr, 0x22d8729);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN7GuiData14showTipMessageERKSs, baseAddr, 0xc251b9);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN7GuiData14showTipMessageERKSs, baseAddr, 0xb768e7);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN7GuiData20displayClientMessageERKSs, baseAddr, 0xb75349);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i, baseAddr, 0x13b13ed);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN7Spawner9spawnItemER11BlockSourceRK9ItemStackP5ActorRK4Vec3i, baseAddr, 0x2850d19);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN8GameMode12destroyBlockERK8BlockPosh, baseAddr, 0x23d444d);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN8GameMode17startDestroyBlockERK8BlockPoshRb, baseAddr, 0x23d4171);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN8GameMode18getDestroyProgressEv, baseAddr, 0x23d5beb);
