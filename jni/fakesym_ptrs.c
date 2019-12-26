@@ -205,7 +205,7 @@ struct bl_sym_pair bl_sym_pairs[] = {
 {"_ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2", 0x20c9a79},
 {"_ZN12ActorFactoryC1ER5Level", 0x20c79d9},
 {"_ZN12ItemInstanceC1Ev", 0x24508dd},
-{"_ZN12ItemInstanceD2Ev", 0xf54565},
+{"_ZN12ItemInstanceD2Ev", 0x98fc01},
 {"_ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_", 0x24518a5},
 {"_ZN12ItemRegistry7getItemEs", 0x2450e69},
 {"_ZN12ItemRenderer17forceGraphicsLoadEv", 0x105b299},
@@ -418,7 +418,7 @@ bl_fakeSyms_initOneAddress(&bl_addr__ZN11ServerLevel11getCommandsEv, baseAddr, 0
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ActorFactory19createSpawnedEntityERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2, baseAddr, 0x20c9a79);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ActorFactoryC1ER5Level, baseAddr, 0x20c79d9);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemInstanceC1Ev, baseAddr, 0x24508dd);
-bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemInstanceD2Ev, baseAddr, 0xf54565);
+bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemInstanceD2Ev, baseAddr, 0x98fc01);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRegistry18registerItemSharedI4ItemJRKSsRsEEE7WeakPtrIT_EDpOT0_, baseAddr, 0x24518a5);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRegistry7getItemEs, baseAddr, 0x2450e69);
 bl_fakeSyms_initOneAddress(&bl_addr__ZN12ItemRenderer17forceGraphicsLoadEv, baseAddr, 0x105b299);
