@@ -80,13 +80,15 @@ public:
 	char filler4[584-192]; //192
 	std::vector<Entity*> riders; // 584
 
-	char filler3[768-596]; // 596
-	float motionX; // 768 - Actor::push or PushableComponent::push
-	float motionY; // 772
-	float motionZ; // 776
+	char filler3[780-596]; // 596
 	float x; //780 - Entity::setPos(Vec3 const&) or Actor.getPos
 	float y; //784
 	float z; //788
+	// Actor::lerpMotion
+	char filler5[804-792];
+	float motionX; // 804 - Actor::push or PushableComponent::push
+	float motionY; // 808
+	float motionZ; // 812
 
 	virtual ~Actor();
 	BlockSource* getRegion() const;
@@ -120,6 +122,7 @@ public:
 static_assert(offsetof(Entity, riders) == 584, "Entity rider offset wrong");
 static_assert(offsetof(Actor, pitch) == 176, "Actor pitch offset wrong");
 static_assert(offsetof(Actor, x) == 780, "Actor x offset wrong");
+static_assert(offsetof(Actor, motionX) == 804, "Actor motionX offset wrong");
 
 class Mob: public Entity {
 public:
