@@ -305,8 +305,17 @@ public class Utils {
 		}
 		ComponentName componentName = new ComponentName(activity, RelaunchInstrumentation.class);
 		try {
-			Method ActivityManager_getService = ActivityManager.class.getMethod("getService");
-			Object iActivityManager = ActivityManager_getService.invoke(null);
+			Object iActivityManager = null;
+			try {
+				Method ActivityManager_getService = ActivityManager.class.getMethod("getService");
+				iActivityManager = ActivityManager_getService.invoke(null);
+			} catch (NoSuchMethodException nme) {
+				System.err.println(nme);
+				// Android 7.1 and below
+				Method ActivityManagerNative_getDefault =
+					Class.forName("android.app.ActivityManagerNative").getMethod("getDefault");
+				iActivityManager = ActivityManagerNative_getDefault.invoke(null);
+			}
 			Method IActivityManager_startInstrumentation = iActivityManager.getClass().getMethod("startInstrumentation",
 					ComponentName.class, String.class, Integer.TYPE, Bundle.class,
 					Class.forName("android.app.IInstrumentationWatcher"),
