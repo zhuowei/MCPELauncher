@@ -624,7 +624,7 @@ void bl_ClientInstanceScreenModel_executeCommand_hook(ClientInstanceScreenModel*
 	__android_log_print(ANDROID_LOG_INFO, "BlockLauncher", "Command message: %s preventDefault %d\n", chatMessageChars,
 		(int) preventDefaultStatus);
 	if (!preventDefaultStatus) {
-		bl_ClientInstanceScreenModel_executeCommand_hook(chatScreen, message);
+		bl_ClientInstanceScreenModel_executeCommand_real(chatScreen, message);
 	} else {
 		//clear the chat string
 		chatScreen->updateTextBoxText("");
