@@ -1,4 +1,5 @@
 #!/bin/bash
+rm ../mcpelauncher-app/blocklauncherkey.keystore || true
 7z -o../mcpelauncher-app -p$SIGNING_KEY_7Z_PASSWORD x tools/ci/blocklauncherkey.7z
 echo """key.store=blocklauncherkey.keystore
 key.alias=blocklauncherkey
