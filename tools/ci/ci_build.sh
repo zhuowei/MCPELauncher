@@ -7,8 +7,15 @@ parent_dir="$(cd ..; pwd)"
 export ANDROID_HOME="$parent_dir/android-sdk-linux_86"
 export NDK_ROOT="$parent_dir/android-ndk-r10c"
 export PATH="$PATH:$NDK_ROOT"
+# Download and extract dependencies
 tools/ci/setup_sdks.sh
 tools/ci/setup_repositories.sh
+tools/ci/download_mc.sh
+tools/ci/download_resources.sh
+# Prepare the repositories
 tools/ci/build_dependencies.sh
+tools/ci/prep_repositories.sh
+tools/ci/setup_signing_key.sh
+# Build!
 tools/ci/build.sh
 tools/ci/copy_artifact.sh
