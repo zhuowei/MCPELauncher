@@ -1,0 +1,28 @@
+name: Build BlockLauncher
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Build with CI build script
+      run: tools/ci/ci_build.sh
+      env:
+        ASSETS_PASSWORD: ${{ secrets.ASSETS_PASSWORD }}
+        SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        SIGNING_KEY_7Z_PASSWORD: ${{ secrets.SIGNING_KEY_7Z_PASSWORD }}
+
+    - name: Upload build output
+      uses: actions/upload-artifact@v1
+      with:
+        name: MCPELauncherApp
+        path: MCPELauncherApp-release.apk
