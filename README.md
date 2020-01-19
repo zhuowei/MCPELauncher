@@ -1,5 +1,6 @@
 # BlockLauncher: a custom Minecraft launcher for Android
 
+![](https://raw.githubusercontent.com/zhuowei/MCPELauncher/master/res/drawable-xxxhdpi/ic_launcher.png)
 [![Build Status](https://github.com/zhuowei/MCPELauncher/workflows/Build%20BlockLauncher/badge.svg)](https://github.com/zhuowei/MCPELauncher/actions)
 
 ## Building
