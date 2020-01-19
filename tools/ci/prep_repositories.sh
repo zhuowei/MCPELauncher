@@ -9,6 +9,7 @@ ln -s "$(readlink -e ../mcpe/1141/lib/armeabi-v7a/libfmod.so)" jni/armeabi-v7a/l
 ln -s "$(readlink -e ../mcpe/190b3_x86/lib/x86/libminecraftpe.so)" jni/x86/libminecraftpe.so
 ln -s "$(readlink -e ../mcpe/190b3_x86/lib/x86/libfmod.so)" jni/x86/libfmod.so
 android update project -t android-21 -p httpclient
+ln -s "$(readlink -e ../android-sdk-linux_86/extras/android/support/v4/android-support-v4.jar)" libs/
 
 
 cd ../mcpelauncher-app
