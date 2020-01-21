@@ -74,7 +74,7 @@ public class NerdyStuffActivity extends Activity implements View.OnClickListener
 			Toast.makeText(
 					this,
 					Environment.getExternalStorageDirectory().getAbsolutePath()
-							+ "libminecraftpe.so.dump", Toast.LENGTH_LONG).show();
+							+ "/libminecraftpe.so.dump", Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
