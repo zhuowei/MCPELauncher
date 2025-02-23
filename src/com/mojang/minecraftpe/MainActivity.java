@@ -10,13 +10,9 @@ import java.util.*;
 
 import javax.net.ssl.*;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.app.AlertDialog;
@@ -28,8 +24,6 @@ import android.content.DialogInterface;
 import android.content.pm.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaScannerConnection;
 import android.media.AudioManager;
@@ -42,7 +36,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.speech.tts.TextToSpeech;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -57,9 +50,9 @@ import android.util.SparseArray;
 import android.webkit.*;
 import android.widget.*;
 
-import dalvik.system.BaseDexClassLoader;
-
 import org.mozilla.javascript.RhinoException;
+
+import com.kamcord.android.Kamcord;
 
 import net.zhuoweizhang.mcpelauncher.*;
 import static net.zhuoweizhang.mcpelauncher.Utils.isSafeMode;
@@ -73,7 +66,6 @@ import net.zhuoweizhang.mcpelauncher.ui.ManageScriptsActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NerdyStuffActivity;
 import net.zhuoweizhang.mcpelauncher.ui.NoMinecraftActivity;
 import net.zhuoweizhang.mcpelauncher.ui.MinecraftNotSupportedActivity;
-import net.zhuoweizhang.mcpelauncher.ui.TexturePacksActivity;
 import net.zhuoweizhang.mcpelauncher.texture.*;
 import net.zhuoweizhang.pokerface.PokerFace;
 
@@ -81,12 +73,7 @@ import net.zhuoweizhang.pokerface.PokerFace;
 @SuppressWarnings("deprecation")
 public class MainActivity extends NativeActivity {
 
-	public static final String TAG = "BlockLauncher/Main";
-	public static final String SCRIPT_SUPPORT_VERSION = "1.14.1.5";
-	public static final String HALF_SUPPORT_VERSION = "1.15";
-	private static final boolean HALF_VERSION_HAS_SCRIPTS = false;
-	public static final String LITE_SUPPORT_VERSION = "~~~";
-	private static final String SUPPORTED_VERSION_READABLE = "1.14.1";
+	public static final String TAG = "BlockLauncher/MainActivity";
 
 	public static final int INPUT_STATUS_IN_PROGRESS = -1;
 
@@ -114,8 +101,6 @@ public class MainActivity extends NativeActivity {
 	public static final int DIALOG_MULTIPLAYER_DISABLE_SCRIPTS = 0x1008;
 	public static final int DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT = 0x1009;
 	public static final int DIALOG_SELINUX_BROKE_EVERYTHING = 0x1000 + 10;
-
-	public static final String HEY_CAN_YOU_STOP_STEALING_BLOCKLAUNCHER_CODE = "please?";
 
 	protected DisplayMetrics displayMetrics;
 
@@ -185,21 +170,24 @@ public class MainActivity extends NativeActivity {
 	private List<String> commandHistoryList = new ArrayList<String>();
 	private Button prevButton, nextButton;
 	private int commandHistoryIndex = 0;
+	/* restarter */
+	private static boolean hasAlreadyInited = false;
+	private static boolean globalRestart = false;
+	private static long lastDestroyTime = 0;
+	private static final int MILLISECONDS_FOR_WORLD_SAVE = 3000; //3 seconds
 
-	protected boolean hasRecorder = false;
-	protected boolean isRecording = false;
+	private boolean hasRecorder = false;
+	private boolean isRecording = false;
 
 	private boolean hasResetSafeModeCounter = false;
 
 	private final static int MAX_FAILS = 2;
 
 	private static final int REQUEST_PICK_IMAGE = 415;
-	private static final int REQUEST_MANAGE_TEXTURES = 416;
-	private static final int REQUEST_MANAGE_SCRIPTS = 417;
-	private static final int REQUEST_STORAGE_PERMISSION = 418;
-
 	private long pickImageCallbackAddress = 0;
 	private Intent pickImageResult;
+
+	public static final boolean disableModPEForDev = false;
 
 	private boolean controllerInit = false;
 
@@ -209,42 +197,40 @@ public class MainActivity extends NativeActivity {
 			toggleRecording();
 		}
 	};
-	private int mcpeArch = ScriptManager.ARCH_ARM;
-	public AddonOverrideTexturePack addonOverrideTexturePackInstance = null;
-	private boolean textureVerbose = false;
-	private PrintStream fileDataLog;
-
-	private int storedSdkTarget = -1;
-	private Class classVMRuntime;
-	private Method methodVMRuntimeGetRuntime;
-	private Method methodVMRuntimeGetTargetSdkVersion;
-	private Method methodVMRuntimeSetTargetSdkVersion;
-	private final boolean NATIVE_DEBUGGER_ENABLED = false;
-	public static boolean forceLaunchedIntoDifferentAbi = false;
-	private boolean extractNativeLibs = false;
-	private File extractNativeLibsDir = null;
 
 	/** Called when the activity is first created. */
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (needsRelaunchIntoCorrectAbi()) {
-			relaunchIntoCorrectAbi();
-		}
-		if (BuildConfig.DEBUG && NATIVE_DEBUGGER_ENABLED && new File("/sdcard/bl_native_debugger.txt").exists()) {
-			startNativeDebugger();
-		}
 		currentMainActivity = new WeakReference<MainActivity>(this);
+		if (hasAlreadyInited) {
+			globalRestart = true;
+			if (lastDestroyTime != 0) {
+				long elapsedTime = System.currentTimeMillis() - lastDestroyTime;
+				if (elapsedTime < MILLISECONDS_FOR_WORLD_SAVE) {
+					try {
+						if (BuildConfig.DEBUG) Log.i(TAG, "Bae caught me slipping for " + elapsedTime);
+						Thread.sleep(elapsedTime);
+					} catch (InterruptedException ie) {}
+				}
+			}
+			// restart if already initialized before
+			finish();
+			NerdyStuffActivity.forceRestart(this, 1000, false);
+			System.exit(0);
+		}
+		hasAlreadyInited = true;
+
+		checkForSubstrate();
 
 		int safeModeCounter = Utils.getPrefs(2).getInt("safe_mode_counter", 0);
 		System.out.println("Current fails: " + safeModeCounter);
-		if (safeModeCounter == MAX_FAILS && !new File("/sdcard/bl_nosafemode.txt").exists()) {
+		if (safeModeCounter == MAX_FAILS) {
 			Utils.getPrefs(0).edit().putBoolean("zz_safe_mode", true).apply();
 			safeModeCounter = 0;
 		}
 		safeModeCounter++;
 		Utils.getPrefs(2).edit().putInt("safe_mode_counter", safeModeCounter).commit();
-		textureVerbose = new File("/sdcard/bl_textureVerbose.txt").exists();
 
 		MinecraftVersion.context = this.getApplicationContext();
 		boolean needsToClearOverrides = false;
@@ -255,7 +241,6 @@ public class MainActivity extends NativeActivity {
 			MC_NATIVE_LIBRARY_DIR = mcAppInfo.nativeLibraryDir;
 			MC_NATIVE_LIBRARY_LOCATION = MC_NATIVE_LIBRARY_DIR + "/libminecraftpe.so";
 			System.out.println("libminecraftpe.so is at " + MC_NATIVE_LIBRARY_LOCATION);
-			checkArch();
 			minecraftApkForwardLocked = !mcAppInfo.sourceDir.equals(mcAppInfo.publicSourceDir);
 			int minecraftVersionCode = mcPkgInfo.versionCode;
 			minecraftVersion = MinecraftVersion.getRaw(minecraftVersionCode);
@@ -268,20 +253,13 @@ public class MainActivity extends NativeActivity {
 				Log.w(TAG, "OMG hipster version code found - breaking mod compat before it's cool");
 			}
 			net.zhuoweizhang.mcpelauncher.patch.PatchUtils.minecraftVersion = minecraftVersion;
-			com.mojang.minecraftpe.store.Store.needsNativeListenerCallback =
-				mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 10, 0);
 
-			boolean isTooOldMinorVersion = !mcpeGreaterEqualThan(mcPkgInfo.versionName, 1, 11, 1);
-			boolean isSupportedVersion = (mcPkgInfo.versionName.startsWith(SCRIPT_SUPPORT_VERSION) &&
-				!isTooOldMinorVersion) ||
-				mcPkgInfo.versionName.startsWith(HALF_SUPPORT_VERSION) ||
-				mcPkgInfo.versionName.startsWith(LITE_SUPPORT_VERSION);
-			// && !mcPkgInfo.versionName.startsWith("0.11.0");
+			boolean isSupportedVersion = mcPkgInfo.versionName.startsWith("0.11") && !mcPkgInfo.versionName.startsWith("0.11.0");
 
 			if (!isSupportedVersion) {
 				Intent intent = new Intent(this, MinecraftNotSupportedActivity.class);
 				intent.putExtra("minecraftVersion", mcPkgInfo.versionName);
-				intent.putExtra("supportedVersion", SUPPORTED_VERSION_READABLE);
+				intent.putExtra("supportedVersion", "0.11.1");
 				startActivity(intent);
 				finish();
 				try {
@@ -290,8 +268,6 @@ public class MainActivity extends NativeActivity {
 				} catch (Throwable t) {
 				}
 			}
-
-			checkForSubstrate();
 
 			fixMyEpicFail();
 
@@ -305,19 +281,11 @@ public class MainActivity extends NativeActivity {
 				myprefs.edit().putBoolean("force_prepatch", true).apply();
 				disableAllPatches();
 				needsToClearOverrides = true;
-			}
-
-			int lastVersionCode = myprefs.getInt("last_version", -1);
-
-			if (lastVersionCode != minecraftVersionCode) {
-				// don't depend on prepatch
-				Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
-				myprefs.edit().putInt("last_version", minecraftVersionCode).apply();
+				//Utils.getPrefs(0).edit().putBoolean("zz_texture_pack_enable", false).apply();
 				if (myprefs.getString("texture_packs", "").indexOf("minecraft.apk") >= 0) {
 					showDialog(DIALOG_UPDATE_TEXTURE_PACK);
 				}
 			}
-
 
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
@@ -363,30 +331,8 @@ public class MainActivity extends NativeActivity {
 
 		requiresGuiBlocksPatch = doesRequireGuiBlocksPatch();
 
-		extractNativeLibs = false;
-
 		try {
-			loadLibrary("mcpelauncher_early");
-		} catch (UnsatisfiedLinkError e) {
-			System.err.println(e);
-			forceLaunchedIntoDifferentAbi = true;
-			// for now, always re-extract the libs on every load.
-			extractNativeLibs = true;
-		}
-
-		if (extractNativeLibs) {
-			try {
-				extractNativeLibsIfNeeded();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			loadLibrary("mcpelauncher_early");
-		}
-
-		try {
-			if ((!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) ||
-				getMCPEVersion().startsWith(HALF_SUPPORT_VERSION) ||
-				getMCPEVersion().startsWith(LITE_SUPPORT_VERSION)) {
+			if (!isSafeMode() && Utils.getPrefs(0).getBoolean("zz_manage_patches", true)) {
 				prePatch();
 			}
 		} catch (Exception e) {
@@ -394,90 +340,32 @@ public class MainActivity extends NativeActivity {
 			// showDialog(DIALOG_UNABLE_TO_PATCH);
 		}
 
-		//org.fmod.FMOD.assetManager = getAssets();
-		boolean shouldInitPatching = !isSafeMode() || requiresPatchingInSafeMode();
-
-		// between here and end init patching, we temporarily drop to Lollipop target SDK
-		// this is a danger zone: run as little code as possible in here.
-		lowerSdkTarget();
-
 		try {
-			//System.load(mcAppInfo.nativeLibraryDir + "/libgnustl_shared.so");
-			System.load(mcAppInfo.nativeLibraryDir + "/libfmod.so");
 			System.load(MC_NATIVE_LIBRARY_LOCATION);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
-			//e.printStackTrace();
-			//Toast.makeText(this, "Can't load libminecraftpe.so from the original APK",
-			//		Toast.LENGTH_LONG).show();
-			//finish();
-		}
-
-		try {
-			if (shouldInitPatching) {
-				initPatching();
-			}
-		} catch (Exception e) {
 			e.printStackTrace();
-			reportError(e);
+			Toast.makeText(this, "Can't load libminecraftpe.so from the original APK",
+					Toast.LENGTH_LONG).show();
+			finish();
 		}
-
-		restoreSdkTarget();
-		// we should be back to regular target SDK.
-
-		org.fmod.FMOD.init(this);
 
 		libLoaded = true;
 
 		try {
-			if (shouldInitPatching) {
-				//initPatching();
+			if (!isSafeMode()) {
+				initPatching();
 				if (minecraftLibBuffer != null) {
 					boolean signalHandler = Utils.getPrefs(0).getBoolean("zz_signal_handler", false);
-					ScriptManager.nativePrePatch(signalHandler, this, /* limited? */ !hasScriptSupport(),
-						mcPkgInfo.versionCode);
-					if (hasScriptSupport() && Utils.getPrefs(0).getBoolean("zz_desktop_gui", false)) {
-						ScriptManager.nativeModPESetDesktopGui(true);
-					}
-					if (!isSafeMode()) loadNativeAddons();
+					ScriptManager.nativePrePatch(signalHandler, this);
+					loadNativeAddons();
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
-
-		try {
-			boolean shouldLoadScripts = hasScriptSupport();
-			if (!isSafeMode() && minecraftLibBuffer != null) {
-				applyBuiltinPatches();
-				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
-					ScriptManager.init(this);
-					textureOverrides.add(ScriptManager.modPkgTexturePack);
-				}
-			}
-			if (isSafeMode() || !shouldLoadScripts) {
-				ScriptManager.loadEnabledScriptsNames(this);
-				// in safe mode, script names, but not the actual scripts,
-				// should be loaded
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			reportError(e);
-		}
-
-		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		initAtlasMeta();
-
-		if (BuildConfig.DEBUG && new File("/sdcard/bl_enablelog.txt").exists()) {
-			try {
-				fileDataLog = new PrintStream(new File("/sdcard/bl_filelog.txt"));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 
 		displayMetrics = new DisplayMetrics();
 
@@ -495,10 +383,30 @@ public class MainActivity extends NativeActivity {
 
 		setFakePackage(false);
 
-		Utils.setupTheme(this, true);
+		try {
+			boolean shouldLoadScripts = true;
+			if (!isSafeMode() && minecraftLibBuffer != null) {
+				applyBuiltinPatches();
+				if (shouldLoadScripts && Utils.getPrefs(0).getBoolean("zz_script_enable", true)) {
+					ScriptManager.init(this);
+					if (isForcingController()) ScriptManager.nativeSetUseController(isForcingController());
+				}
+			}
+			if (isSafeMode() || !shouldLoadScripts) {
+				ScriptManager.loadEnabledScriptsNames(this);
+				// in safe mode, script names, but not the actual scripts,
+				// should be loaded
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			reportError(e);
+		}
+
+		if (needsToClearOverrides) ScriptManager.clearTextureOverrides();
 
 		//enableSoftMenuKey();
-		disableTransparentSystemBar();
+		//disableTransparentSystemBar(); not needed when targetting KitKat
 
 		java.net.CookieManager cookieManager = new java.net.CookieManager();
 		java.net.CookieHandler.setDefault(cookieManager);
@@ -514,16 +422,8 @@ public class MainActivity extends NativeActivity {
 		// note that Kamcord works better with targetSdkVersion=19 than with 21
 		initKamcord();
 
-		grabPermissionsIfNeeded();
-
 		System.gc();
 
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		processIntentImport();
 	}
 
 	@Override
@@ -561,6 +461,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void onDestroy() {
+		if (globalRestart) {
+			super.onDestroy();
+			return;
+		}
 		nativeUnregisterThis();
 		super.onDestroy();
 		File lockFile = new File(getFilesDir(), "running.lock");
@@ -571,8 +475,10 @@ public class MainActivity extends NativeActivity {
 			hoverCar = null;
 		}
 		ScriptManager.destroy();
-
-		System.exit(0);
+		lastDestroyTime = System.currentTimeMillis();
+		Thread presidentMadagascar = new Thread(new ShutdownTask());
+		presidentMadagascar.setDaemon(true);
+		presidentMadagascar.start();
 	}
 
 	public void onStop() {
@@ -599,14 +505,6 @@ public class MainActivity extends NativeActivity {
 		File originalLibminecraft = new File(mcAppInfo.nativeLibraryDir + "/libminecraftpe.so");
 		File newMinecraft = new File(patched, "libminecraftpe.so");
 		boolean forcePrePatch = Utils.getPrefs(1).getBoolean("force_prepatch", true);
-		if (!hasPrePatched && Utils.getEnabledPatches().size() == 0) {
-			// no patches needed
-			hasPrePatched = true;
-			if (newMinecraft.exists()) newMinecraft.delete();
-			if (forcePrePatch) Utils.getPrefs(1).edit().putBoolean("force_prepatch", false)
-					.putInt("prepatch_version", mcPkgInfo.versionCode).apply();
-			return;
-		}
 		if (!hasPrePatched && (!newMinecraft.exists() || forcePrePatch)) {
 
 			System.out.println("Forcing new prepatch");
@@ -724,11 +622,6 @@ public class MainActivity extends NativeActivity {
 
 	public native void nativeReturnKeyPressed();
 
-	public native void nativeProcessIntentUriQuery(String a, String b);
-
-	// added in 0.16.0
-	public native void nativeKeyHandler(int keyCode, boolean keyDown);
-
 	public void buyGame() {
 	}
 
@@ -783,11 +676,6 @@ public class MainActivity extends NativeActivity {
 				nativeOnPickImageSuccess(pickImageCallbackAddress, tempFile.getAbsolutePath());
 			} else {
 				nativeOnPickImageCanceled(pickImageCallbackAddress);
-			}
-		} else if (requestCode == REQUEST_MANAGE_TEXTURES || requestCode == REQUEST_MANAGE_SCRIPTS) {
-			if (resultCode == RESULT_OK) {
-				finish();
-				NerdyStuffActivity.forceRestart(this);
 			}
 		}
 	}
@@ -866,7 +754,7 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected Dialog createRuntimeOptionsDialog(final boolean hasInsertText) {
-		CharSequence livePatch = getResources().getString(R.string.pref_texture_pack);
+		CharSequence livePatch = getResources().getString(R.string.hovercar_live_patch);
 		final CharSequence optionMenu = getResources().getString(R.string.hovercar_options);
 		final CharSequence insertText = getResources().getString(R.string.hovercar_insert_text);
 		CharSequence manageModPEScripts = getResources().getString(R.string.pref_zz_manage_scripts);
@@ -875,8 +763,8 @@ public class MainActivity extends NativeActivity {
 		final CharSequence stopRecording = getResources().getString(R.string.hovercar_stop_recording);
 		final List<CharSequence> options = new ArrayList<CharSequence>(
 			Arrays.asList(livePatch, manageModPEScripts, takeScreenshot));
+		isRecording = Kamcord.isRecording();
 		if (hasRecorder) {
-			isRecording = isKamcordRecording();
 			options.add(isRecording? stopRecording: startRecording);
 		}
 		if (hasInsertText) {
@@ -889,23 +777,22 @@ public class MainActivity extends NativeActivity {
 					public void onClick(DialogInterface dialogI, int button) {
 						CharSequence buttonText = options.get(button);
 						if (button == 0) {
-							Intent intent = new Intent(MainActivity.this, TexturePacksActivity.class);
-							startActivityForResult(intent, REQUEST_MANAGE_TEXTURES);
-						} else if (button == 1) {
-							if (hasScriptSupport()) {
-								Intent intent = new Intent(MainActivity.this,
-										ManageScriptsActivity.class);
-								startActivityForResult(intent, REQUEST_MANAGE_SCRIPTS);
-							} else {
-								new AlertDialog.Builder(MainActivity.this)
-										.setMessage("Scripts are not supported yet in Minecraft PE "
-											+ mcPkgInfo.versionName)
-										.setPositiveButton(android.R.string.ok, null).show();
+							if (minecraftLibBuffer == null) {
+								startActivity(getOptionsActivityIntent());
+								return;
 							}
+							Intent intent = new Intent(MainActivity.this,
+									ManagePatchesActivity.class);
+							intent.putExtra("prePatchConfigure", false);
+							startActivity(intent);
+						} else if (button == 1) {
+							Intent intent = new Intent(MainActivity.this,
+									ManageScriptsActivity.class);
+							startActivity(intent);
 						} else if (button == 2) {
 							boolean hasLoadedScripts = Utils.getPrefs(0).getBoolean(
 									"zz_script_enable", true)
-									&& !isSafeMode() && hasScriptSupport();
+									&& !isSafeMode();
 							if (hasLoadedScripts) {
 								ScriptManager.takeScreenshot("screenshot");
 							} else {
@@ -1024,7 +911,7 @@ public class MainActivity extends NativeActivity {
 			@Override
 			public void onClick(View v) {
 				try {
-					//nativeTypeCharacter("" + ((char) 0x08)); // is this the
+					nativeTypeCharacter("" + ((char) 0x08)); // is this the
 																// correct
 																// method of
 																// backspace?
@@ -1037,7 +924,6 @@ public class MainActivity extends NativeActivity {
 		return new AlertDialog.Builder(this).setTitle(R.string.hovercar_insert_text).setView(ll)
 				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialogI, int button) {
-						/*
 						try {
 							String[] lines = editText.getText().toString().split("\n");
 							for (int line = 0; line < lines.length; line++) {
@@ -1051,7 +937,6 @@ public class MainActivity extends NativeActivity {
 						} catch (UnsatisfiedLinkError e) {
 							showDialog(DIALOG_NOT_SUPPORTED);
 						}
-						*/
 					}
 				}).setNegativeButton(android.R.string.cancel, null).create();
 	}
@@ -1073,39 +958,28 @@ public class MainActivity extends NativeActivity {
 	 */
 
 	public String getDateString(int time) {
-		//System.out.println("getDateString: " + time);
+		System.out.println("getDateString: " + time);
 		return DateFormat.getDateInstance(DateFormat.SHORT, Locale.US).format(
 				new Date(((long) time) * 1000));
 	}
 	public byte[] getFileDataBytes(String name) {
 		byte[] bytes = getFileDataBytes(name, false);
-		if (name.endsWith(".meta")) { // hack for people trying to use 0.11 textures on 0.12.1
+		/*
+		if (name.endsWith(".meta")) { // hack for people trying to use 0.8.1 textures on 0.9.0
 			String fileStr = new String(bytes, Charset.forName("UTF-8"));
-			if (!fileStr.contains("portal") && !fileStr.contains("rabbit_foot")) {
+			if (fileStr.contains("additonal_textures")) {
 				bytes = getFileDataBytes(name, true);
 			}
 		}
+		*/
 		return bytes;
 	}
 
 	public byte[] getFileDataBytes(String name, boolean forceInternal) {
-		//if (BuildConfig.DEBUG) System.out.println("Get file data: " + name);
-		if (BuildConfig.DEBUG && fileDataLog != null) {
-			fileDataLog.println("Get file data: " + name);
-		}
+		System.out.println("Get file data: " + name);
 		try {
-			InputStream is = null;
-			if (name.charAt(0) == '/') {
-				is = getRegularInputStream(name);
-			} else if (name.equals("behavior_packs/vanilla/entities/villager.json") ||
-				name.equals("resourcepacks/vanilla/server/entities/villager.json")) {
-				// FIXME 0.17: villagers
-				// kludge to make villagers rideable
-				is = openFallbackAsset(name);
-			} else {
-				is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
-			}
-			if (is == null || TAG.hashCode() != -1771687045)
+			InputStream is = forceInternal? getLocalInputStreamForAsset(name): getInputStreamForAsset(name);
+			if (is == null)
 				return null;
 			// can't always find length - use the method from
 			// http://www.velocityreviews.com/forums/t136788-store-whole-inputstream-in-a-string.html
@@ -1128,171 +1002,63 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public InputStream getInputStreamForAsset(String name) {
-		return getInputStreamForAsset(name, null);
-	}
-
-	public InputStream getInputStreamForAsset(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			for (int i = 0; i < textureOverrides.size(); i++) {
 				try {
 					is = textureOverrides.get(i).getInputStream(name);
-					if (is != null) {
-						if (lengthOut != null) lengthOut[0] = textureOverrides.get(i).getSize(name);
+					if (is != null)
 						return is;
-					}
 				} catch (IOException e) {
 				}
 			}
-
 			if (texturePack == null) {
-				return getLocalInputStreamForAsset(name, lengthOut);
+				return getLocalInputStreamForAsset(name);
 			} else {
 				System.out.println("Trying to load  " + name + "from tp");
 				is = texturePack.getInputStream(name);
 				if (is == null) {
 					System.out.println("Can't load " + name + " from tp");
-					return getLocalInputStreamForAsset(name, lengthOut);
+					return getLocalInputStreamForAsset(name);
 				}
 			}
 			return is;
 		} catch (Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
 
 	protected InputStream getLocalInputStreamForAsset(String name) {
-		return getLocalInputStreamForAsset(name, null);
-	}
-
-	private boolean mcpeGreaterEqualThan(int major, int minor, int rel) {
-		return mcpeGreaterEqualThan(getMCPEVersion(), major, minor, rel);
-	}
-	private static boolean mcpeGreaterEqualThan(String baseVersion, int major, int minor, int rel) {
-		String[] parts = baseVersion.split("\\.");
-		if (parts.length == 0) return true;
-		int theirMajor = Integer.parseInt(parts[0]);
-		int theirMinor = parts.length < 2? 0: Integer.parseInt(parts[1]);
-		int theirRel = parts.length < 3? 0: Integer.parseInt(parts[2]);
-		if (theirMajor > major) return true;
-		if (theirMajor < major) return false;
-		// major is equal
-		if (theirMinor > minor) return true;
-		if (theirMinor < minor) return false;
-		// minor is also equal
-		return theirRel >= rel;
-	}
-
-	protected InputStream openFallbackAsset(String name) throws IOException {
-		return getAssets().open(name);
-	}
-
-	protected InputStream getLocalInputStreamForAsset(String name, long[] lengthOut) {
 		InputStream is = null;
 		try {
 			if (forceFallback) {
-				return openFallbackAsset(name);
+				return getAssets().open(name);
 			}
 			try {
 				is = minecraftApkContext.getAssets().open(name);
 			} catch (Exception e) {
 				// e.printStackTrace();
-				if (textureVerbose) System.out.println("Attempting to load fallback");
-				is = openFallbackAsset(name);
+				System.out.println("Attempting to load fallback");
+				is = getAssets().open(name);
 			}
 			if (is == null) {
-				if (textureVerbose) System.out.println("Can't find it in the APK - attempting to load fallback");
-				is = openFallbackAsset(name);
-			}
-			if (is != null && lengthOut != null) {
-				lengthOut[0] = is.available();
+				System.out.println("Can't find it in the APK - attempting to load fallback");
+				is = getAssets().open(name);
 			}
 			return is;
 		} catch (Exception e) {
-			if (textureVerbose) System.err.println(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public String[] listDirForPath(String dirPath) {
-		System.out.println("Listing dir for " + dirPath);
-		String prefix = dirPath + "/";
-		Set<String> outList = new HashSet<String>();
-		//System.out.println("Start listing texture overrides");
-		long start = System.currentTimeMillis();
-		for (TexturePack pack: textureOverrides) {
-			List<String> addedFiles = null;
-			try {
-				addedFiles = pack.listFiles();
-			} catch (IOException ie) {
-				continue;
-			}
-			for (String path: addedFiles) {
-				if (!path.startsWith(prefix) || path.indexOf("/", prefix.length()) != -1) continue;
-				outList.add(path.substring(path.lastIndexOf("/")));
-			}
-		}
-		//System.out.println("End listing texture overrides " + (System.currentTimeMillis() - start));
-		String[] origDir = null;
-		String newPath = dirPath;
-
-		try {
-			origDir = this.getAssets().list(newPath);
-		} catch (IOException ie) {
-			origDir = new String[0];
-		}
-		//System.out.println("list 1 " + (System.currentTimeMillis() - start));
-		// merge
-		for (String s: origDir) {
-			outList.add(s);
-		}
-
-		//System.out.println("End merge 1 " + (System.currentTimeMillis() - start));
-
-		try {
-			origDir = minecraftApkContext.getAssets().list(dirPath);
-		} catch (IOException ie) {
-			origDir = new String[0];
-		}
-		//System.out.println("list 2 " + (System.currentTimeMillis() - start));
-		// merge
-		for (String s: origDir) {
-			outList.add(s);
-		}
-		//System.out.println("End merge 2 " + (System.currentTimeMillis() - start));
-		String[] retval = outList.toArray(origDir);
-		System.out.println(Arrays.toString(retval));
-		return retval;
-	}
-
-	public boolean existsForPath(String path) {
-		InputStream is = null;
-		if ((path.startsWith("resource_packs/") && !path.startsWith("resource_packs/vanilla")) ||
-			(path.startsWith("resourcepacks") && !path.startsWith("resourcepacks/vanilla"))) {
-			is = getLocalInputStreamForAsset(path);
-		} else {
-			is = getInputStreamForAsset(path);
-		}
-		if (is != null) {
-			try {
-				is.close();
-			} catch (IOException ie) {}
-		}
-		return is != null;
-	}
-
-	public int[] getImageData(String name) {
-		return getImageData(name, true);
-	}
-
 	public int[] getImageData(String name, boolean fromAssets) {
 		System.out.println("Get image data: " + name + " from assets? " + fromAssets);
-		boolean externalData = (name.length() > 0 && name.charAt(0) == '/');
 		try {
-			InputStream is = externalData? getRegularInputStream(name) : getInputStreamForAsset(name);
+			InputStream is = fromAssets? getInputStreamForAsset(name): getRegularInputStream(name);
 			if (is == null)
-				return getFakeImageData(name, fromAssets);
+				return null;
 			Bitmap bmp = BitmapFactory.decodeStream(is);
 			int[] retval = new int[(bmp.getWidth() * bmp.getHeight()) + 2];
 			retval[0] = bmp.getWidth();
@@ -1308,10 +1074,6 @@ public class MainActivity extends NativeActivity {
 		}
 		/* format: width, height, each integer a pixel */
 		/* 0 = white, full transparent */
-	}
-
-	public int[] getFakeImageData(String name, boolean fromAssets) {
-		return new int[] {1, 1, 0};
 	}
 
 	public String[] getOptionStrings() {
@@ -1563,7 +1325,6 @@ public class MainActivity extends NativeActivity {
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (BuildConfig.DEBUG)
 			Log.i(TAG, event.toString());
-/*
 		if (event.getAction() == KeyEvent.ACTION_MULTIPLE
 				&& event.getKeyCode() == KeyEvent.KEYCODE_UNKNOWN) {
 			try {
@@ -1573,7 +1334,6 @@ public class MainActivity extends NativeActivity {
 				// Do nothing
 			}
 		}
-*/
 		return super.dispatchKeyEvent(event);
 	}
 
@@ -1636,14 +1396,9 @@ public class MainActivity extends NativeActivity {
 	}
 
 	// added in 0.8.0
-	// showKeyboard modified in 0.12.0b10 and 1.2.13
 	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool) {
-		this.showKeyboard(mystr, maxLength, mybool, false, false);
-	}
-	public void showKeyboard(final String mystr, final int maxLength, final boolean mybool, final boolean mybool2,
-		final boolean mybool3) {
 		if (BuildConfig.DEBUG)
-			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool + ":" + mybool2 + ":" + mybool3);
+			Log.i(TAG, "Show keyboard: " + mystr + ":" + maxLength + ":" + mybool);
 		if (useLegacyKeyboardInput()) {
 			showKeyboardView();
 			return;
@@ -1743,13 +1498,11 @@ public class MainActivity extends NativeActivity {
 			hiddenTextWindow.setOutsideTouchable(true);
 			// These flags were taken from a dumpsys window output of Mojang's
 			// window
-			/*
 			hiddenTextWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
 				public void onDismiss() {
 					nativeBackPressed();
 				}
 			});
-			*/
 		}
 
 		if (commandHistory) {
@@ -1777,11 +1530,7 @@ public class MainActivity extends NativeActivity {
 		if (hiddenTextWindow == null)
 			return;
 		hiddenTextWindow.dismiss();
-		this.getWindow().getDecorView().postDelayed(new Runnable() {
-			public void run() {
-				hideKeyboardView();
-			}
-		}, 100);
+		hideKeyboardView();
 	}
 
 	// added in 0.9.0
@@ -1792,14 +1541,10 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public long getTotalMemory() {
-		try {
-			long retval = Utils.parseMemInfo();
-			Log.i(TAG, "Get total memory: " + retval);
-			return retval;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0x400000000L; // 16GB
-		}
+		//long retval = Debug.getNativeHeapSize();
+		//Log.i(TAG, "Get total memory: " + retval);
+		//return retval;
+		return 0x400000000L; // 16 GB
 	}
 
 	// added in 0.10.0
@@ -1816,22 +1561,6 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void initPatching() throws Exception {
-		loadLibrary("gnustl_shared");
-		loadLibrary("mcpelauncher_tinysubstrate");
-		String mcpeVersion = getMCPEVersion();
-		System.out.println("MCPE Version is " + mcpeVersion);
-		if (mcpeVersion.startsWith(HALF_SUPPORT_VERSION)) {
-			if (HALF_VERSION_HAS_SCRIPTS) {
-				loadLibrary("mcpelauncher_new");
-			} else {
-				loadLibrary("mcpelauncher_lite");
-			}
-		} else if (mcpeVersion.startsWith(LITE_SUPPORT_VERSION)) {
-			loadLibrary("mcpelauncher_lite");
-		} else {
-			loadLibrary("mcpelauncher");
-		}
-
 		long minecraftLibLength = findMinecraftLibLength();
 		boolean success = MaraudersMap.initPatching(this, minecraftLibLength);
 		if (!success) {
@@ -1871,12 +1600,11 @@ public class MainActivity extends NativeActivity {
 	}
 
 	protected void loadNativeAddons() {
-		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", true))
+		if (!Utils.getPrefs(0).getBoolean("zz_load_native_addons", false))
 			return;
 		PackageManager pm = getPackageManager();
 		AddonManager addonManager = AddonManager.getAddonManager(this);
 		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-		StringBuilder archFail = new StringBuilder();
 		for (ApplicationInfo app : apps) {
 			if (app.metaData == null)
 				continue;
@@ -1884,41 +1612,24 @@ public class MainActivity extends NativeActivity {
 					.getString("net.zhuoweizhang.mcpelauncher.api.nativelibname");
 			String targetMCPEVersion = app.metaData
 					.getString("net.zhuoweizhang.mcpelauncher.api.targetmcpeversion");
-			if (pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
+			if (nativeLibName != null
+				&& pm.checkPermission("net.zhuoweizhang.mcpelauncher.ADDON", app.packageName) ==
 					PackageManager.PERMISSION_GRANTED
 				&& addonManager.isEnabled(app.packageName)) {
 				try {
 					if (!isAddonCompat(targetMCPEVersion)) {
-						throw new Exception("The addon \"" + pm.getApplicationLabel(app).toString() +
-							"\" (" + app.packageName + ")" +
-							" is not compatible with Minecraft PE " + mcPkgInfo.versionName + ".");
+						throw new Exception("The addon " + app.packageName +
+							" is not compatible with this version of Minecraft PE.");
 					}
-					if (nativeLibName != null) {
-						if (checkAddonArch(new File(app.nativeLibraryDir + "/lib" + nativeLibName + ".so"))) {
-							System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
-							loadedAddons.add(app.packageName);
-						} else {
-							archFail.append("\"").append(pm.getApplicationLabel(app).toString()).
-								append("\" (").append(app.packageName).append(") ");
-						}
-					} else {
-						// no native code; just texture pack
-						loadedAddons.add(app.packageName);
-					}
+					System.load(app.nativeLibraryDir + "/lib" + nativeLibName + ".so");
+					loadedAddons.add(app.packageName);
 				} catch (Throwable e) {
 					reportError(e);
 					e.printStackTrace();
 				}
 			}
 		}
-		if (archFail.length() != 0) {
-			reportError(new Exception(
-				this.getResources().getString(R.string.addons_wrong_arch).toString()
-				.replaceAll("ARCH", Utils.getArchName(mcpeArch)).replaceAll("ADDONS", archFail.toString())
-			));
-		}
-		addonOverrideTexturePackInstance = new AddonOverrideTexturePack(this, "resource_packs/vanilla/");
-		textureOverrides.add(addonOverrideTexturePackInstance);
+		textureOverrides.add(new AddonOverrideTexturePack(this));
 	}
 
 	protected void migrateToPatchManager() {
@@ -1967,20 +1678,8 @@ public class MainActivity extends NativeActivity {
 			boolean loadTexturePack = Utils.getPrefs(0).getBoolean("zz_texture_pack_enable", false);
 			texturePack = null;
 			if (loadTexturePack) {
-				List<String> incompatible = new ArrayList<String>();
-				List<TexturePack> packs = TexturePackLoader.loadTexturePacks(this, incompatible,
-					getFileDataBytes("images/terrain.meta", true),
-					getFileDataBytes("images/items.meta", true));
-				if (incompatible.size() != 0) {
-					new AlertDialog.Builder(this)
-						.setMessage("Some of your texture packs are not compatible with Minecraft PE " +
-							getMCPEVersion() + ". Please update " + Utils.join(incompatible, ", ") + ".")
-						.setPositiveButton(android.R.string.ok, null)
-						.show();
-				}
-				textureOverrides.addAll(packs);
+				textureOverrides.addAll(TexturePackLoader.loadTexturePacks(this));
 			}
-			//System.out.println(textureOverrides);
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e, R.string.texture_pack_unable_to_load, null);
@@ -2049,7 +1748,6 @@ public class MainActivity extends NativeActivity {
 	}
 
 	public void hideKeyboardView() {
-		System.out.println("Hiding the keyboard view");
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getWindow().getDecorView().getWindowToken(), 0);
 		touchImmersiveMode();
@@ -2105,310 +1803,12 @@ public class MainActivity extends NativeActivity {
 	public boolean isTablet() {
 		// metric: >= sw600dp
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-			return false; //getResources().getConfiguration().screenHeightDp >= 600;
+			return getResources().getConfiguration().screenHeightDp >= 600;
 		}
 		return getResources().getConfiguration().smallestScreenWidthDp >= 600;
 	}
 
 	// end 0.11
-
-	// 0.12, changed in 0.13
-	public float getKeyboardHeight() {
-		Rect r = new Rect();
-		View rootview = this.getWindow().getDecorView();
-		rootview.getWindowVisibleDisplayFrame(r);
-		if (r.bottom == 0) return 0; // if the keyboard height goes fullscreen, ignore
-		return displayMetrics.heightPixels - r.bottom;
-	}
-	// end 0.12
-
-	// 0.14
-	public void launchUri(String theUri) {
-		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(theUri));
-		try {
-			startActivity(intent);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	// 0.15
-	public void setFileDialogCallback(long pointer) {
-		if (BuildConfig.DEBUG) System.out.println("Set file dialog callback: " + Long.toString(pointer, 16));
-	}
-
-	public void updateLocalization(String a, String b) {
-		System.out.println("Update localization: " + a + ":" + b);
-	}
-
-	public String[] getIPAddresses() {
-		System.out.println("get IP addresses?");
-		return new String[] {"127.0.0.1"};
-	}
-
-	public Intent getLaunchIntent() {
-		System.out.println("get launch intent");
-		return getIntent();
-	}
-
-	public Intent createAndroidLaunchIntent() {
-		System.out.println("create android launch intent");
-		return getIntent();
-	}
-	private TextToSpeech tts;
-	// 0.17
-	public void startTextToSpeech(String a) {
-		System.out.println("Text to speech: " + a);
-		if (tts != null) tts.speak(a, TextToSpeech.QUEUE_ADD, null);
-	}
-
-	public void stopTextToSpeech() {
-		System.out.println("Shutting up");
-		if (tts != null) tts.stop();
-	}
-
-	public boolean isTextToSpeechInProgress() {
-		return false;
-	}
-
-	public void setTextToSpeechEnabled(boolean enabled) {
-		System.out.println("Text to speech?");
-		if (enabled) {
-			if (tts == null) tts = new TextToSpeech(this, null);
-		} else {
-			if (tts != null) {
-				tts.shutdown();
-				tts = null;
-			}
-		}
-	}
-
-	public void setClipboard(String text) {
-		ClipboardManager mgr = (ClipboardManager) this.getSystemService(CLIPBOARD_SERVICE);
-		mgr.setText(text);
-	}
-
-	public long calculateAvailableDiskFreeSpace(String disk) {
-		System.out.println("Calculate disk free space: " + disk);
-		return 0;
-	}
-
-	public int getCursorPosition() {
-		if (hiddenTextView == null) return 0;
-		return hiddenTextView.getSelectionStart();
-	}
-
-	// 1.0.5
-	public long getAvailableMemory() {
-		return 0x40000000L;
-	}
-
-	public void requestStoragePermission(int requestId) {
-		System.out.println("Request storage: " + requestId);
-		grabPermissionsIfNeeded();
-	}
-
-	public boolean hasWriteExternalStoragePermission() {
-		return hasStoragePermissions();
-	}
-
-	public void trackPurchaseEvent(String a, String b, String c) {
-		System.out.println("Track purchase event: " + a + ":" + b + ":" + c);
-	}
-
-	// 1.1
-	public String getFormattedDateString(int date) {
-		return getDateString(date);
-	}
-
-	public String getFileTimestamp(int date) {
-		return getDateString(date);
-	}
-
-	public long getUsedMemory() {
-		return 0;
-	}
-
-	public void trackPurchaseEvent(String a, String b, String c, String d, String e) {
-		System.out.println("Track purchase event: " + a + ":" + b + ":" + c + ":" + d + ":" + e);
-	}
-
-	public String createDeviceID() {
-		return getDeviceId();
-	}
-
-	// 1.2.0
-	public boolean unpackMonoAssemblies() {
-		// WHAT
-		System.out.println("Unpack Mono assemblies");
-		return false;
-	}
-
-	public void share(String shareText) {
-		System.out.println("Share: " + shareText);
-	}
-
-	public void trackPurchaseEvent(String a, String b, String c, String d, String e, String f) {
-		System.out.println("Track purchase event: " + a + ":" + b + ":" + c + ":" + d + ":" + e + ":" + f);
-	}
-
-	public String getLegacyDeviceID() {
-		return getDeviceId();
-	}
-
-	private boolean isPackageInstalledByName(String pkgName) {
-		try {
-			return this.getPackageManager().getPackageInfo(pkgName, 0) != null;
-		} catch (PackageManager.NameNotFoundException e) {
-			return false;
-		}
-	}
-	public boolean isMixerCreateInstalled() {
-		return isPackageInstalledByName("com.microsoft.beambroadcast") ||
-			isPackageInstalledByName("com.microsoft.beambroadcast.beta");
-	}
-	public void navigateToPlaystoreForMixerCreate() {
-		launchUri("market://details?id=com.microsoft.beambroadcast");
-	}
-	public boolean launchMixerCreateForBroadcast() {
-		try {
-			launchUri("beambroadcast://");
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	public int getAPIVersion(String theName) {
-		System.out.println("Get API version: " + theName);
-		try {
-			Field field = Build.VERSION_CODES.class.getField(theName);
-			if (field == null) return -1;
-			return field.getInt(null);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return -1;
-		}
-	}
-
-	public String getSecureStorageKey(String key) {
-		System.out.println("Get secure storage key: " + key);
-		SharedPreferences myprefs = Utils.getPrefs(1);
-		return myprefs.getString("secure_storage_" + key, "");
-	}
-
-	public void setSecureStorageKey(String key, String value) {
-		System.out.println("Set secure storage key: " + key);
-		SharedPreferences myprefs = Utils.getPrefs(1);
-		myprefs.edit().putString("secure_storage_" + key, value).apply();
-	}
-
-	// 1.2.10
-	public long getMemoryLimit() {
-		return 0x100000000L; // 4GB
-	}
-	public long getFreeMemory() {
-		return 0x100000000L; // 4GB
-	}
-
-	// 1.2.20
-	public void setCachedDeviceId(String deviceId) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("Cached device ID: " + deviceId);
-		}
-	}
-
-	public void trackPurchaseEvent(String arg1, String arg2, String arg3, String arg4,
-		String arg5, String arg6, String arg7) {
-		System.out.println("Track purchase event: " + arg1 + ":" + arg2 + ":" + arg3 + ":" + arg4 + ":" +
-			arg5 + ":" + arg6 + ":" + arg7);
-	}
-
-	// 1.4.4
-	public HardwareInformation getHardwareInfo() {
-		return new HardwareInformation();
-	}
-
-	public void setLastDeviceSessionId(String sessionId) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("Last device session ID: " + sessionId);
-		}
-		SharedPreferences myprefs = Utils.getPrefs(1);
-		myprefs.edit().putString("last_device_session_id", sessionId).apply();
-	}
-
-	public String getLastDeviceSessionId() {
-		if (BuildConfig.DEBUG) {
-			System.out.println("Get last device session ID");
-		}
-		SharedPreferences myprefs = Utils.getPrefs(1);
-		return myprefs.getString("last_device_session_id", "");
-	}
-
-	// 1.7.0
-	public void share(String shareText, String shareText2, String shareText3) {
-		System.out.println("Share: " + shareText + ":" + shareText2 + ":" + shareText3);
-	}
-
-	public void deviceIdCorrelationStart() {
-		if (BuildConfig.DEBUG) {
-			System.out.println("Device ID correlation start");
-		}
-	}
-
-	// 1.9.0
-	public void sendBrazeEvent(String event) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("send braze event: " + event);
-		}
-	}
-
-	public void sendBrazeEventWithProperty(String event, String property, int number) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("send braze event with property: " + event + ": " + property + ": " + number);
-		}
-	}
-
-	public void sendBrazeEventWithStringProperty(String event, String property, String value) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("send braze event with string: " + event + ": " + property + ": " + value);
-		}
-	}
-
-	public void sendBrazeToastClick() {
-		if (BuildConfig.DEBUG) {
-			System.out.println("send braze toast click");
-		}
-	}
-
-	public void sendBrazeDialogButtonClick(int value) {
-		if (BuildConfig.DEBUG) {
-			System.out.println("send braze dialog button click " + value);
-		}
-	}
-
-	// 1.11.0
-
-	public boolean isTTSEnabled() {
-		return false;
-	}
-
-	// 1.12.0
-	public boolean hasHardwareKeyboard() {
-		return getResources().getConfiguration().keyboard == android.content.res.Configuration.KEYBOARD_QWERTY;
-	}
-
-	public void trackPurchaseEvent(String arg1, String arg2, String arg3, String arg4, String arg5, String arg6, String arg7, String arg8) {
-		if (BuildConfig.DEBUG) {
-			System.out.println(arg1 + ":" + arg2 + ":" + arg3 + ":" + arg4 + ":" + arg5 + ":" + arg6 + ":" + arg7 + ":" + arg8);
-		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		nativeBackPressed();
-	}
 
 	private InputStream getRegularInputStream(String path) {
 		try {
@@ -2420,11 +1820,8 @@ public class MainActivity extends NativeActivity {
 	}
 
 	private File copyContentStoreToTempFile(Uri content) {
-		return copyContentStoreToTempFile(content, "skintemp.png");
-	}
-	private File copyContentStoreToTempFile(Uri content, String targetName) {
 		try {
-			File tempFile = new File(this.getExternalFilesDir(null), targetName);
+			File tempFile = new File(this.getExternalFilesDir(null), "skintemp.png");
 			tempFile.getParentFile().mkdirs();
 			InputStream is = getContentResolver().openInputStream(content);
 			OutputStream os = new FileOutputStream(tempFile);
@@ -2467,9 +1864,6 @@ public class MainActivity extends NativeActivity {
 	public void leaveGameCallback() {
 		System.out.println("Leave game");
 		if (hasRecorder) clearRuntimeOptionsDialog();
-		if (BuildConfig.DEBUG) {
-			scriptPrintCallback("Leave game called", "bl");
-		}
 	}
 
 	public void scriptPrintCallback(final String message, final String scriptName) {
@@ -2477,31 +1871,6 @@ public class MainActivity extends NativeActivity {
 			public void run() {
 				Toast.makeText(MainActivity.this, "Script " + scriptName + ": " + message,
 						Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
-
-	private Typeface minecraftTypeface = null;
-	private Toast lastToast = null;
-	public void fakeTipMessageCallback(final String messageRaw) {
-		if (minecraftTypeface == null) {
-			minecraftTypeface = Typeface.createFromAsset(this.getAssets(), "fonts/minecraft.ttf");
-		}
-		// strip all colour characters
-		final String message = messageRaw.replaceAll(ChatColor.BEGIN + ".", "");
-		this.runOnUiThread(new Runnable() {
-			public void run() {
-				TextView toastText = new TextView(MainActivity.this);
-				toastText.setText(message);
-				toastText.setTypeface(minecraftTypeface);
-				toastText.setTextColor(0xffffffff);
-				toastText.setShadowLayer(0.1f, 8f, 8f, 0xff000000);
-				toastText.setTextSize(16);
-				if (lastToast != null) lastToast.cancel();
-				Toast myToast = new Toast(MainActivity.this);
-				myToast.setView(toastText);
-				lastToast = myToast;
-				myToast.show();
 			}
 		});
 	}
@@ -2533,11 +1902,11 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	public void reportError(final Throwable t) {
+	private void reportError(final Throwable t) {
 		reportError(t, R.string.report_error_title, null);
 	}
 
-	public void reportError(final Throwable t, final int messageId, final String extraData) {
+	private void reportError(final Throwable t, final int messageId, final String extraData) {
 		this.runOnUiThread(new Runnable() {
 			public void run() {
 				final StringWriter strWriter = new StringWriter();
@@ -2641,36 +2010,36 @@ public class MainActivity extends NativeActivity {
 			natfield.setAccessible(true);
 			Object theFileList = natfield.get(pathListObj);
 			if (theFileList instanceof File[]) {
-				File[] fileList = (File[]) theFileList;
-				File[] newList = addToFileList(fileList, new File(path));
-				if (fileList != newList)
-					natfield.set(pathListObj, newList);
+					File[] fileList = (File[]) theFileList;
+					File[] newList = addToFileList(fileList, new File(path));
+					if (fileList != newList)
+							natfield.set(pathListObj, newList);
 			}
 			Field natElemsField = Utils.getDeclaredFieldRecursive(pathListClass,
-					"nativeLibraryPathElements");
+							"nativeLibraryPathElements");
 			if (natElemsField != null && classLoader instanceof BaseDexClassLoader &&
-				((BaseDexClassLoader) classLoader).findLibrary("minecraftpe") == null) {
-				// Android 6.0 and above; needed on N
-				natElemsField.setAccessible(true);
-				Object[] theObjects = (Object[]) natElemsField.get(pathListObj);
-				Class<? extends Object> elemClass = theObjects.getClass().getComponentType();
-				Object newObject = null;
-				try {
-					Constructor<? extends Object> elemConstructor =
-						elemClass.getConstructor(File.class, Boolean.TYPE, File.class, dalvik.system.DexFile.class);
-					elemConstructor.setAccessible(true);
-					newObject = elemConstructor.newInstance(new File(path), true, null, null);
-				} catch (NoSuchMethodException nsm) {
-					// Android 8.0 uses a different signature.
-					Constructor<? extends Object> elemConstructor =
-						elemClass.getConstructor(File.class);
-					elemConstructor.setAccessible(true);
-					newObject = elemConstructor.newInstance(new File(path));
-				}
-				Object[] newObjects = Arrays.copyOf(theObjects, theObjects.length + 1);
-				newObjects[newObjects.length - 1] = newObject;
-				System.out.println(newObjects);
-				natElemsField.set(pathListObj, newObjects);
+					((BaseDexClassLoader) classLoader).findLibrary("minecraftpe") == null) {
+					// Android 6.0 and above; needed on N
+					natElemsField.setAccessible(true);
+					Object[] theObjects = (Object[]) natElemsField.get(pathListObj);
+					Class<? extends Object> elemClass = theObjects.getClass().getComponentType();
+					Object newObject = null;
+					try {
+						Constructor<? extends Object> elemConstructor =
+							elemClass.getConstructor(File.class, Boolean.TYPE, File.class, dalvik.system.DexFile.class)
+						elemConstructor.setAccessible(true);
+						newObject = elemConstructor.newInstance(new File(path), true, null, null);
+					} catch (NoSuchMethodException nsm) {
+						// Android 8.0 uses a different signature.
+						Constructor<? extends Object> elemConstructor =
+							elemClass.getConstructor(File.class);
+						elemConstructor.setAccessible(true);
+						newObject = elemConstructor.newInstance(new File(path));
+					}
+					Object[] newObjects = Arrays.copyOf(theObjects, theObjects.length  1);
+					newObjects[newObjects.length - 1] = newObject;
+					System.out.println(newObjects);
+					natElemsField.set(pathListObj, newObjects);
 			}
 			// check
 			// System.out.println("Class loader shenanigans: " +
@@ -2717,7 +2086,6 @@ public class MainActivity extends NativeActivity {
 		return Utils.getPrefs(0).getBoolean("zz_command_history", true);
 	}
 
-	@TargetApi(Build.VERSION_CODES.KITKAT)
 	private void setImmersiveMode(boolean set) {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return;
 		int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
@@ -2748,13 +2116,45 @@ public class MainActivity extends NativeActivity {
 		}
 	}
 
-	protected void initKamcord() {
+	private void initKamcord() {
+		// test if we have kamcord
+		hasRecorder = this.getPackageName().equals("net.zhuoweizhang.mcpelauncher.pro") &&
+			Utils.getPrefs(0).getBoolean("zz_enable_kamcord", false);
+/*
+		try {
+			getPackageManager().getPackageInfo("net.zhuoweizhang.mcpelauncher.recorder", 0);
+			hasRecorder = getPackageManager().getInstallerPackageName("net.zhuoweizhang.mcpelauncher.recorder") != null;
+		} catch (PackageManager.NameNotFoundException ex) {
+		}
+*/
+		if (hasRecorder) {
+			// patch Kamcord
+			System.loadLibrary("mcpelauncher");
+			try {
+				com.kamcord.android.core.KamcordFix.install();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			Kamcord.whitelistAll();
+			Kamcord.initKeyAndSecret(KamcordConstants.DEV_KEY, KamcordConstants.DEV_SECRET, KamcordConstants.GAME_NAME);
+			Kamcord.whitelistAll();
+			Kamcord.initActivity(this);
+			Kamcord.whitelistAll();
+			hasRecorder = Kamcord.isEnabled();
+		}
 	}
 
-	protected void toggleRecording() {
-	}
-	protected boolean isKamcordRecording() {
-		return false;
+	private void toggleRecording() {
+		isRecording = !isRecording;
+		//ScriptManager.nativeSetIsRecording(isRecording);
+		if (isRecording) {
+			Kamcord.startRecording();
+		} else {
+			Kamcord.stopRecording();
+			Kamcord.showView();
+		}
+		removeDialog(DIALOG_RUNTIME_OPTIONS);
+		removeDialog(DIALOG_RUNTIME_OPTIONS_WITH_INSERT_TEXT);
 	}
 
 	private void clearRuntimeOptionsDialog() {
@@ -2815,296 +2215,37 @@ public class MainActivity extends NativeActivity {
 		System.load(substrateLibFile.getAbsolutePath());
 	}
 
-	private void checkArch() {
-		try {
-			File mcpeLib = new File(MC_NATIVE_LIBRARY_LOCATION);
-			mcpeArch = Utils.getElfArch(mcpeLib);
-			File ownLib = new File(this.getApplicationInfo().nativeLibraryDir + "/libmcpelauncher.so");
-			int myArch = Utils.getElfArch(ownLib);
-			if (mcpeArch != myArch) {
-				Intent intent = new Intent(this, NoMinecraftActivity.class);
-				String message = this.getResources().getString(R.string.minecraft_wrong_arch).toString().
-					replaceAll("ARCH", Utils.getArchName(myArch));
-				intent.putExtra("message", message);
-				intent.putExtra("learnmore_uri", "https://github.com/zhuowei/MCPELauncher/issues/495");
-				startActivity(intent);
-				finish();
-				try {
-					Thread.sleep(1000);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				System.exit(0);
-			}
-		} catch (IOException e) {
-		}
-	}
-
-	private boolean checkAddonArch(File file) {
-		try {
-			int addonArch = Utils.getElfArch(file);
-			return addonArch == mcpeArch;
-		} catch (IOException e) {
-			return true;
-		}
-	}
-
 	private boolean isAddonCompat(String version) {
 		if (version == null) return false;
-		//if (version.matches("0\\.11\\.0.*")) return true;
-		if (version.equals(mcPkgInfo.versionName)) return true;
-		if (mcPkgInfo.versionName.startsWith("1.0")) {
-			if (version.startsWith("1.0.0")) return true;
-			if (version.startsWith("1.0.2")) return true;
-			if (version.startsWith("1.0.3")) return true;
-			if (version.startsWith("1.0.4")) return true;
-			if (version.startsWith("1.0.5")) return true;
-			if (version.startsWith("1.0.6")) return true;
-		}
+		if (version.matches("0\\.11\\.0.*")) return true;
+		if (version.matches("0\\.11\\.1.*")) return true;
 		return false;
 	}
 
 	private void initAtlasMeta() {
-		final boolean dumpAtlas = BuildConfig.DEBUG && hasStoragePermissions() && new File("/sdcard/bl_dump_atlas.txt").exists();
 		if (isSafeMode()) return;
 		try {
-			AtlasProvider terrainProvider = new AtlasProvider("resource_packs/vanilla/textures/terrain_texture.json",
-				"images/terrain-atlas/", "block.bl_modpkg.");
-			AtlasProvider itemsProvider = new AtlasProvider("resource_packs/vanilla/textures/item_texture.json",
-				"images/items-opaque/", "item.bl_modpkg.");
-			PackContentsProvider packContentsProvider = new PackContentsProvider(
-				"resource_packs/vanilla/textures/textures_list.json",
-				"resource_packs/vanilla/contents.json");
+			AtlasProvider terrainProvider = new AtlasProvider("images/terrain.meta", "images/terrain-atlas.tga",
+				"images/terrain-atlas/", new TGAImageLoader(), 1, 4);
+			AtlasProvider itemsProvider = new AtlasProvider("images/items.meta", "images/items-opaque.png",
+				"images/items-opaque/", new PNGImageLoader(), 2, 0);
 			terrainProvider.initAtlas(this);
 			itemsProvider.initAtlas(this);
-			packContentsProvider.init(this);
-
-			ClientBlocksJsonProvider blocksJsonProvider = new ClientBlocksJsonProvider("resource_packs/vanilla/blocks.json");
-			blocksJsonProvider.init(this);
-			if (dumpAtlas) {
-				terrainProvider.dumpAtlas();
-				itemsProvider.dumpAtlas();
-				blocksJsonProvider.dumpAtlas();
-				packContentsProvider.dumpAtlas();
-			}
+			//terrainProvider.dumpAtlas();
+			//itemsProvider.dumpAtlas();
 			textureOverrides.add(0, terrainProvider);
 			textureOverrides.add(1, itemsProvider);
-			textureOverrides.add(2, blocksJsonProvider);
-			textureOverrides.add(3, packContentsProvider);
-			ScriptManager.terrainMeta = terrainProvider;
-			ScriptManager.itemsMeta = itemsProvider;
-			ScriptManager.blocksJson = blocksJsonProvider;
+			ScriptManager.terrainMeta = terrainProvider.metaObj;
+			ScriptManager.itemsMeta = itemsProvider.metaObj;
 		} catch (Exception e) {
 			e.printStackTrace();
 			reportError(e);
 		}
-/*
-		FIXME 0.16
-			ResourcePackManifestProvider resourcePackManifestProvider =
-				new ResourcePackManifestProvider("resourcepacks/vanilla/resources.json");
-			resourcePackManifestProvider.init(this);
-			resourcePackManifestProvider.addTextures(terrainProvider.addedTextureNames);
-			resourcePackManifestProvider.addTextures(itemsProvider.addedTextureNames);
-*/
 	}
 
 	private boolean isForcingController() {
 		return Build.VERSION.SDK_INT >= 12 &&
 			Utils.hasExtrasPackage(this) && Utils.getPrefs(0).getBoolean("zz_use_controller", false);
-	}
-
-	protected boolean hasScriptSupport() {
-		String mcpeVersion = mcPkgInfo.versionName;
-		if (HALF_VERSION_HAS_SCRIPTS && mcpeVersion.startsWith(HALF_SUPPORT_VERSION)) return true;
-		return mcpeVersion.startsWith(SCRIPT_SUPPORT_VERSION);
-	}
-	public String getMCPEVersion() {
-		return mcPkgInfo.versionName;
-	}
-	private boolean requiresPatchingInSafeMode() {
-		return true;// fixme 1.1 getMCPEVersion().startsWith(HALF_SUPPORT_VERSION);
-	}
-
-	public void reportReimported(final String scripts) {
-		this.runOnUiThread(new Runnable() {
-			public void run() {
-				Toast.makeText(MainActivity.this, MainActivity.this.getResources().
-					getString(R.string.manage_scripts_reimported_toast) + " " + scripts,
-					Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
-
-	public void showStoreNotWorkingDialog() {
-		this.runOnUiThread(new Runnable() {
-			public void run() {
-				new AlertDialog.Builder(MainActivity.this).setTitle(R.string.store_not_supported_title).
-					setMessage(R.string.store_not_supported_message).
-					setPositiveButton(android.R.string.ok, null).
-					show();
-			}
-		});
-	}
-
-	private void grabPermissionsIfNeeded() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			grabPermissions();
-		}
-	}
-
-	private boolean hasStoragePermissions() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			return hasStoragePermissionsM();
-		}
-		return true;
-	}
-
-	private boolean hasStoragePermissionsM() {
-		return checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-	}
-
-	private boolean grabPermissions() {
-		if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-			requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-		if (requestCode == REQUEST_STORAGE_PERMISSION) {
-			if (permissions.length >= 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				// todo?
-			} else {
-			}
-		}
-	}
-
-	private void startNativeDebugger() {
-		System.out.println("gdbserver: " + android.os.Process.myPid());
-		try {
-			Runtime.getRuntime().exec(new String[] {
-				new File(getFilesDir(), "gdbserver").getAbsolutePath(),
-				"--attach",
-				":3333",
-				"" + android.os.Process.myPid()
-			});
-				Thread.sleep(5000);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void lowerSdkTarget() {
-		try {
-			// I'm so, so sorry.
-			classVMRuntime = Class.forName("dalvik.system.VMRuntime");
-
-			methodVMRuntimeGetRuntime = classVMRuntime.getMethod("getRuntime");
-			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
-			methodVMRuntimeGetTargetSdkVersion = classVMRuntime.getMethod("getTargetSdkVersion");
-			if (Build.VERSION.SDK_INT > 28) { // higher than Pie
-				methodVMRuntimeSetTargetSdkVersion = ScriptManager.nativeGrabMethod(classVMRuntime,
-					"setTargetSdkVersion", "(I)V", false);
-			} else {
-				methodVMRuntimeSetTargetSdkVersion = classVMRuntime.getMethod("setTargetSdkVersion", Integer.TYPE);
-			}
-			storedSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
-			methodVMRuntimeSetTargetSdkVersion.invoke(runtime, Build.VERSION_CODES.LOLLIPOP);
-			int newSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
-			System.out.println("Temporarily setting SDK target to: " + newSdkTarget);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void restoreSdkTarget() {
-		if (storedSdkTarget == -1) return;
-		try {
-			Object runtime = methodVMRuntimeGetRuntime.invoke(null);
-			methodVMRuntimeSetTargetSdkVersion.invoke(runtime, storedSdkTarget);
-			int newSdkTarget = (Integer)methodVMRuntimeGetTargetSdkVersion.invoke(runtime);
-			System.out.println("Restored SDK target to: " + newSdkTarget);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void processIntentImport() {
-		try {
-			Intent intent = this.getIntent();
-			Uri uri = intent.getData();
-			System.out.println("Intent: " + intent.getAction() + ":" + uri);
-			if (intent.getAction().equals(Intent.ACTION_VIEW)) {
-				if (uri == null) return;
-				String scheme = uri.getScheme();
-				String outputPath = uri.getPath();
-				if (outputPath.toLowerCase().endsWith(".mcworld")) {
-					if (!scheme.equals("file")) {
-						File tempFile = copyContentStoreToTempFile(intent.getData(), uri.getLastPathSegment());
-						outputPath = tempFile.getAbsolutePath();
-					}
-					nativeProcessIntentUriQuery("fileIntent", outputPath + "&" + outputPath);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			reportError(e);
-		}
-	}
-
-	private void loadLibrary(String libraryName) {
-		if (!extractNativeLibs) {
-			System.loadLibrary(libraryName);
-			return;
-		}
-		System.load(new File(extractNativeLibsDir, "lib" + libraryName + ".so").getAbsolutePath());
-	}
-
-	private void extractNativeLibsIfNeeded() throws Exception {
-		// figure out which arch we need in this VM
-		String arch = System.getProperty("os.arch");
-		String targetAbi = "armeabi-v7a";
-		if (arch.startsWith("armv") || arch.startsWith("aarch")) {
-			// already arm
-		} else if (arch.equals("x86") || arch.equals("i686") || arch.equals("x86_64")) {
-			targetAbi = "x86";
-		}
-
-		ApplicationInfo appInfo = getApplicationInfo();
-		File apkFile = new File(appInfo.sourceDir);
-		File outputDir = getDir("nativelibs", 0);
-
-		Utils.extractFromZip(apkFile, outputDir, "lib/" + targetAbi + "/");
-
-		extractNativeLibsDir = new File(outputDir, "lib/" + targetAbi);
-	}
-
-	private boolean needsRelaunchIntoCorrectAbi() {
-		try {
-			PackageInfo mcPkgInfo = getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
-			ApplicationInfo mcAppInfo = mcPkgInfo.applicationInfo;
-			String mcNativeLibraryDir = mcAppInfo.nativeLibraryDir;
-			String minecraftArch = new File(mcNativeLibraryDir).getName();
-			boolean minecraftIs64 = minecraftArch.startsWith("arm64-") || minecraftArch.startsWith("x86_64");
-			boolean thisProcessIs64 = thisProcessIs64();
-			return minecraftIs64 != thisProcessIs64;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	private static boolean thisProcessIs64() {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
-		List<String> abi64s = Arrays.asList(Build.SUPPORTED_64_BIT_ABIS);
-		return abi64s.contains(Build.CPU_ABI) || abi64s.contains(Build.CPU_ABI2);
-	}
-		
-
-	private void relaunchIntoCorrectAbi() {
-		Utils.forceRestartIntoDifferentAbi(this, getIntent());
 	}
 
 	private class PopupTextWatcher implements TextWatcher, TextView.OnEditorActionListener {
@@ -3132,8 +2273,11 @@ public class MainActivity extends NativeActivity {
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 			if (BuildConfig.DEBUG)
 				Log.i(TAG, "Editor action: " + actionId);
-			nativeReturnKeyPressed();
-			//nativeTypeCharacter("\n");
+			if (hiddenTextDismissAfterOneLine) {
+				hiddenTextWindow.dismiss();
+			} else {
+				nativeReturnKeyPressed();
+			}
 			return true;
 		}
 	}
@@ -3263,6 +2407,16 @@ public class MainActivity extends NativeActivity {
 			}
 		}
 
+	}
+
+	private class ShutdownTask implements Runnable {
+		public void run() {
+			try {
+				Thread.sleep(MILLISECONDS_FOR_WORLD_SAVE); // to give the worlds some time to save
+			} catch (InterruptedException ie) {}
+			System.out.println("Preparing to exit");
+			if (!globalRestart) System.exit(0);
+		}
 	}
 
 }
