@@ -19,7 +19,12 @@ jobs:
           java-version: "17"
       - name: Install Android SDK and native build components
         run: |
-          test -x "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" || command -v sdkmanager
+          if [ -x "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" ]; then
+            export PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}"
+          elif ! command -v sdkmanager >/dev/null 2>&1; then
+            echo "Android sdkmanager was not found on the hosted runner."
+            exit 1
+          fi
           yes | sdkmanager --licenses >/dev/null
           sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "ndk;27.2.12479018" "cmake;3.22.1"
       - uses: gradle/actions/setup-gradle@v4
