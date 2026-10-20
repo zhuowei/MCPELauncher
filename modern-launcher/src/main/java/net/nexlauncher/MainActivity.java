@@ -61,7 +61,7 @@ public final class MainActivity extends Activity {
         nativeStatus.setOnClickListener(v -> {
             try {
                 status.setText("Native library loaded. Interface version: " + nativeGetAbiVersion()
-                    + "\nThis confirms the JNI bridge only; Bedrock compatibility remains untested.");
+                    + "\nJNI bridge only; Bedrock hooks are not implemented or verified.");
             } catch (UnsatisfiedLinkError error) {
                 status.setText("Native library unavailable: " + error.getMessage());
             }
@@ -70,11 +70,25 @@ public final class MainActivity extends Activity {
         np.topMargin = pad / 3;
         root.addView(nativeStatus, np);
 
+        Button jsTest = new Button(this);
+        jsTest.setText("TEST JAVASCRIPT RUNTIME");
+        jsTest.setOnClickListener(v -> {
+            StringBuilder logs = new StringBuilder();
+            String result = ScriptRuntime.execute(
+                "log('Rhino runtime ready'); var version = 'launcher-js-1'; log(version);",
+                line -> logs.append(line).append('\n'));
+            status.setText(result + (logs.length() == 0 ? "" : "\n" + logs));
+        });
+        LinearLayout.LayoutParams jp = matchWrap();
+        jp.topMargin = pad / 3;
+        root.addView(jsTest, jp);
+
         Button compatibility = new Button(this);
         compatibility.setText("MCPE COMPATIBILITY STATUS");
         compatibility.setOnClickListener(v -> status.setText(
             "Target: Minecraft Bedrock 1.21.132.1\n"
-            + "Launcher integration only. No verified Bedrock native interfaces are included."));
+            + "Launcher, JNI diagnostics, and isolated launcher-side JS only. "
+            + "Bedrock memory hooks and in-game APIs are not implemented or verified."));
         LinearLayout.LayoutParams cp = matchWrap();
         cp.topMargin = pad / 3;
         root.addView(compatibility, cp);
