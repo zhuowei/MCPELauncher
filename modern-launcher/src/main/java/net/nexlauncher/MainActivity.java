@@ -10,10 +10,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/** Safe launcher shell; it does not inject into or patch Minecraft. */
 public final class MainActivity extends Activity {
     private static final String MINECRAFT_PACKAGE = "com.mojang.minecraftpe";
     private TextView status;
+
+    static { System.loadLibrary("nexnative"); }
+    private native int nativeGetAbiVersion();
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -54,14 +56,29 @@ public final class MainActivity extends Activity {
         launch.setOnClickListener(v -> launchMinecraft());
         root.addView(launch, matchWrap());
 
+        Button nativeStatus = new Button(this);
+        nativeStatus.setText("NATIVE BRIDGE STATUS");
+        nativeStatus.setOnClickListener(v -> {
+            try {
+                status.setText("Native library loaded. Interface version: " + nativeGetAbiVersion()
+                    + "\nThis confirms the JNI bridge only; Bedrock compatibility remains untested.");
+            } catch (UnsatisfiedLinkError error) {
+                status.setText("Native library unavailable: " + error.getMessage());
+            }
+        });
+        LinearLayout.LayoutParams np = matchWrap();
+        np.topMargin = pad / 3;
+        root.addView(nativeStatus, np);
+
         Button compatibility = new Button(this);
         compatibility.setText("MCPE COMPATIBILITY STATUS");
         compatibility.setOnClickListener(v -> status.setText(
-            "Test target: Minecraft Bedrock 1.21.132.1\n" +
-            "Launcher integration only. ModPE scripts, native patches, and injection are not verified."));
+            "Target: Minecraft Bedrock 1.21.132.1\n"
+            + "Launcher integration only. No verified Bedrock native interfaces are included."));
         LinearLayout.LayoutParams cp = matchWrap();
         cp.topMargin = pad / 3;
         root.addView(compatibility, cp);
+
         setContentView(root);
         refreshStatus();
     }
