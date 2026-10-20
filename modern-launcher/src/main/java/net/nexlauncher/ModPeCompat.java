@@ -18,6 +18,7 @@ final class ModPeCompat {
     static void install(Scriptable scope, Consumer<String> logger) {
         ScriptableObject.putProperty(scope, "ModPE", makeModPeObject(scope));
         installLogFunction(scope, "print", "[print] ", logger);
+        installLogFunction(scope, "log", "[log] ", logger);
         installLogFunction(scope, "clientMessage", "[clientMessage] ", logger);
     }
 
