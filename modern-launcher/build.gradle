@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-    // Updated standalone Rhino JS runtime for local scripts.
-    // This does not expose Minecraft internals or inject into Bedrock.
     implementation 'org.mozilla:rhino:1.7.15'
+    implementation 'androidx.core:core:1.15.0'
 }
