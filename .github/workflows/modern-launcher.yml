@@ -1,0 +1,27 @@
+name: Modern launcher build
+on:
+  push:
+    branches: ["revival/mcpe-1.21.132.1"]
+    paths: ["modern-launcher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
+  pull_request:
+    paths: ["modern-launcher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Assemble modern launcher
+        run: gradle --no-daemon :modern-launcher:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nex-launcher-debug
+          path: modern-launcher/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
