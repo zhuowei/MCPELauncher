@@ -20,6 +20,8 @@ The APK is emitted under `modern-launcher/build/outputs/apk/debug/`.
 - Hands a validated archive to Android's app chooser using a scoped FileProvider URI, so Minecraft can import it if the installed version registers the relevant import intent.
 - Runs local JavaScript with Rhino 1.7.15 using interpreter mode, a source-size limit, and an instruction budget.
 - Includes a small logging-only ModPE compatibility subset: `print()`, `clientMessage()`, `log()`, and `ModPE.getApiStatus()`.
+- Shows the installed Minecraft version and explicit capability/limitation status in the UI.
+- Includes a sample official Bedrock behavior pack in `samples/bedrock-1211321-test-pack/`; CI validates and publishes it as a `.mcpack` artifact.
 
 ## Important limitations
 
