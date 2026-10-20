@@ -34,7 +34,8 @@ public final class PatchUtils {
         if (minecraftVersion == null) {
             throw new IllegalStateException("No exact Minecraft version profile is selected; refusing native patch.");
         }
-        if (!MinecraftVersion.hasExactVersionCode(minecraftVersion.versionCode)) {
+        if (!MinecraftVersion.isDetectedVersionSupportedForNativePatching() ||
+                !MinecraftVersion.hasExactVersionCode(minecraftVersion.versionCode)) {
             throw new IllegalStateException("Unknown Minecraft version profile; refusing native patch.");
         }
         return minecraftVersion;
@@ -86,6 +87,7 @@ public final class PatchUtils {
     public static boolean canLivePatch(File file) throws IOException {
         if (file == null || !file.isFile() || !file.canRead()) return false;
         if (minecraftVersion == null ||
+                !MinecraftVersion.isDetectedVersionSupportedForNativePatching() ||
                 !MinecraftVersion.hasExactVersionCode(minecraftVersion.versionCode)) return false;
         // The old live-patch analyzer is incomplete; do not claim safety based only on file readability.
         return false;
