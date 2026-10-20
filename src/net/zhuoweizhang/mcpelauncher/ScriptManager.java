@@ -821,6 +821,8 @@ public class ScriptManager {
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
+		// Record the actual installed version before any legacy hook decision.
+		MinecraftVersion.get(cxt);
 		LegacyCompatibilityProfile.Report compatibility = LegacyCompatibilityProfile.inspect(cxt);
 		if (!compatibility.nativeHooksSupported) {
 			scriptingInitialized = false;
