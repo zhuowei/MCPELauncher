@@ -30,6 +30,13 @@ android {
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
         }
     }
+}
+
+dependencies {
+    // Updated standalone Rhino JS runtime for local scripts.
+    // This does not expose Minecraft internals or inject into Bedrock.
+    implementation 'org.mozilla:rhino:1.7.15'
 }
