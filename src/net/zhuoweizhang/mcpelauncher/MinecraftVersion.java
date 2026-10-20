@@ -17,6 +17,10 @@ public final class MinecraftVersion {
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
+	/** Actual installed package metadata, not a guessed fallback profile. */
+	public static int detectedVersionCode = -1;
+	public static String detectedVersionName = null;
+
 	public final static boolean FUZZY_VERSION = false;
 
 	public static MinecraftVersion amazonVer;
@@ -44,6 +48,10 @@ public final class MinecraftVersion {
 	/** Returns true only for an exact version code with an existing legacy profile. */
 	public static boolean hasExactVersionCode(int versionCode) {
 		return versions.containsKey(versionCode);
+	}
+
+	public static boolean isDetectedVersionSupportedForNativePatching() {
+		return detectedVersionCode >= 0 && hasExactVersionCode(detectedVersionCode);
 	}
 
 	/** Returns null for unknown builds instead of guessing a native offset profile. */
@@ -83,8 +91,12 @@ public final class MinecraftVersion {
 		try {
 			PackageInfo mcPkgInfo = context.getPackageManager().getPackageInfo("com.mojang.minecraftpe", 0);
 			int minecraftVersionCode = mcPkgInfo.versionCode;
+			detectedVersionCode = minecraftVersionCode;
+			detectedVersionName = mcPkgInfo.versionName;
 			return get(minecraftVersionCode);
 		} catch (Exception e) {
+			detectedVersionCode = -1;
+			detectedVersionName = null;
 			return getDefault();
 		}
 	}
