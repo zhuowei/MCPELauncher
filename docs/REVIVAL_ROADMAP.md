@@ -24,6 +24,10 @@ Modernize the Android project while preserving the original BlockLauncher-derive
 - [x] Added Storage Access Framework file selection for pack import without broad storage permissions.
 - [x] Added bounded archive copy, ZIP entry/path checks, and basic Bedrock manifest validation.
 - [x] Added scoped FileProvider handoff to Android's app chooser for Minecraft pack import.
+- [x] Added a sample official Bedrock Script API behavior pack and independent CI artifact packaging.
+- [x] Added manifest/script smoke tests for the sample pack.
+- [x] Added exact legacy version-profile checks and disabled fuzzy matching for native patch decisions in the inherited source tree.
+- [x] Hardened legacy patch buffer bounds and made live patch eligibility fail closed.
 
 ## Remaining phases and release gates
 
@@ -44,12 +48,14 @@ Modernize the Android project while preserving the original BlockLauncher-derive
 - [x] Launch Minecraft through its public launcher intent when available.
 - [x] Add a no-broad-storage-permission pack picker and bounded archive/manifest validation.
 - [ ] Verify the import chooser actually imports resource and behavior packs on a physical device.
+- [ ] Import and test `nex-bedrock-test-pack.mcpack` on Minecraft 1.21.132.1.
 - [ ] Add automated unit/instrumentation coverage and test on supported Android versions.
 
 ### Phase 4 — MCPE compatibility investigation
 - [ ] Install and test specifically against MCPE 1.21.132.1 on a device.
 - [ ] Determine which legacy interfaces rely on obsolete symbols, binary layouts, or libraries.
 - [ ] Expand ModPE compatibility only against documented, testable API behavior.
+- [ ] Keep the inherited ModPE/native-hook path disabled for unknown Bedrock versions; the current legacy registry does not contain a verified 1.21.132.1 native profile.
 - [ ] Investigate official/resource-pack-supported extension points before considering any native integration.
 - [ ] Do not claim asset-loader hooks, in-game JavaScript, or native process hooks until implemented and independently tested.
 
