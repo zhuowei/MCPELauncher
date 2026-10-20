@@ -72,11 +72,7 @@ public final class MainActivity extends Activity {
                 line -> logs.append(line).append('\n'));
             status.setText(result + (logs.length() == 0 ? "" : "\n" + logs));
         });
-        addButton(root, "MCPE COMPATIBILITY STATUS", pad, v -> status.setText(
-            "Target: Minecraft Bedrock 1.21.132.1 (not device-verified)\n"
-            + "Implemented: launcher intent, isolated Rhino, logging-only ModPE shim, "
-            + "bounded .mcpack ZIP/manifest validation.\n"
-            + "Not implemented: in-game ModPE APIs, asset-loader hooks, native process hooks."));
+        addButton(root, "MCPE COMPATIBILITY STATUS", pad, v -> status.setText(compatibilityReport()));
 
         setContentView(root);
         refreshStatus();
@@ -130,9 +126,30 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private String compatibilityReport() {
+        String installedVersion = "not installed";
+        String versionCode = "n/a";
+        try {
+            android.content.pm.PackageInfo info =
+                getPackageManager().getPackageInfo(MINECRAFT_PACKAGE, 0);
+            installedVersion = info.versionName == null ? "unknown" : info.versionName;
+            versionCode = String.valueOf(info.versionCode);
+        } catch (android.content.pm.PackageManager.NameNotFoundException ignored) {
+            return "Minecraft was not detected.\nInstall the official Minecraft app first.";
+        }
+
+        boolean targetVersion = installedVersion.startsWith("1.21.132.1");
+        return "Installed Minecraft: " + installedVersion + " (code " + versionCode + ")\n"
+            + "Requested test target: 1.21.132.1 — "
+            + (targetVersion ? "version-name match; still needs device tests." : "version does not match.") + "\n"
+            + "Available: public launch intent, isolated Rhino diagnostics, bounded .mcpack validation.\n"
+            + "Not available: verified in-game ModPE APIs, Bedrock asset-loader hooks, native process hooks.";
+    }
+
     private void refreshStatus() {
         status.setText(getPackageManager().getLaunchIntentForPackage(MINECRAFT_PACKAGE) != null
-            ? "Minecraft detected. Ready to launch or import a validated pack."
+            ? "Minecraft detected. Ready to launch or import a validated pack.\n"
+                + compatibilityReport()
             : "Minecraft was not detected. Install the official Minecraft app, then reopen Nex-Launcher.");
     }
 
