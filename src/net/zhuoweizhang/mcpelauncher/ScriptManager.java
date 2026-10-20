@@ -821,6 +821,16 @@ public class ScriptManager {
 	}
 
 	public static void init(android.content.Context cxt) throws IOException {
+		LegacyCompatibilityProfile.Report compatibility = LegacyCompatibilityProfile.inspect(cxt);
+		if (!compatibility.nativeHooksSupported) {
+			scriptingInitialized = false;
+			scriptingEnabled = false;
+			androidContext = cxt.getApplicationContext();
+			scripts.clear();
+			Log.w("BlockLauncher", "Skipping legacy native hook setup: " + compatibility.describe());
+			return;
+		}
+		scriptingEnabled = true;
 		scriptingInitialized = true;
 		MainActivity mainActivity = MainActivity.currentMainActivity.get();
 		if (mainActivity != null && mainActivity.getMCPEVersion().startsWith("0.16")) {
