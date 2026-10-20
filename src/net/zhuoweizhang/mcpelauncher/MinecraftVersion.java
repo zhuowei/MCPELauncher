@@ -17,7 +17,7 @@ public final class MinecraftVersion {
 
 	public static Map<Integer, MinecraftVersion> versions = new HashMap<Integer, MinecraftVersion>();
 
-	public final static boolean FUZZY_VERSION = true;
+	public final static boolean FUZZY_VERSION = false;
 
 	public static MinecraftVersion amazonVer;
 	public static Context context; //TODO remove this
@@ -39,6 +39,20 @@ public final class MinecraftVersion {
 
 	public static void add(MinecraftVersion version) {
 		versions.put(version.versionCode, version);
+	}
+
+	/** Returns true only for an exact version code with an existing legacy profile. */
+	public static boolean hasExactVersionCode(int versionCode) {
+		return versions.containsKey(versionCode);
+	}
+
+	/** Returns null for unknown builds instead of guessing a native offset profile. */
+	public static MinecraftVersion getExact(int versionCode) {
+		MinecraftVersion version = versions.get(versionCode);
+		if (version != null && version.versionCode == MINECRAFT_VERSION_CODE && isAmazon()) {
+			return amazonVer;
+		}
+		return version;
 	}
 
 	public static MinecraftVersion getRaw(int versionCode) {
