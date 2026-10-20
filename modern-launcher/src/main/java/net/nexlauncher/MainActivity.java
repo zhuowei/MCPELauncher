@@ -1,8 +1,10 @@
 package net.nexlauncher;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 
 public final class MainActivity extends Activity {
     private static final String MINECRAFT_PACKAGE = "com.mojang.minecraftpe";
+    private static final int REQUEST_PICK_PACK = 4102;
     private TextView status;
 
     static { System.loadLibrary("nexnative"); }
@@ -51,50 +54,42 @@ public final class MainActivity extends Activity {
         sp.bottomMargin = pad;
         root.addView(status, sp);
 
-        Button launch = new Button(this);
-        launch.setText("LAUNCH MINECRAFT");
-        launch.setOnClickListener(v -> launchMinecraft());
-        root.addView(launch, matchWrap());
-
-        Button nativeStatus = new Button(this);
-        nativeStatus.setText("NATIVE BRIDGE STATUS");
-        nativeStatus.setOnClickListener(v -> {
+        addButton(root, "LAUNCH MINECRAFT", pad, v -> launchMinecraft());
+        addButton(root, "IMPORT .MCPACK", pad, v -> choosePack());
+        addButton(root, "NATIVE BRIDGE STATUS", pad, v -> {
             try {
                 status.setText("Native library loaded. Interface version: " + nativeGetAbiVersion()
-                    + "\nJNI bridge only; Bedrock hooks are not implemented or verified.");
+                    + "\nJNI bridge only; Bedrock process hooks are not implemented or verified.");
             } catch (UnsatisfiedLinkError error) {
                 status.setText("Native library unavailable: " + error.getMessage());
             }
         });
-        LinearLayout.LayoutParams np = matchWrap();
-        np.topMargin = pad / 3;
-        root.addView(nativeStatus, np);
-
-        Button jsTest = new Button(this);
-        jsTest.setText("TEST JAVASCRIPT RUNTIME");
-        jsTest.setOnClickListener(v -> {
+        addButton(root, "TEST MODPE JS SHIM", pad, v -> {
             StringBuilder logs = new StringBuilder();
             String result = ScriptRuntime.execute(
-                "log('Rhino runtime ready'); var version = 'launcher-js-1'; log(version);",
+                "print('Rhino runtime ready'); clientMessage('Launcher-only test'); "
+                    + "logStatus = ModPE.getApiStatus(); print(logStatus);",
                 line -> logs.append(line).append('\n'));
             status.setText(result + (logs.length() == 0 ? "" : "\n" + logs));
         });
-        LinearLayout.LayoutParams jp = matchWrap();
-        jp.topMargin = pad / 3;
-        root.addView(jsTest, jp);
-
-        Button compatibility = new Button(this);
-        compatibility.setText("MCPE COMPATIBILITY STATUS");
-        compatibility.setOnClickListener(v -> status.setText(
-            "Target: Minecraft Bedrock 1.21.132.1\n"
-            + "Launcher, JNI diagnostics, and isolated launcher-side JS only. "
-            + "Bedrock memory hooks and in-game APIs are not implemented or verified."));
-        LinearLayout.LayoutParams cp = matchWrap();
-        cp.topMargin = pad / 3;
-        root.addView(compatibility, cp);
+        addButton(root, "MCPE COMPATIBILITY STATUS", pad, v -> status.setText(
+            "Target: Minecraft Bedrock 1.21.132.1 (not device-verified)\n"
+            + "Implemented: launcher intent, isolated Rhino, logging-only ModPE shim, "
+            + "bounded .mcpack ZIP/manifest validation.\n"
+            + "Not implemented: in-game ModPE APIs, asset-loader hooks, native process hooks."));
 
         setContentView(root);
         refreshStatus();
+    }
+
+    private void addButton(LinearLayout root, String label, int pad,
+                           android.view.View.OnClickListener listener) {
+        Button button = new Button(this);
+        button.setText(label);
+        button.setOnClickListener(listener);
+        LinearLayout.LayoutParams params = matchWrap();
+        params.topMargin = pad / 3;
+        root.addView(button, params);
     }
 
     private LinearLayout.LayoutParams matchWrap() {
@@ -102,9 +97,42 @@ public final class MainActivity extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
+    private void choosePack() {
+        Intent picker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        picker.addCategory(Intent.CATEGORY_OPENABLE);
+        picker.setType("*/*");
+        picker.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            startActivityForResult(picker, REQUEST_PICK_PACK);
+        } catch (ActivityNotFoundException error) {
+            status.setText("No file picker is available on this device.");
+        }
+    }
+
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_PICK_PACK || resultCode != RESULT_OK ||
+            data == null || data.getData() == null) return;
+
+        status.setText("Validating archive and manifest…");
+        PackImporter.Result result = PackImporter.validateAndPrepare(this, data.getData());
+        status.setText(result.message);
+        if (!result.success) return;
+
+        Intent open = new Intent(Intent.ACTION_VIEW);
+        open.setDataAndType(result.contentUri, "application/octet-stream");
+        open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            startActivity(Intent.createChooser(open, "Import pack with Minecraft"));
+        } catch (ActivityNotFoundException error) {
+            status.setText("Pack validated, but no app accepted the import intent. "
+                + "Minecraft may need to be installed or its .mcpack association may be unavailable.");
+        }
+    }
+
     private void refreshStatus() {
         status.setText(getPackageManager().getLaunchIntentForPackage(MINECRAFT_PACKAGE) != null
-            ? "Minecraft detected. Ready to launch."
+            ? "Minecraft detected. Ready to launch or import a validated pack."
             : "Minecraft was not detected. Install the official Minecraft app, then reopen Nex-Launcher.");
     }
 
