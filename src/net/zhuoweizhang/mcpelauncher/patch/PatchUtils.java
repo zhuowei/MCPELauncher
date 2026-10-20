@@ -10,88 +10,103 @@ import net.zhuoweizhang.mcpelauncher.MinecraftVersion;
 
 public final class PatchUtils {
 
-	public static MinecraftVersion minecraftVersion = null;
+    public static MinecraftVersion minecraftVersion = null;
 
-	private PatchUtils(){}
+    private PatchUtils() {}
 
-	private static ByteBuffer positionBuf(ByteBuffer buf, int addr) {
-		if (buf == MainActivity.minecraftLibBuffer && addr >= 0 && addr < MaraudersMap.minecraftTextBuffer.capacity()) {
-			buf = MaraudersMap.minecraftTextBuffer;
-		}
-		buf.position(addr);
-		return buf;
-	}
+    private static ByteBuffer positionBuf(ByteBuffer buf, int addr, int length) {
+        if (buf == null) throw new IllegalStateException("Minecraft native buffer is unavailable.");
+        ByteBuffer target = buf;
+        if (buf == MainActivity.minecraftLibBuffer && addr >= 0 &&
+                addr < MaraudersMap.minecraftTextBuffer.capacity()) {
+            target = MaraudersMap.minecraftTextBuffer;
+        }
+        if (addr < 0 || length < 0 || addr > target.capacity() - length) {
+            throw new IndexOutOfBoundsException(
+                "Patch range is outside the mapped buffer: offset=" + addr +
+                ", length=" + length + ", capacity=" + target.capacity());
+        }
+        target.position(addr);
+        return target;
+    }
 
-	public static void patch(ByteBuffer buf, com.joshuahuelsman.patchtool.PTPatch patch) {
-		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
-		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
-			int addr = patch.getNextAddr();
-			if (translator != null) addr = translator.get(addr);
-			ByteBuffer newBuf = positionBuf(buf, addr);
-			newBuf.put(patch.getNextData());
-		}
-	}
+    private static MinecraftVersion requireVersionProfile() {
+        if (minecraftVersion == null) {
+            throw new IllegalStateException("No exact Minecraft version profile is selected; refusing native patch.");
+        }
+        if (!MinecraftVersion.hasExactVersionCode(minecraftVersion.versionCode)) {
+            throw new IllegalStateException("Unknown Minecraft version profile; refusing native patch.");
+        }
+        return minecraftVersion;
+    }
 
-	public static void unpatch(ByteBuffer buf, byte[] original, com.joshuahuelsman.patchtool.PTPatch patch) {
-		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
-		ByteBuffer originalBuf = ByteBuffer.wrap(original);
-		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
-			int addr = patch.getNextAddr();
-			if (translator != null) addr = translator.get(addr);
-			ByteBuffer newBuf = positionBuf(buf, addr);
-			originalBuf.position(addr);
-			byte[] nextData = new byte[patch.getDataLength()];
-			originalBuf.get(nextData);
-			newBuf.put(nextData);
-		}
-	}
+    public static void patch(ByteBuffer buf, com.joshuahuelsman.patchtool.PTPatch patch) {
+        MinecraftVersion profile = requireVersionProfile();
+        MinecraftVersion.PatchTranslator translator = profile.translator;
+        for (patch.count = 0; patch.count < patch.getNumPatches(); patch.count++) {
+            int addr = patch.getNextAddr();
+            if (translator != null) addr = translator.get(addr);
+            byte[] data = patch.getNextData();
+            positionBuf(buf, addr, data.length).put(data);
+        }
+    }
 
-	public static void copy(File from, File to) throws IOException {
-		InputStream is = new FileInputStream(from);
-		int length = (int) from.length();
-		byte[] data = new byte[length];
-		is.read(data);
-		is.close();
-		OutputStream os = new FileOutputStream(to);
-		os.write(data);
-		os.close();
-	}
+    public static void unpatch(ByteBuffer buf, byte[] original,
+                               com.joshuahuelsman.patchtool.PTPatch patch) {
+        MinecraftVersion profile = requireVersionProfile();
+        if (original == null) throw new IllegalArgumentException("Original native image is missing.");
+        MinecraftVersion.PatchTranslator translator = profile.translator;
+        ByteBuffer originalBuf = ByteBuffer.wrap(original);
+        for (patch.count = 0; patch.count < patch.getNumPatches(); patch.count++) {
+            int addr = patch.getNextAddr();
+            if (translator != null) addr = translator.get(addr);
+            int length = patch.getDataLength();
+            if (addr < 0 || length < 0 || addr > originalBuf.capacity() - length) {
+                throw new IndexOutOfBoundsException(
+                    "Original image does not contain patch range: offset=" + addr + ", length=" + length);
+            }
+            ByteBuffer target = positionBuf(buf, addr, length);
+            originalBuf.position(addr);
+            byte[] nextData = new byte[length];
+            originalBuf.get(nextData);
+            target.put(nextData);
+        }
+    }
 
-	public static boolean canLivePatch(File file) throws IOException {
-		/*
-		MinecraftVersion.PatchTranslator translator = minecraftVersion.translator;
-		com.joshuahuelsman.patchtool.PTPatch patch = new com.joshuahuelsman.patchtool.PTPatch();
-		patch.loadPatch(file);
-		for(patch.count = 0; patch.count < patch.getNumPatches(); patch.count++){
-			int address = patch.getNextAddr();
-			if (translator != null) address = translator.get(address);
-			if (address >= minecraftVersion.libLoadOffsetBegin) {
-				return false;
-			}
-		}
-		*/
-		return true;
-	}
+    public static void copy(File from, File to) throws IOException {
+        if (from == null || to == null) throw new IllegalArgumentException("Source and destination are required.");
+        try (InputStream input = new BufferedInputStream(new FileInputStream(from));
+             OutputStream output = new BufferedOutputStream(new FileOutputStream(to))) {
+            byte[] buffer = new byte[32 * 1024];
+            int count;
+            while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+        }
+    }
 
-	public static byte[] createMovwInstr(int rd, int imm) {
-		long instr = 0xf2400000L;
-		instr |= (rd << 8); //RD
-		instr |= (imm & 0xff); //Imm8
-		instr |= ((imm >> 8) & 0x7) << 12; //Imm3
-		instr |= ((imm >> 11) & 0x1) << 26; //i
-		instr |= ((imm >> 12) & 0xf) << 16; //Imm4
-		byte[] finalByte = intToLEByteArray(instr);
-		System.out.println("Port patch: " + Long.toString(instr, 16));
-		return finalByte;
-	}
+    public static boolean canLivePatch(File file) throws IOException {
+        if (file == null || !file.isFile() || !file.canRead()) return false;
+        if (minecraftVersion == null ||
+                !MinecraftVersion.hasExactVersionCode(minecraftVersion.versionCode)) return false;
+        // The old live-patch analyzer is incomplete; do not claim safety based only on file readability.
+        return false;
+    }
 
-	public static final byte[] intToLEByteArray(long value) {
+    public static byte[] createMovwInstr(int rd, int imm) {
+        long instr = 0xf2400000L;
+        instr |= (rd << 8);
+        instr |= (imm & 0xff);
+        instr |= ((imm >> 8) & 0x7) << 12;
+        instr |= ((imm >> 11) & 0x1) << 26;
+        instr |= ((imm >> 12) & 0xf) << 16;
+        return intToLEByteArray(instr);
+    }
+
+    public static final byte[] intToLEByteArray(long value) {
         return new byte[] {
-                (byte)(value >>> 16),
-                (byte)(value >>> 24),
-                (byte)value,
-                (byte)(value >>> 8)};
-
-	}
-		
+            (byte) (value >>> 16),
+            (byte) (value >>> 24),
+            (byte) value,
+            (byte) (value >>> 8)
+        };
+    }
 }
