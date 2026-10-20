@@ -4,7 +4,7 @@ on:
     branches: ["revival/mcpe-1.21.132.1"]
     paths: ["modern-launcher/**", "samples/**", "tests/**", "src/net/zhuoweizhang/mcpelauncher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
   pull_request:
-    paths: ["modern-launcher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
+    paths: ["modern-launcher/**", "samples/**", "tests/**", "src/net/zhuoweizhang/mcpelauncher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
   workflow_dispatch:
 permissions:
   contents: read
