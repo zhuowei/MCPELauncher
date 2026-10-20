@@ -16,17 +16,21 @@ Modernize the Android project while preserving the original BlockLauncher-derive
 ## Implemented in the revival branch
 
 - [x] Added an isolated Gradle Android application module at `modern-launcher/`.
-- [x] Added a native Android Activity with a basic launcher UI.
-- [x] Added package visibility for `com.mojang.minecraftpe` and launch-intent integration.
+- [x] Added a native Android Activity with launcher and JNI diagnostics.
+- [x] Added package visibility for `com.mojang.minecraftpe` and public launch-intent integration.
 - [x] Added a Gradle-based GitHub Actions workflow to assemble a debug APK and upload it as an artifact.
-- [x] Kept the inherited Ant/JNI implementation intact while migration is investigated.
+- [x] Added a sandboxed Rhino 1.7.15 launcher-side script runtime with source and instruction limits.
+- [x] Added a small logging-only ModPE compatibility shim (`print`, `clientMessage`, `log`, `ModPE.getApiStatus`).
+- [x] Added Storage Access Framework file selection for pack import without broad storage permissions.
+- [x] Added bounded archive copy, ZIP entry/path checks, and basic Bedrock manifest validation.
+- [x] Added scoped FileProvider handoff to Android's app chooser for Minecraft pack import.
 
 ## Remaining phases and release gates
 
 ### Phase 1 — Reproducible baseline
 - [ ] Inventory all Java sources, JNI/C++ sources, bundled native binaries, submodules, and third-party licenses.
 - [ ] Run the old build in a controlled environment and record exact success/failure logs.
-- [ ] Review CI workflow result for the new Gradle shell.
+- [ ] Confirm the latest Gradle workflow is green and retain its APK artifact.
 
 ### Phase 2 — Android project modernization
 - [x] Establish a separate Gradle module using JDK 17 and Android SDK 36.
@@ -38,21 +42,23 @@ Modernize the Android project while preserving the original BlockLauncher-derive
 ### Phase 3 — Safe launcher baseline
 - [x] Detect the official Minecraft package through Android package visibility.
 - [x] Launch Minecraft through its public launcher intent when available.
-- [ ] Add automated UI/instrumentation coverage and test on physical Android devices.
-- [ ] Add documented resource-pack import/help without broad storage access.
+- [x] Add a no-broad-storage-permission pack picker and bounded archive/manifest validation.
+- [ ] Verify the import chooser actually imports resource and behavior packs on a physical device.
+- [ ] Add automated unit/instrumentation coverage and test on supported Android versions.
 
 ### Phase 4 — MCPE compatibility investigation
 - [ ] Install and test specifically against MCPE 1.21.132.1 on a device.
 - [ ] Determine which legacy interfaces rely on obsolete symbols, binary layouts, or libraries.
-- [ ] Treat resource packs, ModPE/Rhino scripts, and native patching as separate features with separate evidence.
-- [ ] Do not enable injection/patching by default; any implementation must be explicit, documented, and independently tested.
+- [ ] Expand ModPE compatibility only against documented, testable API behavior.
+- [ ] Investigate official/resource-pack-supported extension points before considering any native integration.
+- [ ] Do not claim asset-loader hooks, in-game JavaScript, or native process hooks until implemented and independently tested.
 
 ### Phase 5 — Release gates
 - [ ] Clean CI build succeeds.
 - [ ] APK installs and launches on supported Android versions.
-- [ ] Minecraft launch tested on-device with the exact target version.
+- [ ] Minecraft launch and pack import are tested on-device with the exact target version.
 - [ ] Known limitations, third-party notices, checksums, and release notes are published.
 
 ## Compatibility policy
 
-A feature is **implemented** only when source exists. It is **verified** only after the relevant build or device test succeeds. A successful build of the modern launcher shell does not imply the legacy native engine works with modern Bedrock.
+A feature is **implemented** only when source exists. It is **verified** only after the relevant build or device test succeeds. Basic manifest validation does not guarantee a pack will load. A successful build of the modern launcher shell does not imply the legacy native engine works with modern Bedrock.
