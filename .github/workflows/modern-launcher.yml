@@ -1,0 +1,69 @@
+name: Modern launcher build
+on:
+  push:
+    branches: ["revival/mcpe-1.21.132.1"]
+    paths: ["modern-launcher/**", "samples/**", "tests/**", "src/net/zhuoweizhang/mcpelauncher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
+  pull_request:
+    paths: ["modern-launcher/**", "samples/**", "tests/**", "src/net/zhuoweizhang/mcpelauncher/**", "build.gradle", "settings.gradle", ".github/workflows/modern-launcher.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nex-launcher-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pack-sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate sample pack manifest
+        run: python -m unittest discover -s tests -v
+      - name: Package sample behavior pack
+        run: |
+          mkdir -p dist
+          cd samples/bedrock-1211321-test-pack
+          zip -X -r ../../dist/nex-bedrock-test-pack.mcpack manifest.json scripts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nex-bedrock-test-pack
+          path: dist/nex-bedrock-test-pack.mcpack
+          if-no-files-found: error
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install Android SDK and native build components
+        run: |
+          if [ -x "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" ]; then
+            export PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}"
+          elif ! command -v sdkmanager >/dev/null 2>&1; then
+            echo "Android sdkmanager was not found on the hosted runner."
+            exit 1
+          fi
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "ndk;27.2.12479018" "cmake;3.22.1"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Verify toolchain
+        run: |
+          java -version
+          gradle --version
+          test -d "$ANDROID_HOME/platforms/android-36"
+          test -d "$ANDROID_HOME/ndk/27.2.12479018"
+          test -d "$ANDROID_HOME/cmake/3.22.1"
+      - name: Assemble modern launcher
+        run: gradle --no-daemon :modern-launcher:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nex-launcher-debug
+          path: modern-launcher/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

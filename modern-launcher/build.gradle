@@ -1,0 +1,41 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'net.nexlauncher'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'net.nexlauncher'
+        minSdk 23
+        targetSdk 35
+        versionCode 2
+        versionName '2.0.0-revival'
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.mozilla:rhino:1.7.15'
+    implementation 'androidx.core:core:1.15.0'
+}

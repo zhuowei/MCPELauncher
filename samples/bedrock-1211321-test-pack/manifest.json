@@ -1,0 +1,25 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Nex Launcher Compatibility Test",
+    "description": "Safe smoke test for official Bedrock Add-On scripting and pack import.",
+    "uuid": "9b8f18d7-23ef-4ef0-a4b6-68b30d7f5c41",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 130]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "entry": "scripts/main.js",
+      "uuid": "ae0dbfe0-5d95-43de-9c38-4f9710a5f8c2",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.7.0"
+    }
+  ]
+}
