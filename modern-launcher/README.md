@@ -20,7 +20,8 @@ The APK is emitted under `modern-launcher/build/outputs/apk/debug/`.
 - Hands a validated archive to Android's app chooser using a scoped FileProvider URI, so Minecraft can import it if the installed version registers the relevant import intent.
 - Runs local JavaScript with Rhino 1.7.15 using interpreter mode, a source-size limit, and an instruction budget.
 - Includes a small logging-only ModPE compatibility subset: `print()`, `clientMessage()`, `log()`, and `ModPE.getApiStatus()`.
-- Shows the installed Minecraft version and explicit capability/limitation status in the UI.
+- Includes `CapabilityStatus`, an explicit capability registry distinguishing available, limited, unavailable, and unverified features.
+- Includes `McpeCompatibilityGate`, a fail-closed metadata gate for the 1.21.132.1 Android ARM64 test target. Passing metadata checks only qualifies a device for manual validation; it does not prove compatibility.
 - Includes a sample official Bedrock behavior pack in `samples/bedrock-1211321-test-pack/`; CI validates and publishes it as a `.mcpack` artifact.
 
 ## Important limitations
@@ -31,4 +32,8 @@ The APK is emitted under `modern-launcher/build/outputs/apk/debug/`.
 - Pack validation checks archive safety and basic manifest structure; it does not prove that every pack asset is valid or that Minecraft will accept the pack. Import depends on the installed Minecraft app's intent handling and must be tested on-device.
 - The legacy BlockLauncher-derived Ant/JNI project remains at repository root and has not been migrated into this module.
 
-A successful Gradle build means only that the launcher shell compiles. It does not establish in-game hook compatibility.
+## MCPE 1.21.132.1 verification gates
+
+Before claiming support, record the installed package version, Android version, ABI, relevant library identities, and device test results. Verify launch and pack import on a physical device. Any feature that has not passed its own verification remains `UNVERIFIED`; version-name matching alone must never enable untested behavior.
+
+A successful Gradle build means only that the launcher shell compiles. It does not establish in-game API or native integration compatibility.
